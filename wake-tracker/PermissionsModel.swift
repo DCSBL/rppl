@@ -27,14 +27,24 @@ final class PermissionsModel {
         refresh()
 
         guard HKHealthStore.isHealthDataAvailable() else { return }
-        let read: Set<HKObjectType> = [
-            HKObjectType.quantityType(forIdentifier: .heartRate)!,
-            HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
-            HKObjectType.workoutType(),
-        ]
+        let workout = HKObjectType.workoutType()
+        let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
+        let energy = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let read: Set<HKObjectType> = [heartRate, energy, workout]
+        // Mirror Watch share types so Health prompts stay consistent across the pair.
+        let share: Set<HKSampleType> = [workout, heartRate, energy]
         do {
-            try await healthStore.requestAuthorization(toShare: [], read: read)
-            healthStatus = "authorized (read)"
+            try await healthStore.requestAuthorization(toShare: share, read: read)
+            switch healthStore.authorizationStatus(for: workout) {
+            case .sharingAuthorized:
+                healthStatus = "workout: authorized"
+            case .sharingDenied:
+                healthStatus = "workout: denied"
+            case .notDetermined:
+                healthStatus = "workout: notDetermined"
+            @unknown default:
+                healthStatus = "workout: unknown"
+            }
         } catch {
             lastError = error.localizedDescription
             healthStatus = "error"

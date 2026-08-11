@@ -16,8 +16,15 @@ struct ContentView: View {
                         .font(.title2.bold())
                     Text(timeString(session.elapsed))
                         .monospacedDigit()
+                    Text("Mode: \(session.recordingMode)")
+                        .font(.caption2)
                     Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)")
                         .font(.caption2)
+                    if !session.motionRecordingEnabled {
+                        Text("Motion skipped")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                     if let lat = session.lastLatitude, let lon = session.lastLongitude {
                         Text(String(format: "%.5f, %.5f", lat, lon))
                             .font(.caption2)
@@ -41,9 +48,21 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
 
+                    Button("Request permissions") {
+                        Task { await session.requestPermissions() }
+                    }
+
                     Button("Retry transfers") {
                         transfer.transferPending()
                     }
+
+                    Group {
+                        Text(session.healthAuthStatus)
+                        Text("Location: \(session.locationAuthStatus)")
+                        Text("Motion: \(session.motionAvailability)")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
 
                 Text(transfer.lastMessage)
@@ -53,7 +72,7 @@ struct ContentView: View {
                 if let error = session.errorText {
                     Text(error)
                         .font(.caption2)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.orange)
                 }
 
                 Text("Action Button → assign “Cycle Label” in Settings")
@@ -64,6 +83,7 @@ struct ContentView: View {
         }
         .onAppear {
             transfer.activate()
+            session.refreshPermissionStatus()
             Task { await session.requestPermissions() }
         }
     }

@@ -22,6 +22,12 @@ final class WatchSessionController: NSObject {
     var lastHeartRate: Double?
     var statusText = "Idle"
     var errorText: String?
+    var healthAuthStatus = "unknown"
+    var locationAuthStatus = "unknown"
+    var motionAvailability = "unknown"
+    /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
+    var recordingMode = "none"
+    var motionRecordingEnabled = false
 
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
@@ -43,19 +49,28 @@ final class WatchSessionController: NSObject {
     private var flushTask: Task<Void, Never>?
     private var timerTask: Task<Void, Never>?
     private var startedAt: Date?
+    private var motionUpdatesStarted = false
+    private var activityUpdatesStarted = false
 
-    private let typesToRead: Set<HKObjectType> = [
-        HKObjectType.quantityType(forIdentifier: .heartRate)!,
-        HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
-        HKObjectType.workoutType(),
-    ]
+    private let workoutType = HKObjectType.workoutType()
+    private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+    private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+
+    /// Write access is required to *start* HKWorkoutSession, even if we never finish/save the workout.
+    private var typesToShare: Set<HKSampleType> {
+        [workoutType, activeEnergyType, heartRateType]
+    }
+
+    private var typesToRead: Set<HKObjectType> {
+        [heartRateType, activeEnergyType, workoutType]
+    }
 
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.allowsBackgroundLocationUpdates = true
         locationManager.activityType = .fitness
+        refreshPermissionStatus()
 
         if CMWaterSubmersionManager.waterSubmersionAvailable {
             let manager = CMWaterSubmersionManager()
@@ -64,21 +79,56 @@ final class WatchSessionController: NSObject {
         }
     }
 
-    func requestPermissions() async {
-        locationManager.requestWhenInUseAuthorization()
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        do {
-            try await healthStore.requestAuthorization(toShare: [], read: typesToRead)
-            statusText = "Permissions ready"
-        } catch {
-            errorText = error.localizedDescription
+    func refreshPermissionStatus() {
+        locationAuthStatus = Self.locationLabel(locationManager.authorizationStatus)
+
+        if motionManager.isDeviceMotionAvailable {
+            motionAvailability = "deviceMotion available"
+        } else {
+            motionAvailability = "unavailable (skipped)"
         }
+
+        guard HKHealthStore.isHealthDataAvailable() else {
+            healthAuthStatus = "Health unavailable"
+            return
+        }
+        switch healthStore.authorizationStatus(for: workoutType) {
+        case .notDetermined:
+            healthAuthStatus = "workout: notDetermined"
+        case .sharingDenied:
+            healthAuthStatus = "workout: denied — enable in Settings › Health"
+        case .sharingAuthorized:
+            healthAuthStatus = "workout: authorized"
+        @unknown default:
+            healthAuthStatus = "workout: unknown"
+        }
+    }
+
+    /// Safe to call repeatedly. System may only show the sheet while status is notDetermined.
+    func requestPermissions() async {
+        errorText = nil
+        locationManager.requestWhenInUseAuthorization()
+
+        guard HKHealthStore.isHealthDataAvailable() else {
+            healthAuthStatus = "Health unavailable"
+            refreshPermissionStatus()
+            return
+        }
+
+        do {
+            try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
+            statusText = "Permissions updated"
+        } catch {
+            errorText = "Health auth: \(error.localizedDescription)"
+        }
+        refreshPermissionStatus()
     }
 
     func startSession() async {
         guard !isRunning else { return }
         errorText = nil
         statusText = "Starting…"
+        recordingMode = "none"
 
         await requestPermissions()
 
@@ -104,17 +154,17 @@ final class WatchSessionController: NSObject {
             return
         }
 
-        do {
-            try await startWorkout()
-        } catch {
-            errorText = "Workout: \(error.localizedDescription)"
-            statusText = "Failed"
-            return
+        let workoutStarted = await startWorkoutIfAuthorized()
+        if workoutStarted {
+            recordingMode = "workout"
+        } else {
+            recordingMode = "sensorsOnly"
+            statusText = "Sensors-only (no HK workout)"
         }
 
         startLocation()
-        startMotion()
-        startActivityUpdates()
+        startMotionIfAvailable()
+        startActivityUpdatesIfAvailable()
 
         currentLabel = LabelCodes.waiting
         labelCount = 0
@@ -122,7 +172,9 @@ final class WatchSessionController: NSObject {
         motionCount = 0
         startedAt = Date()
         isRunning = true
-        statusText = "Recording"
+        if recordingMode == "workout" {
+            statusText = "Recording"
+        }
 
         logLabel(code: LabelCodes.waiting)
         WKInterfaceDevice.current().enableWaterLock()
@@ -160,6 +212,8 @@ final class WatchSessionController: NSObject {
         }
 
         await endWorkoutDiscardingHealthSave()
+        recordingMode = "none"
+        motionRecordingEnabled = false
 
         statusText = "Transferring…"
         WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
@@ -208,6 +262,27 @@ final class WatchSessionController: NSObject {
         }
     }
 
+    /// Returns true if an HK workout session is running.
+    private func startWorkoutIfAuthorized() async -> Bool {
+        refreshPermissionStatus()
+        let status = healthStore.authorizationStatus(for: workoutType)
+        if status == .sharingDenied {
+            errorText = "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout."
+            return false
+        }
+
+        do {
+            try await startWorkout()
+            return true
+        } catch {
+            // Simulator / denied / notDetermined often surfaces here as "Not authorized".
+            errorText = "Workout: \(error.localizedDescription). Continuing sensors-only."
+            workoutSession = nil
+            workoutBuilder = nil
+            return false
+        }
+    }
+
     private func startWorkout() async throws {
         let config = HKWorkoutConfiguration()
         config.activityType = .waterSports
@@ -227,6 +302,7 @@ final class WatchSessionController: NSObject {
     }
 
     private func endWorkoutDiscardingHealthSave() async {
+        guard workoutSession != nil || workoutBuilder != nil else { return }
         let end = Date()
         workoutSession?.stopActivity(with: end)
         do {
@@ -241,11 +317,22 @@ final class WatchSessionController: NSObject {
     }
 
     private func startLocation() {
+        // Background updates need Always auth; avoid enabling them when not allowed.
+        if locationManager.authorizationStatus == .authorizedAlways {
+            locationManager.allowsBackgroundLocationUpdates = true
+        } else {
+            locationManager.allowsBackgroundLocationUpdates = false
+        }
         locationManager.startUpdatingLocation()
     }
 
-    private func startMotion() {
-        guard motionManager.isDeviceMotionAvailable else { return }
+    private func startMotionIfAvailable() {
+        motionRecordingEnabled = false
+        motionUpdatesStarted = false
+        guard motionManager.isDeviceMotionAvailable else {
+            motionAvailability = "unavailable (skipped)"
+            return
+        }
         motionManager.deviceMotionUpdateInterval = 1.0 / 50.0
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let self, let motion, self.isRunning else { return }
@@ -264,9 +351,13 @@ final class WatchSessionController: NSObject {
             self.motionBuffer.append(sample)
             self.motionCount += 1
         }
+        motionUpdatesStarted = true
+        motionRecordingEnabled = true
+        motionAvailability = "recording"
     }
 
-    private func startActivityUpdates() {
+    private func startActivityUpdatesIfAvailable() {
+        activityUpdatesStarted = false
         guard CMMotionActivityManager.isActivityAvailable() else { return }
         activityManager.startActivityUpdates(to: .main) { [weak self] activity in
             guard let activity else { return }
@@ -277,12 +368,19 @@ final class WatchSessionController: NSObject {
             else if activity.stationary { self?.latestActivity = "stationary" }
             else { self?.latestActivity = "unknown" }
         }
+        activityUpdatesStarted = true
     }
 
     private func stopSensors() {
         locationManager.stopUpdatingLocation()
-        motionManager.stopDeviceMotionUpdates()
-        activityManager.stopActivityUpdates()
+        if motionUpdatesStarted {
+            motionManager.stopDeviceMotionUpdates()
+            motionUpdatesStarted = false
+        }
+        if activityUpdatesStarted {
+            activityManager.stopActivityUpdates()
+            activityUpdatesStarted = false
+        }
     }
 
     private func flushBuffers() async {
@@ -306,6 +404,17 @@ final class WatchSessionController: NSObject {
             }
         } catch {
             errorText = "Flush: \(error.localizedDescription)"
+        }
+    }
+
+    private static func locationLabel(_ status: CLAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined: return "notDetermined"
+        case .restricted: return "restricted"
+        case .denied: return "denied"
+        case .authorizedAlways: return "always"
+        case .authorizedWhenInUse: return "whenInUse"
+        @unknown default: return "unknown"
         }
     }
 
@@ -338,6 +447,12 @@ extension WatchSessionController: CLLocationManagerDelegate {
                 )
             )
             locationCount += 1
+        }
+    }
+
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        Task { @MainActor in
+            refreshPermissionStatus()
         }
     }
 }

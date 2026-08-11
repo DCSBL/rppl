@@ -7,9 +7,9 @@
 	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Wake Tracker reads heart rate and active energy while recording cable-park sessions. Alpha builds do not save workouts into Health.</string>
+	<string>Wake Tracker needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Wake Tracker does not save workouts to Health during alpha testing.</string>
+	<string>Wake Tracker requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

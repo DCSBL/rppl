@@ -24,7 +24,11 @@ Label events store: `code`, `timestamp`, latest GPS snapshot, optional water sub
 
 ## HealthKit policy
 
-`HKWorkoutSession` + builder run for sensors/runtime. **Do not call `finishWorkout()`** — alpha keeps personal Health clean.
+`HKWorkoutSession` + builder run for sensors/runtime. Starting a session requires **share** authorization for Workouts (even though we **do not call `finishWorkout()`**).
+
+If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + labels still record; HR/energy from the builder are skipped.
+
+Motion (`deviceMotion`) is optional: when unavailable (Simulator), motion logging is skipped and `MOT` stays 0.
 
 ## Transfer
 
