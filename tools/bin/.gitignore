@@ -1,0 +1,5 @@
+# Local developer binaries (not committed).
+# Place `swiftlint` here or install via Homebrew.
+*
+!.gitignore
+!README.md

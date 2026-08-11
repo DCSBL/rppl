@@ -1,0 +1,35 @@
+# Start relatively lenient so existing alpha code is not blocked on style noise.
+# Tighten over time.
+
+excluded:
+  - WakeTrackerCore/.build
+  - .swiftpm
+  - DerivedData
+  - Exports
+  - tools
+  - Package.swift
+
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - type_name
+  - identifier_name
+  - todo
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - file_length
+  - type_body_length
+  - function_body_length
+  - function_parameter_count
+  - cyclomatic_complexity
+  - nesting
+  - trailing_comma
+  - statement_position
+  - redundant_optional_initialization
+  - static_over_final_class
+
+opt_in_rules: []
+
+analyzer_rules: []
