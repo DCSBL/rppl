@@ -16,7 +16,17 @@ enum SyncConnectionProbe {
             return .notActivated
         }
         guard session.isPaired else { return .notPaired }
-        guard session.isWatchAppInstalled else { return .watchAppMissing }
-        return session.isReachable ? .readyLive : .readyQueued
+
+        // Simulator often reports isWatchAppInstalled == false even when the Watch app is running.
+        // Treat reachable OR installed as enough; on Simulator, paired alone is enough for queued sync.
+        if session.isWatchAppInstalled || session.isReachable {
+            return session.isReachable ? .readyLive : .readyQueued
+        }
+
+        #if targetEnvironment(simulator)
+        return .readyQueued
+        #else
+        return .watchAppMissing
+        #endif
     }
 }

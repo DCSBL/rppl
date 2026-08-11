@@ -78,7 +78,7 @@ struct ContentView: View {
                         .foregroundStyle(.orange)
                 }
 
-                Text("Action Button → assign “Cycle Label” in Settings")
+                Text("Action Button: Settings › Action Button › Workout › Wake Tracker")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

@@ -3,6 +3,7 @@ import HealthKit
 import CoreLocation
 import CoreMotion
 import WatchKit
+import AppIntents
 import WakeTrackerCore
 import Observation
 
@@ -174,6 +175,7 @@ final class WatchSessionController: NSObject {
         isRunning = true
         if recordingMode == "workout" {
             statusText = "Recording"
+            await donateActionButtonCycleIntent()
         }
 
         logLabel(code: LabelCodes.waiting)
@@ -226,6 +228,17 @@ final class WatchSessionController: NSObject {
         let next = LabelCodes.next(after: currentLabel)
         currentLabel = next
         logLabel(code: next)
+    }
+
+    /// Arms Ultra Action Button to run Cycle Label on the next press (requires active HK workout).
+    func donateActionButtonCycleIntent() async {
+        do {
+            try await StartCableParkSessionIntent().donate(
+                result: .result(actionButtonIntent: CycleLabelIntent())
+            )
+        } catch {
+            errorText = "Action Button donate failed: \(error.localizedDescription)"
+        }
     }
 
     private func logLabel(code: String) {

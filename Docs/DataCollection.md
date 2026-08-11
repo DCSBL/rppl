@@ -28,7 +28,15 @@ Label events store: `code`, `timestamp`, latest GPS snapshot, optional water sub
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + labels still record; HR/energy from the builder are skipped.
 
-Motion (`deviceMotion`) is optional: when unavailable (Simulator), motion logging is skipped and `MOT` stays 0.
+## Action Button (Ultra)
+
+Cycle Label is **not** a top-level Action Button menu item (flashlight / workout / shortcut). Wire it like a workout app:
+
+1. Settings › Action Button › **Workout**
+2. App › **Wake Tracker** (Cable Park)
+3. First press starts the session; later presses run **Cycle Label** (donated as the workout “next action”)
+
+Requires an active HealthKit workout session (`Mode: workout`). Sensors-only mode cannot arm the Action Button next action.
 
 ## Transfer
 
