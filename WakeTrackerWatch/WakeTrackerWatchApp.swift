@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct wake_trackerApp: App {
+struct WakeTrackerWatchApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -9,6 +9,6 @@ struct wake_trackerApp: App {
     }
 
     init() {
-        PhoneConnectivityService.shared.activate()
+        WatchTransferService.shared.activate()
     }
 }

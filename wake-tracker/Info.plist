@@ -2,6 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Wake Tracker reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Wake Tracker does not write workouts to Health during alpha testing.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Wake Tracker shows GPS tracks from Apple Watch sessions on the map.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Wake Tracker may use location to display session tracks.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Wake Tracker uses motion APIs when reviewing session context on iPhone.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CCF3D6C7302921A800AF3518 /* WakeTrackerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CCF3D6D1302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* WakeTrackerCore */; };
+		CCF3D6D2302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* WakeTrackerCore */; };
+		CCF3D6D3302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6D0302921A800AF3518 /* WakeTrackerCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CCF3D6A3302921A800AF3518 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +28,34 @@
 			remoteGlobalIDString = CCF3D690302921A400AF3518;
 			remoteInfo = "wake-tracker";
 		};
+		CCF3D6C8302921A800AF3518 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CCF3D689302921A400AF3518 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CCF3D6C5302921A800AF3518;
+			remoteInfo = WakeTrackerWatch;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CCF3D6C6302921A800AF3518 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				CCF3D6C7302921A800AF3518 /* WakeTrackerWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		CCF3D691302921A500AF3518 /* wake-tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "wake-tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6A2302921A800AF3518 /* wake-trackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "wake-trackerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6AC302921A800AF3518 /* wake-trackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "wake-trackerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WakeTrackerWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +65,13 @@
 				Info.plist,
 			);
 			target = CCF3D690302921A400AF3518 /* wake-tracker */;
+		};
+		CCF3D6D5302921A800AF3518 /* Exceptions for "WakeTrackerWatch" folder */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CCF3D6C5302921A800AF3518 /* WakeTrackerWatch */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -58,6 +94,14 @@
 			path = "wake-trackerUITests";
 			sourceTree = "<group>";
 		};
+		CCF3D6C1302921A800AF3518 /* WakeTrackerWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CCF3D6D5302921A800AF3518 /* Exceptions for "WakeTrackerWatch" folder */,
+			);
+			path = WakeTrackerWatch;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +109,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCF3D6D1302921A800AF3518 /* WakeTrackerCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +117,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCF3D6D3302921A800AF3518 /* WakeTrackerCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +128,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCF3D6C3302921A800AF3518 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCF3D6D2302921A800AF3518 /* WakeTrackerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -89,6 +143,7 @@
 			isa = PBXGroup;
 			children = (
 				CCF3D693302921A500AF3518 /* wake-tracker */,
+				CCF3D6C1302921A800AF3518 /* WakeTrackerWatch */,
 				CCF3D6A5302921A800AF3518 /* wake-trackerTests */,
 				CCF3D6AF302921A800AF3518 /* wake-trackerUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
@@ -99,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				CCF3D691302921A500AF3518 /* wake-tracker.app */,
+				CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */,
 				CCF3D6A2302921A800AF3518 /* wake-trackerTests.xctest */,
 				CCF3D6AC302921A800AF3518 /* wake-trackerUITests.xctest */,
 			);
@@ -115,16 +171,19 @@
 				CCF3D68D302921A400AF3518 /* Sources */,
 				CCF3D68E302921A400AF3518 /* Frameworks */,
 				CCF3D68F302921A400AF3518 /* Resources */,
+				CCF3D6C6302921A800AF3518 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CCF3D6C9302921A800AF3518 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CCF3D693302921A500AF3518 /* wake-tracker */,
 			);
 			name = "wake-tracker";
 			packageProductDependencies = (
+				CCF3D6CE302921A800AF3518 /* WakeTrackerCore */,
 			);
 			productName = "wake-tracker";
 			productReference = CCF3D691302921A500AF3518 /* wake-tracker.app */;
@@ -148,6 +207,7 @@
 			);
 			name = "wake-trackerTests";
 			packageProductDependencies = (
+				CCF3D6D0302921A800AF3518 /* WakeTrackerCore */,
 			);
 			productName = "wake-trackerTests";
 			productReference = CCF3D6A2302921A800AF3518 /* wake-trackerTests.xctest */;
@@ -176,6 +236,29 @@
 			productReference = CCF3D6AC302921A800AF3518 /* wake-trackerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		CCF3D6C5302921A800AF3518 /* WakeTrackerWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCF3D6CC302921A800AF3518 /* Build configuration list for PBXNativeTarget "WakeTrackerWatch" */;
+			buildPhases = (
+				CCF3D6C2302921A800AF3518 /* Sources */,
+				CCF3D6C3302921A800AF3518 /* Frameworks */,
+				CCF3D6C4302921A800AF3518 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CCF3D6C1302921A800AF3518 /* WakeTrackerWatch */,
+			);
+			name = WakeTrackerWatch;
+			packageProductDependencies = (
+				CCF3D6CF302921A800AF3518 /* WakeTrackerCore */,
+			);
+			productName = WakeTrackerWatch;
+			productReference = CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,6 +280,9 @@
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = CCF3D690302921A400AF3518;
 					};
+					CCF3D6C5302921A800AF3518 = {
+						CreatedOnToolsVersion = 26.3;
+					};
 				};
 			};
 			buildConfigurationList = CCF3D68C302921A400AF3518 /* Build configuration list for PBXProject "wake-tracker" */;
@@ -208,12 +294,16 @@
 			);
 			mainGroup = CCF3D688302921A400AF3518;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "WakeTrackerCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CCF3D692302921A500AF3518 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				CCF3D690302921A400AF3518 /* wake-tracker */,
+				CCF3D6C5302921A800AF3518 /* WakeTrackerWatch */,
 				CCF3D6A1302921A800AF3518 /* wake-trackerTests */,
 				CCF3D6AB302921A800AF3518 /* wake-trackerUITests */,
 			);
@@ -236,6 +326,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CCF3D6AA302921A800AF3518 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCF3D6C4302921A800AF3518 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,6 +363,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCF3D6C2302921A800AF3518 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -279,6 +383,11 @@
 			target = CCF3D690302921A400AF3518 /* wake-tracker */;
 			targetProxy = CCF3D6AD302921A800AF3518 /* PBXContainerItemProxy */;
 		};
+		CCF3D6C9302921A800AF3518 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CCF3D6C5302921A800AF3518 /* WakeTrackerWatch */;
+			targetProxy = CCF3D6C8302921A800AF3518 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -287,11 +396,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "wake-tracker/wake-tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wake-tracker/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -305,23 +414,24 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -330,11 +440,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "wake-tracker/wake-tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wake-tracker/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -348,23 +458,25 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -488,22 +600,21 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-trackerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/wake-tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/wake-tracker";
-				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
 		};
@@ -513,22 +624,21 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-trackerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/wake-tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/wake-tracker";
-				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
 		};
@@ -537,22 +647,21 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-trackerUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "wake-tracker";
-				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
 		};
@@ -561,22 +670,90 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-trackerUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "wake-tracker";
-				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		CCF3D6CA302921A800AF3518 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WakeTrackerWatch/WakeTrackerWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WakeTrackerWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WakeTracker;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		CCF3D6CB302921A800AF3518 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WakeTrackerWatch/WakeTrackerWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WakeTrackerWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WakeTracker;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
 		};
@@ -619,7 +796,41 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CCF3D6CC302921A800AF3518 /* Build configuration list for PBXNativeTarget "WakeTrackerWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCF3D6CA302921A800AF3518 /* Debug */,
+				CCF3D6CB302921A800AF3518 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "WakeTrackerCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = WakeTrackerCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CCF3D6CE302921A800AF3518 /* WakeTrackerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "WakeTrackerCore" */;
+			productName = WakeTrackerCore;
+		};
+		CCF3D6CF302921A800AF3518 /* WakeTrackerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "WakeTrackerCore" */;
+			productName = WakeTrackerCore;
+		};
+		CCF3D6D0302921A800AF3518 /* WakeTrackerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "WakeTrackerCore" */;
+			productName = WakeTrackerCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CCF3D689302921A400AF3518 /* Project object */;
 }

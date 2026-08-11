@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>nl.dcsbl.wake-tracker</string>
+	<key>WKRunsIndependentlyOfCompanionApp</key>
+	<false/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Wake Tracker reads heart rate and active energy while recording cable-park sessions. Alpha builds do not save workouts into Health.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Wake Tracker does not save workouts to Health during alpha testing.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Wake Tracker records GPS for the full park session, including when the wrist is down.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+		<string>location</string>
+	</array>
+</dict>
+</plist>

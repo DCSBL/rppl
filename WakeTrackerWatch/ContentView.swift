@@ -1,0 +1,79 @@
+import SwiftUI
+import WakeTrackerCore
+
+struct ContentView: View {
+    @State private var session = WatchSessionController.shared
+    @State private var transfer = WatchTransferService.shared
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(session.statusText)
+                    .font(.headline)
+
+                if session.isRunning {
+                    Text(session.currentLabel.uppercased())
+                        .font(.title2.bold())
+                    Text(timeString(session.elapsed))
+                        .monospacedDigit()
+                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)")
+                        .font(.caption2)
+                    if let lat = session.lastLatitude, let lon = session.lastLongitude {
+                        Text(String(format: "%.5f, %.5f", lat, lon))
+                            .font(.caption2)
+                            .monospaced()
+                    }
+                    if let hr = session.lastHeartRate {
+                        Text(String(format: "HR %.0f", hr))
+                            .font(.caption2)
+                    }
+
+                    Button("Cycle label") {
+                        session.cycleLabelFromActionButton()
+                    }
+
+                    Button("Stop session", role: .destructive) {
+                        Task { await session.stopSession() }
+                    }
+                } else {
+                    Button("Start session") {
+                        Task { await session.startSession() }
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("Retry transfers") {
+                        transfer.transferPending()
+                    }
+                }
+
+                Text(transfer.lastMessage)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                if let error = session.errorText {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                }
+
+                Text("Action Button → assign “Cycle Label” in Settings")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .onAppear {
+            transfer.activate()
+            Task { await session.requestPermissions() }
+        }
+    }
+
+    private func timeString(_ t: TimeInterval) -> String {
+        let s = Int(t)
+        return String(format: "%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
+    }
+}
+
+#Preview {
+    ContentView()
+}
