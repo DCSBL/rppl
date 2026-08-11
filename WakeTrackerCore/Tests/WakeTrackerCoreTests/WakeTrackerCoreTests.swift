@@ -14,6 +14,25 @@ struct LabelCodesTests {
     @Test func unknownCodeRestartsCycle() {
         #expect(LabelCodes.next(after: "dockStartJump") == LabelCodes.waiting)
     }
+
+    @Test func fullCycleReturnsToStart() {
+        var code = LabelCodes.waiting
+        for _ in 0..<LabelCodes.actionButtonCycle.count {
+            code = LabelCodes.next(after: code)
+        }
+        #expect(code == LabelCodes.waiting)
+    }
+
+    @Test func multiStepFromWaiting() {
+        let riding = LabelCodes.next(after: LabelCodes.waiting)
+        let swimming = LabelCodes.next(after: riding)
+        let walking = LabelCodes.next(after: swimming)
+        #expect([riding, swimming, walking] == [
+            LabelCodes.riding,
+            LabelCodes.swimming,
+            LabelCodes.walking,
+        ])
+    }
 }
 
 @Suite("SessionFileStore")
@@ -121,6 +140,73 @@ struct SessionFileStoreTests {
         // Simulate failure: leave as transferring / ready — still present on disk
         let stillThere = try store.readManifest(sessionId: manifest.sessionId)
         #expect(stillThere.transferState == .transferring)
+    }
+
+    @Test func emptyStoreHasNoPendingTransfers() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("empty-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        #expect(try store.sessionsNeedingTransfer().isEmpty)
+        #expect(try store.listSessionIDs().isEmpty)
+    }
+
+    @Test func acknowledgedSessionLeavesPendingEmpty() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ack-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markAcknowledged(sessionId: manifest.sessionId)
+        #expect(try store.sessionsNeedingTransfer().isEmpty)
+    }
+
+    @Test func recordingSessionNotPending() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("rec-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+        #expect(try store.sessionsNeedingTransfer().isEmpty)
+    }
+
+    @Test func listSessionIDsSorted() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("list-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        for id in ["b-session", "a-session", "c-session"] {
+            _ = try store.createSession(
+                manifest: SessionManifest(
+                    sessionId: id,
+                    testerId: "t",
+                    appVersion: "1.0",
+                    buildNumber: "1",
+                    watchModel: "Ultra2",
+                    systemVersion: "26.0"
+                )
+            )
+        }
+        #expect(try store.listSessionIDs() == ["a-session", "b-session", "c-session"])
     }
 
     @Test func testerIdentityPersistsInDefaults() {

@@ -63,9 +63,13 @@ struct CycleLabelIntent: AppIntent {
         WatchSessionController.shared.cycleLabelFromActionButton()
         let label = WatchSessionController.shared.currentLabel
         // Keep Action Button armed for the next cycle press.
-        try? await StartCableParkSessionIntent().donate(
-            result: .result(actionButtonIntent: CycleLabelIntent())
-        )
+        do {
+            _ = try await StartCableParkSessionIntent().donate(
+                result: .result(actionButtonIntent: CycleLabelIntent())
+            )
+        } catch {
+            // Donation is best-effort; label already logged.
+        }
         return .result(dialog: IntentDialog(stringLiteral: "Logged \(label)"))
     }
 }

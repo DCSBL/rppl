@@ -139,17 +139,8 @@ public final class SessionFileStore: @unchecked Sendable {
 
     /// Sessions waiting for a successful phone ack. Never delete these on transfer failure.
     public func sessionsNeedingTransfer() throws -> [SessionManifest] {
-        try listSessionIDs().compactMap { id in
-            let manifest = try readManifest(sessionId: id)
-            switch manifest.transferState {
-            case .readyToTransfer, .transferring, .recording:
-                // recording with endedAt set shouldn't happen, but include ready/transferring
-                if manifest.transferState == .recording { return nil }
-                return manifest
-            case .acknowledged:
-                return nil
-            }
-        }
+        let manifests = try listSessionIDs().map { try readManifest(sessionId: $0) }
+        return TransferPendingFilter.needingTransfer(manifests)
     }
 
     public func zipSessionForTransfer(sessionId: String, to destinationURL: URL) throws -> URL {

@@ -4,29 +4,33 @@ import WakeTrackerCore
 
 enum SyncConnectionProbe {
     static func current(session: WCSession = .default) -> SyncConnectionState {
-        guard WCSession.isSupported() else { return .unsupported }
+        #if targetEnvironment(simulator)
+        let simulator = true
+        #else
+        let simulator = false
+        #endif
+
+        let activation: SyncConnectionResolver.Activation
         switch session.activationState {
         case .notActivated:
-            return .notActivated
+            activation = .notActivated
         case .inactive:
-            return .inactive
+            activation = .inactive
         case .activated:
-            break
+            activation = .activated
         @unknown default:
-            return .notActivated
-        }
-        guard session.isPaired else { return .notPaired }
-
-        // Simulator often reports isWatchAppInstalled == false even when the Watch app is running.
-        // Treat reachable OR installed as enough; on Simulator, paired alone is enough for queued sync.
-        if session.isWatchAppInstalled || session.isReachable {
-            return session.isReachable ? .readyLive : .readyQueued
+            activation = .notActivated
         }
 
-        #if targetEnvironment(simulator)
-        return .readyQueued
-        #else
-        return .watchAppMissing
-        #endif
+        return SyncConnectionResolver.resolve(
+            supported: WCSession.isSupported(),
+            activation: activation,
+            isPaired: session.isPaired,
+            isWatchAppInstalled: session.isWatchAppInstalled,
+            isCompanionAppInstalled: true,
+            isReachable: session.isReachable,
+            isSimulator: simulator,
+            platform: .phone
+        )
     }
 }

@@ -245,21 +245,21 @@ final class WatchSessionController: NSObject {
         guard let store, let manifest else { return }
         let gps: GPSSnapshot?
         if let loc = latestLocation {
-            gps = GPSSnapshot(
+            gps = LabelEventFactory.gpsSnapshot(
                 latitude: loc.coordinate.latitude,
                 longitude: loc.coordinate.longitude,
                 altitude: loc.altitude,
                 horizontalAccuracy: loc.horizontalAccuracy,
                 verticalAccuracy: loc.verticalAccuracy,
-                speed: loc.speed >= 0 ? loc.speed : nil,
-                course: loc.course >= 0 ? loc.course : nil,
+                speed: loc.speed,
+                course: loc.course,
                 timestamp: loc.timestamp
             )
         } else {
             gps = nil
         }
 
-        let event = LabelEvent(
+        let event = LabelEventFactory.make(
             code: code,
             timestamp: Date(),
             gps: gps,
