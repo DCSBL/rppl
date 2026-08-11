@@ -21,6 +21,20 @@
                ReferencedContainer = "container:wake-tracker.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CCF3D6C5302921A800AF3518"
+               BuildableName = "WakeTrackerWatch.app"
+               BlueprintName = "WakeTrackerWatch"
+               ReferencedContainer = "container:wake-tracker.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
