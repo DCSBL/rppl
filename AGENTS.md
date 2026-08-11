@@ -21,7 +21,7 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 - Prefer extending opaque string label codes over closed Swift enums.
 - Prefer pure logic in `WakeTrackerCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
+Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md).
 
 ## Architecture rules
 
@@ -68,6 +68,8 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories. 
 | Action Button / workout next action | `WakeTrackerWatch/CycleLabelIntent.swift` |
 | Phone sync + export UI | `wake-tracker/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
+| Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
+| Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
 
 ## Out of scope unless explicitly asked
 
@@ -77,7 +79,9 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories. 
 - CloudKit / HealthKit workout saves (Phase 4)
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
+- Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
+- Mac viz, Core auto-detector, or live Watch detection until a Phase 3 code pass is requested ([Docs/Phase3.md](Docs/Phase3.md))
 
 ## When unsure
 
-Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (pause, phone labeling, Health saves, deleting Watch data early), **stop and ask**.
+Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (pause, phone labeling, Health saves, deleting Watch data early), **stop and ask**. Do not invent Phase 3 detector thresholds or park profiles without an explicit code ask — follow [Docs/Phase3.md](Docs/Phase3.md).

@@ -30,7 +30,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 
 ### Later
 
-- **Phase 3** — Auto-detection from labeled fixtures (Core), live Watch state + manual override
+- **Phase 3** — Auto-detection from labeled fixtures (Core), live Watch state + manual override · roadmap: [Docs/Phase3.md](Docs/Phase3.md) · ideas: [Docs/Ideas.md](Docs/Ideas.md)
 - **Phase 4** — Product UI, HealthKit saves, CloudKit sync, heatmap polish
 
 ## Repo layout
@@ -39,7 +39,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 WakeTrackerCore/     Shared models, IO, sync/label helpers (SPM + Swift Testing)
 WakeTrackerWatch/    Session engine, sensors, Action Button, WC send
 wake-tracker/        iPhone permissions, sync receive, map, export
-Docs/                DataCollection + DevWorkflow
+Docs/                DataCollection, DevWorkflow, Phase3, Ideas
 scripts/git-hooks/   pre-commit xcode gate
 ```
 
