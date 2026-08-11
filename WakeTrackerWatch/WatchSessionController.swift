@@ -107,11 +107,13 @@ final class WatchSessionController: NSObject {
 
     /// Safe to call repeatedly. System may only show the sheet while status is notDetermined.
     func requestPermissions() async {
+        WakeLog.debug(.permissions, "requestPermissions begin")
         errorText = nil
         locationManager.requestWhenInUseAuthorization()
 
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = "Health unavailable"
+            WakeLog.debug(.permissions, "Health unavailable")
             refreshPermissionStatus()
             return
         }
@@ -119,14 +121,24 @@ final class WatchSessionController: NSObject {
         do {
             try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
             statusText = "Permissions updated"
+            WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {
             errorText = "Health auth: \(error.localizedDescription)"
+            WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
         }
         refreshPermissionStatus()
+        WakeLog.debug(
+            .permissions,
+            "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
+        )
     }
 
     func startSession() async {
-        guard !isRunning else { return }
+        guard !isRunning else {
+            WakeLog.debug(.session, "startSession ignored — already running")
+            return
+        }
+        WakeLog.debug(.session, "startSession begin")
         errorText = nil
         statusText = "Starting…"
         recordingMode = "none"
@@ -146,12 +158,15 @@ final class WatchSessionController: NSObject {
             systemVersion: WKInterfaceDevice.current().systemVersion
         )
         self.manifest = manifest
+        WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")
 
         do {
             _ = try fileStore.createSession(manifest: manifest)
+            WakeLog.debug(.store, "createSession OK \(manifest.sessionId.prefix(8))…")
         } catch {
             errorText = "Store: \(error.localizedDescription)"
             statusText = "Failed"
+            WakeLog.error(.store, "createSession: \(error.localizedDescription)")
             return
         }
 
@@ -162,6 +177,7 @@ final class WatchSessionController: NSObject {
             recordingMode = "sensorsOnly"
             statusText = "Sensors-only (no HK workout)"
         }
+        WakeLog.debug(.session, "recordingMode=\(recordingMode)")
 
         startLocation()
         startMotionIfAvailable()
@@ -180,6 +196,7 @@ final class WatchSessionController: NSObject {
 
         logLabel(code: LabelCodes.waiting)
         WKInterfaceDevice.current().enableWaterLock()
+        WakeLog.debug(.session, "Water Lock enabled")
 
         flushTask = Task { [weak self] in
             while let self, !Task.isCancelled, self.isRunning {
@@ -195,10 +212,15 @@ final class WatchSessionController: NSObject {
                 }
             }
         }
+        WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
     }
 
     func stopSession() async {
-        guard isRunning, let manifest, let store else { return }
+        guard isRunning, let manifest, let store else {
+            WakeLog.debug(.session, "stopSession ignored — not running")
+            return
+        }
+        WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
         statusText = "Stopping…"
         isRunning = false
         flushTask?.cancel()
@@ -209,8 +231,10 @@ final class WatchSessionController: NSObject {
 
         do {
             try store.markReadyToTransfer(sessionId: manifest.sessionId)
+            WakeLog.debug(.store, "markReadyToTransfer \(manifest.sessionId.prefix(8))…")
         } catch {
             errorText = "Mark transfer: \(error.localizedDescription)"
+            WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
         }
 
         await endWorkoutDiscardingHealthSave()
@@ -220,29 +244,42 @@ final class WatchSessionController: NSObject {
         statusText = "Transferring…"
         WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
         statusText = "Stopped — waiting for phone ack"
+        WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         self.manifest = nil
     }
 
     func cycleLabelFromActionButton() {
-        guard isRunning else { return }
+        guard isRunning else {
+            WakeLog.debug(.label, "cycleLabel ignored — not running")
+            return
+        }
+        let previous = currentLabel
         let next = LabelCodes.next(after: currentLabel)
         currentLabel = next
+        WakeLog.debug(.label, "cycle \(previous) → \(next)")
         logLabel(code: next)
+        WKInterfaceDevice.current().play(.click)
     }
 
     /// Arms Ultra Action Button to run Cycle Label on the next press (requires active HK workout).
     func donateActionButtonCycleIntent() async {
+        WakeLog.debug(.intent, "donate Action Button → CycleLabelIntent")
         do {
             try await StartCableParkSessionIntent().donate(
                 result: .result(actionButtonIntent: CycleLabelIntent())
             )
+            WakeLog.debug(.intent, "donate Action Button OK")
         } catch {
             errorText = "Action Button donate failed: \(error.localizedDescription)"
+            WakeLog.error(.intent, "donate failed: \(error.localizedDescription)")
         }
     }
 
     private func logLabel(code: String) {
-        guard let store, let manifest else { return }
+        guard let store, let manifest else {
+            WakeLog.error(.label, "appendLabel skipped — no store/manifest")
+            return
+        }
         let gps: GPSSnapshot?
         if let loc = latestLocation {
             gps = LabelEventFactory.gpsSnapshot(
@@ -270,8 +307,13 @@ final class WatchSessionController: NSObject {
         do {
             try store.appendLabel(event, sessionId: manifest.sessionId)
             labelCount += 1
+            WakeLog.debug(
+                .label,
+                "appended code=\(code) gps=\(gps != nil) water=\(latestWaterState ?? "nil") activity=\(latestActivity ?? "nil") count=\(labelCount)"
+            )
         } catch {
             errorText = "Label: \(error.localizedDescription)"
+            WakeLog.error(.label, "appendLabel: \(error.localizedDescription)")
         }
     }
 
@@ -281,15 +323,18 @@ final class WatchSessionController: NSObject {
         let status = healthStore.authorizationStatus(for: workoutType)
         if status == .sharingDenied {
             errorText = "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout."
+            WakeLog.debug(.workout, "sharingDenied — sensors-only")
             return false
         }
 
         do {
             try await startWorkout()
+            WakeLog.debug(.workout, "HKWorkoutSession started (dry-run)")
             return true
         } catch {
             // Simulator / denied / notDetermined often surfaces here as "Not authorized".
             errorText = "Workout: \(error.localizedDescription). Continuing sensors-only."
+            WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
             workoutSession = nil
             workoutBuilder = nil
             return false
@@ -316,6 +361,7 @@ final class WatchSessionController: NSObject {
 
     private func endWorkoutDiscardingHealthSave() async {
         guard workoutSession != nil || workoutBuilder != nil else { return }
+        WakeLog.debug(.workout, "end workout (no finishWorkout / Health save)")
         let end = Date()
         workoutSession?.stopActivity(with: end)
         do {
@@ -323,6 +369,7 @@ final class WatchSessionController: NSObject {
             // Intentionally do NOT call finishWorkout() — dry-run, keep Health clean.
         } catch {
             errorText = "End workout: \(error.localizedDescription)"
+            WakeLog.error(.workout, "endCollection: \(error.localizedDescription)")
         }
         workoutSession?.end()
         workoutSession = nil
@@ -337,6 +384,7 @@ final class WatchSessionController: NSObject {
             locationManager.allowsBackgroundLocationUpdates = false
         }
         locationManager.startUpdatingLocation()
+        WakeLog.debug(.session, "location updates started auth=\(locationAuthStatus)")
     }
 
     private func startMotionIfAvailable() {
@@ -344,6 +392,7 @@ final class WatchSessionController: NSObject {
         motionUpdatesStarted = false
         guard motionManager.isDeviceMotionAvailable else {
             motionAvailability = "unavailable (skipped)"
+            WakeLog.debug(.session, "device motion unavailable — skipped")
             return
         }
         motionManager.deviceMotionUpdateInterval = 1.0 / 50.0
@@ -367,24 +416,35 @@ final class WatchSessionController: NSObject {
         motionUpdatesStarted = true
         motionRecordingEnabled = true
         motionAvailability = "recording"
+        WakeLog.debug(.session, "device motion recording @50Hz")
     }
 
     private func startActivityUpdatesIfAvailable() {
         activityUpdatesStarted = false
-        guard CMMotionActivityManager.isActivityAvailable() else { return }
+        guard CMMotionActivityManager.isActivityAvailable() else {
+            WakeLog.debug(.session, "motion activity unavailable")
+            return
+        }
         activityManager.startActivityUpdates(to: .main) { [weak self] activity in
-            guard let activity else { return }
-            if activity.automotive { self?.latestActivity = "automotive" }
-            else if activity.cycling { self?.latestActivity = "cycling" }
-            else if activity.running { self?.latestActivity = "running" }
-            else if activity.walking { self?.latestActivity = "walking" }
-            else if activity.stationary { self?.latestActivity = "stationary" }
-            else { self?.latestActivity = "unknown" }
+            guard let self, let activity else { return }
+            let next: String
+            if activity.automotive { next = "automotive" }
+            else if activity.cycling { next = "cycling" }
+            else if activity.running { next = "running" }
+            else if activity.walking { next = "walking" }
+            else if activity.stationary { next = "stationary" }
+            else { next = "unknown" }
+            if self.latestActivity != next {
+                self.latestActivity = next
+                WakeLog.debug(.session, "motionActivity → \(next)")
+            }
         }
         activityUpdatesStarted = true
+        WakeLog.debug(.session, "motion activity updates started")
     }
 
     private func stopSensors() {
+        WakeLog.debug(.session, "stopSensors")
         locationManager.stopUpdatingLocation()
         if motionUpdatesStarted {
             motionManager.stopDeviceMotionUpdates()
@@ -405,6 +465,8 @@ final class WatchSessionController: NSObject {
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
 
+        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty else { return }
+
         do {
             if !locations.isEmpty {
                 try store.appendLocationSamples(locations, sessionId: manifest.sessionId)
@@ -415,8 +477,13 @@ final class WatchSessionController: NSObject {
             if !health.isEmpty {
                 try store.appendHealthSamples(health, sessionId: manifest.sessionId)
             }
+            // Success path silent — every ~2s while recording would drown action logs.
         } catch {
             errorText = "Flush: \(error.localizedDescription)"
+            WakeLog.error(
+                .store,
+                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count): \(error.localizedDescription)"
+            )
         }
     }
 
@@ -465,7 +532,9 @@ extension WatchSessionController: CLLocationManagerDelegate {
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor in
+            let before = locationAuthStatus
             refreshPermissionStatus()
+            WakeLog.debug(.permissions, "location auth \(before) → \(locationAuthStatus)")
         }
     }
 }
@@ -476,11 +545,33 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
         didChangeTo toState: HKWorkoutSessionState,
         from fromState: HKWorkoutSessionState,
         date: Date
-    ) {}
+    ) {
+        Task { @MainActor in
+            WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
+            // Donate only once the HK session is actually running — earlier donate can arm a
+            // next-action the system never delivers.
+            if toState == .running, isRunning, recordingMode == "workout" {
+                await donateActionButtonCycleIntent()
+            }
+        }
+    }
 
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
         Task { @MainActor in
             errorText = error.localizedDescription
+            WakeLog.error(.workout, "session failed: \(error.localizedDescription)")
+        }
+    }
+
+    private static func workoutStateName(_ state: HKWorkoutSessionState) -> String {
+        switch state {
+        case .notStarted: return "notStarted"
+        case .running: return "running"
+        case .ended: return "ended"
+        case .paused: return "paused"
+        case .prepared: return "prepared"
+        case .stopped: return "stopped"
+        @unknown default: return "unknown(\(state.rawValue))"
         }
     }
 }
@@ -527,11 +618,16 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
 extension WatchSessionController: CMWaterSubmersionManagerDelegate {
     nonisolated func manager(_ manager: CMWaterSubmersionManager, didUpdate event: CMWaterSubmersionEvent) {
         Task { @MainActor in
+            let next: String
             switch event.state {
-            case .unknown: latestWaterState = "unknown"
-            case .notSubmerged: latestWaterState = "notSubmerged"
-            case .submerged: latestWaterState = "submerged"
-            @unknown default: latestWaterState = "other"
+            case .unknown: next = "unknown"
+            case .notSubmerged: next = "notSubmerged"
+            case .submerged: next = "submerged"
+            @unknown default: next = "other"
+            }
+            if latestWaterState != next {
+                latestWaterState = next
+                WakeLog.debug(.water, "submersion → \(next)")
             }
         }
     }
@@ -541,10 +637,14 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
         didUpdate measurement: CMWaterSubmersionMeasurement
     ) {
         Task { @MainActor in
-            latestWaterState = String(describing: measurement.submersionState)
+            var next = String(describing: measurement.submersionState)
             if let depth = measurement.depth {
                 let meters = depth.converted(to: UnitLength.meters).value
-                if meters > 0 { latestWaterState = "submerged" }
+                if meters > 0 { next = "submerged" }
+            }
+            if latestWaterState != next {
+                latestWaterState = next
+                WakeLog.debug(.water, "measurement → \(next)")
             }
         }
     }
@@ -554,11 +654,18 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
         didUpdate measurement: CMWaterTemperature
     ) {
         Task { @MainActor in
-            latestWaterTempC = measurement.temperature.converted(to: UnitTemperature.celsius).value
+            let temp = measurement.temperature.converted(to: UnitTemperature.celsius).value
+            let previous = latestWaterTempC
+            latestWaterTempC = temp
+            if previous == nil || abs((previous ?? 0) - temp) >= 0.5 {
+                WakeLog.debug(.water, String(format: "waterTemp %.1f°C", temp))
+            }
         }
     }
 
     nonisolated func manager(_ manager: CMWaterSubmersionManager, errorOccurred error: any Error) {
-        // Best-effort only for alpha.
+        Task { @MainActor in
+            WakeLog.error(.water, "submersion error: \(error.localizedDescription)")
+        }
     }
 }

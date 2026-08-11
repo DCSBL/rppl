@@ -43,23 +43,28 @@ struct ContentView: View {
                     }
 
                     Button("Cycle label") {
+                        WakeLog.debug(.ui, "tap Cycle label")
                         session.cycleLabelFromActionButton()
                     }
 
                     Button("Stop session", role: .destructive) {
+                        WakeLog.debug(.ui, "tap Stop session")
                         Task { await session.stopSession() }
                     }
                 } else {
                     Button("Start session") {
+                        WakeLog.debug(.ui, "tap Start session")
                         Task { await session.startSession() }
                     }
                     .buttonStyle(.borderedProminent)
 
                     Button("Request permissions") {
+                        WakeLog.debug(.ui, "tap Request permissions")
                         Task { await session.requestPermissions() }
                     }
 
                     Button("Retry transfers") {
+                        WakeLog.debug(.ui, "tap Retry transfers")
                         transfer.transferPending()
                     }
 
@@ -78,19 +83,21 @@ struct ContentView: View {
                         .foregroundStyle(.orange)
                 }
 
-                Text("Action Button: Settings › Action Button › Workout › Wake Tracker")
+                Text("Action Button: Workout › Wake Tracker (or Shortcut › Cycle Label)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onAppear {
+            WakeLog.debug(.lifecycle, "Watch ContentView onAppear")
             transfer.activate()
             transfer.refreshSyncState()
             session.refreshPermissionStatus()
             Task { await session.requestPermissions() }
         }
         .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
+            WakeLog.debug(.lifecycle, "WKApplication.didBecomeActive")
             transfer.refreshSyncState()
         }
     }

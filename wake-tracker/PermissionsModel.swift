@@ -3,6 +3,7 @@ import HealthKit
 import CoreLocation
 import CoreMotion
 import Observation
+import WakeTrackerCore
 
 @Observable
 @MainActor
@@ -19,14 +20,22 @@ final class PermissionsModel {
         locationStatus = Self.locationLabel(locationManager.authorizationStatus)
         motionStatus = CMMotionActivityManager.isActivityAvailable() ? "available" : "unavailable"
         healthStatus = HKHealthStore.isHealthDataAvailable() ? "available" : "unavailable"
+        WakeLog.debug(
+            .permissions,
+            "refresh health=\(healthStatus) loc=\(locationStatus) motion=\(motionStatus)"
+        )
     }
 
     func requestAll() async {
+        WakeLog.debug(.permissions, "requestAll begin")
         lastError = nil
         locationManager.requestWhenInUseAuthorization()
         refresh()
 
-        guard HKHealthStore.isHealthDataAvailable() else { return }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            WakeLog.debug(.permissions, "Health unavailable")
+            return
+        }
         let workout = HKObjectType.workoutType()
         let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
         let energy = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
@@ -45,9 +54,11 @@ final class PermissionsModel {
             @unknown default:
                 healthStatus = "workout: unknown"
             }
+            WakeLog.debug(.permissions, "Health auth result \(healthStatus)")
         } catch {
             lastError = error.localizedDescription
             healthStatus = "error"
+            WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
         }
         refresh()
     }

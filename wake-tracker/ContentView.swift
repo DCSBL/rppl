@@ -17,6 +17,7 @@ struct ContentView: View {
                         footnote: connectivity.status
                     )
                     Button("Refresh sync status") {
+                        WakeLog.debug(.ui, "tap Refresh sync status")
                         connectivity.refreshSyncState()
                     }
                 }
@@ -26,6 +27,7 @@ struct ContentView: View {
                     LabeledContent("Location", value: permissions.locationStatus)
                     LabeledContent("Motion", value: permissions.motionStatus)
                     Button("Request permissions") {
+                        WakeLog.debug(.ui, "tap Request permissions")
                         Task { await permissions.requestAll() }
                     }
                     if let err = permissions.lastError {
@@ -57,15 +59,20 @@ struct ContentView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Reload") { reload() }
+                    Button("Reload") {
+                        WakeLog.debug(.ui, "tap Reload sessions")
+                        reload()
+                    }
                 }
             }
             .onAppear {
+                WakeLog.debug(.lifecycle, "Phone ContentView onAppear")
                 permissions.refresh()
                 connectivity.refreshSyncState()
                 reload()
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
+                WakeLog.debug(.ui, "sessionsRevision changed — reload")
                 reload()
             }
         }
@@ -76,8 +83,10 @@ struct ContentView: View {
             let ids = try connectivity.store.listSessionIDs()
             manifests = try ids.compactMap { try connectivity.store.readManifest(sessionId: $0) }
                 .sorted { $0.startedAt > $1.startedAt }
+            WakeLog.debug(.ui, "reload sessions count=\(manifests.count)")
         } catch {
             manifests = []
+            WakeLog.error(.store, "reload sessions: \(error.localizedDescription)")
         }
     }
 }
@@ -151,7 +160,10 @@ struct SessionDetailView: View {
             }
         }
         .navigationTitle("Session")
-        .onAppear(perform: load)
+        .onAppear {
+            WakeLog.debug(.ui, "SessionDetail onAppear \(sessionId.prefix(8))…")
+            load()
+        }
     }
 
     private func load() {
@@ -159,13 +171,19 @@ struct SessionDetailView: View {
             manifest = try store.readManifest(sessionId: sessionId)
             labels = try store.readLabels(sessionId: sessionId)
             locations = try store.readLocationSamples(sessionId: sessionId)
+            WakeLog.debug(
+                .ui,
+                "SessionDetail loaded labels=\(labels.count) gps=\(locations.count)"
+            )
         } catch {
             errorText = error.localizedDescription
+            WakeLog.error(.store, "SessionDetail load: \(error.localizedDescription)")
         }
     }
 
     private func exportFile() -> URL {
         if let exportURL { return exportURL }
+        WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
         do {
             let package = try store.buildTransferPackage(sessionId: sessionId)
@@ -174,9 +192,11 @@ struct SessionDetailView: View {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             try encoder.encode(package).write(to: url, options: [.atomic])
             exportURL = url
+            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
             return url
         } catch {
             errorText = error.localizedDescription
+            WakeLog.error(.store, "export: \(error.localizedDescription)")
             return url
         }
     }

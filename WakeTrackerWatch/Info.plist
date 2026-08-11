@@ -16,10 +16,15 @@
 	<string>Wake Tracker records GPS for the full park session, including when the wrist is down.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.</string>
+	<!-- Location stays under UIBackgroundModes; workout-processing must be WKBackgroundModes
+	     or Action Button next-action (Cycle Label) fails after the red confirmation. -->
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>workout-processing</string>
 		<string>location</string>
+	</array>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
 	</array>
 </dict>
 </plist>

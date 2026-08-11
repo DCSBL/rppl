@@ -1,0 +1,4 @@
+{"sessionId":"abf617","runId":"pre","hypothesisId":"C,E","data":{"phase":"inactive"},"timestamp":1786459512897,"message":"watch scene phase","location":"WakeTrackerWatchApp.scenePhase"}
+{"hypothesisId":"C,E","timestamp":1786459513454,"data":{"phase":"background"},"location":"WakeTrackerWatchApp.scenePhase","sessionId":"abf617","runId":"pre","message":"watch scene phase"}
+{"location":"wake_trackerApp.scenePhase","timestamp":1786460318787,"sessionId":"abf617","runId":"pre","data":{"phase":"inactive"},"hypothesisId":"C,E","message":"phone scene phase"}
+{"sessionId":"abf617","location":"wake_trackerApp.scenePhase","message":"phone scene phase","runId":"pre","timestamp":1786460319579,"hypothesisId":"C,E","data":{"phase":"background"}}

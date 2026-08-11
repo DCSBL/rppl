@@ -19,6 +19,7 @@ enum CableParkWorkoutStyle: String, AppEnum {
 struct StartCableParkSessionIntent: StartWorkoutIntent {
     static var title: LocalizedStringResource = "Start Cable Park Session"
     static var description = IntentDescription("Starts a Wake Tracker cable-park recording session.")
+    static var openAppWhenRun: Bool { true }
 
     static var suggestedWorkouts: [StartCableParkSessionIntent] = [
         StartCableParkSessionIntent()
@@ -40,37 +41,38 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
             ?? DisplayRepresentation(title: "Cable Park")
     }
 
-    @MainActor
     func perform() async throws -> some IntentResult {
-        if !WatchSessionController.shared.isRunning {
+        WakeLog.debug(.intent, "StartCableParkSessionIntent.perform begin")
+        let running = await WatchSessionController.shared.isRunning
+        if running {
+            // Backup: some OS builds re-fire Start instead of donated next action.
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — cycle label")
+            await WatchSessionController.shared.cycleLabelFromActionButton()
+        } else {
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
             await WatchSessionController.shared.startSession()
         }
-        // First Action Button press starts the session; subsequent presses run Cycle Label.
         return .result(actionButtonIntent: CycleLabelIntent())
     }
 }
 
-/// Next Action Button press while a workout session is active.
+/// Donated Action Button next-action while a workout session is active.
+///
+/// Critical: `openAppWhenRun` must stay **false**. Opening the app from the Action Button
+/// during an active workout / Water Lock often yields a blank red flash and never calls
+/// `perform()` (no logs, label unchanged).
 struct CycleLabelIntent: AppIntent {
     static var title: LocalizedStringResource = "Cycle Label"
     static var description = IntentDescription(
         "Advances waiting → riding → swimming → walking and logs a label."
     )
-    static var openAppWhenRun = false
+    static var openAppWhenRun: Bool { false }
 
-    @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
-        WatchSessionController.shared.cycleLabelFromActionButton()
-        let label = WatchSessionController.shared.currentLabel
-        // Keep Action Button armed for the next cycle press.
-        do {
-            _ = try await StartCableParkSessionIntent().donate(
-                result: .result(actionButtonIntent: CycleLabelIntent())
-            )
-        } catch {
-            // Donation is best-effort; label already logged.
-        }
-        return .result(dialog: IntentDialog(stringLiteral: "Logged \(label)"))
+    func perform() async throws -> some IntentResult {
+        WakeLog.debug(.intent, "CycleLabelIntent.perform begin")
+        await WatchSessionController.shared.cycleLabelFromActionButton()
+        WakeLog.debug(.intent, "CycleLabelIntent.perform done")
+        return .result()
     }
 }
 
