@@ -9,6 +9,7 @@ final class PhoneConnectivityService: NSObject {
     static let shared = PhoneConnectivityService()
 
     var status = "WC idle"
+    var syncState: SyncConnectionState = .notActivated
     var sessionsRevision = 0
 
     let store: SessionFileStore
@@ -25,17 +26,24 @@ final class PhoneConnectivityService: NSObject {
     func activate() {
         guard WCSession.isSupported() else {
             status = "WC unsupported"
+            syncState = .unsupported
             return
         }
         let session = WCSession.default
         session.delegate = self
         session.activate()
+        refreshSyncState()
+    }
+
+    func refreshSyncState() {
+        syncState = SyncConnectionProbe.current()
     }
 
     private func acknowledge(sessionId: String) {
         guard WCSession.default.isReachable else {
             status = "Imported \(sessionId.prefix(8)) — Watch not reachable for ack (will retry when reachable)"
             pendingAcks.insert(sessionId)
+            refreshSyncState()
             return
         }
         WCSession.default.sendMessage(
@@ -45,11 +53,13 @@ final class PhoneConnectivityService: NSObject {
                 Task { @MainActor in
                     self?.pendingAcks.insert(sessionId)
                     self?.status = "Ack send failed: \(error.localizedDescription)"
+                    self?.refreshSyncState()
                 }
             }
         )
         pendingAcks.remove(sessionId)
         status = "Acked \(sessionId.prefix(8))"
+        refreshSyncState()
     }
 
     func flushPendingAcks() {
@@ -78,6 +88,7 @@ extension PhoneConnectivityService: WCSessionDelegate {
         error: Error?
     ) {
         Task { @MainActor in
+            refreshSyncState()
             if let error {
                 status = "WC error: \(error.localizedDescription)"
             } else {
@@ -102,19 +113,39 @@ extension PhoneConnectivityService: WCSessionDelegate {
             } catch {
                 status = "Import failed: \(error.localizedDescription)"
             }
+            refreshSyncState()
         }
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         Task { @MainActor in
+            refreshSyncState()
             if session.isReachable {
+                status = "Watch reachable"
                 flushPendingAcks()
+            } else {
+                status = "Watch not reachable — transfers still queue"
             }
         }
     }
 
-    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
+        Task { @MainActor in
+            refreshSyncState()
+            status = "Watch state updated"
+        }
+    }
+
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {
+        Task { @MainActor in
+            refreshSyncState()
+        }
+    }
+
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
         session.activate()
+        Task { @MainActor in
+            refreshSyncState()
+        }
     }
 }

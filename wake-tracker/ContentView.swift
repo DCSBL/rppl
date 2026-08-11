@@ -11,6 +11,16 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Sync") {
+                    SyncStatusIndicator(
+                        state: connectivity.syncState,
+                        footnote: connectivity.status
+                    )
+                    Button("Refresh sync status") {
+                        connectivity.refreshSyncState()
+                    }
+                }
+
                 Section("Permissions") {
                     LabeledContent("Health", value: permissions.healthStatus)
                     LabeledContent("Location", value: permissions.locationStatus)
@@ -21,11 +31,6 @@ struct ContentView: View {
                     if let err = permissions.lastError {
                         Text(err).foregroundStyle(.red).font(.caption)
                     }
-                }
-
-                Section("Watch Connectivity") {
-                    Text(connectivity.status)
-                        .font(.caption)
                 }
 
                 Section("Sessions") {
@@ -57,6 +62,7 @@ struct ContentView: View {
             }
             .onAppear {
                 permissions.refresh()
+                connectivity.refreshSyncState()
                 reload()
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in

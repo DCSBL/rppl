@@ -1,4 +1,5 @@
 import SwiftUI
+import WatchKit
 import WakeTrackerCore
 
 struct ContentView: View {
@@ -8,6 +9,12 @@ struct ContentView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
+                SyncStatusIndicator(
+                    state: transfer.syncState,
+                    pendingCount: transfer.pendingTransferCount,
+                    footnote: transfer.lastMessage
+                )
+
                 Text(session.statusText)
                     .font(.headline)
 
@@ -65,10 +72,6 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
                 }
 
-                Text(transfer.lastMessage)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-
                 if let error = session.errorText {
                     Text(error)
                         .font(.caption2)
@@ -83,8 +86,12 @@ struct ContentView: View {
         }
         .onAppear {
             transfer.activate()
+            transfer.refreshSyncState()
             session.refreshPermissionStatus()
             Task { await session.requestPermissions() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
+            transfer.refreshSyncState()
         }
     }
 

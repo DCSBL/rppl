@@ -9,6 +9,8 @@ final class WatchTransferService: NSObject {
     static let shared = WatchTransferService()
 
     var lastMessage = "WC idle"
+    var syncState: SyncConnectionState = .notActivated
+    var pendingTransferCount = 0
 
     private var store: SessionFileStore?
     private let tempDir: URL
@@ -23,11 +25,23 @@ final class WatchTransferService: NSObject {
     func activate() {
         guard WCSession.isSupported() else {
             lastMessage = "WC unsupported"
+            syncState = .unsupported
             return
         }
         let session = WCSession.default
         session.delegate = self
         session.activate()
+        refreshSyncState()
+    }
+
+    func refreshSyncState() {
+        syncState = SyncConnectionProbe.current()
+        refreshPendingCount()
+    }
+
+    func refreshPendingCount() {
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        pendingTransferCount = (try? fileStore.sessionsNeedingTransfer().count) ?? 0
     }
 
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {
@@ -40,9 +54,11 @@ final class WatchTransferService: NSObject {
             store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         }
         guard let store else { return }
+        refreshSyncState()
 
         do {
             let pending = try store.sessionsNeedingTransfer()
+            pendingTransferCount = pending.count
             lastMessage = "Pending transfers: \(pending.count)"
             for manifest in pending {
                 try transfer(sessionId: manifest.sessionId, store: store)
@@ -55,6 +71,7 @@ final class WatchTransferService: NSObject {
     private func transfer(sessionId: String, store: SessionFileStore) throws {
         guard WCSession.default.activationState == .activated else {
             lastMessage = "WC not activated — will retry"
+            refreshSyncState()
             return
         }
 
@@ -64,6 +81,7 @@ final class WatchTransferService: NSObject {
             AppConstants.wcSessionFileMetaSessionID: sessionId
         ])
         lastMessage = "Queued \(sessionId.prefix(8))…"
+        refreshPendingCount()
     }
 }
 
@@ -74,12 +92,31 @@ extension WatchTransferService: WCSessionDelegate {
         error: Error?
     ) {
         Task { @MainActor in
+            refreshSyncState()
             if let error {
                 lastMessage = "WC activate error: \(error.localizedDescription)"
             } else {
                 lastMessage = "WC activated"
                 transferPending()
             }
+        }
+    }
+
+    nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
+        Task { @MainActor in
+            refreshSyncState()
+            if session.isReachable {
+                lastMessage = "iPhone reachable"
+                transferPending()
+            } else {
+                lastMessage = "iPhone not reachable — transfers will queue"
+            }
+        }
+    }
+
+    nonisolated func sessionCompanionAppInstalledDidChange(_ session: WCSession) {
+        Task { @MainActor in
+            refreshSyncState()
         }
     }
 
@@ -90,6 +127,7 @@ extension WatchTransferService: WCSessionDelegate {
             do {
                 try store.markAcknowledged(sessionId: ack)
                 lastMessage = "Acked \(ack.prefix(8))"
+                refreshPendingCount()
             } catch {
                 lastMessage = "Ack failed: \(error.localizedDescription)"
             }
@@ -111,6 +149,7 @@ extension WatchTransferService: WCSessionDelegate {
             } else {
                 lastMessage = "File delivered — awaiting phone ack"
             }
+            refreshSyncState()
         }
     }
 }
