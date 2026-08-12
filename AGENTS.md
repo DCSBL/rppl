@@ -72,7 +72,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories/A
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `WakeTrackerWatch/WatchSessionController.swift` |
-| Action Button / workout next action | `WakeTrackerWatch/CycleLabelIntent.swift` |
+| Action Button / workout next action | `WakeTrackerWatch/CycleLabelIntent.swift` · [Docs/Postmortems/ActionButtonCycleLabel.md](Docs/Postmortems/ActionButtonCycleLabel.md) |
 | Phone sync + export UI | `wake-tracker/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |

@@ -45,6 +45,8 @@ Cycle Label is **not** a top-level Action Button menu item (flashlight / workout
 
 Requires an active HealthKit workout session (`Mode: workout`). Sensors-only mode cannot arm the Action Button next action.
 
+If Action Button shows Cycle Label then fails after ~30s (label unchanged, on-screen cycle still works), see [Postmortems/ActionButtonCycleLabel.md](Postmortems/ActionButtonCycleLabel.md).
+
 ## Transfer
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `assumptions` when present (legacy packages without the key decode as empty).

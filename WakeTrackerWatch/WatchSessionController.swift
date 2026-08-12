@@ -274,9 +274,9 @@ final class WatchSessionController: NSObject {
 
     /// Schedules a label cycle without awaiting MainActor (Action Button safe).
     ///
-    /// `CycleLabelIntent.perform` must return before the ~30s App Intent timeout. Awaiting
-    /// this `@MainActor` controller from the intent can deadlock against the Action Button
-    /// confirmation UI.
+    /// Call from a **`nonisolated`** `CycleLabelIntent.perform`. Do not `await` this from the
+    /// intent — return `.result()` first so Action Button UI can release the main actor, then
+    /// this `Task` runs the cycle.
     nonisolated static func scheduleCycleLabelFromActionButton() {
         Task { @MainActor in
             shared.cycleLabelFromActionButton()
@@ -284,8 +284,6 @@ final class WatchSessionController: NSObject {
     }
 
     /// Start-workout Action Button entry: start session, or cycle if already recording.
-    ///
-    /// Uses non-awaiting MainActor hops where needed so Action Button UI cannot deadlock.
     func handleStartWorkoutIntent() async {
         if isRunning {
             WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — cycle label")
