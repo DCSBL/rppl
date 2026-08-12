@@ -16,6 +16,10 @@ struct ContentView: View {
                         state: connectivity.syncState,
                         footnote: connectivity.status
                     )
+                    Text(connectivity.wcDebugSummary)
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
                     Button("Refresh sync status") {
                         WakeLog.debug(.ui, "tap Refresh sync status")
                         connectivity.refreshSyncState()

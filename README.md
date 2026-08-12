@@ -65,9 +65,10 @@ scripts/git-hooks/   pre-commit xcode gate
 ## Quick start
 
 1. Open `wake-tracker.xcodeproj` in Xcode 26+.
-2. Select the **wake-tracker** scheme (embeds Watch).
-3. Run on device pair when possible — Simulator is weak for HealthKit / motion / WC.
-4. Ultra Action Button: **Settings → Action Button → Workout → Wake Tracker**.
+2. Device pair (recommended): scheme **WakeTrackerWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
+3. Or phone-first: scheme **wake-tracker** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
+4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
+5. Ultra Action Button: **Settings → Action Button → Workout → Wake Tracker**.
 
 Dev gate (tests + lint + build + analyze):
 
@@ -79,11 +80,12 @@ make check
 
 Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & labels: [Docs/DataCollection.md](Docs/DataCollection.md) · Core design: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
 
-## Bundle IDs
+## Bundle IDs (current `.dev` builds)
 
-- iOS: `nl.dcsbl.wake-tracker`
-- watchOS: `nl.dcsbl.wake-tracker.watchkitapp`
-- App Group: `group.nl.dcsbl.wake-tracker`
+- iOS: `nl.dcsbl.wake-tracker.dev`
+- watchOS: `nl.dcsbl.wake-tracker.dev.watchkitapp` (must be `{iOS}.watchkitapp`)
+- Companion: Watch → iPhone ID above
+- App Group: `group.nl.dcsbl.wake-tracker-dev`
 
 ## Agents
 

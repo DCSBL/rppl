@@ -12,6 +12,12 @@ This project uses **caveman** mode for agent ↔ human chat.
 - **Do not** write README, AGENTS, commits, PR bodies, or other repo docs in caveman. Those stay normal prose.
 - Chat replies: caveman while active. Code, comments, docs, commit messages: normal.
 
+## Source management
+- Always work on a worktree
+- Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
+- A worktree will be squashed and merged via a GitHub PR by human.
+- Each commit triggers `pre-commit`. Make sure to pass all checks, resolve issues when needed.
+
 ## Product north star
 
 Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tracker yet.
