@@ -21,11 +21,14 @@ struct ContentView: View {
                 if session.isRunning {
                     Text(session.currentLabel.uppercased())
                         .font(.title2.bold())
+                    Text("assume \(session.assumedLabel)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     Text(timeString(session.elapsed))
                         .monospacedDigit()
                     Text("Mode: \(session.recordingMode)")
                         .font(.caption2)
-                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)")
+                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)  ASM \(session.assumptionCount)")
                         .font(.caption2)
                     if !session.motionRecordingEnabled {
                         Text("Motion skipped")

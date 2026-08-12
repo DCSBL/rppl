@@ -24,6 +24,7 @@ public enum WakeLog {
         case store
         case workout
         case water
+        case assumption
     }
 
     private static func logger(_ category: Category) -> Logger {

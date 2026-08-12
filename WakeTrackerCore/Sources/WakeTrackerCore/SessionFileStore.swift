@@ -11,6 +11,7 @@ public enum SessionStoreError: Error, Equatable, Sendable {
 /// <root>/<sessionId>/
 ///   manifest.json
 ///   labels.jsonl
+///   assumptions.jsonl
 ///   location-000.jsonl
 ///   motion-000.jsonl
 ///   health-000.jsonl
@@ -49,6 +50,10 @@ public final class SessionFileStore: @unchecked Sendable {
         if !fileManager.fileExists(atPath: labelsURL.path) {
             fileManager.createFile(atPath: labelsURL.path, contents: nil)
         }
+        let assumptionsURL = dir.appendingPathComponent("assumptions.jsonl")
+        if !fileManager.fileExists(atPath: assumptionsURL.path) {
+            fileManager.createFile(atPath: assumptionsURL.path, contents: nil)
+        }
         return dir
     }
 
@@ -73,6 +78,10 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func appendLabel(_ event: LabelEvent, sessionId: String) throws {
         try appendJSONLine(event, to: "labels.jsonl", sessionId: sessionId)
+    }
+
+    public func appendAssumption(_ event: AssumptionEvent, sessionId: String) throws {
+        try appendJSONLine(event, to: "assumptions.jsonl", sessionId: sessionId)
     }
 
     public func appendLocationSamples(_ samples: [LocationSample], sessionId: String, chunkIndex: Int = 0) throws {
@@ -111,6 +120,10 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func readLabels(sessionId: String) throws -> [LabelEvent] {
         try readJSONL(LabelEvent.self, from: "labels.jsonl", sessionId: sessionId)
+    }
+
+    public func readAssumptions(sessionId: String) throws -> [AssumptionEvent] {
+        try readJSONL(AssumptionEvent.self, from: "assumptions.jsonl", sessionId: sessionId)
     }
 
     public func readLocationSamples(sessionId: String, chunkIndex: Int = 0) throws -> [LocationSample] {
@@ -163,6 +176,9 @@ public final class SessionFileStore: @unchecked Sendable {
         for label in package.labels {
             try phoneStore.appendLabel(label, sessionId: package.manifest.sessionId)
         }
+        for assumption in package.assumptions {
+            try phoneStore.appendAssumption(assumption, sessionId: package.manifest.sessionId)
+        }
         try phoneStore.appendLocationSamples(package.locations, sessionId: package.manifest.sessionId)
         try phoneStore.appendMotionSamples(package.motion, sessionId: package.manifest.sessionId)
         try phoneStore.appendHealthSamples(package.health, sessionId: package.manifest.sessionId)
@@ -174,12 +190,14 @@ public final class SessionFileStore: @unchecked Sendable {
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
         let manifest = try readManifest(sessionId: sessionId)
         let labels = try readLabels(sessionId: sessionId)
+        let assumptions = try readAssumptions(sessionId: sessionId)
         let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
         let motion = (try? readJSONL(MotionSample.self, from: "motion-000.jsonl", sessionId: sessionId)) ?? []
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         return SessionTransferPackage(
             manifest: manifest,
             labels: labels,
+            assumptions: assumptions,
             locations: locations,
             motion: motion,
             health: health
@@ -222,6 +240,7 @@ public final class SessionFileStore: @unchecked Sendable {
 public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var manifest: SessionManifest
     public var labels: [LabelEvent]
+    public var assumptions: [AssumptionEvent]
     public var locations: [LocationSample]
     public var motion: [MotionSample]
     public var health: [HealthMetricSample]
@@ -229,15 +248,27 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public init(
         manifest: SessionManifest,
         labels: [LabelEvent],
+        assumptions: [AssumptionEvent] = [],
         locations: [LocationSample],
         motion: [MotionSample],
         health: [HealthMetricSample]
     ) {
         self.manifest = manifest
         self.labels = labels
+        self.assumptions = assumptions
         self.locations = locations
         self.motion = motion
         self.health = health
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        manifest = try container.decode(SessionManifest.self, forKey: .manifest)
+        labels = try container.decode([LabelEvent].self, forKey: .labels)
+        assumptions = try container.decodeIfPresent([AssumptionEvent].self, forKey: .assumptions) ?? []
+        locations = try container.decode([LocationSample].self, forKey: .locations)
+        motion = try container.decode([MotionSample].self, forKey: .motion)
+        health = try container.decode([HealthMetricSample].self, forKey: .health)
     }
 }
 

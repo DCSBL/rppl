@@ -399,7 +399,7 @@
 				CODE_SIGN_ENTITLEMENTS = "wake-tracker/wake-tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5UBFX6V97;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wake-tracker/Info.plist";
@@ -429,7 +429,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -455,7 +455,7 @@
 				CODE_SIGN_ENTITLEMENTS = "wake-tracker/wake-tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5UBFX6V97;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wake-tracker/Info.plist";
@@ -485,7 +485,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -719,18 +719,24 @@
 				CODE_SIGN_ENTITLEMENTS = WakeTrackerWatch/WakeTrackerWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5UBFX6V97;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WakeTrackerWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = WakeTracker;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Wake Tracker needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Wake Tracker requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Wake Tracker records GPS for the full park session, including when the wrist is down.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp.dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -753,18 +759,24 @@
 				CODE_SIGN_ENTITLEMENTS = WakeTrackerWatch/WakeTrackerWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5UBFX6V97;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WakeTrackerWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = WakeTracker;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Wake Tracker needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Wake Tracker requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Wake Tracker records GPS for the full park session, including when the wrist is down.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp.dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

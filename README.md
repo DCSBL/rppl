@@ -28,18 +28,37 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 
 **Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, Action Button labels with enriched snapshots, reliable WC transfer + ack, iPhone export, Core tests green.
 
+### Assumption algorithm (Phase 3 slice — live)
+
+Alongside manual labels, Watch runs a pure Core FSM (`SegmentAssumer`) that proposes the **same four opaque codes** into a second stream:
+
+| Stream | File | Who writes |
+|--------|------|------------|
+| Manual ground truth | `labels.jsonl` | Action Button / Cycle label |
+| Auto assumptions | `assumptions.jsonl` | Assumer on code change (+ `session_start`) |
+
+Tracks stay **independent** (no Action Button resync) so park days become A/B corpora. Each assumption line carries a `reason` with speeds in **km/h**. Watch shows assumed code under the manual label; phone lists reasons and Share-export includes `assumptions`.
+
+Pipeline (filter → holds → ordered rules):
+
+1. **Filter noisy GPS** — reject nil / bad accuracy / implausible speed / sudden jumps for *speed* rules; Ultra `submerged` can still force swim.
+2. **Hold clocks** — require sustained speed bands (e.g. ≥15 km/h for 2 s to enter `riding`).
+3. **Transition rules** — first matching edge wins (`ride_start`, `fall_swim`, `failed_start`, `long_stop`, `water_start`, walk/wait settle).
+
+Ultra-first: auto-`swimming` needs water submersion. Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML + how to add rules: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System sequence: [Docs/DESIGN.md](Docs/DESIGN.md).
+
 ### Later
 
-- **Phase 3** — Auto-detection from labeled fixtures (Core), live Watch state + manual override · roadmap: [Docs/Phase3.md](Docs/Phase3.md) · ideas: [Docs/Ideas.md](Docs/Ideas.md)
+- **Phase 3 continued** — Mac timeline viz (manual + assumed lanes, threshold scrubbers), then fewer-press live override UX · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
 - **Phase 4** — Product UI, HealthKit saves, CloudKit sync, heatmap polish
 
 ## Repo layout
 
 ```
-WakeTrackerCore/     Shared models, IO, sync/label helpers (SPM + Swift Testing)
+WakeTrackerCore/     Shared models, IO, Assumer FSM (SPM + Swift Testing) · DESIGN.md
 WakeTrackerWatch/    Session engine, sensors, Action Button, WC send
 wake-tracker/        iPhone permissions, sync receive, map, export
-Docs/                DataCollection, DevWorkflow, Phase3, Ideas
+Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit xcode gate
 ```
 
@@ -58,7 +77,7 @@ pre-commit install
 make check
 ```
 
-Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & labels: [Docs/DataCollection.md](Docs/DataCollection.md).
+Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & labels: [Docs/DataCollection.md](Docs/DataCollection.md) · Core design: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
 
 ## Bundle IDs
 
@@ -68,4 +87,4 @@ Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & labels: [Docs/D
 
 ## Agents
 
-Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior.
+Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior. Library shape: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System layers: [Docs/DESIGN.md](Docs/DESIGN.md).

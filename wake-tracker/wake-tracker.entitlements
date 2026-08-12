@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.nl.dcsbl.wake-tracker</string>
+		<string>group.nl.dcsbl.wake-tracker-dev</string>
 	</array>
 </dict>
 </plist>

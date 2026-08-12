@@ -14,10 +14,12 @@ final class WatchSessionController: NSObject {
 
     var isRunning = false
     var currentLabel = LabelCodes.waiting
+    var assumedLabel = LabelCodes.waiting
     var elapsed: TimeInterval = 0
     var locationCount = 0
     var motionCount = 0
     var labelCount = 0
+    var assumptionCount = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
     var lastHeartRate: Double?
@@ -44,6 +46,7 @@ final class WatchSessionController: NSObject {
     private var latestActivity: String?
     private var latestWaterState: String?
     private var latestWaterTempC: Double?
+    private var segmentAssumer = SegmentAssumer()
     private var locationBuffer: [LocationSample] = []
     private var motionBuffer: [MotionSample] = []
     private var healthBuffer: [HealthMetricSample] = []
@@ -184,9 +187,12 @@ final class WatchSessionController: NSObject {
         startActivityUpdatesIfAvailable()
 
         currentLabel = LabelCodes.waiting
+        assumedLabel = LabelCodes.waiting
         labelCount = 0
+        assumptionCount = 0
         locationCount = 0
         motionCount = 0
+        segmentAssumer = SegmentAssumer()
         startedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
@@ -195,6 +201,7 @@ final class WatchSessionController: NSObject {
         }
 
         logLabel(code: LabelCodes.waiting)
+        logSessionStartAssumption()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
 
@@ -314,6 +321,50 @@ final class WatchSessionController: NSObject {
         } catch {
             errorText = "Label: \(error.localizedDescription)"
             WakeLog.error(.label, "appendLabel: \(error.localizedDescription)")
+        }
+    }
+
+    private func logSessionStartAssumption() {
+        let event = segmentAssumer.makeSessionStartEvent(at: Date())
+        assumedLabel = event.code
+        persistAssumption(event)
+    }
+
+    private func processAssumerTick(timestamp: Date = Date()) {
+        guard isRunning else { return }
+        let speed: Double?
+        if let loc = latestLocation, loc.speed >= 0 {
+            speed = loc.speed
+        } else {
+            speed = nil
+        }
+        let tick = AssumerTick(
+            timestamp: timestamp,
+            speedMps: speed,
+            horizontalAccuracy: latestLocation?.horizontalAccuracy,
+            waterSubmersionState: latestWaterState,
+            motionActivity: latestActivity
+        )
+        guard let event = segmentAssumer.process(tick) else { return }
+        assumedLabel = event.code
+        persistAssumption(event)
+    }
+
+    private func persistAssumption(_ event: AssumptionEvent) {
+        guard let store, let manifest else {
+            WakeLog.error(.assumption, "appendAssumption skipped — no store/manifest")
+            return
+        }
+        do {
+            try store.appendAssumption(event, sessionId: manifest.sessionId)
+            assumptionCount += 1
+            WakeLog.debug(
+                .assumption,
+                "appended code=\(event.code) reason=\(event.reason) count=\(assumptionCount)"
+            )
+        } catch {
+            errorText = "Assumption: \(error.localizedDescription)"
+            WakeLog.error(.assumption, "appendAssumption: \(error.localizedDescription)")
         }
     }
 
@@ -527,6 +578,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
                 )
             )
             locationCount += 1
+            processAssumerTick(timestamp: loc.timestamp)
         }
     }
 
@@ -628,6 +680,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "submersion → \(next)")
+                processAssumerTick()
             }
         }
     }
@@ -645,6 +698,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "measurement → \(next)")
+                processAssumerTick()
             }
         }
     }

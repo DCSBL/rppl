@@ -97,6 +97,7 @@ struct SessionDetailView: View {
 
     @State private var manifest: SessionManifest?
     @State private var labels: [LabelEvent] = []
+    @State private var assumptions: [AssumptionEvent] = []
     @State private var locations: [LocationSample] = []
     @State private var exportURL: URL?
     @State private var errorText: String?
@@ -145,6 +146,24 @@ struct SessionDetailView: View {
                 }
             }
 
+            Section("Assumptions (\(assumptions.count))") {
+                if assumptions.isEmpty {
+                    Text("No auto assumptions in this session.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(assumptions) { assumption in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(assumption.code).font(.headline)
+                        Text(assumption.timestamp.formatted(date: .omitted, time: .standard))
+                            .font(.caption)
+                        Text(assumption.reason)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             Section("Samples") {
                 LabeledContent("GPS points", value: "\(locations.count)")
             }
@@ -170,10 +189,11 @@ struct SessionDetailView: View {
         do {
             manifest = try store.readManifest(sessionId: sessionId)
             labels = try store.readLabels(sessionId: sessionId)
+            assumptions = try store.readAssumptions(sessionId: sessionId)
             locations = try store.readLocationSamples(sessionId: sessionId)
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded labels=\(labels.count) gps=\(locations.count)"
+                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locations.count)"
             )
         } catch {
             errorText = error.localizedDescription

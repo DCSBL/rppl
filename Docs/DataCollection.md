@@ -12,6 +12,12 @@ Cycle: `waiting` → `riding` → `swimming` → `walking` → …
 
 Label events store: `code`, `timestamp`, latest GPS snapshot, optional water submersion/temp, optional motion-activity hint. High-rate motion/HR live in chunk files and are joined by time offline.
 
+## Assumption codes (auto, corpus)
+
+Independent of Action Button. Same opaque strings. Written to `assumptions.jsonl` on Assumer transitions (+ `session_start`).
+
+Each line: `code`, `timestamp`, `reason` (km/h speeds), optional speed/water/activity snapshot. Watch shows assumed code under manual; phone lists + Share export includes `assumptions`. Dual-stream design: [DESIGN.md](DESIGN.md) · Core UML: [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
+
 ## Streams
 
 | Stream | Approx rate | File |
@@ -20,6 +26,7 @@ Label events store: `code`, `timestamp`, latest GPS snapshot, optional water sub
 | deviceMotion | ~50 Hz | `motion-000.jsonl` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Labels | on events | `labels.jsonl` |
+| Assumptions | on Assumer transitions | `assumptions.jsonl` |
 | Manifest | once | `manifest.json` |
 
 ## HealthKit policy
@@ -40,8 +47,8 @@ Requires an active HealthKit workout session (`Mode: workout`). Sensors-only mod
 
 ## Transfer
 
-Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data.
+Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `assumptions` when present (legacy packages without the key decode as empty).
 
 ## Export
 
-On iPhone: open a session → **Export session JSON** (Share/AirDrop to Mac for manual analysis).
+On iPhone: open a session → **Export session JSON** (Share/AirDrop to Mac for manual analysis). Export includes `labels` and `assumptions`.

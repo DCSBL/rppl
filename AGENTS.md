@@ -21,17 +21,17 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 - Prefer extending opaque string label codes over closed Swift enums.
 - Prefer pure logic in `WakeTrackerCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md).
+Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / Assumer: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
 
 ## Architecture rules
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `WakeTrackerCore` | Models, schema, file store, `LabelCodes`, `LabelEventFactory`, `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, Action Button intents, WC send, thin probes | Business decisions that can be pure functions |
+| `WakeTrackerCore` | Models, schema, file store, `LabelCodes`, `LabelEventFactory`, `SegmentAssumer` (+ filter/holds/rules), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, Action Button intents, WC send, thin Assumer probes | Business decisions that can be pure functions |
 | `wake-tracker` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing (Phase 2), session engine |
 
-App probes read live `WCSession` / sensors, then call Core resolvers/factories. Do not duplicate decision trees in both targets.
+App probes read live `WCSession` / sensors, then call Core resolvers/factories/Assumer. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Hard constraints (do not “helpfully” break)
 
@@ -62,6 +62,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories. 
 | Task | Start here |
 |------|------------|
 | Label cycle / next code | `WakeTrackerCore/.../LabelCodes.swift`, `LabelEventFactory.swift` |
+| Assumer / thresholds / rules | `SegmentAssumer.swift`, `AssumerTransitions.swift`, `AssumptionThresholds.swift` · [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `WakeTrackerWatch/WatchSessionController.swift` |
@@ -69,6 +70,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories. 
 | Phone sync + export UI | `wake-tracker/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
+| System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
 | Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
 
 ## Out of scope unless explicitly asked
@@ -80,7 +82,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories. 
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
-- Mac viz, Core auto-detector, or live Watch detection until a Phase 3 code pass is requested ([Docs/Phase3.md](Docs/Phase3.md))
+- Mac viz, Core Assumer threshold invention, or park profiles until explicitly requested ([Docs/Phase3.md](Docs/Phase3.md), [Docs/Ideas.md](Docs/Ideas.md))
 
 ## When unsure
 
