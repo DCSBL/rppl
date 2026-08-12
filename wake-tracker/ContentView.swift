@@ -6,6 +6,8 @@ struct ContentView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var permissions = PermissionsModel()
     @State private var manifests: [SessionManifest] = []
+    @State private var sessionSizes: [String: Int64] = [:]
+    @State private var syncedTotalBytes: Int64 = 0
     @State private var selected: SessionManifest?
 
     var body: some View {
@@ -16,6 +18,7 @@ struct ContentView: View {
                         state: connectivity.syncState,
                         footnote: connectivity.status
                     )
+                    LabeledContent("Synced data", value: ByteSizeFormat.string(syncedTotalBytes))
                     Button("Refresh sync status") {
                         WakeLog.debug(.ui, "tap Refresh sync status")
                         connectivity.refreshSyncState()
@@ -48,6 +51,12 @@ struct ContentView: View {
                                 Text("\(manifest.sessionId.prefix(8))… · \(manifest.transferState.rawValue)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                if let size = sessionSizes[manifest.sessionId] {
+                                    Text(ByteSizeFormat.string(size))
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .monospacedDigit()
+                                }
                             }
                         }
                     }
@@ -83,9 +92,20 @@ struct ContentView: View {
             let ids = try connectivity.store.listSessionIDs()
             manifests = try ids.compactMap { try connectivity.store.readManifest(sessionId: $0) }
                 .sorted { $0.startedAt > $1.startedAt }
-            WakeLog.debug(.ui, "reload sessions count=\(manifests.count)")
+            var sizes: [String: Int64] = [:]
+            for id in ids {
+                sizes[id] = (try? connectivity.store.sessionByteSize(sessionId: id)) ?? 0
+            }
+            sessionSizes = sizes
+            syncedTotalBytes = try connectivity.store.totalStoredByteSize()
+            WakeLog.debug(
+                .ui,
+                "reload sessions count=\(manifests.count) synced=\(ByteSizeFormat.string(syncedTotalBytes))"
+            )
         } catch {
             manifests = []
+            sessionSizes = [:]
+            syncedTotalBytes = 0
             WakeLog.error(.store, "reload sessions: \(error.localizedDescription)")
         }
     }
@@ -99,6 +119,7 @@ struct SessionDetailView: View {
     @State private var labels: [LabelEvent] = []
     @State private var assumptions: [AssumptionEvent] = []
     @State private var locations: [LocationSample] = []
+    @State private var storedByteSize: Int64 = 0
     @State private var exportURL: URL?
     @State private var errorText: String?
 
@@ -110,6 +131,7 @@ struct SessionDetailView: View {
                     LabeledContent("Watch", value: manifest.watchModel)
                     LabeledContent("OS", value: manifest.systemVersion)
                     LabeledContent("Schema", value: "\(manifest.schemaVersion)")
+                    LabeledContent("Size", value: ByteSizeFormat.string(storedByteSize))
                     if let ended = manifest.endedAt {
                         LabeledContent("Ended", value: ended.formatted())
                     }
@@ -191,9 +213,10 @@ struct SessionDetailView: View {
             labels = try store.readLabels(sessionId: sessionId)
             assumptions = try store.readAssumptions(sessionId: sessionId)
             locations = try store.readLocationSamples(sessionId: sessionId)
+            storedByteSize = try store.sessionByteSize(sessionId: sessionId)
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locations.count)"
+                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locations.count) size=\(ByteSizeFormat.string(storedByteSize))"
             )
         } catch {
             errorText = error.localizedDescription

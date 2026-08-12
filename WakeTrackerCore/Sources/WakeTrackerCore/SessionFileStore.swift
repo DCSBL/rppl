@@ -118,6 +118,38 @@ public final class SessionFileStore: @unchecked Sendable {
             .sorted()
     }
 
+    /// On-disk byte size of one session package (manifest + JSONL checkpoints).
+    public func sessionByteSize(sessionId: String) throws -> Int64 {
+        let dir = sessionDirectory(for: sessionId)
+        guard fileManager.fileExists(atPath: dir.path) else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        return try directoryByteSize(at: dir)
+    }
+
+    /// Sum of all session packages under the store root (Watch local or phone synced).
+    public func totalStoredByteSize() throws -> Int64 {
+        try ensureRootExists()
+        return try directoryByteSize(at: rootURL)
+    }
+
+    private func directoryByteSize(at url: URL) throws -> Int64 {
+        guard let enumerator = fileManager.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return 0
+        }
+        var total: Int64 = 0
+        for case let fileURL as URL in enumerator {
+            let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+            guard values.isRegularFile == true else { continue }
+            total += Int64(values.fileSize ?? 0)
+        }
+        return total
+    }
+
     public func readLabels(sessionId: String) throws -> [LabelEvent] {
         try readJSONL(LabelEvent.self, from: "labels.jsonl", sessionId: sessionId)
     }

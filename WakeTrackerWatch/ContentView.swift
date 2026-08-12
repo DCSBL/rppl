@@ -30,6 +30,9 @@ struct ContentView: View {
                         .font(.caption2)
                     Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)  ASM \(session.assumptionCount)")
                         .font(.caption2)
+                    Text("Stored \(ByteSizeFormat.string(session.storedByteSize))")
+                        .font(.caption2)
+                        .monospacedDigit()
                     if !session.motionRecordingEnabled {
                         Text("Motion skipped")
                             .font(.caption2)
