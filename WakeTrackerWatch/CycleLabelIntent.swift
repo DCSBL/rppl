@@ -41,10 +41,10 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
             ?? DisplayRepresentation(title: "Cable Park")
     }
 
-    func perform() async throws -> some IntentResult {
+    /// Must stay `nonisolated`: Watch target uses `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`,
+    /// so an implicit `@MainActor perform` deadlocks against Action Button confirmation UI.
+    nonisolated func perform() async throws -> some IntentResult {
         WakeLog.debug(.intent, "StartCableParkSessionIntent.perform begin")
-        // Do not `await` the MainActor controller while Action Button UI may hold it —
-        // that deadlocks until the ~30s intent timeout. Schedule work, return fast.
         await WatchSessionController.shared.handleStartWorkoutIntent()
         return .result(actionButtonIntent: CycleLabelIntent())
     }
@@ -52,13 +52,12 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
 
 /// Donated Action Button next-action while a workout session is active.
 ///
-/// Critical: `openAppWhenRun` must stay **false**. Opening the app from the Action Button
-/// during an active workout / Water Lock often yields a blank red flash and never calls
-/// `perform()` (no logs, label unchanged).
-///
-/// Also critical: do **not** `await` `@MainActor` work inside `perform()`. The system
-/// confirmation UI can hold the main actor; awaiting `WatchSessionController` then hangs
-/// until the App Intent 30s timeout ("Cycle Label has failed").
+/// Critical:
+/// - `openAppWhenRun` must stay **false** (Water Lock / active workout: opening app → blank red,
+///   `perform` never runs).
+/// - `perform` must stay **`nonisolated`**. This target defaults to MainActor isolation; an
+///   implicit `@MainActor perform` cannot start while Action Button UI holds the main actor,
+///   so the system times out (~30s, "Cycle Label has failed" / Dutch "mislukt") with no label change.
 struct CycleLabelIntent: AppIntent {
     static var title: LocalizedStringResource = "Cycle Label"
     static var description = IntentDescription(
@@ -66,8 +65,9 @@ struct CycleLabelIntent: AppIntent {
     )
     static var openAppWhenRun: Bool { false }
 
-    func perform() async throws -> some IntentResult {
+    nonisolated func perform() async throws -> some IntentResult {
         WakeLog.debug(.intent, "CycleLabelIntent.perform begin")
+        // Schedule onto MainActor after we return — never await it here.
         WatchSessionController.scheduleCycleLabelFromActionButton()
         WakeLog.debug(.intent, "CycleLabelIntent.perform returned (cycle scheduled)")
         return .result()
