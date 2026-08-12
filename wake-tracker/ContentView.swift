@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var permissions = PermissionsModel()
     @State private var manifests: [SessionManifest] = []
     @State private var selected: SessionManifest?
+    @State private var isReloadingSessions = false
 
     var body: some View {
         NavigationStack {
@@ -36,7 +37,13 @@ struct ContentView: View {
                 }
 
                 Section("Sessions") {
-                    if manifests.isEmpty {
+                    if isReloadingSessions && manifests.isEmpty {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Loading sessions…")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if manifests.isEmpty {
                         Text("No sessions yet. Record on Apple Watch, then bring phone nearby.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -63,6 +70,7 @@ struct ContentView: View {
                         WakeLog.debug(.ui, "tap Reload sessions")
                         reload()
                     }
+                    .disabled(isReloadingSessions)
                 }
             }
             .onAppear {
@@ -79,50 +87,145 @@ struct ContentView: View {
     }
 
     private func reload() {
-        do {
-            let ids = try connectivity.store.listSessionIDs()
-            manifests = try ids.compactMap { try connectivity.store.readManifest(sessionId: $0) }
-                .sorted { $0.startedAt > $1.startedAt }
-            WakeLog.debug(.ui, "reload sessions count=\(manifests.count)")
-        } catch {
-            manifests = []
-            WakeLog.error(.store, "reload sessions: \(error.localizedDescription)")
+        isReloadingSessions = true
+        Task(priority: .userInitiated) {
+            let store = connectivity.store
+            do {
+                let ids = try store.listSessionIDs()
+                let loaded = try ids.compactMap { try store.readManifest(sessionId: $0) }
+                    .sorted { $0.startedAt > $1.startedAt }
+                await MainActor.run {
+                    manifests = loaded
+                    isReloadingSessions = false
+                    WakeLog.debug(.ui, "reload sessions count=\(loaded.count)")
+                }
+            } catch {
+                await MainActor.run {
+                    manifests = []
+                    isReloadingSessions = false
+                    WakeLog.error(.store, "reload sessions: \(error.localizedDescription)")
+                }
+            }
         }
     }
+}
+
+private enum SessionDetailLoadPhase: Equatable {
+    case manifest
+    case labels
+    case locations
+    case ready
+    case cancelled
 }
 
 struct SessionDetailView: View {
     let sessionId: String
     let store: SessionFileStore
 
+    private static let mapPointBudget = 800
+
     @State private var manifest: SessionManifest?
     @State private var labels: [LabelEvent] = []
     @State private var assumptions: [AssumptionEvent] = []
-    @State private var locations: [LocationSample] = []
+    /// Downsampled for MapKit; full count lives in `locationCount`.
+    @State private var mapLocations: [LocationSample] = []
+    @State private var locationCount = 0
+    @State private var loadPhase: SessionDetailLoadPhase = .manifest
+    @State private var loadTask: Task<Void, Never>?
     @State private var exportURL: URL?
+    @State private var isExporting = false
+    @State private var exportTask: Task<Void, Never>?
     @State private var errorText: String?
+
+    private var isLoading: Bool {
+        switch loadPhase {
+        case .manifest, .labels, .locations: return true
+        case .ready, .cancelled: return false
+        }
+    }
 
     var body: some View {
         List {
+            if isLoading {
+                Section {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                        Text(loadStatusText)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Cancel") {
+                            cancelLoad()
+                        }
+                    }
+                }
+            } else if loadPhase == .cancelled {
+                Section {
+                    HStack(spacing: 10) {
+                        Text(errorText == nil ? "Load cancelled" : "Load failed")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Retry") {
+                            retryLoad()
+                        }
+                    }
+                }
+            }
+
             if let manifest {
                 Section("Manifest") {
                     LabeledContent("Tester", value: String(manifest.testerId.prefix(8)) + "…")
                     LabeledContent("Watch", value: manifest.watchModel)
                     LabeledContent("OS", value: manifest.systemVersion)
                     LabeledContent("Schema", value: "\(manifest.schemaVersion)")
+                    LabeledContent("Started", value: manifest.startedAt.formatted())
                     if let ended = manifest.endedAt {
                         LabeledContent("Ended", value: ended.formatted())
                     }
+                    LabeledContent("Transfer", value: manifest.transferState.rawValue)
                 }
             }
 
             Section("Map") {
-                SessionMapView(locations: locations)
-                    .frame(height: 220)
-                    .listRowInsets(EdgeInsets())
+                if mapLocations.isEmpty {
+                    if loadPhase == .locations {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Loading GPS track…")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 80)
+                    } else if loadPhase == .ready || loadPhase == .cancelled {
+                        Text("No GPS points")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, minHeight: 80)
+                    } else {
+                        Text("Map loads after labels")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, minHeight: 80)
+                    }
+                } else {
+                    SessionMapView(locations: mapLocations)
+                        .frame(height: 220)
+                        .listRowInsets(EdgeInsets())
+                }
             }
 
             Section("Labels (\(labels.count))") {
+                if loadPhase == .labels {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Loading labels…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if labels.isEmpty {
+                    Text("No labels in this session.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 ForEach(labels) { label in
                     VStack(alignment: .leading) {
                         Text(label.code).font(.headline)
@@ -147,7 +250,7 @@ struct SessionDetailView: View {
             }
 
             Section("Assumptions (\(assumptions.count))") {
-                if assumptions.isEmpty {
+                if assumptions.isEmpty && loadPhase != .labels && loadPhase != .manifest {
                     Text("No auto assumptions in this session.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -165,60 +268,233 @@ struct SessionDetailView: View {
             }
 
             Section("Samples") {
-                LabeledContent("GPS points", value: "\(locations.count)")
+                LabeledContent(
+                    "GPS points",
+                    value: loadPhase == .locations || loadPhase == .labels || loadPhase == .manifest
+                        ? "…"
+                        : "\(locationCount)"
+                )
+                if locationCount > mapLocations.count, !mapLocations.isEmpty {
+                    Text("Map shows \(mapLocations.count) of \(locationCount) points")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section {
-                ShareLink(item: exportFile()) {
-                    Label("Export session JSON", systemImage: "square.and.arrow.up")
+                if let exportURL {
+                    ShareLink(item: exportURL) {
+                        Label("Share export", systemImage: "square.and.arrow.up")
+                    }
+                } else if isExporting {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                        Text("Preparing export…")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Cancel") {
+                            cancelExport()
+                        }
+                    }
+                } else {
+                    Button {
+                        startExport()
+                    } label: {
+                        Label("Export session JSON", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(manifest == nil)
                 }
             }
 
             if let errorText {
-                Text(errorText).foregroundStyle(.red).font(.caption)
+                Section {
+                    Text(errorText).foregroundStyle(.red).font(.caption)
+                }
             }
         }
-        .navigationTitle("Session")
+        .navigationTitle(String(sessionId.prefix(8)) + "…")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             WakeLog.debug(.ui, "SessionDetail onAppear \(sessionId.prefix(8))…")
-            load()
+            startLoadIfNeeded()
+        }
+        .onDisappear {
+            cancelLoad()
+            cancelExport()
         }
     }
 
-    private func load() {
+    private var loadStatusText: String {
+        switch loadPhase {
+        case .manifest: return "Loading manifest…"
+        case .labels: return "Loading labels…"
+        case .locations: return "Loading GPS…"
+        case .ready: return "Ready"
+        case .cancelled: return "Cancelled"
+        }
+    }
+
+    private func startLoadIfNeeded() {
+        guard loadTask == nil else { return }
+        guard loadPhase != .ready, loadPhase != .cancelled else { return }
+        beginLoad()
+    }
+
+    private func retryLoad() {
+        cancelLoad()
+        errorText = nil
+        labels = []
+        assumptions = []
+        mapLocations = []
+        locationCount = 0
+        // Keep manifest if already loaded; otherwise clear for a full restart.
+        beginLoad()
+    }
+
+    private func beginLoad() {
+        loadPhase = .manifest
+        loadTask = Task(priority: .userInitiated) {
+            await loadSession()
+        }
+    }
+
+    private func cancelLoad() {
+        loadTask?.cancel()
+        loadTask = nil
+        if loadPhase != .ready {
+            loadPhase = .cancelled
+            WakeLog.debug(.ui, "SessionDetail load cancelled \(sessionId.prefix(8))…")
+        }
+    }
+
+    private func loadSession() async {
+        let store = store
+        let sessionId = sessionId
+
         do {
-            manifest = try store.readManifest(sessionId: sessionId)
-            labels = try store.readLabels(sessionId: sessionId)
-            assumptions = try store.readAssumptions(sessionId: sessionId)
-            locations = try store.readLocationSamples(sessionId: sessionId)
+            loadPhase = .manifest
+            let loadedManifest = try await Self.runStoreIO {
+                try store.readManifest(sessionId: sessionId)
+            }
+            try Task.checkCancellation()
+            manifest = loadedManifest
+            loadPhase = .labels
+
+            let labelBundle = try await Self.runStoreIO {
+                let labels = try store.readLabels(sessionId: sessionId)
+                try Task.checkCancellation()
+                let assumptions = try store.readAssumptions(sessionId: sessionId)
+                return (labels, assumptions)
+            }
+            try Task.checkCancellation()
+            labels = labelBundle.0
+            assumptions = labelBundle.1
+            loadPhase = .locations
+
+            let locationBundle = try await Self.runStoreIO {
+                let locations = try store.readLocationSamples(sessionId: sessionId)
+                try Task.checkCancellation()
+                let mapPoints = Self.downsample(locations, maxCount: Self.mapPointBudget)
+                return (locations.count, mapPoints)
+            }
+            try Task.checkCancellation()
+            locationCount = locationBundle.0
+            mapLocations = locationBundle.1
+            loadPhase = .ready
+            loadTask = nil
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locations.count)"
+                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locationCount)"
             )
+        } catch is CancellationError {
+            if loadPhase != .ready {
+                loadPhase = .cancelled
+            }
+            loadTask = nil
         } catch {
             errorText = error.localizedDescription
+            loadPhase = .cancelled
+            loadTask = nil
             WakeLog.error(.store, "SessionDetail load: \(error.localizedDescription)")
         }
     }
 
-    private func exportFile() -> URL {
-        if let exportURL { return exportURL }
+    private func startExport() {
+        guard exportTask == nil, !isExporting else { return }
+        isExporting = true
+        errorText = nil
+        exportTask = Task(priority: .utility) {
+            await prepareExport()
+        }
+    }
+
+    private func cancelExport() {
+        exportTask?.cancel()
+        exportTask = nil
+        isExporting = false
+    }
+
+    private func prepareExport() async {
+        let store = store
+        let sessionId = sessionId
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
+
         do {
-            let package = try store.buildTransferPackage(sessionId: sessionId)
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            try encoder.encode(package).write(to: url, options: [.atomic])
+            try await Self.runStoreIO {
+                let package = try store.buildTransferPackage(sessionId: sessionId)
+                try Task.checkCancellation()
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                // Compact JSON — pretty-print of 50Hz motion makes huge files slower.
+                encoder.outputFormatting = [.sortedKeys]
+                try encoder.encode(package).write(to: url, options: [.atomic])
+            }
+            try Task.checkCancellation()
             exportURL = url
+            isExporting = false
+            exportTask = nil
             WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
-            return url
+        } catch is CancellationError {
+            isExporting = false
+            exportTask = nil
+            WakeLog.debug(.ui, "export cancelled \(sessionId.prefix(8))…")
         } catch {
             errorText = error.localizedDescription
+            isExporting = false
+            exportTask = nil
             WakeLog.error(.store, "export: \(error.localizedDescription)")
-            return url
         }
+    }
+
+    /// Runs store I/O off the main actor; cancels with the enclosing task (unlike `Task.detached`).
+    private static func runStoreIO<T: Sendable>(
+        _ work: @Sendable @escaping () throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask(priority: .userInitiated) {
+                try work()
+            }
+            guard let value = try await group.next() else {
+                throw CancellationError()
+            }
+            group.cancelAll()
+            return value
+        }
+    }
+
+    /// Evenly pick up to `maxCount` samples so MapKit stays responsive.
+    private static func downsample(_ locations: [LocationSample], maxCount: Int) -> [LocationSample] {
+        guard maxCount > 1, locations.count > maxCount else { return locations }
+        let lastIndex = locations.count - 1
+        let step = Double(lastIndex) / Double(maxCount - 1)
+        var result: [LocationSample] = []
+        result.reserveCapacity(maxCount)
+        for i in 0..<maxCount {
+            let index = min(lastIndex, Int((Double(i) * step).rounded()))
+            result.append(locations[index])
+        }
+        return result
     }
 }
 
