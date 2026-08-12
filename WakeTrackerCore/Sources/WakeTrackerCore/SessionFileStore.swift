@@ -163,6 +163,15 @@ public final class SessionFileStore: @unchecked Sendable {
             .sorted()
     }
 
+    /// Permanently removes one session package directory from this store.
+    public func deleteSession(sessionId: String) throws {
+        let dir = sessionDirectory(for: sessionId)
+        guard fileManager.fileExists(atPath: dir.path) else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        try fileManager.removeItem(at: dir)
+    }
+
     /// On-disk byte size of one session package (manifest + JSONL checkpoints).
     public func sessionByteSize(sessionId: String) throws -> Int64 {
         let dir = sessionDirectory(for: sessionId)
