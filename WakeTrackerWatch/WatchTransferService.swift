@@ -69,8 +69,18 @@ final class WatchTransferService: NSObject {
             lastMessage = "Pending transfers: \(pending.count)"
             WakeLog.debug(.transfer, "transferPending count=\(pending.count)")
             for manifest in pending {
-                try transfer(sessionId: manifest.sessionId, store: store)
+                do {
+                    try transfer(sessionId: manifest.sessionId, store: store)
+                } catch {
+                    lastMessage = "Transfer error: \(error.localizedDescription)"
+                    WakeLog.error(
+                        .transfer,
+                        "transfer \(manifest.sessionId.prefix(8))…: \(error.localizedDescription)"
+                    )
+                    try? store.markReadyToTransfer(sessionId: manifest.sessionId)
+                }
             }
+            refreshPendingCount()
         } catch {
             lastMessage = "Transfer list error: \(error.localizedDescription)"
             WakeLog.error(.transfer, "list error: \(error.localizedDescription)")

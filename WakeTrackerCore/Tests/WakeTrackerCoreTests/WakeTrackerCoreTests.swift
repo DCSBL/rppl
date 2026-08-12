@@ -142,6 +142,55 @@ struct SessionFileStoreTests {
         #expect(stillThere.transferState == .transferring)
     }
 
+    @Test func unreadableSiblingDoesNotHidePendingTransfer() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("orphan-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let ready = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try store.createSession(manifest: ready)
+        try store.markReadyToTransfer(sessionId: ready.sessionId)
+
+        // Empty dormant folder (no manifest.json) — must not abort the pending list.
+        let emptyDir = root.appendingPathComponent("zzz-empty-dormant", isDirectory: true)
+        try FileManager.default.createDirectory(at: emptyDir, withIntermediateDirectories: true)
+
+        // Corrupt manifest sibling — same: skip, do not throw away ready sessions.
+        let corruptDir = root.appendingPathComponent("aaa-corrupt-dormant", isDirectory: true)
+        try FileManager.default.createDirectory(at: corruptDir, withIntermediateDirectories: true)
+        try Data("{not-json".utf8).write(
+            to: corruptDir.appendingPathComponent("manifest.json"),
+            options: [.atomic]
+        )
+
+        let pending = try store.sessionsNeedingTransfer()
+        #expect(pending.map(\.sessionId) == [ready.sessionId])
+        #expect(pending.first?.transferState == .readyToTransfer)
+
+        let readable = try store.listReadableManifests()
+        #expect(readable.map(\.sessionId) == [ready.sessionId])
+    }
+
+    @Test func sessionStoreErrorHasReadableDescription() {
+        #expect(
+            SessionStoreError.invalidManifest.localizedDescription == "Invalid session manifest"
+        )
+        #expect(
+            SessionStoreError.sessionNotFound("abc").localizedDescription
+                == "Session not found: abc"
+        )
+        #expect(
+            SessionStoreError.ioFailure("disk full").localizedDescription == "disk full"
+        )
+    }
+
     @Test func emptyStoreHasNoPendingTransfers() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("empty-\(UUID().uuidString)", isDirectory: true)
