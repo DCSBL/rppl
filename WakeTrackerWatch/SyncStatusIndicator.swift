@@ -19,7 +19,7 @@ struct SyncStatusIndicator: View {
                 Text(state.detail)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
                 if pendingCount > 0 {
                     Text("Pending: \(pendingCount)")
                         .font(.caption2)
@@ -29,7 +29,7 @@ struct SyncStatusIndicator: View {
                     Text(footnote)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }

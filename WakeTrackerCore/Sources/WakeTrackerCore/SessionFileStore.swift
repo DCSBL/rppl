@@ -1,9 +1,20 @@
 import Foundation
 
-public enum SessionStoreError: Error, Equatable, Sendable {
+public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
     case sessionNotFound(String)
     case invalidManifest
     case ioFailure(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .sessionNotFound(let sessionId):
+            return "Session not found: \(sessionId)"
+        case .invalidManifest:
+            return "Invalid session manifest"
+        case .ioFailure(let message):
+            return message
+        }
+    }
 }
 
 /// File layout for one session package:
@@ -217,9 +228,20 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     /// Sessions waiting for a successful phone ack. Never delete these on transfer failure.
+    ///
+    /// Unreadable sibling folders (missing/corrupt manifest) are skipped so one dormant
+    /// directory cannot hide ready sessions from the pending transfer list.
     public func sessionsNeedingTransfer() throws -> [SessionManifest] {
-        let manifests = try listSessionIDs().map { try readManifest(sessionId: $0) }
+        let manifests = try listReadableManifests()
         return TransferPendingFilter.needingTransfer(manifests)
+    }
+
+    /// Loads manifests for every session directory that has a valid `manifest.json`.
+    /// Skips empty or corrupt folders instead of failing the whole list.
+    public func listReadableManifests() throws -> [SessionManifest] {
+        try listSessionIDs().compactMap { sessionId in
+            try? readManifest(sessionId: sessionId)
+        }
     }
 
     public func zipSessionForTransfer(sessionId: String, to destinationURL: URL) throws -> URL {
