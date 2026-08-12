@@ -43,15 +43,9 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
 
     func perform() async throws -> some IntentResult {
         WakeLog.debug(.intent, "StartCableParkSessionIntent.perform begin")
-        let running = await WatchSessionController.shared.isRunning
-        if running {
-            // Backup: some OS builds re-fire Start instead of donated next action.
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — cycle label")
-            await WatchSessionController.shared.cycleLabelFromActionButton()
-        } else {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
-            await WatchSessionController.shared.startSession()
-        }
+        // Do not `await` the MainActor controller while Action Button UI may hold it —
+        // that deadlocks until the ~30s intent timeout. Schedule work, return fast.
+        await WatchSessionController.shared.handleStartWorkoutIntent()
         return .result(actionButtonIntent: CycleLabelIntent())
     }
 }
@@ -61,6 +55,10 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
 /// Critical: `openAppWhenRun` must stay **false**. Opening the app from the Action Button
 /// during an active workout / Water Lock often yields a blank red flash and never calls
 /// `perform()` (no logs, label unchanged).
+///
+/// Also critical: do **not** `await` `@MainActor` work inside `perform()`. The system
+/// confirmation UI can hold the main actor; awaiting `WatchSessionController` then hangs
+/// until the App Intent 30s timeout ("Cycle Label has failed").
 struct CycleLabelIntent: AppIntent {
     static var title: LocalizedStringResource = "Cycle Label"
     static var description = IntentDescription(
@@ -70,8 +68,8 @@ struct CycleLabelIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         WakeLog.debug(.intent, "CycleLabelIntent.perform begin")
-        await WatchSessionController.shared.cycleLabelFromActionButton()
-        WakeLog.debug(.intent, "CycleLabelIntent.perform done")
+        WatchSessionController.scheduleCycleLabelFromActionButton()
+        WakeLog.debug(.intent, "CycleLabelIntent.perform returned (cycle scheduled)")
         return .result()
     }
 }
