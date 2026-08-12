@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CCF3D6C7302921A800AF3518 /* WakeTrackerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CCF3D6C7302921A800AF3518 /* WakeTrackerWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CCF3D6C0302921A800AF3518 /* WakeTrackerWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CCF3D6D1302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* WakeTrackerCore */; };
 		CCF3D6D2302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* WakeTrackerCore */; };
 		CCF3D6D3302921A800AF3518 /* WakeTrackerCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6D0302921A800AF3518 /* WakeTrackerCore */; };
@@ -41,7 +41,7 @@
 		CCF3D6C6302921A800AF3518 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
 				CCF3D6C7302921A800AF3518 /* WakeTrackerWatch.app in Embed Watch Content */,
@@ -729,14 +729,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Wake Tracker records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker.dev";
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp.dev";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.dev.watchkitapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -769,14 +769,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Wake Tracker records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Wake Tracker records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Wake Tracker records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.wake-tracker.dev";
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.watchkitapp.dev";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.wake-tracker.dev.watchkitapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

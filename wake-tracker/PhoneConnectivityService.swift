@@ -11,6 +11,8 @@ final class PhoneConnectivityService: NSObject {
     var status = "WC idle"
     var syncState: SyncConnectionState = .notActivated
     var sessionsRevision = 0
+    /// Raw WCSession flags for device-pair debugging (shown under Sync).
+    var wcDebugSummary = "WC —"
 
     let store: SessionFileStore
     private var pendingAcks = Set<String>()
@@ -40,24 +42,46 @@ final class PhoneConnectivityService: NSObject {
     func refreshSyncState() {
         let previous = syncState
         syncState = SyncConnectionProbe.current()
+        let session = WCSession.default
+        let activation: String
+        switch session.activationState {
+        case .notActivated: activation = "notActivated"
+        case .inactive: activation = "inactive"
+        case .activated: activation = "activated"
+        @unknown default: activation = "unknown"
+        }
+        wcDebugSummary =
+            "paired=\(session.isPaired) installed=\(session.isWatchAppInstalled) " +
+            "reachable=\(session.isReachable) activation=\(activation)"
         if previous != syncState {
             WakeLog.debug(.sync, "state \(previous) → \(syncState)")
         }
+        WakeLog.debug(.sync, wcDebugSummary)
     }
 
     private func acknowledge(sessionId: String) {
+        let payload: [String: Any] = [AppConstants.wcAckMessageKey: sessionId]
+        // Queued delivery survives Watch not reachable / app restart on phone side of WC.
+        WCSession.default.transferUserInfo(payload)
+        WakeLog.debug(.ack, "queued userInfo \(sessionId.prefix(8))…")
+
         guard WCSession.default.isReachable else {
             status = "Imported \(sessionId.prefix(8)) — Watch not reachable for ack (will retry when reachable)"
             pendingAcks.insert(sessionId)
-            WakeLog.debug(.ack, "defer \(sessionId.prefix(8))… — Watch unreachable pending=\(pendingAcks.count)")
+            WakeLog.debug(.ack, "defer live \(sessionId.prefix(8))… — Watch unreachable pending=\(pendingAcks.count)")
             refreshSyncState()
             return
         }
-        WakeLog.debug(.ack, "send \(sessionId.prefix(8))…")
+        WakeLog.debug(.ack, "send live \(sessionId.prefix(8))…")
         WCSession.default.sendMessage(
-            [AppConstants.wcAckMessageKey: sessionId],
-            replyHandler: { _ in
-                WakeLog.debug(.ack, "send reply OK \(sessionId.prefix(8))…")
+            payload,
+            replyHandler: { [weak self] _ in
+                Task { @MainActor in
+                    self?.pendingAcks.remove(sessionId)
+                    self?.status = "Acked \(sessionId.prefix(8))"
+                    WakeLog.debug(.ack, "send reply OK \(sessionId.prefix(8))…")
+                    self?.refreshSyncState()
+                }
             },
             errorHandler: { [weak self] error in
                 Task { @MainActor in
@@ -68,8 +92,6 @@ final class PhoneConnectivityService: NSObject {
                 }
             }
         )
-        pendingAcks.remove(sessionId)
-        status = "Acked \(sessionId.prefix(8))"
         refreshSyncState()
     }
 
@@ -80,6 +102,26 @@ final class PhoneConnectivityService: NSObject {
         WakeLog.debug(.ack, "flushPendingAcks count=\(ids.count)")
         for id in ids {
             acknowledge(sessionId: id)
+        }
+    }
+
+    /// Re-queue acks for sessions already imported on phone (heals Watch stuck in transferring).
+    func rebroadcastAcksForImportedSessions() {
+        guard WCSession.default.activationState == .activated else { return }
+        do {
+            let ids = try store.listSessionIDs()
+            var count = 0
+            for id in ids {
+                let manifest = try store.readManifest(sessionId: id)
+                guard manifest.transferState == .acknowledged else { continue }
+                WCSession.default.transferUserInfo([AppConstants.wcAckMessageKey: id])
+                count += 1
+            }
+            if count > 0 {
+                WakeLog.debug(.ack, "rebroadcast userInfo for \(count) imported session(s)")
+            }
+        } catch {
+            WakeLog.error(.ack, "rebroadcast failed: \(error.localizedDescription)")
         }
     }
 
@@ -111,6 +153,7 @@ extension PhoneConnectivityService: WCSessionDelegate {
             } else {
                 status = "WC activated"
                 WakeLog.debug(.sync, "WC activated state=\(activationState.rawValue)")
+                rebroadcastAcksForImportedSessions()
                 flushPendingAcks()
             }
         }

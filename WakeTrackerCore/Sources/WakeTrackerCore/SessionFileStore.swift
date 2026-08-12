@@ -326,14 +326,20 @@ public final class SessionFileStore: @unchecked Sendable {
         guard let text = String(data: data, encoding: .utf8) else {
             throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL")
         }
-        return try text
-            .split(separator: "\n", omittingEmptySubsequences: true)
-            .map { line in
-                guard let lineData = line.data(using: .utf8) else {
-                    throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL line")
-                }
-                return try decoder.decode(T.self, from: lineData)
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
+        var result: [T] = []
+        result.reserveCapacity(lines.count)
+        for (index, line) in lines.enumerated() {
+            // Cooperative cancel when called from a Task (detail load / export).
+            if index.isMultiple(of: 256), Task.isCancelled {
+                throw CancellationError()
             }
+            guard let lineData = line.data(using: .utf8) else {
+                throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL line")
+            }
+            result.append(try decoder.decode(T.self, from: lineData))
+        }
+        return result
     }
 }
 

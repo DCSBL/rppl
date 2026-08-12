@@ -138,21 +138,44 @@ extension WatchTransferService: WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         Task { @MainActor in
-            guard let ack = message[AppConstants.wcAckMessageKey] as? String else {
-                WakeLog.debug(.ack, "ignored non-ack message keys=\(Array(message.keys))")
-                return
-            }
-            WakeLog.debug(.ack, "received ack \(ack.prefix(8))…")
-            let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
-            do {
-                try store.markAcknowledged(sessionId: ack)
-                lastMessage = "Acked \(ack.prefix(8))"
-                WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
-                refreshPendingCount()
-            } catch {
-                lastMessage = "Ack failed: \(error.localizedDescription)"
-                WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
-            }
+            applyAckMessage(message)
+        }
+    }
+
+    /// Phone `sendMessage` uses a replyHandler — WC delivers here, not `didReceiveMessage`.
+    nonisolated func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any],
+        replyHandler: @escaping ([String: Any]) -> Void
+    ) {
+        replyHandler([AppConstants.wcAckMessageKey: "ok"])
+        Task { @MainActor in
+            applyAckMessage(message)
+        }
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        Task { @MainActor in
+            applyAckMessage(userInfo)
+        }
+    }
+
+    @MainActor
+    private func applyAckMessage(_ message: [String: Any]) {
+        guard let ack = message[AppConstants.wcAckMessageKey] as? String else {
+            WakeLog.debug(.ack, "ignored non-ack message keys=\(Array(message.keys))")
+            return
+        }
+        WakeLog.debug(.ack, "received ack \(ack.prefix(8))…")
+        let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        do {
+            try store.markAcknowledged(sessionId: ack)
+            lastMessage = "Acked \(ack.prefix(8))"
+            WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
+            refreshPendingCount()
+        } catch {
+            lastMessage = "Ack failed: \(error.localizedDescription)"
+            WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
         }
     }
 

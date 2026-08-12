@@ -285,6 +285,46 @@ struct SessionFileStoreTests {
         #expect(!ByteSizeFormat.string(2_500_000).isEmpty)
     }
 
+    @Test func readLocationSamplesHonorsTaskCancellation() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cancel-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try store.createSession(manifest: manifest)
+
+        let samples = (0..<4_000).map { index in
+            LocationSample(
+                timestamp: Date(timeIntervalSince1970: Double(index)),
+                latitude: Double(index) * 0.0001,
+                longitude: Double(index) * 0.0001,
+                horizontalAccuracy: 5
+            )
+        }
+        try store.appendLocationSamples(samples, sessionId: manifest.sessionId)
+
+        let reader = Task {
+            try store.readLocationSamples(sessionId: manifest.sessionId)
+        }
+        // Cancel before the cooperative checkpoints can finish the whole file.
+        reader.cancel()
+        do {
+            _ = try await reader.value
+            Issue.record("Expected CancellationError from cancelled JSONL read")
+        } catch is CancellationError {
+            // Expected
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
     @Test func testerIdentityPersistsInDefaults() {
         let suite = "WakeTrackerCoreTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
