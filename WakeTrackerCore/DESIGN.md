@@ -169,11 +169,11 @@ Concrete v0 rules (examples): `RideStartRule`, `FallSwimRule`, `FailedStartRule`
   labels.jsonl          # manual LabelEvent
   assumptions.jsonl     # auto AssumptionEvent (transitions only)
   location-000.jsonl
-  motion-000.jsonl
+  motion-000.jsonl.zlib # framed zlib JSONL (legacy plain .jsonl still readable)
   health-000.jsonl
 ```
 
-`SessionTransferPackage` carries `assumptions` (decode-missing → `[]` for legacy exports).
+`SessionTransferPackage` carries `assumptions` (decode-missing → `[]` for legacy exports) and `motionFramesZlib` when motion was recorded compressed.
 
 ## Tests
 

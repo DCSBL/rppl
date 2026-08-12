@@ -452,7 +452,7 @@ final class WatchSessionController: NSObject {
             WakeLog.debug(.session, "device motion unavailable — skipped")
             return
         }
-        motionManager.deviceMotionUpdateInterval = 1.0 / 50.0
+        motionManager.deviceMotionUpdateInterval = 1.0 / 25.0
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let self, let motion, self.isRunning else { return }
             let sample = MotionSample(
@@ -473,7 +473,7 @@ final class WatchSessionController: NSObject {
         motionUpdatesStarted = true
         motionRecordingEnabled = true
         motionAvailability = "recording"
-        WakeLog.debug(.session, "device motion recording @50Hz")
+        WakeLog.debug(.session, "device motion recording @25Hz (zlib JSONL)")
     }
 
     private func startActivityUpdatesIfAvailable() {

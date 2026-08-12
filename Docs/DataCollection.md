@@ -10,7 +10,7 @@ Cycle: `waiting` → `riding` → `swimming` → `walking` → …
 - Each Action Button press (or on-screen **Cycle label**) advances and logs the new code.
 - Assign Ultra Action Button to the **Cycle Label** shortcut in Watch Settings.
 
-Label events store: `code`, `timestamp`, latest GPS snapshot, optional water submersion/temp, optional motion-activity hint. High-rate motion/HR live in chunk files and are joined by time offline.
+Label events store: `code`, `timestamp`, latest GPS snapshot, optional water submersion/temp, optional motion-activity hint. High-rate motion/HR live in chunk files and are joined by time offline. Motion is **25 Hz**, compact JSON keys, and **framed zlib** on disk (`motion-000.jsonl.zlib`) so a park day stays transferable; WC packages carry `motionFramesZlib` instead of expanding every sample into JSON.
 
 ## Assumption codes (auto, corpus)
 
@@ -23,7 +23,7 @@ Each line: `code`, `timestamp`, `reason` (km/h speeds), optional speed/water/act
 | Stream | Approx rate | File |
 |--------|-------------|------|
 | GPS | Core Location updates | `location-000.jsonl` |
-| deviceMotion | ~50 Hz | `motion-000.jsonl` |
+| deviceMotion | ~25 Hz → framed zlib JSONL | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Labels | on events | `labels.jsonl` |
 | Assumptions | on Assumer transitions | `assumptions.jsonl` |

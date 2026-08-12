@@ -13,7 +13,7 @@ public enum SessionStoreError: Error, Equatable, Sendable {
 ///   labels.jsonl
 ///   assumptions.jsonl
 ///   location-000.jsonl
-///   motion-000.jsonl
+///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 /// ```
 public final class SessionFileStore: @unchecked Sendable {
@@ -92,10 +92,44 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func appendMotionSamples(_ samples: [MotionSample], sessionId: String, chunkIndex: Int = 0) throws {
-        let name = String(format: "motion-%03d.jsonl", chunkIndex)
+        guard !samples.isEmpty else { return }
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = sessionDirectory(for: sessionId)
+        try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+
+        var jsonl = Data()
         for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
+            var line = try encoder.encode(sample)
+            line.append(contentsOf: "\n".utf8)
+            jsonl.append(line)
         }
+        try CompressedJSONLFrames.appendFrame(jsonlUTF8: jsonl, to: url, fileManager: fileManager)
+    }
+
+    /// Raw framed zlib bytes for WC transfer without expanding samples in memory.
+    public func readMotionFrameData(sessionId: String, chunkIndex: Int = 0) throws -> Data? {
+        let url = sessionDirectory(for: sessionId)
+            .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+        guard fileManager.fileExists(atPath: url.path) else { return nil }
+        return try Data(contentsOf: url)
+    }
+
+    public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
+        let dir = sessionDirectory(for: sessionId)
+        try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+        try data.write(to: url, options: [.atomic])
+    }
+
+    private static func motionCompressedFileName(chunkIndex: Int) -> String {
+        String(format: "motion-%03d.jsonl.zlib", chunkIndex)
+    }
+
+    private static func motionLegacyFileName(chunkIndex: Int) -> String {
+        String(format: "motion-%03d.jsonl", chunkIndex)
     }
 
     public func appendHealthSamples(_ samples: [HealthMetricSample], sessionId: String, chunkIndex: Int = 0) throws {
@@ -212,7 +246,11 @@ public final class SessionFileStore: @unchecked Sendable {
             try phoneStore.appendAssumption(assumption, sessionId: package.manifest.sessionId)
         }
         try phoneStore.appendLocationSamples(package.locations, sessionId: package.manifest.sessionId)
-        try phoneStore.appendMotionSamples(package.motion, sessionId: package.manifest.sessionId)
+        if let frames = package.motionFramesZlib, !frames.isEmpty {
+            try phoneStore.writeMotionFrameData(frames, sessionId: package.manifest.sessionId)
+        } else if !package.motion.isEmpty {
+            try phoneStore.appendMotionSamples(package.motion, sessionId: package.manifest.sessionId)
+        }
         try phoneStore.appendHealthSamples(package.health, sessionId: package.manifest.sessionId)
         var imported = package.manifest
         imported.transferState = .acknowledged
@@ -224,7 +262,14 @@ public final class SessionFileStore: @unchecked Sendable {
         let labels = try readLabels(sessionId: sessionId)
         let assumptions = try readAssumptions(sessionId: sessionId)
         let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
-        let motion = (try? readJSONL(MotionSample.self, from: "motion-000.jsonl", sessionId: sessionId)) ?? []
+        let motionFrames = try readMotionFrameData(sessionId: sessionId)
+        // Prefer compressed frames on the wire; only expand legacy plain JSONL sessions.
+        let motion: [MotionSample]
+        if motionFrames == nil {
+            motion = (try? readMotionSamples(sessionId: sessionId)) ?? []
+        } else {
+            motion = []
+        }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         return SessionTransferPackage(
             manifest: manifest,
@@ -232,7 +277,23 @@ public final class SessionFileStore: @unchecked Sendable {
             assumptions: assumptions,
             locations: locations,
             motion: motion,
+            motionFramesZlib: motionFrames,
             health: health
+        )
+    }
+
+    public func readMotionSamples(sessionId: String, chunkIndex: Int = 0) throws -> [MotionSample] {
+        let dir = sessionDirectory(for: sessionId)
+        let zlibURL = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+        if fileManager.fileExists(atPath: zlibURL.path) {
+            let framed = try Data(contentsOf: zlibURL)
+            let utf8 = try CompressedJSONLFrames.decodeFrames(framed)
+            return try decodeJSONL(MotionSample.self, from: utf8)
+        }
+        return try readJSONL(
+            MotionSample.self,
+            from: Self.motionLegacyFileName(chunkIndex: chunkIndex),
+            sessionId: sessionId
         )
     }
 
@@ -257,14 +318,21 @@ public final class SessionFileStore: @unchecked Sendable {
     private func readJSONL<T: Decodable>(_ type: T.Type, from fileName: String, sessionId: String) throws -> [T] {
         let url = sessionDirectory(for: sessionId).appendingPathComponent(fileName)
         guard fileManager.fileExists(atPath: url.path) else { return [] }
-        let text = try String(contentsOf: url, encoding: .utf8)
+        let data = try Data(contentsOf: url)
+        return try decodeJSONL(type, from: data)
+    }
+
+    private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data) throws -> [T] {
+        guard let text = String(data: data, encoding: .utf8) else {
+            throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL")
+        }
         return try text
             .split(separator: "\n", omittingEmptySubsequences: true)
             .map { line in
-                guard let data = line.data(using: .utf8) else {
-                    throw SessionStoreError.ioFailure("Invalid UTF-8 in \(fileName)")
+                guard let lineData = line.data(using: .utf8) else {
+                    throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL line")
                 }
-                return try decoder.decode(T.self, from: data)
+                return try decoder.decode(T.self, from: lineData)
             }
     }
 }
@@ -274,7 +342,10 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var labels: [LabelEvent]
     public var assumptions: [AssumptionEvent]
     public var locations: [LocationSample]
+    /// Expanded motion samples (legacy packages / tiny fixtures). Prefer `motionFramesZlib` for sessions.
     public var motion: [MotionSample]
+    /// Framed zlib JSONL bytes (`motion-000.jsonl.zlib`) — keeps WC transfer small.
+    public var motionFramesZlib: Data?
     public var health: [HealthMetricSample]
 
     public init(
@@ -282,7 +353,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         labels: [LabelEvent],
         assumptions: [AssumptionEvent] = [],
         locations: [LocationSample],
-        motion: [MotionSample],
+        motion: [MotionSample] = [],
+        motionFramesZlib: Data? = nil,
         health: [HealthMetricSample]
     ) {
         self.manifest = manifest
@@ -290,6 +362,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.assumptions = assumptions
         self.locations = locations
         self.motion = motion
+        self.motionFramesZlib = motionFramesZlib
         self.health = health
     }
 
@@ -299,8 +372,28 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         labels = try container.decode([LabelEvent].self, forKey: .labels)
         assumptions = try container.decodeIfPresent([AssumptionEvent].self, forKey: .assumptions) ?? []
         locations = try container.decode([LocationSample].self, forKey: .locations)
-        motion = try container.decode([MotionSample].self, forKey: .motion)
+        motion = try container.decodeIfPresent([MotionSample].self, forKey: .motion) ?? []
+        motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(manifest, forKey: .manifest)
+        try container.encode(labels, forKey: .labels)
+        try container.encode(assumptions, forKey: .assumptions)
+        try container.encode(locations, forKey: .locations)
+        if let motionFramesZlib, !motionFramesZlib.isEmpty {
+            try container.encode(motionFramesZlib, forKey: .motionFramesZlib)
+            // Omit expanded motion when frames present — avoids megabyte JSON arrays on the wire.
+        } else {
+            try container.encode(motion, forKey: .motion)
+        }
+        try container.encode(health, forKey: .health)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case manifest, labels, assumptions, locations, motion, motionFramesZlib, health
     }
 }
 

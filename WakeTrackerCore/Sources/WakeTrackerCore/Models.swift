@@ -169,6 +169,62 @@ public struct MotionSample: Codable, Equatable, Sendable {
         self.roll = roll
         self.yaw = yaw
     }
+
+    /// Short keys + 4-decimal quantize — JSONL shrinks hard before zlib.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CompactCodingKeys.self)
+        try container.encode(timestamp, forKey: .t)
+        try container.encode(Self.quantize(userAccelX), forKey: .ax)
+        try container.encode(Self.quantize(userAccelY), forKey: .ay)
+        try container.encode(Self.quantize(userAccelZ), forKey: .az)
+        try container.encode(Self.quantize(rotationX), forKey: .rx)
+        try container.encode(Self.quantize(rotationY), forKey: .ry)
+        try container.encode(Self.quantize(rotationZ), forKey: .rz)
+        try container.encode(Self.quantize(pitch), forKey: .p)
+        try container.encode(Self.quantize(roll), forKey: .r)
+        try container.encode(Self.quantize(yaw), forKey: .y)
+    }
+
+    public init(from decoder: Decoder) throws {
+        if let compact = try? decoder.container(keyedBy: CompactCodingKeys.self),
+           compact.contains(.t) {
+            timestamp = try compact.decode(Date.self, forKey: .t)
+            userAccelX = try compact.decode(Double.self, forKey: .ax)
+            userAccelY = try compact.decode(Double.self, forKey: .ay)
+            userAccelZ = try compact.decode(Double.self, forKey: .az)
+            rotationX = try compact.decode(Double.self, forKey: .rx)
+            rotationY = try compact.decode(Double.self, forKey: .ry)
+            rotationZ = try compact.decode(Double.self, forKey: .rz)
+            pitch = try compact.decode(Double.self, forKey: .p)
+            roll = try compact.decode(Double.self, forKey: .r)
+            yaw = try compact.decode(Double.self, forKey: .y)
+            return
+        }
+        let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+        timestamp = try legacy.decode(Date.self, forKey: .timestamp)
+        userAccelX = try legacy.decode(Double.self, forKey: .userAccelX)
+        userAccelY = try legacy.decode(Double.self, forKey: .userAccelY)
+        userAccelZ = try legacy.decode(Double.self, forKey: .userAccelZ)
+        rotationX = try legacy.decode(Double.self, forKey: .rotationX)
+        rotationY = try legacy.decode(Double.self, forKey: .rotationY)
+        rotationZ = try legacy.decode(Double.self, forKey: .rotationZ)
+        pitch = try legacy.decode(Double.self, forKey: .pitch)
+        roll = try legacy.decode(Double.self, forKey: .roll)
+        yaw = try legacy.decode(Double.self, forKey: .yaw)
+    }
+
+    private enum CompactCodingKeys: String, CodingKey {
+        case t, ax, ay, az, rx, ry, rz, p, r, y
+    }
+
+    private enum LegacyCodingKeys: String, CodingKey {
+        case timestamp, userAccelX, userAccelY, userAccelZ
+        case rotationX, rotationY, rotationZ, pitch, roll, yaw
+    }
+
+    private static func quantize(_ value: Double) -> Double {
+        (value * 10_000).rounded() / 10_000
+    }
 }
 
 public struct HealthMetricSample: Codable, Equatable, Sendable {

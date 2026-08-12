@@ -7,7 +7,7 @@ import OSLog
 /// `nl.dcsbl.wake-tracker`. In DEBUG builds also `print`s so Xcode’s debug console
 /// always shows lines without enabling “Include Debug Messages”.
 ///
-/// Do **not** log high-frequency sensor samples (GPS / 50 Hz motion / HR ticks).
+/// Do **not** log high-frequency sensor samples (GPS / 25 Hz motion / HR ticks).
 public enum WakeLog {
     public static let subsystem = "nl.dcsbl.wake-tracker"
 
