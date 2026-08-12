@@ -279,6 +279,42 @@ struct SessionFileStoreTests {
         }
     }
 
+    @Test func deleteSessionRemovesPackage() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("delete-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            sessionId: "to-delete",
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try store.createSession(manifest: manifest)
+        try store.appendLabel(LabelEvent(code: LabelCodes.waiting), sessionId: manifest.sessionId)
+        #expect(try store.listSessionIDs() == ["to-delete"])
+
+        try store.deleteSession(sessionId: manifest.sessionId)
+        #expect(try store.listSessionIDs().isEmpty)
+        #expect(throws: SessionStoreError.sessionNotFound("to-delete")) {
+            try store.readManifest(sessionId: "to-delete")
+        }
+    }
+
+    @Test func deleteSessionThrowsWhenMissing() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("delete-missing-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        #expect(throws: SessionStoreError.sessionNotFound("nope")) {
+            try store.deleteSession(sessionId: "nope")
+        }
+    }
+
     @Test func byteSizeFormatNonEmpty() {
         #expect(!ByteSizeFormat.string(0).isEmpty)
         #expect(!ByteSizeFormat.string(1_500).isEmpty)

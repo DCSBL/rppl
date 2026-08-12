@@ -10,6 +10,8 @@ struct ContentView: View {
     @State private var syncedTotalBytes: Int64 = 0
     @State private var selected: SessionManifest?
     @State private var isReloadingSessions = false
+    @State private var pendingDeleteSessionId: String?
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -70,12 +72,38 @@ struct ContentView: View {
                                 }
                             }
                         }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                WakeLog.debug(.ui, "swipe delete \(manifest.sessionId.prefix(8))…")
+                                pendingDeleteSessionId = manifest.sessionId
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle("Wake Tracker")
             .navigationDestination(for: String.self) { sessionId in
                 SessionDetailView(sessionId: sessionId, store: connectivity.store)
+            }
+            .confirmationDialog(
+                "Delete Session?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Permanently", role: .destructive) {
+                    if let sessionId = pendingDeleteSessionId {
+                        deleteSession(sessionId)
+                    }
+                    pendingDeleteSessionId = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingDeleteSessionId = nil
+                }
+            } message: {
+                Text("This permanently removes the session from this iPhone. This cannot be undone.")
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -96,6 +124,17 @@ struct ContentView: View {
                 WakeLog.debug(.ui, "sessionsRevision changed — reload")
                 reload()
             }
+        }
+    }
+
+    private func deleteSession(_ sessionId: String) {
+        WakeLog.debug(.ui, "confirm delete \(sessionId.prefix(8))…")
+        do {
+            try connectivity.store.deleteSession(sessionId: sessionId)
+            WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
+            reload()
+        } catch {
+            WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }
 
