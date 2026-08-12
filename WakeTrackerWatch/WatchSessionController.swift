@@ -20,6 +20,8 @@ final class WatchSessionController: NSObject {
     var motionCount = 0
     var labelCount = 0
     var assumptionCount = 0
+    /// On-disk size of the active session package (updated after flushes / label writes).
+    var storedByteSize: Int64 = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
     var lastHeartRate: Double?
@@ -165,6 +167,7 @@ final class WatchSessionController: NSObject {
 
         do {
             _ = try fileStore.createSession(manifest: manifest)
+            refreshStoredByteSize()
             WakeLog.debug(.store, "createSession OK \(manifest.sessionId.prefix(8))…")
         } catch {
             errorText = "Store: \(error.localizedDescription)"
@@ -252,6 +255,7 @@ final class WatchSessionController: NSObject {
         WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
         statusText = "Stopped — waiting for phone ack"
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
+        storedByteSize = 0
         self.manifest = nil
     }
 
@@ -314,6 +318,7 @@ final class WatchSessionController: NSObject {
         do {
             try store.appendLabel(event, sessionId: manifest.sessionId)
             labelCount += 1
+            refreshStoredByteSize()
             WakeLog.debug(
                 .label,
                 "appended code=\(code) gps=\(gps != nil) water=\(latestWaterState ?? "nil") activity=\(latestActivity ?? "nil") count=\(labelCount)"
@@ -358,6 +363,7 @@ final class WatchSessionController: NSObject {
         do {
             try store.appendAssumption(event, sessionId: manifest.sessionId)
             assumptionCount += 1
+            refreshStoredByteSize()
             WakeLog.debug(
                 .assumption,
                 "appended code=\(event.code) reason=\(event.reason) count=\(assumptionCount)"
@@ -446,7 +452,7 @@ final class WatchSessionController: NSObject {
             WakeLog.debug(.session, "device motion unavailable — skipped")
             return
         }
-        motionManager.deviceMotionUpdateInterval = 1.0 / 50.0
+        motionManager.deviceMotionUpdateInterval = 1.0 / 25.0
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let self, let motion, self.isRunning else { return }
             let sample = MotionSample(
@@ -467,7 +473,7 @@ final class WatchSessionController: NSObject {
         motionUpdatesStarted = true
         motionRecordingEnabled = true
         motionAvailability = "recording"
-        WakeLog.debug(.session, "device motion recording @50Hz")
+        WakeLog.debug(.session, "device motion recording @25Hz (zlib JSONL)")
     }
 
     private func startActivityUpdatesIfAvailable() {
@@ -528,6 +534,7 @@ final class WatchSessionController: NSObject {
             if !health.isEmpty {
                 try store.appendHealthSamples(health, sessionId: manifest.sessionId)
             }
+            refreshStoredByteSize()
             // Success path silent — every ~2s while recording would drown action logs.
         } catch {
             errorText = "Flush: \(error.localizedDescription)"
@@ -535,6 +542,18 @@ final class WatchSessionController: NSObject {
                 .store,
                 "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count): \(error.localizedDescription)"
             )
+        }
+    }
+
+    private func refreshStoredByteSize() {
+        guard let store, let manifest else {
+            storedByteSize = 0
+            return
+        }
+        do {
+            storedByteSize = try store.sessionByteSize(sessionId: manifest.sessionId)
+        } catch {
+            WakeLog.error(.store, "sessionByteSize: \(error.localizedDescription)")
         }
     }
 

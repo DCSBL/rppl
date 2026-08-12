@@ -209,6 +209,82 @@ struct SessionFileStoreTests {
         #expect(try store.listSessionIDs() == ["a-session", "b-session", "c-session"])
     }
 
+    @Test func sessionByteSizeGrowsWithAppends() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("size-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try store.createSession(manifest: manifest)
+
+        let afterCreate = try store.sessionByteSize(sessionId: manifest.sessionId)
+        #expect(afterCreate > 0)
+        #expect(try store.totalStoredByteSize() == afterCreate)
+
+        try store.appendLabel(LabelEvent(code: LabelCodes.riding), sessionId: manifest.sessionId)
+        try store.appendLocationSamples([
+            LocationSample(
+                timestamp: Date(timeIntervalSince1970: 10),
+                latitude: 1,
+                longitude: 2,
+                horizontalAccuracy: 3,
+                speed: 4
+            )
+        ], sessionId: manifest.sessionId)
+
+        let afterAppend = try store.sessionByteSize(sessionId: manifest.sessionId)
+        #expect(afterAppend > afterCreate)
+        #expect(try store.totalStoredByteSize() == afterAppend)
+    }
+
+    @Test func totalStoredByteSizeSumsSessions() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("totalsize-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        var sizes: [Int64] = []
+        for id in ["s1", "s2"] {
+            try store.createSession(
+                manifest: SessionManifest(
+                    sessionId: id,
+                    testerId: "t",
+                    appVersion: "1.0",
+                    buildNumber: "1",
+                    watchModel: "Ultra2",
+                    systemVersion: "26.0"
+                )
+            )
+            try store.appendLabel(LabelEvent(code: LabelCodes.waiting), sessionId: id)
+            sizes.append(try store.sessionByteSize(sessionId: id))
+        }
+        #expect(try store.totalStoredByteSize() == sizes.reduce(0, +))
+    }
+
+    @Test func sessionByteSizeThrowsWhenMissing() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("missing-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        #expect(throws: SessionStoreError.sessionNotFound("nope")) {
+            try store.sessionByteSize(sessionId: "nope")
+        }
+    }
+
+    @Test func byteSizeFormatNonEmpty() {
+        #expect(!ByteSizeFormat.string(0).isEmpty)
+        #expect(!ByteSizeFormat.string(1_500).isEmpty)
+        #expect(!ByteSizeFormat.string(2_500_000).isEmpty)
+    }
+
     @Test func readLocationSamplesHonorsTaskCancellation() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("cancel-\(UUID().uuidString)", isDirectory: true)

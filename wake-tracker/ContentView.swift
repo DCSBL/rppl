@@ -6,6 +6,8 @@ struct ContentView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var permissions = PermissionsModel()
     @State private var manifests: [SessionManifest] = []
+    @State private var sessionSizes: [String: Int64] = [:]
+    @State private var syncedTotalBytes: Int64 = 0
     @State private var selected: SessionManifest?
     @State private var isReloadingSessions = false
 
@@ -17,6 +19,7 @@ struct ContentView: View {
                         state: connectivity.syncState,
                         footnote: connectivity.status
                     )
+                    LabeledContent("Synced data", value: ByteSizeFormat.string(syncedTotalBytes))
                     Text(connectivity.wcDebugSummary)
                         .font(.caption2.monospaced())
                         .foregroundStyle(.secondary)
@@ -59,6 +62,12 @@ struct ContentView: View {
                                 Text("\(manifest.sessionId.prefix(8))… · \(manifest.transferState.rawValue)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                if let size = sessionSizes[manifest.sessionId] {
+                                    Text(ByteSizeFormat.string(size))
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .monospacedDigit()
+                                }
                             }
                         }
                     }
@@ -98,14 +107,26 @@ struct ContentView: View {
                 let ids = try store.listSessionIDs()
                 let loaded = try ids.compactMap { try store.readManifest(sessionId: $0) }
                     .sorted { $0.startedAt > $1.startedAt }
+                var sizes: [String: Int64] = [:]
+                for id in ids {
+                    sizes[id] = (try? store.sessionByteSize(sessionId: id)) ?? 0
+                }
+                let total = try store.totalStoredByteSize()
                 await MainActor.run {
                     manifests = loaded
+                    sessionSizes = sizes
+                    syncedTotalBytes = total
                     isReloadingSessions = false
-                    WakeLog.debug(.ui, "reload sessions count=\(loaded.count)")
+                    WakeLog.debug(
+                        .ui,
+                        "reload sessions count=\(loaded.count) synced=\(ByteSizeFormat.string(total))"
+                    )
                 }
             } catch {
                 await MainActor.run {
                     manifests = []
+                    sessionSizes = [:]
+                    syncedTotalBytes = 0
                     isReloadingSessions = false
                     WakeLog.error(.store, "reload sessions: \(error.localizedDescription)")
                 }
@@ -134,6 +155,7 @@ struct SessionDetailView: View {
     /// Downsampled for MapKit; full count lives in `locationCount`.
     @State private var mapLocations: [LocationSample] = []
     @State private var locationCount = 0
+    @State private var storedByteSize: Int64 = 0
     @State private var loadPhase: SessionDetailLoadPhase = .manifest
     @State private var loadTask: Task<Void, Never>?
     @State private var exportURL: URL?
@@ -181,6 +203,7 @@ struct SessionDetailView: View {
                     LabeledContent("Watch", value: manifest.watchModel)
                     LabeledContent("OS", value: manifest.systemVersion)
                     LabeledContent("Schema", value: "\(manifest.schemaVersion)")
+                    LabeledContent("Size", value: ByteSizeFormat.string(storedByteSize))
                     LabeledContent("Started", value: manifest.startedAt.formatted())
                     if let ended = manifest.endedAt {
                         LabeledContent("Ended", value: ended.formatted())
@@ -357,6 +380,7 @@ struct SessionDetailView: View {
 
     private func beginLoad() {
         loadPhase = .manifest
+        storedByteSize = 0
         loadTask = Task(priority: .userInitiated) {
             await loadSession()
         }
@@ -399,16 +423,18 @@ struct SessionDetailView: View {
                 let locations = try store.readLocationSamples(sessionId: sessionId)
                 try Task.checkCancellation()
                 let mapPoints = Self.downsample(locations, maxCount: Self.mapPointBudget)
-                return (locations.count, mapPoints)
+                let size = try store.sessionByteSize(sessionId: sessionId)
+                return (locations.count, mapPoints, size)
             }
             try Task.checkCancellation()
             locationCount = locationBundle.0
             mapLocations = locationBundle.1
+            storedByteSize = locationBundle.2
             loadPhase = .ready
             loadTask = nil
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locationCount)"
+                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locationCount) size=\(ByteSizeFormat.string(storedByteSize))"
             )
         } catch is CancellationError {
             if loadPhase != .ready {

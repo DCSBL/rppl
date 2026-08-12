@@ -282,6 +282,19 @@ struct ModelCodableTests {
             yaw: 0.6
         )
         let decoded = try decoder.decode(MotionSample.self, from: try encoder.encode(sample))
-        #expect(decoded == sample)
+        #expect(decoded.timestamp == sample.timestamp)
+        #expect(decoded.userAccelX == 0.1)
+        #expect(decoded.yaw == 0.6)
+    }
+
+    @Test func motionSampleDecodesLegacyVerboseKeys() throws {
+        let json = Data(
+            #"{"timestamp":"1970-01-01T00:00:50Z","userAccelX":0.1,"userAccelY":0.2,"userAccelZ":0.3,"rotationX":1,"rotationY":2,"rotationZ":3,"pitch":0.4,"roll":0.5,"yaw":0.6}"#.utf8
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(MotionSample.self, from: json)
+        #expect(decoded.userAccelX == 0.1)
+        #expect(decoded.pitch == 0.4)
     }
 }

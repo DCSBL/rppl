@@ -2,7 +2,8 @@ import Foundation
 
 /// Schema version for on-disk session packages. Bump when breaking changes land.
 public enum SessionSchema {
-    public static let currentVersion = 1
+    /// v2: motion stored as framed zlib JSONL (`motion-NNN.jsonl.zlib`); transfer may carry `motionFramesZlib`.
+    public static let currentVersion = 2
 }
 
 /// Coarse Action Button label codes (opaque strings — not a closed enum).
