@@ -9,52 +9,55 @@ struct ContentView: View {
     private let thresholds = AssumptionThresholds.default
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                toolbar
-                if let error = model.loadError {
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .font(.callout)
-                }
-                if model.isLoading {
-                    ProgressView("Loading export…")
-                        .frame(maxWidth: .infinity, minHeight: 120)
-                } else if model.package != nil {
-                    TimeRangeBar(model: model)
-                    SessionMapView(locations: model.windowLocations())
-                        .frame(minHeight: 180)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    SpeedChartView(
-                        points: model.windowSpeedPoints(),
-                        range: model.selectedRange,
-                        thresholds: thresholds,
-                        highlight: model.visibleHighlight
-                    )
-                    AccuracyChartView(
-                        points: model.windowAccuracyPoints(),
-                        range: model.selectedRange,
-                        maxAccuracyM: thresholds.maxHorizontalAccuracyM,
-                        highlight: model.visibleHighlight
-                    )
-                    EventsLaneView(
-                        segments: model.windowSegments(),
-                        range: model.selectedRange,
-                        selectedID: model.selectedSegmentID,
-                        onSelect: { model.selectAssumption(at: $0) }
-                    )
-                    detailPane
-                } else {
-                    ContentUnavailableView(
-                        "Open an export JSON",
-                        systemImage: "doc",
-                        description: Text("ShareLink session file from iPhone.")
-                    )
-                    .frame(maxWidth: .infinity, minHeight: 280)
-                }
+        VStack(alignment: .leading, spacing: 12) {
+            toolbar
+            if let error = model.loadError {
+                Text(error)
+                    .foregroundStyle(.red)
+                    .font(.callout)
             }
-            .padding()
+            if model.isLoading {
+                ProgressView("Loading export…")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if model.package != nil {
+                TimeRangeBar(model: model)
+                // Map must not live inside ScrollView — layout loop / crash on macOS.
+                SessionMapView(locations: model.windowLocations())
+                    .frame(height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        SpeedChartView(
+                            points: model.windowSpeedPoints(),
+                            range: model.selectedRange,
+                            thresholds: thresholds,
+                            highlight: model.visibleHighlight
+                        )
+                        AccuracyChartView(
+                            points: model.windowAccuracyPoints(),
+                            range: model.selectedRange,
+                            maxAccuracyM: thresholds.maxHorizontalAccuracyM,
+                            highlight: model.visibleHighlight
+                        )
+                        EventsLaneView(
+                            segments: model.windowSegments(),
+                            range: model.selectedRange,
+                            selectedID: model.selectedSegmentID,
+                            onSelect: { model.selectAssumption(at: $0) }
+                        )
+                        detailPane
+                    }
+                }
+            } else {
+                ContentUnavailableView(
+                    "Open an export JSON",
+                    systemImage: "doc",
+                    description: Text("ShareLink session file from iPhone.")
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
+        .padding()
         .fileImporter(
             isPresented: $isImporterPresented,
             allowedContentTypes: [.json],
@@ -68,6 +71,7 @@ struct ContentView: View {
                 model.reportLoadFailure(error.localizedDescription)
             }
         }
+        .onAppear(perform: loadLaunchArgumentIfPresent)
     }
 
     private var toolbar: some View {
@@ -125,6 +129,18 @@ struct ContentView: View {
             Text("Click assumption lane to inspect reason")
                 .font(.callout)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private func loadLaunchArgumentIfPresent() {
+        let args = ProcessInfo.processInfo.arguments
+        guard let index = args.firstIndex(of: "-loadExport"),
+              args.index(after: index) < args.endIndex else { return }
+        let path = args[args.index(after: index)]
+        do {
+            try model.loadSynchronously(url: URL(fileURLWithPath: path))
+        } catch {
+            model.reportLoadFailure(error.localizedDescription)
         }
     }
 }

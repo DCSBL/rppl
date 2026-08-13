@@ -13,7 +13,7 @@ struct SessionMapView: View {
                     MapPolyline(coordinates: coordinates)
                         .stroke(.blue, lineWidth: 3)
                 }
-                .mapStyle(.standard(elevation: .realistic))
+                .mapStyle(.standard)
                 .onChange(of: locationSignature) { _, _ in
                     fitCamera()
                 }

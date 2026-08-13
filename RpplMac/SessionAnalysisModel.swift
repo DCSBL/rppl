@@ -13,6 +13,17 @@ struct AssumptionSegment: Identifiable, Equatable {
     var motionActivity: String?
 
     var duration: TimeInterval { end.timeIntervalSince(start) }
+
+    init(_ segment: SessionAnalysisPrep.Segment) {
+        id = segment.id
+        code = segment.code
+        start = segment.start
+        end = segment.end
+        reason = segment.reason
+        speedMps = segment.speedMps
+        waterSubmersionState = segment.waterSubmersionState
+        motionActivity = segment.motionActivity
+    }
 }
 
 struct SpeedPoint: Identifiable, Equatable {
@@ -30,8 +41,8 @@ struct AccuracyPoint: Identifiable, Equatable {
 @Observable
 @MainActor
 final class SessionAnalysisModel {
-    static let defaultWindow: TimeInterval = 10 * 60
-    static let minimumWindow: TimeInterval = 60
+    static let defaultWindow = SessionAnalysisPrep.defaultWindow
+    static let minimumWindow = SessionAnalysisPrep.minimumWindow
 
     private(set) var package: AnalysisPackage?
     private(set) var loadError: String?
@@ -44,8 +55,7 @@ final class SessionAnalysisModel {
     var selectedSegmentID: String?
 
     var selectedRange: ClosedRange<Date> {
-        let end = max(rangeStart, rangeEnd)
-        return rangeStart...end
+        rangeStart...max(rangeStart, rangeEnd)
     }
 
     var selectedSegment: AssumptionSegment? {
@@ -53,7 +63,6 @@ final class SessionAnalysisModel {
         return segments.first { $0.id == selectedSegmentID }
     }
 
-    /// Selection only when it overlaps the visible window (avoids inverted chart marks).
     var visibleHighlight: AssumptionSegment? {
         guard let selectedSegment else { return nil }
         let range = selectedRange
@@ -91,7 +100,7 @@ final class SessionAnalysisModel {
         segments = []
         sessionSpan = nil
 
-        Task {
+        Task { @MainActor in
             let access = url.startAccessingSecurityScopedResource()
             defer {
                 if access { url.stopAccessingSecurityScopedResource() }
@@ -110,6 +119,18 @@ final class SessionAnalysisModel {
             }
             isLoading = false
         }
+    }
+
+    /// Sync load for launch-argument / tests.
+    func loadSynchronously(url: URL) throws {
+        let access = url.startAccessingSecurityScopedResource()
+        defer {
+            if access { url.stopAccessingSecurityScopedResource() }
+        }
+        let package = try SessionExportLoader.load(fromFile: url)
+        apply(package: package)
+        isLoading = false
+        loadError = nil
     }
 
     func reportLoadFailure(_ message: String) {
@@ -163,9 +184,8 @@ final class SessionAnalysisModel {
         var points: [SpeedPoint] = []
 
         for sample in package.locations where range.contains(sample.timestamp) {
-            let speed = sample.speed
             let usableInput: Double? = {
-                guard let speed, speed.isFinite, speed >= 0 else { return nil }
+                guard let speed = sample.speed, speed.isFinite, speed >= 0 else { return nil }
                 return speed
             }()
             let accuracy: Double? = sample.horizontalAccuracy.isFinite ? sample.horizontalAccuracy : nil
@@ -210,53 +230,19 @@ final class SessionAnalysisModel {
 
     private func apply(package: AnalysisPackage) {
         self.package = package
-        let manifest = package.manifest
-        let locationTimes = package.locations.map(\.timestamp)
-        let assumptionTimes = package.assumptions.map(\.timestamp)
-        let lower = [
-            manifest.startedAt,
-            locationTimes.min(),
-            assumptionTimes.min()
-        ].compactMap { $0 }.min() ?? manifest.startedAt
-        let upperCandidates: [Date] = [
-            manifest.endedAt,
-            locationTimes.max(),
-            assumptionTimes.max()
-        ].compactMap { $0 }
-        let upper = max(
-            upperCandidates.max() ?? lower.addingTimeInterval(Self.defaultWindow),
-            lower.addingTimeInterval(Self.minimumWindow)
+        let span = SessionAnalysisPrep.sessionSpan(
+            manifest: package.manifest,
+            locations: package.locations,
+            assumptions: package.assumptions
         )
-        sessionSpan = lower...upper
-        segments = Self.buildSegments(assumptions: package.assumptions, sessionEnd: upper)
-
-        let defaultEnd = min(lower.addingTimeInterval(Self.defaultWindow), upper)
-        rangeStart = lower
-        rangeEnd = max(defaultEnd, lower.addingTimeInterval(Self.minimumWindow))
-    }
-
-    private static func buildSegments(
-        assumptions: [AssumptionEvent],
-        sessionEnd: Date
-    ) -> [AssumptionSegment] {
-        let sorted = assumptions.sorted { $0.timestamp < $1.timestamp }
-        guard !sorted.isEmpty else { return [] }
-        return sorted.enumerated().compactMap { index, event in
-            let rawEnd = index + 1 < sorted.count ? sorted[index + 1].timestamp : sessionEnd
-            let end = max(rawEnd, event.timestamp)
-            // Skip zero-length (duplicate timestamps) — Charts traps on xStart==xEnd marks.
-            guard end > event.timestamp else { return nil }
-            return AssumptionSegment(
-                id: event.id.isEmpty ? "assumption-\(index)" : event.id,
-                code: event.code,
-                start: event.timestamp,
-                end: end,
-                reason: event.reason,
-                speedMps: event.speedMps,
-                waterSubmersionState: event.waterSubmersionState,
-                motionActivity: event.motionActivity
-            )
-        }
+        sessionSpan = span
+        segments = SessionAnalysisPrep.segments(
+            assumptions: package.assumptions,
+            sessionEnd: span.upperBound
+        ).map(AssumptionSegment.init)
+        let selection = SessionAnalysisPrep.defaultSelection(span: span)
+        rangeStart = selection.lowerBound
+        rangeEnd = selection.upperBound
     }
 
     private func downsample<T>(_ points: [T], limit: Int) -> [T] {

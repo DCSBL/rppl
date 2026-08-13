@@ -15,7 +15,10 @@ let package = Package(
         .target(name: "RpplCore"),
         .testTarget(
             name: "RpplCoreTests",
-            dependencies: ["RpplCore"]
+            dependencies: ["RpplCore"],
+            resources: [
+                .copy("Fixtures"),
+            ]
         ),
     ]
 )
