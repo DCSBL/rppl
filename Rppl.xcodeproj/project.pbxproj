@@ -11,6 +11,7 @@
 		CCF3D6D1302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* RpplCore */; };
 		CCF3D6D2302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* RpplCore */; };
 		CCF3D6D3302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6D0302921A800AF3518 /* RpplCore */; };
+		A1MAC010000000000000001 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = A1MAC011000000000000001 /* RpplCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -19,14 +20,14 @@
 			containerPortal = CCF3D689302921A400AF3518 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CCF3D690302921A400AF3518;
-			remoteInfo = "Rppl";
+			remoteInfo = Rppl;
 		};
 		CCF3D6AD302921A800AF3518 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CCF3D689302921A400AF3518 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CCF3D690302921A400AF3518;
-			remoteInfo = "Rppl";
+			remoteInfo = Rppl;
 		};
 		CCF3D6C8302921A800AF3518 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,10 +53,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		CCF3D691302921A500AF3518 /* Rppl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Rppl.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CCF3D6A2302921A800AF3518 /* RpplTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RpplTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RpplUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCF3D691302921A500AF3518 /* Rppl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rppl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCF3D6A2302921A800AF3518 /* RpplTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6C0302921A800AF3518 /* RpplWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RpplWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1MAC001000000000000001 /* RpplMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RpplMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -81,17 +83,17 @@
 			exceptions = (
 				CCF3D6B4302921A800AF3518 /* Exceptions for "Rppl" folder in "Rppl" target */,
 			);
-			path = "Rppl";
+			path = Rppl;
 			sourceTree = "<group>";
 		};
 		CCF3D6A5302921A800AF3518 /* RpplTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "RpplTests";
+			path = RpplTests;
 			sourceTree = "<group>";
 		};
 		CCF3D6AF302921A800AF3518 /* RpplUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "RpplUITests";
+			path = RpplUITests;
 			sourceTree = "<group>";
 		};
 		CCF3D6C1302921A800AF3518 /* RpplWatch */ = {
@@ -100,6 +102,11 @@
 				CCF3D6D5302921A800AF3518 /* Exceptions for "RpplWatch" folder in "RpplWatch" target */,
 			);
 			path = RpplWatch;
+			sourceTree = "<group>";
+		};
+		A1MAC002000000000000001 /* RpplMac */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RpplMac;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -136,6 +143,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1MAC003000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1MAC010000000000000001 /* RpplCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -144,6 +159,7 @@
 			children = (
 				CCF3D693302921A500AF3518 /* Rppl */,
 				CCF3D6C1302921A800AF3518 /* RpplWatch */,
+				A1MAC002000000000000001 /* RpplMac */,
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
@@ -155,6 +171,7 @@
 			children = (
 				CCF3D691302921A500AF3518 /* Rppl.app */,
 				CCF3D6C0302921A800AF3518 /* RpplWatch.app */,
+				A1MAC001000000000000001 /* RpplMac.app */,
 				CCF3D6A2302921A800AF3518 /* RpplTests.xctest */,
 				CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */,
 			);
@@ -181,11 +198,11 @@
 			fileSystemSynchronizedGroups = (
 				CCF3D693302921A500AF3518 /* Rppl */,
 			);
-			name = "Rppl";
+			name = Rppl;
 			packageProductDependencies = (
 				CCF3D6CE302921A800AF3518 /* RpplCore */,
 			);
-			productName = "Rppl";
+			productName = Rppl;
 			productReference = CCF3D691302921A500AF3518 /* Rppl.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -205,11 +222,11 @@
 			fileSystemSynchronizedGroups = (
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 			);
-			name = "RpplTests";
+			name = RpplTests;
 			packageProductDependencies = (
 				CCF3D6D0302921A800AF3518 /* RpplCore */,
 			);
-			productName = "RpplTests";
+			productName = RpplTests;
 			productReference = CCF3D6A2302921A800AF3518 /* RpplTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -229,10 +246,10 @@
 			fileSystemSynchronizedGroups = (
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 			);
-			name = "RpplUITests";
+			name = RpplUITests;
 			packageProductDependencies = (
 			);
-			productName = "RpplUITests";
+			productName = RpplUITests;
 			productReference = CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
@@ -259,7 +276,31 @@
 			productReference = CCF3D6C0302921A800AF3518 /* RpplWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+A1MAC006000000000000001 /* RpplMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1MAC009000000000000001 /* Build configuration list for PBXNativeTarget "RpplMac" */;
+			buildPhases = (
+				A1MAC004000000000000001 /* Sources */,
+				A1MAC003000000000000001 /* Frameworks */,
+				A1MAC005000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A1MAC002000000000000001 /* RpplMac */,
+			);
+			name = RpplMac;
+			packageProductDependencies = (
+				A1MAC011000000000000001 /* RpplCore */,
+			);
+			productName = RpplMac;
+			productReference = A1MAC001000000000000001 /* RpplMac.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
+
 
 /* Begin PBXProject section */
 		CCF3D689302921A400AF3518 /* Project object */ = {
@@ -283,6 +324,9 @@
 					CCF3D6C5302921A800AF3518 = {
 						CreatedOnToolsVersion = 26.3;
 					};
+					A1MAC006000000000000001 = {
+						CreatedOnToolsVersion = 26.3;
+					};
 				};
 			};
 			buildConfigurationList = CCF3D68C302921A400AF3518 /* Build configuration list for PBXProject "Rppl" */;
@@ -304,6 +348,7 @@
 			targets = (
 				CCF3D690302921A400AF3518 /* Rppl */,
 				CCF3D6C5302921A800AF3518 /* RpplWatch */,
+				A1MAC006000000000000001 /* RpplMac */,
 				CCF3D6A1302921A800AF3518 /* RpplTests */,
 				CCF3D6AB302921A800AF3518 /* RpplUITests */,
 			);
@@ -333,6 +378,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CCF3D6C4302921A800AF3518 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1MAC005000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -370,6 +422,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1MAC004000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -396,13 +455,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Rppl/Rppl.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Rppl/Info.plist";
+				INFOPLIST_FILE = Rppl/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha.";
@@ -430,7 +489,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -453,13 +512,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Rppl/Rppl.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ZBB5RH99X8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Rppl/Info.plist";
+				INFOPLIST_FILE = Rppl/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha.";
@@ -487,7 +546,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -630,7 +689,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -654,7 +713,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -677,7 +736,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -687,7 +746,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Rppl";
+				TEST_TARGET_NAME = Rppl;
 			};
 			name = Debug;
 		};
@@ -700,7 +759,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -710,7 +769,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Rppl";
+				TEST_TARGET_NAME = Rppl;
 			};
 			name = Release;
 		};
@@ -731,14 +790,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.dev.rppl";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.dev.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -771,14 +830,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "nl.dcsbl.dev.rppl";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.dev.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "nl.dcsbl.dev.rppl.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -795,6 +854,66 @@
 			};
 			name = Release;
 		};
+A1MAC007000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Mac";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A1MAC008000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Mac";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+
+
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -843,6 +962,17 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+A1MAC009000000000000001 /* Build configuration list for PBXNativeTarget "RpplMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1MAC007000000000000001 /* Debug */,
+				A1MAC008000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -864,6 +994,11 @@
 			productName = RpplCore;
 		};
 		CCF3D6D0302921A800AF3518 /* RpplCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
+			productName = RpplCore;
+		};
+		A1MAC011000000000000001 /* RpplCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
 			productName = RpplCore;
