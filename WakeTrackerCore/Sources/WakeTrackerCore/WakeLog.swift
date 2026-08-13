@@ -13,7 +13,7 @@ public enum WakeLog {
 
     public enum Category: String {
         case session
-        case label
+        case detection
         case intent
         case sync
         case transfer
@@ -24,7 +24,6 @@ public enum WakeLog {
         case store
         case workout
         case water
-        case assumption
     }
 
     private static func logger(_ category: Category) -> Logger {

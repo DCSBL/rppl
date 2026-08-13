@@ -1,5 +1,7 @@
 # Post-mortem: Action Button Cycle Label (again)
 
+> **Obsolete (2026-08):** Cycle Label removed from the product. Detection is automatic (`DetectionEngine`). Keep this post-mortem for historical Action Button pitfalls only.
+
 **When:** 2026-08-11 → 2026-08-12
 **Symptom:** Ultra Action Button → red “Workout / Cycle Label” → ~30s → Dutch “mislukt” / “Cycle Label has failed”. Label no change. On-screen **Cycle label** OK.
 **Files:** `WakeTrackerWatch/CycleLabelIntent.swift`, `WatchSessionController.swift`, `Info.plist` (`WKBackgroundModes`)

@@ -1,14 +1,14 @@
 # Wake Tracker
 
-**Cable-park wakeboarding, captured on Watch — labels included.**
+**Cable-park wakeboarding, captured on Watch — rides and pauses detected.**
 
-Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and coarse Action Button labels (`waiting` → `riding` → `swimming` → `walking`). Phone stays view-only: sync, map, export. Analysis happens on Mac.
+Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and automatic ride/pause detection. Phone stays view-only: sync, map, export. Analysis happens on Mac.
 
 Alpha first. Ugly is fine. Lost park days are not.
 
 ## Why this exists
 
-Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Wake Tracker collects **labeled sensor corpora** from instructed testers so later phases can detect starts and segments automatically. No tricks yet. No App Store polish yet.
+Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Wake Tracker collects **sensor corpora** from instructed testers so later phases can measure ride length, rounds, and balance. No tricks yet. No App Store polish yet.
 
 ## MVP (Phases 1–2) — distilled
 
@@ -18,7 +18,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Test gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Alpha testers · data collection > product UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
-| Labels | Action Button cycles opaque string codes · Start logs `waiting` at t0 |
+| Detection | Live ride / pause / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
 | HealthKit | Session for sensors · **do not `finishWorkout()`** · still mirror HR/energy into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
@@ -26,37 +26,34 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Identity | Anonymous `testerId` in UserDefaults / App Group |
 | Core | Pure logic in `WakeTrackerCore` · unit-tested with `swift test` |
 
-**Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, Action Button labels with enriched snapshots, reliable WC transfer + ack, iPhone export, Core tests green.
+**Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.
 
-### Assumption algorithm (Phase 3 slice — live)
+### Detection (Phase 3)
 
-Alongside manual labels, Watch runs a pure Core FSM (`SegmentAssumer`) that proposes the **same four opaque codes** into a second stream:
+Watch runs a pure Core **detector + merger** (`DetectionEngine`) that writes opaque codes into `detections.jsonl`:
 
-| Stream | File | Who writes |
-|--------|------|------------|
-| Manual ground truth | `labels.jsonl` | Action Button / Cycle label |
-| Auto assumptions | `assumptions.jsonl` | Assumer on code change (+ `session_start`) |
+| Code | Meaning |
+|------|---------|
+| `paused` | Not riding (dock / swim / walk / wait) |
+| `riding` | On the cable / skimming at ride speed |
+| `unsure` | Mid-ride GPS soft; primary UI keeps last confident code |
 
-Tracks stay **independent** (no Action Button resync) so park days become A/B corpora. Each assumption line carries a `reason` with speeds in **km/h**. Watch shows assumed code under the manual label; phone lists reasons and Share-export includes `assumptions`.
+Writes **only on transitions** (+ `session_start`) and lookback revisions (`supersedesId`). Speeds in `reason` strings use **km/h**. Offline: `DetectionEngine.replay(ticks:)` / `replay(locations:)`.
 
-Pipeline (filter → holds → ordered rules):
+Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 3 min same ride). Water / motion activity are logged on ticks but unused by MVP detectors.
 
-1. **Filter noisy GPS** — reject nil / bad accuracy / implausible speed / sudden jumps for *speed* rules; Ultra `submerged` can still force swim.
-2. **Hold clocks** — require sustained speed bands (e.g. ≥15 km/h for 2 s to enter `riding`).
-3. **Transition rules** — first matching edge wins (`ride_start`, `fall_swim`, `failed_start`, `long_stop`, `water_start`, walk/wait settle).
-
-Ultra-first: auto-`swimming` needs water submersion. Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML + how to add rules: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System sequence: [Docs/DESIGN.md](Docs/DESIGN.md).
+Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ### Later
 
-- **Phase 3 continued** — Mac timeline viz (manual + assumed lanes, threshold scrubbers), then fewer-press live override UX · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
+- **Phase 3 continued** — Mac timeline viz (detections lane, threshold scrubbers), ride-length / rounds metrics · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
 - **Phase 4** — Product UI, HealthKit saves, CloudKit sync, heatmap polish
 
 ## Repo layout
 
 ```
-WakeTrackerCore/     Shared models, IO, Assumer FSM (SPM + Swift Testing) · DESIGN.md
-WakeTrackerWatch/    Session engine, sensors, Action Button, WC send
+WakeTrackerCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
+WakeTrackerWatch/    Session engine, sensors, StartWorkoutIntent, WC send
 wake-tracker/        iPhone permissions, sync receive, map, export
 Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit xcode gate
@@ -68,7 +65,7 @@ scripts/git-hooks/   pre-commit xcode gate
 2. Device pair (recommended): scheme **WakeTrackerWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
 3. Or phone-first: scheme **wake-tracker** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
 4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
-5. Ultra Action Button: **Settings → Action Button → Workout → Wake Tracker**.
+5. Ultra Action Button (optional): **Settings → Action Button → Workout → Wake Tracker** starts a session only.
 
 Dev gate (tests + lint + build + analyze):
 
@@ -77,16 +74,3 @@ brew install pre-commit swiftlint codespell
 pre-commit install
 make check
 ```
-
-Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & labels: [Docs/DataCollection.md](Docs/DataCollection.md) · Core design: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
-
-## Bundle IDs (current `.dev` builds)
-
-- iOS: `nl.dcsbl.wake-tracker.dev`
-- watchOS: `nl.dcsbl.wake-tracker.dev.watchkitapp` (must be `{iOS}.watchkitapp`)
-- Companion: Watch → iPhone ID above
-- App Group: `group.nl.dcsbl.wake-tracker-dev`
-
-## Agents
-
-Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior. Library shape: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System layers: [Docs/DESIGN.md](Docs/DESIGN.md).

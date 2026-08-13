@@ -15,7 +15,7 @@ enum CableParkWorkoutStyle: String, AppEnum {
     ]
 }
 
-/// Registers Wake Tracker under Action Button → Workout.
+/// Registers Wake Tracker under Action Button → Workout (start session only).
 struct StartCableParkSessionIntent: StartWorkoutIntent {
     static var title: LocalizedStringResource = "Start Cable Park Session"
     static var description = IntentDescription("Starts a Wake Tracker cable-park recording session.")
@@ -46,30 +46,6 @@ struct StartCableParkSessionIntent: StartWorkoutIntent {
     nonisolated func perform() async throws -> some IntentResult {
         WakeLog.debug(.intent, "StartCableParkSessionIntent.perform begin")
         await WatchSessionController.shared.handleStartWorkoutIntent()
-        return .result(actionButtonIntent: CycleLabelIntent())
-    }
-}
-
-/// Donated Action Button next-action while a workout session is active.
-///
-/// Critical:
-/// - `openAppWhenRun` must stay **false** (Water Lock / active workout: opening app → blank red,
-///   `perform` never runs).
-/// - `perform` must stay **`nonisolated`**. This target defaults to MainActor isolation; an
-///   implicit `@MainActor perform` cannot start while Action Button UI holds the main actor,
-///   so the system times out (~30s, "Cycle Label has failed" / Dutch "mislukt") with no label change.
-struct CycleLabelIntent: AppIntent {
-    static var title: LocalizedStringResource = "Cycle Label"
-    static var description = IntentDescription(
-        "Advances waiting → riding → swimming → walking and logs a label."
-    )
-    static var openAppWhenRun: Bool { false }
-
-    nonisolated func perform() async throws -> some IntentResult {
-        WakeLog.debug(.intent, "CycleLabelIntent.perform begin")
-        // Schedule onto MainActor after we return — never await it here.
-        WatchSessionController.scheduleCycleLabelFromActionButton()
-        WakeLog.debug(.intent, "CycleLabelIntent.perform returned (cycle scheduled)")
         return .result()
     }
 }
@@ -87,15 +63,6 @@ struct WakeTrackerShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Start Session",
             systemImageName: "figure.surfing"
-        )
-        AppShortcut(
-            intent: CycleLabelIntent(),
-            phrases: [
-                "Cycle wake label in \(.applicationName)",
-                "Log wake label with \(.applicationName)"
-            ],
-            shortTitle: "Cycle Label",
-            systemImageName: "arrow.triangle.2.circlepath"
         )
     }
 }

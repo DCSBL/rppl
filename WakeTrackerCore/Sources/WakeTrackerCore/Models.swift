@@ -44,65 +44,6 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     }
 }
 
-public struct GPSSnapshot: Codable, Equatable, Sendable {
-    public var latitude: Double
-    public var longitude: Double
-    public var altitude: Double?
-    public var horizontalAccuracy: Double
-    public var verticalAccuracy: Double?
-    public var speed: Double?
-    public var course: Double?
-    public var timestamp: Date
-
-    public init(
-        latitude: Double,
-        longitude: Double,
-        altitude: Double? = nil,
-        horizontalAccuracy: Double,
-        verticalAccuracy: Double? = nil,
-        speed: Double? = nil,
-        course: Double? = nil,
-        timestamp: Date
-    ) {
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitude = altitude
-        self.horizontalAccuracy = horizontalAccuracy
-        self.verticalAccuracy = verticalAccuracy
-        self.speed = speed
-        self.course = course
-        self.timestamp = timestamp
-    }
-}
-
-public struct LabelEvent: Codable, Equatable, Sendable, Identifiable {
-    public var id: String
-    public var code: String
-    public var timestamp: Date
-    public var gps: GPSSnapshot?
-    public var waterSubmersionState: String?
-    public var waterTemperatureCelsius: Double?
-    public var motionActivity: String?
-
-    public init(
-        id: String = UUID().uuidString,
-        code: String,
-        timestamp: Date = Date(),
-        gps: GPSSnapshot? = nil,
-        waterSubmersionState: String? = nil,
-        waterTemperatureCelsius: Double? = nil,
-        motionActivity: String? = nil
-    ) {
-        self.id = id
-        self.code = code
-        self.timestamp = timestamp
-        self.gps = gps
-        self.waterSubmersionState = waterSubmersionState
-        self.waterTemperatureCelsius = waterTemperatureCelsius
-        self.motionActivity = motionActivity
-    }
-}
-
 public struct LocationSample: Codable, Equatable, Sendable {
     public var timestamp: Date
     public var latitude: Double

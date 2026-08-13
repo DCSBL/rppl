@@ -24,28 +24,28 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 
 - Watch records; iPhone views/exports; Mac analyzes.
 - Prefer reliable checkpoints over pretty UI.
-- Prefer extending opaque string label codes over closed Swift enums.
+- Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `WakeTrackerCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / Assumer: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
+Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
 
 ## Architecture rules
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `WakeTrackerCore` | Models, schema, file store, `LabelCodes`, `LabelEventFactory`, `SegmentAssumer` (+ filter/holds/rules), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, Action Button intents, WC send, thin Assumer probes | Business decisions that can be pure functions |
-| `wake-tracker` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing (Phase 2), session engine |
+| `WakeTrackerCore` | Models, schema, file store, `DetectionCodes`, `DetectionEngine` (+ filter/holds/detectors), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
+| `wake-tracker` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing, session engine |
 
-App probes read live `WCSession` / sensors, then call Core resolvers/factories/Assumer. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
+App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Hard constraints (do not “helpfully” break)
 
 1. **HealthKit dry-run:** use workout session + builder for runtime/sensors; **do not `finishWorkout()` / save to Health** in alpha. Still mirror HR/active energy into our JSONL.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day**; no pause unless product decision changes.
-4. **Label codes are strings** (`waiting`, `riding`, `swimming`, `walking`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
-5. **iPhone Phase 2 = view-only** — no label editor.
+4. **Detection codes are strings** (`riding`, `paused`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
+5. **iPhone = view-only** — no label editor; no manual Action Button labeling.
 6. **OS floor:** iOS 26+ / watchOS 26+.
 7. **Water Lock** on session start.
 
@@ -67,12 +67,11 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories/A
 
 | Task | Start here |
 |------|------------|
-| Label cycle / next code | `WakeTrackerCore/.../LabelCodes.swift`, `LabelEventFactory.swift` |
-| Assumer / thresholds / rules | `SegmentAssumer.swift`, `AssumerTransitions.swift`, `AssumptionThresholds.swift` · [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
+| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `WakeTrackerWatch/WatchSessionController.swift` |
-| Action Button / workout next action | `WakeTrackerWatch/CycleLabelIntent.swift` · [Docs/Postmortems/ActionButtonCycleLabel.md](Docs/Postmortems/ActionButtonCycleLabel.md) |
+| Start session Action Button | `WakeTrackerWatch/CycleLabelIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `wake-tracker/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |

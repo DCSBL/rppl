@@ -13,14 +13,13 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
-    var currentLabel = LabelCodes.waiting
-    var assumedLabel = LabelCodes.waiting
+    var detectionCode = DetectionCodes.paused
+    var lastConfidentCode = DetectionCodes.paused
     var elapsed: TimeInterval = 0
     var locationCount = 0
     var motionCount = 0
-    var labelCount = 0
-    var assumptionCount = 0
-    /// On-disk size of the active session package (updated after flushes / label writes).
+    var detectionCount = 0
+    /// On-disk size of the active session package (updated after flushes / detection writes).
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
@@ -34,6 +33,7 @@ final class WatchSessionController: NSObject {
     var recordingMode = "none"
     var motionRecordingEnabled = false
 
+    var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
@@ -48,7 +48,7 @@ final class WatchSessionController: NSObject {
     private var latestActivity: String?
     private var latestWaterState: String?
     private var latestWaterTempC: Double?
-    private var segmentAssumer = SegmentAssumer()
+    private var detectionEngine = DetectionEngine()
     private var locationBuffer: [LocationSample] = []
     private var motionBuffer: [MotionSample] = []
     private var healthBuffer: [HealthMetricSample] = []
@@ -189,22 +189,19 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
 
-        currentLabel = LabelCodes.waiting
-        assumedLabel = LabelCodes.waiting
-        labelCount = 0
-        assumptionCount = 0
+        detectionCode = DetectionCodes.paused
+        lastConfidentCode = DetectionCodes.paused
+        detectionCount = 0
         locationCount = 0
         motionCount = 0
-        segmentAssumer = SegmentAssumer()
+        detectionEngine = DetectionEngine()
         startedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
             statusText = "Recording"
-            await donateActionButtonCycleIntent()
         }
 
-        logLabel(code: LabelCodes.waiting)
-        logSessionStartAssumption()
+        logSessionStartDetection()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
 
@@ -259,105 +256,24 @@ final class WatchSessionController: NSObject {
         self.manifest = nil
     }
 
-    func cycleLabelFromActionButton() {
-        guard isRunning else {
-            WakeLog.debug(.label, "cycleLabel ignored — not running")
-            return
-        }
-        let previous = currentLabel
-        let next = LabelCodes.next(after: currentLabel)
-        currentLabel = next
-        WakeLog.debug(.label, "cycle \(previous) → \(next)")
-        logLabel(code: next)
-        WKInterfaceDevice.current().play(.click)
-    }
-
-    /// Schedules a label cycle without awaiting MainActor (Action Button safe).
-    ///
-    /// Call from a **`nonisolated`** `CycleLabelIntent.perform`. Do not `await` this from the
-    /// intent — return `.result()` first so Action Button UI can release the main actor, then
-    /// this `Task` runs the cycle.
-    nonisolated static func scheduleCycleLabelFromActionButton() {
-        Task { @MainActor in
-            shared.cycleLabelFromActionButton()
-        }
-    }
-
-    /// Start-workout Action Button entry: start session, or cycle if already recording.
+    /// Start-workout Action Button entry: start session, or no-op if already recording.
     func handleStartWorkoutIntent() async {
         if isRunning {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — cycle label")
-            cycleLabelFromActionButton()
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — no-op")
             return
         }
         WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
         await startSession()
     }
 
-    /// Arms Ultra Action Button to run Cycle Label on the next press (requires active HK workout).
-    func donateActionButtonCycleIntent() async {
-        WakeLog.debug(.intent, "donate Action Button → CycleLabelIntent")
-        do {
-            try await StartCableParkSessionIntent().donate(
-                result: .result(actionButtonIntent: CycleLabelIntent())
-            )
-            WakeLog.debug(.intent, "donate Action Button OK")
-        } catch {
-            errorText = "Action Button donate failed: \(error.localizedDescription)"
-            WakeLog.error(.intent, "donate failed: \(error.localizedDescription)")
-        }
+    private func logSessionStartDetection() {
+        let event = detectionEngine.makeSessionStartEvent(at: Date())
+        detectionCode = event.code
+        lastConfidentCode = detectionEngine.lastConfidentCode
+        persistDetection(event)
     }
 
-    private func logLabel(code: String) {
-        guard let store, let manifest else {
-            WakeLog.error(.label, "appendLabel skipped — no store/manifest")
-            return
-        }
-        let gps: GPSSnapshot?
-        if let loc = latestLocation {
-            gps = LabelEventFactory.gpsSnapshot(
-                latitude: loc.coordinate.latitude,
-                longitude: loc.coordinate.longitude,
-                altitude: loc.altitude,
-                horizontalAccuracy: loc.horizontalAccuracy,
-                verticalAccuracy: loc.verticalAccuracy,
-                speed: loc.speed,
-                course: loc.course,
-                timestamp: loc.timestamp
-            )
-        } else {
-            gps = nil
-        }
-
-        let event = LabelEventFactory.make(
-            code: code,
-            timestamp: Date(),
-            gps: gps,
-            waterSubmersionState: latestWaterState,
-            waterTemperatureCelsius: latestWaterTempC,
-            motionActivity: latestActivity
-        )
-        do {
-            try store.appendLabel(event, sessionId: manifest.sessionId)
-            labelCount += 1
-            refreshStoredByteSize()
-            WakeLog.debug(
-                .label,
-                "appended code=\(code) gps=\(gps != nil) water=\(latestWaterState ?? "nil") activity=\(latestActivity ?? "nil") count=\(labelCount)"
-            )
-        } catch {
-            errorText = "Label: \(error.localizedDescription)"
-            WakeLog.error(.label, "appendLabel: \(error.localizedDescription)")
-        }
-    }
-
-    private func logSessionStartAssumption() {
-        let event = segmentAssumer.makeSessionStartEvent(at: Date())
-        assumedLabel = event.code
-        persistAssumption(event)
-    }
-
-    private func processAssumerTick(timestamp: Date = Date()) {
+    private func processDetectionTick(timestamp: Date = Date()) {
         guard isRunning else { return }
         let speed: Double?
         if let loc = latestLocation, loc.speed >= 0 {
@@ -365,34 +281,38 @@ final class WatchSessionController: NSObject {
         } else {
             speed = nil
         }
-        let tick = AssumerTick(
+        let tick = DetectionTick(
             timestamp: timestamp,
             speedMps: speed,
             horizontalAccuracy: latestLocation?.horizontalAccuracy,
             waterSubmersionState: latestWaterState,
             motionActivity: latestActivity
         )
-        guard let event = segmentAssumer.process(tick) else { return }
-        assumedLabel = event.code
-        persistAssumption(event)
+        let events = detectionEngine.process(tick)
+        guard !events.isEmpty else { return }
+        detectionCode = detectionEngine.currentCode
+        lastConfidentCode = detectionEngine.lastConfidentCode
+        for event in events {
+            persistDetection(event)
+        }
     }
 
-    private func persistAssumption(_ event: AssumptionEvent) {
+    private func persistDetection(_ event: DetectionEvent) {
         guard let store, let manifest else {
-            WakeLog.error(.assumption, "appendAssumption skipped — no store/manifest")
+            WakeLog.error(.detection, "appendDetection skipped — no store/manifest")
             return
         }
         do {
-            try store.appendAssumption(event, sessionId: manifest.sessionId)
-            assumptionCount += 1
+            try store.appendDetection(event, sessionId: manifest.sessionId)
+            detectionCount += 1
             refreshStoredByteSize()
             WakeLog.debug(
-                .assumption,
-                "appended code=\(event.code) reason=\(event.reason) count=\(assumptionCount)"
+                .detection,
+                "appended code=\(event.code) reason=\(event.reason) count=\(detectionCount)"
             )
         } catch {
-            errorText = "Assumption: \(error.localizedDescription)"
-            WakeLog.error(.assumption, "appendAssumption: \(error.localizedDescription)")
+            errorText = "Detection: \(error.localizedDescription)"
+            WakeLog.error(.detection, "appendDetection: \(error.localizedDescription)")
         }
     }
 
@@ -619,7 +539,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
                 )
             )
             locationCount += 1
-            processAssumerTick(timestamp: loc.timestamp)
+            processDetectionTick(timestamp: loc.timestamp)
         }
     }
 
@@ -641,11 +561,6 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
     ) {
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
-            // Donate only once the HK session is actually running — earlier donate can arm a
-            // next-action the system never delivers.
-            if toState == .running, isRunning, recordingMode == "workout" {
-                await donateActionButtonCycleIntent()
-            }
         }
     }
 
@@ -721,7 +636,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "submersion → \(next)")
-                processAssumerTick()
+                processDetectionTick()
             }
         }
     }
@@ -739,7 +654,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "measurement → \(next)")
-                processAssumerTick()
+                processDetectionTick()
             }
         }
     }
