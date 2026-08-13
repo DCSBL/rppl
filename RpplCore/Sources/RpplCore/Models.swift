@@ -76,6 +76,7 @@ public struct GPSSnapshot: Codable, Equatable, Sendable {
 }
 
 public struct LabelEvent: Codable, Equatable, Sendable, Identifiable {
+    /// Legacy manual label from older builds; new sessions leave `labels.jsonl` empty.
     public var id: String
     public var code: String
     public var timestamp: Date

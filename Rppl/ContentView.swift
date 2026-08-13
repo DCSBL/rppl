@@ -267,7 +267,7 @@ struct SessionDetailView: View {
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 80)
                     } else {
-                        Text("Map loads after labels")
+                        Text("Map loads after GPS…")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 80)
@@ -279,7 +279,7 @@ struct SessionDetailView: View {
                 }
             }
 
-            Section("Labels (\(labels.count))") {
+            Section("Legacy labels (\(labels.count))") {
                 if loadPhase == .labels {
                     HStack(spacing: 8) {
                         ProgressView()
@@ -288,7 +288,7 @@ struct SessionDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 } else if labels.isEmpty {
-                    Text("No labels in this session.")
+                    Text("No legacy labels in this session.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

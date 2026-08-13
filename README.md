@@ -1,14 +1,14 @@
 # Rppl
 
-**Cable-park wakeboarding, captured on Watch — labels included.**
+**Cable-park wakeboarding, captured on Watch — Assumer segment codes included.**
 
-Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and coarse Action Button labels (`waiting` → `riding` → `swimming` → `walking`). Phone stays view-only: sync, map, export. Analysis happens on Mac.
+Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and auto-proposed segment codes (`waiting`, `riding`, `swimming`, `walking`). Phone stays view-only: sync, map, export. Analysis happens on Mac.
 
 Alpha first. Ugly is fine. Lost park days are not.
 
 ## Why this exists
 
-Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl collects **labeled sensor corpora** from instructed testers so later phases can detect starts and segments automatically. No tricks yet. No App Store polish yet.
+Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl collects **sensor corpora with Assumer segment codes** from instructed testers so later phases can tune detection. No tricks yet. No App Store polish yet.
 
 ## MVP (Phases 1–2) — distilled
 
@@ -18,7 +18,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Test gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Alpha testers · data collection > product UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
-| Labels | Action Button cycles opaque string codes · Start logs `waiting` at t0 |
+| Segment codes | Assumer writes opaque string codes · Start logs `waiting` at t0 |
 | Phone | View-only list / map / Share-Export · **no label editor** |
 | HealthKit | Session for sensors · **do not `finishWorkout()`** · still mirror HR/energy into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
@@ -26,18 +26,18 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Identity | Anonymous `testerId` in UserDefaults / App Group |
 | Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
 
-**Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, Action Button labels with enriched snapshots, reliable WC transfer + ack, iPhone export, Core tests green.
+**Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, Assumer assumptions with reasons, reliable WC transfer + ack, iPhone export, Core tests green.
 
 ### Assumption algorithm (Phase 3 slice — live)
 
-Alongside manual labels, Watch runs a pure Core FSM (`SegmentAssumer`) that proposes the **same four opaque codes** into a second stream:
+Watch runs a pure Core FSM (`SegmentAssumer`) that proposes opaque segment codes into `assumptions.jsonl`:
 
 | Stream | File | Who writes |
 |--------|------|------------|
-| Manual ground truth | `labels.jsonl` | Action Button / Cycle label |
 | Auto assumptions | `assumptions.jsonl` | Assumer on code change (+ `session_start`) |
+| Legacy manual labels | `labels.jsonl` | Empty for new sessions; still decoded for old exports |
 
-Tracks stay **independent** (no Action Button resync) so park days become A/B corpora. Each assumption line carries a `reason` with speeds in **km/h**. Watch shows assumed code under the manual label; phone lists reasons and Share-export includes `assumptions`.
+Each assumption line carries a `reason` with speeds in **km/h**. Watch shows the assumed code as primary UI; phone lists reasons and Share-export includes `assumptions`.
 
 Pipeline (filter → holds → ordered rules):
 
@@ -49,14 +49,14 @@ Ultra-first: auto-`swimming` needs water submersion. Thresholds and roadmap: [Do
 
 ### Later
 
-- **Phase 3 continued** — Mac timeline viz (manual + assumed lanes, threshold scrubbers), then fewer-press live override UX · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
+- **Phase 3 continued** — Mac timeline viz (assumed lane, threshold scrubbers), then optional live override UX · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
 - **Phase 4** — Product UI, HealthKit saves, CloudKit sync, heatmap polish
 
 ## Repo layout
 
 ```
 RpplCore/     Shared models, IO, Assumer FSM (SPM + Swift Testing) · DESIGN.md
-RpplWatch/    Session engine, sensors, Action Button, WC send
+RpplWatch/    Session engine, sensors, WC send
 Rppl/        iPhone permissions, sync receive, map, export
 Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit xcode gate
@@ -68,7 +68,6 @@ scripts/git-hooks/   pre-commit xcode gate
 2. Device pair (recommended): scheme **RpplWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
 3. Or phone-first: scheme **Rppl** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
 4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
-5. Ultra Action Button: **Settings → Action Button → Workout → Rppl**.
 
 Dev gate (tests + lint + build + analyze):
 

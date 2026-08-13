@@ -7,10 +7,11 @@ Short backlog for later phases. Not a design doc. Do not implement items marked 
 - **Park profiles** — Per-park metadata: orientation, dock/start location, obstacles, cable layout. Used later to geofence “waiting” / failed starts near the dock, hardcode or learn a start point, and give detectors park-specific priors. Out of scope until after detector v1. Do not build profile files, editors, or geofence hardcoding yet.
 - **Non-Ultra auto-swim** — Speed-only fall→`swimming` without `CMWaterSubmersionManager`. v0 requires Ultra `submerged`.
 - **Knots / mph display** — Thresholds authored in km/h; convert at GPS edge to m/s. Extra unit labels later for Mac viz only.
+- **Manual / Action Button labeling** — Removed from alpha. Optional live override UX later if product asks.
 
 ## Detection hypotheses (v0 shipped in Core)
 
-Coarse Action Button labels remain ground truth while tuning. Dual stream: `labels.jsonl` vs `assumptions.jsonl`. GPS samples store m/s; Assumer thresholds + `reason` strings use **km/h**.
+Assumer writes opaque segment codes to `assumptions.jsonl`. Legacy packages may still carry `labels.jsonl`. GPS samples store m/s; Assumer thresholds + `reason` strings use **km/h**.
 
 | Signal | Proposed label | v0 notes |
 |--------|----------------|----------|
@@ -25,6 +26,6 @@ Coarse Action Button labels remain ground truth while tuning. Dual stream: `labe
 
 ## Other notes
 
-- Corpus mode: assumed track **independent** of Action Button (no resync). Live “override wins / fewer presses” UX later.
 - Temporary wrong auto-labels OK if `reason` makes tuning obvious.
+- Optional live “override wins” UX later — not wired today.
 - Trick detection, ML models, CloudKit, and phone label editing stay out until Phase 4 / explicit ask.

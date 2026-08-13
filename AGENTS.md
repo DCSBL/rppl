@@ -33,11 +33,11 @@ Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/D
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `RpplCore` | Models, schema, file store, `LabelCodes`, `LabelEventFactory`, `SegmentAssumer` (+ filter/holds/rules), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, Action Button intents, WC send, thin Assumer probes | Business decisions that can be pure functions |
+| `RpplCore` | Models, schema, file store, `LabelCodes`, `SegmentAssumer` (+ filter/holds/rules), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, WC send, thin Assumer probes | Business decisions that can be pure functions |
 | `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing (Phase 2), session engine |
 
-App probes read live `WCSession` / sensors, then call Core resolvers/factories/Assumer. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
+App probes read live `WCSession` / sensors, then call Core resolvers/Assumer. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Hard constraints (do not “helpfully” break)
 
@@ -67,12 +67,11 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories/A
 
 | Task | Start here |
 |------|------------|
-| Label cycle / next code | `RpplCore/.../LabelCodes.swift`, `LabelEventFactory.swift` |
+| Opaque segment codes | `RpplCore/.../LabelCodes.swift` |
 | Assumer / thresholds / rules | `SegmentAssumer.swift`, `AssumerTransitions.swift`, `AssumptionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |
-| Action Button / workout next action | `RpplWatch/CycleLabelIntent.swift` · [Docs/Postmortems/ActionButtonCycleLabel.md](Docs/Postmortems/ActionButtonCycleLabel.md) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
@@ -88,6 +87,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/factories/A
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
+- Manual labeling / Action Button integration (removed; Assumer is live writer)
 - Mac viz, Core Assumer threshold invention, or park profiles until explicitly requested ([Docs/Phase3.md](Docs/Phase3.md), [Docs/Ideas.md](Docs/Ideas.md))
 
 ## When unsure

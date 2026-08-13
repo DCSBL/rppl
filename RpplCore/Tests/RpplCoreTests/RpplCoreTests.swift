@@ -2,39 +2,6 @@ import Foundation
 import Testing
 @testable import RpplCore
 
-@Suite("LabelCodes")
-struct LabelCodesTests {
-    @Test func cyclesInExpectedOrder() {
-        #expect(LabelCodes.next(after: LabelCodes.waiting) == LabelCodes.riding)
-        #expect(LabelCodes.next(after: LabelCodes.riding) == LabelCodes.swimming)
-        #expect(LabelCodes.next(after: LabelCodes.swimming) == LabelCodes.walking)
-        #expect(LabelCodes.next(after: LabelCodes.walking) == LabelCodes.waiting)
-    }
-
-    @Test func unknownCodeRestartsCycle() {
-        #expect(LabelCodes.next(after: "dockStartJump") == LabelCodes.waiting)
-    }
-
-    @Test func fullCycleReturnsToStart() {
-        var code = LabelCodes.waiting
-        for _ in 0..<LabelCodes.actionButtonCycle.count {
-            code = LabelCodes.next(after: code)
-        }
-        #expect(code == LabelCodes.waiting)
-    }
-
-    @Test func multiStepFromWaiting() {
-        let riding = LabelCodes.next(after: LabelCodes.waiting)
-        let swimming = LabelCodes.next(after: riding)
-        let walking = LabelCodes.next(after: swimming)
-        #expect([riding, swimming, walking] == [
-            LabelCodes.riding,
-            LabelCodes.swimming,
-            LabelCodes.walking,
-        ])
-    }
-}
-
 @Suite("SessionFileStore")
 struct SessionFileStoreTests {
     @Test func createsManifestAndRoundTripsLabels() throws {

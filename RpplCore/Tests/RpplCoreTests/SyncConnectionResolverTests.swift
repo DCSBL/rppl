@@ -163,51 +163,6 @@ struct SyncConnectionResolverTests {
     }
 }
 
-@Suite("LabelEventFactory")
-struct LabelEventFactoryTests {
-    @Test func makePreservesSnapshotFields() {
-        let ts = Date(timeIntervalSince1970: 1_700_000_100)
-        let gps = LabelEventFactory.gpsSnapshot(
-            latitude: 52.1,
-            longitude: 5.2,
-            altitude: 1.5,
-            horizontalAccuracy: 4,
-            verticalAccuracy: 6,
-            speed: 2.5,
-            course: 90,
-            timestamp: ts
-        )
-        let event = LabelEventFactory.make(
-            code: LabelCodes.riding,
-            timestamp: ts,
-            id: "fixed-id",
-            gps: gps,
-            waterSubmersionState: "submerged",
-            waterTemperatureCelsius: 17.2,
-            motionActivity: "unknown"
-        )
-        #expect(event.id == "fixed-id")
-        #expect(event.code == LabelCodes.riding)
-        #expect(event.gps?.latitude == 52.1)
-        #expect(event.gps?.speed == 2.5)
-        #expect(event.waterTemperatureCelsius == 17.2)
-        #expect(event.motionActivity == "unknown")
-    }
-
-    @Test func gpsSnapshotDropsNegativeSpeedAndCourse() {
-        let gps = LabelEventFactory.gpsSnapshot(
-            latitude: 1,
-            longitude: 2,
-            horizontalAccuracy: 3,
-            speed: -1,
-            course: -1,
-            timestamp: Date(timeIntervalSince1970: 1)
-        )
-        #expect(gps.speed == nil)
-        #expect(gps.course == nil)
-    }
-}
-
 @Suite("TransferPendingFilter")
 struct TransferPendingFilterTests {
     private func manifest(_ state: SessionManifest.TransferState) -> SessionManifest {
