@@ -1,6 +1,6 @@
 # RpplCore — design
 
-Pure Swift package: models, session IO, label helpers, sync resolvers, and the **segment Assumer** FSM. No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
+Pure Swift package: models, session IO, sync resolvers, and the **segment Assumer** FSM. No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
 
 Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · Phase 3: [../Docs/Phase3.md](../Docs/Phase3.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
 
@@ -19,7 +19,7 @@ classDiagram
   class SessionTransferPackage
   class SessionFileStore
   class LabelCodes
-  class LabelEventFactory
+  class TransferPendingFilter
   class SyncConnectionResolver
   class SegmentAssumer
   class AssumerSignalFilter
@@ -30,7 +30,7 @@ classDiagram
   class SpeedUnits
 
   SessionFileStore --> SessionManifest : read/write
-  SessionFileStore --> LabelEvent : labels.jsonl
+  SessionFileStore --> LabelEvent : labels.jsonl legacy
   SessionFileStore --> AssumptionEvent : assumptions.jsonl
   SessionFileStore --> LocationSample
   SessionFileStore --> MotionSample
@@ -44,9 +44,7 @@ classDiagram
   SessionTransferPackage --> MotionSample
   SessionTransferPackage --> HealthMetricSample
 
-  LabelEventFactory --> LabelEvent
-  LabelEventFactory --> LabelCodes : opaque strings
-
+  SegmentAssumer --> LabelCodes : opaque strings
   SegmentAssumer --> AssumerSignalFilter : filter tick
   SegmentAssumer --> AssumerHoldClock : sustained holds
   SegmentAssumer --> AssumerRuleSet : first match
@@ -58,14 +56,15 @@ classDiagram
   AssumptionThresholds --> SpeedUnits : km/h to m/s
 
   SyncConnectionResolver ..> SyncConnectionState : resolve UI wording
+  TransferPendingFilter --> SessionManifest
 ```
 
 | Area | Types | Role |
 |------|--------|------|
 | Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package |
-| Manual labels | `LabelEvent`, `LabelCodes`, `LabelEventFactory` | Action Button ground truth |
-| Assumptions | `AssumptionEvent`, `AssumerTick`, `SegmentAssumer`, filter/holds/rules | Auto dual stream |
-| Sync copy | `SyncConnectionResolver`, `SyncConnectionState` | Paired/reachable wording (apps probe WC, Core decides text) |
+| Segment codes | `LabelCodes`, legacy `LabelEvent` | Opaque strings; `LabelEvent` for old packages |
+| Assumptions | `AssumptionEvent`, `AssumerTick`, `SegmentAssumer`, filter/holds/rules | Live Assumer stream |
+| Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `AssumptionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
 
 Opaque label **codes are strings** (`waiting`, `riding`, …). Unknown codes must round-trip. No closed taxonomy enum yet.
@@ -92,7 +91,7 @@ flowchart LR
 2. **Hold clock** — named sustained predicates (`highSpeed`, `stopped`, `walkBand`, `waitSettle`). Bad/missing usable speed clears holds.
 3. **Rule set** — ordered `AssumerTransitionRule` list; first match for `currentCode` wins. Emit `AssumptionEvent` with km/h `reason` string.
 
-Session start: `makeSessionStartEvent()` → `waiting` + `reason=session_start`, independent of manual `labels.jsonl`.
+Session start: `makeSessionStartEvent()` → `waiting` + `reason=session_start`.
 
 ### Extending
 
@@ -166,8 +165,8 @@ Concrete v0 rules (examples): `RideStartRule`, `FallSwimRule`, `FailedStartRule`
 ```
 <root>/<sessionId>/
   manifest.json
-  labels.jsonl          # manual LabelEvent
-  assumptions.jsonl     # auto AssumptionEvent (transitions only)
+  labels.jsonl          # legacy LabelEvent (empty on new sessions)
+  assumptions.jsonl     # AssumptionEvent (transitions only)
   location-000.jsonl
   motion-000.jsonl.zlib # framed zlib JSONL (legacy plain .jsonl still readable)
   health-000.jsonl
@@ -181,4 +180,4 @@ Concrete v0 rules (examples): `RideStartRule`, `FallSwimRule`, `FailedStartRule`
 cd RpplCore && swift test
 ```
 
-Suites cover label cycle, store/transfer, Assumer scenarios, signal filter noise, and rule-set extensibility (custom rule prepend).
+Suites cover store/transfer, Assumer scenarios, signal filter noise, and rule-set extensibility (custom rule prepend).

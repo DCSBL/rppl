@@ -1,7 +1,7 @@
 import Foundation
 
 /// Pure FSM orchestrator: filter → hold clocks → ordered transition rules.
-/// Manual Action Button labels never call into this type — tracks stay independent.
+/// Proposes opaque segment codes into `assumptions.jsonl` only.
 public struct SegmentAssumer: Sendable {
     public var thresholds: AssumptionThresholds {
         didSet {

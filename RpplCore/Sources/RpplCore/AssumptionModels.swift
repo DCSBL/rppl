@@ -23,7 +23,7 @@ public struct AssumerTick: Equatable, Sendable {
     }
 }
 
-/// Auto-proposed segment label (corpus stream). Independent of manual `LabelEvent`.
+/// Auto-proposed segment label written to `assumptions.jsonl`.
 public struct AssumptionEvent: Codable, Equatable, Sendable, Identifiable {
     public var id: String
     public var code: String

@@ -3,7 +3,6 @@ import HealthKit
 import CoreLocation
 import CoreMotion
 import WatchKit
-import AppIntents
 import RpplCore
 import Observation
 
@@ -13,14 +12,12 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
-    var currentLabel = LabelCodes.waiting
     var assumedLabel = LabelCodes.waiting
     var elapsed: TimeInterval = 0
     var locationCount = 0
     var motionCount = 0
-    var labelCount = 0
     var assumptionCount = 0
-    /// On-disk size of the active session package (updated after flushes / label writes).
+    /// On-disk size of the active session package (updated after flushes / assumption writes).
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
@@ -189,9 +186,7 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
 
-        currentLabel = LabelCodes.waiting
         assumedLabel = LabelCodes.waiting
-        labelCount = 0
         assumptionCount = 0
         locationCount = 0
         motionCount = 0
@@ -200,10 +195,8 @@ final class WatchSessionController: NSObject {
         isRunning = true
         if recordingMode == "workout" {
             statusText = "Recording"
-            await donateActionButtonCycleIntent()
         }
 
-        logLabel(code: LabelCodes.waiting)
         logSessionStartAssumption()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
@@ -257,98 +250,6 @@ final class WatchSessionController: NSObject {
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
         self.manifest = nil
-    }
-
-    func cycleLabelFromActionButton() {
-        guard isRunning else {
-            WakeLog.debug(.label, "cycleLabel ignored — not running")
-            return
-        }
-        let previous = currentLabel
-        let next = LabelCodes.next(after: currentLabel)
-        currentLabel = next
-        WakeLog.debug(.label, "cycle \(previous) → \(next)")
-        logLabel(code: next)
-        WKInterfaceDevice.current().play(.click)
-    }
-
-    /// Schedules a label cycle without awaiting MainActor (Action Button safe).
-    ///
-    /// Call from a **`nonisolated`** `CycleLabelIntent.perform`. Do not `await` this from the
-    /// intent — return `.result()` first so Action Button UI can release the main actor, then
-    /// this `Task` runs the cycle.
-    nonisolated static func scheduleCycleLabelFromActionButton() {
-        Task { @MainActor in
-            shared.cycleLabelFromActionButton()
-        }
-    }
-
-    /// Start-workout Action Button entry: start session, or cycle if already recording.
-    func handleStartWorkoutIntent() async {
-        if isRunning {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — cycle label")
-            cycleLabelFromActionButton()
-            return
-        }
-        WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
-        await startSession()
-    }
-
-    /// Arms Ultra Action Button to run Cycle Label on the next press (requires active HK workout).
-    func donateActionButtonCycleIntent() async {
-        WakeLog.debug(.intent, "donate Action Button → CycleLabelIntent")
-        do {
-            try await StartCableParkSessionIntent().donate(
-                result: .result(actionButtonIntent: CycleLabelIntent())
-            )
-            WakeLog.debug(.intent, "donate Action Button OK")
-        } catch {
-            errorText = "Action Button donate failed: \(error.localizedDescription)"
-            WakeLog.error(.intent, "donate failed: \(error.localizedDescription)")
-        }
-    }
-
-    private func logLabel(code: String) {
-        guard let store, let manifest else {
-            WakeLog.error(.label, "appendLabel skipped — no store/manifest")
-            return
-        }
-        let gps: GPSSnapshot?
-        if let loc = latestLocation {
-            gps = LabelEventFactory.gpsSnapshot(
-                latitude: loc.coordinate.latitude,
-                longitude: loc.coordinate.longitude,
-                altitude: loc.altitude,
-                horizontalAccuracy: loc.horizontalAccuracy,
-                verticalAccuracy: loc.verticalAccuracy,
-                speed: loc.speed,
-                course: loc.course,
-                timestamp: loc.timestamp
-            )
-        } else {
-            gps = nil
-        }
-
-        let event = LabelEventFactory.make(
-            code: code,
-            timestamp: Date(),
-            gps: gps,
-            waterSubmersionState: latestWaterState,
-            waterTemperatureCelsius: latestWaterTempC,
-            motionActivity: latestActivity
-        )
-        do {
-            try store.appendLabel(event, sessionId: manifest.sessionId)
-            labelCount += 1
-            refreshStoredByteSize()
-            WakeLog.debug(
-                .label,
-                "appended code=\(code) gps=\(gps != nil) water=\(latestWaterState ?? "nil") activity=\(latestActivity ?? "nil") count=\(labelCount)"
-            )
-        } catch {
-            errorText = "Label: \(error.localizedDescription)"
-            WakeLog.error(.label, "appendLabel: \(error.localizedDescription)")
-        }
     }
 
     private func logSessionStartAssumption() {
@@ -641,11 +542,6 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
     ) {
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
-            // Donate only once the HK session is actually running — earlier donate can arm a
-            // next-action the system never delivers.
-            if toState == .running, isRunning, recordingMode == "workout" {
-                await donateActionButtonCycleIntent()
-            }
         }
     }
 

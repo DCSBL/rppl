@@ -19,16 +19,13 @@ struct ContentView: View {
                     .font(.headline)
 
                 if session.isRunning {
-                    Text(session.currentLabel.uppercased())
+                    Text(session.assumedLabel.uppercased())
                         .font(.title2.bold())
-                    Text("assume \(session.assumedLabel)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                     Text(timeString(session.elapsed))
                         .monospacedDigit()
                     Text("Mode: \(session.recordingMode)")
                         .font(.caption2)
-                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  LBL \(session.labelCount)  ASM \(session.assumptionCount)")
+                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  ASM \(session.assumptionCount)")
                         .font(.caption2)
                     Text("Stored \(ByteSizeFormat.string(session.storedByteSize))")
                         .font(.caption2)
@@ -46,11 +43,6 @@ struct ContentView: View {
                     if let hr = session.lastHeartRate {
                         Text(String(format: "HR %.0f", hr))
                             .font(.caption2)
-                    }
-
-                    Button("Cycle label") {
-                        WakeLog.debug(.ui, "tap Cycle label")
-                        session.cycleLabelFromActionButton()
                     }
 
                     Button("Stop session", role: .destructive) {
@@ -88,10 +80,6 @@ struct ContentView: View {
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
-
-                Text("Action Button: Workout › Rppl (or Shortcut › Cycle Label)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

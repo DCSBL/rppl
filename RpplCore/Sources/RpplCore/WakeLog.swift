@@ -13,8 +13,6 @@ public enum WakeLog {
 
     public enum Category: String {
         case session
-        case label
-        case intent
         case sync
         case transfer
         case ack

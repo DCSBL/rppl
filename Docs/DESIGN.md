@@ -15,7 +15,7 @@ flowchart TB
   subgraph core [RpplCore]
     Store[SessionFileStore]
     Assumer[SegmentAssumer]
-    Labels[LabelEventFactory / LabelCodes]
+    Codes[LabelCodes]
     SyncRes[SyncConnectionResolver]
   end
 
@@ -26,7 +26,7 @@ flowchart TB
 
   WUI --> WSC
   WSC --> Assumer
-  WSC --> Labels
+  WSC --> Codes
   WSC --> Store
   WCSend --> Store
   WCSend --> SyncRes
@@ -37,15 +37,15 @@ flowchart TB
 
 | Layer | Owns | Avoids |
 |-------|------|--------|
-| `RpplCore` | Models, schema, file store, Assumer FSM, label factory, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, Action Button, WC send, thin probes into Core | Business decision trees that can be pure functions |
+| `RpplCore` | Models, schema, file store, Assumer FSM, opaque `LabelCodes`, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, WC send, thin probes into Core | Business decision trees that can be pure functions |
 | `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export | Label editing (Phase 2), session engine |
 
 Apps read live `WCSession` / sensors, then call Core. Do not duplicate Assumer or sync decision trees in both targets.
 
-## Dual-label corpus flow
+## Assumption flow
 
-Manual Action Button labels and auto assumptions are **independent** tracks (corpus mode). Join offline by timestamp.
+Assumer is the live segment-code writer. `labels.jsonl` remains in the package schema for legacy exports (new sessions leave it empty).
 
 ```mermaid
 sequenceDiagram
@@ -56,7 +56,6 @@ sequenceDiagram
   participant Phone as iPhone
 
   Note over WSC,Store: Session start
-  WSC->>Store: appendLabel waiting
   WSC->>Assumer: makeSessionStartEvent
   Assumer-->>WSC: AssumptionEvent session_start
   WSC->>Store: appendAssumption
@@ -68,18 +67,17 @@ sequenceDiagram
       Assumer-->>WSC: AssumptionEvent + reason
       WSC->>Store: assumptions.jsonl
     end
-    Note over WSC,Store: Action Button only touches labels.jsonl
   end
 
   WSC->>Store: markReadyToTransfer
   WSC->>Phone: SessionTransferPackage via WC
-  Phone->>Store: import labels + assumptions + samples
+  Phone->>Store: import assumptions + samples (+ legacy labels if any)
 ```
 
-- **Ground truth:** `labels.jsonl` (Action Button / Cycle label).
 - **Assumptions:** `assumptions.jsonl` (transitions + `session_start`; km/h `reason`).
-- Watch UI: manual code primary; assumed code secondary (debug).
-- Phone: list both; Share export includes `assumptions`.
+- **Legacy labels:** `labels.jsonl` may appear in older packages; phone still lists them.
+- Watch UI: assumed code primary.
+- Phone: list assumptions (+ legacy labels); Share export includes `assumptions`.
 
 Algorithm thresholds and rule list: [Phase3.md](Phase3.md) · Core UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 

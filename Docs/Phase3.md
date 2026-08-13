@@ -1,26 +1,25 @@
 # Phase 3 — Auto-detection roadmap
 
-Library UML (Assumer filter / holds / rules): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System dual-stream sequence: [DESIGN.md](DESIGN.md).
+Library UML (Assumer filter / holds / rules): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System assumption sequence: [DESIGN.md](DESIGN.md).
 
 ## Goal
 
-Propose segment labels from GPS speed + Ultra water submersion (+ weak CMMotionActivity) so testers need fewer Action Button presses later. Manual override always wins for UX; for corpus collection, tracks stay **independent**. Labels stay opaque strings (`waiting`, `riding`, `swimming`, `walking`, …).
+Propose segment labels from GPS speed + Ultra water submersion (+ weak CMMotionActivity). Labels stay opaque strings (`waiting`, `riding`, `swimming`, `walking`, …). Manual labeling and Action Button integration are removed; Assumer is the live writer.
 
-## Dual streams (live now)
+## Assumption stream (live now)
 
 During a Watch session:
 
 | Stream | Source | File |
 |--------|--------|------|
-| Manual ground truth | Action Button / Cycle label | `labels.jsonl` |
 | Auto assumptions | `SegmentAssumer` transitions | `assumptions.jsonl` |
+| Legacy manual labels | Older builds only | `labels.jsonl` (empty on new sessions) |
 
 - Assumer starts with `waiting` + `reason=session_start`.
 - Writes **only on code change** (no heartbeats).
 - Each `AssumptionEvent` has a `reason` string with rule id + speeds in **km/h**.
-- Watch UI: manual code primary; assumed code secondary (debug mirror).
+- Watch UI: assumed code primary.
 - Phone: list assumptions; Share JSON includes `assumptions` array.
-- Action Button never resyncs Assumer state.
 
 Pure FSM: `RpplCore` (`SegmentAssumer`, `AssumptionThresholds`, `SpeedUnits`). Covered by `swift test`.
 
@@ -43,7 +42,7 @@ Non-Ultra auto-swim deferred. Knots/mph later for display only.
 iPhone Share export is pretty-printed `SessionTransferPackage` JSON (`manifest`, `labels`, `assumptions`, `locations`, plus motion/health when present).
 
 - `LocationSample` / `GPSSnapshot.speed` — meters per second (nil when invalid).
-- `LabelEvent` — manual ground truth.
+- `LabelEvent` — legacy manual events (may be empty).
 - `AssumptionEvent` — auto proposal + `reason`.
 - Streams detail: [DataCollection.md](DataCollection.md). Hypotheses: [Ideas.md](Ideas.md).
 
@@ -51,29 +50,29 @@ iPhone Share export is pretty-printed `SessionTransferPackage` JSON (`manifest`,
 
 ```mermaid
 flowchart LR
-  collect[Phase2 collect labels]
-  dual[Live dual stream assumptions]
+  collect[Phase2 collect sensors]
+  assume[Live Assumer assumptions]
   docs[Docs idea book plus Phase3 plan]
   viz[Mac timeline viz]
   core[Core rule detector plus tests]
-  live[Watch live detect plus override]
+  live[Watch assumed face plus optional override]
   collect --> docs
-  docs --> dual
-  dual --> viz
+  docs --> assume
+  assume --> viz
   viz --> core
   core --> live
 ```
 
-**Done this slice:** Core Assumer + live Watch writer + phone list/export (corpus dual stream). Manual still primary UX.
+**Done this slice:** Core Assumer + live Watch writer + phone list/export. Assumed code is primary Watch UI.
 
-**Next:** Mac timeline viz with manual + assumed lanes and threshold scrubbers. Then tighten constants / optional live override UX.
+**Next:** Mac timeline viz with assumed lane and threshold scrubbers. Then tighten constants / optional live override UX.
 
 ## Step A — Mac timeline viz (next code)
 
 New macOS app/target in this repo (or SPM tool + SwiftUI Mac).
 
 - Open exported session JSON or dropped session folder.
-- Timeline: speed vs time, **manual** label markers, **assumed** markers, map track.
+- Timeline: speed vs time, **assumed** markers (plus legacy manual markers when present), map track.
 - Editable threshold scrubbers.
 - Keep chart/data-prep separable for Core / iOS reuse.
 
@@ -86,9 +85,9 @@ New macOS app/target in this repo (or SPM tool + SwiftUI Mac).
 
 `SegmentAssumer` shipped as v0. Expand fixtures as park days land. Opaque string codes only.
 
-## Step D — Live Watch (corpus mode shipped)
+## Step D — Live Watch (shipped)
 
-Feed Assumer from live GPS + water-edge ticks. Assumed code on face is debug-only. Full “override wins / fewer presses” UX still later — today tracks stay independent for tuning.
+Feed Assumer from live GPS + water-edge ticks. Assumed code on face is the primary Watch label. Optional “override wins / fewer presses” UX still later.
 
 ## Non-goals (Phase 3)
 
@@ -96,5 +95,6 @@ Feed Assumer from live GPS + water-edge ticks. Assumed code on face is debug-onl
 - Trick detection / full taxonomy
 - CloudKit
 - Phone label editor
+- Manual / Action Button labeling
 - ML models
 - Non-Ultra speed-only auto-`swimming`
