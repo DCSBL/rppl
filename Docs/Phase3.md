@@ -1,6 +1,6 @@
 # Phase 3 — Auto-detection roadmap
 
-Library UML (Assumer filter / holds / rules): [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md). System dual-stream sequence: [DESIGN.md](DESIGN.md).
+Library UML (Assumer filter / holds / rules): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System dual-stream sequence: [DESIGN.md](DESIGN.md).
 
 ## Goal
 
@@ -22,7 +22,7 @@ During a Watch session:
 - Phone: list assumptions; Share JSON includes `assumptions` array.
 - Action Button never resyncs Assumer state.
 
-Pure FSM: `WakeTrackerCore` (`SegmentAssumer`, `AssumptionThresholds`, `SpeedUnits`). Covered by `swift test`.
+Pure FSM: `RpplCore` (`SegmentAssumer`, `AssumptionThresholds`, `SpeedUnits`). Covered by `swift test`.
 
 ## ASSUMPTION thresholds (v0, km/h)
 
@@ -79,7 +79,7 @@ New macOS app/target in this repo (or SPM tool + SwiftUI Mac).
 
 ## Step B — Synth / real fixtures
 
-- Synth ticks already in `WakeTrackerCoreTests` (`SegmentAssumerTests`).
+- Synth ticks already in `RpplCoreTests` (`SegmentAssumerTests`).
 - **Real exports:** drop into `Exports/` (gitignored). Do not commit private park GPS without consent.
 
 ## Step C — Core detector

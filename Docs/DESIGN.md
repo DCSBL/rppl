@@ -1,25 +1,25 @@
 # System design
 
-How Watch, iPhone, and `WakeTrackerCore` fit together. Library internals (Assumer UML, store types): [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md). Product lock: [../README.md](../README.md).
+How Watch, iPhone, and `RpplCore` fit together. Library internals (Assumer UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product lock: [../README.md](../README.md).
 
 ## Layers
 
 ```mermaid
 flowchart TB
-  subgraph watch [WakeTrackerWatch]
+  subgraph watch [RpplWatch]
     WSC[WatchSessionController]
     WUI[Watch ContentView]
     WCSend[WatchTransferService]
   end
 
-  subgraph core [WakeTrackerCore]
+  subgraph core [RpplCore]
     Store[SessionFileStore]
     Assumer[SegmentAssumer]
     Labels[LabelEventFactory / LabelCodes]
     SyncRes[SyncConnectionResolver]
   end
 
-  subgraph phone [wake-tracker iOS]
+  subgraph phone [Rppl iOS]
     PCS[PhoneConnectivityService]
     PUI[Session list / map / export]
   end
@@ -37,9 +37,9 @@ flowchart TB
 
 | Layer | Owns | Avoids |
 |-------|------|--------|
-| `WakeTrackerCore` | Models, schema, file store, Assumer FSM, label factory, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, Action Button, WC send, thin probes into Core | Business decision trees that can be pure functions |
-| `wake-tracker` (iOS) | Permissions, WC receive/ack, session list/map/export | Label editing (Phase 2), session engine |
+| `RpplCore` | Models, schema, file store, Assumer FSM, label factory, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, Action Button, WC send, thin probes into Core | Business decision trees that can be pure functions |
+| `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export | Label editing (Phase 2), session engine |
 
 Apps read live `WCSession` / sensors, then call Core. Do not duplicate Assumer or sync decision trees in both targets.
 
@@ -81,7 +81,7 @@ sequenceDiagram
 - Watch UI: manual code primary; assumed code secondary (debug).
 - Phone: list both; Share export includes `assumptions`.
 
-Algorithm thresholds and rule list: [Phase3.md](Phase3.md) · Core UML: [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md).
+Algorithm thresholds and rule list: [Phase3.md](Phase3.md) · Core UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
 ## Hard constraints (unchanged)
 

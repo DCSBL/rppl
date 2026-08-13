@@ -2,7 +2,7 @@
 
 **When:** 2026-08-11 → 2026-08-12
 **Symptom:** Ultra Action Button → red “Workout / Cycle Label” → ~30s → Dutch “mislukt” / “Cycle Label has failed”. Label no change. On-screen **Cycle label** OK.
-**Files:** `WakeTrackerWatch/CycleLabelIntent.swift`, `WatchSessionController.swift`, `Info.plist` (`WKBackgroundModes`)
+**Files:** `RpplWatch/CycleLabelIntent.swift`, `WatchSessionController.swift`, `Info.plist` (`WKBackgroundModes`)
 
 This bite twice. Write down so next agent no re-invent wrong fix.
 
@@ -56,7 +56,7 @@ No label. Maybe no `perform begin` log.
 ## Checklist next time Action Button break
 
 1. Real Ultra preferred (sim next-action flaky).
-2. Scheme **WakeTrackerWatch**, paired iPhone+Watch, Cmd+R.
+2. Scheme **RpplWatch**, paired iPhone+Watch, Cmd+R.
 3. Session `Mode: workout`. Log `donate Action Button OK`.
 4. Press Action Button. Console need:
    - `CycleLabelIntent.perform begin`
