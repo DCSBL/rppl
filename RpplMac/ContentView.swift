@@ -21,7 +21,6 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if model.package != nil {
                 TimeRangeBar(model: model)
-                // Map must not live inside ScrollView — layout loop / crash on macOS.
                 SessionMapView(locations: model.windowLocations())
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -71,7 +70,7 @@ struct ContentView: View {
                 model.reportLoadFailure(error.localizedDescription)
             }
         }
-        .onAppear(perform: loadLaunchArgumentIfPresent)
+        .onAppear(perform: autoLoadDebugExport)
     }
 
     private var toolbar: some View {
@@ -132,11 +131,24 @@ struct ContentView: View {
         }
     }
 
-    private func loadLaunchArgumentIfPresent() {
+    private func autoLoadDebugExport() {
         let args = ProcessInfo.processInfo.arguments
-        guard let index = args.firstIndex(of: "-loadExport"),
-              args.index(after: index) < args.endIndex else { return }
-        let path = args[args.index(after: index)]
+        if let index = args.firstIndex(of: "-loadExport"),
+           args.index(after: index) < args.endIndex {
+            loadPath(args[args.index(after: index)])
+            return
+        }
+        #if DEBUG
+        // Hardcoded short session for crash reproduction (dev only).
+        let hardcoded =
+            "/Users/ducosebel/Development/rppl/Exports/0158167A-A54E-45D4-8245-3AAD743F7979.json"
+        if FileManager.default.fileExists(atPath: hardcoded) {
+            loadPath(hardcoded)
+        }
+        #endif
+    }
+
+    private func loadPath(_ path: String) {
         do {
             try model.loadSynchronously(url: URL(fileURLWithPath: path))
         } catch {

@@ -1,4 +1,4 @@
-import Charts
+import AppKit
 import SwiftUI
 import RpplCore
 
@@ -18,44 +18,78 @@ struct SpeedChartView: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            Chart {
-                ForEach(points) { point in
-                    LineMark(
-                        x: .value("Time", point.timestamp),
-                        y: .value("km/h", point.speedKmh)
-                    )
-                    .interpolationMethod(.linear)
-                }
-
-                RuleMark(y: .value("rideEnter", thresholds.rideEnterSpeedKmh))
-                    .foregroundStyle(.blue.opacity(0.45))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-
-                RuleMark(y: .value("swimMax", thresholds.swimMaxSpeedKmh))
-                    .foregroundStyle(.teal.opacity(0.45))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-
-                if let highlight, let band = highlightBand(for: highlight) {
-                    RectangleMark(
-                        xStart: .value("hs", band.lowerBound),
-                        xEnd: .value("he", band.upperBound)
-                    )
-                    .foregroundStyle(AssumptionColors.color(for: highlight.code).opacity(0.18))
-                }
+            CGPlotView { context, size in
+                Self.draw(
+                    context: context,
+                    size: size,
+                    points: points,
+                    range: range,
+                    thresholds: thresholds,
+                    highlight: highlight
+                )
             }
-            .chartXScale(domain: range.lowerBound...range.upperBound)
-            .chartYScale(domain: 0...yMax)
             .frame(height: 140)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
 
-    private var yMax: Double {
-        let peak = points.map(\.speedKmh).filter(\.isFinite).max() ?? 20
-        return max(30, peak + 5)
+    private static func draw(
+        context: CGContext,
+        size: CGSize,
+        points: [SpeedPoint],
+        range: ClosedRange<Date>,
+        thresholds: AssumptionThresholds,
+        highlight: AssumptionSegment?
+    ) {
+        let inset = CGRect(x: 36, y: 8, width: max(size.width - 44, 1), height: max(size.height - 16, 1))
+        let yMax = max(30, (points.map(\.speedKmh).filter(\.isFinite).max() ?? 20) + 5)
+        let xSpan = max(range.upperBound.timeIntervalSince(range.lowerBound), 1)
+
+        func x(_ date: Date) -> CGFloat {
+            inset.minX + CGFloat(date.timeIntervalSince(range.lowerBound) / xSpan) * inset.width
+        }
+        func y(_ kmh: Double) -> CGFloat {
+            inset.maxY - CGFloat(kmh / yMax) * inset.height
+        }
+
+        if let highlight,
+           let band = SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range) {
+            let rect = CGRect(
+                x: x(band.lowerBound),
+                y: inset.minY,
+                width: max(x(band.upperBound) - x(band.lowerBound), 1),
+                height: inset.height
+            )
+            context.setFillColor(NSColor(AssumptionColors.color(for: highlight.code)).withAlphaComponent(0.18).cgColor)
+            context.fill(rect)
+        }
+
+        context.setStrokeColor(NSColor.separatorColor.cgColor)
+        context.setLineWidth(1)
+        context.stroke(inset)
+
+        drawRule(context: context, inset: inset, y: y(thresholds.rideEnterSpeedKmh), color: .systemBlue)
+        drawRule(context: context, inset: inset, y: y(thresholds.swimMaxSpeedKmh), color: .systemTeal)
+
+        guard points.count >= 2 else { return }
+        context.setStrokeColor(NSColor.labelColor.cgColor)
+        context.setLineWidth(1.5)
+        context.beginPath()
+        for (index, point) in points.enumerated() {
+            let p = CGPoint(x: x(point.timestamp), y: y(point.speedKmh))
+            if index == 0 { context.move(to: p) } else { context.addLine(to: p) }
+        }
+        context.strokePath()
     }
 
-    private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
-        SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range)
+    private static func drawRule(context: CGContext, inset: CGRect, y: CGFloat, color: NSColor) {
+        context.setStrokeColor(color.withAlphaComponent(0.5).cgColor)
+        context.setLineWidth(1)
+        context.setLineDash(phase: 0, lengths: [4, 3])
+        context.move(to: CGPoint(x: inset.minX, y: y))
+        context.addLine(to: CGPoint(x: inset.maxX, y: y))
+        context.strokePath()
+        context.setLineDash(phase: 0, lengths: [])
     }
 }
 
@@ -75,41 +109,71 @@ struct AccuracyChartView: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            Chart {
-                ForEach(points) { point in
-                    LineMark(
-                        x: .value("Time", point.timestamp),
-                        y: .value("m", point.horizontalAccuracy)
-                    )
-                    .interpolationMethod(.linear)
-                    .foregroundStyle(.orange)
-                }
-
-                RuleMark(y: .value("max", maxAccuracyM))
-                    .foregroundStyle(.red.opacity(0.5))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-
-                if let highlight, let band = highlightBand(for: highlight) {
-                    RectangleMark(
-                        xStart: .value("hs", band.lowerBound),
-                        xEnd: .value("he", band.upperBound)
-                    )
-                    .foregroundStyle(AssumptionColors.color(for: highlight.code).opacity(0.18))
-                }
+            CGPlotView { context, size in
+                Self.draw(
+                    context: context,
+                    size: size,
+                    points: points,
+                    range: range,
+                    maxAccuracyM: maxAccuracyM,
+                    highlight: highlight
+                )
             }
-            .chartXScale(domain: range.lowerBound...range.upperBound)
-            .chartYScale(domain: 0...yMax)
             .frame(height: 110)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
 
-    private var yMax: Double {
+    private static func draw(
+        context: CGContext,
+        size: CGSize,
+        points: [AccuracyPoint],
+        range: ClosedRange<Date>,
+        maxAccuracyM: Double,
+        highlight: AssumptionSegment?
+    ) {
+        let inset = CGRect(x: 36, y: 8, width: max(size.width - 44, 1), height: max(size.height - 16, 1))
         let peak = points.map(\.horizontalAccuracy).filter(\.isFinite).max() ?? maxAccuracyM
-        let candidate = max(maxAccuracyM * 1.5, peak + 5)
-        return candidate.isFinite ? candidate : maxAccuracyM * 1.5
-    }
+        let yMax = max(maxAccuracyM * 1.5, peak + 5)
+        let xSpan = max(range.upperBound.timeIntervalSince(range.lowerBound), 1)
 
-    private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
-        SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range)
+        func x(_ date: Date) -> CGFloat {
+            inset.minX + CGFloat(date.timeIntervalSince(range.lowerBound) / xSpan) * inset.width
+        }
+        func y(_ meters: Double) -> CGFloat {
+            inset.maxY - CGFloat(meters / yMax) * inset.height
+        }
+
+        if let highlight,
+           let band = SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range) {
+            let rect = CGRect(
+                x: x(band.lowerBound),
+                y: inset.minY,
+                width: max(x(band.upperBound) - x(band.lowerBound), 1),
+                height: inset.height
+            )
+            context.setFillColor(NSColor(AssumptionColors.color(for: highlight.code)).withAlphaComponent(0.18).cgColor)
+            context.fill(rect)
+        }
+
+        context.setStrokeColor(NSColor.separatorColor.cgColor)
+        context.stroke(inset)
+
+        context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.5).cgColor)
+        context.setLineDash(phase: 0, lengths: [4, 3])
+        context.move(to: CGPoint(x: inset.minX, y: y(maxAccuracyM)))
+        context.addLine(to: CGPoint(x: inset.maxX, y: y(maxAccuracyM)))
+        context.strokePath()
+        context.setLineDash(phase: 0, lengths: [])
+
+        guard points.count >= 2 else { return }
+        context.setStrokeColor(NSColor.systemOrange.cgColor)
+        context.setLineWidth(1.5)
+        context.beginPath()
+        for (index, point) in points.enumerated() {
+            let p = CGPoint(x: x(point.timestamp), y: y(point.horizontalAccuracy))
+            if index == 0 { context.move(to: p) } else { context.addLine(to: p) }
+        }
+        context.strokePath()
     }
 }
