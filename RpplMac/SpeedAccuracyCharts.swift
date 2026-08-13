@@ -10,8 +10,14 @@ struct SpeedChartView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Speed (usable km/h)")
-                .font(.headline)
+            HStack {
+                Text("Speed (usable km/h)")
+                    .font(.headline)
+                Spacer()
+                Text("ride \(Int(thresholds.rideEnterSpeedKmh)) · swimMax \(Int(thresholds.swimMaxSpeedKmh))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             Chart {
                 ForEach(points) { point in
                     LineMark(
@@ -22,22 +28,12 @@ struct SpeedChartView: View {
                 }
 
                 RuleMark(y: .value("rideEnter", thresholds.rideEnterSpeedKmh))
-                    .foregroundStyle(.blue.opacity(0.55))
+                    .foregroundStyle(.blue.opacity(0.45))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .annotation(position: .top, alignment: .trailing) {
-                        Text("ride \(Int(thresholds.rideEnterSpeedKmh))")
-                            .font(.caption2)
-                            .foregroundStyle(.blue)
-                    }
 
                 RuleMark(y: .value("swimMax", thresholds.swimMaxSpeedKmh))
-                    .foregroundStyle(.teal.opacity(0.55))
+                    .foregroundStyle(.teal.opacity(0.45))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .annotation(position: .top, alignment: .leading) {
-                        Text("swimMax \(Int(thresholds.swimMaxSpeedKmh))")
-                            .font(.caption2)
-                            .foregroundStyle(.teal)
-                    }
 
                 if let highlight, let band = highlightBand(for: highlight) {
                     RectangleMark(
@@ -49,7 +45,7 @@ struct SpeedChartView: View {
             }
             .chartXScale(domain: range.lowerBound...range.upperBound)
             .chartYScale(domain: 0...yMax)
-            .frame(minHeight: 140)
+            .frame(height: 140)
         }
     }
 
@@ -59,10 +55,7 @@ struct SpeedChartView: View {
     }
 
     private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
-        let start = max(highlight.start, range.lowerBound)
-        let end = min(highlight.end, range.upperBound)
-        guard end > start else { return nil }
-        return start...end
+        SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range)
     }
 }
 
@@ -74,8 +67,14 @@ struct AccuracyChartView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("GPS accuracy (m)")
-                .font(.headline)
+            HStack {
+                Text("GPS accuracy (m)")
+                    .font(.headline)
+                Spacer()
+                Text("max \(Int(maxAccuracyM))m")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             Chart {
                 ForEach(points) { point in
                     LineMark(
@@ -87,13 +86,8 @@ struct AccuracyChartView: View {
                 }
 
                 RuleMark(y: .value("max", maxAccuracyM))
-                    .foregroundStyle(.red.opacity(0.6))
+                    .foregroundStyle(.red.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .annotation(position: .top, alignment: .trailing) {
-                        Text("max \(Int(maxAccuracyM))m")
-                            .font(.caption2)
-                            .foregroundStyle(.red)
-                    }
 
                 if let highlight, let band = highlightBand(for: highlight) {
                     RectangleMark(
@@ -105,7 +99,7 @@ struct AccuracyChartView: View {
             }
             .chartXScale(domain: range.lowerBound...range.upperBound)
             .chartYScale(domain: 0...yMax)
-            .frame(minHeight: 110)
+            .frame(height: 110)
         }
     }
 
@@ -116,9 +110,6 @@ struct AccuracyChartView: View {
     }
 
     private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
-        let start = max(highlight.start, range.lowerBound)
-        let end = min(highlight.end, range.upperBound)
-        guard end > start else { return nil }
-        return start...end
+        SessionAnalysisPrep.clippedBand(start: highlight.start, end: highlight.end, range: range)
     }
 }

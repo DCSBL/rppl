@@ -1,5 +1,6 @@
 import Charts
 import SwiftUI
+import RpplCore
 
 struct EventsLaneView: View {
     let segments: [AssumptionSegment]
@@ -34,12 +35,8 @@ struct EventsLaneView: View {
                             x: .value("a", segment.start),
                             y: .value("activity", 1)
                         )
-                        .symbolSize(36)
-                        .annotation(position: .overlay, alignment: .leading) {
-                            Text(shortActivity(activity))
-                                .font(.system(size: 8))
-                                .foregroundStyle(.secondary)
-                        }
+                        .foregroundStyle(.secondary)
+                        .symbolSize(28)
                     }
 
                     if range.contains(segment.start),
@@ -50,12 +47,7 @@ struct EventsLaneView: View {
                             y: .value("water", 0)
                         )
                         .foregroundStyle(water == "submerged" ? Color.cyan : Color.gray)
-                        .symbolSize(40)
-                        .annotation(position: .overlay, alignment: .leading) {
-                            Text(shortWater(water))
-                                .font(.system(size: 8))
-                                .foregroundStyle(.secondary)
-                        }
+                        .symbolSize(28)
                     }
                 }
             }
@@ -75,7 +67,7 @@ struct EventsLaneView: View {
                     }
                 }
             }
-            .frame(minHeight: 120)
+            .frame(height: 120)
             .chartOverlay { proxy in
                 GeometryReader { geo in
                     Rectangle()
@@ -100,10 +92,7 @@ struct EventsLaneView: View {
     }
 
     private func clippedBand(for segment: AssumptionSegment) -> ClosedRange<Date>? {
-        let start = max(segment.start, range.lowerBound)
-        let end = min(segment.end, range.upperBound)
-        guard end > start else { return nil }
-        return start...end
+        SessionAnalysisPrep.clippedBand(start: segment.start, end: segment.end, range: range)
     }
 
     private var legend: some View {
@@ -124,13 +113,5 @@ struct EventsLaneView: View {
                 .frame(width: 10, height: 10)
             Text(title)
         }
-    }
-
-    private func shortActivity(_ value: String) -> String {
-        String(value.prefix(4))
-    }
-
-    private func shortWater(_ value: String) -> String {
-        value == "submerged" ? "sub" : "dry"
     }
 }
