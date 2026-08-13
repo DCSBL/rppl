@@ -44,4 +44,24 @@ struct SessionExportLoaderTests {
         #expect(segments.count == 1)
         #expect(segments[0].end > segments[0].start)
     }
+
+    @Test("loads big export without materializing motion key")
+    func loadsBigExportIfPresent() throws {
+        let url = URL(fileURLWithPath:
+            "/Users/ducosebel/Development/rppl/Exports/15AD6E59-4C8B-4DEB-8A6B-AFE8B06D7A39.json"
+        )
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return
+        }
+        let raw = try Data(contentsOf: url, options: [.mappedIfSafe])
+        let stripped = try SessionExportLoader.stripTopLevelKeys(
+            raw,
+            keys: ["motionFramesZlib", "motion", "health", "labels"]
+        )
+        #expect(stripped.count < raw.count / 2)
+        #expect(!String(decoding: stripped.prefix(200), as: UTF8.self).contains("motionFramesZlib"))
+        let package = try SessionExportLoader.load(from: raw)
+        #expect(package.locations.count > 1000)
+        #expect(!package.assumptions.isEmpty)
+    }
 }

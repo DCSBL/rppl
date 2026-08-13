@@ -17,7 +17,8 @@ struct ContentView: View {
                     .font(.callout)
             }
             if model.isLoading {
-                ProgressView("Loading export…")
+                Text("Loading export…")
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if model.package != nil {
                 TimeRangeBar(model: model)
@@ -48,12 +49,9 @@ struct ContentView: View {
                     }
                 }
             } else {
-                ContentUnavailableView(
-                    "Open an export JSON",
-                    systemImage: "doc",
-                    description: Text("ShareLink session file from iPhone.")
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Text("Open an export JSON (ShareLink session file from iPhone).")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .padding()
@@ -135,7 +133,7 @@ struct ContentView: View {
         let args = ProcessInfo.processInfo.arguments
         if let index = args.firstIndex(of: "-loadExport"),
            args.index(after: index) < args.endIndex {
-            loadPath(args[args.index(after: index)])
+            model.loadPathAsync(args[args.index(after: index)])
             return
         }
         #if DEBUG
@@ -143,16 +141,8 @@ struct ContentView: View {
         let hardcoded =
             "/Users/ducosebel/Development/rppl/Exports/0158167A-A54E-45D4-8245-3AAD743F7979.json"
         if FileManager.default.fileExists(atPath: hardcoded) {
-            loadPath(hardcoded)
+            model.loadPathAsync(hardcoded)
         }
         #endif
-    }
-
-    private func loadPath(_ path: String) {
-        do {
-            try model.loadSynchronously(url: URL(fileURLWithPath: path))
-        } catch {
-            model.reportLoadFailure(error.localizedDescription)
-        }
     }
 }

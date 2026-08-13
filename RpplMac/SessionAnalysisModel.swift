@@ -121,7 +121,7 @@ final class SessionAnalysisModel {
         }
     }
 
-    /// Sync load for launch-argument / tests.
+    /// Sync load for tests only — prefer `load(url:)` on UI path.
     func loadSynchronously(url: URL) throws {
         let access = url.startAccessingSecurityScopedResource()
         defer {
@@ -131,6 +131,10 @@ final class SessionAnalysisModel {
         apply(package: package)
         isLoading = false
         loadError = nil
+    }
+
+    func loadPathAsync(_ path: String) {
+        load(url: URL(fileURLWithPath: path))
     }
 
     func reportLoadFailure(_ message: String) {
@@ -169,11 +173,12 @@ final class SessionAnalysisModel {
     func windowLocations() -> [LocationSample] {
         guard let package else { return [] }
         let range = selectedRange
-        return package.locations.filter {
+        let filtered = package.locations.filter {
             range.contains($0.timestamp)
                 && $0.latitude.isFinite
                 && $0.longitude.isFinite
         }
+        return downsample(filtered, limit: 1_500)
     }
 
     func windowSpeedPoints() -> [SpeedPoint] {

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct TimeRangeBar: View {
@@ -22,21 +23,15 @@ struct TimeRangeBar: View {
                 if spanSeconds >= SessionAnalysisModel.minimumWindow {
                     labeledSlider(
                         title: "Start",
-                        value: Binding(
-                            get: { model.rangeStart.timeIntervalSinceReferenceDate },
-                            set: { model.setRangeStart(Date(timeIntervalSinceReferenceDate: $0)) }
-                        ),
+                        value: model.rangeStart.timeIntervalSinceReferenceDate,
                         bounds: startBound...(endBound - SessionAnalysisModel.minimumWindow)
-                    )
+                    ) { model.setRangeStart(Date(timeIntervalSinceReferenceDate: $0)) }
 
                     labeledSlider(
                         title: "End",
-                        value: Binding(
-                            get: { model.rangeEnd.timeIntervalSinceReferenceDate },
-                            set: { model.setRangeEnd(Date(timeIntervalSinceReferenceDate: $0)) }
-                        ),
+                        value: model.rangeEnd.timeIntervalSinceReferenceDate,
                         bounds: (startBound + SessionAnalysisModel.minimumWindow)...endBound
-                    )
+                    ) { model.setRangeEnd(Date(timeIntervalSinceReferenceDate: $0)) }
                 }
 
                 Text(timeCaption(span: span, spanSeconds: max(spanSeconds, 0)))
@@ -49,14 +44,16 @@ struct TimeRangeBar: View {
 
     private func labeledSlider(
         title: String,
-        value: Binding<Double>,
-        bounds: ClosedRange<Double>
+        value: Double,
+        bounds: ClosedRange<Double>,
+        onChange: @escaping (Double) -> Void
     ) -> some View {
         HStack {
             Text(title)
                 .frame(width: 44, alignment: .leading)
-            Slider(value: value, in: bounds)
-            Text(shortTime(Date(timeIntervalSinceReferenceDate: value.wrappedValue)))
+            AppKitSlider(value: value, bounds: bounds, onChange: onChange)
+                .frame(height: 22)
+            Text(shortTime(Date(timeIntervalSinceReferenceDate: value)))
                 .monospacedDigit()
                 .frame(width: 64, alignment: .trailing)
         }
@@ -75,5 +72,45 @@ struct TimeRangeBar: View {
             startOffset,
             endOffset
         )
+    }
+}
+
+/// AppKit slider — SwiftUI `Slider` hits RenderBox/Metal on Intel.
+struct AppKitSlider: NSViewRepresentable {
+    var value: Double
+    var bounds: ClosedRange<Double>
+    var onChange: (Double) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onChange: onChange)
+    }
+
+    func makeNSView(context: Context) -> NSSlider {
+        let slider = NSSlider(value: value, minValue: bounds.lowerBound, maxValue: bounds.upperBound, target: context.coordinator, action: #selector(Coordinator.changed(_:)))
+        slider.isContinuous = true
+        context.coordinator.slider = slider
+        return slider
+    }
+
+    func updateNSView(_ slider: NSSlider, context: Context) {
+        context.coordinator.onChange = onChange
+        slider.minValue = bounds.lowerBound
+        slider.maxValue = bounds.upperBound
+        if abs(slider.doubleValue - value) > 0.000_1 {
+            slider.doubleValue = value
+        }
+    }
+
+    final class Coordinator: NSObject {
+        var onChange: (Double) -> Void
+        weak var slider: NSSlider?
+
+        init(onChange: @escaping (Double) -> Void) {
+            self.onChange = onChange
+        }
+
+        @objc func changed(_ sender: NSSlider) {
+            onChange(sender.doubleValue)
+        }
     }
 }

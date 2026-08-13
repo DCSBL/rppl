@@ -23,6 +23,7 @@ final class PlotNSView: NSView {
     override var isFlipped: Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
+        guard bounds.width > 1, bounds.height > 1 else { return }
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         context.clear(bounds)
         NSColor.controlBackgroundColor.setFill()
