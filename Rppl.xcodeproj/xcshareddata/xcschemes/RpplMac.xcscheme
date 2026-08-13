@@ -40,7 +40,8 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      enableGPUValidationMode = "0">
+      enableGPUValidationMode = "0"
+      enableGPUFrameCaptureMode = "3">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
@@ -51,6 +52,18 @@
             ReferencedContainer = "container:Rppl.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "MTL_DEBUG_LAYER"
+            value = "0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "MTL_SHADER_VALIDATION"
+            value = "0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

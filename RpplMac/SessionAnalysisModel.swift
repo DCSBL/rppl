@@ -53,6 +53,11 @@ final class SessionAnalysisModel {
     var rangeStart: Date = .now
     var rangeEnd: Date = .now
     var selectedSegmentID: String?
+    var onChange: (() -> Void)?
+
+    private func notify() {
+        onChange?()
+    }
 
     var selectedRange: ClosedRange<Date> {
         rangeStart...max(rangeStart, rangeEnd)
@@ -99,6 +104,7 @@ final class SessionAnalysisModel {
         package = nil
         segments = []
         sessionSpan = nil
+        notify()
 
         Task { @MainActor in
             let access = url.startAccessingSecurityScopedResource()
@@ -118,6 +124,7 @@ final class SessionAnalysisModel {
                 loadError = error.localizedDescription
             }
             isLoading = false
+            notify()
         }
     }
 
@@ -131,6 +138,7 @@ final class SessionAnalysisModel {
         apply(package: package)
         isLoading = false
         loadError = nil
+        notify()
     }
 
     func loadPathAsync(_ path: String) {
@@ -140,6 +148,7 @@ final class SessionAnalysisModel {
     func reportLoadFailure(_ message: String) {
         loadError = message
         isLoading = false
+        notify()
     }
 
     func setRangeStart(_ date: Date) {
@@ -152,6 +161,7 @@ final class SessionAnalysisModel {
         if rangeEnd.timeIntervalSince(rangeStart) < Self.minimumWindow {
             rangeEnd = min(rangeStart.addingTimeInterval(Self.minimumWindow), sessionSpan.upperBound)
         }
+        notify()
     }
 
     func setRangeEnd(_ date: Date) {
@@ -164,10 +174,12 @@ final class SessionAnalysisModel {
         if rangeEnd.timeIntervalSince(rangeStart) < Self.minimumWindow {
             rangeStart = max(rangeEnd.addingTimeInterval(-Self.minimumWindow), sessionSpan.lowerBound)
         }
+        notify()
     }
 
     func selectAssumption(at date: Date) {
         selectedSegmentID = segments.first { $0.start <= date && date < $0.end }?.id
+        notify()
     }
 
     func windowLocations() -> [LocationSample] {
@@ -248,6 +260,7 @@ final class SessionAnalysisModel {
         let selection = SessionAnalysisPrep.defaultSelection(span: span)
         rangeStart = selection.lowerBound
         rangeEnd = selection.upperBound
+        notify()
     }
 
     private func downsample<T>(_ points: [T], limit: Int) -> [T] {
