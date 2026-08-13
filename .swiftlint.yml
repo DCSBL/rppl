@@ -2,7 +2,7 @@
 # Tighten over time.
 
 excluded:
-  - WakeTrackerCore/.build
+  - RpplCore/.build
   - .swiftpm
   - DerivedData
   - Exports

@@ -16,7 +16,7 @@ Label events store: `code`, `timestamp`, latest GPS snapshot, optional water sub
 
 Independent of Action Button. Same opaque strings. Written to `assumptions.jsonl` on Assumer transitions (+ `session_start`).
 
-Each line: `code`, `timestamp`, `reason` (km/h speeds), optional speed/water/activity snapshot. Watch shows assumed code under manual; phone lists + Share export includes `assumptions`. Dual-stream design: [DESIGN.md](DESIGN.md) · Core UML: [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
+Each line: `code`, `timestamp`, `reason` (km/h speeds), optional speed/water/activity snapshot. Watch shows assumed code under manual; phone lists + Share export includes `assumptions`. Dual-stream design: [DESIGN.md](DESIGN.md) · Core UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
 
 ## Streams
 
@@ -40,7 +40,7 @@ If Health denies workout sharing (common after tapping Don’t Allow, or flaky o
 Cycle Label is **not** a top-level Action Button menu item (flashlight / workout / shortcut). Wire it like a workout app:
 
 1. Settings › Action Button › **Workout**
-2. App › **Wake Tracker** (Cable Park)
+2. App › **Rppl** (Cable Park)
 3. First press starts the session; later presses run **Cycle Label** (donated as the workout “next action”)
 
 Requires an active HealthKit workout session (`Mode: workout`). Sensors-only mode cannot arm the Action Button next action.
