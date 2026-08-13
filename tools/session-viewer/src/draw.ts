@@ -1,0 +1,422 @@
+import type {
+  AccuracyPoint,
+  LocationSample,
+  Segment,
+  SpeedPoint,
+  TimeRange,
+} from './types'
+import { clippedBand, toMs } from './analysisPrep'
+import { thresholds } from './signalFilter'
+
+const PAD = { left: 48, right: 12, top: 18, bottom: 28 }
+
+const CODE_COLORS: Record<string, string> = {
+  waiting: '#6b7280',
+  riding: '#2563eb',
+  swimming: '#0891b2',
+  walking: '#ca8a04',
+}
+
+export function codeColor(code: string): string {
+  return CODE_COLORS[code] ?? '#a855f7'
+}
+
+function setupCanvas(canvas: HTMLCanvasElement): {
+  ctx: CanvasRenderingContext2D
+  w: number
+  h: number
+  dpr: number
+} {
+  const dpr = window.devicePixelRatio || 1
+  const rect = canvas.getBoundingClientRect()
+  const w = Math.max(1, Math.floor(rect.width))
+  const h = Math.max(1, Math.floor(rect.height))
+  canvas.width = Math.floor(w * dpr)
+  canvas.height = Math.floor(h * dpr)
+  const ctx = canvas.getContext('2d')!
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  return { ctx, w, h, dpr }
+}
+
+function clear(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.fillStyle = '#111827'
+  ctx.fillRect(0, 0, w, h)
+}
+
+function drawCentered(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  text: string,
+): void {
+  ctx.fillStyle = '#9ca3af'
+  ctx.font = '13px ui-sans-serif, system-ui, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(text, w / 2, h / 2)
+}
+
+function plotFrame(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  title: string,
+): { x0: number; y0: number; x1: number; y1: number } {
+  clear(ctx, w, h)
+  ctx.fillStyle = '#e5e7eb'
+  ctx.font = '12px ui-sans-serif, system-ui, sans-serif'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'top'
+  ctx.fillText(title, 8, 4)
+  const x0 = PAD.left
+  const y0 = PAD.top
+  const x1 = w - PAD.right
+  const y1 = h - PAD.bottom
+  ctx.strokeStyle = '#374151'
+  ctx.strokeRect(x0, y0, x1 - x0, y1 - y0)
+  return { x0, y0, x1, y1 }
+}
+
+function xAt(tMs: number, range: TimeRange, x0: number, x1: number): number {
+  const span = Math.max(1, range.endMs - range.startMs)
+  return x0 + ((tMs - range.startMs) / span) * (x1 - x0)
+}
+
+function yAt(v: number, minV: number, maxV: number, y0: number, y1: number): number {
+  const span = Math.max(1e-9, maxV - minV)
+  return y1 - ((v - minV) / span) * (y1 - y0)
+}
+
+/** Stroke open polyline only — never closePath. Breaks when `breakBefore` is true. */
+function strokeOpenPath(
+  ctx: CanvasRenderingContext2D,
+  points: { x: number; y: number }[],
+  breakBefore?: (index: number) => boolean,
+): void {
+  if (!points.length) return
+  ctx.beginPath()
+  let penDown = false
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]!
+    if (!penDown || (breakBefore?.(i) ?? false)) {
+      ctx.moveTo(p.x, p.y)
+      penDown = true
+    } else {
+      ctx.lineTo(p.x, p.y)
+    }
+  }
+  ctx.stroke()
+}
+
+const SERIES_GAP_MS = 30_000
+
+
+export interface TrackExtent {
+  minLon: number
+  maxLon: number
+  minLat: number
+  maxLat: number
+}
+
+/** Bounds from full session GPS — fixed zoom while scrubbing. */
+export function trackExtent(locations: LocationSample[]): TrackExtent | null {
+  if (!locations.length) return null
+  let minLon = Infinity
+  let maxLon = -Infinity
+  let minLat = Infinity
+  let maxLat = -Infinity
+  for (const loc of locations) {
+    minLon = Math.min(minLon, loc.longitude)
+    maxLon = Math.max(maxLon, loc.longitude)
+    minLat = Math.min(minLat, loc.latitude)
+    maxLat = Math.max(maxLat, loc.latitude)
+  }
+  if (maxLon - minLon < 1e-7) {
+    minLon -= 1e-5
+    maxLon += 1e-5
+  }
+  if (maxLat - minLat < 1e-7) {
+    minLat -= 1e-5
+    maxLat += 1e-5
+  }
+  return { minLon, maxLon, minLat, maxLat }
+}
+
+/** Relative lon/lat track — scale from full extent; draw window polyline + markers. */
+export function drawTrack(
+  canvas: HTMLCanvasElement,
+  locations: LocationSample[],
+  markers: { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[],
+  extent: TrackExtent | null,
+): void {
+  const { ctx, w, h } = setupCanvas(canvas)
+  const frame = plotFrame(ctx, w, h, 'Track (relative, fixed zoom)')
+  if (!extent) {
+    drawCentered(ctx, w, h, 'No GPS in session')
+    return
+  }
+  if (!locations.length) {
+    drawCentered(ctx, w, h, 'No GPS in window')
+    return
+  }
+
+  const { minLon, maxLon, minLat, maxLat } = extent
+  const midLat = ((minLat + maxLat) / 2) * (Math.PI / 180)
+  const lonScale = Math.cos(midLat)
+  const widthM = (maxLon - minLon) * lonScale
+  const heightM = maxLat - minLat
+  const plotW = frame.x1 - frame.x0
+  const plotH = frame.y1 - frame.y0
+  const scale = Math.min(plotW / Math.max(widthM, 1e-12), plotH / Math.max(heightM, 1e-12)) * 0.9
+  const cx = (frame.x0 + frame.x1) / 2
+  const cy = (frame.y0 + frame.y1) / 2
+  const midLon = (minLon + maxLon) / 2
+  const midLatVal = (minLat + maxLat) / 2
+
+  const project = (lat: number, lon: number): [number, number] => {
+    const x = cx + (lon - midLon) * lonScale * scale
+    const y = cy - (lat - midLatVal) * scale
+    return [x, y]
+  }
+
+  const sorted = [...locations].sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
+  const diag = Math.hypot(plotW, plotH)
+  const jumpLimit = diag * 0.35
+  const pts = sorted.map((loc) => {
+    const [x, y] = project(loc.latitude, loc.longitude)
+    return { x, y, tMs: toMs(loc.timestamp) }
+  })
+
+  ctx.strokeStyle = '#93c5fd'
+  ctx.lineWidth = 1.5
+  strokeOpenPath(ctx, pts, (i) => {
+    const prev = pts[i - 1]!
+    const cur = pts[i]!
+    if (cur.tMs < prev.tMs) return true
+    if (cur.tMs - prev.tMs > SERIES_GAP_MS) return true
+    const dist = Math.hypot(cur.x - prev.x, cur.y - prev.y)
+    return dist > jumpLimit
+  })
+
+  for (const m of markers) {
+    const [x, y] = project(m.lat, m.lon)
+    ctx.beginPath()
+    if (m.kind === 'start') {
+      ctx.fillStyle = '#22c55e'
+      ctx.arc(x, y, 5, 0, Math.PI * 2)
+    } else if (m.kind === 'end') {
+      ctx.fillStyle = '#ef4444'
+      ctx.arc(x, y, 5, 0, Math.PI * 2)
+    } else {
+      ctx.fillStyle = '#fbbf24'
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2)
+    }
+    ctx.fill()
+  }
+}
+
+export function drawSpeed(
+  canvas: HTMLCanvasElement,
+  points: SpeedPoint[],
+  range: TimeRange,
+  highlight: Segment | null,
+): void {
+  const { ctx, w, h } = setupCanvas(canvas)
+  const frame = plotFrame(ctx, w, h, 'Speed (km/h, usable)')
+  const maxV = Math.max(
+    thresholds.rideEnterSpeedKmh + 5,
+    ...points.map((p) => p.kmh),
+    1,
+  )
+  const minV = 0
+
+  if (highlight) {
+    const band = clippedBand(highlight.startMs, highlight.endMs, range)
+    if (band) {
+      const xA = xAt(band.startMs, range, frame.x0, frame.x1)
+      const xB = xAt(band.endMs, range, frame.x0, frame.x1)
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.18)'
+      ctx.fillRect(xA, frame.y0, Math.max(1, xB - xA), frame.y1 - frame.y0)
+    }
+  }
+
+  const dash = (kmh: number, color: string, label: string) => {
+    const y = yAt(kmh, minV, maxV, frame.y0, frame.y1)
+    ctx.strokeStyle = color
+    ctx.setLineDash([4, 4])
+    ctx.beginPath()
+    ctx.moveTo(frame.x0, y)
+    ctx.lineTo(frame.x1, y)
+    ctx.stroke()
+    ctx.setLineDash([])
+    ctx.fillStyle = color
+    ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(label, frame.x0 + 4, y - 2)
+  }
+  dash(thresholds.rideEnterSpeedKmh, '#60a5fa', `ride ${thresholds.rideEnterSpeedKmh}`)
+  dash(thresholds.swimMaxSpeedKmh, '#22d3ee', `swim ${thresholds.swimMaxSpeedKmh}`)
+
+  if (!points.length) {
+    drawCentered(ctx, w, h, 'No usable speed in window')
+    return
+  }
+
+  const sorted = [...points].sort((a, b) => a.tMs - b.tMs)
+  const pts = sorted.map((p) => ({
+    x: xAt(p.tMs, range, frame.x0, frame.x1),
+    y: yAt(p.kmh, minV, maxV, frame.y0, frame.y1),
+    tMs: p.tMs,
+  }))
+  ctx.strokeStyle = '#f8fafc'
+  ctx.lineWidth = 1.25
+  strokeOpenPath(ctx, pts, (i) => {
+    const prev = pts[i - 1]!
+    const cur = pts[i]!
+    return cur.tMs < prev.tMs || cur.tMs - prev.tMs > SERIES_GAP_MS
+  })
+
+  ctx.fillStyle = '#9ca3af'
+  ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+  ctx.textAlign = 'right'
+  ctx.fillText(String(Math.round(maxV)), frame.x0 - 4, frame.y0 + 8)
+  ctx.fillText('0', frame.x0 - 4, frame.y1)
+}
+
+export function drawAccuracy(
+  canvas: HTMLCanvasElement,
+  points: AccuracyPoint[],
+  range: TimeRange,
+  highlight: Segment | null,
+): void {
+  const { ctx, w, h } = setupCanvas(canvas)
+  const frame = plotFrame(ctx, w, h, 'GPS accuracy (m)')
+  const maxV = Math.max(
+    thresholds.maxHorizontalAccuracyM + 5,
+    ...points.map((p) => p.meters),
+    1,
+  )
+  const minV = 0
+
+  if (highlight) {
+    const band = clippedBand(highlight.startMs, highlight.endMs, range)
+    if (band) {
+      const xA = xAt(band.startMs, range, frame.x0, frame.x1)
+      const xB = xAt(band.endMs, range, frame.x0, frame.x1)
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.18)'
+      ctx.fillRect(xA, frame.y0, Math.max(1, xB - xA), frame.y1 - frame.y0)
+    }
+  }
+
+  const yGate = yAt(thresholds.maxHorizontalAccuracyM, minV, maxV, frame.y0, frame.y1)
+  ctx.strokeStyle = '#f87171'
+  ctx.setLineDash([4, 4])
+  ctx.beginPath()
+  ctx.moveTo(frame.x0, yGate)
+  ctx.lineTo(frame.x1, yGate)
+  ctx.stroke()
+  ctx.setLineDash([])
+  ctx.fillStyle = '#f87171'
+  ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+  ctx.fillText(`gate ${thresholds.maxHorizontalAccuracyM}m`, frame.x0 + 4, yGate - 2)
+
+  if (!points.length) {
+    drawCentered(ctx, w, h, 'No accuracy samples in window')
+    return
+  }
+
+  const sorted = [...points].sort((a, b) => a.tMs - b.tMs)
+  const pts = sorted.map((p) => ({
+    x: xAt(p.tMs, range, frame.x0, frame.x1),
+    y: yAt(p.meters, minV, maxV, frame.y0, frame.y1),
+    tMs: p.tMs,
+  }))
+  ctx.strokeStyle = '#fbbf24'
+  ctx.lineWidth = 1.25
+  strokeOpenPath(ctx, pts, (i) => {
+    const prev = pts[i - 1]!
+    const cur = pts[i]!
+    return cur.tMs < prev.tMs || cur.tMs - prev.tMs > SERIES_GAP_MS
+  })
+}
+
+export function drawEvents(
+  canvas: HTMLCanvasElement,
+  segs: Segment[],
+  range: TimeRange,
+  selectedId: string | null,
+): void {
+  const { ctx, w, h } = setupCanvas(canvas)
+  const frame = plotFrame(ctx, w, h, 'Assumptions')
+  if (!segs.length) {
+    drawCentered(ctx, w, h, 'No assumptions in window')
+    return
+  }
+  const laneTop = frame.y0 + 8
+  const laneH = frame.y1 - frame.y0 - 16
+  for (const seg of segs) {
+    const band = clippedBand(seg.startMs, seg.endMs, range)
+    if (!band) continue
+    const xA = xAt(band.startMs, range, frame.x0, frame.x1)
+    const xB = xAt(band.endMs, range, frame.x0, frame.x1)
+    ctx.fillStyle = codeColor(seg.code)
+    ctx.globalAlpha = seg.id === selectedId ? 1 : 0.75
+    ctx.fillRect(xA, laneTop, Math.max(2, xB - xA), laneH)
+    ctx.globalAlpha = 1
+    if (seg.id === selectedId) {
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 2
+      ctx.strokeRect(xA, laneTop, Math.max(2, xB - xA), laneH)
+    }
+  }
+}
+
+export function hitTestEvents(
+  canvas: HTMLCanvasElement,
+  clientX: number,
+  segs: Segment[],
+  range: TimeRange,
+): Segment | null {
+  const rect = canvas.getBoundingClientRect()
+  const x = clientX - rect.left
+  const x0 = PAD.left
+  const x1 = rect.width - PAD.right
+  if (x < x0 || x > x1) return null
+  const t = range.startMs + ((x - x0) / Math.max(1, x1 - x0)) * (range.endMs - range.startMs)
+  for (let i = segs.length - 1; i >= 0; i--) {
+    const s = segs[i]!
+    if (t >= s.startMs && t < s.endMs) return s
+  }
+  return null
+}
+
+export function assumptionMarkers(
+  locations: LocationSample[],
+  segs: Segment[],
+): { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[] {
+  const markers: { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[] = []
+  if (!locations.length) return markers
+  const first = locations[0]!
+  const last = locations[locations.length - 1]!
+  markers.push({ lat: first.latitude, lon: first.longitude, kind: 'start' })
+  markers.push({ lat: last.latitude, lon: last.longitude, kind: 'end' })
+
+  const nearest = (tMs: number): LocationSample | null => {
+    let best: LocationSample | null = null
+    let bestDist = Infinity
+    for (const loc of locations) {
+      const d = Math.abs(toMs(loc.timestamp) - tMs)
+      if (d < bestDist) {
+        bestDist = d
+        best = loc
+      }
+    }
+    return best
+  }
+
+  for (const seg of segs) {
+    const loc = nearest(seg.startMs)
+    if (loc) markers.push({ lat: loc.latitude, lon: loc.longitude, kind: 'assumption' })
+  }
+  return markers
+}

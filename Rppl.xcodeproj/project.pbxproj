@@ -11,7 +11,6 @@
 		CCF3D6D1302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* RpplCore */; };
 		CCF3D6D2302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* RpplCore */; };
 		CCF3D6D3302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6D0302921A800AF3518 /* RpplCore */; };
-		A1MAC010000000000000001 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = A1MAC011000000000000001 /* RpplCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +56,6 @@
 		CCF3D6A2302921A800AF3518 /* RpplTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6C0302921A800AF3518 /* RpplWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RpplWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1MAC001000000000000001 /* RpplMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RpplMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -104,11 +102,6 @@
 			path = RpplWatch;
 			sourceTree = "<group>";
 		};
-		A1MAC002000000000000001 /* RpplMac */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RpplMac;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,14 +136,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A1MAC003000000000000001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A1MAC010000000000000001 /* RpplCore in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -159,7 +144,6 @@
 			children = (
 				CCF3D693302921A500AF3518 /* Rppl */,
 				CCF3D6C1302921A800AF3518 /* RpplWatch */,
-				A1MAC002000000000000001 /* RpplMac */,
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
@@ -171,7 +155,6 @@
 			children = (
 				CCF3D691302921A500AF3518 /* Rppl.app */,
 				CCF3D6C0302921A800AF3518 /* RpplWatch.app */,
-				A1MAC001000000000000001 /* RpplMac.app */,
 				CCF3D6A2302921A800AF3518 /* RpplTests.xctest */,
 				CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */,
 			);
@@ -276,29 +259,6 @@
 			productReference = CCF3D6C0302921A800AF3518 /* RpplWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
-A1MAC006000000000000001 /* RpplMac */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A1MAC009000000000000001 /* Build configuration list for PBXNativeTarget "RpplMac" */;
-			buildPhases = (
-				A1MAC004000000000000001 /* Sources */,
-				A1MAC003000000000000001 /* Frameworks */,
-				A1MAC005000000000000001 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				A1MAC002000000000000001 /* RpplMac */,
-			);
-			name = RpplMac;
-			packageProductDependencies = (
-				A1MAC011000000000000001 /* RpplCore */,
-			);
-			productName = RpplMac;
-			productReference = A1MAC001000000000000001 /* RpplMac.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 
@@ -324,9 +284,6 @@ A1MAC006000000000000001 /* RpplMac */ = {
 					CCF3D6C5302921A800AF3518 = {
 						CreatedOnToolsVersion = 26.3;
 					};
-					A1MAC006000000000000001 = {
-						CreatedOnToolsVersion = 26.3;
-					};
 				};
 			};
 			buildConfigurationList = CCF3D68C302921A400AF3518 /* Build configuration list for PBXProject "Rppl" */;
@@ -348,7 +305,6 @@ A1MAC006000000000000001 /* RpplMac */ = {
 			targets = (
 				CCF3D690302921A400AF3518 /* Rppl */,
 				CCF3D6C5302921A800AF3518 /* RpplWatch */,
-				A1MAC006000000000000001 /* RpplMac */,
 				CCF3D6A1302921A800AF3518 /* RpplTests */,
 				CCF3D6AB302921A800AF3518 /* RpplUITests */,
 			);
@@ -384,13 +340,6 @@ A1MAC006000000000000001 /* RpplMac */ = {
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A1MAC005000000000000001 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -416,13 +365,6 @@ A1MAC006000000000000001 /* RpplMac */ = {
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CCF3D6C2302921A800AF3518 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A1MAC004000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -854,64 +796,6 @@ A1MAC006000000000000001 /* RpplMac */ = {
 			};
 			name = Release;
 		};
-A1MAC007000000000000001 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Mac";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.mac;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		A1MAC008000000000000001 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Mac";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.mac;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
 
 
 /* End XCBuildConfiguration section */
@@ -962,15 +846,6 @@ A1MAC007000000000000001 /* Debug */ = {
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-A1MAC009000000000000001 /* Build configuration list for PBXNativeTarget "RpplMac" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A1MAC007000000000000001 /* Debug */,
-				A1MAC008000000000000001 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 
 
 /* End XCConfigurationList section */
@@ -994,11 +869,6 @@ A1MAC009000000000000001 /* Build configuration list for PBXNativeTarget "RpplMac
 			productName = RpplCore;
 		};
 		CCF3D6D0302921A800AF3518 /* RpplCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
-			productName = RpplCore;
-		};
-		A1MAC011000000000000001 /* RpplCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
 			productName = RpplCore;
