@@ -39,18 +39,30 @@ struct SpeedChartView: View {
                             .foregroundStyle(.teal)
                     }
 
-                if let highlight {
+                if let highlight, let band = highlightBand(for: highlight) {
                     RectangleMark(
-                        xStart: .value("hs", max(highlight.start, range.lowerBound)),
-                        xEnd: .value("he", min(highlight.end, range.upperBound))
+                        xStart: .value("hs", band.lowerBound),
+                        xEnd: .value("he", band.upperBound)
                     )
                     .foregroundStyle(AssumptionColors.color(for: highlight.code).opacity(0.18))
                 }
             }
             .chartXScale(domain: range.lowerBound...range.upperBound)
-            .chartYScale(domain: 0...max(30, (points.map(\.speedKmh).max() ?? 20) + 5))
+            .chartYScale(domain: 0...yMax)
             .frame(minHeight: 140)
         }
+    }
+
+    private var yMax: Double {
+        let peak = points.map(\.speedKmh).filter(\.isFinite).max() ?? 20
+        return max(30, peak + 5)
+    }
+
+    private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
+        let start = max(highlight.start, range.lowerBound)
+        let end = min(highlight.end, range.upperBound)
+        guard end > start else { return nil }
+        return start...end
     }
 }
 
@@ -83,17 +95,30 @@ struct AccuracyChartView: View {
                             .foregroundStyle(.red)
                     }
 
-                if let highlight {
+                if let highlight, let band = highlightBand(for: highlight) {
                     RectangleMark(
-                        xStart: .value("hs", max(highlight.start, range.lowerBound)),
-                        xEnd: .value("he", min(highlight.end, range.upperBound))
+                        xStart: .value("hs", band.lowerBound),
+                        xEnd: .value("he", band.upperBound)
                     )
                     .foregroundStyle(AssumptionColors.color(for: highlight.code).opacity(0.18))
                 }
             }
             .chartXScale(domain: range.lowerBound...range.upperBound)
-            .chartYScale(domain: 0...max(maxAccuracyM * 1.5, (points.map(\.horizontalAccuracy).max() ?? maxAccuracyM) + 5))
+            .chartYScale(domain: 0...yMax)
             .frame(minHeight: 110)
         }
+    }
+
+    private var yMax: Double {
+        let peak = points.map(\.horizontalAccuracy).filter(\.isFinite).max() ?? maxAccuracyM
+        let candidate = max(maxAccuracyM * 1.5, peak + 5)
+        return candidate.isFinite ? candidate : maxAccuracyM * 1.5
+    }
+
+    private func highlightBand(for highlight: AssumptionSegment) -> ClosedRange<Date>? {
+        let start = max(highlight.start, range.lowerBound)
+        let end = min(highlight.end, range.upperBound)
+        guard end > start else { return nil }
+        return start...end
     }
 }

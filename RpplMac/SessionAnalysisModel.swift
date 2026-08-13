@@ -11,16 +11,18 @@ struct AssumptionSegment: Identifiable, Equatable {
     var speedMps: Double?
     var waterSubmersionState: String?
     var motionActivity: String?
+
+    var duration: TimeInterval { end.timeIntervalSince(start) }
 }
 
 struct SpeedPoint: Identifiable, Equatable {
-    var id: Date { timestamp }
+    var id: Int
     var timestamp: Date
     var speedKmh: Double
 }
 
 struct AccuracyPoint: Identifiable, Equatable {
-    var id: Date { timestamp }
+    var id: Int
     var timestamp: Date
     var horizontalAccuracy: Double
 }
@@ -31,8 +33,9 @@ final class SessionAnalysisModel {
     static let defaultWindow: TimeInterval = 10 * 60
     static let minimumWindow: TimeInterval = 60
 
-    private(set) var package: SessionTransferPackage?
+    private(set) var package: AnalysisPackage?
     private(set) var loadError: String?
+    private(set) var isLoading = false
     private(set) var sessionSpan: ClosedRange<Date>?
     private(set) var segments: [AssumptionSegment] = []
 
@@ -41,12 +44,23 @@ final class SessionAnalysisModel {
     var selectedSegmentID: String?
 
     var selectedRange: ClosedRange<Date> {
-        rangeStart...max(rangeStart, rangeEnd)
+        let end = max(rangeStart, rangeEnd)
+        return rangeStart...end
     }
 
     var selectedSegment: AssumptionSegment? {
         guard let selectedSegmentID else { return nil }
         return segments.first { $0.id == selectedSegmentID }
+    }
+
+    /// Selection only when it overlaps the visible window (avoids inverted chart marks).
+    var visibleHighlight: AssumptionSegment? {
+        guard let selectedSegment else { return nil }
+        let range = selectedRange
+        guard selectedSegment.start < range.upperBound, selectedSegment.end > range.lowerBound else {
+            return nil
+        }
+        return selectedSegment
     }
 
     var sessionTitle: String {
@@ -63,7 +77,7 @@ final class SessionAnalysisModel {
     }
 
     var windowDurationLabel: String {
-        let seconds = rangeEnd.timeIntervalSince(rangeStart)
+        let seconds = max(0, rangeEnd.timeIntervalSince(rangeStart))
         let minutes = Int(seconds / 60)
         let rem = Int(seconds.truncatingRemainder(dividingBy: 60))
         return String(format: "%d:%02d", minutes, rem)
@@ -72,26 +86,41 @@ final class SessionAnalysisModel {
     func load(url: URL) {
         loadError = nil
         selectedSegmentID = nil
-        do {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let decoded = try decoder.decode(SessionTransferPackage.self, from: data)
-            apply(package: decoded)
-        } catch {
-            package = nil
-            segments = []
-            sessionSpan = nil
-            loadError = error.localizedDescription
+        isLoading = true
+        package = nil
+        segments = []
+        sessionSpan = nil
+
+        Task {
+            let access = url.startAccessingSecurityScopedResource()
+            defer {
+                if access { url.stopAccessingSecurityScopedResource() }
+            }
+            do {
+                let data = try Data(contentsOf: url)
+                let decoded = try await Task.detached(priority: .userInitiated) {
+                    try SessionExportLoader.load(from: data)
+                }.value
+                apply(package: decoded)
+            } catch {
+                package = nil
+                segments = []
+                sessionSpan = nil
+                loadError = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 
     func reportLoadFailure(_ message: String) {
         loadError = message
+        isLoading = false
     }
 
     func setRangeStart(_ date: Date) {
         guard let sessionSpan else { return }
+        let spanLength = sessionSpan.upperBound.timeIntervalSince(sessionSpan.lowerBound)
+        guard spanLength >= Self.minimumWindow else { return }
         let maxStart = sessionSpan.upperBound.addingTimeInterval(-Self.minimumWindow)
         let clamped = min(max(date, sessionSpan.lowerBound), maxStart)
         rangeStart = clamped
@@ -102,6 +131,8 @@ final class SessionAnalysisModel {
 
     func setRangeEnd(_ date: Date) {
         guard let sessionSpan else { return }
+        let spanLength = sessionSpan.upperBound.timeIntervalSince(sessionSpan.lowerBound)
+        guard spanLength >= Self.minimumWindow else { return }
         let minEnd = sessionSpan.lowerBound.addingTimeInterval(Self.minimumWindow)
         let clamped = max(min(date, sessionSpan.upperBound), minEnd)
         rangeEnd = clamped
@@ -117,33 +148,38 @@ final class SessionAnalysisModel {
     func windowLocations() -> [LocationSample] {
         guard let package else { return [] }
         let range = selectedRange
-        return package.locations.filter { range.contains($0.timestamp) }
+        return package.locations.filter {
+            range.contains($0.timestamp)
+                && $0.latitude.isFinite
+                && $0.longitude.isFinite
+        }
     }
 
     func windowSpeedPoints() -> [SpeedPoint] {
         guard let package else { return [] }
         let range = selectedRange
-        let thresholds = AssumptionThresholds.default
-        let filter = AssumerSignalFilter(thresholds: thresholds)
+        let filter = AssumerSignalFilter(thresholds: .default)
         var previousUsable: Double?
         var points: [SpeedPoint] = []
 
         for sample in package.locations where range.contains(sample.timestamp) {
             let speed = sample.speed
+            let usableInput: Double? = {
+                guard let speed, speed.isFinite, speed >= 0 else { return nil }
+                return speed
+            }()
+            let accuracy: Double? = sample.horizontalAccuracy.isFinite ? sample.horizontalAccuracy : nil
             let tick = AssumerTick(
                 timestamp: sample.timestamp,
-                speedMps: (speed != nil && speed! >= 0) ? speed : nil,
-                horizontalAccuracy: sample.horizontalAccuracy
+                speedMps: usableInput,
+                horizontalAccuracy: accuracy
             )
             let outcome = filter.evaluate(tick, previousUsableSpeedMps: previousUsable)
             if let usable = outcome.usableSpeedMps {
                 previousUsable = usable
-                points.append(
-                    SpeedPoint(
-                        timestamp: sample.timestamp,
-                        speedKmh: SpeedUnits.kilometersPerHour(fromMetersPerSecond: usable)
-                    )
-                )
+                let kmh = SpeedUnits.kilometersPerHour(fromMetersPerSecond: usable)
+                guard kmh.isFinite else { continue }
+                points.append(SpeedPoint(id: points.count, timestamp: sample.timestamp, speedKmh: kmh))
             }
         }
         return downsample(points, limit: 2_000)
@@ -152,20 +188,27 @@ final class SessionAnalysisModel {
     func windowAccuracyPoints() -> [AccuracyPoint] {
         guard let package else { return [] }
         let range = selectedRange
-        let points = package.locations
-            .filter { range.contains($0.timestamp) }
-            .map {
-                AccuracyPoint(timestamp: $0.timestamp, horizontalAccuracy: $0.horizontalAccuracy)
-            }
+        var points: [AccuracyPoint] = []
+        for sample in package.locations where range.contains(sample.timestamp) {
+            let accuracy = sample.horizontalAccuracy
+            guard accuracy.isFinite else { continue }
+            points.append(
+                AccuracyPoint(id: points.count, timestamp: sample.timestamp, horizontalAccuracy: accuracy)
+            )
+        }
         return downsample(points, limit: 2_000)
     }
 
     func windowSegments() -> [AssumptionSegment] {
         let range = selectedRange
-        return segments.filter { $0.start < range.upperBound && $0.end > range.lowerBound }
+        return segments.filter {
+            $0.duration > 0
+                && $0.start < range.upperBound
+                && $0.end > range.lowerBound
+        }
     }
 
-    private func apply(package: SessionTransferPackage) {
+    private func apply(package: AnalysisPackage) {
         self.package = package
         let manifest = package.manifest
         let locationTimes = package.locations.map(\.timestamp)
@@ -180,9 +223,11 @@ final class SessionAnalysisModel {
             locationTimes.max(),
             assumptionTimes.max()
         ].compactMap { $0 }
-        let upper = max(upperCandidates.max() ?? lower.addingTimeInterval(Self.defaultWindow), lower.addingTimeInterval(Self.minimumWindow))
-        let span = lower...upper
-        sessionSpan = span
+        let upper = max(
+            upperCandidates.max() ?? lower.addingTimeInterval(Self.defaultWindow),
+            lower.addingTimeInterval(Self.minimumWindow)
+        )
+        sessionSpan = lower...upper
         segments = Self.buildSegments(assumptions: package.assumptions, sessionEnd: upper)
 
         let defaultEnd = min(lower.addingTimeInterval(Self.defaultWindow), upper)
@@ -196,13 +241,16 @@ final class SessionAnalysisModel {
     ) -> [AssumptionSegment] {
         let sorted = assumptions.sorted { $0.timestamp < $1.timestamp }
         guard !sorted.isEmpty else { return [] }
-        return sorted.enumerated().map { index, event in
-            let end = index + 1 < sorted.count ? sorted[index + 1].timestamp : sessionEnd
+        return sorted.enumerated().compactMap { index, event in
+            let rawEnd = index + 1 < sorted.count ? sorted[index + 1].timestamp : sessionEnd
+            let end = max(rawEnd, event.timestamp)
+            // Skip zero-length (duplicate timestamps) — Charts traps on xStart==xEnd marks.
+            guard end > event.timestamp else { return nil }
             return AssumptionSegment(
-                id: event.id,
+                id: event.id.isEmpty ? "assumption-\(index)" : event.id,
                 code: event.code,
                 start: event.timestamp,
-                end: max(end, event.timestamp),
+                end: end,
                 reason: event.reason,
                 speedMps: event.speedMps,
                 waterSubmersionState: event.waterSubmersionState,

@@ -17,7 +17,10 @@ struct ContentView: View {
                         .foregroundStyle(.red)
                         .font(.callout)
                 }
-                if model.package != nil {
+                if model.isLoading {
+                    ProgressView("Loading export…")
+                        .frame(maxWidth: .infinity, minHeight: 120)
+                } else if model.package != nil {
                     TimeRangeBar(model: model)
                     SessionMapView(locations: model.windowLocations())
                         .frame(minHeight: 180)
@@ -26,13 +29,13 @@ struct ContentView: View {
                         points: model.windowSpeedPoints(),
                         range: model.selectedRange,
                         thresholds: thresholds,
-                        highlight: model.selectedSegment
+                        highlight: model.visibleHighlight
                     )
                     AccuracyChartView(
                         points: model.windowAccuracyPoints(),
                         range: model.selectedRange,
                         maxAccuracyM: thresholds.maxHorizontalAccuracyM,
-                        highlight: model.selectedSegment
+                        highlight: model.visibleHighlight
                     )
                     EventsLaneView(
                         segments: model.windowSegments(),
@@ -60,10 +63,6 @@ struct ContentView: View {
             switch result {
             case .success(let urls):
                 guard let url = urls.first else { return }
-                let access = url.startAccessingSecurityScopedResource()
-                defer {
-                    if access { url.stopAccessingSecurityScopedResource() }
-                }
                 model.load(url: url)
             case .failure(let error):
                 model.reportLoadFailure(error.localizedDescription)

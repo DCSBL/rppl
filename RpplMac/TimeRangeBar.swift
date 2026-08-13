@@ -7,7 +7,7 @@ struct TimeRangeBar: View {
         if let span = model.sessionSpan {
             let startBound = span.lowerBound.timeIntervalSinceReferenceDate
             let endBound = span.upperBound.timeIntervalSinceReferenceDate
-            let spanSeconds = max(endBound - startBound, 1)
+            let spanSeconds = endBound - startBound
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -19,25 +19,27 @@ struct TimeRangeBar: View {
                         .foregroundStyle(.secondary)
                 }
 
-                labeledSlider(
-                    title: "Start",
-                    value: Binding(
-                        get: { model.rangeStart.timeIntervalSinceReferenceDate },
-                        set: { model.setRangeStart(Date(timeIntervalSinceReferenceDate: $0)) }
-                    ),
-                    bounds: startBound...(endBound - SessionAnalysisModel.minimumWindow)
-                )
+                if spanSeconds >= SessionAnalysisModel.minimumWindow {
+                    labeledSlider(
+                        title: "Start",
+                        value: Binding(
+                            get: { model.rangeStart.timeIntervalSinceReferenceDate },
+                            set: { model.setRangeStart(Date(timeIntervalSinceReferenceDate: $0)) }
+                        ),
+                        bounds: startBound...(endBound - SessionAnalysisModel.minimumWindow)
+                    )
 
-                labeledSlider(
-                    title: "End",
-                    value: Binding(
-                        get: { model.rangeEnd.timeIntervalSinceReferenceDate },
-                        set: { model.setRangeEnd(Date(timeIntervalSinceReferenceDate: $0)) }
-                    ),
-                    bounds: (startBound + SessionAnalysisModel.minimumWindow)...endBound
-                )
+                    labeledSlider(
+                        title: "End",
+                        value: Binding(
+                            get: { model.rangeEnd.timeIntervalSinceReferenceDate },
+                            set: { model.setRangeEnd(Date(timeIntervalSinceReferenceDate: $0)) }
+                        ),
+                        bounds: (startBound + SessionAnalysisModel.minimumWindow)...endBound
+                    )
+                }
 
-                Text(timeCaption(span: span, spanSeconds: spanSeconds))
+                Text(timeCaption(span: span, spanSeconds: max(spanSeconds, 0)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

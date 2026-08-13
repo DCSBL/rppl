@@ -13,19 +13,23 @@ struct EventsLaneView: View {
                 .font(.headline)
 
             Chart {
-                ForEach(segments) { segment in
-                    RectangleMark(
-                        xStart: .value("start", max(segment.start, range.lowerBound)),
-                        xEnd: .value("end", min(segment.end, range.upperBound)),
-                        yStart: .value("ylo", 2),
-                        yEnd: .value("yhi", 3)
-                    )
-                    .foregroundStyle(AssumptionColors.color(for: segment.code).opacity(selectedID == segment.id ? 1 : 0.75))
+                ForEach(visibleSegments) { segment in
+                    if let band = clippedBand(for: segment) {
+                        RectangleMark(
+                            xStart: .value("start", band.lowerBound),
+                            xEnd: .value("end", band.upperBound),
+                            yStart: .value("ylo", 2),
+                            yEnd: .value("yhi", 3)
+                        )
+                        .foregroundStyle(
+                            AssumptionColors.color(for: segment.code)
+                                .opacity(selectedID == segment.id ? 1 : 0.75)
+                        )
+                    }
 
-                    if let activity = segment.motionActivity, !activity.isEmpty {
-                        RuleMark(x: .value("a", segment.start))
-                            .foregroundStyle(.secondary)
-                            .lineStyle(StrokeStyle(lineWidth: 1))
+                    if range.contains(segment.start),
+                       let activity = segment.motionActivity,
+                       !activity.isEmpty {
                         PointMark(
                             x: .value("a", segment.start),
                             y: .value("activity", 1)
@@ -38,7 +42,9 @@ struct EventsLaneView: View {
                         }
                     }
 
-                    if let water = segment.waterSubmersionState, !water.isEmpty {
+                    if range.contains(segment.start),
+                       let water = segment.waterSubmersionState,
+                       !water.isEmpty {
                         PointMark(
                             x: .value("w", segment.start),
                             y: .value("water", 0)
@@ -87,6 +93,17 @@ struct EventsLaneView: View {
 
             legend
         }
+    }
+
+    private var visibleSegments: [AssumptionSegment] {
+        segments.filter { $0.duration > 0 && $0.start < range.upperBound && $0.end > range.lowerBound }
+    }
+
+    private func clippedBand(for segment: AssumptionSegment) -> ClosedRange<Date>? {
+        let start = max(segment.start, range.lowerBound)
+        let end = min(segment.end, range.upperBound)
+        guard end > start else { return nil }
+        return start...end
     }
 
     private var legend: some View {
