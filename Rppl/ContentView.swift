@@ -178,6 +178,7 @@ private enum SessionDetailLoadPhase: Equatable {
     case manifest
     case detections
     case locations
+    case stats
     case ready
     case cancelled
 }
@@ -193,6 +194,7 @@ struct SessionDetailView: View {
     /// Downsampled for MapKit; full count lives in `locationCount`.
     @State private var mapLocations: [LocationSample] = []
     @State private var locationCount = 0
+    @State private var sessionStats: SessionStats?
     @State private var storedByteSize: Int64 = 0
     @State private var loadPhase: SessionDetailLoadPhase = .manifest
     @State private var loadTask: Task<Void, Never>?
@@ -203,7 +205,7 @@ struct SessionDetailView: View {
 
     private var isLoading: Bool {
         switch loadPhase {
-        case .manifest, .detections, .locations: return true
+        case .manifest, .detections, .locations, .stats: return true
         case .ready, .cancelled: return false
         }
     }
@@ -247,6 +249,43 @@ struct SessionDetailView: View {
                         LabeledContent("Ended", value: ended.formatted())
                     }
                     LabeledContent("Transfer", value: manifest.transferState.rawValue)
+                }
+            }
+
+            if let stats = sessionStats {
+                Section("Summary") {
+                    LabeledContent("Duration", value: Self.formatDuration(stats.totalDuration))
+                    LabeledContent("Distance", value: DistanceFormat.meters(stats.totalDistanceMeters))
+                    LabeledContent(
+                        "Calories",
+                        value: stats.activeEnergyKilocalories.map { String(format: "%.0f kcal", $0) } ?? "—"
+                    )
+                    LabeledContent("Rides", value: "\(stats.rideCount)")
+                    LabeledContent(
+                        "Riding",
+                        value: "\(Int((stats.ridingPausedRatio * 100).rounded()))% · "
+                            + Self.formatDuration(stats.ridingDuration)
+                    )
+                    LabeledContent("Paused", value: Self.formatDuration(stats.pausedDuration))
+                }
+
+                Section("Rides (\(stats.rides.count))") {
+                    if stats.rides.isEmpty {
+                        Text("No rides detected.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(stats.rides) { ride in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Ride \(ride.index)")
+                                .font(.headline)
+                            Text(DistanceFormat.meters(ride.distanceMeters))
+                                .font(.caption)
+                            Text(Self.formatDuration(ride.duration))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
 
@@ -370,6 +409,7 @@ struct SessionDetailView: View {
         case .manifest: return "Loading manifest…"
         case .detections: return "Loading detections…"
         case .locations: return "Loading GPS…"
+        case .stats: return "Computing stats…"
         case .ready: return "Ready"
         case .cancelled: return "Cancelled"
         }
@@ -387,6 +427,7 @@ struct SessionDetailView: View {
         detections = []
         mapLocations = []
         locationCount = 0
+        sessionStats = nil
         // Keep manifest if already loaded; otherwise clear for a full restart.
         beginLoad()
     }
@@ -433,17 +474,31 @@ struct SessionDetailView: View {
                 try Task.checkCancellation()
                 let mapPoints = Self.downsample(locations, maxCount: Self.mapPointBudget)
                 let size = try store.sessionByteSize(sessionId: sessionId)
-                return (locations.count, mapPoints, size)
+                return (locations, locations.count, mapPoints, size)
             }
             try Task.checkCancellation()
-            locationCount = locationBundle.0
-            mapLocations = locationBundle.1
-            storedByteSize = locationBundle.2
+            locationCount = locationBundle.1
+            mapLocations = locationBundle.2
+            storedByteSize = locationBundle.3
+            loadPhase = .stats
+
+            let stats = try await Self.runStoreIO {
+                let health = try store.readHealthSamples(sessionId: sessionId)
+                return SessionStatsBuilder.build(
+                    manifest: loadedManifest,
+                    detections: loadedDetections,
+                    locations: locationBundle.0,
+                    health: health
+                )
+            }
+            try Task.checkCancellation()
+            sessionStats = stats
             loadPhase = .ready
             loadTask = nil
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded detections=\(detections.count) gps=\(locationCount) size=\(ByteSizeFormat.string(storedByteSize))"
+                "SessionDetail loaded detections=\(detections.count) gps=\(locationCount) "
+                    + "rides=\(stats.rideCount) size=\(ByteSizeFormat.string(storedByteSize))"
             )
         } catch is CancellationError {
             if loadPhase != .ready {
@@ -520,6 +575,17 @@ struct SessionDetailView: View {
             group.cancelAll()
             return value
         }
+    }
+
+    private static func formatDuration(_ interval: TimeInterval) -> String {
+        let total = max(0, Int(interval.rounded()))
+        let hours = total / 3600
+        let minutes = (total % 3600) / 60
+        let seconds = total % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%d:%02d", minutes, seconds)
     }
 
     /// Evenly pick up to `maxCount` samples so MapKit stays responsive.

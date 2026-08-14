@@ -59,8 +59,13 @@ classDiagram
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `DetectionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
+| Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `GeoDistance`, `DistanceFormat` | Recomputed from detections + GPS + health; not persisted |
 
 Opaque detection **codes are strings** (`riding`, `paused`, `unsure`). Unknown codes must round-trip.
+
+## Session stats (derived)
+
+`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, attributes `unsure` to last confident code, sums haversine meters on ride intervals only (accuracy + max-step gates), and reads cumulative calories as max HK mirror value. `LiveRideTracker` mirrors ride count / meters on Watch during recording.
 
 ## Detection pipeline
 

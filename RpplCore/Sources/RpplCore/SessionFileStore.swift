@@ -249,6 +249,11 @@ public final class SessionFileStore: @unchecked Sendable {
         return try readJSONL(LocationSample.self, from: name, sessionId: sessionId)
     }
 
+    public func readHealthSamples(sessionId: String, chunkIndex: Int = 0) throws -> [HealthMetricSample] {
+        let name = String(format: "health-%03d.jsonl", chunkIndex)
+        return try readJSONL(HealthMetricSample.self, from: name, sessionId: sessionId)
+    }
+
     public func markReadyToTransfer(sessionId: String, endedAt: Date = Date()) throws {
         var manifest = try readManifest(sessionId: sessionId)
         manifest.endedAt = endedAt

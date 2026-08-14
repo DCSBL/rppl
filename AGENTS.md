@@ -68,6 +68,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 | Task | Start here |
 |------|------------|
 | Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |

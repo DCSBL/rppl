@@ -33,6 +33,17 @@ final class WatchSessionController: NSObject {
     var motionRecordingEnabled = false
 
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
+    var rideCount: Int { liveRideTracker.rideCount }
+    var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
+    /// Live meters while riding; frozen last-ride meters when paused (`0 m` before first ride).
+    var displayRideMeters: Double {
+        liveRideTracker.isRideOngoing
+            ? liveRideTracker.currentRideMeters
+            : liveRideTracker.lastRideMeters
+    }
+    var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
+
+    private var liveRideTracker = LiveRideTracker()
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
@@ -194,6 +205,7 @@ final class WatchSessionController: NSObject {
         locationCount = 0
         motionCount = 0
         detectionEngine = DetectionEngine()
+        liveRideTracker.reset()
         startedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
@@ -233,6 +245,7 @@ final class WatchSessionController: NSObject {
         timerTask?.cancel()
 
         stopSensors()
+        liveRideTracker.closeOpenRide()
         await flushBuffers()
 
         do {
@@ -288,12 +301,20 @@ final class WatchSessionController: NSObject {
             motionActivity: latestActivity
         )
         let events = detectionEngine.process(tick)
-        guard !events.isEmpty else { return }
         detectionCode = detectionEngine.currentCode
         lastConfidentCode = detectionEngine.lastConfidentCode
+        liveRideTracker.update(
+            currentCode: detectionCode,
+            lastConfident: lastConfidentCode,
+            events: events
+        )
         for event in events {
             persistDetection(event)
         }
+    }
+
+    private func processLocationSample(_ sample: LocationSample) {
+        liveRideTracker.addLocation(sample)
     }
 
     private func persistDetection(_ event: DetectionEvent) {
@@ -525,19 +546,19 @@ extension WatchSessionController: CLLocationManagerDelegate {
             latestLocation = loc
             lastLatitude = loc.coordinate.latitude
             lastLongitude = loc.coordinate.longitude
-            locationBuffer.append(
-                LocationSample(
-                    timestamp: loc.timestamp,
-                    latitude: loc.coordinate.latitude,
-                    longitude: loc.coordinate.longitude,
-                    altitude: loc.altitude,
-                    horizontalAccuracy: loc.horizontalAccuracy,
-                    verticalAccuracy: loc.verticalAccuracy,
-                    speed: loc.speed >= 0 ? loc.speed : nil,
-                    course: loc.course >= 0 ? loc.course : nil
-                )
+            let sample = LocationSample(
+                timestamp: loc.timestamp,
+                latitude: loc.coordinate.latitude,
+                longitude: loc.coordinate.longitude,
+                altitude: loc.altitude,
+                horizontalAccuracy: loc.horizontalAccuracy,
+                verticalAccuracy: loc.verticalAccuracy,
+                speed: loc.speed >= 0 ? loc.speed : nil,
+                course: loc.course >= 0 ? loc.course : nil
             )
+            locationBuffer.append(sample)
             locationCount += 1
+            processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)
         }
     }
