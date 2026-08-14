@@ -11,11 +11,33 @@ struct SessionEntry: Identifiable, Sendable {
     var id: String { manifest.sessionId }
 }
 
+struct TotalsSummary: Sendable {
+    var sessionCount = 0
+    var totalDistanceMeters = 0.0
+    var topSpeedKmh = 0.0
+    var totalRuns = 0
+}
+
 @Observable
 @MainActor
 final class SessionCatalog {
     var entries: [SessionEntry] = []
     var isLoading = false
+
+    var totals: TotalsSummary {
+        var summary = TotalsSummary()
+        summary.sessionCount = entries.count
+        for entry in entries {
+            if let stats = entry.stats {
+                summary.totalDistanceMeters += stats.totalDistanceMeters
+                summary.totalRuns += stats.rideCount
+            }
+            if let speed = entry.topSpeedKmh {
+                summary.topSpeedKmh = max(summary.topSpeedKmh, speed)
+            }
+        }
+        return summary
+    }
 
     private var loadTask: Task<Void, Never>?
 

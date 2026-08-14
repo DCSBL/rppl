@@ -19,6 +19,11 @@ struct ContentView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .background {
+            TabBarLeadingAligner()
+                .frame(width: 0, height: 0)
+                .allowsHitTesting(false)
+        }
     }
 }
 

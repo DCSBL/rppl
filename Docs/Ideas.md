@@ -24,7 +24,7 @@ GPS samples store m/s; detection thresholds + `reason` strings use **km/h**. Str
 
 ## Other notes
 
-- **Logbook season summary** — iPhone logbook “This season” card (sessions, distance, top speed, total runs for calendar year). Deferred until we have enough history and year-boundary UX.
+- **Logbook season summary** — Filter the totals card by calendar year / season. All-time totals already ship on the logbook home. Deferred until year-boundary UX is needed.
 - Temporary wrong detections OK if `reason` makes tuning obvious.
 - Trick detection, ML models, CloudKit, and phone label editing stay out until Phase 4 / explicit ask.
 - Park profiles / dock geofence still Deferred above.

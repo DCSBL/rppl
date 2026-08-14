@@ -45,7 +45,7 @@ struct LogbookSessionDetailView: View {
                     ridesSection
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
         .background(Color(.systemGroupedBackground))

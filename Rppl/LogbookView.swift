@@ -12,7 +12,14 @@ struct LogbookView: View {
             List {
                 Section {
                     header
-                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
+                Section {
+                    totalsCard
+                        .listRowInsets(LogbookLayout.rowInsets(top: 4, bottom: 12))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
@@ -24,6 +31,7 @@ struct LogbookView: View {
                             ProgressView("Loading sessions…")
                             Spacer()
                         }
+                        .listRowInsets(LogbookLayout.rowInsets())
                         .listRowBackground(Color.clear)
                     }
                 } else if catalog.entries.isEmpty {
@@ -33,6 +41,7 @@ struct LogbookView: View {
                             systemImage: "water.waves",
                             description: Text("Record on Apple Watch, then bring your iPhone nearby.")
                         )
+                        .listRowInsets(LogbookLayout.rowInsets())
                         .listRowBackground(Color.clear)
                     }
                 } else {
@@ -55,7 +64,7 @@ struct LogbookView: View {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
-                            .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                         }
@@ -66,6 +75,8 @@ struct LogbookView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+            .contentMargins(.top, 8, for: .scrollContent)
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
@@ -104,6 +115,69 @@ struct LogbookView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var totalsCard: some View {
+        let totals = catalog.totals
+        return VStack(alignment: .leading, spacing: 16) {
+            Label("TOTAL", systemImage: "water.waves")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tint)
+                .labelStyle(.titleAndIcon)
+
+            HStack(spacing: 0) {
+                totalMetric(
+                    value: catalog.isLoading ? "—" : "\(totals.sessionCount)",
+                    label: "Sessions"
+                )
+                totalDivider
+                totalMetric(
+                    value: catalog.isLoading
+                        ? "—"
+                        : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters),
+                    label: "Distance"
+                )
+                totalDivider
+                totalMetric(
+                    value: catalog.isLoading || totals.topSpeedKmh <= 0
+                        ? "—"
+                        : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh),
+                    label: "Top Speed"
+                )
+            }
+
+            Divider()
+
+            HStack {
+                Text(catalog.isLoading ? "— total runs" : "\(totals.totalRuns) total runs")
+                Spacer()
+                Text("All sessions")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(20)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private var totalDivider: some View {
+        Rectangle()
+            .fill(.quaternary)
+            .frame(width: 1, height: 44)
+    }
+
+    private func totalMetric(value: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.title2.bold())
+                .monospacedDigit()
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var sessionsHeader: some View {
@@ -207,6 +281,14 @@ private struct SessionCard: View {
         Label(value, systemImage: symbol)
             .labelStyle(.titleAndIcon)
             .lineLimit(1)
+    }
+}
+
+private enum LogbookLayout {
+    static let horizontalInset: CGFloat = 16
+
+    static func rowInsets(top: CGFloat = 8, bottom: CGFloat = 8) -> EdgeInsets {
+        EdgeInsets(top: top, leading: 0, bottom: bottom, trailing: 0)
     }
 }
 
