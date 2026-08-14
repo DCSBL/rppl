@@ -31,7 +31,10 @@ enum LogbookFormatting {
         date.formatted(.dateTime.month(.abbreviated).day())
     }
 
-    static func seasonYear(_ date: Date = .now) -> Int {
-        Calendar.current.component(.year, from: date)
+    static func sessionTimeRange(start: Date, end: Date?) -> String {
+        let startText = start.formatted(date: .omitted, time: .shortened)
+        guard let end else { return startText }
+        let endText = end.formatted(date: .omitted, time: .shortened)
+        return "\(startText) – \(endText)"
     }
 }

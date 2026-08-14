@@ -299,7 +299,7 @@ struct SessionDetailView: View {
             let locationBundle = try await Self.runStoreIO {
                 let locations = try store.readLocationSamples(sessionId: sessionId)
                 try Task.checkCancellation()
-                let mapPoints = Self.downsample(locations, maxCount: Self.mapPointBudget)
+                let mapPoints = SessionLocationHelpers.downsample(locations, maxCount: Self.mapPointBudget)
                 let size = try store.sessionByteSize(sessionId: sessionId)
                 return (locations, locations.count, mapPoints, size)
             }
@@ -411,19 +411,6 @@ struct SessionDetailView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         }
         return String(format: "%d:%02d", minutes, seconds)
-    }
-
-    private static func downsample(_ locations: [LocationSample], maxCount: Int) -> [LocationSample] {
-        guard maxCount > 1, locations.count > maxCount else { return locations }
-        let lastIndex = locations.count - 1
-        let step = Double(lastIndex) / Double(maxCount - 1)
-        var result: [LocationSample] = []
-        result.reserveCapacity(maxCount)
-        for i in 0..<maxCount {
-            let index = min(lastIndex, Int((Double(i) * step).rounded()))
-            result.append(locations[index])
-        }
-        return result
     }
 }
 

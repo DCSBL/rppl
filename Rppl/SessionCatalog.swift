@@ -10,13 +10,6 @@ struct SessionEntry: Identifiable, Sendable {
     var id: String { manifest.sessionId }
 }
 
-struct SeasonSummary: Sendable {
-    var sessionCount = 0
-    var totalDistanceMeters = 0.0
-    var topSpeedKmh = 0.0
-    var totalRuns = 0
-}
-
 @Observable
 @MainActor
 final class SessionCatalog {
@@ -31,24 +24,6 @@ final class SessionCatalog {
         loadTask = Task(priority: .userInitiated) {
             await load(store: store)
         }
-    }
-
-    func seasonSummary(year: Int) -> SeasonSummary {
-        let seasonEntries = entries.filter {
-            Calendar.current.component(.year, from: $0.manifest.startedAt) == year
-        }
-        var summary = SeasonSummary()
-        summary.sessionCount = seasonEntries.count
-        for entry in seasonEntries {
-            if let stats = entry.stats {
-                summary.totalDistanceMeters += stats.totalDistanceMeters
-                summary.totalRuns += stats.rideCount
-            }
-            if let speed = entry.topSpeedKmh {
-                summary.topSpeedKmh = max(summary.topSpeedKmh, speed)
-            }
-        }
-        return summary
     }
 
     private func load(store: SessionFileStore) async {
@@ -93,7 +68,7 @@ final class SessionCatalog {
                 locations: locations,
                 health: health
             )
-            let topSpeedKmh = peakSpeedKmh(from: locations)
+            let topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: locations)
             return SessionEntry(manifest: manifest, stats: stats, topSpeedKmh: topSpeedKmh)
         }
     }
@@ -112,10 +87,4 @@ final class SessionCatalog {
             return value
         }
     }
-}
-
-private func peakSpeedKmh(from locations: [LocationSample]) -> Double? {
-    let peakMps = locations.compactMap(\.speed).filter { $0 > 0 }.max()
-    guard let peakMps else { return nil }
-    return SpeedUnits.kilometersPerHour(fromMetersPerSecond: peakMps)
 }
