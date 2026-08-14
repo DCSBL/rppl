@@ -12,7 +12,7 @@ enum SessionLocationHelpers {
         for ride: RideSegmentStats,
         in all: [LocationSample]
     ) -> [LocationSample] {
-        all.filter { $0.timestamp >= ride.startedAt && $0.timestamp <= ride.endedAt }
+        RideLocationFilter.samples(in: all, from: ride.startedAt, to: ride.endedAt)
     }
 
     /// Evenly pick up to `maxCount` samples so MapKit stays responsive.

@@ -55,7 +55,7 @@ struct DebugView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(manifests, id: \.sessionId) { manifest in
-                    NavigationLink(value: manifest.sessionId) {
+                    NavigationLink(value: DebugSessionRoute(sessionId: manifest.sessionId)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(manifest.startedAt.formatted(date: .abbreviated, time: .shortened))
                             Text("\(manifest.sessionId.prefix(8))… · \(manifest.transferState.rawValue)")
@@ -82,9 +82,10 @@ struct DebugView: View {
             }
         }
         .navigationTitle("Debug")
-        .navigationDestination(for: String.self) { sessionId in
-            SessionDetailView(sessionId: sessionId, store: connectivity.store)
-        }
+        .scrollContentBackground(.hidden)
+        .background(Color.rpplBackground)
+        .toolbarBackground(Color.rpplBackground, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .confirmationDialog(
             "Delete Session?",
             isPresented: $showDeleteConfirmation,
@@ -111,8 +112,8 @@ struct DebugView: View {
                 .disabled(isReloadingSessions)
             }
         }
-        .onAppear {
-            WakeLog.debug(.lifecycle, "DebugView onAppear")
+        .task {
+            WakeLog.debug(.lifecycle, "DebugView task")
             permissions.refresh()
             connectivity.refreshSyncState()
             reload()
@@ -173,5 +174,11 @@ struct DebugView: View {
 #Preview {
     NavigationStack {
         DebugView()
+            .navigationDestination(for: DebugSessionRoute.self) { route in
+                SessionDetailView(
+                    sessionId: route.sessionId,
+                    store: PhoneConnectivityService.shared.store
+                )
+            }
     }
 }

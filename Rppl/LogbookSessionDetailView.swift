@@ -11,7 +11,7 @@ struct LogbookSessionDetailView: View {
 
     @State private var manifest: SessionManifest?
     @State private var sessionStats: SessionStats?
-    @State private var mapLocations: [LocationSample] = []
+    @State private var mapTracks: [[LocationSample]] = []
     @State private var allLocations: [LocationSample] = []
     @State private var topSpeedKmh: Double?
     @State private var cityName: String?
@@ -48,9 +48,10 @@ struct LogbookSessionDetailView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.rpplBackground)
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
         .onDisappear { cancelLoad() }
     }
@@ -62,10 +63,10 @@ struct LogbookSessionDetailView: View {
 
     @ViewBuilder
     private var sessionMap: some View {
-        if mapLocations.isEmpty {
-            mapPlaceholder("No GPS track")
+        if mapTracks.isEmpty {
+            mapPlaceholder(sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
         } else {
-            SessionMapView(locations: mapLocations)
+            SessionMapView(tracks: mapTracks)
                 .frame(height: 240)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
@@ -77,6 +78,7 @@ struct LogbookSessionDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Session")
                     .font(.headline)
+                    .foregroundStyle(Color.rpplText)
 
                 if let manifest {
                     LabeledContent("Time") {
@@ -131,7 +133,8 @@ struct LogbookSessionDetailView: View {
                 }
             }
             .padding(16)
-            .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .foregroundStyle(Color.rpplText)
+            .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 
@@ -141,11 +144,12 @@ struct LogbookSessionDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Rides")
                     .font(.title3.bold())
+                    .foregroundStyle(Color.rpplText)
 
                 if stats.rides.isEmpty {
                     Text("No rides detected.")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplMuted)
                 } else {
                     ForEach(stats.rides) { ride in
                         RideDetailCard(
@@ -180,19 +184,19 @@ struct LogbookSessionDetailView: View {
                 .monospacedDigit()
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.rpplMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func mapPlaceholder(_ message: String) -> some View {
         Text(message)
             .font(.subheadline)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.rpplMuted)
             .frame(maxWidth: .infinity, minHeight: 120)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func startLoadIfNeeded() {
@@ -240,15 +244,16 @@ struct LogbookSessionDetailView: View {
                 health: health
             )
             let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            let mapPoints = SessionLocationHelpers.downsample(
-                sortedLocations,
-                maxCount: Self.sessionMapPointBudget
-            )
+            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: stats.rides)
+            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
+            let mapPoints = rideTracks.map {
+                SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
+            }
 
             manifest = loadedManifest
             sessionStats = stats
             allLocations = sortedLocations
-            mapLocations = mapPoints
+            mapTracks = mapPoints
             topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: sortedLocations)
             cityName = await SessionCityResolver.shared.cityName(
                 sessionId: sessionId,
@@ -301,6 +306,7 @@ private struct RideDetailCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Ride \(ride.index)")
                 .font(.headline)
+                .foregroundStyle(Color.rpplText)
 
             if locations.count >= 2 {
                 SessionMapView(locations: locations)
@@ -309,9 +315,9 @@ private struct RideDetailCard: View {
             } else {
                 Text("No GPS track for this ride")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -329,15 +335,16 @@ private struct RideDetailCard: View {
                 }
             }
             .font(.subheadline)
+            .foregroundStyle(Color.rpplText)
 
             Text(
                 LogbookFormatting.sessionTimeRange(start: ride.startedAt, end: ride.endedAt)
             )
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.rpplMuted)
         }
         .padding(16)
-        .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

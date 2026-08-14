@@ -130,7 +130,7 @@ struct SessionDetailView: View {
                     } else if loadPhase == .ready || loadPhase == .cancelled {
                         Text("No GPS points")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.rpplMuted)
                             .frame(maxWidth: .infinity, minHeight: 80)
                     } else {
                         Text("Map loads after detections")
@@ -222,6 +222,9 @@ struct SessionDetailView: View {
         }
         .navigationTitle(String(sessionId.prefix(8)) + "…")
         .navigationBarTitleDisplayMode(.inline)
+        .scrollContentBackground(.hidden)
+        .background(Color.rpplBackground)
+        .tint(Color.rpplAccent)
         .onAppear {
             WakeLog.debug(.ui, "SessionDetail onAppear \(sessionId.prefix(8))…")
             startLoadIfNeeded()
@@ -415,23 +418,31 @@ struct SessionDetailView: View {
 }
 
 struct SessionMapView: View {
-    let locations: [LocationSample]
+    let tracks: [[LocationSample]]
+
+    init(locations: [LocationSample]) {
+        self.tracks = locations.count >= 2 ? [locations] : []
+    }
+
+    init(tracks: [[LocationSample]]) {
+        self.tracks = tracks.filter { $0.count >= 2 }
+    }
 
     var body: some View {
         Map {
-            if locations.count >= 2 {
-                MapPolyline(coordinates: locations.map {
+            ForEach(Array(tracks.enumerated()), id: \.offset) { _, track in
+                MapPolyline(coordinates: track.map {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
                 })
-                .stroke(.blue, lineWidth: 3)
+                .stroke(Color.rpplHighlight, lineWidth: 3)
             }
-            if let first = locations.first {
+            if let first = tracks.first?.first {
                 Marker("Start", coordinate: CLLocationCoordinate2D(
                     latitude: first.latitude,
                     longitude: first.longitude
                 ))
             }
-            if let last = locations.last, locations.count > 1 {
+            if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
                 Marker("End", coordinate: CLLocationCoordinate2D(
                     latitude: last.latitude,
                     longitude: last.longitude

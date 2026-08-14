@@ -14,10 +14,11 @@ struct ContentView: View {
                 LogbookView()
             }
 
-            Tab("This app", systemImage: "app.fill", value: AppTab.app) {
+            Tab("rppl", systemImage: "app.fill", value: AppTab.app) {
                 AppInfoView()
             }
         }
+        .tint(Color.rpplAccent)
         .tabBarMinimizeBehavior(.onScrollDown)
         .background {
             TabBarLeadingAligner()

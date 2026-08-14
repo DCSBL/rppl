@@ -1,6 +1,16 @@
 import SwiftUI
 
+enum AppInfoRoute: Hashable {
+    case debug
+}
+
+struct DebugSessionRoute: Hashable {
+    let sessionId: String
+}
+
 struct AppInfoView: View {
+    @State private var path = NavigationPath()
+
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
@@ -8,7 +18,7 @@ struct AppInfoView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 Section {
                     LabeledContent("Version", value: appVersion)
@@ -22,32 +32,47 @@ struct AppInfoView: View {
                 Section("Permissions") {
                     Text("Health, location, and motion permissions are requested when needed for sync and viewing session data.")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplMuted)
                 }
 
                 Section("Legal") {
                     LabeledContent("Privacy") {
                         Text("Alpha — no cloud upload")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.rpplMuted)
                     }
                     LabeledContent("Terms") {
                         Text("Internal testing only")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.rpplMuted)
                     }
                 }
 
                 Section {
-                    NavigationLink {
-                        DebugView()
-                    } label: {
+                    NavigationLink(value: AppInfoRoute.debug) {
                         Label("Debug", systemImage: "ladybug")
                     }
                 } footer: {
                     Text("Sync status, permissions, and manual session inspection.")
                 }
             }
-            .navigationTitle("This app")
+            .scrollContentBackground(.hidden)
+            .background(Color.rpplBackground)
+            .navigationTitle("rppl")
+            .toolbarBackground(Color.rpplBackground, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationDestination(for: AppInfoRoute.self) { route in
+                switch route {
+                case .debug:
+                    DebugView()
+                }
+            }
+            .navigationDestination(for: DebugSessionRoute.self) { route in
+                SessionDetailView(
+                    sessionId: route.sessionId,
+                    store: PhoneConnectivityService.shared.store
+                )
+            }
         }
+        .tint(Color.rpplAccent)
     }
 }
 

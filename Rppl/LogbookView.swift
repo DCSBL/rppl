@@ -36,11 +36,18 @@ struct LogbookView: View {
                     }
                 } else if catalog.entries.isEmpty {
                     Section {
-                        ContentUnavailableView(
-                            "No sessions yet",
-                            systemImage: "water.waves",
-                            description: Text("Record on Apple Watch, then bring your iPhone nearby.")
-                        )
+                        ContentUnavailableView {
+                            Label {
+                                Text("No sessions yet")
+                            } icon: {
+                                MDIIconView(icon: .skiWater)
+                                    .frame(width: 48, height: 48)
+                                    .foregroundStyle(Color.rpplAccent)
+                            }
+                        } description: {
+                            Text("Record on Apple Watch, then bring your iPhone nearby.")
+                        }
+                        .foregroundStyle(Color.rpplText)
                         .listRowInsets(LogbookLayout.rowInsets())
                         .listRowBackground(Color.clear)
                     }
@@ -77,9 +84,10 @@ struct LogbookView: View {
             .scrollContentBackground(.hidden)
             .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
             .contentMargins(.top, 8, for: .scrollContent)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.rpplBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
+            .tint(Color.rpplAccent)
             .confirmationDialog(
                 "Delete Session?",
                 isPresented: $showDeleteConfirmation,
@@ -110,9 +118,10 @@ struct LogbookView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Logbook")
                 .font(.largeTitle.bold())
+                .foregroundStyle(Color.rpplText)
             Text("Cable park sessions")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.rpplMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -120,10 +129,15 @@ struct LogbookView: View {
     private var totalsCard: some View {
         let totals = catalog.totals
         return VStack(alignment: .leading, spacing: 16) {
-            Label("TOTAL", systemImage: "water.waves")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.tint)
-                .labelStyle(.titleAndIcon)
+            Label {
+                Text("TOTAL")
+            } icon: {
+                MDIIconView(icon: .skiWater)
+                    .frame(width: 14, height: 14)
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color.rpplAccent)
+            .labelStyle(.titleAndIcon)
 
             HStack(spacing: 0) {
                 totalMetric(
@@ -147,22 +161,19 @@ struct LogbookView: View {
             }
 
             Divider()
+                .overlay(Color.rpplFill)
 
-            HStack {
-                Text(catalog.isLoading ? "— total runs" : "\(totals.totalRuns) total runs")
-                Spacer()
-                Text("All sessions")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            Text(catalog.isLoading ? "— total rides" : "\(totals.totalRuns) total rides")
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
         }
         .padding(20)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var totalDivider: some View {
         Rectangle()
-            .fill(.quaternary)
+            .fill(Color.rpplFill)
             .frame(width: 1, height: 44)
     }
 
@@ -170,12 +181,13 @@ struct LogbookView: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.title2.bold())
+                .foregroundStyle(Color.rpplText)
                 .monospacedDigit()
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.rpplMuted)
         }
         .frame(maxWidth: .infinity)
     }
@@ -184,11 +196,11 @@ struct LogbookView: View {
         HStack {
             Text("Sessions")
                 .font(.title3.bold())
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.rpplText)
             Spacer()
             Text(catalog.isLoading ? "…" : "\(catalog.entries.count) total")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.rpplMuted)
         }
         .textCase(nil)
         .padding(.bottom, 4)
@@ -213,19 +225,20 @@ private struct SessionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "figure.wakeboarding")
-                    .font(.title3)
-                    .foregroundStyle(.tint)
+                MDIIconView(icon: .skiWater)
+                    .frame(width: 22, height: 22)
+                    .foregroundStyle(Color.rpplAccent)
                     .frame(width: 40, height: 40)
-                    .background(.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Color.rpplAccent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Wakeboarding")
                         .font(.headline)
+                        .foregroundStyle(Color.rpplText)
 
                     Text(timeRangeText)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplMuted)
                 }
 
                 Spacer(minLength: 8)
@@ -233,15 +246,16 @@ private struct SessionCard: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(LogbookFormatting.sessionDate(entry.manifest.startedAt))
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplMuted)
 
                     Text(entry.cityName ?? "—")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplMuted)
                 }
             }
 
             Divider()
+                .overlay(Color.rpplFill)
 
             HStack(spacing: 16) {
                 statLabel("clock", value: durationText)
@@ -249,10 +263,10 @@ private struct SessionCard: View {
                 statLabel("flag.checkered", value: ridesText)
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.rpplMuted)
         }
         .padding(16)
-        .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var timeRangeText: String {
