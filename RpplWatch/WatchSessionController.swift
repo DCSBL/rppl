@@ -22,7 +22,13 @@ final class WatchSessionController: NSObject {
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
+    var lastHorizontalAccuracy: Double?
     var lastHeartRate: Double?
+    var lastSpeedMps: Double?
+    var totalDistanceM: Double = 0
+    var currentRideDuration: TimeInterval = 0
+    var currentPauseDuration: TimeInterval = 0
+    var filterRejectionReason: String?
     var statusText = "Idle"
     var errorText: String?
     var healthAuthStatus = "unknown"
@@ -65,6 +71,8 @@ final class WatchSessionController: NSObject {
     private var flushTask: Task<Void, Never>?
     private var timerTask: Task<Void, Never>?
     private var startedAt: Date?
+    private var currentSegmentStartedAt: Date?
+    private var lastPersistedConfidentCode = DetectionCodes.paused
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
 
@@ -201,12 +209,20 @@ final class WatchSessionController: NSObject {
 
         detectionCode = DetectionCodes.paused
         lastConfidentCode = DetectionCodes.paused
+        lastPersistedConfidentCode = DetectionCodes.paused
         detectionCount = 0
         locationCount = 0
         motionCount = 0
+        totalDistanceM = 0
+        currentRideDuration = 0
+        currentPauseDuration = 0
+        lastSpeedMps = nil
+        lastHorizontalAccuracy = nil
+        filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
         startedAt = Date()
+        currentSegmentStartedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
             statusText = "Recording"
@@ -228,6 +244,7 @@ final class WatchSessionController: NSObject {
                 if let startedAt = self.startedAt {
                     self.elapsed = Date().timeIntervalSince(startedAt)
                 }
+                self.refreshSegmentDurations()
             }
         }
         WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
@@ -265,7 +282,20 @@ final class WatchSessionController: NSObject {
         statusText = "Stopped — waiting for phone ack"
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
+        totalDistanceM = 0
+        currentRideDuration = 0
+        currentPauseDuration = 0
+        lastSpeedMps = nil
+        lastHorizontalAccuracy = nil
+        filterRejectionReason = nil
+        currentSegmentStartedAt = nil
+        lastPersistedConfidentCode = DetectionCodes.paused
         self.manifest = nil
+    }
+
+    func enableWaterLock() {
+        WKInterfaceDevice.current().enableWaterLock()
+        WakeLog.debug(.ui, "Water Lock enabled (manual)")
     }
 
     /// Start-workout Action Button entry: start session, or no-op if already recording.
@@ -301,6 +331,7 @@ final class WatchSessionController: NSObject {
             motionActivity: latestActivity
         )
         let events = detectionEngine.process(tick)
+        filterRejectionReason = detectionEngine.lastFilterRejection
         detectionCode = detectionEngine.currentCode
         lastConfidentCode = detectionEngine.lastConfidentCode
         liveRideTracker.update(
@@ -308,6 +339,7 @@ final class WatchSessionController: NSObject {
             lastConfident: lastConfidentCode,
             events: events
         )
+        guard !events.isEmpty else { return }
         for event in events {
             persistDetection(event)
         }
@@ -330,9 +362,38 @@ final class WatchSessionController: NSObject {
                 .detection,
                 "appended code=\(event.code) reason=\(event.reason) count=\(detectionCount)"
             )
+            handleDetectionTransition(event)
         } catch {
             errorText = "Detection: \(error.localizedDescription)"
             WakeLog.error(.detection, "appendDetection: \(error.localizedDescription)")
+        }
+    }
+
+    private func handleDetectionTransition(_ event: DetectionEvent) {
+        guard DetectionCodes.isConfident(event.code) else { return }
+        if event.code != lastPersistedConfidentCode {
+            currentSegmentStartedAt = event.timestamp
+            lastPersistedConfidentCode = event.code
+            refreshSegmentDurations()
+        }
+    }
+
+    private func refreshSegmentDurations() {
+        guard let segmentStart = currentSegmentStartedAt else {
+            currentRideDuration = 0
+            currentPauseDuration = 0
+            return
+        }
+        let segmentElapsed = Date().timeIntervalSince(segmentStart)
+        if lastConfidentCode == DetectionCodes.riding {
+            currentRideDuration = segmentElapsed
+            currentPauseDuration = 0
+        } else if lastConfidentCode == DetectionCodes.paused {
+            currentPauseDuration = segmentElapsed
+            currentRideDuration = 0
+        } else {
+            currentRideDuration = 0
+            currentPauseDuration = 0
         }
     }
 
@@ -543,6 +604,19 @@ extension WatchSessionController: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
             guard isRunning, let loc = locations.last else { return }
+            if let previous = latestLocation,
+               loc.horizontalAccuracy >= 0,
+               previous.horizontalAccuracy >= 0,
+               loc.horizontalAccuracy <= 100,
+               previous.horizontalAccuracy <= 100 {
+                totalDistanceM += loc.distance(from: previous)
+            }
+            if loc.speed >= 0 {
+                lastSpeedMps = loc.speed
+            }
+            if loc.horizontalAccuracy >= 0 {
+                lastHorizontalAccuracy = loc.horizontalAccuracy
+            }
             latestLocation = loc
             lastLatitude = loc.coordinate.latitude
             lastLongitude = loc.coordinate.longitude
