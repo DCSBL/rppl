@@ -28,6 +28,10 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 
 Schema **v3**: detections replace labels/assumptions. Legacy `assumptions.jsonl` migrates to detections on open; transfer packages may still carry `assumptions` / `labels` keys (decoded into detections / discarded).
 
+## Derived stats (not a stream)
+
+Ride distance, duration, ride count, riding/paused ratio, and calories are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+
 ## HealthKit policy
 
 `HKWorkoutSession` + builder run for sensors/runtime. Starting a session requires **share** authorization for Workouts (even though we **do not call `finishWorkout()`**).

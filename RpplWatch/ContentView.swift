@@ -28,6 +28,16 @@ struct ContentView: View {
                     }
                     Text(timeString(session.elapsed))
                         .monospacedDigit()
+                    Text("Rides \(session.rideCount)")
+                        .font(.caption)
+                    Text(DistanceFormat.meters(session.displayRideMeters))
+                        .font(.caption)
+                        .monospacedDigit()
+                    if session.isRideOngoing, let speed = session.currentRideSpeedKmh {
+                        Text(String(format: "%.0f km/h", speed))
+                            .font(.caption)
+                            .monospacedDigit()
+                    }
                     Text("Mode: \(session.recordingMode)")
                         .font(.caption2)
                     Text(
