@@ -124,6 +124,7 @@ struct LogbookView: View {
         WakeLog.debug(.ui, "confirm delete \(sessionId.prefix(8))…")
         do {
             try connectivity.store.deleteSession(sessionId: sessionId)
+            SessionCityResolver.shared.invalidate(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
@@ -160,7 +161,7 @@ private struct SessionCard: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
-                    Text("Cable park")
+                    Text(entry.cityName ?? "—")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

@@ -6,6 +6,7 @@ struct SessionEntry: Identifiable, Sendable {
     let manifest: SessionManifest
     let stats: SessionStats?
     let topSpeedKmh: Double?
+    let cityName: String?
 
     var id: String { manifest.sessionId }
 }
@@ -58,7 +59,7 @@ final class SessionCatalog {
     }
 
     private func buildEntry(store: SessionFileStore, manifest: SessionManifest) async throws -> SessionEntry {
-        try await runStoreIO {
+        let bundle = try await runStoreIO {
             let detections = try store.readDetections(sessionId: manifest.sessionId)
             let locations = try store.readLocationSamples(sessionId: manifest.sessionId)
             let health = try store.readHealthSamples(sessionId: manifest.sessionId)
@@ -69,8 +70,20 @@ final class SessionCatalog {
                 health: health
             )
             let topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: locations)
-            return SessionEntry(manifest: manifest, stats: stats, topSpeedKmh: topSpeedKmh)
+            return (stats: stats, topSpeedKmh: topSpeedKmh, locations: locations)
         }
+
+        let cityName = await SessionCityResolver.shared.cityName(
+            sessionId: manifest.sessionId,
+            locations: bundle.locations
+        )
+
+        return SessionEntry(
+            manifest: manifest,
+            stats: bundle.stats,
+            topSpeedKmh: bundle.topSpeedKmh,
+            cityName: cityName
+        )
     }
 
     private func runStoreIO<T: Sendable>(

@@ -14,6 +14,7 @@ struct LogbookSessionDetailView: View {
     @State private var mapLocations: [LocationSample] = []
     @State private var allLocations: [LocationSample] = []
     @State private var topSpeedKmh: Double?
+    @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
     @State private var loadTask: Task<Void, Never>?
     @State private var errorText: String?
@@ -86,6 +87,10 @@ struct LogbookSessionDetailView: View {
                             )
                         )
                         .multilineTextAlignment(.trailing)
+                    }
+
+                    LabeledContent("Location") {
+                        Text(cityName ?? "—")
                     }
                 }
 
@@ -245,6 +250,10 @@ struct LogbookSessionDetailView: View {
             allLocations = sortedLocations
             mapLocations = mapPoints
             topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: sortedLocations)
+            cityName = await SessionCityResolver.shared.cityName(
+                sessionId: sessionId,
+                locations: sortedLocations
+            )
             loadPhase = .ready
             loadTask = nil
         } catch is CancellationError {
