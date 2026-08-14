@@ -1,29 +1,25 @@
 import Foundation
 
-/// GPS / speed quality gate before hold clocks and transition rules see a tick.
-/// Swap or tighten independently of FSM transitions.
-public struct AssumerSignalFilter: Equatable, Sendable {
-    public var thresholds: AssumptionThresholds
+/// GPS / speed quality gate before hold clocks and detectors see a tick.
+public struct GpsSignalFilter: Equatable, Sendable {
+    public var thresholds: DetectionThresholds
 
-    public init(thresholds: AssumptionThresholds = .default) {
+    public init(thresholds: DetectionThresholds = .default) {
         self.thresholds = thresholds
     }
 
-    public static let `default` = AssumerSignalFilter()
+    public static let `default` = GpsSignalFilter()
 
-    /// Result of filtering one tick. Water / activity always pass through on `raw`.
     public struct Outcome: Equatable, Sendable {
-        public var raw: AssumerTick
-        /// Speed trusted for speed-based holds and rules.
+        public var raw: DetectionTick
         public var usableSpeedMps: Double?
         public var rejectionReason: String?
 
         public var speedUsable: Bool { usableSpeedMps != nil }
     }
 
-    /// Filter speed; keep water/activity on `raw` for non-speed rules (e.g. Ultra swim).
     public func evaluate(
-        _ tick: AssumerTick,
+        _ tick: DetectionTick,
         previousUsableSpeedMps: Double?
     ) -> Outcome {
         guard let speed = tick.speedMps else {

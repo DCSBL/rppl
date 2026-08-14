@@ -12,12 +12,13 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
-    var assumedLabel = LabelCodes.waiting
+    var detectionCode = DetectionCodes.paused
+    var lastConfidentCode = DetectionCodes.paused
     var elapsed: TimeInterval = 0
     var locationCount = 0
     var motionCount = 0
-    var assumptionCount = 0
-    /// On-disk size of the active session package (updated after flushes / assumption writes).
+    var detectionCount = 0
+    /// On-disk size of the active session package (updated after flushes / detection writes).
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
     var lastLongitude: Double?
@@ -31,6 +32,7 @@ final class WatchSessionController: NSObject {
     var recordingMode = "none"
     var motionRecordingEnabled = false
 
+    var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
@@ -45,7 +47,7 @@ final class WatchSessionController: NSObject {
     private var latestActivity: String?
     private var latestWaterState: String?
     private var latestWaterTempC: Double?
-    private var segmentAssumer = SegmentAssumer()
+    private var detectionEngine = DetectionEngine()
     private var locationBuffer: [LocationSample] = []
     private var motionBuffer: [MotionSample] = []
     private var healthBuffer: [HealthMetricSample] = []
@@ -186,18 +188,19 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
 
-        assumedLabel = LabelCodes.waiting
-        assumptionCount = 0
+        detectionCode = DetectionCodes.paused
+        lastConfidentCode = DetectionCodes.paused
+        detectionCount = 0
         locationCount = 0
         motionCount = 0
-        segmentAssumer = SegmentAssumer()
+        detectionEngine = DetectionEngine()
         startedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
             statusText = "Recording"
         }
 
-        logSessionStartAssumption()
+        logSessionStartDetection()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
 
@@ -252,13 +255,24 @@ final class WatchSessionController: NSObject {
         self.manifest = nil
     }
 
-    private func logSessionStartAssumption() {
-        let event = segmentAssumer.makeSessionStartEvent(at: Date())
-        assumedLabel = event.code
-        persistAssumption(event)
+    /// Start-workout Action Button entry: start session, or no-op if already recording.
+    func handleStartWorkoutIntent() async {
+        if isRunning {
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — no-op")
+            return
+        }
+        WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
+        await startSession()
     }
 
-    private func processAssumerTick(timestamp: Date = Date()) {
+    private func logSessionStartDetection() {
+        let event = detectionEngine.makeSessionStartEvent(at: Date())
+        detectionCode = event.code
+        lastConfidentCode = detectionEngine.lastConfidentCode
+        persistDetection(event)
+    }
+
+    private func processDetectionTick(timestamp: Date = Date()) {
         guard isRunning else { return }
         let speed: Double?
         if let loc = latestLocation, loc.speed >= 0 {
@@ -266,34 +280,38 @@ final class WatchSessionController: NSObject {
         } else {
             speed = nil
         }
-        let tick = AssumerTick(
+        let tick = DetectionTick(
             timestamp: timestamp,
             speedMps: speed,
             horizontalAccuracy: latestLocation?.horizontalAccuracy,
             waterSubmersionState: latestWaterState,
             motionActivity: latestActivity
         )
-        guard let event = segmentAssumer.process(tick) else { return }
-        assumedLabel = event.code
-        persistAssumption(event)
+        let events = detectionEngine.process(tick)
+        guard !events.isEmpty else { return }
+        detectionCode = detectionEngine.currentCode
+        lastConfidentCode = detectionEngine.lastConfidentCode
+        for event in events {
+            persistDetection(event)
+        }
     }
 
-    private func persistAssumption(_ event: AssumptionEvent) {
+    private func persistDetection(_ event: DetectionEvent) {
         guard let store, let manifest else {
-            WakeLog.error(.assumption, "appendAssumption skipped — no store/manifest")
+            WakeLog.error(.detection, "appendDetection skipped — no store/manifest")
             return
         }
         do {
-            try store.appendAssumption(event, sessionId: manifest.sessionId)
-            assumptionCount += 1
+            try store.appendDetection(event, sessionId: manifest.sessionId)
+            detectionCount += 1
             refreshStoredByteSize()
             WakeLog.debug(
-                .assumption,
-                "appended code=\(event.code) reason=\(event.reason) count=\(assumptionCount)"
+                .detection,
+                "appended code=\(event.code) reason=\(event.reason) count=\(detectionCount)"
             )
         } catch {
-            errorText = "Assumption: \(error.localizedDescription)"
-            WakeLog.error(.assumption, "appendAssumption: \(error.localizedDescription)")
+            errorText = "Detection: \(error.localizedDescription)"
+            WakeLog.error(.detection, "appendDetection: \(error.localizedDescription)")
         }
     }
 
@@ -520,7 +538,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
                 )
             )
             locationCount += 1
-            processAssumerTick(timestamp: loc.timestamp)
+            processDetectionTick(timestamp: loc.timestamp)
         }
     }
 
@@ -617,7 +635,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "submersion → \(next)")
-                processAssumerTick()
+                processDetectionTick()
             }
         }
     }
@@ -635,7 +653,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             if latestWaterState != next {
                 latestWaterState = next
                 WakeLog.debug(.water, "measurement → \(next)")
-                processAssumerTick()
+                processDetectionTick()
             }
         }
     }

@@ -1,16 +1,14 @@
 import Foundation
 
-/// Named sustained predicates. Add a case + predicate in `AssumerHoldClock.update` to track new holds.
-public enum AssumerHoldKind: String, CaseIterable, Sendable, Equatable {
+public enum DetectionHoldKind: String, CaseIterable, Sendable, Equatable {
     case highSpeed
     case stopped
-    case walkBand
-    case waitSettle
+    case unusable
 }
 
 /// Tracks how long each hold predicate has been continuously true.
-public struct AssumerHoldClock: Sendable, Equatable {
-    private var startedAt: [AssumerHoldKind: Date] = [:]
+public struct DetectionHoldClock: Sendable, Equatable {
+    private var startedAt: [DetectionHoldKind: Date] = [:]
 
     public init() {}
 
@@ -18,7 +16,7 @@ public struct AssumerHoldClock: Sendable, Equatable {
         startedAt.removeAll()
     }
 
-    public func duration(_ kind: AssumerHoldKind, at timestamp: Date) -> TimeInterval? {
+    public func duration(_ kind: DetectionHoldKind, at timestamp: Date) -> TimeInterval? {
         guard let start = startedAt[kind] else { return nil }
         return timestamp.timeIntervalSince(start)
     }
@@ -26,7 +24,7 @@ public struct AssumerHoldClock: Sendable, Equatable {
     public mutating func update(
         timestamp: Date,
         usableSpeedMps: Double?,
-        thresholds: AssumptionThresholds
+        thresholds: DetectionThresholds
     ) {
         set(
             .highSpeed,
@@ -38,21 +36,10 @@ public struct AssumerHoldClock: Sendable, Equatable {
             active: usableSpeedMps.map { $0 <= thresholds.stoppedSpeedMps } ?? false,
             at: timestamp
         )
-        set(
-            .walkBand,
-            active: usableSpeedMps.map {
-                $0 >= thresholds.walkSpeedMinMps && $0 <= thresholds.walkSpeedMaxMps
-            } ?? false,
-            at: timestamp
-        )
-        set(
-            .waitSettle,
-            active: usableSpeedMps.map { $0 <= thresholds.waitSpeedMps } ?? false,
-            at: timestamp
-        )
+        set(.unusable, active: usableSpeedMps == nil, at: timestamp)
     }
 
-    private mutating func set(_ kind: AssumerHoldKind, active: Bool, at timestamp: Date) {
+    private mutating func set(_ kind: DetectionHoldKind, active: Bool, at timestamp: Date) {
         if active {
             if startedAt[kind] == nil {
                 startedAt[kind] = timestamp

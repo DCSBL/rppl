@@ -2,9 +2,19 @@ import Foundation
 import Testing
 @testable import RpplCore
 
+@Suite("DetectionCodes")
+struct DetectionCodesTests {
+    @Test func confidentCodes() {
+        #expect(DetectionCodes.isConfident(DetectionCodes.riding))
+        #expect(DetectionCodes.isConfident(DetectionCodes.paused))
+        #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
+        #expect(!DetectionCodes.isConfident("waiting"))
+    }
+}
+
 @Suite("SessionFileStore")
 struct SessionFileStoreTests {
-    @Test func createsManifestAndRoundTripsLabels() throws {
+    @Test func createsManifestAndRoundTripsDetections() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -19,28 +29,23 @@ struct SessionFileStoreTests {
         )
         try store.createSession(manifest: manifest)
 
-        let event = LabelEvent(
-            code: LabelCodes.waiting,
-            gps: GPSSnapshot(
-                latitude: 52.1,
-                longitude: 5.1,
-                horizontalAccuracy: 5,
-                timestamp: Date(timeIntervalSince1970: 1_700_000_000)
-            ),
-            waterSubmersionState: "notSubmerged",
-            waterTemperatureCelsius: 18.5,
+        let event = DetectionEvent(
+            code: DetectionCodes.paused,
+            reason: "session_start",
+            detectorId: "session_start",
+            speedMps: nil,
             motionActivity: "stationary"
         )
-        try store.appendLabel(event, sessionId: manifest.sessionId)
+        try store.appendDetection(event, sessionId: manifest.sessionId)
 
         let loaded = try store.readManifest(sessionId: manifest.sessionId)
         #expect(loaded.testerId == "tester-1")
         #expect(loaded.schemaVersion == SessionSchema.currentVersion)
 
-        let labels = try store.readLabels(sessionId: manifest.sessionId)
-        #expect(labels.count == 1)
-        #expect(labels[0].code == LabelCodes.waiting)
-        #expect(labels[0].waterTemperatureCelsius == 18.5)
+        let detections = try store.readDetections(sessionId: manifest.sessionId)
+        #expect(detections.count == 1)
+        #expect(detections[0].code == DetectionCodes.paused)
+        #expect(detections[0].detectorId == "session_start")
     }
 
     @Test func transferPackageRoundTripPreservesSamples() throws {
@@ -54,7 +59,7 @@ struct SessionFileStoreTests {
         }
 
         let watchStore = SessionFileStore(rootURL: watchRoot)
-        var manifest = SessionManifest(
+        let manifest = SessionManifest(
             testerId: "t",
             appVersion: "1.0",
             buildNumber: "1",
@@ -62,7 +67,14 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         try watchStore.createSession(manifest: manifest)
-        try watchStore.appendLabel(LabelEvent(code: LabelCodes.riding), sessionId: manifest.sessionId)
+        try watchStore.appendDetection(
+            DetectionEvent(
+                code: DetectionCodes.riding,
+                reason: "ride_enter",
+                detectorId: "ride_enter"
+            ),
+            sessionId: manifest.sessionId
+        )
         try watchStore.appendLocationSamples([
             LocationSample(
                 timestamp: Date(timeIntervalSince1970: 10),
@@ -80,8 +92,71 @@ struct SessionFileStoreTests {
         let phoneStore = SessionFileStore(rootURL: phoneRoot)
         let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
         #expect(phoneManifest.transferState == .acknowledged)
-        #expect(try phoneStore.readLabels(sessionId: manifest.sessionId).count == 1)
+        #expect(try phoneStore.readDetections(sessionId: manifest.sessionId).count == 1)
         #expect(try phoneStore.readLocationSamples(sessionId: manifest.sessionId).count == 1)
+    }
+
+    @Test func migratesLegacyAssumptionsFile() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("migrate-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try store.createSession(manifest: manifest)
+
+        let assumptionsURL = store.sessionDirectory(for: manifest.sessionId)
+            .appendingPathComponent("assumptions.jsonl")
+        let legacy =
+            #"{"code":"riding","id":"legacy-1","reason":"ride_start","timestamp":"2024-01-01T00:00:00Z"}"#
+            + "\n"
+        try Data(legacy.utf8).write(to: assumptionsURL)
+        // Empty detections from createSession — migrate should fill from assumptions.
+        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+            .appendingPathComponent("detections.jsonl")
+        try Data().write(to: detectionsURL)
+
+        let detections = try store.readDetections(sessionId: manifest.sessionId)
+        #expect(detections.count == 1)
+        #expect(detections[0].code == "riding")
+        #expect(detections[0].id == "legacy-1")
+        #expect(!FileManager.default.fileExists(atPath: assumptionsURL.path))
+    }
+
+    @Test func legacyTransferAssumptionsBecomeDetections() throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let json = Data(
+            #"""
+            {
+              "manifest": {
+                "schemaVersion": 2,
+                "sessionId": "s1",
+                "testerId": "t",
+                "appVersion": "1.0",
+                "buildNumber": "1",
+                "watchModel": "Ultra2",
+                "systemVersion": "26.0",
+                "startedAt": "2024-01-01T00:00:00Z",
+                "transferState": "acknowledged"
+              },
+              "labels": [{"code":"waiting","id":"l1","timestamp":"2024-01-01T00:00:00Z"}],
+              "assumptions": [{"code":"riding","id":"a1","reason":"ride_start","timestamp":"2024-01-01T00:00:01Z"}],
+              "locations": [],
+              "health": []
+            }
+            """#.utf8
+        )
+        let package = try decoder.decode(SessionTransferPackage.self, from: json)
+        #expect(package.detections.count == 1)
+        #expect(package.detections[0].code == "riding")
+        #expect(package.detections[0].id == "a1")
     }
 
     @Test func failedTransferDoesNotDropReadySessions() throws {
@@ -244,7 +319,10 @@ struct SessionFileStoreTests {
         #expect(afterCreate > 0)
         #expect(try store.totalStoredByteSize() == afterCreate)
 
-        try store.appendLabel(LabelEvent(code: LabelCodes.riding), sessionId: manifest.sessionId)
+        try store.appendDetection(
+            DetectionEvent(code: DetectionCodes.riding, reason: "t", detectorId: "t"),
+            sessionId: manifest.sessionId
+        )
         try store.appendLocationSamples([
             LocationSample(
                 timestamp: Date(timeIntervalSince1970: 10),
@@ -278,7 +356,10 @@ struct SessionFileStoreTests {
                     systemVersion: "26.0"
                 )
             )
-            try store.appendLabel(LabelEvent(code: LabelCodes.waiting), sessionId: id)
+            try store.appendDetection(
+                DetectionEvent(code: DetectionCodes.paused, reason: "t", detectorId: "t"),
+                sessionId: id
+            )
             sizes.append(try store.sessionByteSize(sessionId: id))
         }
         #expect(try store.totalStoredByteSize() == sizes.reduce(0, +))
@@ -310,7 +391,10 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         try store.createSession(manifest: manifest)
-        try store.appendLabel(LabelEvent(code: LabelCodes.waiting), sessionId: manifest.sessionId)
+        try store.appendDetection(
+            DetectionEvent(code: DetectionCodes.paused, reason: "t", detectorId: "t"),
+            sessionId: manifest.sessionId
+        )
         #expect(try store.listSessionIDs() == ["to-delete"])
 
         try store.deleteSession(sessionId: manifest.sessionId)

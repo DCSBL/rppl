@@ -19,14 +19,21 @@ struct ContentView: View {
                     .font(.headline)
 
                 if session.isRunning {
-                    Text(session.assumedLabel.uppercased())
+                    Text(session.lastConfidentCode.uppercased())
                         .font(.title2.bold())
+                    if session.isUnsure {
+                        Text("unsure")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Text(timeString(session.elapsed))
                         .monospacedDigit()
                     Text("Mode: \(session.recordingMode)")
                         .font(.caption2)
-                    Text("GPS \(session.locationCount)  MOT \(session.motionCount)  ASM \(session.assumptionCount)")
-                        .font(.caption2)
+                    Text(
+                        "GPS \(session.locationCount)  MOT \(session.motionCount)  DET \(session.detectionCount)"
+                    )
+                    .font(.caption2)
                     Text("Stored \(ByteSizeFormat.string(session.storedByteSize))")
                         .font(.caption2)
                         .monospacedDigit()
@@ -80,6 +87,9 @@ struct ContentView: View {
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
+                Text("Action Button: Workout › Rppl (start only)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

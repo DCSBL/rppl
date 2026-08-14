@@ -176,7 +176,7 @@ struct ContentView: View {
 
 private enum SessionDetailLoadPhase: Equatable {
     case manifest
-    case labels
+    case detections
     case locations
     case ready
     case cancelled
@@ -189,8 +189,7 @@ struct SessionDetailView: View {
     private static let mapPointBudget = 800
 
     @State private var manifest: SessionManifest?
-    @State private var labels: [LabelEvent] = []
-    @State private var assumptions: [AssumptionEvent] = []
+    @State private var detections: [DetectionEvent] = []
     /// Downsampled for MapKit; full count lives in `locationCount`.
     @State private var mapLocations: [LocationSample] = []
     @State private var locationCount = 0
@@ -204,7 +203,7 @@ struct SessionDetailView: View {
 
     private var isLoading: Bool {
         switch loadPhase {
-        case .manifest, .labels, .locations: return true
+        case .manifest, .detections, .locations: return true
         case .ready, .cancelled: return false
         }
     }
@@ -267,7 +266,7 @@ struct SessionDetailView: View {
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 80)
                     } else {
-                        Text("Map loads after GPS…")
+                        Text("Map loads after detections")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 80)
@@ -279,56 +278,32 @@ struct SessionDetailView: View {
                 }
             }
 
-            Section("Legacy labels (\(labels.count))") {
-                if loadPhase == .labels {
+            Section("Detections (\(detections.count))") {
+                if loadPhase == .detections {
                     HStack(spacing: 8) {
                         ProgressView()
-                        Text("Loading labels…")
+                        Text("Loading detections…")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                } else if labels.isEmpty {
-                    Text("No legacy labels in this session.")
+                } else if detections.isEmpty {
+                    Text("No detections in this session.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                ForEach(labels) { label in
-                    VStack(alignment: .leading) {
-                        Text(label.code).font(.headline)
-                        Text(label.timestamp.formatted(date: .omitted, time: .standard))
-                            .font(.caption)
-                        if let gps = label.gps {
-                            Text(String(format: "%.5f, %.5f", gps.latitude, gps.longitude))
-                                .font(.caption2)
-                                .monospaced()
-                        }
-                        if let water = label.waterSubmersionState {
-                            Text("water: \(water)").font(.caption2)
-                        }
-                        if let temp = label.waterTemperatureCelsius {
-                            Text(String(format: "waterTemp: %.1f°C", temp)).font(.caption2)
-                        }
-                        if let activity = label.motionActivity {
-                            Text("activity: \(activity)").font(.caption2)
-                        }
-                    }
-                }
-            }
-
-            Section("Assumptions (\(assumptions.count))") {
-                if assumptions.isEmpty && loadPhase != .labels && loadPhase != .manifest {
-                    Text("No auto assumptions in this session.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(assumptions) { assumption in
+                ForEach(detections) { detection in
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(assumption.code).font(.headline)
-                        Text(assumption.timestamp.formatted(date: .omitted, time: .standard))
+                        Text(detection.code).font(.headline)
+                        Text(detection.timestamp.formatted(date: .omitted, time: .standard))
                             .font(.caption)
-                        Text(assumption.reason)
+                        Text(detection.reason)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                        if detection.supersedesId != nil {
+                            Text("revision")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        }
                     }
                 }
             }
@@ -336,7 +311,7 @@ struct SessionDetailView: View {
             Section("Samples") {
                 LabeledContent(
                     "GPS points",
-                    value: loadPhase == .locations || loadPhase == .labels || loadPhase == .manifest
+                    value: loadPhase == .locations || loadPhase == .detections || loadPhase == .manifest
                         ? "…"
                         : "\(locationCount)"
                 )
@@ -393,7 +368,7 @@ struct SessionDetailView: View {
     private var loadStatusText: String {
         switch loadPhase {
         case .manifest: return "Loading manifest…"
-        case .labels: return "Loading labels…"
+        case .detections: return "Loading detections…"
         case .locations: return "Loading GPS…"
         case .ready: return "Ready"
         case .cancelled: return "Cancelled"
@@ -409,8 +384,7 @@ struct SessionDetailView: View {
     private func retryLoad() {
         cancelLoad()
         errorText = nil
-        labels = []
-        assumptions = []
+        detections = []
         mapLocations = []
         locationCount = 0
         // Keep manifest if already loaded; otherwise clear for a full restart.
@@ -445,17 +419,13 @@ struct SessionDetailView: View {
             }
             try Task.checkCancellation()
             manifest = loadedManifest
-            loadPhase = .labels
+            loadPhase = .detections
 
-            let labelBundle = try await Self.runStoreIO {
-                let labels = try store.readLabels(sessionId: sessionId)
-                try Task.checkCancellation()
-                let assumptions = try store.readAssumptions(sessionId: sessionId)
-                return (labels, assumptions)
+            let loadedDetections = try await Self.runStoreIO {
+                try store.readDetections(sessionId: sessionId)
             }
             try Task.checkCancellation()
-            labels = labelBundle.0
-            assumptions = labelBundle.1
+            detections = loadedDetections
             loadPhase = .locations
 
             let locationBundle = try await Self.runStoreIO {
@@ -473,7 +443,7 @@ struct SessionDetailView: View {
             loadTask = nil
             WakeLog.debug(
                 .ui,
-                "SessionDetail loaded labels=\(labels.count) assumptions=\(assumptions.count) gps=\(locationCount) size=\(ByteSizeFormat.string(storedByteSize))"
+                "SessionDetail loaded detections=\(detections.count) gps=\(locationCount) size=\(ByteSizeFormat.string(storedByteSize))"
             )
         } catch is CancellationError {
             if loadPhase != .ready {

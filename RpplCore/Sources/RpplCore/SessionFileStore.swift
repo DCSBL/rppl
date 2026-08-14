@@ -21,12 +21,12 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 /// ```
 /// <root>/<sessionId>/
 ///   manifest.json
-///   labels.jsonl
-///   assumptions.jsonl
+///   detections.jsonl
 ///   location-000.jsonl
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 /// ```
+/// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
     public let rootURL: URL
     private let fileManager: FileManager
@@ -57,13 +57,9 @@ public final class SessionFileStore: @unchecked Sendable {
         let dir = sessionDirectory(for: manifest.sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         try writeManifest(manifest)
-        let labelsURL = dir.appendingPathComponent("labels.jsonl")
-        if !fileManager.fileExists(atPath: labelsURL.path) {
-            fileManager.createFile(atPath: labelsURL.path, contents: nil)
-        }
-        let assumptionsURL = dir.appendingPathComponent("assumptions.jsonl")
-        if !fileManager.fileExists(atPath: assumptionsURL.path) {
-            fileManager.createFile(atPath: assumptionsURL.path, contents: nil)
+        let detectionsURL = dir.appendingPathComponent("detections.jsonl")
+        if !fileManager.fileExists(atPath: detectionsURL.path) {
+            fileManager.createFile(atPath: detectionsURL.path, contents: nil)
         }
         return dir
     }
@@ -87,12 +83,9 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
-    public func appendLabel(_ event: LabelEvent, sessionId: String) throws {
-        try appendJSONLine(event, to: "labels.jsonl", sessionId: sessionId)
-    }
-
-    public func appendAssumption(_ event: AssumptionEvent, sessionId: String) throws {
-        try appendJSONLine(event, to: "assumptions.jsonl", sessionId: sessionId)
+    public func appendDetection(_ event: DetectionEvent, sessionId: String) throws {
+        try migrateAssumptionsIfNeeded(sessionId: sessionId)
+        try appendJSONLine(event, to: "detections.jsonl", sessionId: sessionId)
     }
 
     public func appendLocationSamples(_ samples: [LocationSample], sessionId: String, chunkIndex: Int = 0) throws {
@@ -120,12 +113,11 @@ public final class SessionFileStore: @unchecked Sendable {
         try CompressedJSONLFrames.appendFrame(jsonlUTF8: jsonl, to: url, fileManager: fileManager)
     }
 
-    /// Raw framed zlib bytes for WC transfer without expanding samples in memory.
-    public func readMotionFrameData(sessionId: String, chunkIndex: Int = 0) throws -> Data? {
-        let url = sessionDirectory(for: sessionId)
-            .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
-        guard fileManager.fileExists(atPath: url.path) else { return nil }
-        return try Data(contentsOf: url)
+    public func appendHealthSamples(_ samples: [HealthMetricSample], sessionId: String, chunkIndex: Int = 0) throws {
+        let name = String(format: "health-%03d.jsonl", chunkIndex)
+        for sample in samples {
+            try appendJSONLine(sample, to: name, sessionId: sessionId)
+        }
     }
 
     public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
@@ -135,19 +127,19 @@ public final class SessionFileStore: @unchecked Sendable {
         try data.write(to: url, options: [.atomic])
     }
 
+    public func readMotionFrameData(sessionId: String, chunkIndex: Int = 0) throws -> Data? {
+        let url = sessionDirectory(for: sessionId)
+            .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+        guard fileManager.fileExists(atPath: url.path) else { return nil }
+        return try Data(contentsOf: url)
+    }
+
     private static func motionCompressedFileName(chunkIndex: Int) -> String {
         String(format: "motion-%03d.jsonl.zlib", chunkIndex)
     }
 
     private static func motionLegacyFileName(chunkIndex: Int) -> String {
         String(format: "motion-%03d.jsonl", chunkIndex)
-    }
-
-    public func appendHealthSamples(_ samples: [HealthMetricSample], sessionId: String, chunkIndex: Int = 0) throws {
-        let name = String(format: "health-%03d.jsonl", chunkIndex)
-        for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
-        }
     }
 
     public func listSessionIDs() throws -> [String] {
@@ -204,12 +196,52 @@ public final class SessionFileStore: @unchecked Sendable {
         return total
     }
 
-    public func readLabels(sessionId: String) throws -> [LabelEvent] {
-        try readJSONL(LabelEvent.self, from: "labels.jsonl", sessionId: sessionId)
+    /// Reads detections, migrating legacy `assumptions.jsonl` once when needed.
+    public func readDetections(sessionId: String) throws -> [DetectionEvent] {
+        try migrateAssumptionsIfNeeded(sessionId: sessionId)
+        return try readJSONL(DetectionEvent.self, from: "detections.jsonl", sessionId: sessionId)
     }
 
-    public func readAssumptions(sessionId: String) throws -> [AssumptionEvent] {
-        try readJSONL(AssumptionEvent.self, from: "assumptions.jsonl", sessionId: sessionId)
+    /// Copy/rename legacy assumptions → detections when detections file is missing or empty
+    /// and assumptions exist.
+    @discardableResult
+    public func migrateAssumptionsIfNeeded(sessionId: String) throws -> Bool {
+        let dir = sessionDirectory(for: sessionId)
+        let detectionsURL = dir.appendingPathComponent("detections.jsonl")
+        let assumptionsURL = dir.appendingPathComponent("assumptions.jsonl")
+
+        let detectionsExists = fileManager.fileExists(atPath: detectionsURL.path)
+        let assumptionsExists = fileManager.fileExists(atPath: assumptionsURL.path)
+        guard assumptionsExists else {
+            if !detectionsExists {
+                fileManager.createFile(atPath: detectionsURL.path, contents: nil)
+            }
+            return false
+        }
+
+        let detectionsEmpty: Bool = {
+            guard detectionsExists,
+                  let attrs = try? fileManager.attributesOfItem(atPath: detectionsURL.path),
+                  let size = attrs[.size] as? NSNumber
+            else {
+                return true
+            }
+            return size.intValue == 0
+        }()
+
+        guard detectionsEmpty else { return false }
+
+        // Legacy AssumptionEvent JSON is a subset of DetectionEvent fields except missing detectorId.
+        // Re-encode through a bridge decode.
+        let legacyLines = try readLegacyAssumptionLines(from: assumptionsURL)
+        if !fileManager.fileExists(atPath: detectionsURL.path) {
+            fileManager.createFile(atPath: detectionsURL.path, contents: nil)
+        }
+        for event in legacyLines {
+            try appendJSONLine(event, to: "detections.jsonl", sessionId: sessionId)
+        }
+        try? fileManager.removeItem(at: assumptionsURL)
+        return true
     }
 
     public func readLocationSamples(sessionId: String, chunkIndex: Int = 0) throws -> [LocationSample] {
@@ -237,16 +269,11 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     /// Sessions waiting for a successful phone ack. Never delete these on transfer failure.
-    ///
-    /// Unreadable sibling folders (missing/corrupt manifest) are skipped so one dormant
-    /// directory cannot hide ready sessions from the pending transfer list.
     public func sessionsNeedingTransfer() throws -> [SessionManifest] {
         let manifests = try listReadableManifests()
         return TransferPendingFilter.needingTransfer(manifests)
     }
 
-    /// Loads manifests for every session directory that has a valid `manifest.json`.
-    /// Skips empty or corrupt folders instead of failing the whole list.
     public func listReadableManifests() throws -> [SessionManifest] {
         try listSessionIDs().compactMap { sessionId in
             try? readManifest(sessionId: sessionId)
@@ -260,7 +287,6 @@ public final class SessionFileStore: @unchecked Sendable {
         }
 
         let zipURL = destinationURL.appendingPathComponent("\(sessionId).json")
-        // For alpha: package as a single JSON bundle for reliable WC transfer without zip deps.
         let package = try buildTransferPackage(sessionId: sessionId)
         let data = try encoder.encode(package)
         try data.write(to: zipURL, options: [.atomic])
@@ -270,11 +296,8 @@ public final class SessionFileStore: @unchecked Sendable {
     public func importTransferPackage(_ package: SessionTransferPackage, intoPhoneStore phoneRoot: URL) throws {
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
         _ = try phoneStore.createSession(manifest: package.manifest)
-        for label in package.labels {
-            try phoneStore.appendLabel(label, sessionId: package.manifest.sessionId)
-        }
-        for assumption in package.assumptions {
-            try phoneStore.appendAssumption(assumption, sessionId: package.manifest.sessionId)
+        for detection in package.detections {
+            try phoneStore.appendDetection(detection, sessionId: package.manifest.sessionId)
         }
         try phoneStore.appendLocationSamples(package.locations, sessionId: package.manifest.sessionId)
         if let frames = package.motionFramesZlib, !frames.isEmpty {
@@ -290,11 +313,9 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
         let manifest = try readManifest(sessionId: sessionId)
-        let labels = try readLabels(sessionId: sessionId)
-        let assumptions = try readAssumptions(sessionId: sessionId)
+        let detections = try readDetections(sessionId: sessionId)
         let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
         let motionFrames = try readMotionFrameData(sessionId: sessionId)
-        // Prefer compressed frames on the wire; only expand legacy plain JSONL sessions.
         let motion: [MotionSample]
         if motionFrames == nil {
             motion = (try? readMotionSamples(sessionId: sessionId)) ?? []
@@ -304,8 +325,7 @@ public final class SessionFileStore: @unchecked Sendable {
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         return SessionTransferPackage(
             manifest: manifest,
-            labels: labels,
-            assumptions: assumptions,
+            detections: detections,
             locations: locations,
             motion: motion,
             motionFramesZlib: motionFrames,
@@ -326,6 +346,28 @@ public final class SessionFileStore: @unchecked Sendable {
             from: Self.motionLegacyFileName(chunkIndex: chunkIndex),
             sessionId: sessionId
         )
+    }
+
+    private func readLegacyAssumptionLines(from url: URL) throws -> [DetectionEvent] {
+        guard fileManager.fileExists(atPath: url.path) else { return [] }
+        let data = try Data(contentsOf: url)
+        guard let text = String(data: data, encoding: .utf8) else {
+            throw SessionStoreError.ioFailure("Invalid UTF-8 in assumptions.jsonl")
+        }
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
+        var result: [DetectionEvent] = []
+        for line in lines {
+            guard let lineData = line.data(using: .utf8) else { continue }
+            if let event = try? decoder.decode(DetectionEvent.self, from: lineData) {
+                result.append(event)
+                continue
+            }
+            // Legacy AssumptionEvent lacked detectorId — bridge via flexible decode.
+            if let legacy = try? decoder.decode(LegacyAssumptionLine.self, from: lineData) {
+                result.append(legacy.asDetectionEvent())
+            }
+        }
+        return result
     }
 
     private func appendJSONLine<T: Encodable>(_ value: T, to fileName: String, sessionId: String) throws {
@@ -361,7 +403,6 @@ public final class SessionFileStore: @unchecked Sendable {
         var result: [T] = []
         result.reserveCapacity(lines.count)
         for (index, line) in lines.enumerated() {
-            // Cooperative cancel when called from a Task (detail load / export).
             if index.isMultiple(of: 256), Task.isCancelled {
                 throw CancellationError()
             }
@@ -374,10 +415,33 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 }
 
+/// Bridge for pre-v3 `assumptions.jsonl` lines (no `detectorId`).
+private struct LegacyAssumptionLine: Decodable {
+    var id: String?
+    var code: String
+    var timestamp: Date
+    var reason: String
+    var speedMps: Double?
+    var waterSubmersionState: String?
+    var motionActivity: String?
+
+    func asDetectionEvent() -> DetectionEvent {
+        DetectionEvent(
+            id: id ?? UUID().uuidString,
+            code: code,
+            timestamp: timestamp,
+            reason: reason,
+            detectorId: "legacy_assumption",
+            speedMps: speedMps,
+            waterSubmersionState: waterSubmersionState,
+            motionActivity: motionActivity
+        )
+    }
+}
+
 public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var manifest: SessionManifest
-    public var labels: [LabelEvent]
-    public var assumptions: [AssumptionEvent]
+    public var detections: [DetectionEvent]
     public var locations: [LocationSample]
     /// Expanded motion samples (legacy packages / tiny fixtures). Prefer `motionFramesZlib` for sessions.
     public var motion: [MotionSample]
@@ -387,16 +451,14 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
 
     public init(
         manifest: SessionManifest,
-        labels: [LabelEvent],
-        assumptions: [AssumptionEvent] = [],
+        detections: [DetectionEvent] = [],
         locations: [LocationSample],
         motion: [MotionSample] = [],
         motionFramesZlib: Data? = nil,
         health: [HealthMetricSample]
     ) {
         self.manifest = manifest
-        self.labels = labels
-        self.assumptions = assumptions
+        self.detections = detections
         self.locations = locations
         self.motion = motion
         self.motionFramesZlib = motionFramesZlib
@@ -406,8 +468,15 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         manifest = try container.decode(SessionManifest.self, forKey: .manifest)
-        labels = try container.decode([LabelEvent].self, forKey: .labels)
-        assumptions = try container.decodeIfPresent([AssumptionEvent].self, forKey: .assumptions) ?? []
+        if let detections = try container.decodeIfPresent([DetectionEvent].self, forKey: .detections) {
+            self.detections = detections
+        } else if let assumptions = try container.decodeIfPresent([DetectionEvent].self, forKey: .assumptions) {
+            self.detections = assumptions
+        } else {
+            self.detections = []
+        }
+        // Discard legacy labels if present.
+        _ = try container.decodeIfPresent([LegacyDiscardable].self, forKey: .labels)
         locations = try container.decode([LocationSample].self, forKey: .locations)
         motion = try container.decodeIfPresent([MotionSample].self, forKey: .motion) ?? []
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
@@ -417,12 +486,10 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(manifest, forKey: .manifest)
-        try container.encode(labels, forKey: .labels)
-        try container.encode(assumptions, forKey: .assumptions)
+        try container.encode(detections, forKey: .detections)
         try container.encode(locations, forKey: .locations)
         if let motionFramesZlib, !motionFramesZlib.isEmpty {
             try container.encode(motionFramesZlib, forKey: .motionFramesZlib)
-            // Omit expanded motion when frames present — avoids megabyte JSON arrays on the wire.
         } else {
             try container.encode(motion, forKey: .motion)
         }
@@ -430,7 +497,22 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, labels, assumptions, locations, motion, motionFramesZlib, health
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health
+    }
+}
+
+/// Opaque decode sink for discarded legacy `labels` arrays.
+private struct LegacyDiscardable: Decodable {
+    private struct AnyKey: CodingKey {
+        var stringValue: String
+        init?(stringValue: String) { self.stringValue = stringValue }
+        var intValue: Int? { nil }
+        init?(intValue: Int) { nil }
+    }
+
+    init(from decoder: Decoder) throws {
+        // Accept any keyed JSON object (old LabelEvent lines).
+        _ = try decoder.container(keyedBy: AnyKey.self)
     }
 }
 

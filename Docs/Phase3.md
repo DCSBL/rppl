@@ -1,100 +1,69 @@
 # Phase 3 — Auto-detection roadmap
 
-Library UML (Assumer filter / holds / rules): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System assumption sequence: [DESIGN.md](DESIGN.md).
+Library UML (filter / holds / detectors): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System map: [DESIGN.md](DESIGN.md).
 
 ## Goal
 
-Propose segment labels from GPS speed + Ultra water submersion (+ weak CMMotionActivity). Labels stay opaque strings (`waiting`, `riding`, `swimming`, `walking`, …). Manual labeling and Action Button integration are removed; Assumer is the live writer.
+Detect **rides** and **pauses** from GPS speed in real time so testers need no Action Button labeling. Codes stay opaque strings (`riding`, `paused`, `unsure`).
 
-## Assumption stream (live now)
-
-During a Watch session:
+## Detection stream (live now)
 
 | Stream | Source | File |
 |--------|--------|------|
-| Auto assumptions | `SegmentAssumer` transitions | `assumptions.jsonl` |
-| Legacy manual labels | Older builds only | `labels.jsonl` (empty on new sessions) |
+| Auto detections | `DetectionEngine` transitions + lookback | `detections.jsonl` |
 
-- Assumer starts with `waiting` + `reason=session_start`.
-- Writes **only on code change** (no heartbeats).
-- Each `AssumptionEvent` has a `reason` string with rule id + speeds in **km/h**.
-- Watch UI: assumed code primary.
-- Phone: list assumptions; Share JSON includes `assumptions` array.
+- Starts with `paused` + `reason=session_start`.
+- Writes **only on code change** / revision (no heartbeats).
+- Each `DetectionEvent` has `detectorId` + `reason` (speeds in **km/h**) and optional `supersedesId`.
+- Watch UI: last confident `riding`/`paused` primary; `unsure` sublabel when soft GPS.
+- Phone: list detections; Share JSON includes `detections`.
+- Manual labels / Cycle Label removed.
 
-Pure FSM: `RpplCore` (`SegmentAssumer`, `AssumptionThresholds`, `SpeedUnits`). Covered by `swift test`.
+Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`). Covered by `swift test` including `replay`.
 
-## ASSUMPTION thresholds (v0, km/h)
+## Detection thresholds (v1, km/h)
 
 | Constant | Value | Notes |
 |----------|-------|-------|
-| Ride enter | ≥15 km/h × 2.0 s | Below typical cable >22; above walk/swim ceiling 10 |
-| Swim (Ultra) | `submerged` AND ≤10 km/h (or nil speed) | No speed-only swim |
-| Failed start | Ride age <5 s, ≤4 km/h, not submerged → `waiting` | |
-| Long stop | Ride age ≥5 s, ≤4 km/h × 3 s, not submerged → `waiting` | End-of-run without fall |
-| Walk | activity `walking` OR 2–10 km/h × 3 s | |
-| Wait settle | ≤1.5 km/h × 5 s, activity ≠ walking | |
-| GPS accuracy gate | >25 m skips speed transitions | Water→swim still OK |
+| Ride enter | ≥15 km/h × 2.0 s | From `paused` |
+| Ride exit | ≤4 km/h × 3.0 s | Usable GPS only |
+| GPS gap → unsure | unusable × 3.0 s while riding | Not immediate pause |
+| Same-ride merge | unsure age &lt; 180 s | Lookback supersede if speed returns high |
+| Unsure timeout | ≥180 s | Force `paused` → next enter is new ride |
+| GPS accuracy gate | >25 m skips speed | |
+| Implausible / jump | >45 km/h / ≥30 km/h jump | |
 
-Non-Ultra auto-swim deferred. Knots/mph later for display only.
+Water / motion activity logged on ticks; unused by MVP detectors. Non-Ultra fine.
 
 ## Input
 
-iPhone Share export is pretty-printed `SessionTransferPackage` JSON (`manifest`, `labels`, `assumptions`, `locations`, plus motion/health when present).
-
-- `LocationSample` / `GPSSnapshot.speed` — meters per second (nil when invalid).
-- `LabelEvent` — legacy manual events (may be empty).
-- `AssumptionEvent` — auto proposal + `reason`.
-- Streams detail: [DataCollection.md](DataCollection.md). Hypotheses: [Ideas.md](Ideas.md).
+iPhone Share export is pretty-printed `SessionTransferPackage` JSON (`manifest`, `detections`, `locations`, plus motion/health when present).
 
 ## Order
 
 ```mermaid
 flowchart LR
-  collect[Phase2 collect sensors]
-  assume[Live Assumer assumptions]
-  docs[Docs idea book plus Phase3 plan]
+  collect[Phase2 collect GPS]
+  detect[Live DetectionEngine]
+  docs[Docs + Core UML]
   viz[Mac timeline viz]
-  core[Core rule detector plus tests]
-  live[Watch assumed face plus optional override]
+  tune[Threshold tune via replay]
   collect --> docs
-  docs --> assume
-  assume --> viz
-  viz --> core
-  core --> live
+  docs --> detect
+  detect --> viz
+  viz --> tune
 ```
 
-**Done this slice:** Core Assumer + live Watch writer + phone list/export. Assumed code is primary Watch UI.
+**Done this slice:** Core detectors + live Watch writer + phone list/export + offline replay + schema v3.
 
-**Next:** Mac timeline viz with assumed lane and threshold scrubbers. Then tighten constants / optional live override UX.
-
-## Step A — Mac timeline viz (next code)
-
-New macOS app/target in this repo (or SPM tool + SwiftUI Mac).
-
-- Open exported session JSON or dropped session folder.
-- Timeline: speed vs time, **assumed** markers (plus legacy manual markers when present), map track.
-- Editable threshold scrubbers.
-- Keep chart/data-prep separable for Core / iOS reuse.
-
-## Step B — Synth / real fixtures
-
-- Synth ticks already in `RpplCoreTests` (`SegmentAssumerTests`).
-- **Real exports:** drop into `Exports/` (gitignored). Do not commit private park GPS without consent.
-
-## Step C — Core detector
-
-`SegmentAssumer` shipped as v0. Expand fixtures as park days land. Opaque string codes only.
-
-## Step D — Live Watch (shipped)
-
-Feed Assumer from live GPS + water-edge ticks. Assumed code on face is the primary Watch label. Optional “override wins / fewer presses” UX still later.
+**Next:** Mac timeline viz with detections lane and threshold scrubbers. Then ride-length / rounds metrics.
 
 ## Non-goals (Phase 3)
 
 - Park profiles / dock geofence hardcoding ([Ideas.md](Ideas.md) Deferred)
 - Trick detection / full taxonomy
+- Manual Action Button labeling
 - CloudKit
 - Phone label editor
-- Manual / Action Button labeling
 - ML models
-- Non-Ultra speed-only auto-`swimming`
+- Water-required auto-swim

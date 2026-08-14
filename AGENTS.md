@@ -24,28 +24,28 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 
 - Watch records; iPhone views/exports; Mac analyzes.
 - Prefer reliable checkpoints over pretty UI.
-- Prefer extending opaque string label codes over closed Swift enums.
+- Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/labels/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / Assumer: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
 
 ## Architecture rules
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `RpplCore` | Models, schema, file store, `LabelCodes`, `SegmentAssumer` (+ filter/holds/rules), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, WC send, thin Assumer probes | Business decisions that can be pure functions |
-| `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing (Phase 2), session engine |
+| `RpplCore` | Models, schema, file store, `DetectionCodes`, `DetectionEngine` (+ filter/holds/detectors), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
+| `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing, session engine |
 
-App probes read live `WCSession` / sensors, then call Core resolvers/Assumer. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
+App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Hard constraints (do not “helpfully” break)
 
 1. **HealthKit dry-run:** use workout session + builder for runtime/sensors; **do not `finishWorkout()` / save to Health** in alpha. Still mirror HR/active energy into our JSONL.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day**; no pause unless product decision changes.
-4. **Label codes are strings** (`waiting`, `riding`, `swimming`, `walking`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
-5. **iPhone Phase 2 = view-only** — no label editor.
+4. **Detection codes are strings** (`riding`, `paused`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
+5. **iPhone = view-only** — no label editor; no manual Action Button labeling.
 6. **OS floor:** iOS 26+ / watchOS 26+.
 7. **Water Lock** on session start.
 
@@ -67,11 +67,11 @@ App probes read live `WCSession` / sensors, then call Core resolvers/Assumer. Do
 
 | Task | Start here |
 |------|------------|
-| Opaque segment codes | `RpplCore/.../LabelCodes.swift` |
-| Assumer / thresholds / rules | `SegmentAssumer.swift`, `AssumerTransitions.swift`, `AssumptionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |
+| Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
@@ -87,7 +87,6 @@ App probes read live `WCSession` / sensors, then call Core resolvers/Assumer. Do
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
-- Manual labeling / Action Button integration (removed; Assumer is live writer)
 - Mac viz, Core Assumer threshold invention, or park profiles until explicitly requested ([Docs/Phase3.md](Docs/Phase3.md), [Docs/Ideas.md](Docs/Ideas.md))
 
 ## When unsure

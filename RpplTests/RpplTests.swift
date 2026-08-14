@@ -2,8 +2,11 @@ import Testing
 import RpplCore
 
 struct RpplTests {
-    @Test func labelCodesAreOpaqueStrings() {
-        #expect(LabelCodes.waiting == "waiting")
-        #expect(LabelCodes.riding == "riding")
+    @Test func detectionCodesExposeRidePauseUnsure() {
+        #expect(DetectionCodes.riding == "riding")
+        #expect(DetectionCodes.paused == "paused")
+        #expect(DetectionCodes.unsure == "unsure")
+        #expect(DetectionCodes.isConfident(DetectionCodes.riding))
+        #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
     }
 }

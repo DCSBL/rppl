@@ -1,6 +1,6 @@
 # RpplCore — design
 
-Pure Swift package: models, session IO, sync resolvers, and the **segment Assumer** FSM. No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
+Pure Swift package: models, session IO, sync resolvers, and the **DetectionEngine** (filter → holds → detectors → lookback). No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
 
 Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · Phase 3: [../Docs/Phase3.md](../Docs/Phase3.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
 
@@ -11,49 +11,43 @@ classDiagram
   direction TB
 
   class SessionManifest
-  class LabelEvent
-  class AssumptionEvent
+  class DetectionEvent
   class LocationSample
   class MotionSample
   class HealthMetricSample
   class SessionTransferPackage
   class SessionFileStore
-  class LabelCodes
+  class DetectionCodes
   class TransferPendingFilter
   class SyncConnectionResolver
-  class SegmentAssumer
-  class AssumerSignalFilter
-  class AssumerHoldClock
-  class AssumerRuleSet
-  class AssumerTransitionRule
-  class AssumptionThresholds
+  class DetectionEngine
+  class GpsSignalFilter
+  class DetectionHoldClock
+  class Detector
+  class DetectionThresholds
   class SpeedUnits
 
   SessionFileStore --> SessionManifest : read/write
-  SessionFileStore --> LabelEvent : labels.jsonl legacy
-  SessionFileStore --> AssumptionEvent : assumptions.jsonl
+  SessionFileStore --> DetectionEvent : detections.jsonl
   SessionFileStore --> LocationSample
   SessionFileStore --> MotionSample
   SessionFileStore --> HealthMetricSample
   SessionFileStore --> SessionTransferPackage : build/import
 
   SessionTransferPackage --> SessionManifest
-  SessionTransferPackage --> LabelEvent
-  SessionTransferPackage --> AssumptionEvent
+  SessionTransferPackage --> DetectionEvent
   SessionTransferPackage --> LocationSample
   SessionTransferPackage --> MotionSample
   SessionTransferPackage --> HealthMetricSample
 
-  SegmentAssumer --> LabelCodes : opaque strings
-  SegmentAssumer --> AssumerSignalFilter : filter tick
-  SegmentAssumer --> AssumerHoldClock : sustained holds
-  SegmentAssumer --> AssumerRuleSet : first match
-  SegmentAssumer --> AssumptionEvent : on transition
-  SegmentAssumer --> AssumptionThresholds
-  AssumerRuleSet --> AssumerTransitionRule : ordered rules
-  AssumerSignalFilter --> AssumptionThresholds
-  AssumerHoldClock --> AssumptionThresholds
-  AssumptionThresholds --> SpeedUnits : km/h to m/s
+  DetectionEngine --> GpsSignalFilter : filter tick
+  DetectionEngine --> DetectionHoldClock : sustained holds
+  DetectionEngine --> Detector : first match
+  DetectionEngine --> DetectionEvent : on transition / revision
+  DetectionEngine --> DetectionThresholds
+  GpsSignalFilter --> DetectionThresholds
+  DetectionHoldClock --> DetectionThresholds
+  DetectionThresholds --> SpeedUnits : km/h to m/s
 
   SyncConnectionResolver ..> SyncConnectionState : resolve UI wording
   TransferPendingFilter --> SessionManifest
@@ -62,117 +56,97 @@ classDiagram
 | Area | Types | Role |
 |------|--------|------|
 | Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package |
-| Segment codes | `LabelCodes`, legacy `LabelEvent` | Opaque strings; `LabelEvent` for old packages |
-| Assumptions | `AssumptionEvent`, `AssumerTick`, `SegmentAssumer`, filter/holds/rules | Live Assumer stream |
+| Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
-| Units | `SpeedUnits`, `AssumptionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
+| Units | `SpeedUnits`, `DetectionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
 
-Opaque label **codes are strings** (`waiting`, `riding`, …). Unknown codes must round-trip. No closed taxonomy enum yet.
+Opaque detection **codes are strings** (`riding`, `paused`, `unsure`). Unknown codes must round-trip.
 
-## Assumer pipeline
+## Detection pipeline
 
-Watch feeds `AssumerTick` (speed m/s, accuracy, water state, motion activity). Core never imports CoreLocation / CoreMotion — apps map Apple types into ticks.
+Watch feeds `DetectionTick` (speed m/s, accuracy, optional water/activity). Core never imports CoreLocation / CoreMotion.
 
 ```mermaid
 flowchart LR
-  tick[AssumerTick]
-  filter[AssumerSignalFilter]
-  holds[AssumerHoldClock]
-  rules[AssumerRuleSet]
-  event[AssumptionEvent?]
+  tick[DetectionTick]
+  filter[GpsSignalFilter]
+  holds[DetectionHoldClock]
+  dets[Detectors]
+  merge[LookbackMerger]
+  event[DetectionEvent]
   tick --> filter
   filter -->|usableSpeed or nil| holds
-  filter --> rules
-  holds --> rules
-  rules -->|first match for currentCode| event
+  filter --> dets
+  holds --> dets
+  dets --> merge
+  merge --> event
 ```
 
-1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 45 km/h, jump ≥ 30 km/h vs last usable). Water/activity still available on the raw tick (Ultra swim can fire when speed is filtered).
-2. **Hold clock** — named sustained predicates (`highSpeed`, `stopped`, `walkBand`, `waitSettle`). Bad/missing usable speed clears holds.
-3. **Rule set** — ordered `AssumerTransitionRule` list; first match for `currentCode` wins. Emit `AssumptionEvent` with km/h `reason` string.
+1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 45 km/h, jump ≥ 30 km/h vs last usable).
+2. **Hold clock** — `highSpeed`, `stopped`, `unusable`.
+3. **Lookback** — while `unsure`, usable fast within 3 min supersedes same ride; usable slow → paused; ≥ 3 min → timeout to paused (new ride later).
+4. **Detectors** — ordered plugins; first match wins (`unsure_timeout`, `gps_gap`, `ride_exit`, `ride_enter`).
 
-Session start: `makeSessionStartEvent()` → `waiting` + `reason=session_start`.
+Session start: `makeSessionStartEvent()` → `paused` + `reason=session_start`.
 
 ### Extending
 
 | Goal | Do this |
 |------|---------|
-| Tighter GPS filter | Adjust `AssumptionThresholds` or replace `AssumerSignalFilter` |
-| New sustained signal | Add `AssumerHoldKind` + predicate in `AssumerHoldClock.update` |
-| New behaviour / edge | New `AssumerTransitionRule` struct; append or prepend on `AssumerRuleSet` |
-| Custom corpus experiment | `SegmentAssumer(rules: AssumerRuleSet(rules: [...]))` |
+| Tighter GPS filter | Adjust `DetectionThresholds` or replace `GpsSignalFilter` |
+| New sustained signal | Add `DetectionHoldKind` + predicate |
+| New behaviour | New `Detector` struct; prepend/append on `DetectionEngine` init |
+| Offline experiment | `DetectionEngine.replay(ticks:)` or `replay(locations:)` |
 
-Default rules: `AssumerRuleSet.cableParkV0` (see [Docs/Phase3.md](../Docs/Phase3.md) threshold table).
-
-### Class detail (Assumer)
+### Class detail
 
 ```mermaid
 classDiagram
   direction LR
 
-  class SegmentAssumer {
-    +thresholds: AssumptionThresholds
+  class DetectionEngine {
+    +thresholds: DetectionThresholds
     +currentCode: String
-    +lastFilterRejection: String?
-    +makeSessionStartEvent(at) AssumptionEvent
-    +process(tick) AssumptionEvent?
+    +lastConfidentCode: String
+    +makeSessionStartEvent(at) DetectionEvent
+    +process(tick) DetectionEvent[]
+    +replay(ticks)$ DetectionEvent[]
   }
 
-  class AssumerSignalFilter {
+  class GpsSignalFilter {
     +evaluate(tick, previousUsableSpeedMps) Outcome
   }
 
-  class AssumerHoldClock {
+  class DetectionHoldClock {
     +duration(kind, at) TimeInterval?
     +update(timestamp, usableSpeedMps, thresholds)
-    +clear()
   }
 
-  class AssumerRuleSet {
-    +rules: AssumerTransitionRule[]
-    +firstMatch(from, ctx) optional
-    +cableParkV0$
-  }
-
-  class AssumerTransitionRule {
+  class Detector {
     <<protocol>>
     +id: String
-    +from: String
-    +to: String
-    +reasonIfMatches(ctx) String?
+    +evaluate(ctx) DetectionSignal?
   }
 
-  class AssumerEvalContext {
-    +currentCode: String
-    +tick: AssumerTick
-    +usableSpeedMps: Double?
-    +rideAge: TimeInterval?
-    +holds: AssumerHoldClock
-    +thresholds: AssumptionThresholds
-  }
-
-  SegmentAssumer --> AssumerSignalFilter
-  SegmentAssumer --> AssumerHoldClock
-  SegmentAssumer --> AssumerRuleSet
-  AssumerRuleSet --> AssumerTransitionRule
-  AssumerTransitionRule ..> AssumerEvalContext : reads
+  DetectionEngine --> GpsSignalFilter
+  DetectionEngine --> DetectionHoldClock
+  DetectionEngine --> Detector
 ```
 
-Concrete v0 rules (examples): `RideStartRule`, `FallSwimRule`, `FailedStartRule`, `LongStopRule`, `WaterStartRule`, `WalkFromWaitingRule`, `WalkFromSwimmingRule`, `WaitSettleRule`.
+MVP detectors: `RideEnterDetector`, `RideExitDetector`, `GpsGapDetector`, `UnsureTimeoutDetector`.
 
 ## On-disk session layout
 
 ```
 <root>/<sessionId>/
   manifest.json
-  labels.jsonl          # legacy LabelEvent (empty on new sessions)
-  assumptions.jsonl     # AssumptionEvent (transitions only)
+  detections.jsonl      # DetectionEvent (transitions + revisions)
   location-000.jsonl
-  motion-000.jsonl.zlib # framed zlib JSONL (legacy plain .jsonl still readable)
+  motion-000.jsonl.zlib
   health-000.jsonl
 ```
 
-`SessionTransferPackage` carries `assumptions` (decode-missing → `[]` for legacy exports) and `motionFramesZlib` when motion was recorded compressed.
+`SessionTransferPackage` carries `detections` (legacy `assumptions` → detections; `labels` discarded).
 
 ## Tests
 
@@ -180,4 +154,4 @@ Concrete v0 rules (examples): `RideStartRule`, `FallSwimRule`, `FailedStartRule`
 cd RpplCore && swift test
 ```
 
-Suites cover store/transfer, Assumer scenarios, signal filter noise, and rule-set extensibility (custom rule prepend).
+Suites cover store/transfer, detection scenarios, GPS filter noise, detector extensibility, and offline replay.
