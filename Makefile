@@ -5,7 +5,7 @@ export PATH := $(CURDIR)/tools/bin:$(HOME)/Library/Python/3.9/bin:$(PATH)
 check: gate
 
 test-core:
-	cd WakeTrackerCore && swift test
+	cd RpplCore && swift test
 
 lint:
 	bash scripts/git-hooks/run-swiftlint.sh

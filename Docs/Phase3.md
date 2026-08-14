@@ -1,6 +1,6 @@
 # Phase 3 — Auto-detection roadmap
 
-Library UML (filter / holds / detectors): [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md). System map: [DESIGN.md](DESIGN.md).
+Library UML (filter / holds / detectors): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). System map: [DESIGN.md](DESIGN.md).
 
 ## Goal
 
@@ -19,7 +19,7 @@ Detect **rides** and **pauses** from GPS speed in real time so testers need no A
 - Phone: list detections; Share JSON includes `detections`.
 - Manual labels / Cycle Label removed.
 
-Pure engine: `WakeTrackerCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`). Covered by `swift test` including `replay`.
+Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`). Covered by `swift test` including `replay`.
 
 ## Detection thresholds (v1, km/h)
 

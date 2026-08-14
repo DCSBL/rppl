@@ -10,11 +10,11 @@ Opaque strings written to `detections.jsonl`:
 - `riding` — wakeboard / waterski ride speed
 - `unsure` — mid-ride GPS soft (Watch primary UI keeps last confident code)
 
-Engine: `DetectionEngine` in WakeTrackerCore (filter → holds → detectors → lookback merger). Writes on transitions + lookback revisions only. Each line: `code`, `timestamp`, `reason` (km/h), `detectorId`, optional speed/accuracy/water/activity, optional `supersedesId`.
+Engine: `DetectionEngine` in RpplCore (filter → holds → detectors → lookback merger). Writes on transitions + lookback revisions only. Each line: `code`, `timestamp`, `reason` (km/h), `detectorId`, optional speed/accuracy/water/activity, optional `supersedesId`.
 
 Manual Action Button labels are **removed**. Ultra Action Button may still **start** a session via Workout intent.
 
-Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
+Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
 
 ## Streams
 
@@ -39,7 +39,7 @@ If Health denies workout sharing (common after tapping Don’t Allow, or flaky o
 Optional start only:
 
 1. Settings › Action Button › **Workout**
-2. App › **Wake Tracker** (Cable Park)
+2. App › **Rppl** (Cable Park)
 3. Press starts the session when idle; press while recording is a **no-op**
 
 Requires an active HealthKit workout path for Workout intent registration. Cycle Label is obsolete — see [Postmortems/ActionButtonCycleLabel.md](Postmortems/ActionButtonCycleLabel.md).

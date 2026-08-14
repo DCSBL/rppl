@@ -1,4 +1,4 @@
-# Wake Tracker
+# Rppl
 
 **Cable-park wakeboarding, captured on Watch — rides and pauses detected.**
 
@@ -8,7 +8,7 @@ Alpha first. Ugly is fine. Lost park days are not.
 
 ## Why this exists
 
-Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Wake Tracker collects **sensor corpora** from instructed testers so later phases can measure ride length, rounds, and balance. No tricks yet. No App Store polish yet.
+Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl collects **sensor corpora** from instructed testers so later phases can measure ride length, rounds, and balance. No tricks yet. No App Store polish yet.
 
 ## MVP (Phases 1–2) — distilled
 
@@ -24,7 +24,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
 | Water Lock | On at session start |
 | Identity | Anonymous `testerId` in UserDefaults / App Group |
-| Core | Pure logic in `WakeTrackerCore` · unit-tested with `swift test` |
+| Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
 
 **Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.
 
@@ -42,7 +42,7 @@ Writes **only on transitions** (+ `session_start`) and lookback revisions (`supe
 
 Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 3 min same ride). Water / motion activity are logged on ticks but unused by MVP detectors.
 
-Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
+Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ### Later
 
@@ -52,20 +52,20 @@ Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [WakeTrac
 ## Repo layout
 
 ```
-WakeTrackerCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
-WakeTrackerWatch/    Session engine, sensors, StartWorkoutIntent, WC send
-wake-tracker/        iPhone permissions, sync receive, map, export
+RpplCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
+RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
+Rppl/         iPhone permissions, sync receive, map, export
 Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit xcode gate
 ```
 
 ## Quick start
 
-1. Open `wake-tracker.xcodeproj` in Xcode 26+.
-2. Device pair (recommended): scheme **WakeTrackerWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
-3. Or phone-first: scheme **wake-tracker** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
+1. Open `Rppl.xcodeproj` in Xcode 26+.
+2. Device pair (recommended): scheme **RpplWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
+3. Or phone-first: scheme **Rppl** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
 4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
-5. Ultra Action Button (optional): **Settings → Action Button → Workout → Wake Tracker** starts a session only.
+5. Ultra Action Button (optional): **Settings → Action Button → Workout → Rppl** starts a session only.
 
 Dev gate (tests + lint + build + analyze):
 
@@ -74,3 +74,16 @@ brew install pre-commit swiftlint codespell
 pre-commit install
 make check
 ```
+
+Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & detection: [Docs/DataCollection.md](Docs/DataCollection.md) · Core design: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+
+## Bundle IDs (current `.dev` builds)
+
+- iOS: `nl.dcsbl.dev.rppl`
+- watchOS: `nl.dcsbl.dev.rppl.watchkitapp` (must be `{iOS}.watchkitapp`)
+- Companion: Watch → iPhone ID above
+- App Group: `group.nl.dcsbl.dev.rppl`
+
+## Agents
+
+Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior. Library shape: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System layers: [Docs/DESIGN.md](Docs/DESIGN.md).

@@ -1,4 +1,4 @@
-# AGENTS.md — Wake Tracker
+# AGENTS.md — Rppl
 
 Instructions for AI coding agents working in this repo.
 
@@ -25,17 +25,17 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 - Watch records; iPhone views/exports; Mac analyzes.
 - Prefer reliable checkpoints over pretty UI.
 - Prefer extending opaque string detection codes over closed Swift enums.
-- Prefer pure logic in `WakeTrackerCore` so `swift test` covers it without device APIs.
+- Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md).
+Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
 
 ## Architecture rules
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `WakeTrackerCore` | Models, schema, file store, `DetectionCodes`, `DetectionEngine` (+ filter/holds/detectors), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
-| `wake-tracker` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing, session engine |
+| `RpplCore` | Models, schema, file store, `DetectionCodes`, `DetectionEngine` (+ filter/holds/detectors), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
+| `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing, session engine |
 
 App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
@@ -51,8 +51,8 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Testing
 
-- Source of truth: `cd WakeTrackerCore && swift test` (Swift Testing).
-- Expand Core tests for pure logic; keep `wake-trackerTests` thin.
+- Source of truth: `cd RpplCore && swift test` (Swift Testing).
+- Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
 - Pre-commit runs: hygiene → codespell → SwiftLint → `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze).
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
@@ -67,15 +67,15 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 | Task | Start here |
 |------|------------|
-| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
+| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
-| Watch record loop | `WakeTrackerWatch/WatchSessionController.swift` |
-| Start session Action Button | `WakeTrackerWatch/CycleLabelIntent.swift` (StartWorkoutIntent only) |
-| Phone sync + export UI | `wake-tracker/PhoneConnectivityService.swift`, `ContentView.swift` |
+| Watch record loop | `RpplWatch/WatchSessionController.swift` |
+| Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
+| Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
-| System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [WakeTrackerCore/DESIGN.md](WakeTrackerCore/DESIGN.md) |
+| System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
 
 ## Out of scope unless explicitly asked

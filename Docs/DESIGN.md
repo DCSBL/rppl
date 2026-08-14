@@ -1,39 +1,42 @@
 # System design
 
-How Watch, iPhone, and `WakeTrackerCore` fit together. Library internals (DetectionEngine UML, store types): [../WakeTrackerCore/DESIGN.md](../WakeTrackerCore/DESIGN.md). Product lock: [../README.md](../README.md).
+How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngine UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product lock: [../README.md](../README.md).
 
 ## Layers
 
 ```mermaid
 flowchart TB
-  subgraph watch [WakeTrackerWatch]
+  subgraph watch [RpplWatch]
     WSC[WatchSessionController]
     Intent[StartCableParkSessionIntent]
   end
-  subgraph phone [wake-tracker iOS]
+
+  subgraph core [RpplCore]
+    Store[SessionFileStore]
+    Engine[DetectionEngine]
+    Codes[DetectionCodes]
+    SyncRes[SyncConnectionResolver]
+  end
+
+  subgraph phone [Rppl iOS]
     PCS[PhoneConnectivityService]
     UI[ContentView session list map export]
   end
-  subgraph core [WakeTrackerCore]
-    Engine[DetectionEngine]
-    Codes[DetectionCodes]
-    Store[SessionFileStore]
-    Sync[SyncConnectionResolver]
-  end
+
   WSC --> Engine
   WSC --> Store
   Intent --> WSC
   PCS --> Store
   UI --> Store
-  WSC --> Sync
-  PCS --> Sync
+  WSC --> SyncRes
+  PCS --> SyncRes
 ```
 
 | Layer | Own | Avoid |
 |-------|-----|--------|
-| `WakeTrackerCore` | Models, schema, file store, DetectionEngine, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `WakeTrackerWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin probes into Core | Business decision trees that can be pure functions |
-| `wake-tracker` | Permissions, WC receive/ack, session list/map/export | Session engine, label editing |
+| `RpplCore` | Models, schema, file store, DetectionEngine, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
+| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin probes into Core | Business decision trees that can be pure functions |
+| `Rppl` | Permissions, WC receive/ack, session list/map/export | Session engine, label editing |
 
 Apps read live `WCSession` / sensors, then call Core. Do not duplicate detection or sync decision trees in both targets.
 
@@ -61,3 +64,13 @@ sequenceDiagram
 - Manual labels removed.
 
 Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](Phase3.md).
+
+## Hard constraints (unchanged)
+
+1. HealthKit dry-run — no `finishWorkout()` / Health save; still mirror HR/energy into JSONL.
+2. Never delete Watch session files until phone ack.
+3. One continuous session per park day; no pause.
+4. Detection codes stay opaque strings.
+5. iPhone view-only — no label editor.
+6. OS floor iOS 26+ / watchOS 26+.
+7. Water Lock on session start.
