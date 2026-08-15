@@ -1,4 +1,4 @@
-import type { AnalysisPackage, AssumptionEvent, LocationSample, SessionManifest } from './types'
+import type { AnalysisPackage, DetectionEvent, LocationSample, SessionManifest } from './types'
 import { stripHeavyKeys } from './stripHeavyKeys'
 
 export async function loadExportJson(file: File): Promise<AnalysisPackage> {
@@ -6,15 +6,15 @@ export async function loadExportJson(file: File): Promise<AnalysisPackage> {
   const lean = stripHeavyKeys(raw)
   const parsed = JSON.parse(lean) as {
     manifest?: SessionManifest
-    assumptions?: AssumptionEvent[]
+    detections?: DetectionEvent[]
+    assumptions?: DetectionEvent[]
     locations?: LocationSample[]
   }
   if (!parsed.manifest) throw new Error('export missing manifest')
+  const detections = normalizeDetections(parsed.detections ?? parsed.assumptions ?? [])
   return {
     manifest: parsed.manifest,
-    assumptions: [...(parsed.assumptions ?? [])].sort(
-      (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
-    ),
+    detections,
     locations: [...(parsed.locations ?? [])].sort(
       (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
     ),
@@ -39,9 +39,10 @@ async function loadFromFlatList(list: File[]): Promise<AnalysisPackage> {
   const manifestFile = list.find((f) => basename(f.name) === 'manifest.json')
   if (!manifestFile) throw new Error('folder missing manifest.json')
   const manifest = JSON.parse(await manifestFile.text()) as SessionManifest
-  const assumptions = await parseJsonl(
-    list.find((f) => basename(f.name) === 'assumptions.jsonl'),
-  ) as AssumptionEvent[]
+  const detectionsFile =
+    list.find((f) => basename(f.name) === 'detections.jsonl') ??
+    list.find((f) => basename(f.name) === 'assumptions.jsonl')
+  const detections = normalizeDetections((await parseJsonl(detectionsFile)) as DetectionEvent[])
   const locationFiles = list
     .filter((f) => /^location-\d+\.jsonl$/i.test(basename(f.name)))
     .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
@@ -50,8 +51,7 @@ async function loadFromFlatList(list: File[]): Promise<AnalysisPackage> {
     locations.push(...((await parseJsonl(file)) as LocationSample[]))
   }
   locations.sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
-  assumptions.sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
-  return { manifest, assumptions, locations }
+  return { manifest, detections, locations }
 }
 
 async function loadFromFileMap(
@@ -72,6 +72,15 @@ function groupByDir(files: File[]): Map<string, File[]> {
     map.set(dir, arr)
   }
   return map
+}
+
+function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
+  return raw
+    .map((event) => ({
+      ...event,
+      detectorId: event.detectorId ?? 'legacy_assumption',
+    }))
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
 }
 
 async function parseJsonl(file: File | undefined): Promise<unknown[]> {

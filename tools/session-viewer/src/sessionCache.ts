@@ -1,4 +1,4 @@
-import type { AnalysisPackage, TimeRange } from './types'
+import type { AnalysisPackage, DetectionEvent, TimeRange } from './types'
 
 const DB_NAME = 'rppl-session-viewer'
 const STORE = 'kv'
@@ -9,6 +9,7 @@ export interface CachedSession {
   label: string
   package: AnalysisPackage
   window?: TimeRange | null
+  playheadMs?: number | null
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -21,6 +22,22 @@ function openDb(): Promise<IDBDatabase> {
     }
     req.onsuccess = () => resolve(req.result)
   })
+}
+
+/** Migrate cached packages that still store `assumptions`. */
+function normalizePackage(raw: unknown): AnalysisPackage | null {
+  if (!raw || typeof raw !== 'object') return null
+  const pkg = raw as AnalysisPackage & { assumptions?: DetectionEvent[] }
+  if (!pkg.manifest) return null
+  const detections = (pkg.detections ?? pkg.assumptions ?? []).map((e) => ({
+    ...e,
+    detectorId: e.detectorId ?? 'legacy_assumption',
+  }))
+  return {
+    manifest: pkg.manifest,
+    detections,
+    locations: pkg.locations ?? [],
+  }
 }
 
 export async function saveCachedSession(entry: CachedSession): Promise<void> {
@@ -42,7 +59,21 @@ export async function loadCachedSession(): Promise<CachedSession | null> {
     req.onerror = () => reject(req.error ?? new Error('indexedDB read failed'))
     req.onsuccess = () => {
       const value = req.result as CachedSession | undefined
-      resolve(value ?? null)
+      if (!value) {
+        resolve(null)
+        return
+      }
+      const pkg = normalizePackage(value.package)
+      if (!pkg) {
+        resolve(null)
+        return
+      }
+      resolve({
+        label: value.label,
+        package: pkg,
+        window: value.window,
+        playheadMs: value.playheadMs,
+      })
     }
   })
   db.close()

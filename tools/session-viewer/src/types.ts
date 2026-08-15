@@ -22,19 +22,22 @@ export interface LocationSample {
   course?: number | null
 }
 
-export interface AssumptionEvent {
+export interface DetectionEvent {
   id: string
   code: string
   timestamp: string
   reason: string
+  detectorId: string
   speedMps?: number | null
+  horizontalAccuracy?: number | null
   waterSubmersionState?: string | null
   motionActivity?: string | null
+  supersedesId?: string | null
 }
 
 export interface AnalysisPackage {
   manifest: SessionManifest
-  assumptions: AssumptionEvent[]
+  detections: DetectionEvent[]
   locations: LocationSample[]
 }
 
@@ -47,6 +50,7 @@ export interface Segment {
   speedMps?: number | null
   waterSubmersionState?: string | null
   motionActivity?: string | null
+  detectorId?: string
 }
 
 export interface TimeRange {
@@ -62,4 +66,21 @@ export interface SpeedPoint {
 export interface AccuracyPoint {
   tMs: number
   meters: number
+}
+
+export interface RideSegment {
+  index: number
+  startMs: number
+  endMs: number
+  durationMs: number
+  distanceMeters: number
+  lapCount: number
+  startLatitude: number | null
+  startLongitude: number | null
+}
+
+export interface DerivedSession {
+  phases: { code: string; startMs: number; endMs: number }[]
+  rides: RideSegment[]
+  totalLapCount: number
 }
