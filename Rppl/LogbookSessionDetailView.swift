@@ -122,13 +122,13 @@ struct LogbookSessionDetailView: View {
                     )
                     if let calories = stats.activeEnergyKilocalories {
                         statTile(
-                            String(format: String(localized: "%.0f kcal"), calories),
+                            LogbookFormatting.kilocalories(calories),
                             label: "Active calories"
                         )
                     }
                     if let total = stats.totalEnergyKilocalories {
                         statTile(
-                            String(format: String(localized: "%.0f kcal"), total),
+                            LogbookFormatting.kilocalories(total),
                             label: "Total calories"
                         )
                     }

@@ -90,15 +90,11 @@ struct SessionDetailView: View {
                     LabeledContent("Distance", value: DistanceFormat.meters(stats.totalDistanceMeters))
                     LabeledContent(
                         "Active calories",
-                        value: stats.activeEnergyKilocalories.map {
-                            String(format: String(localized: "%.0f kcal"), $0)
-                        } ?? "—"
+                        value: stats.activeEnergyKilocalories.map(LogbookFormatting.kilocalories) ?? "—"
                     )
                     LabeledContent(
                         "Total calories",
-                        value: stats.totalEnergyKilocalories.map {
-                            String(format: String(localized: "%.0f kcal"), $0)
-                        } ?? "—"
+                        value: stats.totalEnergyKilocalories.map(LogbookFormatting.kilocalories) ?? "—"
                     )
                     LabeledContent("Rides", value: "\(stats.rideCount)")
                     LabeledContent(
@@ -129,7 +125,7 @@ struct SessionDetailView: View {
                                 }
                             }
                             Text(
-                                "\(DistanceFormat.meters(ride.distanceMeters)) · \(ride.lapCount) laps"
+                                "\(DistanceFormat.meters(ride.distanceMeters)) · \(LogbookFormatting.lapCount(ride.lapCount))"
                             )
                             .font(.caption)
                             Text(Self.formatDuration(ride.duration))
