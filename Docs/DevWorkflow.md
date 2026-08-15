@@ -34,27 +34,26 @@ Fast checks only — commit is blocked if any fail:
 
 Heavy gate — **only if the push includes build-related files** (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, or `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, and other scripts/helpers skip this.
 
-When it runs, push is blocked if any fail:
+When it runs, push is blocked if any fail. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`) then:
 
-1. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`):
-   - `swift test` in `RpplCore` (fail fast)
-   - `xcodebuild build` for `Rppl` (iOS Simulator; embeds Watch)
-   - `xcodebuild analyze`
+1. **`swift test` in `RpplCore`** — skipped if Core sources/tests/`Package.swift` and the local Swift/Xcode toolchain match the last successful run (content fingerprint of tracked files, not a time TTL). Dirty working-tree edits count, so `make gate` does not skip stale.
+2. **`xcodebuild build`** for `Rppl` (iOS Simulator; embeds Watch) — skipped if app/Watch/project/Core *sources* match the last successful build. Changing only `RpplCore/Tests` does not rebuild the apps.
+3. **`xcodebuild analyze` is not part of push.** It is slow and mostly overlaps `build`. Use `make check` (or `XCODE_GATE_ANALYZE=1`) when you want it.
 
-Manual full gate:
+Stamps live in `.git/rppl-xcode-gate/` (shared across worktrees of the same clone). Toolchain (`xcodebuild -version` / `swift --version`) is part of the key, so an Xcode upgrade rebuilds.
+
+Manual gates:
 
 ```bash
-make check
+make gate          # same as pre-push (cache + no analyze)
+make check         # full: ignore cache, tests + build + analyze
+make test-core     # RpplCore swift test only
 # or
 pre-commit run --all-files --hook-stage pre-push
 # (also: pre-commit run --all-files for commit-stage hooks)
 ```
 
-Core tests only:
-
-```bash
-make test-core
-```
+Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
 
 ## Escape hatches (emergency only)
 
@@ -63,7 +62,7 @@ make test-core
 
 ## Notes
 
-- Commit stays light (hygiene + spell + lint). Expect the heavy build/test gate on **push** when app/build files change (~1–2+ minutes).
+- Commit stays light (hygiene + spell + lint). First push after app/Core source changes still pays for `xcodebuild`; later pushes with the same inputs skip it. Core-test-only pushes skip the app build.
 - SwiftLint starts lenient; tighten `.swiftlint.yml` over time.
 - Unit tests live primarily in `RpplCore` (`swift test`). Keep app targets thin wrappers around Core logic.
 

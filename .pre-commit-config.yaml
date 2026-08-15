@@ -44,7 +44,7 @@ repos:
         stages: [pre-commit]
 
       - id: xcode-gate
-        name: Core tests + xcodebuild build/analyze
+        name: Core tests + xcodebuild (skip unchanged; no analyze)
         entry: bash scripts/git-hooks/xcode-gate.sh
         language: system
         pass_filenames: false
