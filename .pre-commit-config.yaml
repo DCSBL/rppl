@@ -1,14 +1,27 @@
+# Install both commit and push hooks:
+#   pre-commit install
+# (default_install_hook_types below installs pre-commit + pre-push)
+default_install_hook_types: [pre-commit, pre-push]
+# Light hooks only on commit; xcode-gate opts into pre-push below.
+default_stages: [pre-commit]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: end-of-file-fixer
+        stages: [pre-commit]
       - id: check-yaml
+        stages: [pre-commit]
       - id: check-json
+        stages: [pre-commit]
       - id: check-merge-conflict
+        stages: [pre-commit]
       - id: check-added-large-files
         args: ["--maxkb=1000"]
+        stages: [pre-commit]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
@@ -18,6 +31,7 @@ repos:
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
           - "--ignore-words-list=te,crate,mot,inout,alllocations"
+        stages: [pre-commit]
 
   - repo: local
     hooks:
@@ -27,6 +41,7 @@ repos:
         language: system
         pass_filenames: false
         types: [swift]
+        stages: [pre-commit]
 
       - id: xcode-gate
         name: Core tests + xcodebuild build/analyze
@@ -35,3 +50,4 @@ repos:
         pass_filenames: false
         always_run: true
         types: [swift]
+        stages: [pre-push]

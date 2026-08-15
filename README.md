@@ -56,7 +56,7 @@ RpplCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN
 RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
 Rppl/         iPhone permissions, sync receive, map, export
 Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
-scripts/git-hooks/   pre-commit xcode gate
+scripts/git-hooks/   pre-commit lint; pre-push xcode gate
 ```
 
 ## Quick start
@@ -67,11 +67,11 @@ scripts/git-hooks/   pre-commit xcode gate
 4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
 5. Ultra Action Button (optional): **Settings → Action Button → Workout → Rppl** starts a session only.
 
-Dev gate (tests + lint + build + analyze):
+Dev gate (lint on commit; tests + build + analyze on push):
 
 ```bash
 brew install pre-commit swiftlint codespell
-pre-commit install
+pre-commit install   # installs pre-commit + pre-push
 make check
 ```
 
