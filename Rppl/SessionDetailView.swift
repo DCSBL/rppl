@@ -1,5 +1,4 @@
 import SwiftUI
-import MapKit
 import RpplCore
 
 private enum SessionDetailLoadPhase: Equatable {
@@ -420,40 +419,5 @@ struct SessionDetailView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         }
         return String(format: "%d:%02d", minutes, seconds)
-    }
-}
-
-struct SessionMapView: View {
-    let tracks: [[LocationSample]]
-
-    init(locations: [LocationSample]) {
-        self.tracks = locations.count >= 2 ? [locations] : []
-    }
-
-    init(tracks: [[LocationSample]]) {
-        self.tracks = tracks.filter { $0.count >= 2 }
-    }
-
-    var body: some View {
-        Map(interactionModes: []) {
-            ForEach(Array(tracks.enumerated()), id: \.offset) { _, track in
-                MapPolyline(coordinates: track.map {
-                    CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
-                })
-                .stroke(Color.rpplHighlight, lineWidth: 3)
-            }
-            if let first = tracks.first?.first {
-                Marker("Start", coordinate: CLLocationCoordinate2D(
-                    latitude: first.latitude,
-                    longitude: first.longitude
-                ))
-            }
-            if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
-                Marker("End", coordinate: CLLocationCoordinate2D(
-                    latitude: last.latitude,
-                    longitude: last.longitude
-                ))
-            }
-        }
     }
 }
