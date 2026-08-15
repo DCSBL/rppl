@@ -18,6 +18,10 @@ This project uses **caveman** mode for agent ↔ human chat.
 - A worktree will be squashed and merged via a GitHub PR by human.
 - Each commit triggers `pre-commit`. Make sure to pass all checks, resolve issues when needed.
 
+## Linear issues
+- When starting work on a Linear issue: set status **In Progress**.
+- When finished (merged, or ready on the branch when the user asked to ship): set status **Done**.
+
 ## Product north star
 
 Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tracker yet.
@@ -34,14 +38,14 @@ Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Doc
 | Layer | Own | Avoid |
 |-------|-----|--------|
 | `RpplCore` | Models, schema, file store, `DetectionCodes`, `DetectionEngine` (+ filter/holds/detectors), `SyncConnectionResolver`, transfer filters | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
+| `RpplWatch` | `HKWorkoutSession` + Health save, sensors, StartWorkoutIntent, WC send, thin detection probes | Business decisions that can be pure functions |
 | `Rppl` (iOS) | Permissions, WC receive/ack, session list/map/export, thin probes | Label editing, session engine |
 
 App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do not duplicate decision trees in both targets. Layer diagram: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Hard constraints (do not “helpfully” break)
 
-1. **HealthKit dry-run:** use workout session + builder for runtime/sensors; **do not `finishWorkout()` / save to Health** in alpha. Still mirror HR/active energy into our JSONL.
+1. **HealthKit save:** use workout session + builder; on stop: `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Pause/resume the HK session on confident `riding` ↔ `paused` so active energy is ride-scoped (product day-session stays continuous).
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day**; no pause unless product decision changes.
 4. **Detection codes are strings** (`riding`, `paused`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
@@ -84,7 +88,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - GitHub Actions CI (can mirror `xcode-gate` later)
 - UI tests in the commit gate
 - Trick detection / full taxonomy
-- CloudKit / HealthKit workout saves (Phase 4)
+- CloudKit sync (Phase 4)
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
@@ -92,4 +96,4 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## When unsure
 
-Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (pause, phone labeling, Health saves, deleting Watch data early), **stop and ask**. Do not invent Phase 3 detector thresholds or park profiles without an explicit code ask — follow [Docs/Phase3.md](Docs/Phase3.md).
+Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (product pause, phone labeling, deleting Watch data early), **stop and ask**. Do not invent Phase 3 detector thresholds or park profiles without an explicit code ask — follow [Docs/Phase3.md](Docs/Phase3.md).

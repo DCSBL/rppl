@@ -20,7 +20,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
 | Detection | Live ride / pause / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
-| HealthKit | Session for sensors · **do not `finishWorkout()`** · still mirror HR/energy into files |
+| HealthKit | Save workout via `finishWorkout()` · pause HK on dock · mirror HR/energy into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
 | Water Lock | On at session start |
 | Identity | Anonymous `testerId` in UserDefaults / App Group |
@@ -47,7 +47,7 @@ Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [RpplCore
 ### Later
 
 - **Phase 3 continued** — Mac timeline viz (detections lane, threshold scrubbers), ride-length / rounds metrics · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
-- **Phase 4** — Product UI, HealthKit saves, CloudKit sync, heatmap polish
+- **Phase 4** — Product UI, CloudKit sync, heatmap polish
 
 ## Repo layout
 
