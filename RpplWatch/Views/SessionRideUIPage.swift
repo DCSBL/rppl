@@ -29,7 +29,7 @@ struct SessionRideUIPage: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            HStack(alignment: .firstTextBaseline, spacing: 16) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 VStack(spacing: 2) {
                     Text(SessionFormatters.distance(session.displayRideMeters))
                         .font(.system(.title2, design: .rounded).bold())
@@ -49,6 +49,18 @@ struct SessionRideUIPage: View {
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                     Text("KM/H")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+
+                VStack(spacing: 2) {
+                    Text("\(session.currentRideLapCount)")
+                        .font(.system(.title2, design: .rounded).bold())
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
+                    Text("LAPS")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -125,6 +137,10 @@ struct SessionRideUIPage: View {
                     SessionMetricRow(
                         label: "Distance",
                         value: SessionFormatters.distance(session.lastRideMeters)
+                    )
+                    SessionMetricRow(
+                        label: "Laps",
+                        value: "\(session.lastRideLapCount)"
                     )
                 } else {
                     Text("No rides yet")

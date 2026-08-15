@@ -7,7 +7,8 @@ public enum SessionStatsBuilder {
         detections: [DetectionEvent],
         locations: [LocationSample],
         health: [HealthMetricSample],
-        maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM
+        maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
+        lapThresholds: LapThresholds = .default
     ) -> SessionStats {
         let sessionStart = manifest.startedAt
         let sessionEnd = manifest.endedAt ?? inferSessionEnd(
@@ -37,6 +38,10 @@ public enum SessionStatsBuilder {
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
         var rides: [RideSegmentStats] = []
         var totalDistance = 0.0
+        var lapTracker = LapRideTracker(thresholds: lapThresholds)
+        if Self.hasPausedPhase(phases, before: rideWindows.first?.start ?? sessionEnd) {
+            lapTracker.notePaused()
+        }
 
         for (index, window) in rideWindows.enumerated() {
             let distance = Self.distanceMeters(
@@ -46,13 +51,21 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let duration = window.end.timeIntervalSince(window.start)
+            lapTracker.beginRide()
+            for sample in sortedLocations where sample.timestamp >= window.start
+                && sample.timestamp <= window.end {
+                lapTracker.addLocation(sample)
+            }
+            let laps = lapTracker.lapCount
+            lapTracker.endRide()
             rides.append(
                 RideSegmentStats(
                     index: index + 1,
                     startedAt: window.start,
                     endedAt: window.end,
                     duration: max(0, duration),
-                    distanceMeters: distance
+                    distanceMeters: distance,
+                    lapCount: laps
                 )
             )
             totalDistance += distance
@@ -181,6 +194,14 @@ public enum SessionStatsBuilder {
         phases
             .filter { $0.attributedCode == DetectionCodes.riding }
             .map { TimeWindow(start: $0.start, end: $0.end) }
+    }
+
+    static func hasPausedPhase(_ phases: [AttributedPhase], before date: Date) -> Bool {
+        phases.contains {
+            $0.attributedCode == DetectionCodes.paused
+                && $0.start < date
+                && $0.duration > 0
+        }
     }
 
     // MARK: - Distance

@@ -110,6 +110,7 @@ struct LogbookSessionDetailView: View {
                         label: "Top speed"
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
+                    statTile("\(stats.totalLapCount)", label: "Laps")
                 }
 
                 LabeledContent("Riding") {
@@ -335,6 +336,9 @@ private struct RideDetailCard: View {
                 }
                 LabeledContent("Distance") {
                     Text(LogbookFormatting.distanceKilometers(ride.distanceMeters))
+                }
+                LabeledContent("Laps") {
+                    Text("\(ride.lapCount)")
                 }
                 LabeledContent("Top speed") {
                     Text(topSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—")

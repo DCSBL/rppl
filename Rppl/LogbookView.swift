@@ -163,7 +163,11 @@ struct LogbookView: View {
             Divider()
                 .overlay(Color.rpplFill)
 
-            Text(catalog.isLoading ? "— total rides" : "\(totals.totalRuns) total rides")
+            Text(
+                catalog.isLoading
+                    ? "— total rides"
+                    : "\(totals.totalRuns) total rides · \(totals.totalLaps) laps"
+            )
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -257,10 +261,11 @@ private struct SessionCard: View {
             Divider()
                 .overlay(Color.rpplFill)
 
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 statLabel("clock", value: durationText)
                 statLabel("water.waves", value: distanceText)
                 statLabel("flag.checkered", value: ridesText)
+                statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
@@ -291,10 +296,16 @@ private struct SessionCard: View {
         return "\(stats.rideCount) rides"
     }
 
+    private var lapsText: String {
+        guard let stats = entry.stats else { return "— laps" }
+        return "\(stats.totalLapCount) laps"
+    }
+
     private func statLabel(_ symbol: String, value: String) -> some View {
         Label(value, systemImage: symbol)
             .labelStyle(.titleAndIcon)
             .lineLimit(1)
+            .minimumScaleFactor(0.75)
     }
 }
 
