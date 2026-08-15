@@ -48,6 +48,12 @@ repos:
         entry: bash scripts/git-hooks/xcode-gate.sh
         language: system
         pass_filenames: false
-        always_run: true
-        types: [swift]
+        # Skip when the push is docs/YAML/unrelated scripts only.
+        files: |
+          (?x)(
+            \.(swift|plist|entitlements|pbxproj|xcscheme|xcconfig|xcprivacy|storyboard|xib|metal|intentdefinition)$
+            |Package\.(swift|resolved)$
+            |\.xcassets/
+            |scripts/git-hooks/xcode-gate\.sh$
+          )
         stages: [pre-push]

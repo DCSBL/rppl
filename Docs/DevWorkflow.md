@@ -32,7 +32,9 @@ Fast checks only — commit is blocked if any fail:
 
 ## What runs on push
 
-Heavy gate — push is blocked if any fail:
+Heavy gate — **only if the push includes build-related files** (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, or `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, and other scripts/helpers skip this.
+
+When it runs, push is blocked if any fail:
 
 1. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`):
    - `swift test` in `RpplCore` (fail fast)
@@ -61,7 +63,7 @@ make test-core
 
 ## Notes
 
-- Commit stays light (hygiene + spell + lint). Expect the heavy build/test gate on **push** (~1–2+ minutes).
+- Commit stays light (hygiene + spell + lint). Expect the heavy build/test gate on **push** when app/build files change (~1–2+ minutes).
 - SwiftLint starts lenient; tighten `.swiftlint.yml` over time.
 - Unit tests live primarily in `RpplCore` (`swift test`). Keep app targets thin wrappers around Core logic.
 

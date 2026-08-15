@@ -67,7 +67,7 @@ scripts/git-hooks/   pre-commit lint; pre-push xcode gate
 4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
 5. Ultra Action Button (optional): **Settings → Action Button → Workout → Rppl** starts a session only.
 
-Dev gate (lint on commit; tests + build + analyze on push):
+Dev gate (lint on commit; tests + build + analyze on push when app/build files change):
 
 ```bash
 brew install pre-commit swiftlint codespell
