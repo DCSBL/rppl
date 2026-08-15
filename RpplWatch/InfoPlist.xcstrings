@@ -1,0 +1,102 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven. Alpha-builds slaan de voltooide workout nog niet op in Gezondheid."
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl vraagt schrijfrechten voor workouts alleen om een live sessie voor sensors te draaien; voltooide workouts worden tijdens alpha niet opgeslagen."
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records GPS for the full park session, including when the wrist is down."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt GPS op voor de hele parksessie, ook als de pols omlaag is."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt GPS op tijdens kabelpark-wakeboardsessies voor alpha-datacollectie."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records device motion to collect alpha training data for start/swim/walk detection."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt apparaatbeweging op om alpha-trainingsdata te verzamelen voor start/zwem/loop-detectie."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
