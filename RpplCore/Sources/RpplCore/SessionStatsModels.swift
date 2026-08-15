@@ -30,7 +30,10 @@ public struct SessionStats: Equatable, Sendable {
     public var endedAt: Date
     public var totalDuration: TimeInterval
     public var totalDistanceMeters: Double
+    /// Ride-scoped active energy (max mirrored HK activeEnergyBurned).
     public var activeEnergyKilocalories: Double?
+    /// Active + basal when both available (Apple-like total).
+    public var totalEnergyKilocalories: Double?
     public var rideCount: Int
     public var ridingDuration: TimeInterval
     public var pausedDuration: TimeInterval
@@ -44,6 +47,7 @@ public struct SessionStats: Equatable, Sendable {
         totalDuration: TimeInterval,
         totalDistanceMeters: Double,
         activeEnergyKilocalories: Double?,
+        totalEnergyKilocalories: Double? = nil,
         rideCount: Int,
         ridingDuration: TimeInterval,
         pausedDuration: TimeInterval,
@@ -55,6 +59,7 @@ public struct SessionStats: Equatable, Sendable {
         self.totalDuration = totalDuration
         self.totalDistanceMeters = totalDistanceMeters
         self.activeEnergyKilocalories = activeEnergyKilocalories
+        self.totalEnergyKilocalories = totalEnergyKilocalories
         self.rideCount = rideCount
         self.ridingDuration = ridingDuration
         self.pausedDuration = pausedDuration

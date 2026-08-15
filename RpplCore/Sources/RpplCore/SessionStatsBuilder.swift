@@ -58,14 +58,28 @@ public enum SessionStatsBuilder {
             totalDistance += distance
         }
 
-        let calories = health.compactMap(\.activeEnergyKilocalories).max()
+        let activeCalories = health.compactMap(\.activeEnergyKilocalories).max()
+        let basalCalories = health.compactMap(\.basalEnergyKilocalories).max()
+        let totalCalories: Double? = {
+            switch (activeCalories, basalCalories) {
+            case let (active?, basal?):
+                return active + basal
+            case let (active?, nil):
+                return active
+            case let (nil, basal?):
+                return basal
+            case (nil, nil):
+                return nil
+            }
+        }()
 
         return SessionStats(
             startedAt: sessionStart,
             endedAt: sessionEnd,
             totalDuration: max(0, sessionEnd.timeIntervalSince(sessionStart)),
             totalDistanceMeters: totalDistance,
-            activeEnergyKilocalories: calories,
+            activeEnergyKilocalories: activeCalories,
+            totalEnergyKilocalories: totalCalories,
             rideCount: rides.count,
             ridingDuration: ridingDuration,
             pausedDuration: pausedDuration,

@@ -53,6 +53,10 @@ final class WatchSessionController: NSObject {
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
+    private var workoutRouteBuilder: HKWorkoutRouteBuilder?
+    private var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
+    private var hkRideDistanceMeters = 0.0
+    private var hkRideDistanceAnchorMeters = 0.0
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
     private let activityManager = CMMotionActivityManager()
@@ -79,14 +83,17 @@ final class WatchSessionController: NSObject {
     private let workoutType = HKObjectType.workoutType()
     private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
     private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+    private let basalEnergyType = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!
+    private let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
+    private let workoutRouteType = HKSeriesType.workoutRoute()
 
-    /// Write access is required to *start* HKWorkoutSession, even if we never finish/save the workout.
+    /// Write access required to start HKWorkoutSession and save the workout/route.
     private var typesToShare: Set<HKSampleType> {
-        [workoutType, activeEnergyType, heartRateType]
+        [workoutType, activeEnergyType, basalEnergyType, heartRateType, distanceType, workoutRouteType]
     }
 
     private var typesToRead: Set<HKObjectType> {
-        [heartRateType, activeEnergyType, workoutType]
+        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType]
     }
 
     override init() {
@@ -273,7 +280,7 @@ final class WatchSessionController: NSObject {
             WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
         }
 
-        await endWorkoutDiscardingHealthSave()
+        await finishAndSaveWorkout()
         recordingMode = "none"
         motionRecordingEnabled = false
 
@@ -290,6 +297,8 @@ final class WatchSessionController: NSObject {
         filterRejectionReason = nil
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.paused
+        hkRideDistanceMeters = 0
+        hkRideDistanceAnchorMeters = 0
         self.manifest = nil
     }
 
@@ -347,6 +356,16 @@ final class WatchSessionController: NSObject {
 
     private func processLocationSample(_ sample: LocationSample) {
         liveRideTracker.addLocation(sample)
+        accumulateRideDistanceForHealthKit()
+    }
+
+    private func accumulateRideDistanceForHealthKit() {
+        guard liveRideTracker.isRideOngoing else { return }
+        let current = liveRideTracker.currentRideMeters
+        if current > hkRideDistanceAnchorMeters {
+            hkRideDistanceMeters += current - hkRideDistanceAnchorMeters
+            hkRideDistanceAnchorMeters = current
+        }
     }
 
     private func persistDetection(_ event: DetectionEvent) {
@@ -372,9 +391,29 @@ final class WatchSessionController: NSObject {
     private func handleDetectionTransition(_ event: DetectionEvent) {
         guard DetectionCodes.isConfident(event.code) else { return }
         if event.code != lastPersistedConfidentCode {
+            if lastPersistedConfidentCode == DetectionCodes.riding {
+                accumulateRideDistanceForHealthKit()
+                hkRideDistanceAnchorMeters = 0
+            }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
+            syncWorkoutPauseResume(for: event.code)
             refreshSegmentDurations()
+        }
+    }
+
+    /// Pause HK while docked so active energy only accrues during rides.
+    private func syncWorkoutPauseResume(for code: String) {
+        guard let session = workoutSession else { return }
+        switch code {
+        case DetectionCodes.riding where session.state == .paused:
+            session.resume()
+            WakeLog.debug(.workout, "HK resume (riding)")
+        case DetectionCodes.paused where session.state == .running:
+            session.pause()
+            WakeLog.debug(.workout, "HK pause (paused)")
+        default:
+            break
         }
     }
 
@@ -409,7 +448,7 @@ final class WatchSessionController: NSObject {
 
         do {
             try await startWorkout()
-            WakeLog.debug(.workout, "HKWorkoutSession started (dry-run)")
+            WakeLog.debug(.workout, "HKWorkoutSession started (save on stop)")
             return true
         } catch {
             // Simulator / denied / notDetermined often surfaces here as "Not authorized".
@@ -417,6 +456,7 @@ final class WatchSessionController: NSObject {
             WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
             workoutSession = nil
             workoutBuilder = nil
+            workoutRouteBuilder = nil
             return false
         }
     }
@@ -428,32 +468,107 @@ final class WatchSessionController: NSObject {
 
         let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
         let builder = session.associatedWorkoutBuilder()
-        builder.dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: config)
+        let dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: config)
+        dataSource.enableCollection(for: distanceType, predicate: nil)
+        builder.dataSource = dataSource
         session.delegate = self
         builder.delegate = self
 
+        var metadata: [String: Any] = [
+            HKMetadataKeyIndoorWorkout: false,
+            HKMetadataKeyWorkoutBrandName: "Rppl",
+        ]
+        if let sessionId = manifest?.sessionId {
+            metadata["nl.dcsbl.rppl.sessionId"] = sessionId
+            metadata["nl.dcsbl.rppl.activityName"] = "Cable Park"
+        }
+        try await builder.addMetadata(metadata)
+
         workoutSession = session
         workoutBuilder = builder
+        workoutRouteBuilder = HKWorkoutRouteBuilder(healthStore: healthStore, device: .local())
+        hkRideDistanceMeters = 0
+        hkRideDistanceAnchorMeters = 0
 
         session.startActivity(with: Date())
         try await builder.beginCollection(at: Date())
+        // Dock wait: do not burn active energy until first riding detection.
+        session.pause()
+        WakeLog.debug(.workout, "HK paused until first ride")
     }
 
-    private func endWorkoutDiscardingHealthSave() async {
-        guard workoutSession != nil || workoutBuilder != nil else { return }
-        WakeLog.debug(.workout, "end workout (no finishWorkout / Health save)")
-        let end = Date()
-        workoutSession?.stopActivity(with: end)
-        do {
-            try await workoutBuilder?.endCollection(at: end)
-            // Intentionally do NOT call finishWorkout() — dry-run, keep Health clean.
-        } catch {
-            errorText = "End workout: \(error.localizedDescription)"
-            WakeLog.error(.workout, "endCollection: \(error.localizedDescription)")
+    private func finishAndSaveWorkout() async {
+        guard let session = workoutSession, let builder = workoutBuilder else { return }
+        WakeLog.debug(.workout, "finishAndSaveWorkout begin")
+        accumulateRideDistanceForHealthKit()
+
+        let requestEnd = Date()
+        let stoppedDate: Date
+        if session.state == .stopped {
+            stoppedDate = requestEnd
+        } else {
+            stoppedDate = await withCheckedContinuation { continuation in
+                workoutStoppedContinuation = continuation
+                session.stopActivity(with: requestEnd)
+            }
         }
-        workoutSession?.end()
+
+        do {
+            try await builder.endCollection(at: stoppedDate)
+            if hkRideDistanceMeters > 0, let start = startedAt {
+                let quantity = HKQuantity(unit: .meter(), doubleValue: hkRideDistanceMeters)
+                let sample = HKQuantitySample(
+                    type: distanceType,
+                    quantity: quantity,
+                    start: start,
+                    end: stoppedDate
+                )
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    builder.add([sample]) { success, error in
+                        if let error {
+                            continuation.resume(throwing: error)
+                        } else if success {
+                            continuation.resume()
+                        } else {
+                            continuation.resume(throwing: SessionStoreError.ioFailure("Failed to add distance sample"))
+                        }
+                    }
+                }
+                WakeLog.debug(.workout, "added ride distance \(Int(hkRideDistanceMeters)) m")
+            }
+            let workout = try await builder.finishWorkout()
+            if let workout, let routeBuilder = workoutRouteBuilder {
+                do {
+                    _ = try await routeBuilder.finishRoute(with: workout, metadata: nil)
+                    WakeLog.debug(.workout, "workout route saved")
+                } catch {
+                    WakeLog.error(.workout, "finishRoute: \(error.localizedDescription)")
+                }
+            }
+            WakeLog.debug(.workout, "finishWorkout OK — Health save complete")
+        } catch {
+            errorText = "Save workout: \(error.localizedDescription)"
+            WakeLog.error(.workout, "finishWorkout: \(error.localizedDescription)")
+        }
+
+        session.end()
         workoutSession = nil
         workoutBuilder = nil
+        workoutRouteBuilder = nil
+        workoutStoppedContinuation = nil
+    }
+
+    private func insertRouteLocations(_ locations: [CLLocation]) async {
+        guard let routeBuilder = workoutRouteBuilder else { return }
+        let usable = locations.filter { loc in
+            loc.horizontalAccuracy >= 0 && loc.horizontalAccuracy <= 50
+        }
+        guard !usable.isEmpty else { return }
+        do {
+            try await routeBuilder.insertRouteData(usable)
+        } catch {
+            WakeLog.error(.workout, "insertRouteData: \(error.localizedDescription)")
+        }
     }
 
     private func startLocation() {
@@ -604,6 +719,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
             guard isRunning, let loc = locations.last else { return }
+            await insertRouteLocations(locations)
             if let previous = latestLocation,
                loc.horizontalAccuracy >= 0,
                previous.horizontalAccuracy >= 0,
@@ -655,6 +771,10 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
     ) {
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
+            if toState == .stopped, let continuation = workoutStoppedContinuation {
+                workoutStoppedContinuation = nil
+                continuation.resume(returning: date)
+            }
         }
     }
 
@@ -662,6 +782,10 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
         Task { @MainActor in
             errorText = error.localizedDescription
             WakeLog.error(.workout, "session failed: \(error.localizedDescription)")
+            if let continuation = workoutStoppedContinuation {
+                workoutStoppedContinuation = nil
+                continuation.resume(returning: Date())
+            }
         }
     }
 
@@ -688,6 +812,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
             let now = Date()
             var hr: Double?
             var energy: Double?
+            var basal: Double?
 
             if let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate),
                collectedTypes.contains(hrType),
@@ -702,12 +827,19 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
                let value = statistics.sumQuantity()?.doubleValue(for: .kilocalorie()) {
                 energy = value
             }
-            if hr != nil || energy != nil {
+            if let basalType = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned),
+               collectedTypes.contains(basalType),
+               let statistics = workoutBuilder.statistics(for: basalType),
+               let value = statistics.sumQuantity()?.doubleValue(for: .kilocalorie()) {
+                basal = value
+            }
+            if hr != nil || energy != nil || basal != nil {
                 healthBuffer.append(
                     HealthMetricSample(
                         timestamp: now,
                         heartRateBPM: hr,
-                        activeEnergyKilocalories: energy
+                        activeEnergyKilocalories: energy,
+                        basalEnergyKilocalories: basal
                     )
                 )
             }

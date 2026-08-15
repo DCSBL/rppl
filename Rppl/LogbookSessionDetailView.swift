@@ -126,8 +126,14 @@ struct LogbookSessionDetailView: View {
                 .font(.subheadline)
 
                 if let calories = stats.activeEnergyKilocalories {
-                    LabeledContent("Calories") {
+                    LabeledContent("Active calories") {
                         Text(String(format: "%.0f kcal", calories))
+                    }
+                    .font(.subheadline)
+                }
+                if let total = stats.totalEnergyKilocalories {
+                    LabeledContent("Total calories") {
+                        Text(String(format: "%.0f kcal", total))
                     }
                     .font(.subheadline)
                 }
