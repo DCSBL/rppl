@@ -48,6 +48,9 @@ final class WatchSessionController: NSObject {
             ? liveRideTracker.currentRideMeters
             : liveRideTracker.lastRideMeters
     }
+    var lastRideMeters: Double { liveRideTracker.lastRideMeters }
+    var lastRideDuration: TimeInterval { liveRideTracker.lastRideDuration }
+    var didCompleteRide: Bool { liveRideTracker.didCompleteRide }
     var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
 
     private var liveRideTracker = LiveRideTracker()

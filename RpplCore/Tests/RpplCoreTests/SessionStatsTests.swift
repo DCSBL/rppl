@@ -358,6 +358,57 @@ struct LiveRideTrackerTests {
         #expect(tracker.sessionRideMeters == first + tracker.currentRideMeters)
         #expect(tracker.rideCount == 2)
     }
+
+    @Test func lastRideDurationOnFinish() {
+        var tracker = LiveRideTracker()
+        #expect(!tracker.didCompleteRide)
+        #expect(tracker.lastRideDuration == 0)
+
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 10)]
+        )
+        tracker.update(
+            currentCode: DetectionCodes.paused,
+            lastConfident: DetectionCodes.paused,
+            events: [detection(code: DetectionCodes.paused, at: 55)]
+        )
+        #expect(tracker.didCompleteRide)
+        #expect(tracker.lastRideDuration == 45)
+        #expect(!tracker.isRideOngoing)
+    }
+
+    @Test func closeOpenRideRecordsDuration() {
+        var tracker = LiveRideTracker()
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 0)]
+        )
+        tracker.closeOpenRide(at: t0.addingTimeInterval(30))
+        #expect(tracker.didCompleteRide)
+        #expect(tracker.lastRideDuration == 30)
+        #expect(!tracker.isRideOngoing)
+    }
+
+    @Test func resetClearsLastRideDuration() {
+        var tracker = LiveRideTracker()
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 0)]
+        )
+        tracker.update(
+            currentCode: DetectionCodes.paused,
+            lastConfident: DetectionCodes.paused,
+            events: [detection(code: DetectionCodes.paused, at: 20)]
+        )
+        tracker.reset()
+        #expect(!tracker.didCompleteRide)
+        #expect(tracker.lastRideDuration == 0)
+        #expect(tracker.lastRideMeters == 0)
+    }
 }
 
 @Suite("LocationSpeedStats")
