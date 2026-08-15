@@ -10,6 +10,12 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
     public var distanceMeters: Double
     /// Crossing-based laps for this ride (0 until assumed return to start).
     public var lapCount: Int
+    /// Best sustained-window mean speed (km/h); see `LocationSpeedStats.sustainedSpeedKmh`.
+    public var sustainedSpeedKmh: Double?
+    /// Trimmed path average (km/h); see `LocationSpeedStats.trimmedAverageSpeedKmh`.
+    public var averageSpeedKmh: Double?
+    /// Record badges for this ride within the session (empty if none).
+    public var highlights: [RideHighlight]
 
     public init(
         index: Int,
@@ -17,7 +23,10 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        lapCount: Int = 0
+        lapCount: Int = 0,
+        sustainedSpeedKmh: Double? = nil,
+        averageSpeedKmh: Double? = nil,
+        highlights: [RideHighlight] = []
     ) {
         self.index = index
         self.startedAt = startedAt
@@ -25,6 +34,9 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
         self.duration = duration
         self.distanceMeters = distanceMeters
         self.lapCount = lapCount
+        self.sustainedSpeedKmh = sustainedSpeedKmh
+        self.averageSpeedKmh = averageSpeedKmh
+        self.highlights = highlights
     }
 }
 
@@ -44,6 +56,11 @@ public struct SessionStats: Equatable, Sendable {
     /// `ridingDuration / (ridingDuration + pausedDuration)`; 0 when no active time.
     public var ridingPausedRatio: Double
     public var rides: [RideSegmentStats]
+
+    /// Max sustained speed across rides (km/h).
+    public var topSpeedKmh: Double? {
+        rides.compactMap(\.sustainedSpeedKmh).max()
+    }
 
     /// Sum of per-ride crossing counts.
     public var totalLapCount: Int {

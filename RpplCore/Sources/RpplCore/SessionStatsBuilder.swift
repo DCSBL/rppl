@@ -58,6 +58,16 @@ public enum SessionStatsBuilder {
             }
             let laps = lapTracker.lapCount
             lapTracker.endRide()
+            let rideLocations = RideLocationFilter.samples(
+                in: sortedLocations,
+                from: window.start,
+                to: window.end
+            )
+            let sustained = LocationSpeedStats.sustainedSpeedKmh(from: rideLocations)
+            let average = LocationSpeedStats.trimmedAverageSpeedKmh(
+                locations: rideLocations,
+                maxHorizontalAccuracyM: maxHorizontalAccuracyM
+            )
             rides.append(
                 RideSegmentStats(
                     index: index + 1,
@@ -65,7 +75,9 @@ public enum SessionStatsBuilder {
                     endedAt: window.end,
                     duration: max(0, duration),
                     distanceMeters: distance,
-                    lapCount: laps
+                    lapCount: laps,
+                    sustainedSpeedKmh: sustained,
+                    averageSpeedKmh: average
                 )
             )
             totalDistance += distance
@@ -86,6 +98,8 @@ public enum SessionStatsBuilder {
             }
         }()
 
+        let highlightedRides = HighlightAssigner.assignRideHighlights(rides)
+
         return SessionStats(
             startedAt: sessionStart,
             endedAt: sessionEnd,
@@ -93,11 +107,11 @@ public enum SessionStatsBuilder {
             totalDistanceMeters: totalDistance,
             activeEnergyKilocalories: activeCalories,
             totalEnergyKilocalories: totalCalories,
-            rideCount: rides.count,
+            rideCount: highlightedRides.count,
             ridingDuration: ridingDuration,
             pausedDuration: pausedDuration,
             ridingPausedRatio: ratio,
-            rides: rides
+            rides: highlightedRides
         )
     }
 
