@@ -151,8 +151,11 @@ public enum SessionStatsBuilder {
         return mergeAdjacentPhases(phases)
     }
 
-    static func attributed(_ code: String, lastConfident: String) -> String {
-        code == DetectionCodes.unsure ? lastConfident : code
+    static func attributed(_ code: String, lastConfident _: String) -> String {
+        // Unsure gaps do not extend ride windows — fall/GPS death ends ride duration/distance.
+        // Lookback supersedes restore continuous riding when speed returns inside the same-ride window.
+        if code == DetectionCodes.unsure { return DetectionCodes.paused }
+        return code
     }
 
     static func mergeAdjacentPhases(_ phases: [AttributedPhase]) -> [AttributedPhase] {

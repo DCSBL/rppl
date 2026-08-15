@@ -6,11 +6,14 @@ public struct LiveRideTracker: Sendable {
     public private(set) var isRideOngoing = false
     public private(set) var currentRideMeters = 0.0
     public private(set) var lastRideMeters = 0.0
+    /// Sum of finished ride meters plus current ride (ride-gated session distance).
+    public private(set) var sessionRideMeters = 0.0
     public private(set) var currentSpeedKmh: Double?
 
     private var trackedCode = DetectionCodes.paused
     private var trackedLastConfident = DetectionCodes.paused
     private var previousLocation: LocationSample?
+    private var finishedRideMeters = 0.0
     private let maxHorizontalAccuracyM: Double
 
     public init(maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM) {
@@ -22,6 +25,8 @@ public struct LiveRideTracker: Sendable {
         isRideOngoing = false
         currentRideMeters = 0
         lastRideMeters = 0
+        sessionRideMeters = 0
+        finishedRideMeters = 0
         currentSpeedKmh = nil
         trackedCode = DetectionCodes.paused
         trackedLastConfident = DetectionCodes.paused
@@ -60,18 +65,21 @@ public struct LiveRideTracker: Sendable {
         }
         trackedLastConfident = lastConfident
         isRideOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
-        if !isRideOngoing {
+        if trackedCode != DetectionCodes.riding {
             currentSpeedKmh = nil
         }
+        refreshSessionMeters()
     }
 
     /// Add distance and speed from a new GPS fix.
     public mutating func addLocation(_ sample: LocationSample) {
-        if isRideOngoing, let speed = sample.speed, speed >= 0 {
+        // Meters and display speed only while confidently riding — not during unsure gaps.
+        let accrue = trackedCode == DetectionCodes.riding
+        if accrue, let speed = sample.speed, speed >= 0 {
             currentSpeedKmh = SpeedUnits.kilometersPerHour(fromMetersPerSecond: speed)
         }
 
-        guard isRideOngoing else {
+        guard accrue else {
             previousLocation = sample
             return
         }
@@ -84,6 +92,7 @@ public struct LiveRideTracker: Sendable {
                 toLat: sample.latitude,
                 toLon: sample.longitude
             )
+            refreshSessionMeters()
         }
         previousLocation = sample
     }
@@ -97,9 +106,15 @@ public struct LiveRideTracker: Sendable {
 
     private mutating func finishCurrentRide() {
         lastRideMeters = currentRideMeters
+        finishedRideMeters += currentRideMeters
         currentRideMeters = 0
         isRideOngoing = false
         currentSpeedKmh = nil
+        refreshSessionMeters()
+    }
+
+    private mutating func refreshSessionMeters() {
+        sessionRideMeters = finishedRideMeters + currentRideMeters
     }
 
     private static func attributesAsRiding(code: String, lastConfident: String) -> Bool {
