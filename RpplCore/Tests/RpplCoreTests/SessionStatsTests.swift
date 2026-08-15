@@ -65,10 +65,35 @@ struct GeoDistanceTests {
         #expect(!GeoDistance.acceptsStep(from: from, to: to, maxHorizontalAccuracyM: 25))
     }
 
-    @Test func rejectsTeleport() {
-        let from = location(at: 0, lat: 52.0, lon: 5.0)
-        let to = location(at: 1, lat: 52.1, lon: 5.0, speedMps: 5)
+    @Test func rejectsImpliedSpeedAbovePlausible() {
+        // ~20 m in 1 s ≈ 72 km/h implied; high reported speed keeps maxStep ≥ 20 m.
+        let from = location(
+            at: 0,
+            lat: 52.0,
+            lon: 5.0,
+            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 40)
+        )
+        let to = location(
+            at: 1,
+            lat: 52.00018,
+            lon: 5.0,
+            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 40)
+        )
+        let step = GeoDistance.meters(
+            fromLat: from.latitude,
+            fromLon: from.longitude,
+            toLat: to.latitude,
+            toLon: to.longitude
+        )
+        #expect(step > 15)
+        #expect(step < 50)
         #expect(!GeoDistance.acceptsStep(from: from, to: to, maxHorizontalAccuracyM: 25))
+    }
+
+    @Test func acceptsPlausibleRideStep() {
+        let from = location(at: 0, lat: 52.0, lon: 5.0, speedMps: 8)
+        let to = location(at: 1, lat: 52.00005, lon: 5.0, speedMps: 8)
+        #expect(GeoDistance.acceptsStep(from: from, to: to, maxHorizontalAccuracyM: 25))
     }
 }
 
@@ -162,6 +187,25 @@ struct SessionStatsBuilderTests {
         )
         #expect(stats.rideCount == 1)
         #expect(stats.rides[0].duration == 90)
+    }
+
+    @Test func timedOutUnsureEndsRideAtGap() {
+        // Unsure without lookback supersede: ride ends at unsure (not attributed riding).
+        let detections = [
+            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.unsure, at: 40, id: "u1"),
+            detection(code: DetectionCodes.paused, at: 100, id: "p1"),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(120)),
+            detections: detections,
+            locations: [],
+            health: []
+        )
+        #expect(stats.rideCount == 1)
+        #expect(stats.rides[0].duration == 30)
+        #expect(stats.ridingDuration == 30)
     }
 
     @Test func caloriesUsesMaxCumulative() {
@@ -259,5 +303,95 @@ struct LiveRideTrackerTests {
         let tracker = LiveRideTracker()
         #expect(tracker.lastRideMeters == 0)
         #expect(tracker.rideCount == 0)
+        #expect(tracker.sessionRideMeters == 0)
+    }
+
+    @Test func unsureDoesNotAccrueDistance() {
+        var tracker = LiveRideTracker()
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 0)]
+        )
+        tracker.addLocation(location(at: 1, lat: 52.0, lon: 5.0))
+        tracker.addLocation(location(at: 2, lat: 52.0001, lon: 5.0))
+        let meters = tracker.currentRideMeters
+        #expect(meters > 0)
+
+        tracker.update(
+            currentCode: DetectionCodes.unsure,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.unsure, at: 3)]
+        )
+        #expect(tracker.isRideOngoing)
+        tracker.addLocation(location(at: 4, lat: 52.0003, lon: 5.0))
+        #expect(tracker.currentRideMeters == meters)
+        #expect(tracker.currentSpeedKmh == nil)
+        #expect(tracker.sessionRideMeters == meters)
+    }
+
+    @Test func sessionRideMetersSumsFinishedRides() {
+        var tracker = LiveRideTracker()
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 0)]
+        )
+        tracker.addLocation(location(at: 1, lat: 52.0, lon: 5.0))
+        tracker.addLocation(location(at: 2, lat: 52.0001, lon: 5.0))
+        let first = tracker.currentRideMeters
+
+        tracker.update(
+            currentCode: DetectionCodes.paused,
+            lastConfident: DetectionCodes.paused,
+            events: [detection(code: DetectionCodes.paused, at: 10)]
+        )
+        #expect(tracker.sessionRideMeters == first)
+
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 20)]
+        )
+        tracker.addLocation(location(at: 21, lat: 52.0, lon: 5.0))
+        tracker.addLocation(location(at: 22, lat: 52.0001, lon: 5.0))
+        #expect(tracker.sessionRideMeters == first + tracker.currentRideMeters)
+        #expect(tracker.rideCount == 2)
+    }
+}
+
+@Suite("LocationSpeedStats")
+struct LocationSpeedStatsTests {
+    @Test func peakIgnoresImplausibleSpike() {
+        let locations = [
+            location(at: 0, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 30)),
+            location(at: 1, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 80)),
+            location(at: 2, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 28)),
+        ]
+        let peak = LocationSpeedStats.peakSpeedKmh(from: locations)
+        #expect(peak != nil)
+        #expect(abs((peak ?? 0) - 30) < 0.5)
+    }
+
+    @Test func sessionPeakUsesRideWindowsOnly() {
+        let rideLocations = [
+            location(at: 10, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 32)),
+            location(at: 11, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 34)),
+        ]
+        let pausedSpike = location(
+            at: 50,
+            lat: 52.0,
+            lon: 5.0,
+            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 44)
+        )
+        let all = rideLocations + [pausedSpike]
+        let windows = [(start: t0.addingTimeInterval(10), end: t0.addingTimeInterval(20))]
+        let sessionPeak = LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: all)
+        let rawAll = LocationSpeedStats.peakSpeedKmh(from: all)
+        #expect(sessionPeak != nil)
+        #expect(abs((sessionPeak ?? 0) - 34) < 0.5)
+        // Spike during pause is accepted by filter but outside ride window → not in session peak.
+        #expect(rawAll != nil)
+        #expect((rawAll ?? 0) > (sessionPeak ?? 0))
     }
 }

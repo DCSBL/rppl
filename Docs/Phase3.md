@@ -28,12 +28,13 @@ Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`)
 | Ride enter | ≥15 km/h × 2.0 s | From `paused` |
 | Ride exit | ≤4 km/h × 3.0 s | Usable GPS only |
 | GPS gap → unsure | unusable × 3.0 s while riding | Not immediate pause |
-| Same-ride merge | unsure age &lt; 180 s | Lookback supersede if speed returns high |
-| Unsure timeout | ≥180 s | Force `paused` → next enter is new ride |
+| Same-ride merge | unsure age &lt; 60 s | Lookback supersede if speed returns high |
+| Unsure timeout | ≥60 s | Force `paused` → next enter is new ride |
+| Water exit | `submerged` while riding/unsure | Ultra fall → `paused`; next enter = new ride |
 | GPS accuracy gate | >25 m skips speed | |
 | Implausible / jump | >45 km/h / ≥30 km/h jump | |
 
-Water / motion activity logged on ticks; unused by MVP detectors. Non-Ultra fine.
+Motion activity logged on ticks; unused by detectors. Non-Ultra uses GPS gap path (no water).
 
 ## Input
 

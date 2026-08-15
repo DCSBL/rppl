@@ -25,7 +25,8 @@ final class WatchSessionController: NSObject {
     var lastHorizontalAccuracy: Double?
     var lastHeartRate: Double?
     var lastSpeedMps: Double?
-    var totalDistanceM: Double = 0
+    /// Ride-gated session distance (sum of ride meters). Not dock/pause walking.
+    var totalDistanceM: Double { liveRideTracker.sessionRideMeters }
     var currentRideDuration: TimeInterval = 0
     var currentPauseDuration: TimeInterval = 0
     var filterRejectionReason: String?
@@ -220,7 +221,6 @@ final class WatchSessionController: NSObject {
         detectionCount = 0
         locationCount = 0
         motionCount = 0
-        totalDistanceM = 0
         currentRideDuration = 0
         currentPauseDuration = 0
         lastSpeedMps = nil
@@ -289,7 +289,6 @@ final class WatchSessionController: NSObject {
         statusText = "Stopped — waiting for phone ack"
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
-        totalDistanceM = 0
         currentRideDuration = 0
         currentPauseDuration = 0
         lastSpeedMps = nil
@@ -720,13 +719,6 @@ extension WatchSessionController: CLLocationManagerDelegate {
         Task { @MainActor in
             guard isRunning, let loc = locations.last else { return }
             await insertRouteLocations(locations)
-            if let previous = latestLocation,
-               loc.horizontalAccuracy >= 0,
-               previous.horizontalAccuracy >= 0,
-               loc.horizontalAccuracy <= 100,
-               previous.horizontalAccuracy <= 100 {
-                totalDistanceM += loc.distance(from: previous)
-            }
             if loc.speed >= 0 {
                 lastSpeedMps = loc.speed
             }

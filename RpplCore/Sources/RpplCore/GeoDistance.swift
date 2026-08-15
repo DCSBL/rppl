@@ -36,7 +36,8 @@ public enum GeoDistance {
     public static func acceptsStep(
         from: LocationSample,
         to: LocationSample,
-        maxHorizontalAccuracyM: Double
+        maxHorizontalAccuracyM: Double,
+        maxPlausibleSpeedKmh: Double = DetectionThresholds.default.maxPlausibleSpeedKmh
     ) -> Bool {
         guard from.horizontalAccuracy >= 0, to.horizontalAccuracy >= 0 else { return false }
         guard from.horizontalAccuracy <= maxHorizontalAccuracyM,
@@ -56,6 +57,10 @@ public enum GeoDistance {
         )
         let speed = to.speed ?? from.speed
         let maxStep = maxStepMeters(deltaSeconds: delta, speedMps: speed)
-        return step <= maxStep
+        guard step <= maxStep else { return false }
+
+        let impliedMps = step / delta
+        let impliedKmh = SpeedUnits.kilometersPerHour(fromMetersPerSecond: impliedMps)
+        return impliedKmh <= maxPlausibleSpeedKmh
     }
 }

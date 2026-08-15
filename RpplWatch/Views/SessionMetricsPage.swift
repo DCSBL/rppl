@@ -28,7 +28,7 @@ struct SessionMetricsPage: View {
 
                 SessionMetricRow(
                     label: "Km/h",
-                    value: SessionFormatters.speedKmh(session.lastSpeedMps)
+                    value: session.currentRideSpeedKmh.map { String(format: "%.0f", $0) } ?? "--"
                 )
 
                 statusSection

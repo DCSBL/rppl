@@ -20,7 +20,7 @@ public struct DetectionThresholds: Equatable, Sendable {
         stoppedSpeedKmh: Double = 4,
         rideExitHold: TimeInterval = 3.0,
         gapUnsureHold: TimeInterval = 3.0,
-        unsureSameRideWindow: TimeInterval = 180.0,
+        unsureSameRideWindow: TimeInterval = 60.0,
         maxHorizontalAccuracyM: Double = 25,
         maxPlausibleSpeedKmh: Double = 45,
         maxSpeedJumpKmh: Double = 30
