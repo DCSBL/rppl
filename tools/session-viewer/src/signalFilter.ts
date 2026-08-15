@@ -1,10 +1,8 @@
 import type { AccuracyPoint, LocationSample, SpeedPoint, TimeRange } from './types'
 import { toMs } from './analysisPrep'
 
-/** Defaults mirror RpplCore AssumptionThresholds. */
+/** Defaults mirror RpplCore DetectionThresholds GPS gates. */
 export const thresholds = {
-  rideEnterSpeedKmh: 15,
-  swimMaxSpeedKmh: 10,
   maxHorizontalAccuracyM: 25,
   maxPlausibleSpeedKmh: 45,
   maxSpeedJumpKmh: 30,
@@ -42,6 +40,27 @@ export function accuracySeries(
     points.push({ tMs, meters: loc.horizontalAccuracy })
   }
   return points
+}
+
+/** Single usable speed at tMs, or null. */
+export function usableSpeedAt(
+  locations: LocationSample[],
+  tMs: number,
+): number | null {
+  let previousUsable: number | null = null
+  let best: { tMs: number; kmh: number } | null = null
+  for (const loc of locations) {
+    const locMs = toMs(loc.timestamp)
+    const usable = filterSpeed(loc.speed ?? null, loc.horizontalAccuracy, previousUsable)
+    if (usable === null) continue
+    previousUsable = usable
+    if (locMs <= tMs) {
+      best = { tMs: locMs, kmh: mpsToKmh(usable) }
+    } else {
+      break
+    }
+  }
+  return best?.kmh ?? null
 }
 
 function filterSpeed(

@@ -1,6 +1,6 @@
 import type {
   AnalysisPackage,
-  AssumptionEvent,
+  DetectionEvent,
   LocationSample,
   Segment,
   TimeRange,
@@ -15,18 +15,18 @@ export function toMs(iso: string): number {
 
 export function sessionSpan(pkg: AnalysisPackage): TimeRange {
   const locationTimes = pkg.locations.map((l) => toMs(l.timestamp))
-  const assumptionTimes = pkg.assumptions.map((a) => toMs(a.timestamp))
+  const detectionTimes = pkg.detections.map((a) => toMs(a.timestamp))
   const started = toMs(pkg.manifest.startedAt)
   const lower = Math.min(
     started,
     ...locationTimes,
-    ...assumptionTimes.filter((n) => !Number.isNaN(n)),
+    ...detectionTimes.filter((n) => !Number.isNaN(n)),
   )
   const ended = pkg.manifest.endedAt ? toMs(pkg.manifest.endedAt) : NaN
   const upperCandidates = [
     ended,
     ...locationTimes,
-    ...assumptionTimes,
+    ...detectionTimes,
   ].filter((n) => !Number.isNaN(n))
   const upper = Math.max(
     upperCandidates.length ? Math.max(...upperCandidates) : lower + DEFAULT_WINDOW_MS,
@@ -55,8 +55,8 @@ export function clampWindow(startMs: number, endMs: number, span: TimeRange): Ti
   return { startMs: start, endMs: end }
 }
 
-export function segments(assumptions: AssumptionEvent[], sessionEndMs: number): Segment[] {
-  const sorted = [...assumptions].sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
+export function segments(detections: DetectionEvent[], sessionEndMs: number): Segment[] {
+  const sorted = [...detections].sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
   if (!sorted.length) return []
   return sorted.flatMap((event, index) => {
     const start = toMs(event.timestamp)
@@ -65,7 +65,7 @@ export function segments(assumptions: AssumptionEvent[], sessionEndMs: number): 
     if (end <= start) return []
     return [
       {
-        id: event.id || `assumption-${index}`,
+        id: event.id || `detection-${index}`,
         code: event.code,
         startMs: start,
         endMs: end,
@@ -73,6 +73,7 @@ export function segments(assumptions: AssumptionEvent[], sessionEndMs: number): 
         speedMps: event.speedMps,
         waterSubmersionState: event.waterSubmersionState,
         motionActivity: event.motionActivity,
+        detectorId: event.detectorId,
       },
     ]
   })
@@ -101,4 +102,9 @@ export function locationsInWindow(
 
 export function segmentsInWindow(segs: Segment[], range: TimeRange): Segment[] {
   return segs.filter((s) => s.endMs > range.startMs && s.startMs < range.endMs)
+}
+
+/** Clamp playhead into window (inclusive). */
+export function clampPlayhead(tMs: number, window: TimeRange): number {
+  return Math.max(window.startMs, Math.min(tMs, window.endMs))
 }

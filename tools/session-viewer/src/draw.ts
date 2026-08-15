@@ -1,6 +1,7 @@
 import type {
   AccuracyPoint,
   LocationSample,
+  RideSegment,
   Segment,
   SpeedPoint,
   TimeRange,
@@ -11,10 +12,9 @@ import { thresholds } from './signalFilter'
 const PAD = { left: 48, right: 12, top: 18, bottom: 28 }
 
 const CODE_COLORS: Record<string, string> = {
-  waiting: '#6b7280',
-  riding: '#2563eb',
-  swimming: '#0891b2',
-  walking: '#ca8a04',
+  riding: '#22c55e',
+  paused: '#3b82f6',
+  unsure: '#9ca3af',
 }
 
 export function codeColor(code: string): string {
@@ -110,12 +110,19 @@ function strokeOpenPath(
 
 const SERIES_GAP_MS = 30_000
 
-
 export interface TrackExtent {
   minLon: number
   maxLon: number
   minLat: number
   maxLat: number
+}
+
+export type TrackMarkerKind = 'start' | 'end' | 'anchor' | 'playhead'
+
+export interface TrackMarker {
+  lat: number
+  lon: number
+  kind: TrackMarkerKind
 }
 
 /** Bounds from full session GPS — fixed zoom while scrubbing. */
@@ -142,11 +149,20 @@ export function trackExtent(locations: LocationSample[]): TrackExtent | null {
   return { minLon, maxLon, minLat, maxLat }
 }
 
-/** Relative lon/lat track — scale from full extent; draw window polyline + markers. */
+function codeAtTime(segs: Segment[], tMs: number): string {
+  for (let i = segs.length - 1; i >= 0; i--) {
+    const s = segs[i]!
+    if (tMs >= s.startMs && tMs < s.endMs) return s.code
+  }
+  return 'paused'
+}
+
+/** Relative lon/lat track — colored by detection code; markers + playhead. */
 export function drawTrack(
   canvas: HTMLCanvasElement,
   locations: LocationSample[],
-  markers: { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[],
+  allSegments: Segment[],
+  markers: TrackMarker[],
   extent: TrackExtent | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
@@ -184,19 +200,28 @@ export function drawTrack(
   const jumpLimit = diag * 0.35
   const pts = sorted.map((loc) => {
     const [x, y] = project(loc.latitude, loc.longitude)
-    return { x, y, tMs: toMs(loc.timestamp) }
+    return {
+      x,
+      y,
+      tMs: toMs(loc.timestamp),
+      code: codeAtTime(allSegments, toMs(loc.timestamp)),
+    }
   })
 
-  ctx.strokeStyle = '#93c5fd'
-  ctx.lineWidth = 1.5
-  strokeOpenPath(ctx, pts, (i) => {
+  ctx.lineWidth = 2
+  for (let i = 1; i < pts.length; i++) {
     const prev = pts[i - 1]!
     const cur = pts[i]!
-    if (cur.tMs < prev.tMs) return true
-    if (cur.tMs - prev.tMs > SERIES_GAP_MS) return true
+    if (cur.tMs < prev.tMs) continue
+    if (cur.tMs - prev.tMs > SERIES_GAP_MS) continue
     const dist = Math.hypot(cur.x - prev.x, cur.y - prev.y)
-    return dist > jumpLimit
-  })
+    if (dist > jumpLimit) continue
+    ctx.strokeStyle = codeColor(prev.code)
+    ctx.beginPath()
+    ctx.moveTo(prev.x, prev.y)
+    ctx.lineTo(cur.x, cur.y)
+    ctx.stroke()
+  }
 
   for (const m of markers) {
     const [x, y] = project(m.lat, m.lon)
@@ -207,12 +232,45 @@ export function drawTrack(
     } else if (m.kind === 'end') {
       ctx.fillStyle = '#ef4444'
       ctx.arc(x, y, 5, 0, Math.PI * 2)
+    } else if (m.kind === 'anchor') {
+      ctx.strokeStyle = '#fbbf24'
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.35)'
+      ctx.lineWidth = 2
+      ctx.arc(x, y, 7, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      continue
     } else {
-      ctx.fillStyle = '#fbbf24'
-      ctx.arc(x, y, 3.5, 0, Math.PI * 2)
+      // playhead
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#111827'
+      ctx.lineWidth = 1.5
+      ctx.arc(x, y, 6, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      continue
     }
     ctx.fill()
   }
+}
+
+function drawPlayheadCursor(
+  ctx: CanvasRenderingContext2D,
+  frame: { x0: number; y0: number; x1: number; y1: number },
+  range: TimeRange,
+  playheadMs: number | null,
+): void {
+  if (playheadMs == null) return
+  if (playheadMs < range.startMs || playheadMs > range.endMs) return
+  const x = xAt(playheadMs, range, frame.x0, frame.x1)
+  ctx.strokeStyle = '#f8fafc'
+  ctx.lineWidth = 1
+  ctx.setLineDash([3, 3])
+  ctx.beginPath()
+  ctx.moveTo(x, frame.y0)
+  ctx.lineTo(x, frame.y1)
+  ctx.stroke()
+  ctx.setLineDash([])
 }
 
 export function drawSpeed(
@@ -220,14 +278,11 @@ export function drawSpeed(
   points: SpeedPoint[],
   range: TimeRange,
   highlight: Segment | null,
+  playheadMs: number | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
   const frame = plotFrame(ctx, w, h, 'Speed (km/h, usable)')
-  const maxV = Math.max(
-    thresholds.rideEnterSpeedKmh + 5,
-    ...points.map((p) => p.kmh),
-    1,
-  )
+  const maxV = Math.max(20, ...points.map((p) => p.kmh), 1)
   const minV = 0
 
   if (highlight) {
@@ -240,25 +295,9 @@ export function drawSpeed(
     }
   }
 
-  const dash = (kmh: number, color: string, label: string) => {
-    const y = yAt(kmh, minV, maxV, frame.y0, frame.y1)
-    ctx.strokeStyle = color
-    ctx.setLineDash([4, 4])
-    ctx.beginPath()
-    ctx.moveTo(frame.x0, y)
-    ctx.lineTo(frame.x1, y)
-    ctx.stroke()
-    ctx.setLineDash([])
-    ctx.fillStyle = color
-    ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
-    ctx.textAlign = 'left'
-    ctx.fillText(label, frame.x0 + 4, y - 2)
-  }
-  dash(thresholds.rideEnterSpeedKmh, '#60a5fa', `ride ${thresholds.rideEnterSpeedKmh}`)
-  dash(thresholds.swimMaxSpeedKmh, '#22d3ee', `swim ${thresholds.swimMaxSpeedKmh}`)
-
   if (!points.length) {
     drawCentered(ctx, w, h, 'No usable speed in window')
+    drawPlayheadCursor(ctx, frame, range, playheadMs)
     return
   }
 
@@ -281,6 +320,7 @@ export function drawSpeed(
   ctx.textAlign = 'right'
   ctx.fillText(String(Math.round(maxV)), frame.x0 - 4, frame.y0 + 8)
   ctx.fillText('0', frame.x0 - 4, frame.y1)
+  drawPlayheadCursor(ctx, frame, range, playheadMs)
 }
 
 export function drawAccuracy(
@@ -288,6 +328,7 @@ export function drawAccuracy(
   points: AccuracyPoint[],
   range: TimeRange,
   highlight: Segment | null,
+  playheadMs: number | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
   const frame = plotFrame(ctx, w, h, 'GPS accuracy (m)')
@@ -322,6 +363,7 @@ export function drawAccuracy(
 
   if (!points.length) {
     drawCentered(ctx, w, h, 'No accuracy samples in window')
+    drawPlayheadCursor(ctx, frame, range, playheadMs)
     return
   }
 
@@ -338,6 +380,7 @@ export function drawAccuracy(
     const cur = pts[i]!
     return cur.tMs < prev.tMs || cur.tMs - prev.tMs > SERIES_GAP_MS
   })
+  drawPlayheadCursor(ctx, frame, range, playheadMs)
 }
 
 export function drawEvents(
@@ -345,11 +388,14 @@ export function drawEvents(
   segs: Segment[],
   range: TimeRange,
   selectedId: string | null,
+  rides: RideSegment[],
+  playheadMs: number | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
-  const frame = plotFrame(ctx, w, h, 'Assumptions')
+  const frame = plotFrame(ctx, w, h, 'Detections')
   if (!segs.length) {
-    drawCentered(ctx, w, h, 'No assumptions in window')
+    drawCentered(ctx, w, h, 'No detections in window')
+    drawPlayheadCursor(ctx, frame, range, playheadMs)
     return
   }
   const laneTop = frame.y0 + 8
@@ -369,6 +415,24 @@ export function drawEvents(
       ctx.strokeRect(xA, laneTop, Math.max(2, xB - xA), laneH)
     }
   }
+
+  for (const ride of rides) {
+    if (ride.startMs >= range.endMs || ride.endMs <= range.startMs) continue
+    const x = xAt(
+      Math.max(ride.startMs, range.startMs),
+      range,
+      frame.x0,
+      frame.x1,
+    )
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(x, laneTop)
+    ctx.lineTo(x, laneTop + laneH)
+    ctx.stroke()
+  }
+
+  drawPlayheadCursor(ctx, frame, range, playheadMs)
 }
 
 export function hitTestEvents(
@@ -377,12 +441,8 @@ export function hitTestEvents(
   segs: Segment[],
   range: TimeRange,
 ): Segment | null {
-  const rect = canvas.getBoundingClientRect()
-  const x = clientX - rect.left
-  const x0 = PAD.left
-  const x1 = rect.width - PAD.right
-  if (x < x0 || x > x1) return null
-  const t = range.startMs + ((x - x0) / Math.max(1, x1 - x0)) * (range.endMs - range.startMs)
+  const t = timeAtClientX(canvas, clientX, range)
+  if (t == null) return null
   for (let i = segs.length - 1; i >= 0; i--) {
     const s = segs[i]!
     if (t >= s.startMs && t < s.endMs) return s
@@ -390,33 +450,94 @@ export function hitTestEvents(
   return null
 }
 
-export function assumptionMarkers(
+export function timeAtClientX(
+  canvas: HTMLCanvasElement,
+  clientX: number,
+  range: TimeRange,
+): number | null {
+  const rect = canvas.getBoundingClientRect()
+  const x = clientX - rect.left
+  const x0 = PAD.left
+  const x1 = rect.width - PAD.right
+  if (x < x0 || x > x1) return null
+  return range.startMs + ((x - x0) / Math.max(1, x1 - x0)) * (range.endMs - range.startMs)
+}
+
+/** Nearest GPS sample under a track click (client coords). */
+export function hitTestTrack(
+  canvas: HTMLCanvasElement,
+  clientX: number,
+  clientY: number,
   locations: LocationSample[],
-  segs: Segment[],
-): { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[] {
-  const markers: { lat: number; lon: number; kind: 'start' | 'end' | 'assumption' }[] = []
+  extent: TrackExtent | null,
+): LocationSample | null {
+  if (!extent || !locations.length) return null
+  const rect = canvas.getBoundingClientRect()
+  const mx = clientX - rect.left
+  const my = clientY - rect.top
+  const w = rect.width
+  const h = rect.height
+  const frame = {
+    x0: PAD.left,
+    y0: PAD.top,
+    x1: w - PAD.right,
+    y1: h - PAD.bottom,
+  }
+  const { minLon, maxLon, minLat, maxLat } = extent
+  const midLat = ((minLat + maxLat) / 2) * (Math.PI / 180)
+  const lonScale = Math.cos(midLat)
+  const widthM = (maxLon - minLon) * lonScale
+  const heightM = maxLat - minLat
+  const plotW = frame.x1 - frame.x0
+  const plotH = frame.y1 - frame.y0
+  const scale = Math.min(plotW / Math.max(widthM, 1e-12), plotH / Math.max(heightM, 1e-12)) * 0.9
+  const cx = (frame.x0 + frame.x1) / 2
+  const cy = (frame.y0 + frame.y1) / 2
+  const midLon = (minLon + maxLon) / 2
+  const midLatVal = (minLat + maxLat) / 2
+
+  let best: LocationSample | null = null
+  let bestDist = 24
+  for (const loc of locations) {
+    const x = cx + (loc.longitude - midLon) * lonScale * scale
+    const y = cy - (loc.latitude - midLatVal) * scale
+    const d = Math.hypot(x - mx, y - my)
+    if (d < bestDist) {
+      bestDist = d
+      best = loc
+    }
+  }
+  return best
+}
+
+export function buildTrackMarkers(
+  locations: LocationSample[],
+  rides: RideSegment[],
+  playheadLoc: LocationSample | null,
+): TrackMarker[] {
+  const markers: TrackMarker[] = []
   if (!locations.length) return markers
   const first = locations[0]!
   const last = locations[locations.length - 1]!
   markers.push({ lat: first.latitude, lon: first.longitude, kind: 'start' })
   markers.push({ lat: last.latitude, lon: last.longitude, kind: 'end' })
 
-  const nearest = (tMs: number): LocationSample | null => {
-    let best: LocationSample | null = null
-    let bestDist = Infinity
-    for (const loc of locations) {
-      const d = Math.abs(toMs(loc.timestamp) - tMs)
-      if (d < bestDist) {
-        bestDist = d
-        best = loc
-      }
+  for (const ride of rides) {
+    if (ride.startLatitude != null && ride.startLongitude != null) {
+      markers.push({
+        lat: ride.startLatitude,
+        lon: ride.startLongitude,
+        kind: 'anchor',
+      })
     }
-    return best
   }
 
-  for (const seg of segs) {
-    const loc = nearest(seg.startMs)
-    if (loc) markers.push({ lat: loc.latitude, lon: loc.longitude, kind: 'assumption' })
+  if (playheadLoc) {
+    markers.push({
+      lat: playheadLoc.latitude,
+      lon: playheadLoc.longitude,
+      kind: 'playhead',
+    })
   }
   return markers
 }

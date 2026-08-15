@@ -41,6 +41,27 @@ header h1 {
   align-items: center;
 }
 
+.play-btn {
+  margin-left: auto;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  color: #e5e7eb;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 72px;
+}
+
+.play-btn:hover:not(:disabled) {
+  background: #374151;
+}
+
+.play-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 label.file {
   display: inline-flex;
   align-items: center;
