@@ -322,7 +322,7 @@ private struct RideDetailCard: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 LabeledContent("Duration") {
-                    Text(LogbookFormatting.rideCardDuration(ride.duration))
+                    Text(LogbookFormatting.duration(ride.duration))
                 }
                 LabeledContent("Distance") {
                     Text(LogbookFormatting.distanceKilometers(ride.distanceMeters))
