@@ -3,16 +3,12 @@ import RpplCore
 
 enum LogbookFormatting {
     static func duration(_ interval: TimeInterval) -> String {
-        let total = max(0, Int(interval.rounded()))
-        let hours = total / 3600
-        let minutes = (total % 3600) / 60
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        }
-        if minutes > 0 {
-            return "\(minutes)m"
-        }
-        return "0m"
+        formatDuration(interval, minutesUnit: "m")
+    }
+
+    /// Ride cards spell out minutes; other surfaces keep compact `m`.
+    static func rideCardDuration(_ interval: TimeInterval) -> String {
+        formatDuration(interval, minutesUnit: "minutes")
     }
 
     static func distanceKilometers(_ meters: Double) -> String {
@@ -20,7 +16,7 @@ enum LogbookFormatting {
         if km >= 10 {
             return String(format: "%.0f km", km)
         }
-        return String(format: "%.1f km", km)
+        return String(format: "%.2f km", km)
     }
 
     static func speedKilometersPerHour(_ kmh: Double) -> String {
@@ -36,5 +32,26 @@ enum LogbookFormatting {
         guard let end else { return startText }
         let endText = end.formatted(date: .omitted, time: .shortened)
         return "\(startText) – \(endText)"
+    }
+
+    private static func formatDuration(_ interval: TimeInterval, minutesUnit: String) -> String {
+        let total = max(0, Int(interval.rounded()))
+        let hours = total / 3600
+        let minutes = (total % 3600) / 60
+        let seconds = total % 60
+
+        var parts: [String] = []
+        if hours > 0 {
+            parts.append("\(hours)h")
+        }
+        if minutes > 0 || hours > 0 {
+            if minutesUnit == "m" {
+                parts.append("\(minutes)m")
+            } else {
+                parts.append("\(minutes) \(minutesUnit)")
+            }
+        }
+        parts.append("\(seconds)s")
+        return parts.joined(separator: " ")
     }
 }

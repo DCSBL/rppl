@@ -429,7 +429,7 @@ struct SessionMapView: View {
     }
 
     var body: some View {
-        Map {
+        Map(interactionModes: []) {
             ForEach(Array(tracks.enumerated()), id: \.offset) { _, track in
                 MapPolyline(coordinates: track.map {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
