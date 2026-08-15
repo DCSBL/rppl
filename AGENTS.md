@@ -60,7 +60,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
 - Pre-commit (commit): hygiene → codespell → SwiftLint.
-- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze) when the push includes build-related files.
+- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests; `xcodebuild` build if app/Core sources changed) when the push includes build-related files. Skips steps whose inputs match the last successful run. Analyze is `make check` / `XCODE_GATE_ANALYZE=1` only.
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
 
 ## Git / commits

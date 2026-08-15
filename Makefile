@@ -2,7 +2,9 @@
 
 export PATH := $(CURDIR)/tools/bin:$(HOME)/Library/Python/3.9/bin:$(PATH)
 
-check: gate
+# Full gate: Core tests + xcodebuild build + analyze (ignores skip cache).
+check:
+	XCODE_GATE_FULL=1 bash scripts/git-hooks/xcode-gate.sh
 
 test-core:
 	cd RpplCore && swift test
@@ -10,6 +12,7 @@ test-core:
 lint:
 	bash scripts/git-hooks/run-swiftlint.sh
 
+# Same as pre-push: skip unchanged steps; no analyze.
 gate:
 	bash scripts/git-hooks/xcode-gate.sh
 
