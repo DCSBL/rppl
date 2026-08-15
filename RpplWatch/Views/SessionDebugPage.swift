@@ -11,6 +11,13 @@ struct SessionDebugPage: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
 
+                Button(session.detectionSimulationMode.buttonTitle) {
+                    WakeLog.debug(.ui, "tap sim \(session.detectionSimulationMode.rawValue)")
+                    session.cycleDetectionSimulation()
+                }
+                .buttonStyle(.bordered)
+                .tint(simulationTint)
+
                 Text(statusLabel)
                     .font(.caption.bold())
                     .foregroundStyle(statusColor)
@@ -72,6 +79,14 @@ struct SessionDebugPage: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
+        }
+    }
+
+    private var simulationTint: Color {
+        switch session.detectionSimulationMode {
+        case .detected: return .secondary
+        case .pause: return .gray
+        case .ride: return .blue
         }
     }
 
