@@ -252,10 +252,11 @@ struct LogbookSessionDetailView: View {
             sessionStats = stats
             allLocations = sortedLocations
             mapTracks = mapPoints
-            topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(
-                rides: stats.rides,
-                locations: sortedLocations
-            )
+            topSpeedKmh = stats.topSpeedKmh
+                ?? SessionLocationHelpers.sustainedSpeedKmh(
+                    rides: stats.rides,
+                    locations: sortedLocations
+                )
             cityName = await SessionCityResolver.shared.cityName(
                 sessionId: sessionId,
                 locations: sortedLocations
@@ -293,21 +294,29 @@ private struct RideDetailCard: View {
     let locations: [LocationSample]
 
     private var topSpeedKmh: Double? {
-        SessionLocationHelpers.peakSpeedKmh(from: locations)
+        ride.sustainedSpeedKmh ?? SessionLocationHelpers.sustainedSpeedKmh(from: locations)
     }
 
     private var averageSpeedKmh: Double? {
-        SessionLocationHelpers.averageSpeedKmh(
-            distanceMeters: ride.distanceMeters,
-            duration: ride.duration
-        )
+        SessionLocationHelpers.averageSpeedKmh(for: ride)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Ride \(ride.index)")
+            VStack(alignment: .leading, spacing: 2) {
+                (
+                    Text("Ride \(ride.index)")
+                        .foregroundStyle(Color.rpplText)
+                    + (ride.highlights.isEmpty
+                        ? Text("")
+                        : Text(" - \(LogbookFormatting.joinedRideHighlights(ride.highlights))")
+                            .foregroundStyle(Color.rpplMuted))
+                )
                 .font(.headline)
-                .foregroundStyle(Color.rpplText)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
+            }
 
             if locations.count >= 2 {
                 SessionMapView(locations: locations)

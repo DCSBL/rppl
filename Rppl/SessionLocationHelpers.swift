@@ -2,16 +2,28 @@ import Foundation
 import RpplCore
 
 enum SessionLocationHelpers {
-    static func peakSpeedKmh(from locations: [LocationSample]) -> Double? {
-        LocationSpeedStats.peakSpeedKmh(from: locations)
+    static func sustainedSpeedKmh(from locations: [LocationSample]) -> Double? {
+        LocationSpeedStats.sustainedSpeedKmh(from: locations)
     }
 
-    static func peakSpeedKmh(
+    static func sustainedSpeedKmh(
         rides: [RideSegmentStats],
         locations: [LocationSample]
     ) -> Double? {
+        if let fromRides = rides.compactMap(\.sustainedSpeedKmh).max() {
+            return fromRides
+        }
         let windows = rides.map { (start: $0.startedAt, end: $0.endedAt) }
-        return LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: locations)
+        return LocationSpeedStats.sustainedSpeedKmh(rideWindows: windows, locations: locations)
+    }
+
+    /// Prefer ride `averageSpeedKmh` (trimmed); fall back to raw distance/duration.
+    static func averageSpeedKmh(for ride: RideSegmentStats) -> Double? {
+        if let trimmed = ride.averageSpeedKmh { return trimmed }
+        return LocationSpeedStats.averageSpeedKmh(
+            distanceMeters: ride.distanceMeters,
+            duration: ride.duration
+        )
     }
 
     static func locations(
@@ -33,10 +45,6 @@ enum SessionLocationHelpers {
             result.append(locations[sampleIndex])
         }
         return result
-    }
-
-    static func averageSpeedKmh(distanceMeters: Double, duration: TimeInterval) -> Double? {
-        LocationSpeedStats.averageSpeedKmh(distanceMeters: distanceMeters, duration: duration)
     }
 
     /// Centroid of usable GPS points for reverse geocoding.

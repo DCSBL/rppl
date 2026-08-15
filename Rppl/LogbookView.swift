@@ -236,14 +236,24 @@ private struct SessionCard: View {
                     .background(Color.rpplAccent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Wakeboarding")
-                        .font(.headline)
-                        .foregroundStyle(Color.rpplText)
+                    (
+                        Text("Wakeboarding")
+                            .foregroundStyle(Color.rpplText)
+                        + (entry.highlights.isEmpty
+                            ? Text("")
+                            : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
+                                .foregroundStyle(Color.rpplMuted))
+                    )
+                    .font(.headline)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
 
                     Text(timeRangeText)
                         .font(.caption)
                         .foregroundStyle(Color.rpplMuted)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Spacer(minLength: 8)
 

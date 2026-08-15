@@ -56,4 +56,28 @@ enum LogbookFormatting {
         let endText = end.formatted(date: .omitted, time: .shortened)
         return "\(startText) – \(endText)"
     }
+
+    static func rideHighlightLabel(_ highlight: RideHighlight) -> String {
+        switch highlight {
+        case .longest: return "Longest"
+        case .longestTime: return "Longest time"
+        case .fastest: return "Fastest"
+        }
+    }
+
+    static func sessionHighlightLabel(_ highlight: SessionHighlight) -> String {
+        switch highlight {
+        case .longest: return "Longest"
+        case .mostWaterTime: return "Most water time"
+        case .mostLaps: return "Most laps"
+        }
+    }
+
+    static func joinedRideHighlights(_ highlights: [RideHighlight]) -> String {
+        highlights.map(rideHighlightLabel).joined(separator: " ")
+    }
+
+    static func joinedSessionHighlights(_ highlights: [SessionHighlight]) -> String {
+        highlights.map(sessionHighlightLabel).joined(separator: " ")
+    }
 }

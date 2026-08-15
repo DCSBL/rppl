@@ -7,6 +7,7 @@ struct SessionEntry: Identifiable, Sendable {
     let stats: SessionStats?
     let topSpeedKmh: Double?
     let cityName: String?
+    let highlights: [SessionHighlight]
 
     var id: String { manifest.sessionId }
 }
@@ -68,7 +69,27 @@ final class SessionCatalog {
                 loaded.append(entry)
             }
 
-            entries = loaded
+            let highlightMap = HighlightAssigner.assignSessionHighlights(
+                loaded.compactMap { entry in
+                    guard let stats = entry.stats else { return nil }
+                    return SessionHighlightInput(
+                        id: entry.manifest.sessionId,
+                        totalDuration: stats.totalDuration,
+                        ridingDuration: stats.ridingDuration,
+                        lapCount: stats.totalLapCount
+                    )
+                }
+            )
+
+            entries = loaded.map { entry in
+                SessionEntry(
+                    manifest: entry.manifest,
+                    stats: entry.stats,
+                    topSpeedKmh: entry.topSpeedKmh,
+                    cityName: entry.cityName,
+                    highlights: highlightMap[entry.manifest.sessionId] ?? []
+                )
+            }
             isLoading = false
             loadTask = nil
             WakeLog.debug(.ui, "SessionCatalog loaded count=\(loaded.count)")
@@ -93,10 +114,11 @@ final class SessionCatalog {
                 locations: locations,
                 health: health
             )
-            let topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(
-                rides: stats.rides,
-                locations: locations
-            )
+            let topSpeedKmh = stats.topSpeedKmh
+                ?? SessionLocationHelpers.sustainedSpeedKmh(
+                    rides: stats.rides,
+                    locations: locations
+                )
             return (stats: stats, topSpeedKmh: topSpeedKmh, locations: locations)
         }
 
@@ -109,7 +131,8 @@ final class SessionCatalog {
             manifest: manifest,
             stats: bundle.stats,
             topSpeedKmh: bundle.topSpeedKmh,
-            cityName: cityName
+            cityName: cityName,
+            highlights: []
         )
     }
 
