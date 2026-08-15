@@ -1,4 +1,5 @@
 import type { LocationSample } from './types'
+import { toMs } from './analysisPrep'
 import { acceptsStep, meters } from './geoDistance'
 import { thresholds as gpsThresholds } from './signalFilter'
 
@@ -25,6 +26,8 @@ type ZoneState = 'idle' | 'awaitingAnchor' | 'atStart' | 'outside'
  */
 export class LapRideTracker {
   lapCount = 0
+  /** Timestamps (ms) of each completed crossing for this ride. */
+  lapAtMs: number[] = []
   isRideActive = false
   startLatitude: number | null = null
   startLongitude: number | null = null
@@ -42,6 +45,7 @@ export class LapRideTracker {
 
   reset(): void {
     this.lapCount = 0
+    this.lapAtMs = []
     this.isRideActive = false
     this.zoneState = 'idle'
     this.hasSeenPause = false
@@ -60,6 +64,7 @@ export class LapRideTracker {
   beginRide(): void {
     if (this.isRideActive) this.endRide()
     this.lapCount = 0
+    this.lapAtMs = []
     this.isRideActive = true
     this.scoringThisRide = this.hasSeenPause
     this.zoneState = this.scoringThisRide ? 'awaitingAnchor' : 'idle'
@@ -136,6 +141,7 @@ export class LapRideTracker {
         this.pathSinceLeaveM >= this.thresholds.minPathBeforeCrossingM
       ) {
         this.lapCount += 1
+        this.lapAtMs.push(toMs(sample.timestamp))
         this.zoneState = 'atStart'
         this.pathSinceLeaveM = 0
       }

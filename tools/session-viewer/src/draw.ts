@@ -392,7 +392,7 @@ export function drawEvents(
   playheadMs: number | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
-  const frame = plotFrame(ctx, w, h, 'Detections')
+  const frame = plotFrame(ctx, w, h, 'Detections · laps')
   if (!segs.length) {
     drawCentered(ctx, w, h, 'No detections in window')
     drawPlayheadCursor(ctx, frame, range, playheadMs)
@@ -417,19 +417,16 @@ export function drawEvents(
   }
 
   for (const ride of rides) {
-    if (ride.startMs >= range.endMs || ride.endMs <= range.startMs) continue
-    const x = xAt(
-      Math.max(ride.startMs, range.startMs),
-      range,
-      frame.x0,
-      frame.x1,
-    )
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.moveTo(x, laneTop)
-    ctx.lineTo(x, laneTop + laneH)
-    ctx.stroke()
+    for (const lapMs of ride.lapAtMs) {
+      if (lapMs < range.startMs || lapMs > range.endMs) continue
+      const x = xAt(lapMs, range, frame.x0, frame.x1)
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.9)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(x, laneTop)
+      ctx.lineTo(x, laneTop + laneH)
+      ctx.stroke()
+    }
   }
 
   drawPlayheadCursor(ctx, frame, range, playheadMs)
