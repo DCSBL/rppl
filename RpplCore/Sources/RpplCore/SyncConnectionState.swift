@@ -27,35 +27,41 @@ public enum SyncConnectionState: String, Codable, Sendable, Equatable {
 
     public var title: String {
         switch self {
-        case .unsupported: return "Unsupported"
-        case .notActivated: return "Not activated"
-        case .inactive: return "Inactive"
-        case .notPaired: return "No Watch paired"
-        case .watchAppMissing: return "Watch app missing"
-        case .companionMissing: return "iPhone app missing"
-        case .readyQueued: return "Ready (queued)"
-        case .readyLive: return "Connected"
+        case .unsupported: return String(localized: "Unsupported", bundle: .module)
+        case .notActivated: return String(localized: "Not activated", bundle: .module)
+        case .inactive: return String(localized: "Inactive", bundle: .module)
+        case .notPaired: return String(localized: "No Watch paired", bundle: .module)
+        case .watchAppMissing: return String(localized: "Watch app missing", bundle: .module)
+        case .companionMissing: return String(localized: "iPhone app missing", bundle: .module)
+        case .readyQueued: return String(localized: "Ready (queued)", bundle: .module)
+        case .readyLive: return String(localized: "Connected", bundle: .module)
         }
     }
 
     public var detail: String {
         switch self {
         case .unsupported:
-            return "WatchConnectivity is not available here."
+            return String(localized: "WatchConnectivity is not available here.", bundle: .module)
         case .notActivated:
-            return "Waiting for WatchConnectivity to activate."
+            return String(localized: "Waiting for WatchConnectivity to activate.", bundle: .module)
         case .inactive:
-            return "Session inactive — reopen the app."
+            return String(localized: "Session inactive — reopen the app.", bundle: .module)
         case .notPaired:
-            return "Pair an Apple Watch to sync sessions."
+            return String(localized: "Pair an Apple Watch to sync sessions.", bundle: .module)
         case .watchAppMissing:
-            return "Install Rppl on the Watch."
+            return String(localized: "Install Rppl on the Watch.", bundle: .module)
         case .companionMissing:
-            return "Install / open Rppl on iPhone."
+            return String(localized: "Install / open Rppl on iPhone.", bundle: .module)
         case .readyQueued:
-            return "Paired and ready — files sync when the phone is nearby."
+            return String(
+                localized: "Paired and ready — files sync when the phone is nearby.",
+                bundle: .module
+            )
         case .readyLive:
-            return "iPhone and Watch are connected — ready to sync."
+            return String(
+                localized: "iPhone and Watch are connected — ready to sync.",
+                bundle: .module
+            )
         }
     }
 }

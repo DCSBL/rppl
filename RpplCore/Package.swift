@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "RpplCore",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v26),
         .watchOS(.v26),
@@ -12,7 +13,10 @@ let package = Package(
         .library(name: "RpplCore", targets: ["RpplCore"]),
     ],
     targets: [
-        .target(name: "RpplCore"),
+        .target(
+            name: "RpplCore",
+            resources: [.process("Resources")]
+        ),
         .testTarget(
             name: "RpplCoreTests",
             dependencies: ["RpplCore"]
