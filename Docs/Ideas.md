@@ -18,9 +18,9 @@ GPS samples store m/s; detection thresholds + `reason` strings use **km/h**. Str
 | ≥15 km/h sustained 2 s while `paused` | `riding` | Mid-session start OK |
 | ≤4 km/h × 3 s usable while `riding` | `paused` | End of run |
 | Unusable GPS × 3 s while `riding` | `unsure` | Fall flake; not pause |
-| Unsure &lt; 3 min + speed returns high | `riding` (supersede) | Same ride lookback |
-| Unsure ≥ 3 min | `paused` | Next enter = new ride |
-| Water / motion activity | (logged only) | Future fall / walk detectors |
+| Unsure &lt; 60 s + speed returns high | `riding` (supersede) | Same ride lookback |
+| Unsure ≥ 60 s | `paused` | Next enter = new ride |
+| Water / motion activity | Ultra `submerged` → `paused` | Motion still logged only |
 
 ## Other notes
 

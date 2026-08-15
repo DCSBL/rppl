@@ -40,7 +40,7 @@ Watch runs a pure Core **detector + merger** (`DetectionEngine`) that writes opa
 
 Writes **only on transitions** (+ `session_start`) and lookback revisions (`supersedesId`). Speeds in `reason` strings use **km/h**. Offline: `DetectionEngine.replay(ticks:)` / `replay(locations:)`.
 
-Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 3 min same ride). Water / motion activity are logged on ticks but unused by MVP detectors.
+Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `water_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 60 s same ride). Ultra `submerged` ends a ride; motion activity is logged only.
 
 Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
 

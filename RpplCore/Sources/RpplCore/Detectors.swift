@@ -62,6 +62,23 @@ public struct RideExitDetector: Detector {
     }
 }
 
+/// Ultra water submersion ends the ride (fall). Non-Ultra stays on GPS gap path.
+public struct WaterExitDetector: Detector {
+    public let id = "water_exit"
+
+    public init() {}
+
+    public func evaluate(_ ctx: DetectionEvalContext) -> DetectionSignal? {
+        guard ctx.currentCode == DetectionCodes.riding || ctx.currentCode == DetectionCodes.unsure
+        else {
+            return nil
+        }
+        guard ctx.tick.waterSubmersionState == "submerged" else { return nil }
+        let reason = "water_exit submerged from=\(ctx.currentCode)"
+        return DetectionSignal(kind: .exitRide, detectorId: id, reason: reason)
+    }
+}
+
 public struct GpsGapDetector: Detector {
     public let id = "gps_gap"
 

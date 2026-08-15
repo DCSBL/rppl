@@ -89,7 +89,7 @@ flowchart LR
 
 1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 45 km/h, jump ≥ 30 km/h vs last usable).
 2. **Hold clock** — `highSpeed`, `stopped`, `unusable`.
-3. **Lookback** — while `unsure`, usable fast within 3 min supersedes same ride; usable slow → paused; ≥ 3 min → timeout to paused (new ride later).
+3. **Lookback** — while `unsure`, usable fast within 60 s supersedes same ride; usable slow → paused; ≥ 60 s → timeout to paused (new ride later). Ultra `submerged` → paused via `water_exit`.
 4. **Detectors** — ordered plugins; first match wins (`unsure_timeout`, `gps_gap`, `ride_exit`, `ride_enter`).
 
 Session start: `makeSessionStartEvent()` → `paused` + `reason=session_start`.

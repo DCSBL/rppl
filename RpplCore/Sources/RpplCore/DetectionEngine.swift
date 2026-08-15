@@ -36,6 +36,7 @@ public struct DetectionEngine: Sendable {
     public static var defaultDetectors: [any Detector] {
         [
             UnsureTimeoutDetector(),
+            WaterExitDetector(),
             GpsGapDetector(),
             RideExitDetector(),
             RideEnterDetector(),
