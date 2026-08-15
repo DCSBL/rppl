@@ -65,7 +65,7 @@ Opaque detection **codes are strings** (`riding`, `paused`, `unsure`). Unknown c
 
 ## Session stats (derived)
 
-`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, attributes `unsure` to last confident code, sums haversine meters on ride intervals only (accuracy + max-step gates), and reads cumulative calories as max HK mirror value. `LiveRideTracker` mirrors ride count / meters on Watch during recording.
+`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, attributes `unsure` to last confident code, sums haversine meters on ride intervals only (accuracy + max-step gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). `LiveRideTracker` mirrors ride count / meters on Watch during recording.
 
 ## Detection pipeline
 

@@ -172,14 +172,17 @@ public struct HealthMetricSample: Codable, Equatable, Sendable {
     public var timestamp: Date
     public var heartRateBPM: Double?
     public var activeEnergyKilocalories: Double?
+    public var basalEnergyKilocalories: Double?
 
     public init(
         timestamp: Date,
         heartRateBPM: Double? = nil,
-        activeEnergyKilocalories: Double? = nil
+        activeEnergyKilocalories: Double? = nil,
+        basalEnergyKilocalories: Double? = nil
     ) {
         self.timestamp = timestamp
         self.heartRateBPM = heartRateBPM
         self.activeEnergyKilocalories = activeEnergyKilocalories
+        self.basalEnergyKilocalories = basalEnergyKilocalories
     }
 }

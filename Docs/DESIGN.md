@@ -35,7 +35,7 @@ flowchart TB
 | Layer | Own | Avoid |
 |-------|-----|--------|
 | `RpplCore` | Models, schema, file store, DetectionEngine, sync *wording* resolvers | UIKit/SwiftUI, WCSession, HealthKit, CoreLocation |
-| `RpplWatch` | `HKWorkoutSession` dry-run, sensors, StartWorkoutIntent, WC send, thin probes into Core | Business decision trees that can be pure functions |
+| `RpplWatch` | `HKWorkoutSession` + Health save, sensors, StartWorkoutIntent, WC send, thin probes into Core | Business decision trees that can be pure functions |
 | `Rppl` | Permissions, WC receive/ack, session list/map/export | Session engine, label editing |
 
 Apps read live `WCSession` / sensors, then call Core. Do not duplicate detection or sync decision trees in both targets.
@@ -67,7 +67,7 @@ Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](
 
 ## Hard constraints (unchanged)
 
-1. HealthKit dry-run — no `finishWorkout()` / Health save; still mirror HR/energy into JSONL.
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → `finishWorkout()` → `session.end()`; mirror HR/energy into JSONL; pause/resume HK on ride/pause detection (day-session stays continuous).
 2. Never delete Watch session files until phone ack.
 3. One continuous session per park day; no pause.
 4. Detection codes stay opaque strings.

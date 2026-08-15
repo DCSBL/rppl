@@ -85,8 +85,12 @@ struct SessionDetailView: View {
                     LabeledContent("Duration", value: Self.formatDuration(stats.totalDuration))
                     LabeledContent("Distance", value: DistanceFormat.meters(stats.totalDistanceMeters))
                     LabeledContent(
-                        "Calories",
+                        "Active calories",
                         value: stats.activeEnergyKilocalories.map { String(format: "%.0f kcal", $0) } ?? "—"
+                    )
+                    LabeledContent(
+                        "Total calories",
+                        value: stats.totalEnergyKilocalories.map { String(format: "%.0f kcal", $0) } ?? "—"
                     )
                     LabeledContent("Rides", value: "\(stats.rideCount)")
                     LabeledContent(

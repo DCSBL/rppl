@@ -177,6 +177,30 @@ struct SessionStatsBuilderTests {
             health: health
         )
         #expect(stats.activeEnergyKilocalories == 180)
+        #expect(stats.totalEnergyKilocalories == 180)
+    }
+
+    @Test func totalCaloriesSumsActiveAndBasal() {
+        let health = [
+            HealthMetricSample(
+                timestamp: t0.addingTimeInterval(10),
+                activeEnergyKilocalories: 100,
+                basalEnergyKilocalories: 40
+            ),
+            HealthMetricSample(
+                timestamp: t0.addingTimeInterval(100),
+                activeEnergyKilocalories: 200,
+                basalEnergyKilocalories: 80
+            ),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(300)),
+            detections: [detection(code: DetectionCodes.paused, at: 0, id: "s")],
+            locations: [],
+            health: health
+        )
+        #expect(stats.activeEnergyKilocalories == 200)
+        #expect(stats.totalEnergyKilocalories == 280)
     }
 
     @Test func openRideClosedAtSessionEnd() {
