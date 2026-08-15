@@ -75,6 +75,8 @@ export interface RideSegment {
   durationMs: number
   distanceMeters: number
   lapCount: number
+  /** Crossing completion times (ms) for timeline markers. */
+  lapAtMs: number[]
   startLatitude: number | null
   startLongitude: number | null
 }
@@ -83,4 +85,9 @@ export interface DerivedSession {
   phases: { code: string; startMs: number; endMs: number }[]
   rides: RideSegment[]
   totalLapCount: number
+  totalDistanceMeters: number
+  ridingDurationMs: number
+  pausedDurationMs: number
+  peakSpeedKmh: number | null
+  averageSpeedKmh: number | null
 }

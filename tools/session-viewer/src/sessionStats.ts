@@ -8,7 +8,7 @@ import type {
 import { toMs } from './analysisPrep'
 import { acceptsStep, meters } from './geoDistance'
 import { LapRideTracker, defaultLapThresholds } from './lapRideTracker'
-import { thresholds } from './signalFilter'
+import { filterSpeedMps, mpsToKmh, thresholds } from './signalFilter'
 
 const RIDING = 'riding'
 const PAUSED = 'paused'
@@ -121,7 +121,44 @@ function distanceMeters(
   return total
 }
 
-/** Derive rides + lap counts + start anchors (offline, mirrors branch SessionStatsBuilder). */
+function phaseDurationMs(phases: AttributedPhase[], code: string): number {
+  return phases
+    .filter((p) => p.attributedCode === code)
+    .reduce((sum, p) => sum + Math.max(0, p.endMs - p.startMs), 0)
+}
+
+/** Peak usable km/h inside ride windows (mirrors LocationSpeedStats). */
+function peakSpeedKmhInRides(
+  locations: LocationSample[],
+  windows: { startMs: number; endMs: number }[],
+): number | null {
+  if (!windows.length) return null
+  let previousUsable: number | null = null
+  let peakMps: number | null = null
+  const sorted = [...locations].sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
+  for (const loc of sorted) {
+    const tMs = toMs(loc.timestamp)
+    const inRide = windows.some((w) => tMs >= w.startMs && tMs <= w.endMs)
+    if (!inRide) {
+      // Reset jump baseline between rides so a pause gap doesn't poison next ride.
+      previousUsable = null
+      continue
+    }
+    const usable = filterSpeedMps(loc.speed ?? null, loc.horizontalAccuracy, previousUsable)
+    if (usable === null) continue
+    previousUsable = usable
+    if (usable > 0) peakMps = Math.max(peakMps ?? usable, usable)
+  }
+  return peakMps != null ? mpsToKmh(peakMps) : null
+}
+
+function averageSpeedKmh(distanceMeters: number, durationMs: number): number | null {
+  if (durationMs <= 0 || distanceMeters <= 0) return null
+  const mps = distanceMeters / (durationMs / 1000)
+  return mpsToKmh(mps)
+}
+
+/** Derive rides + lap counts + start anchors (offline, mirrors SessionStatsBuilder). */
 export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedSession {
   const sessionStartMs = toMs(pkg.manifest.startedAt)
   const sessionEndMs = Math.max(
@@ -141,6 +178,7 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
   }
 
   const rides: RideSegment[] = []
+  let totalDistanceMeters = 0
   for (let i = 0; i < windows.length; i++) {
     const window = windows[i]!
     const distance = distanceMeters(
@@ -156,9 +194,11 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       lapTracker.addLocation(sample)
     }
     const laps = lapTracker.lapCount
+    const lapAtMs = [...lapTracker.lapAtMs]
     const startLatitude = lapTracker.startLatitude
     const startLongitude = lapTracker.startLongitude
     lapTracker.endRide()
+    totalDistanceMeters += distance
     rides.push({
       index: i + 1,
       startMs: window.startMs,
@@ -166,10 +206,14 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       durationMs: Math.max(0, window.endMs - window.startMs),
       distanceMeters: distance,
       lapCount: laps,
+      lapAtMs,
       startLatitude,
       startLongitude,
     })
   }
+
+  const ridingDurationMs = phaseDurationMs(phases, RIDING)
+  const pausedDurationMs = phaseDurationMs(phases, PAUSED)
 
   return {
     phases: phases.map((p) => ({
@@ -179,6 +223,11 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
     })),
     rides,
     totalLapCount: rides.reduce((sum, r) => sum + r.lapCount, 0),
+    totalDistanceMeters,
+    ridingDurationMs,
+    pausedDurationMs,
+    peakSpeedKmh: peakSpeedKmhInRides(sortedLocations, windows),
+    averageSpeedKmh: averageSpeedKmh(totalDistanceMeters, ridingDurationMs),
   }
 }
 

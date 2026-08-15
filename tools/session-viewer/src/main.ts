@@ -41,7 +41,15 @@ app.innerHTML = `
     <button type="button" id="playPause" class="play-btn" disabled title="Space">Play</button>
   </header>
   <div id="status">Open session folder (manifest + jsonl) or export JSON.</div>
-  <p class="hint">Window default first 5 min (min 60 s). Track colored by detection (green riding · blue paused · grey unsure). Space = play/pause realtime.</p>
+  <div id="summary" class="summary" hidden>
+    <div class="metric"><span class="metric-label">Distance</span><span class="metric-value" data-k="distance">—</span></div>
+    <div class="metric"><span class="metric-label">Rides</span><span class="metric-value" data-k="rides">—</span></div>
+    <div class="metric"><span class="metric-label">Laps</span><span class="metric-value" data-k="laps">—</span></div>
+    <div class="metric"><span class="metric-label">Peak</span><span class="metric-value" data-k="peak">—</span></div>
+    <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
+    <div class="metric"><span class="metric-label">Riding</span><span class="metric-value" data-k="riding">—</span></div>
+  </div>
+  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue paused · grey unsure · yellow lap. Space = play/pause realtime.</p>
   <div class="range-row">
     <span>Start</span>
     <input id="start" type="range" disabled />
@@ -57,14 +65,15 @@ app.innerHTML = `
     <input id="playhead" type="range" disabled />
     <span id="playheadLabel">—</span>
   </div>
-  <div class="panel track"><canvas id="track"></canvas></div>
-  <div class="panel"><canvas id="speed"></canvas></div>
-  <div class="panel"><canvas id="accuracy"></canvas></div>
   <div class="panel events"><canvas id="events"></canvas></div>
+  <div class="panel"><canvas id="speed"></canvas></div>
+  <div class="panel track"><canvas id="track"></canvas></div>
+  <div class="panel"><canvas id="accuracy"></canvas></div>
   <div id="detail">Scrub playhead or click chart / track for point detail.</div>
 `
 
 const statusEl = document.querySelector<HTMLDivElement>('#status')!
+const summaryEl = document.querySelector<HTMLDivElement>('#summary')!
 const detailEl = document.querySelector<HTMLDivElement>('#detail')!
 const startSlider = document.querySelector<HTMLInputElement>('#start')!
 const endSlider = document.querySelector<HTMLInputElement>('#end')!
@@ -93,6 +102,39 @@ let lastFrameTs: number | null = null
 
 function fmt(ms: number): string {
   return new Date(ms).toISOString().slice(11, 19)
+}
+
+function formatDuration(ms: number): string {
+  const sec = Math.max(0, Math.round(ms / 1000))
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  if (h > 0) return `${h}h ${m}m`
+  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`
+  return `${s}s`
+}
+
+function formatDistanceKm(meters: number): string {
+  return `${(meters / 1000).toFixed(2)} km`
+}
+
+function formatSpeed(kmh: number | null): string {
+  return kmh != null ? `${kmh.toFixed(1)} km/h` : '—'
+}
+
+function setMetric(key: string, value: string): void {
+  const el = summaryEl.querySelector<HTMLSpanElement>(`[data-k="${key}"]`)
+  if (el) el.textContent = value
+}
+
+function updateSummary(d: DerivedSession): void {
+  summaryEl.hidden = false
+  setMetric('distance', formatDistanceKm(d.totalDistanceMeters))
+  setMetric('rides', String(d.rides.length))
+  setMetric('laps', String(d.totalLapCount))
+  setMetric('peak', formatSpeed(d.peakSpeedKmh))
+  setMetric('avg', formatSpeed(d.averageSpeedKmh))
+  setMetric('riding', formatDuration(d.ridingDurationMs))
 }
 
 function offsetLabel(ms: number): string {
@@ -181,9 +223,8 @@ function applyPackage(
     savedPlayhead ?? windowRange.startMs,
     windowRange,
   )
-  const rides = derived.rides.length
-  const laps = derived.totalLapCount
-  statusEl.textContent = `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections · ${rides} rides · ${laps} laps`
+  statusEl.textContent = `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections`
+  updateSummary(derived)
   wireSliders()
   render()
   schedulePersist()
@@ -265,10 +306,10 @@ function render(): void {
   const playLoc = nearestLocation(pkg.locations, playheadMs)
   const markers = buildTrackMarkers(locs, derived.rides, playLoc)
 
-  drawTrack(trackCanvas, locs, allSegments, markers, extent)
-  drawSpeed(speedCanvas, speed, windowRange, selected, playheadMs)
-  drawAccuracy(accuracyCanvas, accuracy, windowRange, selected, playheadMs)
   drawEvents(eventsCanvas, segs, windowRange, selectedId, derived.rides, playheadMs)
+  drawSpeed(speedCanvas, speed, windowRange, selected, playheadMs)
+  drawTrack(trackCanvas, locs, allSegments, markers, extent)
+  drawAccuracy(accuracyCanvas, accuracy, windowRange, selected, playheadMs)
 
   updateDetail(selected, playLoc)
 }
