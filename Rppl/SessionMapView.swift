@@ -21,7 +21,7 @@ struct SessionMapView: View {
     }
 
     private var interactionModes: MapInteractionModes {
-        allowsInteraction ? [.pan, .zoom, .pitch] : []
+        allowsInteraction ? [.pan, .zoom, .pitch, .rotate] : []
     }
 
     var body: some View {
