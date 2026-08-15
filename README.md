@@ -42,7 +42,7 @@ Writes **only on transitions** (+ `session_start`) and lookback revisions (`supe
 
 Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `water_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 60 s same ride). Ultra `submerged` ends a ride; motion activity is logged only.
 
-Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
+Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). **Intern guide (start/stop detection):** [Docs/RideDetection.md](Docs/RideDetection.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ### Later
 
