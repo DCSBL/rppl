@@ -66,8 +66,8 @@ struct LogbookSessionDetailView: View {
         if mapTracks.isEmpty {
             mapPlaceholder(sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
         } else {
-            SessionMapView(tracks: mapTracks)
-                .frame(height: 240)
+            SessionMapView(tracks: mapTracks, allowsInteraction: true)
+                .frame(height: 300)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
@@ -320,7 +320,7 @@ private struct RideDetailCard: View {
 
             if locations.count >= 2 {
                 SessionMapView(locations: locations)
-                    .frame(height: 140)
+                    .frame(height: 168)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             } else {
                 Text("No GPS track for this ride")
