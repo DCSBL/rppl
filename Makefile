@@ -15,4 +15,4 @@ gate:
 
 install-hooks:
 	pre-commit install
-	@echo "Hooks installed. Commits now run make-equivalent gate via pre-commit."
+	@echo "Hooks installed. Commit: hygiene/codespell/SwiftLint. Push: xcode-gate (tests + build/analyze)."

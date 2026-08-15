@@ -16,7 +16,7 @@ This project uses **caveman** mode for agent ↔ human chat.
 - Always work on a worktree
 - Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
 - A worktree will be squashed and merged via a GitHub PR by human.
-- Each commit triggers `pre-commit`. Make sure to pass all checks, resolve issues when needed.
+- Each commit triggers light `pre-commit` hooks; each push runs `xcode-gate`. Pass all checks; resolve issues when needed.
 
 ## Linear issues
 - When starting work on a Linear issue: set status **In Progress**.
@@ -58,7 +58,8 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - Source of truth: `cd RpplCore && swift test` (Swift Testing).
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
-- Pre-commit runs: hygiene → codespell → SwiftLint → `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze).
+- Pre-commit (commit): hygiene → codespell → SwiftLint.
+- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze).
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
 
 ## Git / commits
@@ -86,7 +87,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 ## Out of scope unless explicitly asked
 
 - GitHub Actions CI (can mirror `xcode-gate` later)
-- UI tests in the commit gate
+- UI tests in the push gate
 - Trick detection / full taxonomy
 - CloudKit sync (Phase 4)
 - Auto-format rewriting files in hooks (lint-only for now)

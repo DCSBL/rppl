@@ -20,14 +20,21 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 pre-commit install
 ```
 
-This installs a git `pre-commit` hook. Every `git commit` runs the gate below. Commit is blocked if any step fails.
+`pre-commit install` installs both git `pre-commit` and `pre-push` hooks (see `default_install_hook_types` in `.pre-commit-config.yaml`). Re-run after pulling this change if hooks were installed earlier.
 
 ## What runs on commit
+
+Fast checks only — commit is blocked if any fail:
 
 1. Basic file hygiene (trailing whitespace, YAML/JSON, merge conflict markers)
 2. **codespell**
 3. **SwiftLint** (`--strict`, config in `.swiftlint.yml`)
-4. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`):
+
+## What runs on push
+
+Heavy gate — push is blocked if any fail:
+
+1. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`):
    - `swift test` in `RpplCore` (fail fast)
    - `xcodebuild build` for `Rppl` (iOS Simulator; embeds Watch)
    - `xcodebuild analyze`
@@ -37,7 +44,8 @@ Manual full gate:
 ```bash
 make check
 # or
-pre-commit run --all-files
+pre-commit run --all-files --hook-stage pre-push
+# (also: pre-commit run --all-files for commit-stage hooks)
 ```
 
 Core tests only:
@@ -48,12 +56,12 @@ make test-core
 
 ## Escape hatches (emergency only)
 
-- Skip one hook: `SKIP=xcode-gate git commit ...`
-- Skip all hooks: `git commit --no-verify` (do not use as normal workflow)
+- Skip heavy gate on push: `SKIP=xcode-gate git push ...`
+- Skip all hooks: `git commit --no-verify` / `git push --no-verify` (do not use as normal workflow)
 
 ## Notes
 
-- Gate is intentionally heavy (full build + analyze). Expect ~1–2+ minutes on commit.
+- Commit stays light (hygiene + spell + lint). Expect the heavy build/test gate on **push** (~1–2+ minutes).
 - SwiftLint starts lenient; tighten `.swiftlint.yml` over time.
 - Unit tests live primarily in `RpplCore` (`swift test`). Keep app targets thin wrappers around Core logic.
 
