@@ -261,7 +261,6 @@
 		};
 /* End PBXNativeTarget section */
 
-
 /* Begin PBXProject section */
 		CCF3D689302921A400AF3518 /* Project object */ = {
 			isa = PBXProject;
@@ -796,8 +795,6 @@
 			};
 			name = Release;
 		};
-
-
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -846,8 +843,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-
-
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */

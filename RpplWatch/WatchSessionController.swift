@@ -43,13 +43,20 @@ final class WatchSessionController: NSObject {
     var rideCount: Int { liveRideTracker.rideCount }
     var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
     var currentRideLapCount: Int { liveRideTracker.currentRideLapCount }
+    var lastRideLapCount: Int { liveRideTracker.lastRideLapCount }
     /// Live meters while riding; frozen last-ride meters when paused (`0 m` before first ride).
     var displayRideMeters: Double {
         liveRideTracker.isRideOngoing
             ? liveRideTracker.currentRideMeters
             : liveRideTracker.lastRideMeters
     }
+    var lastRideMeters: Double { liveRideTracker.lastRideMeters }
+    var lastRideDuration: TimeInterval { liveRideTracker.lastRideDuration }
+    var didCompleteRide: Bool { liveRideTracker.didCompleteRide }
     var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
+
+    /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
+    private(set) var detectionSimulationMode: DetectionSimulationMode = .detected
 
     private var liveRideTracker = LiveRideTracker()
     private let healthStore = HKHealthStore()
@@ -219,6 +226,7 @@ final class WatchSessionController: NSObject {
         detectionCode = DetectionCodes.paused
         lastConfidentCode = DetectionCodes.paused
         lastPersistedConfidentCode = DetectionCodes.paused
+        detectionSimulationMode = .detected
         detectionCount = 0
         locationCount = 0
         motionCount = 0
@@ -295,6 +303,7 @@ final class WatchSessionController: NSObject {
         lastSpeedMps = nil
         lastHorizontalAccuracy = nil
         filterRejectionReason = nil
+        detectionSimulationMode = .detected
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.paused
         hkRideDistanceMeters = 0
@@ -305,6 +314,50 @@ final class WatchSessionController: NSObject {
     func enableWaterLock() {
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.ui, "Water Lock enabled (manual)")
+    }
+
+    /// Cycle debug simulation: detected → pause → ride → detected.
+    func cycleDetectionSimulation() {
+        guard isRunning else { return }
+        let next: DetectionSimulationMode
+        switch detectionSimulationMode {
+        case .detected: next = .pause
+        case .pause: next = .ride
+        case .ride: next = .detected
+        }
+        applyDetectionSimulation(next)
+    }
+
+    private func applyDetectionSimulation(_ mode: DetectionSimulationMode) {
+        detectionSimulationMode = mode
+        switch mode {
+        case .detected:
+            WakeLog.debug(.ui, "sim detection=detected (live engine)")
+            processDetectionTick()
+        case .pause:
+            forceSimulatedDetection(code: DetectionCodes.paused)
+        case .ride:
+            forceSimulatedDetection(code: DetectionCodes.riding)
+        }
+    }
+
+    private func forceSimulatedDetection(code: String) {
+        let event = DetectionEvent(
+            code: code,
+            timestamp: Date(),
+            reason: "debug_sim",
+            detectorId: "debug_sim"
+        )
+        detectionCode = code
+        lastConfidentCode = code
+        filterRejectionReason = nil
+        liveRideTracker.update(
+            currentCode: code,
+            lastConfident: code,
+            events: [event]
+        )
+        persistDetection(event)
+        WakeLog.debug(.ui, "sim detection=\(code)")
     }
 
     /// Start-workout Action Button entry: start session, or no-op if already recording.
@@ -326,6 +379,7 @@ final class WatchSessionController: NSObject {
 
     private func processDetectionTick(timestamp: Date = Date()) {
         guard isRunning else { return }
+        guard detectionSimulationMode == .detected else { return }
         let speed: Double?
         if let loc = latestLocation, loc.speed >= 0 {
             speed = loc.speed
