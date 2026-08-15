@@ -6,8 +6,8 @@ struct ActiveSessionView: View {
     var body: some View {
         TabView {
             SessionControlsPage(session: session)
-            SessionMetricsPage(session: session)
+            SessionRideUIPage(session: session)
+            SessionDebugPage(session: session)
         }
-        .tabViewStyle(.verticalPage)
     }
 }

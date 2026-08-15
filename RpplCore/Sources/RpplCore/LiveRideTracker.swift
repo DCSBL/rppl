@@ -6,6 +6,10 @@ public struct LiveRideTracker: Sendable {
     public private(set) var isRideOngoing = false
     public private(set) var currentRideMeters = 0.0
     public private(set) var lastRideMeters = 0.0
+    /// Duration of the most recently finished ride; `0` until the first ride ends.
+    public private(set) var lastRideDuration: TimeInterval = 0
+    /// True after at least one ride has finished (including zero-meter rides).
+    public private(set) var didCompleteRide = false
     /// Sum of finished ride meters plus current ride (ride-gated session distance).
     public private(set) var sessionRideMeters = 0.0
     public private(set) var currentSpeedKmh: Double?
@@ -14,6 +18,7 @@ public struct LiveRideTracker: Sendable {
     private var trackedLastConfident = DetectionCodes.paused
     private var previousLocation: LocationSample?
     private var finishedRideMeters = 0.0
+    private var rideStartedAt: Date?
     private let maxHorizontalAccuracyM: Double
 
     public init(maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM) {
@@ -25,12 +30,15 @@ public struct LiveRideTracker: Sendable {
         isRideOngoing = false
         currentRideMeters = 0
         lastRideMeters = 0
+        lastRideDuration = 0
+        didCompleteRide = false
         sessionRideMeters = 0
         finishedRideMeters = 0
         currentSpeedKmh = nil
         trackedCode = DetectionCodes.paused
         trackedLastConfident = DetectionCodes.paused
         previousLocation = nil
+        rideStartedAt = nil
     }
 
     /// Call after each detection engine tick (with zero or more events).
@@ -49,8 +57,9 @@ public struct LiveRideTracker: Sendable {
                 rideCount += 1
                 currentRideMeters = 0
                 isRideOngoing = true
+                rideStartedAt = event.timestamp
             } else if !nowRiding, wasRiding {
-                finishCurrentRide()
+                finishCurrentRide(at: event.timestamp)
             }
             trackedCode = event.code
             trackedLastConfident = event.code
@@ -98,18 +107,25 @@ public struct LiveRideTracker: Sendable {
     }
 
     /// Close an open ride at session stop.
-    public mutating func closeOpenRide() {
+    public mutating func closeOpenRide(at date: Date = Date()) {
         if isRideOngoing {
-            finishCurrentRide()
+            finishCurrentRide(at: date)
         }
     }
 
-    private mutating func finishCurrentRide() {
+    private mutating func finishCurrentRide(at date: Date) {
         lastRideMeters = currentRideMeters
+        if let started = rideStartedAt {
+            lastRideDuration = max(0, date.timeIntervalSince(started))
+        } else {
+            lastRideDuration = 0
+        }
+        didCompleteRide = true
         finishedRideMeters += currentRideMeters
         currentRideMeters = 0
         isRideOngoing = false
         currentSpeedKmh = nil
+        rideStartedAt = nil
         refreshSessionMeters()
     }
 
