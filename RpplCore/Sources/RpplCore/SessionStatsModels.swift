@@ -8,19 +8,23 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
     public var endedAt: Date
     public var duration: TimeInterval
     public var distanceMeters: Double
+    /// Crossing-based laps for this ride (0 until assumed return to start).
+    public var lapCount: Int
 
     public init(
         index: Int,
         startedAt: Date,
         endedAt: Date,
         duration: TimeInterval,
-        distanceMeters: Double
+        distanceMeters: Double,
+        lapCount: Int = 0
     ) {
         self.index = index
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.duration = duration
         self.distanceMeters = distanceMeters
+        self.lapCount = lapCount
     }
 }
 
@@ -40,6 +44,11 @@ public struct SessionStats: Equatable, Sendable {
     /// `ridingDuration / (ridingDuration + pausedDuration)`; 0 when no active time.
     public var ridingPausedRatio: Double
     public var rides: [RideSegmentStats]
+
+    /// Sum of per-ride crossing counts.
+    public var totalLapCount: Int {
+        rides.reduce(0) { $0 + $1.lapCount }
+    }
 
     public init(
         startedAt: Date,

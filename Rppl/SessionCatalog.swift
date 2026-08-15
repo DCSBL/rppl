@@ -16,6 +16,7 @@ struct TotalsSummary: Sendable {
     var totalDistanceMeters = 0.0
     var topSpeedKmh = 0.0
     var totalRuns = 0
+    var totalLaps = 0
 }
 
 @Observable
@@ -31,6 +32,7 @@ final class SessionCatalog {
             if let stats = entry.stats {
                 summary.totalDistanceMeters += stats.totalDistanceMeters
                 summary.totalRuns += stats.rideCount
+                summary.totalLaps += stats.totalLapCount
             }
             if let speed = entry.topSpeedKmh {
                 summary.topSpeedKmh = max(summary.topSpeedKmh, speed)

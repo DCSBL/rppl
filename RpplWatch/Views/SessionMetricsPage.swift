@@ -38,6 +38,11 @@ struct SessionMetricsPage: View {
                     value: "\(session.rideCount)"
                 )
 
+                SessionMetricRow(
+                    label: "Laps",
+                    value: "\(session.currentRideLapCount)"
+                )
+
                 if session.lastConfidentCode == DetectionCodes.riding {
                     SessionMetricRow(
                         label: "This ride",

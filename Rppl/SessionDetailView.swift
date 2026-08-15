@@ -111,8 +111,10 @@ struct SessionDetailView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Ride \(ride.index)")
                                 .font(.headline)
-                            Text(DistanceFormat.meters(ride.distanceMeters))
-                                .font(.caption)
+                            Text(
+                                "\(DistanceFormat.meters(ride.distanceMeters)) · \(ride.lapCount) laps"
+                            )
+                            .font(.caption)
                             Text(Self.formatDuration(ride.duration))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
