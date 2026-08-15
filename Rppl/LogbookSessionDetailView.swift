@@ -260,7 +260,10 @@ struct LogbookSessionDetailView: View {
             sessionStats = stats
             allLocations = sortedLocations
             mapTracks = mapPoints
-            topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: sortedLocations)
+            topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(
+                rides: stats.rides,
+                locations: sortedLocations
+            )
             cityName = await SessionCityResolver.shared.cityName(
                 sessionId: sessionId,
                 locations: sortedLocations

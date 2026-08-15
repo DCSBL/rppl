@@ -91,7 +91,10 @@ final class SessionCatalog {
                 locations: locations,
                 health: health
             )
-            let topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(from: locations)
+            let topSpeedKmh = SessionLocationHelpers.peakSpeedKmh(
+                rides: stats.rides,
+                locations: locations
+            )
             return (stats: stats, topSpeedKmh: topSpeedKmh, locations: locations)
         }
 
