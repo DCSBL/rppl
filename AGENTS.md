@@ -16,9 +16,10 @@ This project uses **caveman** mode for agent ↔ human chat.
 - Always work on a worktree
 - Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
 - A worktree will be squashed and merged via a GitHub PR by human.
-- Each commit triggers light `pre-commit` hooks; each push runs `xcode-gate`. Pass all checks; resolve issues when needed.
+- Each commit triggers light `pre-commit` hooks; each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
 
 ## Linear issues
+_Only use linear issues when one is given by the user_
 - When starting work on a Linear issue: set status **In Progress**.
 - When finished (merged, or ready on the branch when the user asked to ship): set status **Done**.
 
@@ -59,7 +60,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
 - Pre-commit (commit): hygiene → codespell → SwiftLint.
-- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze).
+- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests, `xcodebuild` build, analyze) when the push includes build-related files.
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
 
 ## Git / commits

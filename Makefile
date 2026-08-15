@@ -15,4 +15,4 @@ gate:
 
 install-hooks:
 	pre-commit install
-	@echo "Hooks installed. Commit: hygiene/codespell/SwiftLint. Push: xcode-gate (tests + build/analyze)."
+	@echo "Hooks installed. Commit: hygiene/codespell/SwiftLint. Push: xcode-gate when build files change."
