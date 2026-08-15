@@ -34,7 +34,7 @@ struct SessionDebugPage: View {
                 }
 
                 if let accuracy = session.lastHorizontalAccuracy, accuracy >= 0 {
-                    Text(String(format: "GPS accuracy: %.0f m", accuracy))
+                    Text(String(format: String(localized: "GPS accuracy: %.0f m"), accuracy))
                         .font(.caption2)
                 }
 
@@ -92,8 +92,8 @@ struct SessionDebugPage: View {
 
     private var statusLabel: String {
         switch session.lastConfidentCode {
-        case DetectionCodes.riding: return "Riding"
-        case DetectionCodes.paused: return "Paused"
+        case DetectionCodes.riding: return String(localized: "Riding")
+        case DetectionCodes.paused: return String(localized: "Paused")
         default: return session.lastConfidentCode.capitalized
         }
     }

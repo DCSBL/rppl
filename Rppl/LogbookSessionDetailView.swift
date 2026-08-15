@@ -36,7 +36,7 @@ struct LogbookSessionDetailView: View {
                     ContentUnavailableView(
                         "Could not load session",
                         systemImage: "exclamationmark.triangle",
-                        description: Text(errorText ?? "Try again later.")
+                        description: Text(errorText ?? String(localized: "Try again later."))
                     )
                     .frame(minHeight: 240)
                 case .ready:
@@ -57,7 +57,7 @@ struct LogbookSessionDetailView: View {
     }
 
     private var navigationTitle: String {
-        guard let manifest else { return "Session" }
+        guard let manifest else { return String(localized: "Session") }
         return LogbookFormatting.sessionDate(manifest.startedAt)
     }
 
@@ -121,10 +121,16 @@ struct LogbookSessionDetailView: View {
                         label: "Paused"
                     )
                     if let calories = stats.activeEnergyKilocalories {
-                        statTile(String(format: "%.0f kcal", calories), label: "Active calories")
+                        statTile(
+                            String(format: String(localized: "%.0f kcal"), calories),
+                            label: "Active calories"
+                        )
                     }
                     if let total = stats.totalEnergyKilocalories {
-                        statTile(String(format: "%.0f kcal", total), label: "Total calories")
+                        statTile(
+                            String(format: String(localized: "%.0f kcal"), total),
+                            label: "Total calories"
+                        )
                     }
                 }
             }
@@ -173,7 +179,7 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private func statTile(_ value: String, label: String) -> some View {
+    private func statTile(_ value: String, label: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
                 .font(.title3.bold())
@@ -189,7 +195,7 @@ struct LogbookSessionDetailView: View {
         .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func mapPlaceholder(_ message: String) -> some View {
+    private func mapPlaceholder(_ message: LocalizedStringKey) -> some View {
         Text(message)
             .font(.subheadline)
             .foregroundStyle(Color.rpplMuted)
@@ -366,7 +372,7 @@ private struct RideDetailCard: View {
         .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private func rideStatTile(_ value: String, label: String) -> some View {
+    private func rideStatTile(_ value: String, label: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
                 .font(.subheadline.bold())

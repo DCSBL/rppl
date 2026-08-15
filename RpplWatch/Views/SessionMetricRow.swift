@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SessionMetricRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     var valueColor: Color = .primary
 
