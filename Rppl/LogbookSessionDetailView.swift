@@ -111,32 +111,21 @@ struct LogbookSessionDetailView: View {
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
                     statTile("\(stats.totalLapCount)", label: "Laps")
-                }
-
-                LabeledContent("Riding") {
-                    Text(
+                    statTile(
                         "\(Int((stats.ridingPausedRatio * 100).rounded()))% · "
-                            + LogbookFormatting.duration(stats.ridingDuration)
+                            + LogbookFormatting.duration(stats.ridingDuration),
+                        label: "Riding"
                     )
-                }
-                .font(.subheadline)
-
-                LabeledContent("Paused") {
-                    Text(LogbookFormatting.duration(stats.pausedDuration))
-                }
-                .font(.subheadline)
-
-                if let calories = stats.activeEnergyKilocalories {
-                    LabeledContent("Active calories") {
-                        Text(String(format: "%.0f kcal", calories))
+                    statTile(
+                        LogbookFormatting.duration(stats.pausedDuration),
+                        label: "Paused"
+                    )
+                    if let calories = stats.activeEnergyKilocalories {
+                        statTile(String(format: "%.0f kcal", calories), label: "Active calories")
                     }
-                    .font(.subheadline)
-                }
-                if let total = stats.totalEnergyKilocalories {
-                    LabeledContent("Total calories") {
-                        Text(String(format: "%.0f kcal", total))
+                    if let total = stats.totalEnergyKilocalories {
+                        statTile(String(format: "%.0f kcal", total), label: "Total calories")
                     }
-                    .font(.subheadline)
                 }
             }
             .padding(16)
@@ -189,6 +178,8 @@ struct LogbookSessionDetailView: View {
             Text(value)
                 .font(.title3.bold())
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
@@ -330,25 +321,31 @@ private struct RideDetailCard: View {
                     .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                LabeledContent("Duration") {
-                    Text(LogbookFormatting.duration(ride.duration))
-                }
-                LabeledContent("Distance") {
-                    Text(LogbookFormatting.distanceKilometers(ride.distanceMeters))
-                }
-                LabeledContent("Laps") {
-                    Text("\(ride.lapCount)")
-                }
-                LabeledContent("Top speed") {
-                    Text(topSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—")
-                }
-                LabeledContent("Avg speed") {
-                    Text(averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—")
-                }
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ],
+                spacing: 8
+            ) {
+                rideStatTile(
+                    LogbookFormatting.duration(ride.duration),
+                    label: "Duration"
+                )
+                rideStatTile(
+                    LogbookFormatting.distanceKilometers(ride.distanceMeters),
+                    label: "Distance"
+                )
+                rideStatTile("\(ride.lapCount)", label: "Laps")
+                rideStatTile(
+                    topSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    label: "Top speed"
+                )
+                rideStatTile(
+                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    label: "Avg speed"
+                )
             }
-            .font(.subheadline)
-            .foregroundStyle(Color.rpplText)
 
             Text(
                 LogbookFormatting.sessionTimeRange(start: ride.startedAt, end: ride.endedAt)
@@ -358,6 +355,22 @@ private struct RideDetailCard: View {
         }
         .padding(16)
         .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func rideStatTile(_ value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value)
+                .font(.subheadline.bold())
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(8)
+        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
