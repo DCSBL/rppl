@@ -85,7 +85,7 @@ struct SessionDebugPage: View {
     private var simulationTint: Color {
         switch session.detectionSimulationMode {
         case .detected: return .secondary
-        case .pause: return .gray
+        case .inactive: return .gray
         case .ride: return .blue
         }
     }
@@ -93,7 +93,7 @@ struct SessionDebugPage: View {
     private var statusLabel: String {
         switch session.lastConfidentCode {
         case DetectionCodes.riding: return String(localized: "Riding")
-        case DetectionCodes.paused: return String(localized: "Paused")
+        case DetectionCodes.inactive: return String(localized: "Inactive")
         default: return session.lastConfidentCode.capitalized
         }
     }
@@ -101,7 +101,7 @@ struct SessionDebugPage: View {
     private var statusColor: Color {
         switch session.lastConfidentCode {
         case DetectionCodes.riding: return .blue
-        case DetectionCodes.paused: return .gray
+        case DetectionCodes.inactive: return .gray
         default: return .secondary
         }
     }

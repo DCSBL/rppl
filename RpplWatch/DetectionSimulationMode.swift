@@ -4,15 +4,15 @@ import Foundation
 enum DetectionSimulationMode: String, Sendable {
     /// Live `DetectionEngine` output.
     case detected
-    /// Force confident `paused`.
-    case pause
+    /// Force confident `inactive`.
+    case inactive
     /// Force confident `riding`.
     case ride
 
     var buttonTitle: String {
         switch self {
         case .detected: return String(localized: "Sim: Detected")
-        case .pause: return String(localized: "Sim: Pause")
+        case .inactive: return String(localized: "Sim: Inactive")
         case .ride: return String(localized: "Sim: Ride")
         }
     }

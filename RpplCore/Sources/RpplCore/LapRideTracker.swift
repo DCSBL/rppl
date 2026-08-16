@@ -18,7 +18,7 @@ public struct LapRideTracker: Sendable {
 
     private var thresholds: LapThresholds
     private var zoneState: ZoneState = .idle
-    private var hasSeenPause = false
+    private var hasSeenInactive = false
     private var scoringThisRide = false
     private var startLatitude: Double?
     private var startLongitude: Double?
@@ -33,7 +33,7 @@ public struct LapRideTracker: Sendable {
         lapCount = 0
         isRideActive = false
         zoneState = .idle
-        hasSeenPause = false
+        hasSeenInactive = false
         scoringThisRide = false
         startLatitude = nil
         startLongitude = nil
@@ -42,21 +42,21 @@ public struct LapRideTracker: Sendable {
     }
 
     /// Mark dock/pause so the next ride may score laps.
-    public mutating func notePaused() {
+    public mutating func noteInactive() {
         if isRideActive {
             endRide()
         }
-        hasSeenPause = true
+        hasSeenInactive = true
     }
 
-    /// Open a ride. Laps score only if `notePaused()` was seen earlier.
+    /// Open a ride. Laps score only if `noteInactive()` was seen earlier.
     public mutating func beginRide() {
         if isRideActive {
             endRide()
         }
         lapCount = 0
         isRideActive = true
-        scoringThisRide = hasSeenPause
+        scoringThisRide = hasSeenInactive
         zoneState = scoringThisRide ? .awaitingAnchor : .idle
         startLatitude = nil
         startLongitude = nil
@@ -71,7 +71,7 @@ public struct LapRideTracker: Sendable {
         zoneState = .idle
         previousLocation = nil
         // Completing a ride implies pause at/after exit — unlock scoring for later rides.
-        hasSeenPause = true
+        hasSeenInactive = true
     }
 
     /// Drive enter/exit from attributed riding (incl. unsure→riding on live).

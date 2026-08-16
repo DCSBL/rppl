@@ -10,7 +10,7 @@ public struct DetectionEngine: Sendable {
     }
 
     public private(set) var currentCode: String
-    /// Last `riding` / `paused` for Watch primary UI while `currentCode` may be `unsure`.
+    /// Last `riding` / `inactive` for Watch primary UI while `currentCode` may be `unsure`.
     public private(set) var lastConfidentCode: String
     public private(set) var lastFilterRejection: String?
 
@@ -29,8 +29,8 @@ public struct DetectionEngine: Sendable {
         self.thresholds = thresholds
         self.detectors = detectors ?? Self.defaultDetectors
         self.filter = filter ?? GpsSignalFilter(thresholds: thresholds)
-        self.currentCode = DetectionCodes.paused
-        self.lastConfidentCode = DetectionCodes.paused
+        self.currentCode = DetectionCodes.inactive
+        self.lastConfidentCode = DetectionCodes.inactive
     }
 
     public static var defaultDetectors: [any Detector] {
@@ -43,17 +43,17 @@ public struct DetectionEngine: Sendable {
         ]
     }
 
-    /// Emit session-start `paused` and reset state. Call once when recording begins.
+    /// Emit session-start `inactive` and reset state. Call once when recording begins.
     public mutating func makeSessionStartEvent(at timestamp: Date = Date()) -> DetectionEvent {
-        currentCode = DetectionCodes.paused
-        lastConfidentCode = DetectionCodes.paused
+        currentCode = DetectionCodes.inactive
+        lastConfidentCode = DetectionCodes.inactive
         previousUsableSpeedMps = nil
         lastFilterRejection = nil
         unsureEnteredAt = nil
         unsureEventId = nil
         holds.clear()
         return DetectionEvent(
-            code: DetectionCodes.paused,
+            code: DetectionCodes.inactive,
             timestamp: timestamp,
             reason: "session_start",
             detectorId: "session_start"
@@ -161,10 +161,10 @@ public struct DetectionEngine: Sendable {
 
         if usableSpeedMps <= thresholds.stoppedSpeedMps {
             let reason =
-                "lookback_pause age=\(fmt(age))s<\(fmt(thresholds.unsureSameRideWindow))s"
+                "lookback_inactive age=\(fmt(age))s<\(fmt(thresholds.unsureSameRideWindow))s"
                 + " speed=\(SpeedUnits.reasonKilometersPerHour(fromMetersPerSecond: usableSpeedMps))"
             return revise(
-                code: DetectionCodes.paused,
+                code: DetectionCodes.inactive,
                 reason: reason,
                 detectorId: "lookback",
                 tick: tick,
@@ -187,7 +187,7 @@ public struct DetectionEngine: Sendable {
             )
         case .exitRide:
             return transition(
-                to: DetectionCodes.paused,
+                to: DetectionCodes.inactive,
                 reason: signal.reason,
                 detectorId: signal.detectorId,
                 tick: tick
@@ -201,7 +201,7 @@ public struct DetectionEngine: Sendable {
             )
         case .unsureTimeout:
             return transition(
-                to: DetectionCodes.paused,
+                to: DetectionCodes.inactive,
                 reason: signal.reason,
                 detectorId: signal.detectorId,
                 tick: tick

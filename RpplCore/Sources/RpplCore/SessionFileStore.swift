@@ -85,6 +85,9 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func appendDetection(_ event: DetectionEvent, sessionId: String) throws {
         try migrateAssumptionsIfNeeded(sessionId: sessionId)
+        try migratePausedToInactiveIfNeeded(sessionId: sessionId)
+        var event = event
+        event.code = DetectionCodes.normalize(event.code)
         try appendJSONLine(event, to: "detections.jsonl", sessionId: sessionId)
     }
 
@@ -196,9 +199,10 @@ public final class SessionFileStore: @unchecked Sendable {
         return total
     }
 
-    /// Reads detections, migrating legacy `assumptions.jsonl` once when needed.
+    /// Reads detections, migrating legacy assumptions / `paused` codes once when needed.
     public func readDetections(sessionId: String) throws -> [DetectionEvent] {
         try migrateAssumptionsIfNeeded(sessionId: sessionId)
+        try migratePausedToInactiveIfNeeded(sessionId: sessionId)
         return try readJSONL(DetectionEvent.self, from: "detections.jsonl", sessionId: sessionId)
     }
 
@@ -238,9 +242,37 @@ public final class SessionFileStore: @unchecked Sendable {
             fileManager.createFile(atPath: detectionsURL.path, contents: nil)
         }
         for event in legacyLines {
-            try appendJSONLine(event, to: "detections.jsonl", sessionId: sessionId)
+            var migrated = event
+            migrated.code = DetectionCodes.normalize(migrated.code)
+            try appendJSONLine(migrated, to: "detections.jsonl", sessionId: sessionId)
         }
         try? fileManager.removeItem(at: assumptionsURL)
+        return true
+    }
+
+    /// Rewrite legacy detection code `paused` → `inactive` once (schema v4).
+    @discardableResult
+    public func migratePausedToInactiveIfNeeded(sessionId: String) throws -> Bool {
+        let detectionsURL = sessionDirectory(for: sessionId).appendingPathComponent("detections.jsonl")
+        guard fileManager.fileExists(atPath: detectionsURL.path) else { return false }
+
+        let events = try readJSONL(DetectionEvent.self, from: "detections.jsonl", sessionId: sessionId)
+        guard events.contains(where: { $0.code == DetectionCodes.legacyPaused }) else {
+            return false
+        }
+
+        let migrated = events.map { event -> DetectionEvent in
+            var copy = event
+            copy.code = DetectionCodes.normalize(copy.code)
+            return copy
+        }
+        try rewriteDetections(migrated, sessionId: sessionId)
+
+        var manifest = try readManifest(sessionId: sessionId)
+        if manifest.schemaVersion < SessionSchema.currentVersion {
+            manifest.schemaVersion = SessionSchema.currentVersion
+            try writeManifest(manifest)
+        }
         return true
     }
 
@@ -373,6 +405,22 @@ public final class SessionFileStore: @unchecked Sendable {
             }
         }
         return result
+    }
+
+    private func rewriteDetections(_ events: [DetectionEvent], sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = sessionDirectory(for: sessionId)
+        try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent("detections.jsonl")
+        var data = Data()
+        for event in events {
+            var line = try encoder.encode(event)
+            line.append(contentsOf: "\n".utf8)
+            data.append(line)
+        }
+        try data.write(to: url, options: [.atomic])
     }
 
     private func appendJSONLine<T: Encodable>(_ value: T, to fileName: String, sessionId: String) throws {

@@ -99,10 +99,10 @@ struct SessionDetailView: View {
                     LabeledContent("Rides", value: "\(stats.rideCount)")
                     LabeledContent(
                         "Riding",
-                        value: "\(Int((stats.ridingPausedRatio * 100).rounded()))% · "
+                        value: "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
                             + Self.formatDuration(stats.ridingDuration)
                     )
-                    LabeledContent("Paused", value: Self.formatDuration(stats.pausedDuration))
+                    LabeledContent("Inactive", value: Self.formatDuration(stats.inactiveDuration))
                 }
 
                 Section("Rides (\(stats.rides.count))") {

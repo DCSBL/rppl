@@ -6,7 +6,7 @@ Alpha collector for cable-park wakeboarding. Tracking runs only on Apple Watch.
 
 Opaque strings written to `detections.jsonl`:
 
-- `paused` — not riding (session starts here)
+- `inactive` — not riding (session starts here)
 - `riding` — wakeboard / waterski ride speed
 - `unsure` — mid-ride GPS soft (Watch primary UI keeps last confident code)
 
@@ -28,13 +28,15 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 
 Schema **v3**: detections replace labels/assumptions. Legacy `assumptions.jsonl` migrates to detections on open; transfer packages may still carry `assumptions` / `labels` keys (decoded into detections / discarded).
 
+Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (one-time per session package).
+
 ## Derived stats (not a stream)
 
-Ride distance, duration, ride count, riding/paused ratio, calories, sustained/trimmed speeds, and record highlights are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, and record highlights are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
 
 ## HealthKit policy
 
-`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. Active energy is ride-scoped: the HK session pauses while detection is confidently `paused` and resumes on `riding`.
+`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. Active energy is ride-scoped: the HK session pauses while detection is confidently `inactive` and resumes on `riding`.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 

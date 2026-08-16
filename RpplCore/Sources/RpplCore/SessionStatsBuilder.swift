@@ -28,10 +28,10 @@ public enum SessionStatsBuilder {
         let ridingDuration = phases
             .filter { $0.attributedCode == DetectionCodes.riding }
             .reduce(0) { $0 + $1.duration }
-        let pausedDuration = phases
-            .filter { $0.attributedCode == DetectionCodes.paused }
+        let inactiveDuration = phases
+            .filter { $0.attributedCode == DetectionCodes.inactive }
             .reduce(0) { $0 + $1.duration }
-        let activeDuration = ridingDuration + pausedDuration
+        let activeDuration = ridingDuration + inactiveDuration
         let ratio = activeDuration > 0 ? ridingDuration / activeDuration : 0
 
         let rideWindows = Self.rideWindows(from: phases)
@@ -39,8 +39,8 @@ public enum SessionStatsBuilder {
         var rides: [RideSegmentStats] = []
         var totalDistance = 0.0
         var lapTracker = LapRideTracker(thresholds: lapThresholds)
-        if Self.hasPausedPhase(phases, before: rideWindows.first?.start ?? sessionEnd) {
-            lapTracker.notePaused()
+        if Self.hasInactivePhase(phases, before: rideWindows.first?.start ?? sessionEnd) {
+            lapTracker.noteInactive()
         }
 
         for (index, window) in rideWindows.enumerated() {
@@ -109,8 +109,8 @@ public enum SessionStatsBuilder {
             totalEnergyKilocalories: totalCalories,
             rideCount: highlightedRides.count,
             ridingDuration: ridingDuration,
-            pausedDuration: pausedDuration,
-            ridingPausedRatio: ratio,
+            inactiveDuration: inactiveDuration,
+            ridingInactiveRatio: ratio,
             rides: highlightedRides
         )
     }
@@ -143,8 +143,8 @@ public enum SessionStatsBuilder {
         sessionEnd: Date
     ) -> [AttributedPhase] {
         var phases: [AttributedPhase] = []
-        var currentCode = DetectionCodes.paused
-        var lastConfident = DetectionCodes.paused
+        var currentCode = DetectionCodes.inactive
+        var lastConfident = DetectionCodes.inactive
         var intervalStart = sessionStart
 
         for event in effectiveEvents {
@@ -158,9 +158,9 @@ public enum SessionStatsBuilder {
                     )
                 )
             }
-            currentCode = event.code
+            currentCode = DetectionCodes.normalize(event.code)
             if DetectionCodes.isConfident(event.code) {
-                lastConfident = event.code
+                lastConfident = DetectionCodes.normalize(event.code)
             }
             intervalStart = max(event.timestamp, sessionStart)
         }
@@ -181,7 +181,8 @@ public enum SessionStatsBuilder {
     static func attributed(_ code: String, lastConfident _: String) -> String {
         // Unsure gaps do not extend ride windows — fall/GPS death ends ride duration/distance.
         // Lookback supersedes restore continuous riding when speed returns inside the same-ride window.
-        if code == DetectionCodes.unsure { return DetectionCodes.paused }
+        let code = DetectionCodes.normalize(code)
+        if code == DetectionCodes.unsure { return DetectionCodes.inactive }
         return code
     }
 
@@ -210,9 +211,9 @@ public enum SessionStatsBuilder {
             .map { TimeWindow(start: $0.start, end: $0.end) }
     }
 
-    static func hasPausedPhase(_ phases: [AttributedPhase], before date: Date) -> Bool {
+    static func hasInactivePhase(_ phases: [AttributedPhase], before date: Date) -> Bool {
         phases.contains {
-            $0.attributedCode == DetectionCodes.paused
+            $0.attributedCode == DetectionCodes.inactive
                 && $0.start < date
                 && $0.duration > 0
         }

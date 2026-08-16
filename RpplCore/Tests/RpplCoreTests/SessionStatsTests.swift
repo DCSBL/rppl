@@ -146,21 +146,21 @@ struct SessionStatsBuilderTests {
     @Test func emptyDetectionsZeroStats() {
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(600)),
-            detections: [detection(code: DetectionCodes.paused, at: 0, id: "start")],
+            detections: [detection(code: DetectionCodes.inactive, at: 0, id: "start")],
             locations: [],
             health: []
         )
         #expect(stats.rideCount == 0)
         #expect(stats.totalDistanceMeters == 0)
         #expect(stats.ridingDuration == 0)
-        #expect(stats.pausedDuration == 600)
+        #expect(stats.inactiveDuration == 600)
     }
 
     @Test func singleRideDistanceAndDuration() {
         let detections = [
-            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
-            detection(code: DetectionCodes.paused, at: 100, id: "p1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
         ]
         let locations = [
             location(at: 20, lat: 52.0, lon: 5.0),
@@ -178,17 +178,17 @@ struct SessionStatsBuilderTests {
         #expect(stats.rides[0].duration == 90)
         #expect(stats.rides[0].distanceMeters > 10)
         #expect(stats.ridingDuration == 90)
-        #expect(stats.pausedDuration == 110)
-        #expect(abs(stats.ridingPausedRatio - 90.0 / 200.0) < 0.001)
+        #expect(stats.inactiveDuration == 110)
+        #expect(abs(stats.ridingInactiveRatio - 90.0 / 200.0) < 0.001)
     }
 
-    @Test func twoRidesFromPauseBetween() {
+    @Test func twoRidesFromInactiveBetween() {
         let detections = [
-            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
-            detection(code: DetectionCodes.paused, at: 50, id: "p1"),
+            detection(code: DetectionCodes.inactive, at: 50, id: "p1"),
             detection(code: DetectionCodes.riding, at: 100, id: "r2"),
-            detection(code: DetectionCodes.paused, at: 150, id: "p2"),
+            detection(code: DetectionCodes.inactive, at: 150, id: "p2"),
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(200)),
@@ -203,7 +203,7 @@ struct SessionStatsBuilderTests {
     @Test func supersededUnsureMergesIntoOneRide() {
         let unsureId = "unsure-1"
         let detections = [
-            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
             detection(code: DetectionCodes.unsure, at: 30, id: unsureId),
             detection(
@@ -212,7 +212,7 @@ struct SessionStatsBuilderTests {
                 id: "lookback",
                 supersedesId: unsureId
             ),
-            detection(code: DetectionCodes.paused, at: 100, id: "p1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(120)),
@@ -227,10 +227,10 @@ struct SessionStatsBuilderTests {
     @Test func timedOutUnsureEndsRideAtGap() {
         // Unsure without lookback supersede: ride ends at unsure (not attributed riding).
         let detections = [
-            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
             detection(code: DetectionCodes.unsure, at: 40, id: "u1"),
-            detection(code: DetectionCodes.paused, at: 100, id: "p1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(120)),
@@ -251,7 +251,7 @@ struct SessionStatsBuilderTests {
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(300)),
-            detections: [detection(code: DetectionCodes.paused, at: 0, id: "s")],
+            detections: [detection(code: DetectionCodes.inactive, at: 0, id: "s")],
             locations: [],
             health: health
         )
@@ -274,7 +274,7 @@ struct SessionStatsBuilderTests {
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(300)),
-            detections: [detection(code: DetectionCodes.paused, at: 0, id: "s")],
+            detections: [detection(code: DetectionCodes.inactive, at: 0, id: "s")],
             locations: [],
             health: health
         )
@@ -284,7 +284,7 @@ struct SessionStatsBuilderTests {
 
     @Test func openRideClosedAtSessionEnd() {
         let detections = [
-            detection(code: DetectionCodes.paused, at: 0, id: "s"),
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
         ]
         let stats = SessionStatsBuilder.build(
@@ -311,7 +311,7 @@ struct LiveRideTrackerTests {
         #expect(tracker.isRideOngoing)
     }
 
-    @Test func frozenLastRideMetersWhenPaused() {
+    @Test func frozenLastRideMetersWhenInactive() {
         var tracker = LiveRideTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
@@ -324,9 +324,9 @@ struct LiveRideTrackerTests {
         #expect(meters > 0)
 
         tracker.update(
-            currentCode: DetectionCodes.paused,
-            lastConfident: DetectionCodes.paused,
-            events: [detection(code: DetectionCodes.paused, at: 50)]
+            currentCode: DetectionCodes.inactive,
+            lastConfident: DetectionCodes.inactive,
+            events: [detection(code: DetectionCodes.inactive, at: 50)]
         )
         #expect(!tracker.isRideOngoing)
         #expect(tracker.lastRideMeters == meters)
@@ -377,9 +377,9 @@ struct LiveRideTrackerTests {
         let first = tracker.currentRideMeters
 
         tracker.update(
-            currentCode: DetectionCodes.paused,
-            lastConfident: DetectionCodes.paused,
-            events: [detection(code: DetectionCodes.paused, at: 10)]
+            currentCode: DetectionCodes.inactive,
+            lastConfident: DetectionCodes.inactive,
+            events: [detection(code: DetectionCodes.inactive, at: 10)]
         )
         #expect(tracker.sessionRideMeters == first)
 
@@ -405,9 +405,9 @@ struct LiveRideTrackerTests {
             events: [detection(code: DetectionCodes.riding, at: 10)]
         )
         tracker.update(
-            currentCode: DetectionCodes.paused,
-            lastConfident: DetectionCodes.paused,
-            events: [detection(code: DetectionCodes.paused, at: 55)]
+            currentCode: DetectionCodes.inactive,
+            lastConfident: DetectionCodes.inactive,
+            events: [detection(code: DetectionCodes.inactive, at: 55)]
         )
         #expect(tracker.didCompleteRide)
         #expect(tracker.lastRideDuration == 45)
@@ -435,9 +435,9 @@ struct LiveRideTrackerTests {
             events: [detection(code: DetectionCodes.riding, at: 0)]
         )
         tracker.update(
-            currentCode: DetectionCodes.paused,
-            lastConfident: DetectionCodes.paused,
-            events: [detection(code: DetectionCodes.paused, at: 20)]
+            currentCode: DetectionCodes.inactive,
+            lastConfident: DetectionCodes.inactive,
+            events: [detection(code: DetectionCodes.inactive, at: 20)]
         )
         tracker.reset()
         #expect(!tracker.didCompleteRide)
@@ -464,13 +464,13 @@ struct LocationSpeedStatsTests {
             location(at: 10, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 32)),
             location(at: 11, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 34)),
         ]
-        let pausedSpike = location(
+        let inactiveSpike = location(
             at: 50,
             lat: 52.0,
             lon: 5.0,
             speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 44)
         )
-        let all = rideLocations + [pausedSpike]
+        let all = rideLocations + [inactiveSpike]
         let windows = [(start: t0.addingTimeInterval(10), end: t0.addingTimeInterval(20))]
         let sessionPeak = LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: all)
         let rawAll = LocationSpeedStats.peakSpeedKmh(from: all)

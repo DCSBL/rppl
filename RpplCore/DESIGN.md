@@ -61,11 +61,11 @@ classDiagram
 | Units | `SpeedUnits`, `DetectionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
 | Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Recomputed from detections + GPS + health; not persisted |
 
-Opaque detection **codes are strings** (`riding`, `paused`, `unsure`). Unknown codes must round-trip.
+Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown codes must round-trip.
 
 ## Session stats (derived)
 
-`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, treats `unsure` as paused for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable) and `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails). `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostLaps`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters on Watch during recording (meters only while confidently `riding`).
+`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, treats `unsure` as inactive for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable) and `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails). `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostLaps`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters on Watch during recording (meters only while confidently `riding`).
 
 ### Laps (crossing-based)
 
@@ -93,10 +93,10 @@ flowchart LR
 
 1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 45 km/h, jump ≥ 30 km/h vs last usable).
 2. **Hold clock** — `highSpeed`, `stopped`, `unusable`.
-3. **Lookback** — while `unsure`, usable fast within 60 s supersedes same ride; usable slow → paused; ≥ 60 s → timeout to paused (new ride later). Ultra `submerged` → paused via `water_exit`.
+3. **Lookback** — while `unsure`, usable fast within 60 s supersedes same ride; usable slow → inactive; ≥ 60 s → timeout to inactive (new ride later). Ultra `submerged` → inactive via `water_exit`.
 4. **Detectors** — ordered plugins; first match wins (`unsure_timeout`, `water_exit`, `gps_gap`, `ride_exit`, `ride_enter`).
 
-Session start: `makeSessionStartEvent()` → `paused` + `reason=session_start`.
+Session start: `makeSessionStartEvent()` → `inactive` + `reason=session_start`.
 
 ### Extending
 

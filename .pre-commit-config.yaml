@@ -30,7 +30,7 @@ repos:
         additional_dependencies: ["tomli"]
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als"
         stages: [pre-commit]
 
   - repo: local

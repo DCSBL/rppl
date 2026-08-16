@@ -161,22 +161,6 @@
         }
       }
     },
-    "Paused": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paused"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pauze"
-          }
-        }
-      }
-    },
     "Ready (queued)": {
       "localizations": {
         "en": {

@@ -18,7 +18,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Test gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Alpha testers · data collection > product UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
-| Detection | Live ride / pause / unsure → `detections.jsonl` · no manual Action Button labels |
+| Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
 | HealthKit | Save workout via `finishWorkout()` · pause HK on dock · mirror HR/energy into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
@@ -34,7 +34,7 @@ Watch runs a pure Core **detector + merger** (`DetectionEngine`) that writes opa
 
 | Code | Meaning |
 |------|---------|
-| `paused` | Not riding (dock / swim / walk / wait) |
+| `inactive` | Not riding (dock / swim / walk / wait) |
 | `riding` | On the cable / skimming at ride speed |
 | `unsure` | Mid-ride GPS soft; primary UI keeps last confident code |
 
