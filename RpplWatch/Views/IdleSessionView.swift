@@ -8,7 +8,7 @@ struct IdleSessionView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                StartCircleButton {
+                StartCircleButton(enabled: !session.isStopping && !session.isRunning) {
                     WakeLog.debug(.ui, "tap Start session")
                     Task { await session.startSession() }
                 }

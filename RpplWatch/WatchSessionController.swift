@@ -12,6 +12,10 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
+    /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
+    var isStopping = false
+    /// Product pause: sensors/timers halted; distinct from detection `inactive`.
+    var isProductPaused = false
     var detectionCode = DetectionCodes.inactive
     var lastConfidentCode = DetectionCodes.inactive
     var elapsed: TimeInterval = 0
@@ -84,6 +88,9 @@ final class WatchSessionController: NSObject {
     private var flushTask: Task<Void, Never>?
     private var timerTask: Task<Void, Never>?
     private var startedAt: Date?
+    /// Wall time excluded from `elapsed` while product-paused (completed pauses).
+    private var pausedAccumulated: TimeInterval = 0
+    private var productPausedAt: Date?
     private var currentSegmentStartedAt: Date?
     private var lastPersistedConfidentCode = DetectionCodes.inactive
     private var motionUpdatesStarted = false
@@ -173,8 +180,8 @@ final class WatchSessionController: NSObject {
     }
 
     func startSession() async {
-        guard !isRunning else {
-            WakeLog.debug(.session, "startSession ignored — already running")
+        guard !isRunning, !isStopping else {
+            WakeLog.debug(.session, "startSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
         }
         WakeLog.debug(.session, "startSession begin")
@@ -238,6 +245,9 @@ final class WatchSessionController: NSObject {
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
         startedAt = Date()
+        pausedAccumulated = 0
+        productPausedAt = nil
+        isProductPaused = false
         currentSegmentStartedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
@@ -248,32 +258,25 @@ final class WatchSessionController: NSObject {
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
 
-        flushTask = Task { [weak self] in
-            while let self, !Task.isCancelled, self.isRunning {
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
-                await self.flushBuffers()
-            }
-        }
-        timerTask = Task { [weak self] in
-            while let self, !Task.isCancelled, self.isRunning {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                if let startedAt = self.startedAt {
-                    self.elapsed = Date().timeIntervalSince(startedAt)
-                }
-                self.refreshSegmentDurations()
-            }
-        }
+        startBackgroundLoops()
         WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
     }
 
     func stopSession() async {
-        guard isRunning, let manifest, let store else {
-            WakeLog.debug(.session, "stopSession ignored — not running")
+        guard isRunning, !isStopping, let manifest, let store else {
+            WakeLog.debug(.session, "stopSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
+        isStopping = true
         statusText = String(localized: "Stopping…")
-        isRunning = false
+        if isProductPaused {
+            if let productPausedAt {
+                pausedAccumulated += Date().timeIntervalSince(productPausedAt)
+            }
+            productPausedAt = nil
+            isProductPaused = false
+        }
         flushTask?.cancel()
         timerTask?.cancel()
 
@@ -308,7 +311,59 @@ final class WatchSessionController: NSObject {
         lastPersistedConfidentCode = DetectionCodes.inactive
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        pausedAccumulated = 0
+        productPausedAt = nil
+        isProductPaused = false
         self.manifest = nil
+        isRunning = false
+        isStopping = false
+    }
+
+    func pauseSession() async {
+        guard isRunning, !isStopping, !isProductPaused else {
+            WakeLog.debug(.session, "pauseSession ignored")
+            return
+        }
+        WakeLog.debug(.session, "pauseSession begin")
+        applyForcedInactive(reason: "product_pause", detectorId: "product_pause")
+        await flushBuffers()
+        flushTask?.cancel()
+        timerTask?.cancel()
+        flushTask = nil
+        timerTask = nil
+        stopSensors()
+        if let session = workoutSession, session.state == .running {
+            session.pause()
+            WakeLog.debug(.workout, "HK pause (product)")
+        }
+        productPausedAt = Date()
+        elapsed = computeElapsed(at: Date())
+        isProductPaused = true
+        statusText = String(localized: "Paused")
+        WakeLog.debug(.session, "pauseSession done")
+    }
+
+    func resumeSession() {
+        guard isRunning, !isStopping, isProductPaused else {
+            WakeLog.debug(.session, "resumeSession ignored")
+            return
+        }
+        WakeLog.debug(.session, "resumeSession begin")
+        if let productPausedAt {
+            pausedAccumulated += Date().timeIntervalSince(productPausedAt)
+        }
+        productPausedAt = nil
+        isProductPaused = false
+        applyForcedInactive(reason: "product_resume", detectorId: "product_resume")
+        startLocation()
+        startMotionIfAvailable()
+        startActivityUpdatesIfAvailable()
+        startBackgroundLoops()
+        syncWorkoutPauseResume(for: lastPersistedConfidentCode)
+        statusText = recordingMode == "workout"
+            ? String(localized: "Recording")
+            : String(localized: "Sensors-only (no HK workout)")
+        WakeLog.debug(.session, "resumeSession done")
     }
 
     func enableWaterLock() {
@@ -318,7 +373,7 @@ final class WatchSessionController: NSObject {
 
     /// Cycle debug simulation: detected → inactive → ride → detected.
     func cycleDetectionSimulation() {
-        guard isRunning else { return }
+        guard isRunning, !isProductPaused else { return }
         let next: DetectionSimulationMode
         switch detectionSimulationMode {
         case .detected: next = .inactive
@@ -337,7 +392,7 @@ final class WatchSessionController: NSObject {
             processDetectionTick()
         case .inactive:
             forceSimulatedDetection(code: DetectionCodes.inactive)
-            playRideHaptic(for: DetectionCodes.paused)
+            playRideHaptic(for: DetectionCodes.inactive)
         case .ride:
             forceSimulatedDetection(code: DetectionCodes.riding)
             playRideHaptic(for: DetectionCodes.riding)
@@ -348,7 +403,7 @@ final class WatchSessionController: NSObject {
         switch code {
         case DetectionCodes.riding:
             WKInterfaceDevice.current().play(.success)
-        case DetectionCodes.paused:
+        case DetectionCodes.inactive:
             WKInterfaceDevice.current().play(.failure)
         default:
             break
@@ -376,8 +431,8 @@ final class WatchSessionController: NSObject {
 
     /// Start-workout Action Button entry: start session, or no-op if already recording.
     func handleStartWorkoutIntent() async {
-        if isRunning {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — no-op")
+        if isRunning || isStopping {
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: busy running=\(isRunning) stopping=\(isStopping) — no-op")
             return
         }
         WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
@@ -392,7 +447,7 @@ final class WatchSessionController: NSObject {
     }
 
     private func processDetectionTick(timestamp: Date = Date()) {
-        guard isRunning else { return }
+        guard isRunning, !isProductPaused else { return }
         guard detectionSimulationMode == .detected else { return }
         let speed: Double?
         if let loc = latestLocation, loc.speed >= 0 {
@@ -476,6 +531,7 @@ final class WatchSessionController: NSObject {
 
     /// Pause HK while docked so active energy only accrues during rides.
     private func syncWorkoutPauseResume(for code: String) {
+        guard !isProductPaused else { return }
         guard let session = workoutSession else { return }
         switch code {
         case DetectionCodes.riding where session.state == .paused:
@@ -487,6 +543,50 @@ final class WatchSessionController: NSObject {
         default:
             break
         }
+    }
+
+    private func startBackgroundLoops() {
+        flushTask?.cancel()
+        timerTask?.cancel()
+        flushTask = Task { [weak self] in
+            while let self, !Task.isCancelled, self.isRunning, !self.isProductPaused {
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                await self.flushBuffers()
+            }
+        }
+        timerTask = Task { [weak self] in
+            while let self, !Task.isCancelled, self.isRunning, !self.isProductPaused {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.elapsed = self.computeElapsed(at: Date())
+                self.refreshSegmentDurations()
+            }
+        }
+    }
+
+    private func computeElapsed(at date: Date) -> TimeInterval {
+        guard let startedAt else { return 0 }
+        var total = date.timeIntervalSince(startedAt) - pausedAccumulated
+        if let productPausedAt {
+            total -= date.timeIntervalSince(productPausedAt)
+        }
+        return max(0, total)
+    }
+
+    private func applyForcedInactive(reason: String, detectorId: String) {
+        let event = detectionEngine.makeForcedInactiveEvent(
+            at: Date(),
+            reason: reason,
+            detectorId: detectorId
+        )
+        detectionCode = event.code
+        lastConfidentCode = detectionEngine.lastConfidentCode
+        filterRejectionReason = nil
+        liveRideTracker.update(
+            currentCode: detectionCode,
+            lastConfident: lastConfidentCode,
+            events: [event]
+        )
+        persistDetection(event)
     }
 
     private func refreshSegmentDurations() {
@@ -664,7 +764,7 @@ final class WatchSessionController: NSObject {
         }
         motionManager.deviceMotionUpdateInterval = 1.0 / 25.0
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
-            guard let self, let motion, self.isRunning else { return }
+            guard let self, let motion, self.isRunning, !self.isProductPaused else { return }
             let sample = MotionSample(
                 timestamp: Date(),
                 userAccelX: motion.userAcceleration.x,
@@ -790,7 +890,7 @@ final class WatchSessionController: NSObject {
 extension WatchSessionController: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
-            guard isRunning, let loc = locations.last else { return }
+            guard isRunning, !isProductPaused, let loc = locations.last else { return }
             await insertRouteLocations(locations)
             if loc.speed >= 0 {
                 lastSpeedMps = loc.speed
@@ -873,7 +973,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
         didCollectDataOf collectedTypes: Set<HKSampleType>
     ) {
         Task { @MainActor in
-            guard isRunning else { return }
+            guard isRunning, !isProductPaused else { return }
             let now = Date()
             var hr: Double?
             var energy: Double?

@@ -38,6 +38,8 @@ Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/
 
 `HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. Active energy is ride-scoped: the HK session pauses while detection is confidently `inactive` and resumes on `riding`.
 
+**Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, pauses HK, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
+
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
 ## Action Button (Ultra)
