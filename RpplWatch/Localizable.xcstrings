@@ -564,6 +564,22 @@
         }
       }
     },
+    "Paused" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paused"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gepauzeerd"
+          }
+        }
+      }
+    },
     "Pending transfers: %lld" : {
       "localizations" : {
         "en" : {
@@ -708,6 +724,22 @@
         }
       }
     },
+    "Resume" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hervatten"
+          }
+        }
+      }
+    },
     "Retry transfers" : {
       "localizations" : {
         "en" : {
@@ -832,6 +864,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sessie"
+          }
+        }
+      }
+    },
+    "Session clock frozen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session clock frozen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessietijd bevroren"
           }
         }
       }
@@ -1090,6 +1138,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opgeslagen %@"
+          }
+        }
+      }
+    },
+    "Swipe for Resume" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe for Resume"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veeg voor Hervatten"
           }
         }
       }
