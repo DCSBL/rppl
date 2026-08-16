@@ -46,9 +46,9 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Hard constraints (do not “helpfully” break)
 
-1. **HealthKit save:** use workout session + builder; on stop: `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Pause/resume the HK session on confident `riding` ↔ `inactive` so active energy is ride-scoped (product day-session stays continuous).
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Pause/resume the HK session on confident `riding` ↔ `inactive` so active energy is ride-scoped. Product Pause also pauses HK and halts sensors (see hard constraint 3).
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
-3. **One continuous session per park day**; no pause unless product decision changes.
+3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
 5. **iPhone = view-only** — no label editor; no manual Action Button labeling.
 6. **OS floor:** iOS 26+ / watchOS 26+.

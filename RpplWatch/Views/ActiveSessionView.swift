@@ -1,13 +1,23 @@
 import SwiftUI
 
+private enum SessionTab: Hashable {
+    case controls
+    case activity
+    case debug
+}
+
 struct ActiveSessionView: View {
     @Bindable var session: WatchSessionController
+    @State private var tab: SessionTab = .activity
 
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             SessionControlsPage(session: session)
+                .tag(SessionTab.controls)
             SessionRideUIPage(session: session)
+                .tag(SessionTab.activity)
             SessionDebugPage(session: session)
+                .tag(SessionTab.debug)
         }
     }
 }
