@@ -52,9 +52,9 @@ public struct SessionStats: Equatable, Sendable {
     public var totalEnergyKilocalories: Double?
     public var rideCount: Int
     public var ridingDuration: TimeInterval
-    public var pausedDuration: TimeInterval
-    /// `ridingDuration / (ridingDuration + pausedDuration)`; 0 when no active time.
-    public var ridingPausedRatio: Double
+    public var inactiveDuration: TimeInterval
+    /// `ridingDuration / (ridingDuration + inactiveDuration)`; 0 when no active time.
+    public var ridingInactiveRatio: Double
     public var rides: [RideSegmentStats]
 
     /// Max sustained speed across rides (km/h).
@@ -76,8 +76,8 @@ public struct SessionStats: Equatable, Sendable {
         totalEnergyKilocalories: Double? = nil,
         rideCount: Int,
         ridingDuration: TimeInterval,
-        pausedDuration: TimeInterval,
-        ridingPausedRatio: Double,
+        inactiveDuration: TimeInterval,
+        ridingInactiveRatio: Double,
         rides: [RideSegmentStats]
     ) {
         self.startedAt = startedAt
@@ -88,8 +88,8 @@ public struct SessionStats: Equatable, Sendable {
         self.totalEnergyKilocalories = totalEnergyKilocalories
         self.rideCount = rideCount
         self.ridingDuration = ridingDuration
-        self.pausedDuration = pausedDuration
-        self.ridingPausedRatio = ridingPausedRatio
+        self.inactiveDuration = inactiveDuration
+        self.ridingInactiveRatio = ridingInactiveRatio
         self.rides = rides
     }
 }

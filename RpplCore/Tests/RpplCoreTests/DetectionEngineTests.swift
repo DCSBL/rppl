@@ -42,14 +42,14 @@ private func enterUnsureFromRide(
 
 @Suite("DetectionEngine")
 struct DetectionEngineTests {
-    @Test func sessionStartIsPaused() {
+    @Test func sessionStartIsInactive() {
         var engine = DetectionEngine()
         let event = engine.makeSessionStartEvent(at: t0)
-        #expect(event.code == DetectionCodes.paused)
+        #expect(event.code == DetectionCodes.inactive)
         #expect(event.reason == "session_start")
         #expect(event.detectorId == "session_start")
-        #expect(engine.currentCode == DetectionCodes.paused)
-        #expect(engine.lastConfidentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
+        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
     }
 
     @Test func processReturnsEmptyWhenCodeUnchanged() {
@@ -57,7 +57,7 @@ struct DetectionEngineTests {
         _ = engine.makeSessionStartEvent(at: t0)
         #expect(engine.process(tick(at: 0, speedKmh: 5)).isEmpty)
         #expect(engine.process(tick(at: 1, speedKmh: 5)).isEmpty)
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
     }
 
     @Test func rideEnterAfterHighSpeedHold() {
@@ -79,7 +79,7 @@ struct DetectionEngineTests {
         #expect(engine.process(tick(at: 0, speedKmh: 20)).isEmpty)
         // 1.5 s < default 2.0 s hold
         #expect(engine.process(tick(at: 1.5, speedKmh: 20)).isEmpty)
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
         let events = engine.process(tick(at: 2.0, speedKmh: 20))
         #expect(events.first?.code == DetectionCodes.riding)
     }
@@ -97,7 +97,7 @@ struct DetectionEngineTests {
         _ = engine.makeSessionStartEvent(at: t0)
         #expect(engine.process(tick(at: 0, speedKmh: 8)).isEmpty)
         #expect(engine.process(tick(at: 5, speedKmh: 8)).isEmpty)
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
     }
 
     @Test func waterSubmergedEndsRideActivityStillIgnored() {
@@ -109,7 +109,7 @@ struct DetectionEngineTests {
                 tick(at: 0, speedKmh: 3, water: "submerged", activity: "walking")
             ).isEmpty
         )
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
 
         enterRiding(&engine)
         #expect(engine.currentCode == DetectionCodes.riding)
@@ -117,11 +117,11 @@ struct DetectionEngineTests {
         let exited = engine.process(
             tick(at: 5, speedKmh: 18, water: "submerged", activity: "walking")
         )
-        #expect(exited.first?.code == DetectionCodes.paused)
+        #expect(exited.first?.code == DetectionCodes.inactive)
         #expect(exited.first?.detectorId == "water_exit")
         #expect(exited.first?.waterSubmersionState == "submerged")
         #expect(exited.first?.motionActivity == "walking")
-        #expect(engine.lastConfidentCode == DetectionCodes.paused)
+        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
 
         // Later start is a new ride (no long water same-ride glue).
         _ = engine.process(tick(at: 120, speedKmh: 18, water: "notSubmerged"))
@@ -136,7 +136,7 @@ struct DetectionEngineTests {
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
         let exited = engine.process(tick(at: 10, speedKmh: nil, water: "submerged"))
-        #expect(exited.first?.code == DetectionCodes.paused)
+        #expect(exited.first?.code == DetectionCodes.inactive)
         #expect(exited.first?.detectorId == "water_exit")
     }
 
@@ -145,7 +145,7 @@ struct DetectionEngineTests {
         enterRiding(&engine)
         #expect(engine.process(tick(at: 3, speedKmh: 2)).isEmpty)
         let events = engine.process(tick(at: 6.1, speedKmh: 1))
-        #expect(events.first?.code == DetectionCodes.paused)
+        #expect(events.first?.code == DetectionCodes.inactive)
         #expect(events.first?.detectorId == "ride_exit")
     }
 
@@ -194,16 +194,16 @@ struct DetectionEngineTests {
         #expect(engine.lastConfidentCode == DetectionCodes.riding)
     }
 
-    @Test func shortGapLookbackToPauseWhenSlow() {
+    @Test func shortGapLookbackToInactiveWhenSlow() {
         var engine = DetectionEngine()
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
         let recovered = engine.process(tick(at: 15, speedKmh: 1, accuracy: 8))
-        #expect(recovered.first?.code == DetectionCodes.paused)
+        #expect(recovered.first?.code == DetectionCodes.inactive)
         #expect(recovered.first?.detectorId == "lookback")
         #expect(recovered.first?.supersedesId != nil)
-        #expect(recovered.first?.reason.contains("lookback_pause") == true)
-        #expect(engine.lastConfidentCode == DetectionCodes.paused)
+        #expect(recovered.first?.reason.contains("lookback_inactive") == true)
+        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
     }
 
     @Test func midBandUsableSpeedWhileUnsureStaysUnsure() {
@@ -231,9 +231,9 @@ struct DetectionEngineTests {
         var engine = DetectionEngine()
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine) // unsure at 6.1
-        // At exactly 60 s: timeout to paused first
+        // At exactly 60 s: timeout to inactive first
         let timedOut = engine.process(tick(at: 6.1 + 60, speedKmh: nil))
-        #expect(timedOut.first?.code == DetectionCodes.paused)
+        #expect(timedOut.first?.code == DetectionCodes.inactive)
         #expect(timedOut.first?.detectorId == "unsure_timeout")
 
         _ = engine.process(tick(at: 80, speedKmh: 18))
@@ -243,16 +243,16 @@ struct DetectionEngineTests {
         #expect(enter.first?.supersedesId == nil)
     }
 
-    @Test func longUnsureTimeoutForcesPaused() {
+    @Test func longUnsureTimeoutForcesInactive() {
         var engine = DetectionEngine()
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
         #expect(engine.currentCode == DetectionCodes.unsure)
 
         let timedOut = engine.process(tick(at: 6.1 + 60, speedKmh: nil))
-        #expect(timedOut.first?.code == DetectionCodes.paused)
+        #expect(timedOut.first?.code == DetectionCodes.inactive)
         #expect(timedOut.first?.detectorId == "unsure_timeout")
-        #expect(engine.lastConfidentCode == DetectionCodes.paused)
+        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
     }
 
     @Test func longGapThenSpeedIsNewRide() {
@@ -260,7 +260,7 @@ struct DetectionEngineTests {
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
         _ = engine.process(tick(at: 6.1 + 60, speedKmh: nil))
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
 
         _ = engine.process(tick(at: 80, speedKmh: 18))
         let enter = engine.process(tick(at: 82.1, speedKmh: 18))
@@ -274,16 +274,16 @@ struct DetectionEngineTests {
         _ = engine.makeSessionStartEvent(at: t0)
         #expect(engine.process(tick(at: 0, speedKmh: 20, accuracy: 40)).isEmpty)
         #expect(engine.process(tick(at: 3, speedKmh: 20, accuracy: 40)).isEmpty)
-        #expect(engine.currentCode == DetectionCodes.paused)
+        #expect(engine.currentCode == DetectionCodes.inactive)
         #expect(engine.lastFilterRejection?.contains("accuracy") == true)
     }
 
-    @Test func fullParkLoopRideUnsurePauseRide() {
+    @Test func fullParkLoopRideUnsureInactiveRide() {
         var engine = DetectionEngine()
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
         let pause = engine.process(tick(at: 20, speedKmh: 1, accuracy: 8))
-        #expect(pause.first?.code == DetectionCodes.paused)
+        #expect(pause.first?.code == DetectionCodes.inactive)
 
         _ = engine.process(tick(at: 30, speedKmh: 17))
         let ride2 = engine.process(tick(at: 32.1, speedKmh: 17))
@@ -301,7 +301,7 @@ struct DetectionEngineTests {
         let events = DetectionEngine.replay(ticks: ticks)
         #expect(events.first?.reason == "session_start")
         #expect(events.contains { $0.code == DetectionCodes.riding && $0.detectorId == "ride_enter" })
-        #expect(events.contains { $0.code == DetectionCodes.paused && $0.detectorId == "ride_exit" })
+        #expect(events.contains { $0.code == DetectionCodes.inactive && $0.detectorId == "ride_exit" })
         #expect(events.filter { $0.code == DetectionCodes.riding }.count == 1)
     }
 
@@ -323,7 +323,7 @@ struct DetectionEngineTests {
             ),
         ]
         let events = DetectionEngine.replay(locations: locations)
-        #expect(events.first?.code == DetectionCodes.paused)
+        #expect(events.first?.code == DetectionCodes.inactive)
         #expect(events.contains { $0.code == DetectionCodes.riding })
     }
 
@@ -443,24 +443,24 @@ struct DetectionEventCodableTests {
 
 @Suite("DetectionExtensibility")
 struct DetectionExtensibilityTests {
-    struct AlwaysPauseDetector: Detector {
-        let id = "test_force_pause"
+    struct AlwaysInactiveDetector: Detector {
+        let id = "test_force_inactive"
         func evaluate(_ ctx: DetectionEvalContext) -> DetectionSignal? {
             guard ctx.currentCode == DetectionCodes.riding else { return nil }
-            return DetectionSignal(kind: .exitRide, detectorId: id, reason: "test_force_pause")
+            return DetectionSignal(kind: .exitRide, detectorId: id, reason: "test_force_inactive")
         }
     }
 
     @Test func customDetectorCanPrepend() {
         var engine = DetectionEngine(
-            detectors: [AlwaysPauseDetector()] + DetectionEngine.defaultDetectors
+            detectors: [AlwaysInactiveDetector()] + DetectionEngine.defaultDetectors
         )
         _ = engine.makeSessionStartEvent(at: t0)
         _ = engine.process(tick(at: 0, speedKmh: 16))
         _ = engine.process(tick(at: 2.1, speedKmh: 16))
         #expect(engine.currentCode == DetectionCodes.riding)
         let events = engine.process(tick(at: 3, speedKmh: 16))
-        #expect(events.first?.detectorId == "test_force_pause")
-        #expect(events.first?.code == DetectionCodes.paused)
+        #expect(events.first?.detectorId == "test_force_inactive")
+        #expect(events.first?.code == DetectionCodes.inactive)
     }
 }

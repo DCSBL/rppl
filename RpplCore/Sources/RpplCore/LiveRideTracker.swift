@@ -15,11 +15,11 @@ public struct LiveRideTracker: Sendable {
     /// Sum of finished ride meters plus current ride (ride-gated session distance).
     public private(set) var sessionRideMeters = 0.0
     public private(set) var currentSpeedKmh: Double?
-    /// Crossing-based laps for the current ride (0 while paused after finish until next enter).
+    /// Crossing-based laps for the current ride (0 while inactive after finish until next enter).
     public var currentRideLapCount: Int { lapTracker.lapCount }
 
-    private var trackedCode = DetectionCodes.paused
-    private var trackedLastConfident = DetectionCodes.paused
+    private var trackedCode = DetectionCodes.inactive
+    private var trackedLastConfident = DetectionCodes.inactive
     private var previousLocation: LocationSample?
     private var finishedRideMeters = 0.0
     private var rideStartedAt: Date?
@@ -34,7 +34,7 @@ public struct LiveRideTracker: Sendable {
         var thresholds = lapThresholds
         thresholds.maxHorizontalAccuracyM = maxHorizontalAccuracyM
         var laps = LapRideTracker(thresholds: thresholds)
-        laps.notePaused()
+        laps.noteInactive()
         self.lapTracker = laps
     }
 
@@ -49,13 +49,13 @@ public struct LiveRideTracker: Sendable {
         sessionRideMeters = 0
         finishedRideMeters = 0
         currentSpeedKmh = nil
-        trackedCode = DetectionCodes.paused
-        trackedLastConfident = DetectionCodes.paused
+        trackedCode = DetectionCodes.inactive
+        trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
         rideStartedAt = nil
         lapTracker.reset()
-        // Session starts paused so the first dock→ride may score laps.
-        lapTracker.notePaused()
+        // Session starts inactive so the first dock→ride may score laps.
+        lapTracker.noteInactive()
     }
 
     /// Call after each detection engine tick (with zero or more events).
@@ -69,7 +69,8 @@ public struct LiveRideTracker: Sendable {
                 code: trackedCode,
                 lastConfident: trackedLastConfident
             )
-            let nowRiding = event.code == DetectionCodes.riding
+            let code = DetectionCodes.normalize(event.code)
+            let nowRiding = code == DetectionCodes.riding
             if nowRiding, !wasRiding {
                 rideCount += 1
                 currentRideMeters = 0
@@ -78,18 +79,18 @@ public struct LiveRideTracker: Sendable {
             } else if !nowRiding, wasRiding {
                 finishCurrentRide(at: event.timestamp)
             }
-            trackedCode = event.code
-            trackedLastConfident = event.code
+            trackedCode = code
+            trackedLastConfident = code
         }
 
-        for event in events where event.code == DetectionCodes.unsure {
+        for event in events where DetectionCodes.normalize(event.code) == DetectionCodes.unsure {
             trackedCode = DetectionCodes.unsure
         }
 
-        if events.isEmpty || events.allSatisfy({ $0.code == DetectionCodes.unsure }) {
-            trackedCode = currentCode
+        if events.isEmpty || events.allSatisfy({ DetectionCodes.normalize($0.code) == DetectionCodes.unsure }) {
+            trackedCode = DetectionCodes.normalize(currentCode)
         }
-        trackedLastConfident = lastConfident
+        trackedLastConfident = DetectionCodes.normalize(lastConfident)
         isRideOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
         lapTracker.updateRiding(isRideOngoing)
         if trackedCode != DetectionCodes.riding {
@@ -164,6 +165,8 @@ public struct LiveRideTracker: Sendable {
     }
 
     private static func attributesAsRiding(code: String, lastConfident: String) -> Bool {
+        let code = DetectionCodes.normalize(code)
+        let lastConfident = DetectionCodes.normalize(lastConfident)
         if code == DetectionCodes.riding { return true }
         if code == DetectionCodes.unsure { return lastConfident == DetectionCodes.riding }
         return false

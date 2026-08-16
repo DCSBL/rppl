@@ -87,7 +87,7 @@ export interface DerivedSession {
   totalLapCount: number
   totalDistanceMeters: number
   ridingDurationMs: number
-  pausedDurationMs: number
+  inactiveDurationMs: number
   peakSpeedKmh: number | null
   averageSpeedKmh: number | null
 }

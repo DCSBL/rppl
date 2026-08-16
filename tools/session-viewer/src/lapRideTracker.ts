@@ -34,7 +34,7 @@ export class LapRideTracker {
 
   private thresholds: LapThresholds
   private zoneState: ZoneState = 'idle'
-  private hasSeenPause = false
+  private hasSeenInactive = false
   private scoringThisRide = false
   private pathSinceLeaveM = 0
   private previousLocation: LocationSample | null = null
@@ -48,7 +48,7 @@ export class LapRideTracker {
     this.lapAtMs = []
     this.isRideActive = false
     this.zoneState = 'idle'
-    this.hasSeenPause = false
+    this.hasSeenInactive = false
     this.scoringThisRide = false
     this.startLatitude = null
     this.startLongitude = null
@@ -56,9 +56,9 @@ export class LapRideTracker {
     this.previousLocation = null
   }
 
-  notePaused(): void {
+  noteInactive(): void {
     if (this.isRideActive) this.endRide()
-    this.hasSeenPause = true
+    this.hasSeenInactive = true
   }
 
   beginRide(): void {
@@ -66,7 +66,7 @@ export class LapRideTracker {
     this.lapCount = 0
     this.lapAtMs = []
     this.isRideActive = true
-    this.scoringThisRide = this.hasSeenPause
+    this.scoringThisRide = this.hasSeenInactive
     this.zoneState = this.scoringThisRide ? 'awaitingAnchor' : 'idle'
     this.startLatitude = null
     this.startLongitude = null
@@ -79,7 +79,7 @@ export class LapRideTracker {
     this.scoringThisRide = false
     this.zoneState = 'idle'
     this.previousLocation = null
-    this.hasSeenPause = true
+    this.hasSeenInactive = true
   }
 
   addLocation(sample: LocationSample): void {

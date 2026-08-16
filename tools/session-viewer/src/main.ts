@@ -49,7 +49,7 @@ app.innerHTML = `
     <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
     <div class="metric"><span class="metric-label">Riding</span><span class="metric-value" data-k="riding">—</span></div>
   </div>
-  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue paused · grey unsure · yellow lap. Space = play/pause realtime.</p>
+  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow lap. Space = play/pause realtime.</p>
   <div class="range-row">
     <span>Start</span>
     <input id="start" type="range" disabled />

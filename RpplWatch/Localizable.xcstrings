@@ -529,34 +529,34 @@
         }
       }
     },
-    "Paused": {
+    "Inactive": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paused"
+            "value": "Inactive"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pauze"
+            "value": "Inactief"
           }
         }
       }
     },
-    "Paused for": {
+    "Inactive for": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paused for"
+            "value": "Inactive for"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pauze sinds"
+            "value": "Inactief sinds"
           }
         }
       }
@@ -849,18 +849,18 @@
         }
       }
     },
-    "Sim: Pause": {
+    "Sim: Inactive": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sim: Pause"
+            "value": "Sim: Inactive"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sim: Pauze"
+            "value": "Sim: Inactief"
           }
         }
       }

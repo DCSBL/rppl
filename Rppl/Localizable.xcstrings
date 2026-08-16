@@ -1137,18 +1137,18 @@
         }
       }
     },
-    "Paused": {
+    "Inactive": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paused"
+            "value": "Inactive"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pauze"
+            "value": "Inactief"
           }
         }
       }
