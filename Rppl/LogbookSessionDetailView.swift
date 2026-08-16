@@ -66,7 +66,11 @@ struct LogbookSessionDetailView: View {
         if mapTracks.isEmpty {
             mapPlaceholder(sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
         } else {
-            SessionMapView(tracks: mapTracks, allowsInteraction: true)
+            SessionMapView(
+                tracks: mapTracks,
+                allowsInteraction: true,
+                showsStyleToggle: true
+            )
                 .frame(height: 300)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }

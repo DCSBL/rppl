@@ -5,53 +5,75 @@ import RpplCore
 struct SessionMapView: View {
     let tracks: [[LocationSample]]
     var allowsInteraction: Bool = false
+    /// Style toggle only on the session map card — not ride maps.
+    var showsStyleToggle: Bool = false
 
+    @AppStorage(MapBaseStyleSetting.usesSatelliteKey) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
     @State private var fitted: MapTrackFit?
     @State private var showReset = false
 
-    init(locations: [LocationSample], allowsInteraction: Bool = false) {
+    init(
+        locations: [LocationSample],
+        allowsInteraction: Bool = false,
+        showsStyleToggle: Bool = false
+    ) {
         self.tracks = locations.count >= 2 ? [locations] : []
         self.allowsInteraction = allowsInteraction
+        self.showsStyleToggle = showsStyleToggle
     }
 
-    init(tracks: [[LocationSample]], allowsInteraction: Bool = false) {
+    init(
+        tracks: [[LocationSample]],
+        allowsInteraction: Bool = false,
+        showsStyleToggle: Bool = false
+    ) {
         self.tracks = tracks.filter { $0.count >= 2 }
         self.allowsInteraction = allowsInteraction
+        self.showsStyleToggle = showsStyleToggle
     }
 
     private var interactionModes: MapInteractionModes {
         allowsInteraction ? [.pan, .zoom, .pitch, .rotate] : []
     }
 
+    private var mapStyle: MapStyle {
+        usesSatellite ? .hybrid : .standard
+    }
+
     var body: some View {
         GeometryReader { geo in
-            ZStack(alignment: .bottomTrailing) {
-                Map(position: $position, interactionModes: interactionModes) {
-                    ForEach(Array(tracks.enumerated()), id: \.offset) { _, track in
-                        MapPolyline(coordinates: track.map {
-                            CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
-                        })
-                        .stroke(Color.rpplHighlight, lineWidth: 3)
-                    }
-                    if let first = tracks.first?.first {
-                        Marker("Start", coordinate: CLLocationCoordinate2D(
-                            latitude: first.latitude,
-                            longitude: first.longitude
-                        ))
-                    }
-                    if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
-                        Marker("End", coordinate: CLLocationCoordinate2D(
-                            latitude: last.latitude,
-                            longitude: last.longitude
-                        ))
-                    }
+            Map(position: $position, interactionModes: interactionModes) {
+                ForEach(Array(tracks.enumerated()), id: \.offset) { _, track in
+                    MapPolyline(coordinates: track.map {
+                        CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+                    })
+                    .stroke(Color.rpplHighlight, lineWidth: 3)
                 }
-                .onMapCameraChange(frequency: .onEnd) { context in
-                    guard allowsInteraction, let fitted else { return }
-                    showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
+                if let first = tracks.first?.first {
+                    Marker("Start", coordinate: CLLocationCoordinate2D(
+                        latitude: first.latitude,
+                        longitude: first.longitude
+                    ))
                 }
-
+                if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
+                    Marker("End", coordinate: CLLocationCoordinate2D(
+                        latitude: last.latitude,
+                        longitude: last.longitude
+                    ))
+                }
+            }
+            .mapStyle(mapStyle)
+            .onMapCameraChange(frequency: .onEnd) { context in
+                guard allowsInteraction, let fitted else { return }
+                showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
+            }
+            .overlay(alignment: .topLeading) {
+                if showsStyleToggle {
+                    mapStyleToggle
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
                 if allowsInteraction, showReset {
                     Button {
                         applyFittedCamera(animated: true)
@@ -87,6 +109,25 @@ struct SessionMapView: View {
         let first = tracks.first?.first
         let last = tracks.last?.last
         return "\(tracks.count)-\(count)-\(first?.latitude ?? 0)-\(last?.longitude ?? 0)"
+    }
+
+    private var mapStyleToggle: some View {
+        Button {
+            usesSatellite.toggle()
+        } label: {
+            Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.rpplText)
+                .frame(width: 36, height: 36)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(10)
+        .accessibilityLabel(
+            usesSatellite
+                ? String(localized: "Show standard map")
+                : String(localized: "Show satellite map")
+        )
     }
 
     private func updateFit(for size: CGSize, forceApply: Bool) {

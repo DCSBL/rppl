@@ -1553,6 +1553,38 @@
         }
       }
     },
+    "Show satellite map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show satellite map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Satellietkaart tonen"
+          }
+        }
+      }
+    },
+    "Show standard map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show standard map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standaardkaart tonen"
+          }
+        }
+      }
+    },
     "Size": {
       "localizations": {
         "en": {
