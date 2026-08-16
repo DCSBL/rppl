@@ -67,9 +67,9 @@ Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](
 
 ## Hard constraints (unchanged)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → `finishWorkout()` → `session.end()`; mirror HR/energy into JSONL; pause/resume HK on ride/inactive detection (day-session stays continuous).
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → `finishWorkout()` → `session.end()`; mirror HR/energy into JSONL; pause/resume HK on ride/inactive detection; product Pause also pauses HK and halts sensors.
 2. Never delete Watch session files until phone ack.
-3. One continuous session per park day; no pause.
+3. One continuous session per park day by default; product Pause allowed (sensor gap + frozen clock; ≠ detection `inactive`).
 4. Detection codes stay opaque strings.
 5. iPhone view-only — no label editor.
 6. OS floor iOS 26+ / watchOS 26+.
