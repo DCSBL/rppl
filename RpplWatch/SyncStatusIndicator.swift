@@ -37,8 +37,8 @@ struct SyncStatusIndicator: View {
 
     private var shortTitle: String {
         switch state {
-        case .readyLive: return "Phone connected"
-        case .readyQueued: return "Ready to sync"
+        case .readyLive: return String(localized: "Phone connected")
+        case .readyQueued: return String(localized: "Ready to sync")
         default: return state.title
         }
     }

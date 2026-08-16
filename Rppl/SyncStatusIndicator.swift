@@ -34,7 +34,7 @@ struct SyncStatusIndicator: View {
             Spacer(minLength: 0)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Sync \(state.title)")
+        .accessibilityLabel(String(localized: "Sync \(state.title)"))
         .accessibilityValue(state.detail)
     }
 

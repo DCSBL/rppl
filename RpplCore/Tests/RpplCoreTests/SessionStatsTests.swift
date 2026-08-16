@@ -104,6 +104,41 @@ struct DistanceFormatTests {
         #expect(formatted.contains("m"))
         #expect(formatted.contains("1") && formatted.contains("234"))
     }
+
+    @Test func kilometersUsesLocaleUnit() {
+        let en = DistanceFormat.kilometers(2500, locale: Locale(identifier: "en_US"))
+        #expect(en.lowercased().contains("km"))
+        let nl = DistanceFormat.kilometers(2500, locale: Locale(identifier: "nl_NL"))
+        #expect(nl.lowercased().contains("km"))
+    }
+
+    @Test func speedUsesLocaleUnit() {
+        let formatted = DistanceFormat.kilometersPerHour(24.5, locale: Locale(identifier: "nl_NL"))
+        #expect(formatted.contains("24"))
+    }
+}
+
+@Suite("DurationFormat")
+struct DurationFormatTests {
+    @Test func wideSingleMinuteUsesLocaleWord() {
+        let en = DurationFormat.units(60, width: .wide, locale: Locale(identifier: "en_US"))
+        #expect(en.contains("minute"))
+        let nl = DurationFormat.units(60, width: .wide, locale: Locale(identifier: "nl_NL"))
+        #expect(nl.lowercased().contains("minuut") || nl.lowercased().contains("min"))
+    }
+
+    @Test func zeroIsNonEmpty() {
+        #expect(!DurationFormat.units(0, width: .wide, locale: Locale(identifier: "en_US")).isEmpty)
+    }
+}
+
+@Suite("EnergyFormat")
+struct EnergyFormatTests {
+    @Test func kilocaloriesIncludesUnit() {
+        let formatted = EnergyFormat.kilocalories(120, locale: Locale(identifier: "en_US"))
+        #expect(formatted.contains("120"))
+        #expect(formatted.lowercased().contains("cal") || formatted.lowercased().contains("kcal"))
+    }
 }
 
 @Suite("SessionStatsBuilder")

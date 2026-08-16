@@ -8,7 +8,7 @@ import Observation
 final class PhoneConnectivityService: NSObject {
     static let shared = PhoneConnectivityService()
 
-    var status = "WC idle"
+    var status = String(localized: "WC idle")
     var syncState: SyncConnectionState = .notActivated
     var sessionsRevision = 0
     /// Raw WCSession flags for device-pair debugging (shown under Sync).
@@ -27,7 +27,7 @@ final class PhoneConnectivityService: NSObject {
 
     func activate() {
         guard WCSession.isSupported() else {
-            status = "WC unsupported"
+            status = String(localized: "WC unsupported")
             syncState = .unsupported
             WakeLog.error(.sync, "WC unsupported on iPhone")
             return
@@ -66,7 +66,7 @@ final class PhoneConnectivityService: NSObject {
         WakeLog.debug(.ack, "queued userInfo \(sessionId.prefix(8))…")
 
         guard WCSession.default.isReachable else {
-            status = "Imported \(sessionId.prefix(8)) — Watch not reachable for ack (will retry when reachable)"
+            status = String(localized: "Imported \(sessionId.prefix(8)) — Watch not reachable for ack (will retry when reachable)")
             pendingAcks.insert(sessionId)
             WakeLog.debug(.ack, "defer live \(sessionId.prefix(8))… — Watch unreachable pending=\(pendingAcks.count)")
             refreshSyncState()
@@ -78,7 +78,7 @@ final class PhoneConnectivityService: NSObject {
             replyHandler: { [weak self] _ in
                 Task { @MainActor in
                     self?.pendingAcks.remove(sessionId)
-                    self?.status = "Acked \(sessionId.prefix(8))"
+                    self?.status = String(localized: "Acked \(sessionId.prefix(8))")
                     WakeLog.debug(.ack, "send reply OK \(sessionId.prefix(8))…")
                     self?.refreshSyncState()
                 }
@@ -86,7 +86,7 @@ final class PhoneConnectivityService: NSObject {
             errorHandler: { [weak self] error in
                 Task { @MainActor in
                     self?.pendingAcks.insert(sessionId)
-                    self?.status = "Ack send failed: \(error.localizedDescription)"
+                    self?.status = String(localized: "Ack send failed: \(error.localizedDescription)")
                     WakeLog.error(.ack, "send failed \(sessionId.prefix(8))…: \(error.localizedDescription)")
                     self?.refreshSyncState()
                 }
@@ -148,10 +148,10 @@ extension PhoneConnectivityService: WCSessionDelegate {
         Task { @MainActor in
             refreshSyncState()
             if let error {
-                status = "WC error: \(error.localizedDescription)"
+                status = String(localized: "WC error: \(error.localizedDescription)")
                 WakeLog.error(.sync, "WC activate error: \(error.localizedDescription)")
             } else {
-                status = "WC activated"
+                status = String(localized: "WC activated")
                 WakeLog.debug(.sync, "WC activated state=\(activationState.rawValue)")
                 rebroadcastAcksForImportedSessions()
                 flushPendingAcks()
@@ -171,9 +171,9 @@ extension PhoneConnectivityService: WCSessionDelegate {
         Task { @MainActor in
             do {
                 try importPackage(from: dest, sessionIdHint: hint)
-                status = "Imported session"
+                status = String(localized: "Imported session")
             } catch {
-                status = "Import failed: \(error.localizedDescription)"
+                status = String(localized: "Import failed: \(error.localizedDescription)")
                 WakeLog.error(.transfer, "import failed: \(error.localizedDescription)")
             }
             refreshSyncState()
@@ -184,11 +184,11 @@ extension PhoneConnectivityService: WCSessionDelegate {
         Task { @MainActor in
             refreshSyncState()
             if session.isReachable {
-                status = "Watch reachable"
+                status = String(localized: "Watch reachable")
                 WakeLog.debug(.sync, "Watch reachable")
                 flushPendingAcks()
             } else {
-                status = "Watch not reachable — transfers still queue"
+                status = String(localized: "Watch not reachable — transfers still queue")
                 WakeLog.debug(.sync, "Watch not reachable")
             }
         }
@@ -197,7 +197,7 @@ extension PhoneConnectivityService: WCSessionDelegate {
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
         Task { @MainActor in
             refreshSyncState()
-            status = "Watch state updated"
+            status = String(localized: "Watch state updated")
             WakeLog.debug(
                 .sync,
                 "watchState paired=\(session.isPaired) appInstalled=\(session.isWatchAppInstalled)"

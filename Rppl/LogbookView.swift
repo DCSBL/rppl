@@ -165,8 +165,11 @@ struct LogbookView: View {
 
             Text(
                 catalog.isLoading
-                    ? "— total rides"
-                    : "\(totals.totalRuns) total rides · \(totals.totalLaps) laps"
+                    ? String(localized: "— total rides")
+                    : LogbookFormatting.totalsFooter(
+                        rides: totals.totalRuns,
+                        laps: totals.totalLaps
+                    )
             )
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
@@ -181,7 +184,7 @@ struct LogbookView: View {
             .frame(width: 1, height: 44)
     }
 
-    private func totalMetric(value: String, label: String) -> some View {
+    private func totalMetric(value: String, label: LocalizedStringKey) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.title2.bold())
@@ -202,7 +205,7 @@ struct LogbookView: View {
                 .font(.title3.bold())
                 .foregroundStyle(Color.rpplText)
             Spacer()
-            Text(catalog.isLoading ? "…" : "\(catalog.entries.count) total")
+            Text(catalog.isLoading ? "…" : LogbookFormatting.sessionCount(catalog.entries.count))
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -302,13 +305,13 @@ private struct SessionCard: View {
     }
 
     private var ridesText: String {
-        guard let stats = entry.stats else { return "— rides" }
-        return "\(stats.rideCount) rides"
+        guard let stats = entry.stats else { return String(localized: "— rides") }
+        return LogbookFormatting.rideCount(stats.rideCount)
     }
 
     private var lapsText: String {
-        guard let stats = entry.stats else { return "— laps" }
-        return "\(stats.totalLapCount) laps"
+        guard let stats = entry.stats else { return String(localized: "— laps") }
+        return LogbookFormatting.lapCount(stats.totalLapCount)
     }
 
     private func statLabel(_ symbol: String, value: String) -> some View {

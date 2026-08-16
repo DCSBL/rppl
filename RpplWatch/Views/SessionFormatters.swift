@@ -1,4 +1,5 @@
 import Foundation
+import RpplCore
 
 enum SessionFormatters {
     static func elapsed(_ interval: TimeInterval) -> String {
@@ -26,9 +27,9 @@ enum SessionFormatters {
 
     static func distance(_ meters: Double) -> String {
         if meters >= 1000 {
-            return String(format: "%.2f KM", meters / 1000)
+            return DistanceFormat.kilometers(meters)
         }
-        return String(format: "%.0f M", meters)
+        return DistanceFormat.meters(meters)
     }
 
     static func speedKmh(_ metersPerSecond: Double?) -> String {

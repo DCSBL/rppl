@@ -154,7 +154,7 @@ struct SessionRideUIPage: View {
     }
 
     @ViewBuilder
-    private func statusLine(primary: String, color: Color) -> some View {
+    private func statusLine(primary: LocalizedStringKey, color: Color) -> some View {
         VStack(spacing: 2) {
             Text(primary)
                 .font(.headline.bold())

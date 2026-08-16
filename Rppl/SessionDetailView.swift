@@ -54,8 +54,13 @@ struct SessionDetailView: View {
             } else if loadPhase == .cancelled {
                 Section {
                     HStack(spacing: 10) {
-                        Text(errorText == nil ? "Load cancelled" : "Load failed")
-                            .foregroundStyle(.secondary)
+                        if errorText == nil {
+                            Text("Load cancelled")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Load failed")
+                                .foregroundStyle(.secondary)
+                        }
                         Spacer()
                         Button("Retry") {
                             retryLoad()
@@ -85,11 +90,11 @@ struct SessionDetailView: View {
                     LabeledContent("Distance", value: DistanceFormat.meters(stats.totalDistanceMeters))
                     LabeledContent(
                         "Active calories",
-                        value: stats.activeEnergyKilocalories.map { String(format: "%.0f kcal", $0) } ?? "—"
+                        value: stats.activeEnergyKilocalories.map(LogbookFormatting.kilocalories) ?? "—"
                     )
                     LabeledContent(
                         "Total calories",
-                        value: stats.totalEnergyKilocalories.map { String(format: "%.0f kcal", $0) } ?? "—"
+                        value: stats.totalEnergyKilocalories.map(LogbookFormatting.kilocalories) ?? "—"
                     )
                     LabeledContent("Rides", value: "\(stats.rideCount)")
                     LabeledContent(
@@ -120,7 +125,7 @@ struct SessionDetailView: View {
                                 }
                             }
                             Text(
-                                "\(DistanceFormat.meters(ride.distanceMeters)) · \(ride.lapCount) laps"
+                                "\(DistanceFormat.meters(ride.distanceMeters)) · \(LogbookFormatting.lapCount(ride.lapCount))"
                             )
                             .font(.caption)
                             Text(Self.formatDuration(ride.duration))
@@ -251,12 +256,12 @@ struct SessionDetailView: View {
 
     private var loadStatusText: String {
         switch loadPhase {
-        case .manifest: return "Loading manifest…"
-        case .detections: return "Loading detections…"
-        case .locations: return "Loading GPS…"
-        case .stats: return "Computing stats…"
-        case .ready: return "Ready"
-        case .cancelled: return "Cancelled"
+        case .manifest: return String(localized: "Loading manifest…")
+        case .detections: return String(localized: "Loading detections…")
+        case .locations: return String(localized: "Loading GPS…")
+        case .stats: return String(localized: "Computing stats…")
+        case .ready: return String(localized: "Ready")
+        case .cancelled: return String(localized: "Cancelled")
         }
     }
 

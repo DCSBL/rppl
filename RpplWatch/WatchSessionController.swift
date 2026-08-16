@@ -30,7 +30,7 @@ final class WatchSessionController: NSObject {
     var currentRideDuration: TimeInterval = 0
     var currentPauseDuration: TimeInterval = 0
     var filterRejectionReason: String?
-    var statusText = "Idle"
+    var statusText = String(localized: "Idle")
     var errorText: String?
     var healthAuthStatus = "unknown"
     var locationAuthStatus = "unknown"
@@ -129,18 +129,18 @@ final class WatchSessionController: NSObject {
         }
 
         guard HKHealthStore.isHealthDataAvailable() else {
-            healthAuthStatus = "Health unavailable"
+            healthAuthStatus = String(localized: "Health unavailable")
             return
         }
         switch healthStore.authorizationStatus(for: workoutType) {
         case .notDetermined:
-            healthAuthStatus = "workout: notDetermined"
+            healthAuthStatus = String(localized: "workout: notDetermined")
         case .sharingDenied:
-            healthAuthStatus = "workout: denied — enable in Settings › Health"
+            healthAuthStatus = String(localized: "workout: denied — enable in Settings › Health")
         case .sharingAuthorized:
-            healthAuthStatus = "workout: authorized"
+            healthAuthStatus = String(localized: "workout: authorized")
         @unknown default:
-            healthAuthStatus = "workout: unknown"
+            healthAuthStatus = String(localized: "workout: unknown")
         }
     }
 
@@ -151,7 +151,7 @@ final class WatchSessionController: NSObject {
         locationManager.requestWhenInUseAuthorization()
 
         guard HKHealthStore.isHealthDataAvailable() else {
-            healthAuthStatus = "Health unavailable"
+            healthAuthStatus = String(localized: "Health unavailable")
             WakeLog.debug(.permissions, "Health unavailable")
             refreshPermissionStatus()
             return
@@ -159,10 +159,10 @@ final class WatchSessionController: NSObject {
 
         do {
             try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
-            statusText = "Permissions updated"
+            statusText = String(localized: "Permissions updated")
             WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {
-            errorText = "Health auth: \(error.localizedDescription)"
+            errorText = String(localized: "Health auth: \(error.localizedDescription)")
             WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
         }
         refreshPermissionStatus()
@@ -179,7 +179,7 @@ final class WatchSessionController: NSObject {
         }
         WakeLog.debug(.session, "startSession begin")
         errorText = nil
-        statusText = "Starting…"
+        statusText = String(localized: "Starting…")
         recordingMode = "none"
 
         await requestPermissions()
@@ -204,8 +204,8 @@ final class WatchSessionController: NSObject {
             refreshStoredByteSize()
             WakeLog.debug(.store, "createSession OK \(manifest.sessionId.prefix(8))…")
         } catch {
-            errorText = "Store: \(error.localizedDescription)"
-            statusText = "Failed"
+            errorText = String(localized: "Store: \(error.localizedDescription)")
+            statusText = String(localized: "Failed")
             WakeLog.error(.store, "createSession: \(error.localizedDescription)")
             return
         }
@@ -215,7 +215,7 @@ final class WatchSessionController: NSObject {
             recordingMode = "workout"
         } else {
             recordingMode = "sensorsOnly"
-            statusText = "Sensors-only (no HK workout)"
+            statusText = String(localized: "Sensors-only (no HK workout)")
         }
         WakeLog.debug(.session, "recordingMode=\(recordingMode)")
 
@@ -241,7 +241,7 @@ final class WatchSessionController: NSObject {
         currentSegmentStartedAt = Date()
         isRunning = true
         if recordingMode == "workout" {
-            statusText = "Recording"
+            statusText = String(localized: "Recording")
         }
 
         logSessionStartDetection()
@@ -272,7 +272,7 @@ final class WatchSessionController: NSObject {
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
-        statusText = "Stopping…"
+        statusText = String(localized: "Stopping…")
         isRunning = false
         flushTask?.cancel()
         timerTask?.cancel()
@@ -285,7 +285,7 @@ final class WatchSessionController: NSObject {
             try store.markReadyToTransfer(sessionId: manifest.sessionId)
             WakeLog.debug(.store, "markReadyToTransfer \(manifest.sessionId.prefix(8))…")
         } catch {
-            errorText = "Mark transfer: \(error.localizedDescription)"
+            errorText = String(localized: "Mark transfer: \(error.localizedDescription)")
             WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
         }
 
@@ -293,9 +293,9 @@ final class WatchSessionController: NSObject {
         recordingMode = "none"
         motionRecordingEnabled = false
 
-        statusText = "Transferring…"
+        statusText = String(localized: "Transferring…")
         WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
-        statusText = "Stopped — waiting for phone ack"
+        statusText = String(localized: "Stopped — waiting for phone ack")
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
         currentRideDuration = 0
@@ -437,7 +437,7 @@ final class WatchSessionController: NSObject {
             )
             handleDetectionTransition(event)
         } catch {
-            errorText = "Detection: \(error.localizedDescription)"
+            errorText = String(localized: "Detection: \(error.localizedDescription)")
             WakeLog.error(.detection, "appendDetection: \(error.localizedDescription)")
         }
     }
@@ -495,7 +495,7 @@ final class WatchSessionController: NSObject {
         refreshPermissionStatus()
         let status = healthStore.authorizationStatus(for: workoutType)
         if status == .sharingDenied {
-            errorText = "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout."
+            errorText = String(localized: "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout.")
             WakeLog.debug(.workout, "sharingDenied — sensors-only")
             return false
         }
@@ -506,7 +506,7 @@ final class WatchSessionController: NSObject {
             return true
         } catch {
             // Simulator / denied / notDetermined often surfaces here as "Not authorized".
-            errorText = "Workout: \(error.localizedDescription). Continuing sensors-only."
+            errorText = String(localized: "Workout: \(error.localizedDescription). Continuing sensors-only.")
             WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
             workoutSession = nil
             workoutBuilder = nil
@@ -601,7 +601,7 @@ final class WatchSessionController: NSObject {
             }
             WakeLog.debug(.workout, "finishWorkout OK — Health save complete")
         } catch {
-            errorText = "Save workout: \(error.localizedDescription)"
+            errorText = String(localized: "Save workout: \(error.localizedDescription)")
             WakeLog.error(.workout, "finishWorkout: \(error.localizedDescription)")
         }
 
@@ -729,7 +729,7 @@ final class WatchSessionController: NSObject {
             refreshStoredByteSize()
             // Success path silent — every ~2s while recording would drown action logs.
         } catch {
-            errorText = "Flush: \(error.localizedDescription)"
+            errorText = String(localized: "Flush: \(error.localizedDescription)")
             WakeLog.error(
                 .store,
                 "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count): \(error.localizedDescription)"

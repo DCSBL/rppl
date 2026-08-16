@@ -11,9 +11,9 @@ enum DetectionSimulationMode: String, Sendable {
 
     var buttonTitle: String {
         switch self {
-        case .detected: return "Sim: Detected"
-        case .pause: return "Sim: Pause"
-        case .ride: return "Sim: Ride"
+        case .detected: return String(localized: "Sim: Detected")
+        case .pause: return String(localized: "Sim: Pause")
+        case .ride: return String(localized: "Sim: Ride")
         }
     }
 }

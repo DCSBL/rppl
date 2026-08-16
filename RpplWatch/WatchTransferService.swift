@@ -8,7 +8,7 @@ import Observation
 final class WatchTransferService: NSObject {
     static let shared = WatchTransferService()
 
-    var lastMessage = "WC idle"
+    var lastMessage = String(localized: "WC idle")
     var syncState: SyncConnectionState = .notActivated
     var pendingTransferCount = 0
 
@@ -24,7 +24,7 @@ final class WatchTransferService: NSObject {
 
     func activate() {
         guard WCSession.isSupported() else {
-            lastMessage = "WC unsupported"
+            lastMessage = String(localized: "WC unsupported")
             syncState = .unsupported
             WakeLog.error(.sync, "WC unsupported on Watch")
             return
@@ -66,13 +66,13 @@ final class WatchTransferService: NSObject {
         do {
             let pending = try store.sessionsNeedingTransfer()
             pendingTransferCount = pending.count
-            lastMessage = "Pending transfers: \(pending.count)"
+            lastMessage = String(localized: "Pending transfers: \(pending.count)")
             WakeLog.debug(.transfer, "transferPending count=\(pending.count)")
             for manifest in pending {
                 do {
                     try transfer(sessionId: manifest.sessionId, store: store)
                 } catch {
-                    lastMessage = "Transfer error: \(error.localizedDescription)"
+                    lastMessage = String(localized: "Transfer error: \(error.localizedDescription)")
                     WakeLog.error(
                         .transfer,
                         "transfer \(manifest.sessionId.prefix(8))…: \(error.localizedDescription)"
@@ -82,14 +82,14 @@ final class WatchTransferService: NSObject {
             }
             refreshPendingCount()
         } catch {
-            lastMessage = "Transfer list error: \(error.localizedDescription)"
+            lastMessage = String(localized: "Transfer list error: \(error.localizedDescription)")
             WakeLog.error(.transfer, "list error: \(error.localizedDescription)")
         }
     }
 
     private func transfer(sessionId: String, store: SessionFileStore) throws {
         guard WCSession.default.activationState == .activated else {
-            lastMessage = "WC not activated — will retry"
+            lastMessage = String(localized: "WC not activated — will retry")
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — WC not activated")
             refreshSyncState()
             return
@@ -100,7 +100,7 @@ final class WatchTransferService: NSObject {
         WCSession.default.transferFile(packageURL, metadata: [
             AppConstants.wcSessionFileMetaSessionID: sessionId
         ])
-        lastMessage = "Queued \(sessionId.prefix(8))…"
+        lastMessage = String(localized: "Queued \(sessionId.prefix(8))…")
         WakeLog.debug(.transfer, "queued file \(sessionId.prefix(8))…")
         refreshPendingCount()
     }
@@ -115,10 +115,10 @@ extension WatchTransferService: WCSessionDelegate {
         Task { @MainActor in
             refreshSyncState()
             if let error {
-                lastMessage = "WC activate error: \(error.localizedDescription)"
+                lastMessage = String(localized: "WC activate error: \(error.localizedDescription)")
                 WakeLog.error(.sync, "WC activate error: \(error.localizedDescription)")
             } else {
-                lastMessage = "WC activated"
+                lastMessage = String(localized: "WC activated")
                 WakeLog.debug(.sync, "WC activated state=\(activationState.rawValue)")
                 transferPending()
             }
@@ -129,11 +129,11 @@ extension WatchTransferService: WCSessionDelegate {
         Task { @MainActor in
             refreshSyncState()
             if session.isReachable {
-                lastMessage = "iPhone reachable"
+                lastMessage = String(localized: "iPhone reachable")
                 WakeLog.debug(.sync, "iPhone reachable")
                 transferPending()
             } else {
-                lastMessage = "iPhone not reachable — transfers will queue"
+                lastMessage = String(localized: "iPhone not reachable — transfers will queue")
                 WakeLog.debug(.sync, "iPhone not reachable — queue transfers")
             }
         }
@@ -180,11 +180,11 @@ extension WatchTransferService: WCSessionDelegate {
         let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         do {
             try store.markAcknowledged(sessionId: ack)
-            lastMessage = "Acked \(ack.prefix(8))"
+            lastMessage = String(localized: "Acked \(ack.prefix(8))")
             WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
             refreshPendingCount()
         } catch {
-            lastMessage = "Ack failed: \(error.localizedDescription)"
+            lastMessage = String(localized: "Ack failed: \(error.localizedDescription)")
             WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
         }
     }
@@ -197,7 +197,7 @@ extension WatchTransferService: WCSessionDelegate {
         Task { @MainActor in
             let sessionId = fileTransfer.file.metadata?[AppConstants.wcSessionFileMetaSessionID] as? String
             if let error {
-                lastMessage = "Transfer failed (kept on Watch): \(error.localizedDescription)"
+                lastMessage = String(localized: "Transfer failed (kept on Watch): \(error.localizedDescription)")
                 WakeLog.error(
                     .transfer,
                     "failed (kept) \(sessionId.map { String($0.prefix(8)) } ?? "?"): \(error.localizedDescription)"
@@ -208,7 +208,7 @@ extension WatchTransferService: WCSessionDelegate {
                     WakeLog.debug(.store, "re-queued readyToTransfer \(sessionId.prefix(8))…")
                 }
             } else {
-                lastMessage = "File delivered — awaiting phone ack"
+                lastMessage = String(localized: "File delivered — awaiting phone ack")
                 WakeLog.debug(
                     .transfer,
                     "delivered \(sessionId.map { String($0.prefix(8)) } ?? "?")… — awaiting ack"
