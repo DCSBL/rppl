@@ -45,6 +45,15 @@ public struct DetectionEngine: Sendable {
 
     /// Emit session-start `inactive` and reset state. Call once when recording begins.
     public mutating func makeSessionStartEvent(at timestamp: Date = Date()) -> DetectionEvent {
+        makeForcedInactiveEvent(at: timestamp, reason: "session_start", detectorId: "session_start")
+    }
+
+    /// Force `inactive` and reset holds/filter state (product pause/resume, etc.).
+    public mutating func makeForcedInactiveEvent(
+        at timestamp: Date = Date(),
+        reason: String,
+        detectorId: String
+    ) -> DetectionEvent {
         currentCode = DetectionCodes.inactive
         lastConfidentCode = DetectionCodes.inactive
         previousUsableSpeedMps = nil
@@ -55,8 +64,8 @@ public struct DetectionEngine: Sendable {
         return DetectionEvent(
             code: DetectionCodes.inactive,
             timestamp: timestamp,
-            reason: "session_start",
-            detectorId: "session_start"
+            reason: reason,
+            detectorId: detectorId
         )
     }
 

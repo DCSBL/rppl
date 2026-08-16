@@ -7,12 +7,49 @@ struct SessionRideUIPage: View {
 
     var body: some View {
         Group {
-            if session.lastConfidentCode == DetectionCodes.riding {
+            if session.isProductPaused {
+                pausedView
+            } else if session.lastConfidentCode == DetectionCodes.riding {
                 ridingView
             } else {
                 inactiveView
             }
         }
+    }
+
+    // MARK: - Product paused
+
+    private var pausedView: some View {
+        VStack(spacing: 8) {
+            Text("Paused")
+                .font(.headline.bold())
+                .foregroundStyle(.orange)
+
+            Text(SessionFormatters.elapsed(session.elapsed))
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+
+            Text("Session clock frozen")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            SessionMetricRow(
+                label: "Distance",
+                value: SessionFormatters.distance(session.totalDistanceM)
+            )
+            SessionMetricRow(
+                label: "Rides",
+                value: "\(session.rideCount)"
+            )
+
+            Text("Swipe for Resume")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 4)
     }
 
     // MARK: - Riding (no scroll — fitted for AWU)

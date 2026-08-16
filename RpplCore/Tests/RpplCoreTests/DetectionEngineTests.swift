@@ -52,6 +52,26 @@ struct DetectionEngineTests {
         #expect(engine.lastConfidentCode == DetectionCodes.inactive)
     }
 
+    @Test func forcedInactiveResetsRidingState() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        enterRiding(&engine)
+        #expect(engine.currentCode == DetectionCodes.riding)
+
+        let event = engine.makeForcedInactiveEvent(
+            at: t0.addingTimeInterval(10),
+            reason: "product_pause",
+            detectorId: "product_pause"
+        )
+        #expect(event.code == DetectionCodes.inactive)
+        #expect(event.detectorId == "product_pause")
+        #expect(event.reason == "product_pause")
+        #expect(engine.currentCode == DetectionCodes.inactive)
+        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
+        #expect(engine.process(tick(at: 10.5, speedKmh: 20)).isEmpty)
+        #expect(engine.currentCode == DetectionCodes.inactive)
+    }
+
     @Test func processReturnsEmptyWhenCodeUnchanged() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)

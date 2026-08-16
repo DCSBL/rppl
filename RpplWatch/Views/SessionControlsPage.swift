@@ -18,10 +18,22 @@ struct SessionControlsPage: View {
                 .tint(.red)
             }
 
-            Button("Pause") {}
+            if session.isProductPaused {
+                Button("Resume") {
+                    WakeLog.debug(.ui, "tap Resume session")
+                    session.resumeSession()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(session.isStopping)
+            } else {
+                Button("Pause") {
+                    WakeLog.debug(.ui, "tap Pause session")
+                    Task { await session.pauseSession() }
+                }
                 .buttonStyle(.bordered)
-                .disabled(true)
-                .foregroundStyle(.secondary)
+                .disabled(session.isStopping)
+            }
 
             Button("Water Lock") {
                 WakeLog.debug(.ui, "tap Water Lock")
