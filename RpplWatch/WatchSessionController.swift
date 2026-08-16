@@ -333,11 +333,25 @@ final class WatchSessionController: NSObject {
         switch mode {
         case .detected:
             WakeLog.debug(.ui, "sim detection=detected (live engine)")
+            WKInterfaceDevice.current().play(.click)
             processDetectionTick()
         case .inactive:
             forceSimulatedDetection(code: DetectionCodes.inactive)
+            playRideHaptic(for: DetectionCodes.paused)
         case .ride:
             forceSimulatedDetection(code: DetectionCodes.riding)
+            playRideHaptic(for: DetectionCodes.riding)
+        }
+    }
+
+    private func playRideHaptic(for code: String) {
+        switch code {
+        case DetectionCodes.riding:
+            WKInterfaceDevice.current().play(.success)
+        case DetectionCodes.paused:
+            WKInterfaceDevice.current().play(.failure)
+        default:
+            break
         }
     }
 
@@ -453,6 +467,10 @@ final class WatchSessionController: NSObject {
             lastPersistedConfidentCode = event.code
             syncWorkoutPauseResume(for: event.code)
             refreshSegmentDurations()
+            // Debug sim plays haptics in `applyDetectionSimulation` so every mode ticks.
+            if event.detectorId != "debug_sim" {
+                playRideHaptic(for: event.code)
+            }
         }
     }
 
