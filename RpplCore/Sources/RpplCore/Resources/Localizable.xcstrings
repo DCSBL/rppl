@@ -1,294 +1,296 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "Connected": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Connected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connected"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verbonden"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbonden"
           }
         }
       }
     },
-    "Inactive": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactive"
+    "Inactive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactive"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactief"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactief"
           }
         }
       }
     },
-    "Install / open Rppl on iPhone.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Install / open Rppl on iPhone."
+    "Install / open Rppl on iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install / open Rppl on iPhone."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Installeer / open Rppl op iPhone."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installeer / open Rppl op iPhone."
           }
         }
       }
     },
-    "Install Rppl on the Watch.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Install Rppl on the Watch."
+    "Install Rppl on the Watch." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Rppl on the Watch."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Installeer Rppl op de Watch."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installeer Rppl op de Watch."
           }
         }
       }
     },
-    "iPhone and Watch are connected — ready to sync.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone and Watch are connected — ready to sync."
+    "iPhone and Watch are connected — ready to sync." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone and Watch are connected — ready to sync."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone en Watch zijn verbonden — klaar om te synchroniseren."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone en Watch zijn verbonden — klaar om te synchroniseren."
           }
         }
       }
     },
-    "iPhone app missing": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone app missing"
+    "iPhone app missing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone app missing"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone-app ontbreekt"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-app ontbreekt"
           }
         }
       }
     },
-    "No Watch paired": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No Watch paired"
+    "No Watch paired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Watch paired"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen Watch gekoppeld"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen Watch gekoppeld"
           }
         }
       }
     },
-    "Not activated": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not activated"
+    "Not activated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not activated"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet geactiveerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet geactiveerd"
           }
         }
       }
     },
-    "Pair an Apple Watch to sync sessions.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pair an Apple Watch to sync sessions."
+    "Pair an Apple Watch to sync sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pair an Apple Watch to sync sessions."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Koppel een Apple Watch om sessies te synchroniseren."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppel een Apple Watch om sessies te synchroniseren."
           }
         }
       }
     },
-    "Paired and ready — files sync when the phone is nearby.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paired and ready — files sync when the phone is nearby."
+    "Paired and ready — files sync when the phone is nearby." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paired and ready — files sync when the phone is nearby."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gekoppeld en klaar — bestanden synchroniseren als de telefoon in de buurt is."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekoppeld en klaar — bestanden synchroniseren als de telefoon in de buurt is."
           }
         }
       }
     },
-    "Ready (queued)": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready (queued)"
+    "Ready (queued)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready (queued)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar (wachtrij)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klaar (wachtrij)"
           }
         }
       }
     },
-    "Riding": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riding"
+    "Riding" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rijden"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rijden"
           }
         }
       }
     },
-    "Session inactive — reopen the app.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session inactive — reopen the app."
+    "Session inactive — reopen the app." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session inactive — reopen the app."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sessie inactief — open de app opnieuw."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie inactief — open de app opnieuw."
           }
         }
       }
     },
-    "Unsupported": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unsupported"
+    "Unsupported" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsupported"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet ondersteund"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet ondersteund"
           }
         }
       }
     },
-    "Unsure": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unsure"
+    "Unsure" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsure"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onzeker"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onzeker"
           }
         }
       }
     },
-    "Waiting for WatchConnectivity to activate.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waiting for WatchConnectivity to activate."
+    "Waiting for WatchConnectivity to activate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for WatchConnectivity to activate."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wachten tot WatchConnectivity activeert."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wachten tot WatchConnectivity activeert."
           }
         }
       }
     },
-    "Watch app missing": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch app missing"
+    "Watch app missing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch app missing"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch-app ontbreekt"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch-app ontbreekt"
           }
         }
       }
     },
-    "WatchConnectivity is not available here.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WatchConnectivity is not available here."
+    "WatchConnectivity is not available here." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchConnectivity is not available here."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WatchConnectivity is hier niet beschikbaar."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchConnectivity is hier niet beschikbaar."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
