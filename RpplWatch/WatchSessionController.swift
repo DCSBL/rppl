@@ -337,7 +337,7 @@ final class WatchSessionController: NSObject {
             processDetectionTick()
         case .inactive:
             forceSimulatedDetection(code: DetectionCodes.inactive)
-            playRideHaptic(for: DetectionCodes.paused)
+            playRideHaptic(for: DetectionCodes.inactive)
         case .ride:
             forceSimulatedDetection(code: DetectionCodes.riding)
             playRideHaptic(for: DetectionCodes.riding)
@@ -348,7 +348,7 @@ final class WatchSessionController: NSObject {
         switch code {
         case DetectionCodes.riding:
             WKInterfaceDevice.current().play(.success)
-        case DetectionCodes.paused:
+        case DetectionCodes.inactive:
             WKInterfaceDevice.current().play(.failure)
         default:
             break
