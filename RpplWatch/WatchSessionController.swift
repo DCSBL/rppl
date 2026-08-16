@@ -974,6 +974,8 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
     ) {
         Task { @MainActor in
             guard isRunning, !isProductPaused else { return }
+            let now = Date()
+            var hr: Double?
             var energy: Double?
             var basal: Double?
 
