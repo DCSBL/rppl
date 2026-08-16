@@ -108,8 +108,17 @@ struct SessionDetailView: View {
                     }
                     ForEach(stats.rides) { ride in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Ride \(ride.index)")
-                                .font(.headline)
+                            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                Text("Ride \(ride.index)")
+                                    .font(.headline)
+                                if !ride.highlights.isEmpty {
+                                    Text("– \(LogbookFormatting.joinedRideHighlights(ride.highlights))")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.75)
+                                }
+                            }
                             Text(
                                 "\(DistanceFormat.meters(ride.distanceMeters)) · \(ride.lapCount) laps"
                             )

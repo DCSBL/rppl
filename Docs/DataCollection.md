@@ -30,7 +30,7 @@ Schema **v3**: detections replace labels/assumptions. Legacy `assumptions.jsonl`
 
 ## Derived stats (not a stream)
 
-Ride distance, duration, ride count, riding/paused ratio, and calories are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+Ride distance, duration, ride count, riding/paused ratio, calories, sustained/trimmed speeds, and record highlights are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
 
 ## HealthKit policy
 
