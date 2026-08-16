@@ -12,6 +12,8 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
+    /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
+    var isStopping = false
     var detectionCode = DetectionCodes.inactive
     var lastConfidentCode = DetectionCodes.inactive
     var elapsed: TimeInterval = 0
@@ -173,8 +175,8 @@ final class WatchSessionController: NSObject {
     }
 
     func startSession() async {
-        guard !isRunning else {
-            WakeLog.debug(.session, "startSession ignored — already running")
+        guard !isRunning, !isStopping else {
+            WakeLog.debug(.session, "startSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
         }
         WakeLog.debug(.session, "startSession begin")
@@ -267,13 +269,13 @@ final class WatchSessionController: NSObject {
     }
 
     func stopSession() async {
-        guard isRunning, let manifest, let store else {
-            WakeLog.debug(.session, "stopSession ignored — not running")
+        guard isRunning, !isStopping, let manifest, let store else {
+            WakeLog.debug(.session, "stopSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
+        isStopping = true
         statusText = String(localized: "Stopping…")
-        isRunning = false
         flushTask?.cancel()
         timerTask?.cancel()
 
@@ -309,6 +311,8 @@ final class WatchSessionController: NSObject {
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         self.manifest = nil
+        isRunning = false
+        isStopping = false
     }
 
     func enableWaterLock() {
@@ -376,8 +380,8 @@ final class WatchSessionController: NSObject {
 
     /// Start-workout Action Button entry: start session, or no-op if already recording.
     func handleStartWorkoutIntent() async {
-        if isRunning {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: already running — no-op")
+        if isRunning || isStopping {
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: busy running=\(isRunning) stopping=\(isStopping) — no-op")
             return
         }
         WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
