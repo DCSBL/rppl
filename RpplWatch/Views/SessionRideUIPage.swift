@@ -1,7 +1,7 @@
 import SwiftUI
 import RpplCore
 
-/// Product session UI: one-screen ride view; scrollable pause overview.
+/// Product session UI: one-screen ride view; scrollable inactive overview.
 struct SessionRideUIPage: View {
     @Bindable var session: WatchSessionController
 
@@ -10,7 +10,7 @@ struct SessionRideUIPage: View {
             if session.lastConfidentCode == DetectionCodes.riding {
                 ridingView
             } else {
-                pausedView
+                inactiveView
             }
         }
     }
@@ -82,12 +82,12 @@ struct SessionRideUIPage: View {
         .padding(.horizontal, 4)
     }
 
-    // MARK: - Paused (scrollable overview)
+    // MARK: - Inactive (scrollable overview)
 
-    private var pausedView: some View {
+    private var inactiveView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                statusLine(primary: "Paused", color: .gray)
+                statusLine(primary: "Inactive", color: .gray)
 
                 Text("Session")
                     .font(.caption.weight(.semibold))
@@ -107,8 +107,8 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
                 SessionMetricRow(
-                    label: "Paused for",
-                    value: SessionFormatters.segmentDuration(session.currentPauseDuration)
+                    label: "Inactive for",
+                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
                 )
 
                 if let hr = session.lastHeartRate {

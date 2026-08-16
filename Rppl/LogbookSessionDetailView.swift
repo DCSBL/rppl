@@ -112,13 +112,13 @@ struct LogbookSessionDetailView: View {
                     statTile("\(stats.rideCount)", label: "Rides")
                     statTile("\(stats.totalLapCount)", label: "Laps")
                     statTile(
-                        "\(Int((stats.ridingPausedRatio * 100).rounded()))% · "
+                        "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
                             + LogbookFormatting.duration(stats.ridingDuration),
                         label: "Riding"
                     )
                     statTile(
-                        LogbookFormatting.duration(stats.pausedDuration),
-                        label: "Paused"
+                        LogbookFormatting.duration(stats.inactiveDuration),
+                        label: "Inactive"
                     )
                     if let calories = stats.activeEnergyKilocalories {
                         statTile(

@@ -6,9 +6,16 @@ import Testing
 struct DetectionCodesTests {
     @Test func confidentCodes() {
         #expect(DetectionCodes.isConfident(DetectionCodes.riding))
-        #expect(DetectionCodes.isConfident(DetectionCodes.paused))
+        #expect(DetectionCodes.isConfident(DetectionCodes.inactive))
+        #expect(DetectionCodes.isConfident(DetectionCodes.legacyPaused))
         #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
         #expect(!DetectionCodes.isConfident("waiting"))
+    }
+
+    @Test func normalizeMapsLegacyPaused() {
+        #expect(DetectionCodes.inactive == "inactive")
+        #expect(DetectionCodes.normalize("paused") == DetectionCodes.inactive)
+        #expect(DetectionCodes.normalize(DetectionCodes.riding) == DetectionCodes.riding)
     }
 }
 
@@ -30,7 +37,7 @@ struct SessionFileStoreTests {
         try store.createSession(manifest: manifest)
 
         let event = DetectionEvent(
-            code: DetectionCodes.paused,
+            code: DetectionCodes.inactive,
             reason: "session_start",
             detectorId: "session_start",
             speedMps: nil,
@@ -44,7 +51,7 @@ struct SessionFileStoreTests {
 
         let detections = try store.readDetections(sessionId: manifest.sessionId)
         #expect(detections.count == 1)
-        #expect(detections[0].code == DetectionCodes.paused)
+        #expect(detections[0].code == DetectionCodes.inactive)
         #expect(detections[0].detectorId == "session_start")
     }
 
@@ -127,6 +134,44 @@ struct SessionFileStoreTests {
         #expect(detections[0].code == "riding")
         #expect(detections[0].id == "legacy-1")
         #expect(!FileManager.default.fileExists(atPath: assumptionsURL.path))
+    }
+
+    @Test func migratesPausedDetectionCodesToInactive() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("migrate-paused-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        var manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        manifest.schemaVersion = 3
+        try store.createSession(manifest: manifest)
+
+        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+            .appendingPathComponent("detections.jsonl")
+        let legacy =
+            #"{"code":"paused","detectorId":"session_start","id":"d1","reason":"session_start","timestamp":"2024-01-01T00:00:00Z"}"#
+            + "\n"
+            + #"{"code":"riding","detectorId":"ride_enter","id":"d2","reason":"enter","timestamp":"2024-01-01T00:01:00Z"}"#
+            + "\n"
+        try Data(legacy.utf8).write(to: detectionsURL)
+
+        let first = try store.readDetections(sessionId: manifest.sessionId)
+        #expect(first.map(\.code) == ["inactive", "riding"])
+        #expect(try store.readManifest(sessionId: manifest.sessionId).schemaVersion == SessionSchema.currentVersion)
+
+        let raw = try String(contentsOf: detectionsURL, encoding: .utf8)
+        #expect(raw.contains(#""code":"inactive""#))
+        #expect(!raw.contains(#""code":"paused""#))
+
+        let second = try store.readDetections(sessionId: manifest.sessionId)
+        #expect(second.map(\.code) == ["inactive", "riding"])
+        #expect(try store.migratePausedToInactiveIfNeeded(sessionId: manifest.sessionId) == false)
     }
 
     @Test func legacyTransferAssumptionsBecomeDetections() throws {
@@ -357,7 +402,7 @@ struct SessionFileStoreTests {
                 )
             )
             try store.appendDetection(
-                DetectionEvent(code: DetectionCodes.paused, reason: "t", detectorId: "t"),
+                DetectionEvent(code: DetectionCodes.inactive, reason: "t", detectorId: "t"),
                 sessionId: id
             )
             sizes.append(try store.sessionByteSize(sessionId: id))
@@ -392,7 +437,7 @@ struct SessionFileStoreTests {
         )
         try store.createSession(manifest: manifest)
         try store.appendDetection(
-            DetectionEvent(code: DetectionCodes.paused, reason: "t", detectorId: "t"),
+            DetectionEvent(code: DetectionCodes.inactive, reason: "t", detectorId: "t"),
             sessionId: manifest.sessionId
         )
         #expect(try store.listSessionIDs() == ["to-delete"])

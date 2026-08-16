@@ -4,7 +4,7 @@ Library UML (filter / holds / detectors): [../RpplCore/DESIGN.md](../RpplCore/DE
 
 ## Goal
 
-Detect **rides** and **pauses** from GPS speed in real time so testers need no Action Button labeling. Codes stay opaque strings (`riding`, `paused`, `unsure`).
+Detect **rides** and **pauses** from GPS speed in real time so testers need no Action Button labeling. Codes stay opaque strings (`riding`, `inactive`, `unsure`).
 
 ## Detection stream (live now)
 
@@ -12,10 +12,10 @@ Detect **rides** and **pauses** from GPS speed in real time so testers need no A
 |--------|--------|------|
 | Auto detections | `DetectionEngine` transitions + lookback | `detections.jsonl` |
 
-- Starts with `paused` + `reason=session_start`.
+- Starts with `inactive` + `reason=session_start`.
 - Writes **only on code change** / revision (no heartbeats).
 - Each `DetectionEvent` has `detectorId` + `reason` (speeds in **km/h**) and optional `supersedesId`.
-- Watch UI: last confident `riding`/`paused` primary; `unsure` sublabel when soft GPS.
+- Watch UI: last confident `riding`/`inactive` primary; `unsure` sublabel when soft GPS.
 - Phone: list detections; Share JSON includes `detections`.
 - Manual labels / Cycle Label removed.
 
@@ -25,12 +25,12 @@ Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`)
 
 | Constant | Value | Notes |
 |----------|-------|-------|
-| Ride enter | ≥15 km/h × 2.0 s | From `paused` |
+| Ride enter | ≥15 km/h × 2.0 s | From `inactive` |
 | Ride exit | ≤4 km/h × 3.0 s | Usable GPS only |
 | GPS gap → unsure | unusable × 3.0 s while riding | Not immediate pause |
 | Same-ride merge | unsure age &lt; 60 s | Lookback supersede if speed returns high |
-| Unsure timeout | ≥60 s | Force `paused` → next enter is new ride |
-| Water exit | `submerged` while riding/unsure | Ultra fall → `paused`; next enter = new ride |
+| Unsure timeout | ≥60 s | Force `inactive` → next enter is new ride |
+| Water exit | `submerged` while riding/unsure | Ultra fall → `inactive`; next enter = new ride |
 | GPS accuracy gate | >25 m skips speed | |
 | Implausible / jump | >45 km/h / ≥30 km/h jump | |
 

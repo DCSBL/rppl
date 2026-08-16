@@ -13,12 +13,13 @@ const PAD = { left: 48, right: 12, top: 18, bottom: 28 }
 
 const CODE_COLORS: Record<string, string> = {
   riding: '#22c55e',
-  paused: '#3b82f6',
+  inactive: '#3b82f6',
   unsure: '#9ca3af',
 }
 
 export function codeColor(code: string): string {
-  return CODE_COLORS[code] ?? '#a855f7'
+  const normalized = code === 'paused' ? 'inactive' : code
+  return CODE_COLORS[normalized] ?? '#a855f7'
 }
 
 function setupCanvas(canvas: HTMLCanvasElement): {
@@ -154,7 +155,7 @@ function codeAtTime(segs: Segment[], tMs: number): string {
     const s = segs[i]!
     if (tMs >= s.startMs && tMs < s.endMs) return s.code
   }
-  return 'paused'
+  return 'inactive'
 }
 
 /** Relative lon/lat track — colored by detection code; markers + playhead. */

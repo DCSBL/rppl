@@ -48,7 +48,7 @@ sequenceDiagram
   participant Engine as DetectionEngine
   participant Store as SessionFileStore
   WSC->>Engine: makeSessionStartEvent
-  Engine-->>WSC: DetectionEvent session_start paused
+  Engine-->>WSC: DetectionEvent session_start inactive
   WSC->>Store: appendDetection
   loop GPS updates
     WSC->>Engine: process DetectionTick
@@ -60,14 +60,14 @@ sequenceDiagram
 ```
 
 - **Detections:** `detections.jsonl` (transitions + `session_start` + lookback revisions; km/h `reason`).
-- Codes: `riding` / `paused` / `unsure`.
+- Codes: `riding` / `inactive` / `unsure`.
 - Manual labels removed.
 
 Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](Phase3.md).
 
 ## Hard constraints (unchanged)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → `finishWorkout()` → `session.end()`; mirror HR/energy into JSONL; pause/resume HK on ride/pause detection (day-session stays continuous).
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → `finishWorkout()` → `session.end()`; mirror HR/energy into JSONL; pause/resume HK on ride/inactive detection (day-session stays continuous).
 2. Never delete Watch session files until phone ack.
 3. One continuous session per park day; no pause.
 4. Detection codes stay opaque strings.

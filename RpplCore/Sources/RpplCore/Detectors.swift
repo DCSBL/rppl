@@ -36,12 +36,12 @@ public struct RideEnterDetector: Detector {
     public init() {}
 
     public func evaluate(_ ctx: DetectionEvalContext) -> DetectionSignal? {
-        guard ctx.currentCode == DetectionCodes.paused else { return nil }
+        guard ctx.currentCode == DetectionCodes.inactive else { return nil }
         guard ctx.speedUsable else { return nil }
         guard let held = ctx.held(.highSpeed), held >= ctx.thresholds.rideEnterHold else { return nil }
         let reason =
             "ride_enter speed=\(ctx.speedKmhText())>=\(ctx.fmt(ctx.thresholds.rideEnterSpeedKmh))"
-            + " for \(ctx.fmt(held))s from=paused"
+            + " for \(ctx.fmt(held))s from=inactive"
         return DetectionSignal(kind: .enterRide, detectorId: id, reason: reason)
     }
 }

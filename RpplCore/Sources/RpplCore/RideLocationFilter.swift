@@ -10,7 +10,7 @@ public enum RideLocationFilter {
         locations.filter { $0.timestamp >= start && $0.timestamp <= end }
     }
 
-    /// One track per ride. Paused/walking samples between rides are omitted,
+    /// One track per ride. Inactive/walking samples between rides are omitted,
     /// so a map can stroke rides without connecting the gaps.
     public static func tracks(
         from locations: [LocationSample],

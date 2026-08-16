@@ -12,8 +12,8 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
-    var detectionCode = DetectionCodes.paused
-    var lastConfidentCode = DetectionCodes.paused
+    var detectionCode = DetectionCodes.inactive
+    var lastConfidentCode = DetectionCodes.inactive
     var elapsed: TimeInterval = 0
     var locationCount = 0
     var motionCount = 0
@@ -28,7 +28,7 @@ final class WatchSessionController: NSObject {
     /// Ride-gated session distance (sum of ride meters). Not dock/pause walking.
     var totalDistanceM: Double { liveRideTracker.sessionRideMeters }
     var currentRideDuration: TimeInterval = 0
-    var currentPauseDuration: TimeInterval = 0
+    var currentInactiveDuration: TimeInterval = 0
     var filterRejectionReason: String?
     var statusText = String(localized: "Idle")
     var errorText: String?
@@ -44,7 +44,7 @@ final class WatchSessionController: NSObject {
     var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
     var currentRideLapCount: Int { liveRideTracker.currentRideLapCount }
     var lastRideLapCount: Int { liveRideTracker.lastRideLapCount }
-    /// Live meters while riding; frozen last-ride meters when paused (`0 m` before first ride).
+    /// Live meters while riding; frozen last-ride meters when inactive (`0 m` before first ride).
     var displayRideMeters: Double {
         liveRideTracker.isRideOngoing
             ? liveRideTracker.currentRideMeters
@@ -85,7 +85,7 @@ final class WatchSessionController: NSObject {
     private var timerTask: Task<Void, Never>?
     private var startedAt: Date?
     private var currentSegmentStartedAt: Date?
-    private var lastPersistedConfidentCode = DetectionCodes.paused
+    private var lastPersistedConfidentCode = DetectionCodes.inactive
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
 
@@ -223,15 +223,15 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
 
-        detectionCode = DetectionCodes.paused
-        lastConfidentCode = DetectionCodes.paused
-        lastPersistedConfidentCode = DetectionCodes.paused
+        detectionCode = DetectionCodes.inactive
+        lastConfidentCode = DetectionCodes.inactive
+        lastPersistedConfidentCode = DetectionCodes.inactive
         detectionSimulationMode = .detected
         detectionCount = 0
         locationCount = 0
         motionCount = 0
         currentRideDuration = 0
-        currentPauseDuration = 0
+        currentInactiveDuration = 0
         lastSpeedMps = nil
         lastHorizontalAccuracy = nil
         filterRejectionReason = nil
@@ -299,13 +299,13 @@ final class WatchSessionController: NSObject {
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
         currentRideDuration = 0
-        currentPauseDuration = 0
+        currentInactiveDuration = 0
         lastSpeedMps = nil
         lastHorizontalAccuracy = nil
         filterRejectionReason = nil
         detectionSimulationMode = .detected
         currentSegmentStartedAt = nil
-        lastPersistedConfidentCode = DetectionCodes.paused
+        lastPersistedConfidentCode = DetectionCodes.inactive
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         self.manifest = nil
@@ -316,13 +316,13 @@ final class WatchSessionController: NSObject {
         WakeLog.debug(.ui, "Water Lock enabled (manual)")
     }
 
-    /// Cycle debug simulation: detected → pause → ride → detected.
+    /// Cycle debug simulation: detected → inactive → ride → detected.
     func cycleDetectionSimulation() {
         guard isRunning else { return }
         let next: DetectionSimulationMode
         switch detectionSimulationMode {
-        case .detected: next = .pause
-        case .pause: next = .ride
+        case .detected: next = .inactive
+        case .inactive: next = .ride
         case .ride: next = .detected
         }
         applyDetectionSimulation(next)
@@ -335,8 +335,8 @@ final class WatchSessionController: NSObject {
             WakeLog.debug(.ui, "sim detection=detected (live engine)")
             WKInterfaceDevice.current().play(.click)
             processDetectionTick()
-        case .pause:
-            forceSimulatedDetection(code: DetectionCodes.paused)
+        case .inactive:
+            forceSimulatedDetection(code: DetectionCodes.inactive)
             playRideHaptic(for: DetectionCodes.paused)
         case .ride:
             forceSimulatedDetection(code: DetectionCodes.riding)
@@ -481,9 +481,9 @@ final class WatchSessionController: NSObject {
         case DetectionCodes.riding where session.state == .paused:
             session.resume()
             WakeLog.debug(.workout, "HK resume (riding)")
-        case DetectionCodes.paused where session.state == .running:
+        case DetectionCodes.inactive where session.state == .running:
             session.pause()
-            WakeLog.debug(.workout, "HK pause (paused)")
+            WakeLog.debug(.workout, "HK pause (inactive)")
         default:
             break
         }
@@ -492,19 +492,19 @@ final class WatchSessionController: NSObject {
     private func refreshSegmentDurations() {
         guard let segmentStart = currentSegmentStartedAt else {
             currentRideDuration = 0
-            currentPauseDuration = 0
+            currentInactiveDuration = 0
             return
         }
         let segmentElapsed = Date().timeIntervalSince(segmentStart)
         if lastConfidentCode == DetectionCodes.riding {
             currentRideDuration = segmentElapsed
-            currentPauseDuration = 0
-        } else if lastConfidentCode == DetectionCodes.paused {
-            currentPauseDuration = segmentElapsed
+            currentInactiveDuration = 0
+        } else if lastConfidentCode == DetectionCodes.inactive {
+            currentInactiveDuration = segmentElapsed
             currentRideDuration = 0
         } else {
             currentRideDuration = 0
-            currentPauseDuration = 0
+            currentInactiveDuration = 0
         }
     }
 

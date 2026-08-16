@@ -11,7 +11,7 @@ import { LapRideTracker, defaultLapThresholds } from './lapRideTracker'
 import { filterSpeedMps, mpsToKmh, thresholds } from './signalFilter'
 
 const RIDING = 'riding'
-const PAUSED = 'paused'
+const INACTIVE = 'inactive'
 const UNSURE = 'unsure'
 
 export interface AttributedPhase {
@@ -29,10 +29,15 @@ export function effectiveEvents(events: DetectionEvent[]): DetectionEvent[] {
     .sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
 }
 
-/** Unsure → paused for ride windows (mirrors SessionStatsBuilder.attributed). */
+/** Unsure → inactive for ride windows (mirrors SessionStatsBuilder.attributed). */
+function normalizeCode(code: string): string {
+  return code === 'paused' ? INACTIVE : code
+}
+
 function attributed(code: string): string {
-  if (code === UNSURE) return PAUSED
-  return code
+  const normalized = normalizeCode(code)
+  if (normalized === UNSURE) return INACTIVE
+  return normalized
 }
 
 export function buildAttributedPhases(
@@ -41,7 +46,7 @@ export function buildAttributedPhases(
   sessionEndMs: number,
 ): AttributedPhase[] {
   const phases: AttributedPhase[] = []
-  let currentCode = PAUSED
+  let currentCode = INACTIVE
   let intervalStart = sessionStartMs
 
   for (const event of effective) {
@@ -53,7 +58,7 @@ export function buildAttributedPhases(
         endMs: end,
       })
     }
-    currentCode = event.code
+    currentCode = normalizeCode(event.code)
     intervalStart = Math.max(toMs(event.timestamp), sessionStartMs)
   }
 
@@ -92,9 +97,9 @@ export function rideWindows(phases: AttributedPhase[]): { startMs: number; endMs
     .map((p) => ({ startMs: p.startMs, endMs: p.endMs }))
 }
 
-function hasPausedPhase(phases: AttributedPhase[], beforeMs: number): boolean {
+function hasInactivePhase(phases: AttributedPhase[], beforeMs: number): boolean {
   return phases.some(
-    (p) => p.attributedCode === PAUSED && p.startMs < beforeMs && p.endMs > p.startMs,
+    (p) => p.attributedCode === INACTIVE && p.startMs < beforeMs && p.endMs > p.startMs,
   )
 }
 
@@ -173,8 +178,8 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
   )
 
   const lapTracker = new LapRideTracker(defaultLapThresholds)
-  if (hasPausedPhase(phases, windows[0]?.startMs ?? sessionEndMs)) {
-    lapTracker.notePaused()
+  if (hasInactivePhase(phases, windows[0]?.startMs ?? sessionEndMs)) {
+    lapTracker.noteInactive()
   }
 
   const rides: RideSegment[] = []
@@ -213,7 +218,7 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
   }
 
   const ridingDurationMs = phaseDurationMs(phases, RIDING)
-  const pausedDurationMs = phaseDurationMs(phases, PAUSED)
+  const inactiveDurationMs = phaseDurationMs(phases, INACTIVE)
 
   return {
     phases: phases.map((p) => ({
@@ -225,7 +230,7 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
     totalLapCount: rides.reduce((sum, r) => sum + r.lapCount, 0),
     totalDistanceMeters,
     ridingDurationMs,
-    pausedDurationMs,
+    inactiveDurationMs,
     peakSpeedKmh: peakSpeedKmhInRides(sortedLocations, windows),
     averageSpeedKmh: averageSpeedKmh(totalDistanceMeters, ridingDurationMs),
   }
