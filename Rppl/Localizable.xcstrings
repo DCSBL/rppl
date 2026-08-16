@@ -513,6 +513,22 @@
         }
       }
     },
+    "Fastest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fastest"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snelste"
+          }
+        }
+      }
+    },
     "GPS points": {
       "localizations": {
         "en": {
@@ -833,6 +849,38 @@
         }
       }
     },
+    "Longest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste"
+          }
+        }
+      }
+    },
+    "Longest time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste tijd"
+          }
+        }
+      }
+    },
     "Manifest": {
       "localizations": {
         "en": {
@@ -893,6 +941,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaart toont %lld van %lld punten"
+          }
+        }
+      }
+    },
+    "Most laps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most laps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meeste rondes"
+          }
+        }
+      }
+    },
+    "Most water time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most water time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meeste watertijd"
           }
         }
       }

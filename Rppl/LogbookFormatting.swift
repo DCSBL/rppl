@@ -57,17 +57,17 @@ enum LogbookFormatting {
 
     static func rideHighlightLabel(_ highlight: RideHighlight) -> String {
         switch highlight {
-        case .longest: return "Longest"
-        case .longestTime: return "Longest time"
-        case .fastest: return "Fastest"
+        case .longest: return String(localized: "Longest")
+        case .longestTime: return String(localized: "Longest time")
+        case .fastest: return String(localized: "Fastest")
         }
     }
 
     static func sessionHighlightLabel(_ highlight: SessionHighlight) -> String {
         switch highlight {
-        case .longest: return "Longest"
-        case .mostWaterTime: return "Most water time"
-        case .mostLaps: return "Most laps"
+        case .longest: return String(localized: "Longest")
+        case .mostWaterTime: return String(localized: "Most water time")
+        case .mostLaps: return String(localized: "Most laps")
         }
     }
 
