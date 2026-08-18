@@ -644,6 +644,9 @@
         }
       }
     },
+    "HealthKit inject" : {
+
+    },
     "Import failed: %@" : {
       "localizations" : {
         "en" : {
@@ -708,6 +711,9 @@
         }
       }
     },
+    "Injecting…" : {
+
+    },
     "Internal testing only" : {
       "localizations" : {
         "en" : {
@@ -723,6 +729,9 @@
           }
         }
       }
+    },
+    "Intervals = detection rides (not cable loop laps). Compare styles in Fitness." : {
+
     },
     "iPhone" : {
       "extractionState" : "stale",

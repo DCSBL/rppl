@@ -39,9 +39,11 @@ Water temperature is a session metric (mean of persisted samples). Ultra sets `m
 
 ## HealthKit policy
 
-`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. Active energy is ride-scoped: the HK session pauses while detection is confidently `inactive` and resumes on `riding`.
+`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. The HK session **stays running** for the full park day. Detection `inactive` does **not** call `session.pause()` (heart rate stays continuous). Instead: **`beginNewActivity`** on each confident `riding` and `inactive` (same `waterSports` type). Fitness Intervals show numbered rows (kcal / time / HR) with **no rest labels**. Disable active-energy + paddle-distance collection while docked. Heart rate and basal energy keep collecting. Do **not** emit `motionPaused` for detection rest (purple duration).
 
-**Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, pauses HK, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
+**Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, **pauses the HK session**, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
+
+**Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **loop laps** (`LapRideTracker`). Loop laps stay in-app / export only. Never emit `HKWorkoutEvent.lap` unless Fitness shows a lap count we can fill. Rest/transition **word labels** are not possible on `waterSports`.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
