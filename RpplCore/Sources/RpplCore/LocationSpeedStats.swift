@@ -84,9 +84,19 @@ public enum LocationSpeedStats {
         return sessionBest
     }
 
-    public static func averageSpeedKmh(distanceMeters: Double, duration: TimeInterval) -> Double? {
+    /// Ride meters / riding duration in m/s. HealthKit `HKMetadataKeyAverageSpeed` and speed samples.
+    public static func averageSpeedMetersPerSecond(
+        distanceMeters: Double,
+        duration: TimeInterval
+    ) -> Double? {
         guard duration > 0, distanceMeters > 0 else { return nil }
-        let mps = distanceMeters / duration
+        return distanceMeters / duration
+    }
+
+    public static func averageSpeedKmh(distanceMeters: Double, duration: TimeInterval) -> Double? {
+        guard let mps = averageSpeedMetersPerSecond(distanceMeters: distanceMeters, duration: duration) else {
+            return nil
+        }
         return SpeedUnits.kilometersPerHour(fromMetersPerSecond: mps)
     }
 
