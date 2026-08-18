@@ -67,7 +67,10 @@ final class WatchSessionController: NSObject {
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
     private var workoutDataSource: HKLiveWorkoutDataSource?
+    private var workoutConfiguration: HKWorkoutConfiguration?
     private var workoutRouteBuilder: HKWorkoutRouteBuilder?
+    /// True while an HK ride activity is open (ended on detection `inactive`).
+    private var hkRideActivityOpen = false
     private var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     private var hkRideDistanceMeters = 0.0
     private var hkRideDistanceAnchorMeters = 0.0
@@ -312,6 +315,7 @@ final class WatchSessionController: NSObject {
         lastPersistedConfidentCode = DetectionCodes.inactive
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRideActivityOpen = false
         pausedAccumulated = 0
         productPausedAt = nil
         isProductPaused = false
@@ -364,7 +368,7 @@ final class WatchSessionController: NSObject {
             session.resume()
             WakeLog.debug(.workout, "HK resume (product)")
         }
-        syncWorkoutForDetection(code: lastPersistedConfidentCode, emitMotionEvents: false)
+        syncWorkoutForDetection(code: lastPersistedConfidentCode)
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
@@ -534,30 +538,39 @@ final class WatchSessionController: NSObject {
         }
     }
 
-    /// Keep HK session running; gate ride metrics and emit motion events on detection rest.
-    private func syncWorkoutForDetection(
-        code: String,
-        at date: Date = Date(),
-        emitMotionEvents: Bool = true
-    ) {
+    /// Keep HK session running. Ride activities only (Fitness interval rows). Dock wait is a gap, not a rest activity.
+    private func syncWorkoutForDetection(code: String, at date: Date = Date()) {
         guard !isProductPaused else { return }
         guard workoutSession != nil else { return }
         switch code {
         case DetectionCodes.riding:
             setRideMetricsCollection(enabled: true)
-            if emitMotionEvents {
-                Task { await addWorkoutEvent(type: .motionResumed, at: date) }
-            }
-            WakeLog.debug(.workout, "HK riding metrics on")
+            beginRideActivity(at: date)
+            WakeLog.debug(.workout, "HK riding activity")
         case DetectionCodes.inactive:
+            endRideActivity(at: date)
             setRideMetricsCollection(enabled: false)
-            if emitMotionEvents {
-                Task { await addWorkoutEvent(type: .motionPaused, at: date) }
-            }
-            WakeLog.debug(.workout, "HK riding metrics off (inactive)")
+            WakeLog.debug(.workout, "HK ride activity ended (inactive)")
         default:
             break
         }
+    }
+
+    private func beginRideActivity(at date: Date) {
+        guard let session = workoutSession, let config = workoutConfiguration else { return }
+        guard !hkRideActivityOpen else { return }
+        session.beginNewActivity(
+            configuration: config,
+            date: date,
+            metadata: ["nl.dcsbl.rppl.detectionCode": DetectionCodes.riding]
+        )
+        hkRideActivityOpen = true
+    }
+
+    private func endRideActivity(at date: Date) {
+        guard let session = workoutSession, hkRideActivityOpen else { return }
+        session.endCurrentActivity(on: date)
+        hkRideActivityOpen = false
     }
 
     private func setRideMetricsCollection(enabled: Bool) {
@@ -568,33 +581,6 @@ final class WatchSessionController: NSObject {
         } else {
             dataSource.disableCollection(for: activeEnergyType)
             dataSource.disableCollection(for: distanceType)
-        }
-    }
-
-    private func addWorkoutEvent(type: HKWorkoutEventType, at date: Date) async {
-        guard let builder = workoutBuilder else { return }
-        let event = HKWorkoutEvent(
-            type: type,
-            dateInterval: DateInterval(start: date, duration: 0),
-            metadata: nil
-        )
-        do {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                builder.addWorkoutEvents([event]) { success, error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                    } else if success {
-                        continuation.resume()
-                    } else {
-                        continuation.resume(
-                            throwing: SessionStoreError.ioFailure("Failed to add workout event")
-                        )
-                    }
-                }
-            }
-            WakeLog.debug(.workout, "HK event \(type.rawValue)")
-        } catch {
-            WakeLog.error(.workout, "addWorkoutEvent: \(error.localizedDescription)")
         }
     }
 
@@ -682,7 +668,9 @@ final class WatchSessionController: NSObject {
             workoutSession = nil
             workoutBuilder = nil
             workoutDataSource = nil
+            workoutConfiguration = nil
             workoutRouteBuilder = nil
+            hkRideActivityOpen = false
             return false
         }
     }
@@ -716,9 +704,11 @@ final class WatchSessionController: NSObject {
 
         workoutSession = session
         workoutBuilder = builder
+        workoutConfiguration = config
         workoutRouteBuilder = HKWorkoutRouteBuilder(healthStore: healthStore, device: .local())
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRideActivityOpen = false
 
         session.startActivity(with: Date())
         try await builder.beginCollection(at: Date())
@@ -733,6 +723,7 @@ final class WatchSessionController: NSObject {
         accumulateRideDistanceForHealthKit()
 
         let requestEnd = Date()
+        endRideActivity(at: requestEnd)
         let stoppedDate: Date
         if session.state == .stopped {
             stoppedDate = requestEnd
@@ -744,6 +735,7 @@ final class WatchSessionController: NSObject {
         }
 
         do {
+            try await builder.addMetadata(["nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount])
             try await builder.endCollection(at: stoppedDate)
             if hkRideDistanceMeters > 0, let start = startedAt {
                 let quantity = HKQuantity(unit: .meter(), doubleValue: hkRideDistanceMeters)
@@ -785,8 +777,10 @@ final class WatchSessionController: NSObject {
         workoutSession = nil
         workoutBuilder = nil
         workoutDataSource = nil
+        workoutConfiguration = nil
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
+        hkRideActivityOpen = false
     }
 
     private func insertRouteLocations(_ locations: [CLLocation]) async {

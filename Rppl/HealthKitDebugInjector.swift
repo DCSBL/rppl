@@ -39,7 +39,8 @@ enum HealthKitDebugInjector {
         case samplesOnly
     }
 
-    struct RoundWindow: Sendable {
+    /// HK activity window — detection **ride** or dock-wait segment. Not cable loop laps.
+    struct RideIntervalWindow: Sendable {
         var start: Date
         var end: Date
         var code: String
@@ -59,7 +60,7 @@ enum HealthKitDebugInjector {
         )
         let sessionStart = package.manifest.startedAt
         let sessionEnd = package.manifest.endedAt ?? stats.endedAt
-        let rounds = windows(style: style, rides: stats.rides, sessionEnd: sessionEnd)
+        let intervals = rideIntervals(style: style, rides: stats.rides, sessionEnd: sessionEnd)
 
         let config = HKWorkoutConfiguration()
         config.activityType = .waterSports
@@ -80,6 +81,7 @@ enum HealthKitDebugInjector {
             "nl.dcsbl.rppl.injectStyle": style.rawValue,
             "nl.dcsbl.rppl.sourceSessionId": package.manifest.sessionId,
             "nl.dcsbl.rppl.activityName": "Cable Park (\(style.rawValue))",
+            "nl.dcsbl.rppl.rideCount": stats.rideCount,
         ]
         if stats.ridingDuration > 0, stats.totalDistanceMeters > 0 {
             let speedMps = stats.totalDistanceMeters / stats.ridingDuration
@@ -90,9 +92,9 @@ enum HealthKitDebugInjector {
         try await addHeartRateSamples(from: package.health, builder: builder)
         try await addEnergySamples(from: package.health, builder: builder)
         try await addRideDistanceSamples(rides: stats.rides, builder: builder)
-        try await addRoundEncodings(
+        try await addRideIntervalEncodings(
             style: style,
-            rounds: rounds,
+            intervals: intervals,
             rides: stats.rides,
             config: config,
             builder: builder
@@ -103,7 +105,7 @@ enum HealthKitDebugInjector {
         try await saveRoute(locations: package.locations, workout: workout, healthStore: healthStore)
 
         let durationMin = Int(sessionEnd.timeIntervalSince(sessionStart) / 60)
-        return "Saved \(style.rawValue) · \(rounds.count) intervals · \(stats.rideCount) rides · \(durationMin) min"
+        return "Saved \(style.rawValue) · \(intervals.count) HK intervals · \(stats.rideCount) rides · \(durationMin) min"
     }
 
     private static func loadFixture() throws -> SessionTransferPackage {
@@ -120,29 +122,33 @@ enum HealthKitDebugInjector {
         }
     }
 
-    private static func windows(
+    private static func rideIntervals(
         style: Style,
         rides: [RideSegmentStats],
         sessionEnd: Date
-    ) -> [RoundWindow] {
+    ) -> [RideIntervalWindow] {
         switch style {
         case .samplesOnly:
             return []
         case .rideOnly:
-            return rides.map { RoundWindow(start: $0.startedAt, end: $0.endedAt, code: DetectionCodes.riding) }
+            return rides.map {
+                RideIntervalWindow(start: $0.startedAt, end: $0.endedAt, code: DetectionCodes.riding)
+            }
         case .ridePlusRest:
             return rides.enumerated().map { index, ride in
                 let end = index + 1 < rides.count ? rides[index + 1].startedAt : sessionEnd
-                return RoundWindow(start: ride.startedAt, end: end, code: DetectionCodes.riding)
+                return RideIntervalWindow(start: ride.startedAt, end: end, code: DetectionCodes.riding)
             }
         case .workRest:
-            var result: [RoundWindow] = []
+            var result: [RideIntervalWindow] = []
             for (index, ride) in rides.enumerated() {
-                result.append(RoundWindow(start: ride.startedAt, end: ride.endedAt, code: DetectionCodes.riding))
+                result.append(
+                    RideIntervalWindow(start: ride.startedAt, end: ride.endedAt, code: DetectionCodes.riding)
+                )
                 let restEnd = index + 1 < rides.count ? rides[index + 1].startedAt : sessionEnd
                 if restEnd > ride.endedAt {
                     result.append(
-                        RoundWindow(start: ride.endedAt, end: restEnd, code: DetectionCodes.inactive)
+                        RideIntervalWindow(start: ride.endedAt, end: restEnd, code: DetectionCodes.inactive)
                     )
                 }
             }
@@ -301,20 +307,21 @@ enum HealthKitDebugInjector {
         try await addSamples(samples, builder: builder)
     }
 
-    private static func addRoundEncodings(
+    /// HKWorkoutActivity intervals for detection rides/rest — never cable loop laps (`.lap` events).
+    private static func addRideIntervalEncodings(
         style: Style,
-        rounds: [RoundWindow],
+        intervals: [RideIntervalWindow],
         rides: [RideSegmentStats],
         config: HKWorkoutConfiguration,
         builder: HKWorkoutBuilder
     ) async throws {
         guard style != .samplesOnly else { return }
-        for round in rounds {
+        for interval in intervals {
             let activity = HKWorkoutActivity(
                 workoutConfiguration: config,
-                start: round.start,
-                end: round.end,
-                metadata: ["nl.dcsbl.rppl.detectionCode": round.code]
+                start: interval.start,
+                end: interval.end,
+                metadata: ["nl.dcsbl.rppl.detectionCode": interval.code]
             )
             try await addWorkoutActivity(activity, builder: builder)
         }

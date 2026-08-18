@@ -644,7 +644,7 @@
         }
       }
     },
-    "HealthKit" : {
+    "HealthKit inject" : {
 
     },
     "Import failed: %@" : {
@@ -711,10 +711,7 @@
         }
       }
     },
-    "Inject workout from fixture" : {
-
-    },
-    "Injecting fixture…" : {
+    "Injecting…" : {
 
     },
     "Internal testing only" : {
@@ -732,6 +729,9 @@
           }
         }
       }
+    },
+    "Intervals = detection rides (not cable loop laps). Compare styles in Fitness." : {
+
     },
     "iPhone" : {
       "extractionState" : "stale",
