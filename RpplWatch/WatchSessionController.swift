@@ -66,6 +66,7 @@ final class WatchSessionController: NSObject {
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
+    private var workoutDataSource: HKLiveWorkoutDataSource?
     private var workoutRouteBuilder: HKWorkoutRouteBuilder?
     private var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     private var hkRideDistanceMeters = 0.0
@@ -359,7 +360,11 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
         startBackgroundLoops()
-        syncWorkoutPauseResume(for: lastPersistedConfidentCode)
+        if let session = workoutSession, session.state == .paused {
+            session.resume()
+            WakeLog.debug(.workout, "HK resume (product)")
+        }
+        syncWorkoutForDetection(code: lastPersistedConfidentCode, emitMotionEvents: false)
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
@@ -520,7 +525,7 @@ final class WatchSessionController: NSObject {
             }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
-            syncWorkoutPauseResume(for: event.code)
+            syncWorkoutForDetection(code: event.code, at: event.timestamp)
             refreshSegmentDurations()
             // Debug sim plays haptics in `applyDetectionSimulation` so every mode ticks.
             if event.detectorId != "debug_sim" {
@@ -529,19 +534,67 @@ final class WatchSessionController: NSObject {
         }
     }
 
-    /// Pause HK while docked so active energy only accrues during rides.
-    private func syncWorkoutPauseResume(for code: String) {
+    /// Keep HK session running; gate ride metrics and emit motion events on detection rest.
+    private func syncWorkoutForDetection(
+        code: String,
+        at date: Date = Date(),
+        emitMotionEvents: Bool = true
+    ) {
         guard !isProductPaused else { return }
-        guard let session = workoutSession else { return }
+        guard workoutSession != nil else { return }
         switch code {
-        case DetectionCodes.riding where session.state == .paused:
-            session.resume()
-            WakeLog.debug(.workout, "HK resume (riding)")
-        case DetectionCodes.inactive where session.state == .running:
-            session.pause()
-            WakeLog.debug(.workout, "HK pause (inactive)")
+        case DetectionCodes.riding:
+            setRideMetricsCollection(enabled: true)
+            if emitMotionEvents {
+                Task { await addWorkoutEvent(type: .motionResumed, at: date) }
+            }
+            WakeLog.debug(.workout, "HK riding metrics on")
+        case DetectionCodes.inactive:
+            setRideMetricsCollection(enabled: false)
+            if emitMotionEvents {
+                Task { await addWorkoutEvent(type: .motionPaused, at: date) }
+            }
+            WakeLog.debug(.workout, "HK riding metrics off (inactive)")
         default:
             break
+        }
+    }
+
+    private func setRideMetricsCollection(enabled: Bool) {
+        guard let dataSource = workoutDataSource else { return }
+        if enabled {
+            dataSource.enableCollection(for: activeEnergyType, predicate: nil)
+            dataSource.enableCollection(for: distanceType, predicate: nil)
+        } else {
+            dataSource.disableCollection(for: activeEnergyType)
+            dataSource.disableCollection(for: distanceType)
+        }
+    }
+
+    private func addWorkoutEvent(type: HKWorkoutEventType, at date: Date) async {
+        guard let builder = workoutBuilder else { return }
+        let event = HKWorkoutEvent(
+            type: type,
+            dateInterval: DateInterval(start: date, duration: 0),
+            metadata: nil
+        )
+        do {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                builder.addWorkoutEvents([event]) { success, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else if success {
+                        continuation.resume()
+                    } else {
+                        continuation.resume(
+                            throwing: SessionStoreError.ioFailure("Failed to add workout event")
+                        )
+                    }
+                }
+            }
+            WakeLog.debug(.workout, "HK event \(type.rawValue)")
+        } catch {
+            WakeLog.error(.workout, "addWorkoutEvent: \(error.localizedDescription)")
         }
     }
 
@@ -628,6 +681,7 @@ final class WatchSessionController: NSObject {
             WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
             workoutSession = nil
             workoutBuilder = nil
+            workoutDataSource = nil
             workoutRouteBuilder = nil
             return false
         }
@@ -641,8 +695,12 @@ final class WatchSessionController: NSObject {
         let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
         let builder = session.associatedWorkoutBuilder()
         let dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: config)
+        dataSource.enableCollection(for: heartRateType, predicate: nil)
+        dataSource.enableCollection(for: basalEnergyType, predicate: nil)
+        dataSource.enableCollection(for: activeEnergyType, predicate: nil)
         dataSource.enableCollection(for: distanceType, predicate: nil)
         builder.dataSource = dataSource
+        workoutDataSource = dataSource
         session.delegate = self
         builder.delegate = self
 
@@ -664,9 +722,9 @@ final class WatchSessionController: NSObject {
 
         session.startActivity(with: Date())
         try await builder.beginCollection(at: Date())
-        // Dock wait: do not burn active energy until first riding detection.
-        session.pause()
-        WakeLog.debug(.workout, "HK paused until first ride")
+        // Session starts inactive: keep HR/basal streaming; ride-scoped metrics off until riding.
+        setRideMetricsCollection(enabled: false)
+        WakeLog.debug(.workout, "HK collection began (inactive — ride metrics gated)")
     }
 
     private func finishAndSaveWorkout() async {
@@ -726,6 +784,7 @@ final class WatchSessionController: NSObject {
         session.end()
         workoutSession = nil
         workoutBuilder = nil
+        workoutDataSource = nil
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
     }
