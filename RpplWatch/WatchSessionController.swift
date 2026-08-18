@@ -78,6 +78,17 @@ final class WatchSessionController: NSObject {
     private var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     private var hkRideDistanceMeters = 0.0
     private var hkRideDistanceAnchorMeters = 0.0
+    /// Ride windows for HealthKit paddle distance/speed samples (Fitness interval tiles).
+    private var hkRides: [HKRideMetric] = []
+    private var hkRideStartedAt: Date?
+
+    private struct HKRideMetric {
+        var startedAt: Date
+        var endedAt: Date
+        var meters: Double
+        var duration: TimeInterval
+    }
+
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
     private let activityManager = CMMotionActivityManager()
@@ -115,6 +126,7 @@ final class WatchSessionController: NSObject {
     private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
     private let basalEnergyType = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!
     private let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
+    private let paddleSpeedType = HKObjectType.quantityType(forIdentifier: .paddleSportsSpeed)!
     private let waterTemperatureType = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
     private let workoutRouteType = HKSeriesType.workoutRoute()
 
@@ -126,13 +138,14 @@ final class WatchSessionController: NSObject {
             basalEnergyType,
             heartRateType,
             distanceType,
+            paddleSpeedType,
             waterTemperatureType,
             workoutRouteType
         ]
     }
 
     private var typesToRead: Set<HKObjectType> {
-        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, waterTemperatureType]
+        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, paddleSpeedType, waterTemperatureType]
     }
 
     override init() {
@@ -338,6 +351,8 @@ final class WatchSessionController: NSObject {
         resetWaterTemperatureTracking()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRides = []
+        hkRideStartedAt = nil
         hkRideActivityOpen = false
         pausedAccumulated = 0
         productPausedAt = nil
@@ -548,7 +563,11 @@ final class WatchSessionController: NSObject {
         if event.code != lastPersistedConfidentCode {
             if lastPersistedConfidentCode == DetectionCodes.riding {
                 accumulateRideDistanceForHealthKit()
+                recordFinishedHkRide(endedAt: event.timestamp)
                 hkRideDistanceAnchorMeters = 0
+            }
+            if event.code == DetectionCodes.riding {
+                hkRideStartedAt = event.timestamp
             }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
@@ -599,10 +618,8 @@ final class WatchSessionController: NSObject {
         guard let dataSource = workoutDataSource else { return }
         if enabled {
             dataSource.enableCollection(for: activeEnergyType, predicate: nil)
-            dataSource.enableCollection(for: distanceType, predicate: nil)
         } else {
             dataSource.disableCollection(for: activeEnergyType)
-            dataSource.disableCollection(for: distanceType)
         }
     }
 
@@ -699,7 +716,8 @@ final class WatchSessionController: NSObject {
 
     private func startWorkout() async throws {
         let config = HKWorkoutConfiguration()
-        config.activityType = .waterSports
+        // Fitness summary distance/speed tiles exist for paddleSports, not waterSports (DCS-44).
+        config.activityType = .paddleSports
         config.locationType = .outdoor
 
         let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
@@ -708,7 +726,8 @@ final class WatchSessionController: NSObject {
         dataSource.enableCollection(for: heartRateType, predicate: nil)
         dataSource.enableCollection(for: basalEnergyType, predicate: nil)
         dataSource.enableCollection(for: activeEnergyType, predicate: nil)
-        dataSource.enableCollection(for: distanceType, predicate: nil)
+        // Paddle sports auto-collects GPS distance. Ride-gated samples at save are the Fitness meters.
+        dataSource.disableCollection(for: distanceType)
         builder.dataSource = dataSource
         workoutDataSource = dataSource
         session.delegate = self
@@ -730,6 +749,8 @@ final class WatchSessionController: NSObject {
         workoutRouteBuilder = HKWorkoutRouteBuilder(healthStore: healthStore, device: .local())
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRides = []
+        hkRideStartedAt = nil
         hkRideActivityOpen = false
 
         session.startActivity(with: Date())
@@ -745,6 +766,7 @@ final class WatchSessionController: NSObject {
         accumulateRideDistanceForHealthKit()
 
         let requestEnd = Date()
+        recordFinishedHkRide(endedAt: requestEnd)
         endRideActivity(at: requestEnd)
         let stoppedDate: Date
         if session.state == .stopped {
@@ -757,18 +779,24 @@ final class WatchSessionController: NSObject {
         }
 
         do {
-            try await builder.addMetadata(["nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount])
-            try await builder.endCollection(at: stoppedDate)
-            if hkRideDistanceMeters > 0, let start = startedAt {
-                let quantity = HKQuantity(unit: .meter(), doubleValue: hkRideDistanceMeters)
-                let sample = HKQuantitySample(
-                    type: distanceType,
-                    quantity: quantity,
-                    start: start,
-                    end: stoppedDate
+            var closingMetadata: [String: Any] = [
+                "nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount
+            ]
+            if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+                distanceMeters: hkRideDistanceMeters,
+                duration: liveRideTracker.sessionRidingDuration
+            ) {
+                closingMetadata[HKMetadataKeyAverageSpeed] = HKQuantity(
+                    unit: .meter().unitDivided(by: .second()),
+                    doubleValue: speedMps
                 )
-                try await addSamples([sample], to: builder)
-                WakeLog.debug(.workout, "added ride distance \(Int(hkRideDistanceMeters)) m")
+            }
+            try await builder.addMetadata(closingMetadata)
+            try await builder.endCollection(at: stoppedDate)
+            do {
+                try await addRideDistanceAndSpeedSamples(to: builder)
+            } catch {
+                WakeLog.error(.workout, "ride distance/speed samples: \(error.localizedDescription)")
             }
             do {
                 try await addWaterTemperatureSamples(to: builder)
@@ -798,6 +826,54 @@ final class WatchSessionController: NSObject {
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
         hkRideActivityOpen = false
+    }
+
+    private func recordFinishedHkRide(endedAt: Date) {
+        guard let start = hkRideStartedAt else { return }
+        let meters = liveRideTracker.lastRideMeters
+        let duration = liveRideTracker.lastRideDuration > 0
+            ? liveRideTracker.lastRideDuration
+            : max(0, endedAt.timeIntervalSince(start))
+        if meters > 0 {
+            hkRides.append(
+                HKRideMetric(startedAt: start, endedAt: endedAt, meters: meters, duration: duration)
+            )
+        }
+        hkRideStartedAt = nil
+    }
+
+    private func addRideDistanceAndSpeedSamples(to builder: HKLiveWorkoutBuilder) async throws {
+        var samples: [HKSample] = []
+        for ride in hkRides where ride.meters > 0 {
+            samples.append(
+                HKQuantitySample(
+                    type: distanceType,
+                    quantity: HKQuantity(unit: .meter(), doubleValue: ride.meters),
+                    start: ride.startedAt,
+                    end: ride.endedAt
+                )
+            )
+            if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+                distanceMeters: ride.meters,
+                duration: ride.duration
+            ) {
+                samples.append(
+                    HKQuantitySample(
+                        type: paddleSpeedType,
+                        quantity: HKQuantity(
+                            unit: .meter().unitDivided(by: .second()),
+                            doubleValue: speedMps
+                        ),
+                        start: ride.startedAt,
+                        end: ride.endedAt
+                    )
+                )
+            }
+        }
+        try await addSamples(samples, to: builder)
+        if !samples.isEmpty {
+            WakeLog.debug(.workout, "added \(hkRides.count) ride distance/speed HK windows")
+        }
     }
 
     private func addWaterTemperatureSamples(to builder: HKLiveWorkoutBuilder) async throws {

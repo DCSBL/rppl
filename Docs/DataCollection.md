@@ -39,15 +39,25 @@ Water temperature is a session metric (mean of persisted samples). Ultra sets `m
 
 ## HealthKit policy
 
-`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. The HK session **stays running** for the full park day. Detection `inactive` does **not** call `session.pause()` (heart rate stays continuous). Instead: **`beginNewActivity`** on each confident `riding` and `inactive` (same `waterSports` type). Fitness Intervals show numbered rows (kcal / time / HR) with **no rest labels**. Disable active-energy + paddle-distance collection while docked. Heart rate and basal energy keep collecting. Do **not** emit `motionPaused` for detection rest (purple duration).
+`HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. The HK session **stays running** for the full park day. Detection `inactive` does **not** call `session.pause()` (heart rate stays continuous). Instead: **`beginNewActivity`** on each confident `riding` and `inactive` (same `paddleSports` type). Fitness Intervals show numbered rows (kcal / time / HR) with **no rest labels**. Disable active-energy collection while docked. Do **not** live-collect paddle GPS distance (system would count dock walking); write ride-gated `distancePaddleSports` + `paddleSportsSpeed` samples at save, one window per ride. Heart rate and basal energy keep collecting. Do **not** emit `motionPaused` for detection rest (purple duration).
+
+**Fitness summary distance / average speed (DCS-44):** Fitness tiles follow the **activity-type template**, not whichever samples exist. Device check: `waterSports` + paddle, walking+running, or swimming distance → **no** summary distance/speed. `paddleSports` → summary distance + average speed, and distance per interval. Production Watch therefore saves `HKWorkoutActivityType.paddleSports` (Fitness label **Paddle Sports**, not Water Sports). Wakeboarding is semantically `waterSports`; that type has no Fitness distance template. At `finishWorkout()` Watch writes:
+
+- Per-ride `HKQuantityTypeIdentifier.distancePaddleSports` (ride-gated meters, aligned to ride activities)
+- Per-ride `HKQuantityTypeIdentifier.paddleSportsSpeed` (m/s = that ride’s meters / duration)
+- Session `HKMetadataKeyAverageSpeed` (ride meters / riding duration)
+
+Do **not** dual-write walking+running or swimming distance (pollutes those Health charts; Fitness still ignored them on water-sports). Debug inject keeps the blank water-sports encodings for regression. JSONL remains the source for in-app stats.
+
+**Activity-type tradeoff:** Fitness/Health list the workout as Paddle Sports. Calorie estimate uses the paddle-sports model (never below brisk-walk while moving — ride-gated active energy still off at the dock). Sessions group with kayak/SUP, not Water Sports. If Apple later adds a water-sports distance template, switch back. App Review rarely rejects a nearby workout subtype; typical HealthKit rejects are missing purpose strings / “not a fitness app.” Do not claim the Health type is wakeboarding in App Store copy. Rest/transition **word labels** are still not possible.
 
 **Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, **pauses the HK session**, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
 
-**Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **loop laps** (`LapRideTracker`). Loop laps stay in-app / export only. Never emit `HKWorkoutEvent.lap` unless Fitness shows a lap count we can fill. Rest/transition **word labels** are not possible on `waterSports`.
+**Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **loop laps** (`LapRideTracker`). Loop laps stay in-app / export only. Never emit `HKWorkoutEvent.lap` unless Fitness shows a lap count we can fill. Rest/transition **word labels** are not possible on `paddleSports`.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
-Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not `.waterSports` — Rppl does not change activity type. JSONL remains the source for in-app stats.
+Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not paddle sports — Rppl does not switch activity type for temperature. JSONL remains the source for in-app stats.
 
 ## Action Button (Ultra)
 
