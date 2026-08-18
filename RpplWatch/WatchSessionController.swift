@@ -58,6 +58,10 @@ final class WatchSessionController: NSObject {
     var lastRideDuration: TimeInterval { liveRideTracker.lastRideDuration }
     var didCompleteRide: Bool { liveRideTracker.didCompleteRide }
     var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
+    /// Ultra water-temp hardware present. Drives hide vs `- C` on inactive overview.
+    var waterTemperatureAvailable = false
+    /// Running mean of persisted submerged samples this session.
+    var averageWaterTemperatureCelsius: Double?
 
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     private(set) var detectionSimulationMode: DetectionSimulationMode = .detected
@@ -66,7 +70,11 @@ final class WatchSessionController: NSObject {
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
+    private var workoutDataSource: HKLiveWorkoutDataSource?
+    private var workoutConfiguration: HKWorkoutConfiguration?
     private var workoutRouteBuilder: HKWorkoutRouteBuilder?
+    /// True while an HK ride activity is open (ended on detection `inactive`).
+    private var hkRideActivityOpen = false
     private var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     private var hkRideDistanceMeters = 0.0
     private var hkRideDistanceAnchorMeters = 0.0
@@ -80,7 +88,12 @@ final class WatchSessionController: NSObject {
     private var latestLocation: CLLocation?
     private var latestActivity: String?
     private var latestWaterState: String?
-    private var latestWaterTempC: Double?
+    private var waterBuffer: [WaterTemperatureSample] = []
+    private var lastPersistedWaterTempAt: Date?
+    private var lastLoggedWaterTempC: Double?
+    private var waterTempNeedsBoutSample = false
+    private var waterTempSum = 0.0
+    private var waterTempCount = 0
     private var detectionEngine = DetectionEngine()
     private var locationBuffer: [LocationSample] = []
     private var motionBuffer: [MotionSample] = []
@@ -95,21 +108,31 @@ final class WatchSessionController: NSObject {
     private var lastPersistedConfidentCode = DetectionCodes.inactive
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
+    private var sessionWaterSamples: [WaterTemperatureSample] = []
 
     private let workoutType = HKObjectType.workoutType()
     private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
     private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
     private let basalEnergyType = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!
     private let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
+    private let waterTemperatureType = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
     private let workoutRouteType = HKSeriesType.workoutRoute()
 
     /// Write access required to start HKWorkoutSession and save the workout/route.
     private var typesToShare: Set<HKSampleType> {
-        [workoutType, activeEnergyType, basalEnergyType, heartRateType, distanceType, workoutRouteType]
+        [
+            workoutType,
+            activeEnergyType,
+            basalEnergyType,
+            heartRateType,
+            distanceType,
+            waterTemperatureType,
+            workoutRouteType
+        ]
     }
 
     private var typesToRead: Set<HKObjectType> {
-        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType]
+        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, waterTemperatureType]
     }
 
     override init() {
@@ -123,6 +146,7 @@ final class WatchSessionController: NSObject {
             let manager = CMWaterSubmersionManager()
             manager.delegate = self
             waterManager = manager
+            waterTemperatureAvailable = true
         }
     }
 
@@ -201,7 +225,8 @@ final class WatchSessionController: NSObject {
             appVersion: info.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
             buildNumber: info.infoDictionary?["CFBundleVersion"] as? String ?? "1",
             watchModel: WatchSessionController.deviceModel(),
-            systemVersion: WKInterfaceDevice.current().systemVersion
+            systemVersion: WKInterfaceDevice.current().systemVersion,
+            waterTemperatureAvailable: waterTemperatureAvailable
         )
         self.manifest = manifest
         WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")
@@ -244,6 +269,7 @@ final class WatchSessionController: NSObject {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        resetWaterTemperatureTracking()
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil
@@ -309,8 +335,10 @@ final class WatchSessionController: NSObject {
         detectionSimulationMode = .detected
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
+        resetWaterTemperatureTracking()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRideActivityOpen = false
         pausedAccumulated = 0
         productPausedAt = nil
         isProductPaused = false
@@ -359,7 +387,11 @@ final class WatchSessionController: NSObject {
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
         startBackgroundLoops()
-        syncWorkoutPauseResume(for: lastPersistedConfidentCode)
+        if let session = workoutSession, session.state == .paused {
+            session.resume()
+            WakeLog.debug(.workout, "HK resume (product)")
+        }
+        syncWorkoutForDetection(code: lastPersistedConfidentCode)
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
@@ -520,7 +552,7 @@ final class WatchSessionController: NSObject {
             }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
-            syncWorkoutPauseResume(for: event.code)
+            syncWorkoutForDetection(code: event.code, at: event.timestamp)
             refreshSegmentDurations()
             // Debug sim plays haptics in `applyDetectionSimulation` so every mode ticks.
             if event.detectorId != "debug_sim" {
@@ -529,19 +561,48 @@ final class WatchSessionController: NSObject {
         }
     }
 
-    /// Pause HK while docked so active energy only accrues during rides.
-    private func syncWorkoutPauseResume(for code: String) {
+    /// Keep HK session running. Fitness intervals = ride then dock-wait activities (no rest labels).
+    private func syncWorkoutForDetection(code: String, at date: Date = Date()) {
         guard !isProductPaused else { return }
-        guard let session = workoutSession else { return }
+        guard workoutSession != nil else { return }
         switch code {
-        case DetectionCodes.riding where session.state == .paused:
-            session.resume()
-            WakeLog.debug(.workout, "HK resume (riding)")
-        case DetectionCodes.inactive where session.state == .running:
-            session.pause()
-            WakeLog.debug(.workout, "HK pause (inactive)")
+        case DetectionCodes.riding:
+            setRideMetricsCollection(enabled: true)
+            beginDetectionActivity(code: code, at: date)
+            WakeLog.debug(.workout, "HK riding activity")
+        case DetectionCodes.inactive:
+            beginDetectionActivity(code: code, at: date)
+            setRideMetricsCollection(enabled: false)
+            WakeLog.debug(.workout, "HK inactive activity")
         default:
             break
+        }
+    }
+
+    private func beginDetectionActivity(code: String, at date: Date) {
+        guard let session = workoutSession, let config = workoutConfiguration else { return }
+        session.beginNewActivity(
+            configuration: config,
+            date: date,
+            metadata: ["nl.dcsbl.rppl.detectionCode": code]
+        )
+        hkRideActivityOpen = true
+    }
+
+    private func endRideActivity(at date: Date) {
+        guard let session = workoutSession, hkRideActivityOpen else { return }
+        session.endCurrentActivity(on: date)
+        hkRideActivityOpen = false
+    }
+
+    private func setRideMetricsCollection(enabled: Bool) {
+        guard let dataSource = workoutDataSource else { return }
+        if enabled {
+            dataSource.enableCollection(for: activeEnergyType, predicate: nil)
+            dataSource.enableCollection(for: distanceType, predicate: nil)
+        } else {
+            dataSource.disableCollection(for: activeEnergyType)
+            dataSource.disableCollection(for: distanceType)
         }
     }
 
@@ -628,7 +689,10 @@ final class WatchSessionController: NSObject {
             WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
             workoutSession = nil
             workoutBuilder = nil
+            workoutDataSource = nil
+            workoutConfiguration = nil
             workoutRouteBuilder = nil
+            hkRideActivityOpen = false
             return false
         }
     }
@@ -641,8 +705,12 @@ final class WatchSessionController: NSObject {
         let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
         let builder = session.associatedWorkoutBuilder()
         let dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: config)
+        dataSource.enableCollection(for: heartRateType, predicate: nil)
+        dataSource.enableCollection(for: basalEnergyType, predicate: nil)
+        dataSource.enableCollection(for: activeEnergyType, predicate: nil)
         dataSource.enableCollection(for: distanceType, predicate: nil)
         builder.dataSource = dataSource
+        workoutDataSource = dataSource
         session.delegate = self
         builder.delegate = self
 
@@ -658,15 +726,17 @@ final class WatchSessionController: NSObject {
 
         workoutSession = session
         workoutBuilder = builder
+        workoutConfiguration = config
         workoutRouteBuilder = HKWorkoutRouteBuilder(healthStore: healthStore, device: .local())
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
+        hkRideActivityOpen = false
 
         session.startActivity(with: Date())
         try await builder.beginCollection(at: Date())
-        // Dock wait: do not burn active energy until first riding detection.
-        session.pause()
-        WakeLog.debug(.workout, "HK paused until first ride")
+        // Session starts inactive: keep HR/basal streaming; ride-scoped metrics off until riding.
+        setRideMetricsCollection(enabled: false)
+        WakeLog.debug(.workout, "HK collection began (inactive — ride metrics gated)")
     }
 
     private func finishAndSaveWorkout() async {
@@ -675,6 +745,7 @@ final class WatchSessionController: NSObject {
         accumulateRideDistanceForHealthKit()
 
         let requestEnd = Date()
+        endRideActivity(at: requestEnd)
         let stoppedDate: Date
         if session.state == .stopped {
             stoppedDate = requestEnd
@@ -686,6 +757,7 @@ final class WatchSessionController: NSObject {
         }
 
         do {
+            try await builder.addMetadata(["nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount])
             try await builder.endCollection(at: stoppedDate)
             if hkRideDistanceMeters > 0, let start = startedAt {
                 let quantity = HKQuantity(unit: .meter(), doubleValue: hkRideDistanceMeters)
@@ -695,18 +767,13 @@ final class WatchSessionController: NSObject {
                     start: start,
                     end: stoppedDate
                 )
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                    builder.add([sample]) { success, error in
-                        if let error {
-                            continuation.resume(throwing: error)
-                        } else if success {
-                            continuation.resume()
-                        } else {
-                            continuation.resume(throwing: SessionStoreError.ioFailure("Failed to add distance sample"))
-                        }
-                    }
-                }
+                try await addSamples([sample], to: builder)
                 WakeLog.debug(.workout, "added ride distance \(Int(hkRideDistanceMeters)) m")
+            }
+            do {
+                try await addWaterTemperatureSamples(to: builder)
+            } catch {
+                WakeLog.error(.workout, "waterTemperature samples: \(error.localizedDescription)")
             }
             let workout = try await builder.finishWorkout()
             if let workout, let routeBuilder = workoutRouteBuilder {
@@ -726,8 +793,40 @@ final class WatchSessionController: NSObject {
         session.end()
         workoutSession = nil
         workoutBuilder = nil
+        workoutDataSource = nil
+        workoutConfiguration = nil
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
+        hkRideActivityOpen = false
+    }
+
+    private func addWaterTemperatureSamples(to builder: HKLiveWorkoutBuilder) async throws {
+        guard !sessionWaterSamples.isEmpty else { return }
+        let samples = sessionWaterSamples.map { sample in
+            HKQuantitySample(
+                type: waterTemperatureType,
+                quantity: HKQuantity(unit: .degreeCelsius(), doubleValue: sample.celsius),
+                start: sample.timestamp,
+                end: sample.timestamp
+            )
+        }
+        try await addSamples(samples, to: builder)
+        WakeLog.debug(.workout, "added \(samples.count) waterTemperature samples")
+    }
+
+    private func addSamples(_ samples: [HKSample], to builder: HKLiveWorkoutBuilder) async throws {
+        guard !samples.isEmpty else { return }
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            builder.add(samples) { success, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: SessionStoreError.ioFailure("Failed to add workout samples"))
+                }
+            }
+        }
     }
 
     private func insertRouteLocations(_ locations: [CLLocation]) async {
@@ -828,11 +927,13 @@ final class WatchSessionController: NSObject {
         let locations = locationBuffer
         let motions = motionBuffer
         let health = healthBuffer
+        let water = waterBuffer
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
+        waterBuffer.removeAll(keepingCapacity: true)
 
-        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty else { return }
+        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty else { return }
 
         do {
             if !locations.isEmpty {
@@ -844,14 +945,65 @@ final class WatchSessionController: NSObject {
             if !health.isEmpty {
                 try store.appendHealthSamples(health, sessionId: manifest.sessionId)
             }
+            if !water.isEmpty {
+                try store.appendWaterTemperatureSamples(water, sessionId: manifest.sessionId)
+            }
             refreshStoredByteSize()
             // Success path silent — every ~2s while recording would drown action logs.
         } catch {
             errorText = String(localized: "Flush: \(error.localizedDescription)")
             WakeLog.error(
                 .store,
-                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count): \(error.localizedDescription)"
+                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
+                    + "water=\(water.count): \(error.localizedDescription)"
             )
+        }
+    }
+
+    private func resetWaterTemperatureTracking() {
+        waterBuffer.removeAll(keepingCapacity: true)
+        sessionWaterSamples.removeAll(keepingCapacity: true)
+        lastPersistedWaterTempAt = nil
+        lastLoggedWaterTempC = nil
+        waterTempNeedsBoutSample = latestWaterState == "submerged"
+        waterTempSum = 0
+        waterTempCount = 0
+        averageWaterTemperatureCelsius = nil
+    }
+
+    private func applyWaterSubmersionState(_ next: String) {
+        if latestWaterState != next {
+            if next == "submerged" {
+                waterTempNeedsBoutSample = true
+            }
+            latestWaterState = next
+            WakeLog.debug(.water, "submersion → \(next)")
+            processDetectionTick()
+        }
+    }
+
+    private func considerPersistingWaterTemperature(_ temp: Double) {
+        guard isRunning, !isProductPaused, latestWaterState == "submerged" else { return }
+        let now = Date()
+        let intervalElapsed = lastPersistedWaterTempAt.map {
+            now.timeIntervalSince($0) >= Self.waterTempPersistInterval
+        } ?? true
+        guard waterTempNeedsBoutSample || intervalElapsed else { return }
+
+        let isBoutStart = waterTempNeedsBoutSample
+        let sample = WaterTemperatureSample(timestamp: now, celsius: temp)
+        waterBuffer.append(sample)
+        sessionWaterSamples.append(sample)
+        lastPersistedWaterTempAt = now
+        waterTempNeedsBoutSample = false
+        waterTempSum += temp
+        waterTempCount += 1
+        averageWaterTemperatureCelsius = waterTempSum / Double(waterTempCount)
+
+        let jumped = lastLoggedWaterTempC.map { abs($0 - temp) >= Self.waterTempLogDeltaC } ?? true
+        if isBoutStart || jumped {
+            lastLoggedWaterTempC = temp
+            WakeLog.debug(.water, String(format: "waterTemp %.1f C n=%d", temp, waterTempCount))
         }
     }
 
@@ -885,6 +1037,9 @@ final class WatchSessionController: NSObject {
         sysctlbyname("hw.machine", &machine, &size, nil, 0)
         return String(cString: machine)
     }
+
+    private static let waterTempPersistInterval: TimeInterval = 15
+    private static let waterTempLogDeltaC = 2.0
 }
 
 extension WatchSessionController: CLLocationManagerDelegate {
@@ -1025,9 +1180,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             @unknown default: next = "other"
             }
             if latestWaterState != next {
-                latestWaterState = next
-                WakeLog.debug(.water, "submersion → \(next)")
-                processDetectionTick()
+                applyWaterSubmersionState(next)
             }
         }
     }
@@ -1043,9 +1196,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
                 if meters > 0 { next = "submerged" }
             }
             if latestWaterState != next {
-                latestWaterState = next
-                WakeLog.debug(.water, "measurement → \(next)")
-                processDetectionTick()
+                applyWaterSubmersionState(next)
             }
         }
     }
@@ -1056,11 +1207,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
     ) {
         Task { @MainActor in
             let temp = measurement.temperature.converted(to: UnitTemperature.celsius).value
-            let previous = latestWaterTempC
-            latestWaterTempC = temp
-            if previous == nil || abs((previous ?? 0) - temp) >= 0.5 {
-                WakeLog.debug(.water, String(format: "waterTemp %.1f°C", temp))
-            }
+            considerPersistingWaterTemperature(temp)
         }
     }
 

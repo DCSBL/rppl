@@ -218,7 +218,7 @@ Offline experiments: `DetectionEngine.replay(ticks:)` or `replay(locations:)`.
 
 ## Quick myths
 
-- **“Session pause”** — product day-session is continuous. `inactive` means *not riding*, not “workout paused” in the Start/Stop sense. (HealthKit energy is ride-scoped separately.)
+- **“Session pause”** — product day-session is continuous. `inactive` means *not riding*, not “workout paused” in the Start/Stop sense. HealthKit keeps the session running; ride-scoped active energy/distance use motion events + collection gating, not `session.pause()`. Product Pause still pauses HK.
 - **“Unsure means swimming”** — no. Unsure means GPS soft. Swimming after Ultra fall is usually already `inactive` via `water_exit`.
 - **“Average speed should equal cable speed”** — avg = ride distance / ride duration. Bad GPS distance or late ride-end still skews it; that is why end detection and step filters matter.
 

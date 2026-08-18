@@ -15,6 +15,7 @@ classDiagram
   class LocationSample
   class MotionSample
   class HealthMetricSample
+  class WaterTemperatureSample
   class SessionTransferPackage
   class SessionFileStore
   class DetectionCodes
@@ -32,6 +33,7 @@ classDiagram
   SessionFileStore --> LocationSample
   SessionFileStore --> MotionSample
   SessionFileStore --> HealthMetricSample
+  SessionFileStore --> WaterTemperatureSample
   SessionFileStore --> SessionTransferPackage : build/import
 
   SessionTransferPackage --> SessionManifest
@@ -39,6 +41,7 @@ classDiagram
   SessionTransferPackage --> LocationSample
   SessionTransferPackage --> MotionSample
   SessionTransferPackage --> HealthMetricSample
+  SessionTransferPackage --> WaterTemperatureSample
 
   DetectionEngine --> GpsSignalFilter : filter tick
   DetectionEngine --> DetectionHoldClock : sustained holds
@@ -55,17 +58,17 @@ classDiagram
 
 | Area | Types | Role |
 |------|--------|------|
-| Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package |
+| Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package (`water-000.jsonl` optional) |
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
-| Units | `SpeedUnits`, `DetectionThresholds` | Thresholds authored in **km/h**; GPS compare in m/s |
-| Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Recomputed from detections + GPS + health; not persisted |
+| Units | `SpeedUnits`, `DetectionThresholds`, `TemperatureFormat` | Thresholds authored in **km/h**; GPS compare in m/s |
+| Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Recomputed from detections + GPS + health + water; not persisted |
 
 Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown codes must round-trip.
 
 ## Session stats (derived)
 
-`SessionStatsBuilder.build(manifest:detections:locations:health:)` resolves superseded detection lines, treats `unsure` as inactive for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable) and `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails). `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostLaps`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters on Watch during recording (meters only while confidently `riding`).
+`SessionStatsBuilder.build(manifest:detections:locations:health:water:)` resolves superseded detection lines, treats `unsure` as inactive for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Water temperature is the mean of all persisted `WaterTemperatureSample`s; `SessionStats.waterTemperatureAvailable` copies `manifest.waterTemperatureAvailable` (missing/false → hide the tile; true with no samples → `- C`). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable) and `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails). `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostLaps`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters on Watch during recording (meters only while confidently `riding`).
 
 ### Laps (crossing-based)
 

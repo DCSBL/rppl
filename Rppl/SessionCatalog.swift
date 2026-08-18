@@ -108,11 +108,13 @@ final class SessionCatalog {
             let detections = try store.readDetections(sessionId: manifest.sessionId)
             let locations = try store.readLocationSamples(sessionId: manifest.sessionId)
             let health = try store.readHealthSamples(sessionId: manifest.sessionId)
+            let water = try store.readWaterTemperatureSamples(sessionId: manifest.sessionId)
             let stats = SessionStatsBuilder.build(
                 manifest: manifest,
                 detections: detections,
                 locations: locations,
-                health: health
+                health: health,
+                water: water
             )
             let topSpeedKmh = stats.topSpeedKmh
                 ?? SessionLocationHelpers.sustainedSpeedKmh(

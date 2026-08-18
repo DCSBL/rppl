@@ -7,6 +7,7 @@ public enum SessionStatsBuilder {
         detections: [DetectionEvent],
         locations: [LocationSample],
         health: [HealthMetricSample],
+        water: [WaterTemperatureSample] = [],
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
         lapThresholds: LapThresholds = .default
     ) -> SessionStats {
@@ -99,6 +100,10 @@ public enum SessionStatsBuilder {
         }()
 
         let highlightedRides = HighlightAssigner.assignRideHighlights(rides)
+        let waterAverage: Double? = {
+            guard !water.isEmpty else { return nil }
+            return water.map(\.celsius).reduce(0, +) / Double(water.count)
+        }()
 
         return SessionStats(
             startedAt: sessionStart,
@@ -111,7 +116,9 @@ public enum SessionStatsBuilder {
             ridingDuration: ridingDuration,
             inactiveDuration: inactiveDuration,
             ridingInactiveRatio: ratio,
-            rides: highlightedRides
+            rides: highlightedRides,
+            averageWaterTemperatureCelsius: waterAverage,
+            waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false
         )
     }
 
