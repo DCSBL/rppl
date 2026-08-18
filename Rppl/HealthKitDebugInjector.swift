@@ -41,13 +41,13 @@ enum HealthKitDebugInjector {
 
     /// Distance / speed samples Fitness may plot on the workout summary (DCS-44).
     enum SummaryEncoding: String, Sendable {
-        /// Production: `waterSports` + paddle distance + paddle speed + average-speed metadata.
+        /// Fitness hides summary tiles for waterSports (confirmed DCS-44).
         case waterSportsPaddle
-        /// `waterSports` + walking+running distance (test generic totalDistance).
+        /// `waterSports` + walking+running distance (Fitness still blank).
         case waterSportsWalkingRunning
-        /// `waterSports` + swimming distance.
+        /// `waterSports` + swimming distance (Fitness still blank).
         case waterSportsSwimming
-        /// Same paddle samples, `paddleSports` activity (Fitness template check).
+        /// Production: paddle distance/speed on `paddleSports` (Fitness summary + interval distance).
         case paddleSportsActivity
 
         var activityType: HKWorkoutActivityType {
@@ -90,7 +90,7 @@ enum HealthKitDebugInjector {
     static func inject(
         healthStore: HKHealthStore,
         style: Style,
-        summary: SummaryEncoding = .waterSportsPaddle
+        summary: SummaryEncoding = .paddleSportsActivity
     ) async throws -> String {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw InjectError.healthUnavailable

@@ -49,13 +49,13 @@ struct DebugView: View {
             }
 
             Section("HealthKit inject") {
-                Text("Ride / rest intervals stay numbered. Extra buttons try Fitness summary distance/speed encodings (DCS-44). Re-request permissions if inject fails.")
+                Text("Paddle Sports = production (Fitness distance + speed). Water-sports encodings stay blank in Activity. Re-request permissions if inject fails.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                injectButton("Ride / rest + paddle distance", style: .workRest, summary: .waterSportsPaddle)
+                injectButton("Paddle Sports (production)", style: .workRest, summary: .paddleSportsActivity)
+                injectButton("Water Sports + paddle distance", style: .workRest, summary: .waterSportsPaddle)
                 injectButton("Walking+running distance", style: .workRest, summary: .waterSportsWalkingRunning)
                 injectButton("Swimming distance", style: .workRest, summary: .waterSportsSwimming)
-                injectButton("Paddle Sports activity type", style: .workRest, summary: .paddleSportsActivity)
                 if isInjectingHealthKit {
                     HStack(spacing: 8) {
                         ProgressView()
