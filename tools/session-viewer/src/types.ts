@@ -41,6 +41,16 @@ export interface AnalysisPackage {
   locations: LocationSample[]
 }
 
+/** Phone Share / WC transfer JSON. Extra keys on samples are kept as-is. */
+export interface SessionTransferPackage {
+  manifest: SessionManifest
+  detections: DetectionEvent[]
+  locations: LocationSample[]
+  motion?: unknown[]
+  motionFramesZlib?: string
+  health: unknown[]
+}
+
 export interface Segment {
   id: string
   code: string
