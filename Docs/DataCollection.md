@@ -41,13 +41,21 @@ Water temperature is a session metric (mean of persisted samples). Ultra sets `m
 
 `HKWorkoutSession` + builder run for sensors/runtime and **save to Health** on stop (`finishWorkout()`). Starting a session requires **share** authorization for Workouts. The HK session **stays running** for the full park day. Detection `inactive` does **not** call `session.pause()` (heart rate stays continuous). Instead: **`beginNewActivity`** on each confident `riding` and `inactive` (same `waterSports` type). Fitness Intervals show numbered rows (kcal / time / HR) with **no rest labels**. Disable active-energy + paddle-distance collection while docked. Heart rate and basal energy keep collecting. Do **not** emit `motionPaused` for detection rest (purple duration).
 
+**Fitness summary distance / average speed (DCS-44):** Fitness tiles are activity-type templates. Cycling shows ride distance + average speed from `distanceCycling` / `cyclingSpeed`. Rppl stays on `HKWorkoutActivityType.waterSports` (wakeboarding / water skiing). At `finishWorkout()` Watch writes:
+
+- `HKQuantityTypeIdentifier.distancePaddleSports` (ride-gated meters; already shipped)
+- `HKQuantityTypeIdentifier.paddleSportsSpeed` (discrete m/s = ride meters / riding duration)
+- `HKMetadataKeyAverageSpeed` (same m/s; Apple documents this for skiing segments — may or may not surface on water-sports)
+
+Paddle distance may still be hidden on a water-sports summary even when samples exist. Do **not** dual-write walking+running or swimming distance on the live Watch path (pollutes those Health charts). Debug inject can A/B: paddle (production), walking+running, swimming, or `paddleSports` activity type. Confirm on device which encoding Fitness plots. JSONL remains the source for in-app stats.
+
 **Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, **pauses the HK session**, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
 
 **Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **loop laps** (`LapRideTracker`). Loop laps stay in-app / export only. Never emit `HKWorkoutEvent.lap` unless Fitness shows a lap count we can fill. Rest/transition **word labels** are not possible on `waterSports`.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
-Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not `.waterSports` — Rppl does not change activity type. JSONL remains the source for in-app stats.
+Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not `.waterSports` — Rppl does not change activity type for temperature. JSONL remains the source for in-app stats.
 
 ## Action Button (Ultra)
 

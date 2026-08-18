@@ -39,6 +39,47 @@ enum HealthKitDebugInjector {
         case samplesOnly
     }
 
+    /// Distance / speed samples Fitness may plot on the workout summary (DCS-44).
+    enum SummaryEncoding: String, Sendable {
+        /// Production: `waterSports` + paddle distance + paddle speed + average-speed metadata.
+        case waterSportsPaddle
+        /// `waterSports` + walking+running distance (test generic totalDistance).
+        case waterSportsWalkingRunning
+        /// `waterSports` + swimming distance.
+        case waterSportsSwimming
+        /// Same paddle samples, `paddleSports` activity (Fitness template check).
+        case paddleSportsActivity
+
+        var activityType: HKWorkoutActivityType {
+            switch self {
+            case .paddleSportsActivity:
+                return .paddleSports
+            case .waterSportsPaddle, .waterSportsWalkingRunning, .waterSportsSwimming:
+                return .waterSports
+            }
+        }
+
+        var distanceIdentifier: HKQuantityTypeIdentifier {
+            switch self {
+            case .waterSportsPaddle, .paddleSportsActivity:
+                return .distancePaddleSports
+            case .waterSportsWalkingRunning:
+                return .distanceWalkingRunning
+            case .waterSportsSwimming:
+                return .distanceSwimming
+            }
+        }
+
+        var writesPaddleSpeed: Bool {
+            switch self {
+            case .waterSportsPaddle, .paddleSportsActivity:
+                return true
+            case .waterSportsWalkingRunning, .waterSportsSwimming:
+                return false
+            }
+        }
+    }
+
     /// HK activity window — detection **ride** or dock-wait segment. Not cable loop laps.
     struct RideIntervalWindow: Sendable {
         var start: Date
@@ -46,10 +87,16 @@ enum HealthKitDebugInjector {
         var code: String
     }
 
-    static func inject(healthStore: HKHealthStore, style: Style) async throws -> String {
+    static func inject(
+        healthStore: HKHealthStore,
+        style: Style,
+        summary: SummaryEncoding = .waterSportsPaddle
+    ) async throws -> String {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw InjectError.healthUnavailable
         }
+
+        try await requestShareAuthorization(healthStore: healthStore)
 
         let package = try loadFixture()
         let stats = SessionStatsBuilder.build(
@@ -63,7 +110,7 @@ enum HealthKitDebugInjector {
         let intervals = rideIntervals(style: style, rides: stats.rides, sessionEnd: sessionEnd)
 
         let config = HKWorkoutConfiguration()
-        config.activityType = .waterSports
+        config.activityType = summary.activityType
         config.locationType = .outdoor
 
         let builder = HKWorkoutBuilder(
@@ -79,19 +126,28 @@ enum HealthKitDebugInjector {
             HKMetadataKeyWorkoutBrandName: "Rppl",
             "nl.dcsbl.rppl.debugInject": true,
             "nl.dcsbl.rppl.injectStyle": style.rawValue,
+            "nl.dcsbl.rppl.summaryEncoding": summary.rawValue,
             "nl.dcsbl.rppl.sourceSessionId": package.manifest.sessionId,
-            "nl.dcsbl.rppl.activityName": "Cable Park (\(style.rawValue))",
+            "nl.dcsbl.rppl.activityName": "Cable Park (\(style.rawValue)/\(summary.rawValue))",
             "nl.dcsbl.rppl.rideCount": stats.rideCount,
         ]
-        if stats.ridingDuration > 0, stats.totalDistanceMeters > 0 {
-            let speedMps = stats.totalDistanceMeters / stats.ridingDuration
-            metadata[HKMetadataKeyAverageSpeed] = HKQuantity(unit: .meter().unitDivided(by: .second()), doubleValue: speedMps)
+        if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+            distanceMeters: stats.totalDistanceMeters,
+            duration: stats.ridingDuration
+        ) {
+            metadata[HKMetadataKeyAverageSpeed] = HKQuantity(
+                unit: .meter().unitDivided(by: .second()),
+                doubleValue: speedMps
+            )
         }
         try await addMetadata(metadata, builder: builder)
 
         try await addHeartRateSamples(from: package.health, builder: builder)
         try await addEnergySamples(from: package.health, builder: builder)
-        try await addRideDistanceSamples(rides: stats.rides, builder: builder)
+        try await addRideDistanceSamples(rides: stats.rides, identifier: summary.distanceIdentifier, builder: builder)
+        if summary.writesPaddleSpeed {
+            try await addPaddleSpeedSamples(rides: stats.rides, builder: builder)
+        }
         try await addRideIntervalEncodings(
             style: style,
             intervals: intervals,
@@ -105,7 +161,29 @@ enum HealthKitDebugInjector {
         try await saveRoute(locations: package.locations, workout: workout, healthStore: healthStore)
 
         let durationMin = Int(sessionEnd.timeIntervalSince(sessionStart) / 60)
-        return "Saved \(style.rawValue) · \(intervals.count) HK intervals · \(stats.rideCount) rides · \(durationMin) min"
+        return "Saved \(style.rawValue)/\(summary.rawValue) · \(intervals.count) HK intervals · \(stats.rideCount) rides · \(durationMin) min"
+    }
+
+    private static func requestShareAuthorization(healthStore: HKHealthStore) async throws {
+        let workout = HKObjectType.workoutType()
+        guard let paddle = HKQuantityType.quantityType(forIdentifier: .distancePaddleSports),
+              let walking = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let swimming = HKQuantityType.quantityType(forIdentifier: .distanceSwimming),
+              let speed = HKQuantityType.quantityType(forIdentifier: .paddleSportsSpeed),
+              let energy = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+              let basal = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned),
+              let heartRate = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
+            throw InjectError.saveFailed("HealthKit quantity types unavailable")
+        }
+        let route = HKSeriesType.workoutRoute()
+        let share: Set<HKSampleType> = [
+            workout, paddle, walking, swimming, speed, energy, basal, heartRate, route
+        ]
+        do {
+            try await healthStore.requestAuthorization(toShare: share, read: share)
+        } catch {
+            throw InjectError.saveFailed(error.localizedDescription)
+        }
     }
 
     private static func loadFixture() throws -> SessionTransferPackage {
@@ -293,13 +371,34 @@ enum HealthKitDebugInjector {
         try await addSamples(samples, builder: builder)
     }
 
-    private static func addRideDistanceSamples(rides: [RideSegmentStats], builder: HKWorkoutBuilder) async throws {
-        guard let type = HKQuantityType.quantityType(forIdentifier: .distancePaddleSports) else { return }
+    private static func addRideDistanceSamples(
+        rides: [RideSegmentStats],
+        identifier: HKQuantityTypeIdentifier,
+        builder: HKWorkoutBuilder
+    ) async throws {
+        guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else { return }
         let samples: [HKQuantitySample] = rides.compactMap { ride in
             guard ride.distanceMeters > 0 else { return nil }
             return HKQuantitySample(
                 type: type,
                 quantity: HKQuantity(unit: .meter(), doubleValue: ride.distanceMeters),
+                start: ride.startedAt,
+                end: ride.endedAt
+            )
+        }
+        try await addSamples(samples, builder: builder)
+    }
+
+    private static func addPaddleSpeedSamples(rides: [RideSegmentStats], builder: HKWorkoutBuilder) async throws {
+        guard let type = HKQuantityType.quantityType(forIdentifier: .paddleSportsSpeed) else { return }
+        let samples: [HKQuantitySample] = rides.compactMap { ride in
+            guard let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+                distanceMeters: ride.distanceMeters,
+                duration: ride.duration
+            ) else { return nil }
+            return HKQuantitySample(
+                type: type,
+                quantity: HKQuantity(unit: .meter().unitDivided(by: .second()), doubleValue: speedMps),
                 start: ride.startedAt,
                 end: ride.endedAt
             )

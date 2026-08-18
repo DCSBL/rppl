@@ -115,6 +115,7 @@ final class WatchSessionController: NSObject {
     private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
     private let basalEnergyType = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!
     private let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
+    private let paddleSpeedType = HKObjectType.quantityType(forIdentifier: .paddleSportsSpeed)!
     private let waterTemperatureType = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
     private let workoutRouteType = HKSeriesType.workoutRoute()
 
@@ -126,13 +127,14 @@ final class WatchSessionController: NSObject {
             basalEnergyType,
             heartRateType,
             distanceType,
+            paddleSpeedType,
             waterTemperatureType,
             workoutRouteType
         ]
     }
 
     private var typesToRead: Set<HKObjectType> {
-        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, waterTemperatureType]
+        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, paddleSpeedType, waterTemperatureType]
     }
 
     override init() {
@@ -757,7 +759,19 @@ final class WatchSessionController: NSObject {
         }
 
         do {
-            try await builder.addMetadata(["nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount])
+            var closingMetadata: [String: Any] = [
+                "nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount
+            ]
+            if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+                distanceMeters: hkRideDistanceMeters,
+                duration: liveRideTracker.sessionRidingDuration
+            ) {
+                closingMetadata[HKMetadataKeyAverageSpeed] = HKQuantity(
+                    unit: .meter().unitDivided(by: .second()),
+                    doubleValue: speedMps
+                )
+            }
+            try await builder.addMetadata(closingMetadata)
             try await builder.endCollection(at: stoppedDate)
             if hkRideDistanceMeters > 0, let start = startedAt {
                 let quantity = HKQuantity(unit: .meter(), doubleValue: hkRideDistanceMeters)
@@ -769,6 +783,10 @@ final class WatchSessionController: NSObject {
                 )
                 try await addSamples([sample], to: builder)
                 WakeLog.debug(.workout, "added ride distance \(Int(hkRideDistanceMeters)) m")
+                if let speedSample = paddleSpeedSample(start: start, end: stoppedDate) {
+                    try await addSamples([speedSample], to: builder)
+                    WakeLog.debug(.workout, "added paddle sports speed sample")
+                }
             }
             do {
                 try await addWaterTemperatureSamples(to: builder)
@@ -798,6 +816,19 @@ final class WatchSessionController: NSObject {
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
         hkRideActivityOpen = false
+    }
+
+    private func paddleSpeedSample(start: Date, end: Date) -> HKQuantitySample? {
+        guard let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
+            distanceMeters: hkRideDistanceMeters,
+            duration: liveRideTracker.sessionRidingDuration
+        ) else { return nil }
+        return HKQuantitySample(
+            type: paddleSpeedType,
+            quantity: HKQuantity(unit: .meter().unitDivided(by: .second()), doubleValue: speedMps),
+            start: start,
+            end: end
+        )
     }
 
     private func addWaterTemperatureSamples(to builder: HKLiveWorkoutBuilder) async throws {
