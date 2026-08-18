@@ -19,7 +19,8 @@ let package = Package(
         ),
         .testTarget(
             name: "RpplCoreTests",
-            dependencies: ["RpplCore"]
+            dependencies: ["RpplCore"],
+            resources: [.copy("Fixtures")]
         ),
     ]
 )

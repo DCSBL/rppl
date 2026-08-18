@@ -283,7 +283,11 @@ export function drawSpeed(
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
   const frame = plotFrame(ctx, w, h, 'Speed (km/h, usable)')
-  const maxV = Math.max(20, ...points.map((p) => p.kmh), 1)
+  const maxV = Math.max(
+    thresholds.rideEnterSpeedKmh + 5,
+    ...points.map((p) => p.kmh),
+    1,
+  )
   const minV = 0
 
   if (highlight) {
@@ -295,6 +299,30 @@ export function drawSpeed(
       ctx.fillRect(xA, frame.y0, Math.max(1, xB - xA), frame.y1 - frame.y0)
     }
   }
+
+  ctx.fillStyle = '#9ca3af'
+  ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+  ctx.textAlign = 'right'
+  ctx.fillText(String(Math.round(maxV)), frame.x0 - 4, frame.y0 + 8)
+  ctx.fillText('0', frame.x0 - 4, frame.y1)
+  drawSpeedGate(
+    ctx,
+    frame,
+    minV,
+    maxV,
+    thresholds.rideEnterSpeedKmh,
+    '#34d399',
+    `enter ${thresholds.rideEnterSpeedKmh} km/h × ${thresholds.rideEnterHold}s`,
+  )
+  drawSpeedGate(
+    ctx,
+    frame,
+    minV,
+    maxV,
+    thresholds.stoppedSpeedKmh,
+    '#60a5fa',
+    `exit ${thresholds.stoppedSpeedKmh} km/h × ${thresholds.rideExitHold}s`,
+  )
 
   if (!points.length) {
     drawCentered(ctx, w, h, 'No usable speed in window')
@@ -316,12 +344,30 @@ export function drawSpeed(
     return cur.tMs < prev.tMs || cur.tMs - prev.tMs > SERIES_GAP_MS
   })
 
-  ctx.fillStyle = '#9ca3af'
-  ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
-  ctx.textAlign = 'right'
-  ctx.fillText(String(Math.round(maxV)), frame.x0 - 4, frame.y0 + 8)
-  ctx.fillText('0', frame.x0 - 4, frame.y1)
   drawPlayheadCursor(ctx, frame, range, playheadMs)
+}
+
+function drawSpeedGate(
+  ctx: CanvasRenderingContext2D,
+  frame: { x0: number; x1: number; y0: number; y1: number },
+  minV: number,
+  maxV: number,
+  kmh: number,
+  color: string,
+  label: string,
+): void {
+  const y = yAt(kmh, minV, maxV, frame.y0, frame.y1)
+  ctx.strokeStyle = color
+  ctx.setLineDash([4, 4])
+  ctx.beginPath()
+  ctx.moveTo(frame.x0, y)
+  ctx.lineTo(frame.x1, y)
+  ctx.stroke()
+  ctx.setLineDash([])
+  ctx.fillStyle = color
+  ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+  ctx.textAlign = 'left'
+  ctx.fillText(label, frame.x0 + 4, y - 2)
 }
 
 export function drawAccuracy(

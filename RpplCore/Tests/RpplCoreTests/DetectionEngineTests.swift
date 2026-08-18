@@ -23,8 +23,8 @@ private func tick(
 /// Enter riding from session start with default thresholds.
 private func enterRiding(_ engine: inout DetectionEngine, at start: TimeInterval = 0) {
     _ = engine.makeSessionStartEvent(at: t0)
-    _ = engine.process(tick(at: start, speedKmh: 16))
-    _ = engine.process(tick(at: start + 2.1, speedKmh: 16))
+    _ = engine.process(tick(at: start, speedKmh: 22))
+    _ = engine.process(tick(at: start + 3.1, speedKmh: 22))
     #expect(engine.currentCode == DetectionCodes.riding)
 }
 
@@ -83,8 +83,8 @@ struct DetectionEngineTests {
     @Test func rideEnterAfterHighSpeedHold() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
-        #expect(engine.process(tick(at: 0, speedKmh: 16)).isEmpty)
-        let events = engine.process(tick(at: 2.1, speedKmh: 16))
+        #expect(engine.process(tick(at: 0, speedKmh: 22)).isEmpty)
+        let events = engine.process(tick(at: 3.1, speedKmh: 22))
         #expect(events.count == 1)
         #expect(events[0].code == DetectionCodes.riding)
         #expect(events[0].detectorId == "ride_enter")
@@ -97,18 +97,18 @@ struct DetectionEngineTests {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
         #expect(engine.process(tick(at: 0, speedKmh: 20)).isEmpty)
-        // 1.5 s < default 2.0 s hold
-        #expect(engine.process(tick(at: 1.5, speedKmh: 20)).isEmpty)
+        // 2.0 s < default 3.0 s hold
+        #expect(engine.process(tick(at: 2.0, speedKmh: 20)).isEmpty)
         #expect(engine.currentCode == DetectionCodes.inactive)
-        let events = engine.process(tick(at: 2.0, speedKmh: 20))
+        let events = engine.process(tick(at: 3.0, speedKmh: 20))
         #expect(events.first?.code == DetectionCodes.riding)
     }
 
     @Test func midSessionStartCanEnterRide() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
-        #expect(engine.process(tick(at: 0, speedKmh: 20)).isEmpty)
-        let events = engine.process(tick(at: 2.0, speedKmh: 22))
+        #expect(engine.process(tick(at: 0, speedKmh: 22)).isEmpty)
+        let events = engine.process(tick(at: 3.0, speedKmh: 22))
         #expect(events.first?.code == DetectionCodes.riding)
     }
 
@@ -144,8 +144,8 @@ struct DetectionEngineTests {
         #expect(engine.lastConfidentCode == DetectionCodes.inactive)
 
         // Later start is a new ride (no long water same-ride glue).
-        _ = engine.process(tick(at: 120, speedKmh: 18, water: "notSubmerged"))
-        let enter = engine.process(tick(at: 122.1, speedKmh: 18, water: "notSubmerged"))
+        _ = engine.process(tick(at: 120, speedKmh: 22, water: "notSubmerged"))
+        let enter = engine.process(tick(at: 123.1, speedKmh: 22, water: "notSubmerged"))
         #expect(enter.first?.code == DetectionCodes.riding)
         #expect(enter.first?.detectorId == "ride_enter")
         #expect(enter.first?.supersedesId == nil)
@@ -185,7 +185,7 @@ struct DetectionEngineTests {
         #expect(engine.process(tick(at: 3, speedKmh: nil)).isEmpty)
         #expect(engine.currentCode == DetectionCodes.riding)
         // Usable again before gap hold → stay riding
-        #expect(engine.process(tick(at: 4, speedKmh: 18)).isEmpty)
+        #expect(engine.process(tick(at: 4, speedKmh: 22)).isEmpty)
         #expect(engine.currentCode == DetectionCodes.riding)
     }
 
@@ -204,7 +204,7 @@ struct DetectionEngineTests {
         let unsure = enterUnsureFromRide(&engine)
         let unsureId = unsure.id
 
-        let recovered = engine.process(tick(at: 20, speedKmh: 18, accuracy: 8))
+        let recovered = engine.process(tick(at: 20, speedKmh: 22, accuracy: 8))
         #expect(recovered.count == 1)
         #expect(recovered[0].code == DetectionCodes.riding)
         #expect(recovered[0].supersedesId == unsureId)
@@ -241,7 +241,7 @@ struct DetectionEngineTests {
         enterRiding(&engine)
         let unsure = enterUnsureFromRide(&engine) // unsure at t=6.1
         // Age 59 s < 60 s window
-        let recovered = engine.process(tick(at: 6.1 + 59, speedKmh: 18, accuracy: 8))
+        let recovered = engine.process(tick(at: 6.1 + 59, speedKmh: 22, accuracy: 8))
         #expect(recovered.first?.code == DetectionCodes.riding)
         #expect(recovered.first?.supersedesId == unsure.id)
         #expect(recovered.first?.detectorId == "lookback")
@@ -256,8 +256,8 @@ struct DetectionEngineTests {
         #expect(timedOut.first?.code == DetectionCodes.inactive)
         #expect(timedOut.first?.detectorId == "unsure_timeout")
 
-        _ = engine.process(tick(at: 80, speedKmh: 18))
-        let enter = engine.process(tick(at: 82.1, speedKmh: 18))
+        _ = engine.process(tick(at: 80, speedKmh: 22))
+        let enter = engine.process(tick(at: 83.1, speedKmh: 22))
         #expect(enter.first?.code == DetectionCodes.riding)
         #expect(enter.first?.detectorId == "ride_enter")
         #expect(enter.first?.supersedesId == nil)
@@ -282,8 +282,8 @@ struct DetectionEngineTests {
         _ = engine.process(tick(at: 6.1 + 60, speedKmh: nil))
         #expect(engine.currentCode == DetectionCodes.inactive)
 
-        _ = engine.process(tick(at: 80, speedKmh: 18))
-        let enter = engine.process(tick(at: 82.1, speedKmh: 18))
+        _ = engine.process(tick(at: 80, speedKmh: 22))
+        let enter = engine.process(tick(at: 83.1, speedKmh: 22))
         #expect(enter.first?.code == DetectionCodes.riding)
         #expect(enter.first?.detectorId == "ride_enter")
         #expect(enter.first?.supersedesId == nil)
@@ -305,16 +305,16 @@ struct DetectionEngineTests {
         let pause = engine.process(tick(at: 20, speedKmh: 1, accuracy: 8))
         #expect(pause.first?.code == DetectionCodes.inactive)
 
-        _ = engine.process(tick(at: 30, speedKmh: 17))
-        let ride2 = engine.process(tick(at: 32.1, speedKmh: 17))
+        _ = engine.process(tick(at: 30, speedKmh: 22))
+        let ride2 = engine.process(tick(at: 33.1, speedKmh: 22))
         #expect(ride2.first?.code == DetectionCodes.riding)
         #expect(ride2.first?.detectorId == "ride_enter")
     }
 
     @Test func replayMatchesLivePipeline() {
         let ticks = [
-            tick(at: 0, speedKmh: 16),
-            tick(at: 2.1, speedKmh: 16),
+            tick(at: 0, speedKmh: 22),
+            tick(at: 3.1, speedKmh: 22),
             tick(at: 5, speedKmh: 2),
             tick(at: 8.1, speedKmh: 1),
         ]
@@ -332,14 +332,14 @@ struct DetectionEngineTests {
                 latitude: 52,
                 longitude: 5,
                 horizontalAccuracy: 10,
-                speed: SpeedUnits.metersPerSecond(fromKilometersPerHour: 16)
+                speed: SpeedUnits.metersPerSecond(fromKilometersPerHour: 22)
             ),
             LocationSample(
-                timestamp: t0.addingTimeInterval(2.1),
+                timestamp: t0.addingTimeInterval(3.1),
                 latitude: 52.001,
                 longitude: 5.001,
                 horizontalAccuracy: 10,
-                speed: SpeedUnits.metersPerSecond(fromKilometersPerHour: 16)
+                speed: SpeedUnits.metersPerSecond(fromKilometersPerHour: 22)
             ),
         ]
         let events = DetectionEngine.replay(locations: locations)
@@ -476,10 +476,10 @@ struct DetectionExtensibilityTests {
             detectors: [AlwaysInactiveDetector()] + DetectionEngine.defaultDetectors
         )
         _ = engine.makeSessionStartEvent(at: t0)
-        _ = engine.process(tick(at: 0, speedKmh: 16))
-        _ = engine.process(tick(at: 2.1, speedKmh: 16))
+        _ = engine.process(tick(at: 0, speedKmh: 22))
+        _ = engine.process(tick(at: 3.1, speedKmh: 22))
         #expect(engine.currentCode == DetectionCodes.riding)
-        let events = engine.process(tick(at: 3, speedKmh: 16))
+        let events = engine.process(tick(at: 4, speedKmh: 22))
         #expect(events.first?.detectorId == "test_force_inactive")
         #expect(events.first?.code == DetectionCodes.inactive)
     }

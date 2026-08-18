@@ -39,7 +39,7 @@ Unknown future codes must round-trip as strings — do not invent a closed Swift
 ```text
 session start ──► inactive
                     │
-        speed ≥15 km/h for 2s
+        speed ≥20 km/h for 3s
                     ▼
                   riding ◄──── lookback: usable fast again within 60s
                     │
@@ -59,7 +59,7 @@ session start ──► inactive
                           ▼                         ▼
                        inactive                    inactive
                           │
-              later: speed ≥15 ×2s again
+              later: speed ≥20 ×3s again
                           ▼
                        riding   ← always a *new* ride after inactive
 ```
@@ -98,7 +98,7 @@ Bad ticks still advance time; they just do not count as “fast” or “slow”
 
 While speed is usable:
 
-- **highSpeed** — speed ≥ enter threshold (15 km/h)
+- **highSpeed** — speed ≥ enter threshold (20 km/h)
 - **stopped** — speed ≤ exit threshold (4 km/h)
 
 While speed is unusable:
@@ -113,7 +113,7 @@ If GPS becomes usable again **before** 60 seconds of unsure:
 
 | Usable speed | Result |
 |--------------|--------|
-| ≥ 15 km/h | Same ride: write `riding` with `supersedesId` pointing at the unsure event (`lookback`) |
+| ≥ 20 km/h | Same ride: write `riding` with `supersedesId` pointing at the unsure event (`lookback`) |
 | ≤ 4 km/h | End ride: write `inactive` with supersede |
 | between | Stay `unsure` |
 
@@ -129,7 +129,7 @@ Default order in `DetectionEngine.defaultDetectors`:
 | 2 | `water_exit` | `riding` or `unsure` + Ultra `submerged` | `inactive` |
 | 3 | `gps_gap` | `riding` + unusable ≥ **3 s** | `unsure` |
 | 4 | `ride_exit` | `riding` + usable slow ≤4 km/h × **3 s** | `inactive` |
-| 5 | `ride_enter` | `inactive` + usable fast ≥15 km/h × **2 s** | `riding` |
+| 5 | `ride_enter` | `inactive` + usable fast ≥20 km/h × **3 s** | `riding` |
 
 **Why water before gap:** a fall in water often kills GPS. Ultra can say “submerged” even when speed is garbage — end the ride immediately instead of waiting on the unsure timer.
 
@@ -145,7 +145,7 @@ Authoritative defaults: `DetectionThresholds` in RpplCore.
 
 | Constant | Default | Role |
 |----------|---------|------|
-| Ride enter | ≥ **15** km/h × **2.0** s | `inactive` → `riding` |
+| Ride enter | ≥ **20** km/h × **3.0** s | `inactive` → `riding` |
 | Ride exit | ≤ **4** km/h × **3.0** s | `riding` → `inactive` (usable GPS only) |
 | GPS gap | unusable × **3.0** s | `riding` → `unsure` |
 | Same-ride / timeout window | **60** s | lookback merge vs force `inactive` |
@@ -185,7 +185,7 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
 ## Common park stories → what the engine does
 
 1. **Clean stop at dock**
-   Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥15×2s → new `riding`.
+   Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥20×3s → new `riding`.
 
 2. **Fall, Ultra**
    `submerged` while riding → `water_exit` → `inactive` immediately. Swim 8 minutes, walk back, start again → new ride (by design).

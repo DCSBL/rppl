@@ -1,8 +1,14 @@
 import type { AccuracyPoint, LocationSample, SpeedPoint, TimeRange } from './types'
 import { toMs } from './analysisPrep'
 
-/** Defaults mirror RpplCore DetectionThresholds GPS gates. */
+/** Defaults mirror RpplCore DetectionThresholds. */
 export const thresholds = {
+  rideEnterSpeedKmh: 20,
+  rideEnterHold: 3.0,
+  stoppedSpeedKmh: 4,
+  rideExitHold: 3.0,
+  gapUnsureHold: 3.0,
+  unsureSameRideWindow: 60.0,
   maxHorizontalAccuracyM: 25,
   maxPlausibleSpeedKmh: 45,
   maxSpeedJumpKmh: 30,
