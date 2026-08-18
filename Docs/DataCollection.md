@@ -45,7 +45,7 @@ Water temperature is a session metric (mean of persisted samples). Ultra sets `m
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
-Water temperature is **not** written to Health. Apple only auto-records `HKQuantityTypeIdentifier.waterTemperature` for swimming workouts and dive sessions; Rppl uses `.waterSports`. Samples stay in `water-000.jsonl`.
+Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not `.waterSports` — Rppl does not change activity type. JSONL remains the source for in-app stats.
 
 ## Action Button (Ultra)
 

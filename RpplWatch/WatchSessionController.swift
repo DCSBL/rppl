@@ -104,21 +104,31 @@ final class WatchSessionController: NSObject {
     private var lastPersistedConfidentCode = DetectionCodes.inactive
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
+    private var sessionWaterSamples: [WaterTemperatureSample] = []
 
     private let workoutType = HKObjectType.workoutType()
     private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
     private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
     private let basalEnergyType = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!
     private let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
+    private let waterTemperatureType = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
     private let workoutRouteType = HKSeriesType.workoutRoute()
 
     /// Write access required to start HKWorkoutSession and save the workout/route.
     private var typesToShare: Set<HKSampleType> {
-        [workoutType, activeEnergyType, basalEnergyType, heartRateType, distanceType, workoutRouteType]
+        [
+            workoutType,
+            activeEnergyType,
+            basalEnergyType,
+            heartRateType,
+            distanceType,
+            waterTemperatureType,
+            workoutRouteType
+        ]
     }
 
     private var typesToRead: Set<HKObjectType> {
-        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType]
+        [heartRateType, activeEnergyType, basalEnergyType, workoutType, distanceType, waterTemperatureType]
     }
 
     override init() {
@@ -708,18 +718,13 @@ final class WatchSessionController: NSObject {
                     start: start,
                     end: stoppedDate
                 )
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                    builder.add([sample]) { success, error in
-                        if let error {
-                            continuation.resume(throwing: error)
-                        } else if success {
-                            continuation.resume()
-                        } else {
-                            continuation.resume(throwing: SessionStoreError.ioFailure("Failed to add distance sample"))
-                        }
-                    }
-                }
+                try await addSamples([sample], to: builder)
                 WakeLog.debug(.workout, "added ride distance \(Int(hkRideDistanceMeters)) m")
+            }
+            do {
+                try await addWaterTemperatureSamples(to: builder)
+            } catch {
+                WakeLog.error(.workout, "waterTemperature samples: \(error.localizedDescription)")
             }
             let workout = try await builder.finishWorkout()
             if let workout, let routeBuilder = workoutRouteBuilder {
@@ -741,6 +746,35 @@ final class WatchSessionController: NSObject {
         workoutBuilder = nil
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
+    }
+
+    private func addWaterTemperatureSamples(to builder: HKLiveWorkoutBuilder) async throws {
+        guard !sessionWaterSamples.isEmpty else { return }
+        let samples = sessionWaterSamples.map { sample in
+            HKQuantitySample(
+                type: waterTemperatureType,
+                quantity: HKQuantity(unit: .degreeCelsius(), doubleValue: sample.celsius),
+                start: sample.timestamp,
+                end: sample.timestamp
+            )
+        }
+        try await addSamples(samples, to: builder)
+        WakeLog.debug(.workout, "added \(samples.count) waterTemperature samples")
+    }
+
+    private func addSamples(_ samples: [HKSample], to builder: HKLiveWorkoutBuilder) async throws {
+        guard !samples.isEmpty else { return }
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            builder.add(samples) { success, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: SessionStoreError.ioFailure("Failed to add workout samples"))
+                }
+            }
+        }
     }
 
     private func insertRouteLocations(_ locations: [CLLocation]) async {
@@ -876,6 +910,7 @@ final class WatchSessionController: NSObject {
 
     private func resetWaterTemperatureTracking() {
         waterBuffer.removeAll(keepingCapacity: true)
+        sessionWaterSamples.removeAll(keepingCapacity: true)
         lastPersistedWaterTempAt = nil
         lastLoggedWaterTempC = nil
         waterTempNeedsBoutSample = latestWaterState == "submerged"
@@ -904,7 +939,9 @@ final class WatchSessionController: NSObject {
         guard waterTempNeedsBoutSample || intervalElapsed else { return }
 
         let isBoutStart = waterTempNeedsBoutSample
-        waterBuffer.append(WaterTemperatureSample(timestamp: now, celsius: temp))
+        let sample = WaterTemperatureSample(timestamp: now, celsius: temp)
+        waterBuffer.append(sample)
+        sessionWaterSamples.append(sample)
         lastPersistedWaterTempAt = now
         waterTempNeedsBoutSample = false
         waterTempSum += temp
