@@ -58,6 +58,10 @@ final class WatchSessionController: NSObject {
     var lastRideDuration: TimeInterval { liveRideTracker.lastRideDuration }
     var didCompleteRide: Bool { liveRideTracker.didCompleteRide }
     var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
+    /// Ultra water-temp hardware present. Drives hide vs `- C` on inactive overview.
+    var waterTemperatureAvailable = false
+    /// Running mean of persisted submerged samples this session.
+    var averageWaterTemperatureCelsius: Double?
 
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     private(set) var detectionSimulationMode: DetectionSimulationMode = .detected
@@ -81,6 +85,12 @@ final class WatchSessionController: NSObject {
     private var latestActivity: String?
     private var latestWaterState: String?
     private var latestWaterTempC: Double?
+    private var waterBuffer: [WaterTemperatureSample] = []
+    private var lastPersistedWaterTempAt: Date?
+    private var lastLoggedWaterTempC: Double?
+    private var waterTempNeedsBoutSample = false
+    private var waterTempSum = 0.0
+    private var waterTempCount = 0
     private var detectionEngine = DetectionEngine()
     private var locationBuffer: [LocationSample] = []
     private var motionBuffer: [MotionSample] = []
@@ -123,6 +133,7 @@ final class WatchSessionController: NSObject {
             let manager = CMWaterSubmersionManager()
             manager.delegate = self
             waterManager = manager
+            waterTemperatureAvailable = true
         }
     }
 
@@ -201,7 +212,8 @@ final class WatchSessionController: NSObject {
             appVersion: info.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
             buildNumber: info.infoDictionary?["CFBundleVersion"] as? String ?? "1",
             watchModel: WatchSessionController.deviceModel(),
-            systemVersion: WKInterfaceDevice.current().systemVersion
+            systemVersion: WKInterfaceDevice.current().systemVersion,
+            waterTemperatureAvailable: waterTemperatureAvailable
         )
         self.manifest = manifest
         WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")
@@ -244,6 +256,7 @@ final class WatchSessionController: NSObject {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        resetWaterTemperatureTracking()
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil
@@ -309,6 +322,7 @@ final class WatchSessionController: NSObject {
         detectionSimulationMode = .detected
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
+        resetWaterTemperatureTracking()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         pausedAccumulated = 0
@@ -828,11 +842,13 @@ final class WatchSessionController: NSObject {
         let locations = locationBuffer
         let motions = motionBuffer
         let health = healthBuffer
+        let water = waterBuffer
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
+        waterBuffer.removeAll(keepingCapacity: true)
 
-        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty else { return }
+        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty else { return }
 
         do {
             if !locations.isEmpty {
@@ -844,14 +860,63 @@ final class WatchSessionController: NSObject {
             if !health.isEmpty {
                 try store.appendHealthSamples(health, sessionId: manifest.sessionId)
             }
+            if !water.isEmpty {
+                try store.appendWaterTemperatureSamples(water, sessionId: manifest.sessionId)
+            }
             refreshStoredByteSize()
             // Success path silent — every ~2s while recording would drown action logs.
         } catch {
             errorText = String(localized: "Flush: \(error.localizedDescription)")
             WakeLog.error(
                 .store,
-                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count): \(error.localizedDescription)"
+                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
+                    + "water=\(water.count): \(error.localizedDescription)"
             )
+        }
+    }
+
+    private func resetWaterTemperatureTracking() {
+        waterBuffer.removeAll(keepingCapacity: true)
+        lastPersistedWaterTempAt = nil
+        lastLoggedWaterTempC = nil
+        waterTempNeedsBoutSample = latestWaterState == "submerged"
+        waterTempSum = 0
+        waterTempCount = 0
+        averageWaterTemperatureCelsius = nil
+        latestWaterTempC = nil
+    }
+
+    private func applyWaterSubmersionState(_ next: String) {
+        if latestWaterState != next {
+            if next == "submerged" {
+                waterTempNeedsBoutSample = true
+            }
+            latestWaterState = next
+            WakeLog.debug(.water, "submersion → \(next)")
+            processDetectionTick()
+        }
+    }
+
+    private func considerPersistingWaterTemperature(_ temp: Double) {
+        guard isRunning, !isProductPaused, latestWaterState == "submerged" else { return }
+        let now = Date()
+        let intervalElapsed = lastPersistedWaterTempAt.map {
+            now.timeIntervalSince($0) >= Self.waterTempPersistInterval
+        } ?? true
+        guard waterTempNeedsBoutSample || intervalElapsed else { return }
+
+        let isBoutStart = waterTempNeedsBoutSample
+        waterBuffer.append(WaterTemperatureSample(timestamp: now, celsius: temp))
+        lastPersistedWaterTempAt = now
+        waterTempNeedsBoutSample = false
+        waterTempSum += temp
+        waterTempCount += 1
+        averageWaterTemperatureCelsius = waterTempSum / Double(waterTempCount)
+
+        let jumped = lastLoggedWaterTempC.map { abs($0 - temp) >= Self.waterTempLogDeltaC } ?? true
+        if isBoutStart || jumped {
+            lastLoggedWaterTempC = temp
+            WakeLog.debug(.water, String(format: "waterTemp %.1f C n=%d", temp, waterTempCount))
         }
     }
 
@@ -885,6 +950,9 @@ final class WatchSessionController: NSObject {
         sysctlbyname("hw.machine", &machine, &size, nil, 0)
         return String(cString: machine)
     }
+
+    private static let waterTempPersistInterval: TimeInterval = 15
+    private static let waterTempLogDeltaC = 2.0
 }
 
 extension WatchSessionController: CLLocationManagerDelegate {
@@ -1025,9 +1093,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
             @unknown default: next = "other"
             }
             if latestWaterState != next {
-                latestWaterState = next
-                WakeLog.debug(.water, "submersion → \(next)")
-                processDetectionTick()
+                applyWaterSubmersionState(next)
             }
         }
     }
@@ -1043,9 +1109,7 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
                 if meters > 0 { next = "submerged" }
             }
             if latestWaterState != next {
-                latestWaterState = next
-                WakeLog.debug(.water, "measurement → \(next)")
-                processDetectionTick()
+                applyWaterSubmersionState(next)
             }
         }
     }
@@ -1056,11 +1120,8 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
     ) {
         Task { @MainActor in
             let temp = measurement.temperature.converted(to: UnitTemperature.celsius).value
-            let previous = latestWaterTempC
             latestWaterTempC = temp
-            if previous == nil || abs((previous ?? 0) - temp) >= 0.5 {
-                WakeLog.debug(.water, String(format: "waterTemp %.1f°C", temp))
-            }
+            considerPersistingWaterTemperature(temp)
         }
     }
 
