@@ -25,6 +25,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   location-000.jsonl
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
+///   water-000.jsonl (optional; Ultra submerged water temperature)
 /// ```
 /// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
@@ -118,6 +119,17 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func appendHealthSamples(_ samples: [HealthMetricSample], sessionId: String, chunkIndex: Int = 0) throws {
         let name = String(format: "health-%03d.jsonl", chunkIndex)
+        for sample in samples {
+            try appendJSONLine(sample, to: name, sessionId: sessionId)
+        }
+    }
+
+    public func appendWaterTemperatureSamples(
+        _ samples: [WaterTemperatureSample],
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws {
+        let name = String(format: "water-%03d.jsonl", chunkIndex)
         for sample in samples {
             try appendJSONLine(sample, to: name, sessionId: sessionId)
         }
@@ -286,6 +298,14 @@ public final class SessionFileStore: @unchecked Sendable {
         return try readJSONL(HealthMetricSample.self, from: name, sessionId: sessionId)
     }
 
+    public func readWaterTemperatureSamples(
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws -> [WaterTemperatureSample] {
+        let name = String(format: "water-%03d.jsonl", chunkIndex)
+        return try readJSONL(WaterTemperatureSample.self, from: name, sessionId: sessionId)
+    }
+
     public func markReadyToTransfer(sessionId: String, endedAt: Date = Date()) throws {
         var manifest = try readManifest(sessionId: sessionId)
         manifest.endedAt = endedAt
@@ -343,6 +363,9 @@ public final class SessionFileStore: @unchecked Sendable {
             try phoneStore.appendMotionSamples(package.motion, sessionId: package.manifest.sessionId)
         }
         try phoneStore.appendHealthSamples(package.health, sessionId: package.manifest.sessionId)
+        if !package.water.isEmpty {
+            try phoneStore.appendWaterTemperatureSamples(package.water, sessionId: package.manifest.sessionId)
+        }
         var imported = package.manifest
         imported.transferState = .acknowledged
         try phoneStore.writeManifest(imported)
@@ -360,13 +383,15 @@ public final class SessionFileStore: @unchecked Sendable {
             motion = []
         }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
+        let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
         return SessionTransferPackage(
             manifest: manifest,
             detections: detections,
             locations: locations,
             motion: motion,
             motionFramesZlib: motionFrames,
-            health: health
+            health: health,
+            water: water
         )
     }
 
@@ -501,6 +526,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     /// Framed zlib JSONL bytes (`motion-000.jsonl.zlib`) — keeps WC transfer small.
     public var motionFramesZlib: Data?
     public var health: [HealthMetricSample]
+    /// Sparse Ultra water-temperature samples (`water-000.jsonl`). Empty on older packages.
+    public var water: [WaterTemperatureSample]
 
     public init(
         manifest: SessionManifest,
@@ -508,7 +535,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         locations: [LocationSample],
         motion: [MotionSample] = [],
         motionFramesZlib: Data? = nil,
-        health: [HealthMetricSample]
+        health: [HealthMetricSample],
+        water: [WaterTemperatureSample] = []
     ) {
         self.manifest = manifest
         self.detections = detections
@@ -516,6 +544,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.motion = motion
         self.motionFramesZlib = motionFramesZlib
         self.health = health
+        self.water = water
     }
 
     public init(from decoder: Decoder) throws {
@@ -534,6 +563,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motion = try container.decodeIfPresent([MotionSample].self, forKey: .motion) ?? []
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
+        water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -547,10 +577,13 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
             try container.encode(motion, forKey: .motion)
         }
         try container.encode(health, forKey: .health)
+        if !water.isEmpty {
+            try container.encode(water, forKey: .water)
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water
     }
 }
 
