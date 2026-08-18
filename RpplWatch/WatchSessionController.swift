@@ -84,7 +84,6 @@ final class WatchSessionController: NSObject {
     private var latestLocation: CLLocation?
     private var latestActivity: String?
     private var latestWaterState: String?
-    private var latestWaterTempC: Double?
     private var waterBuffer: [WaterTemperatureSample] = []
     private var lastPersistedWaterTempAt: Date?
     private var lastLoggedWaterTempC: Double?
@@ -883,7 +882,6 @@ final class WatchSessionController: NSObject {
         waterTempSum = 0
         waterTempCount = 0
         averageWaterTemperatureCelsius = nil
-        latestWaterTempC = nil
     }
 
     private func applyWaterSubmersionState(_ next: String) {
@@ -1120,7 +1118,6 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
     ) {
         Task { @MainActor in
             let temp = measurement.temperature.converted(to: UnitTemperature.celsius).value
-            latestWaterTempC = temp
             considerPersistingWaterTemperature(temp)
         }
     }
