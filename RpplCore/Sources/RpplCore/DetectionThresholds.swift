@@ -15,8 +15,8 @@ public struct DetectionThresholds: Equatable, Sendable {
     public var maxSpeedJumpKmh: Double
 
     public init(
-        rideEnterSpeedKmh: Double = 15,
-        rideEnterHold: TimeInterval = 2.0,
+        rideEnterSpeedKmh: Double = 20,
+        rideEnterHold: TimeInterval = 3.0,
         stoppedSpeedKmh: Double = 4,
         rideExitHold: TimeInterval = 3.0,
         gapUnsureHold: TimeInterval = 3.0,
