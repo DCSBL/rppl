@@ -26,6 +26,23 @@ enum SessionLocationHelpers {
         )
     }
 
+    /// Prefer ride `peakSpeedKmh`; fall back to GPS samples in the ride window.
+    static func peakSpeedKmh(for ride: RideSegmentStats, locations: [LocationSample] = []) -> Double? {
+        if let peak = ride.peakSpeedKmh { return peak }
+        return LocationSpeedStats.peakSpeedKmh(from: locations)
+    }
+
+    static func peakSpeedKmh(
+        rides: [RideSegmentStats],
+        locations: [LocationSample]
+    ) -> Double? {
+        if let fromRides = rides.compactMap(\.peakSpeedKmh).max() {
+            return fromRides
+        }
+        let windows = rides.map { (start: $0.startedAt, end: $0.endedAt) }
+        return LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: locations)
+    }
+
     static func locations(
         for ride: RideSegmentStats,
         in all: [LocationSample]

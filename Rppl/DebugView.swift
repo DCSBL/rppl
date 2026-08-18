@@ -49,13 +49,14 @@ struct DebugView: View {
             }
 
             Section("HealthKit inject") {
-                Text("Paddle Sports = production (Fitness distance + speed). Water-sports encodings stay blank in Activity. Re-request permissions if inject fails.")
+                Text("Writes one waterSports workout matching Watch save (HR, energy, ride distance, route, ride/dock intervals). Fitness may hide distance/speed tiles; logbook shows max/avg from GPS. Re-request permissions if inject fails.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                injectButton("Paddle Sports (production)", style: .workRest, summary: .paddleSportsActivity)
-                injectButton("Water Sports + paddle distance", style: .workRest, summary: .waterSportsPaddle)
-                injectButton("Walking+running distance", style: .workRest, summary: .waterSportsWalkingRunning)
-                injectButton("Swimming distance", style: .workRest, summary: .waterSportsSwimming)
+                Button("Inject session into Health") {
+                    WakeLog.debug(.ui, "tap HK inject waterSports")
+                    injectHealthKitFixture()
+                }
+                .disabled(isInjectingHealthKit)
                 if isInjectingHealthKit {
                     HStack(spacing: 8) {
                         ProgressView()
@@ -156,32 +157,13 @@ struct DebugView: View {
         }
     }
 
-    private func injectButton(
-        _ title: String,
-        style: HealthKitDebugInjector.Style,
-        summary: HealthKitDebugInjector.SummaryEncoding
-    ) -> some View {
-        Button(title) {
-            WakeLog.debug(.ui, "tap HK inject \(style.rawValue)/\(summary.rawValue)")
-            injectHealthKitFixture(style: style, summary: summary)
-        }
-        .disabled(isInjectingHealthKit)
-    }
-
-    private func injectHealthKitFixture(
-        style: HealthKitDebugInjector.Style,
-        summary encoding: HealthKitDebugInjector.SummaryEncoding
-    ) {
+    private func injectHealthKitFixture() {
         hkInjectMessage = nil
         hkInjectError = nil
         isInjectingHealthKit = true
         Task {
             do {
-                let result = try await HealthKitDebugInjector.inject(
-                    healthStore: healthStore,
-                    style: style,
-                    summary: encoding
-                )
+                let result = try await HealthKitDebugInjector.inject(healthStore: healthStore)
                 await MainActor.run {
                     hkInjectMessage = result
                     hkInjectError = nil
