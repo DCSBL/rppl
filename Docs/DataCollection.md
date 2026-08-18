@@ -23,6 +23,7 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 | GPS | Core Location updates | `location-000.jsonl` |
 | deviceMotion | ~25 Hz → framed zlib JSONL | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
+| Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
 | Detections | on transitions / revisions | `detections.jsonl` |
 | Manifest | once | `manifest.json` |
 
@@ -32,7 +33,9 @@ Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (o
 
 ## Derived stats (not a stream)
 
-Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, and record highlights are **computed on demand** from detections + GPS + health — not written to disk. Watch shows live ride count / meters / speed during recording; iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights are **computed on demand** from detections + GPS + health + water — not written to disk. Watch shows live ride count / meters / speed during recording (and water temp on the inactive overview); iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+
+Water temperature is a session metric (mean of persisted samples). Ultra sets `manifest.waterTemperatureAvailable`; the UI hides the tile on unsupported watches, shows `- C` until the first sample, then the average. Submersion is when the Watch can measure; the value stays relevant while riding.
 
 ## HealthKit policy
 
@@ -41,6 +44,8 @@ Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/
 **Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, pauses HK, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
+
+Water temperature is **not** written to Health. Apple only auto-records `HKQuantityTypeIdentifier.waterTemperature` for swimming workouts and dive sessions; Rppl uses `.waterSports`. Samples stay in `water-000.jsonl`.
 
 ## Action Button (Ultra)
 

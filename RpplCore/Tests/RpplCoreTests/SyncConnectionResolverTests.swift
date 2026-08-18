@@ -211,7 +211,8 @@ struct ModelCodableTests {
             systemVersion: "26.2",
             startedAt: Date(timeIntervalSince1970: 100),
             endedAt: Date(timeIntervalSince1970: 200),
-            transferState: .readyToTransfer
+            transferState: .readyToTransfer,
+            waterTemperatureAvailable: true
         )
         let data = try encoder.encode(original)
         let decoded = try decoder.decode(SessionManifest.self, from: data)
