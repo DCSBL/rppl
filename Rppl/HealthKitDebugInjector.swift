@@ -28,12 +28,24 @@ enum HealthKitDebugInjector {
         }
     }
 
+    enum Style: String, Sendable {
+        /// Ride + following dock wait as one activity; motionPaused on rest (first inject).
+        case ridePlusRest
+        /// Alternating riding / inactive activities. No motion pause events.
+        case workRest
+        /// One activity per ride window only. No motion pause events.
+        case rideOnly
+        /// Samples + route only. No intervals, no motion events.
+        case samplesOnly
+    }
+
     struct RoundWindow: Sendable {
         var start: Date
         var end: Date
+        var code: String
     }
 
-    static func inject(healthStore: HKHealthStore) async throws -> String {
+    static func inject(healthStore: HKHealthStore, style: Style) async throws -> String {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw InjectError.healthUnavailable
         }
@@ -47,7 +59,7 @@ enum HealthKitDebugInjector {
         )
         let sessionStart = package.manifest.startedAt
         let sessionEnd = package.manifest.endedAt ?? stats.endedAt
-        let rounds = roundWindows(from: stats.rides, sessionEnd: sessionEnd)
+        let rounds = windows(style: style, rides: stats.rides, sessionEnd: sessionEnd)
 
         let config = HKWorkoutConfiguration()
         config.activityType = .waterSports
@@ -65,8 +77,9 @@ enum HealthKitDebugInjector {
             HKMetadataKeyIndoorWorkout: false,
             HKMetadataKeyWorkoutBrandName: "Rppl",
             "nl.dcsbl.rppl.debugInject": true,
+            "nl.dcsbl.rppl.injectStyle": style.rawValue,
             "nl.dcsbl.rppl.sourceSessionId": package.manifest.sessionId,
-            "nl.dcsbl.rppl.activityName": "Cable Park (fixture)",
+            "nl.dcsbl.rppl.activityName": "Cable Park (\(style.rawValue))",
         ]
         if stats.ridingDuration > 0, stats.totalDistanceMeters > 0 {
             let speedMps = stats.totalDistanceMeters / stats.ridingDuration
@@ -77,14 +90,20 @@ enum HealthKitDebugInjector {
         try await addHeartRateSamples(from: package.health, builder: builder)
         try await addEnergySamples(from: package.health, builder: builder)
         try await addRideDistanceSamples(rides: stats.rides, builder: builder)
-        try await addRoundEncodings(rounds: rounds, rides: stats.rides, config: config, builder: builder)
+        try await addRoundEncodings(
+            style: style,
+            rounds: rounds,
+            rides: stats.rides,
+            config: config,
+            builder: builder
+        )
 
         try await endCollection(builder: builder, at: sessionEnd)
         let workout = try await finishWorkout(builder: builder)
         try await saveRoute(locations: package.locations, workout: workout, healthStore: healthStore)
 
         let durationMin = Int(sessionEnd.timeIntervalSince(sessionStart) / 60)
-        return "Saved \(rounds.count) rounds · \(stats.rideCount) rides · \(durationMin) min"
+        return "Saved \(style.rawValue) · \(rounds.count) intervals · \(stats.rideCount) rides · \(durationMin) min"
     }
 
     private static func loadFixture() throws -> SessionTransferPackage {
@@ -101,11 +120,33 @@ enum HealthKitDebugInjector {
         }
     }
 
-    private static func roundWindows(from rides: [RideSegmentStats], sessionEnd: Date) -> [RoundWindow] {
-        guard !rides.isEmpty else { return [] }
-        return rides.enumerated().map { index, ride in
-            let end = index + 1 < rides.count ? rides[index + 1].startedAt : sessionEnd
-            return RoundWindow(start: ride.startedAt, end: end)
+    private static func windows(
+        style: Style,
+        rides: [RideSegmentStats],
+        sessionEnd: Date
+    ) -> [RoundWindow] {
+        switch style {
+        case .samplesOnly:
+            return []
+        case .rideOnly:
+            return rides.map { RoundWindow(start: $0.startedAt, end: $0.endedAt, code: DetectionCodes.riding) }
+        case .ridePlusRest:
+            return rides.enumerated().map { index, ride in
+                let end = index + 1 < rides.count ? rides[index + 1].startedAt : sessionEnd
+                return RoundWindow(start: ride.startedAt, end: end, code: DetectionCodes.riding)
+            }
+        case .workRest:
+            var result: [RoundWindow] = []
+            for (index, ride) in rides.enumerated() {
+                result.append(RoundWindow(start: ride.startedAt, end: ride.endedAt, code: DetectionCodes.riding))
+                let restEnd = index + 1 < rides.count ? rides[index + 1].startedAt : sessionEnd
+                if restEnd > ride.endedAt {
+                    result.append(
+                        RoundWindow(start: ride.endedAt, end: restEnd, code: DetectionCodes.inactive)
+                    )
+                }
+            }
+            return result
         }
     }
 
@@ -261,24 +302,24 @@ enum HealthKitDebugInjector {
     }
 
     private static func addRoundEncodings(
+        style: Style,
         rounds: [RoundWindow],
         rides: [RideSegmentStats],
         config: HKWorkoutConfiguration,
         builder: HKWorkoutBuilder
     ) async throws {
-        var events: [HKWorkoutEvent] = []
+        guard style != .samplesOnly else { return }
         for round in rounds {
-            let interval = DateInterval(start: round.start, end: round.end)
-            events.append(HKWorkoutEvent(type: .segment, dateInterval: interval, metadata: nil))
-            events.append(HKWorkoutEvent(type: .marker, dateInterval: DateInterval(start: round.start, duration: 0), metadata: nil))
             let activity = HKWorkoutActivity(
                 workoutConfiguration: config,
                 start: round.start,
                 end: round.end,
-                metadata: ["nl.dcsbl.rppl.detectionCode": "round"]
+                metadata: ["nl.dcsbl.rppl.detectionCode": round.code]
             )
             try await addWorkoutActivity(activity, builder: builder)
         }
+        guard style == .ridePlusRest else { return }
+        var events: [HKWorkoutEvent] = []
         for ride in rides {
             events.append(
                 HKWorkoutEvent(

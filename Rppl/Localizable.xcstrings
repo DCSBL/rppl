@@ -644,6 +644,9 @@
         }
       }
     },
+    "HealthKit" : {
+
+    },
     "Import failed: %@" : {
       "localizations" : {
         "en" : {
@@ -707,6 +710,12 @@
           }
         }
       }
+    },
+    "Inject workout from fixture" : {
+
+    },
+    "Injecting fixture…" : {
+
     },
     "Internal testing only" : {
       "localizations" : {
