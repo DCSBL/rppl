@@ -181,9 +181,9 @@ struct SessionStatsBuilderTests {
             detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
         ]
         let locations = [
-            location(at: 20, lat: 52.0, lon: 5.0),
-            location(at: 21, lat: 52.0001, lon: 5.0),
-            location(at: 22, lat: 52.0002, lon: 5.0),
+            location(at: 20, lat: 52.0, lon: 5.0, speedMps: 5),
+            location(at: 21, lat: 52.0001, lon: 5.0, speedMps: 8),
+            location(at: 22, lat: 52.0002, lon: 5.0, speedMps: 6),
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(200)),
@@ -195,6 +195,10 @@ struct SessionStatsBuilderTests {
         #expect(stats.rides.count == 1)
         #expect(stats.rides[0].duration == 90)
         #expect(stats.rides[0].distanceMeters > 10)
+        #expect(stats.rides[0].peakSpeedKmh != nil)
+        #expect(abs((stats.rides[0].peakSpeedKmh ?? 0) - SpeedUnits.kilometersPerHour(fromMetersPerSecond: 8)) < 0.5)
+        #expect(stats.maxSpeedKmh != nil)
+        #expect(stats.averageSpeedKmh != nil)
         #expect(stats.ridingDuration == 90)
         #expect(stats.inactiveDuration == 110)
         #expect(abs(stats.ridingInactiveRatio - 90.0 / 200.0) < 0.001)
