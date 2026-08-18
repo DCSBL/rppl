@@ -25,7 +25,7 @@ Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`)
 
 | Constant | Value | Notes |
 |----------|-------|-------|
-| Ride enter | ≥20 km/h × 3.0 s | From `inactive` |
+| Ride enter | ≥20 km/h × 3.0 s | From `inactive` (4.0 s if highSpeed started from ≤8 km/h walk) |
 | Ride exit | ≤4 km/h × 3.0 s | Usable GPS only |
 | GPS gap → unsure | unusable × 3.0 s while riding | Not immediate pause |
 | Same-ride merge | unsure age &lt; 60 s | Lookback supersede if speed returns high |

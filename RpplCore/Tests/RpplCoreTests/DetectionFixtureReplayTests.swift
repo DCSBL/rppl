@@ -16,6 +16,7 @@ struct DetectionFixtureReplayTests {
         "walk-spike-fp1",
         "walk-spike-fp2",
         "walk-spike-fp3",
+        "walk-spike-fp4",
         "good-ride-1",
         "good-ride-2",
     ]
@@ -55,6 +56,17 @@ struct DetectionFixtureReplayTests {
         _ = engine.process(tick(at: 324, speedKmh: 18.4))
         _ = engine.process(tick(at: 325, speedKmh: 18.4))
         _ = engine.process(tick(at: 326, speedKmh: 14))
+        #expect(engine.currentCode == DetectionCodes.inactive)
+    }
+
+    @Test func walkBumpFixtureSliceStaysInactive() {
+        // Same shape as walk-spike-fp4 (14:10 bump): walk then 21.5 for 2 s.
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 6.7))
+        _ = engine.process(tick(at: 1, speedKmh: 21.5))
+        _ = engine.process(tick(at: 2, speedKmh: 21.5))
+        _ = engine.process(tick(at: 3, speedKmh: 19.9))
         #expect(engine.currentCode == DetectionCodes.inactive)
     }
 }
