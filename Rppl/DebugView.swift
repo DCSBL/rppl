@@ -49,13 +49,10 @@ struct DebugView: View {
             }
 
             Section("HealthKit inject") {
-                Text("Intervals = detection rides (not cable loop laps). Compare styles in Fitness.")
+                Text("Ride / rest = numbered intervals (kcal, time, HR). Other encodings stay in code for later.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                injectButton("Ride-only intervals (locked)", style: .rideOnly)
                 injectButton("Ride / rest intervals", style: .workRest)
-                injectButton("Samples only (no intervals)", style: .samplesOnly)
-                injectButton("Ride+rest + pause events (first try)", style: .ridePlusRest)
                 if isInjectingHealthKit {
                     HStack(spacing: 8) {
                         ProgressView()

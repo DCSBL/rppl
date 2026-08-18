@@ -538,31 +538,30 @@ final class WatchSessionController: NSObject {
         }
     }
 
-    /// Keep HK session running. Ride activities only (Fitness interval rows). Dock wait is a gap, not a rest activity.
+    /// Keep HK session running. Fitness intervals = ride then dock-wait activities (no rest labels).
     private func syncWorkoutForDetection(code: String, at date: Date = Date()) {
         guard !isProductPaused else { return }
         guard workoutSession != nil else { return }
         switch code {
         case DetectionCodes.riding:
             setRideMetricsCollection(enabled: true)
-            beginRideActivity(at: date)
+            beginDetectionActivity(code: code, at: date)
             WakeLog.debug(.workout, "HK riding activity")
         case DetectionCodes.inactive:
-            endRideActivity(at: date)
+            beginDetectionActivity(code: code, at: date)
             setRideMetricsCollection(enabled: false)
-            WakeLog.debug(.workout, "HK ride activity ended (inactive)")
+            WakeLog.debug(.workout, "HK inactive activity")
         default:
             break
         }
     }
 
-    private func beginRideActivity(at date: Date) {
+    private func beginDetectionActivity(code: String, at date: Date) {
         guard let session = workoutSession, let config = workoutConfiguration else { return }
-        guard !hkRideActivityOpen else { return }
         session.beginNewActivity(
             configuration: config,
             date: date,
-            metadata: ["nl.dcsbl.rppl.detectionCode": DetectionCodes.riding]
+            metadata: ["nl.dcsbl.rppl.detectionCode": code]
         )
         hkRideActivityOpen = true
     }
