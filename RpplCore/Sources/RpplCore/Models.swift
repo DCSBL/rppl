@@ -11,6 +11,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var startedAt: Date
     public var endedAt: Date?
     public var transferState: TransferState
+    /// True when Watch had water-submersion hardware at session start (Ultra).
+    public var waterTemperatureAvailable: Bool?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -29,7 +31,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         systemVersion: String,
         startedAt: Date = Date(),
         endedAt: Date? = nil,
-        transferState: TransferState = .recording
+        transferState: TransferState = .recording,
+        waterTemperatureAvailable: Bool? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -41,6 +44,7 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.transferState = transferState
+        self.waterTemperatureAvailable = waterTemperatureAvailable
     }
 }
 
@@ -184,5 +188,16 @@ public struct HealthMetricSample: Codable, Equatable, Sendable {
         self.heartRateBPM = heartRateBPM
         self.activeEnergyKilocalories = activeEnergyKilocalories
         self.basalEnergyKilocalories = basalEnergyKilocalories
+    }
+}
+
+/// Sparse Ultra water-temperature reading (persisted while submerged).
+public struct WaterTemperatureSample: Codable, Equatable, Sendable {
+    public var timestamp: Date
+    public var celsius: Double
+
+    public init(timestamp: Date, celsius: Double) {
+        self.timestamp = timestamp
+        self.celsius = celsius
     }
 }

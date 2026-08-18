@@ -4,7 +4,7 @@ import Testing
 
 private let t0 = Date(timeIntervalSince1970: 1_700_000_000)
 
-private func manifest(endedAt: Date? = nil) -> SessionManifest {
+private func manifest(endedAt: Date? = nil, waterTemperatureAvailable: Bool? = nil) -> SessionManifest {
     SessionManifest(
         sessionId: "test-session",
         testerId: "tester",
@@ -14,7 +14,8 @@ private func manifest(endedAt: Date? = nil) -> SessionManifest {
         systemVersion: "11.0",
         startedAt: t0,
         endedAt: endedAt,
-        transferState: .acknowledged
+        transferState: .acknowledged,
+        waterTemperatureAvailable: waterTemperatureAvailable
     )
 }
 
@@ -48,6 +49,10 @@ private func location(
         horizontalAccuracy: accuracy,
         speed: speedMps
     )
+}
+
+private func waterSample(at offset: TimeInterval, celsius: Double) -> WaterTemperatureSample {
+    WaterTemperatureSample(timestamp: t0.addingTimeInterval(offset), celsius: celsius)
 }
 
 @Suite("GeoDistance")
@@ -138,6 +143,19 @@ struct EnergyFormatTests {
         let formatted = EnergyFormat.kilocalories(120, locale: Locale(identifier: "en_US"))
         #expect(formatted.contains("120"))
         #expect(formatted.lowercased().contains("cal") || formatted.lowercased().contains("kcal"))
+    }
+}
+
+@Suite("TemperatureFormat")
+struct TemperatureFormatTests {
+    @Test func placeholderIsDashC() {
+        #expect(TemperatureFormat.placeholder == "- C")
+    }
+
+    @Test func celsiusIncludesValueAndUnit() {
+        let formatted = TemperatureFormat.celsius(21.4, locale: Locale(identifier: "en_US"))
+        #expect(formatted.contains("21.4"))
+        #expect(formatted.hasSuffix(" C"))
     }
 }
 
@@ -295,6 +313,52 @@ struct SessionStatsBuilderTests {
         )
         #expect(stats.rideCount == 1)
         #expect(stats.rides[0].endedAt == t0.addingTimeInterval(100))
+    }
+
+    @Test func waterTemperatureAveragesAllSamples() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 50, id: "p1"),
+        ]
+        let water = [
+            waterSample(at: 5, celsius: 18),
+            waterSample(at: 20, celsius: 20),
+            waterSample(at: 60, celsius: 22),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(80), waterTemperatureAvailable: true),
+            detections: detections,
+            locations: [],
+            health: [],
+            water: water
+        )
+        #expect(stats.waterTemperatureAvailable)
+        #expect(stats.averageWaterTemperatureCelsius == 20)
+    }
+
+    @Test func missingCapabilityHidesWaterTemperature() {
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(60)),
+            detections: [detection(code: DetectionCodes.inactive, at: 0, id: "s")],
+            locations: [],
+            health: [],
+            water: []
+        )
+        #expect(!stats.waterTemperatureAvailable)
+        #expect(stats.averageWaterTemperatureCelsius == nil)
+    }
+
+    @Test func capableWithoutSamplesLeavesAverageNil() {
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(60), waterTemperatureAvailable: true),
+            detections: [detection(code: DetectionCodes.inactive, at: 0, id: "s")],
+            locations: [],
+            health: [],
+            water: []
+        )
+        #expect(stats.waterTemperatureAvailable)
+        #expect(stats.averageWaterTemperatureCelsius == nil)
     }
 }
 

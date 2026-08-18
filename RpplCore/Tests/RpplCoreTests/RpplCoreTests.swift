@@ -71,7 +71,8 @@ struct SessionFileStoreTests {
             appVersion: "1.0",
             buildNumber: "1",
             watchModel: "Ultra2",
-            systemVersion: "26.0"
+            systemVersion: "26.0",
+            waterTemperatureAvailable: true
         )
         try watchStore.createSession(manifest: manifest)
         try watchStore.appendDetection(
@@ -91,6 +92,9 @@ struct SessionFileStoreTests {
                 speed: 4
             )
         ], sessionId: manifest.sessionId)
+        try watchStore.appendWaterTemperatureSamples([
+            WaterTemperatureSample(timestamp: Date(timeIntervalSince1970: 12), celsius: 19.5)
+        ], sessionId: manifest.sessionId)
         try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
@@ -99,8 +103,12 @@ struct SessionFileStoreTests {
         let phoneStore = SessionFileStore(rootURL: phoneRoot)
         let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
         #expect(phoneManifest.transferState == .acknowledged)
+        #expect(phoneManifest.waterTemperatureAvailable == true)
         #expect(try phoneStore.readDetections(sessionId: manifest.sessionId).count == 1)
         #expect(try phoneStore.readLocationSamples(sessionId: manifest.sessionId).count == 1)
+        let water = try phoneStore.readWaterTemperatureSamples(sessionId: manifest.sessionId)
+        #expect(water.count == 1)
+        #expect(water[0].celsius == 19.5)
     }
 
     @Test func migratesLegacyAssumptionsFile() throws {
@@ -202,6 +210,7 @@ struct SessionFileStoreTests {
         #expect(package.detections.count == 1)
         #expect(package.detections[0].code == "riding")
         #expect(package.detections[0].id == "a1")
+        #expect(package.water.isEmpty)
     }
 
     @Test func failedTransferDoesNotDropReadySessions() throws {

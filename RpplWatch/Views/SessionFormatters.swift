@@ -36,4 +36,8 @@ enum SessionFormatters {
         guard let metersPerSecond, metersPerSecond >= 0 else { return "--" }
         return String(format: "%.1f", metersPerSecond * 3.6)
     }
+
+    static func waterTemp(_ celsius: Double) -> String {
+        TemperatureFormat.celsius(celsius)
+    }
 }

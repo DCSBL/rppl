@@ -103,6 +103,13 @@ struct SessionDetailView: View {
                             + Self.formatDuration(stats.ridingDuration)
                     )
                     LabeledContent("Inactive", value: Self.formatDuration(stats.inactiveDuration))
+                    if stats.waterTemperatureAvailable {
+                        LabeledContent(
+                            "Water temp",
+                            value: stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
+                                ?? TemperatureFormat.placeholder
+                        )
+                    }
                 }
 
                 Section("Rides (\(stats.rides.count))") {
@@ -333,11 +340,13 @@ struct SessionDetailView: View {
 
             let stats = try await Self.runStoreIO {
                 let health = try store.readHealthSamples(sessionId: sessionId)
+                let water = try store.readWaterTemperatureSamples(sessionId: sessionId)
                 return SessionStatsBuilder.build(
                     manifest: loadedManifest,
                     detections: loadedDetections,
                     locations: locationBundle.0,
-                    health: health
+                    health: health,
+                    water: water
                 )
             }
             try Task.checkCancellation()

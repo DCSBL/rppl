@@ -56,6 +56,10 @@ public struct SessionStats: Equatable, Sendable {
     /// `ridingDuration / (ridingDuration + inactiveDuration)`; 0 when no active time.
     public var ridingInactiveRatio: Double
     public var rides: [RideSegmentStats]
+    /// Mean of persisted water-temp samples; nil when none.
+    public var averageWaterTemperatureCelsius: Double?
+    /// Watch could measure (Ultra). Drives hide vs `- C`.
+    public var waterTemperatureAvailable: Bool
 
     /// Max sustained speed across rides (km/h).
     public var topSpeedKmh: Double? {
@@ -78,7 +82,9 @@ public struct SessionStats: Equatable, Sendable {
         ridingDuration: TimeInterval,
         inactiveDuration: TimeInterval,
         ridingInactiveRatio: Double,
-        rides: [RideSegmentStats]
+        rides: [RideSegmentStats],
+        averageWaterTemperatureCelsius: Double? = nil,
+        waterTemperatureAvailable: Bool = false
     ) {
         self.startedAt = startedAt
         self.endedAt = endedAt
@@ -91,5 +97,7 @@ public struct SessionStats: Equatable, Sendable {
         self.inactiveDuration = inactiveDuration
         self.ridingInactiveRatio = ridingInactiveRatio
         self.rides = rides
+        self.averageWaterTemperatureCelsius = averageWaterTemperatureCelsius
+        self.waterTemperatureAvailable = waterTemperatureAvailable
     }
 }

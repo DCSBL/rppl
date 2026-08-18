@@ -26,6 +26,10 @@ enum LogbookFormatting {
         EnergyFormat.kilocalories(value)
     }
 
+    static func waterTemperature(_ celsius: Double) -> String {
+        TemperatureFormat.celsius(celsius)
+    }
+
     static func rideCount(_ count: Int) -> String {
         String(localized: "\(count) rides")
     }

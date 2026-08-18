@@ -150,6 +150,13 @@ struct SessionRideUIPage: View {
                     label: "Inactive for",
                     value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
                 )
+                if session.waterTemperatureAvailable {
+                    SessionMetricRow(
+                        label: "Water",
+                        value: session.averageWaterTemperatureCelsius.map(SessionFormatters.waterTemp)
+                            ?? TemperatureFormat.placeholder
+                    )
+                }
 
                 if let hr = session.lastHeartRate {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
