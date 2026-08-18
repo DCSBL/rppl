@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthKit
 import RpplCore
 
 struct DebugView: View {
@@ -10,6 +11,11 @@ struct DebugView: View {
     @State private var isReloadingSessions = false
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
+    @State private var hkInjectMessage: String?
+    @State private var hkInjectError: String?
+    @State private var isInjectingHealthKit = false
+
+    private let healthStore = HKHealthStore()
 
     var body: some View {
         List {
@@ -39,6 +45,33 @@ struct DebugView: View {
                 }
                 if let err = permissions.lastError {
                     Text(err).foregroundStyle(.red).font(.caption)
+                }
+            }
+
+            Section("HealthKit") {
+                Button {
+                    WakeLog.debug(.ui, "tap Inject HealthKit fixture")
+                    injectHealthKitFixture()
+                } label: {
+                    if isInjectingHealthKit {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Injecting fixture…")
+                        }
+                    } else {
+                        Text("Inject workout from fixture")
+                    }
+                }
+                .disabled(isInjectingHealthKit)
+                if let hkInjectMessage {
+                    Text(hkInjectMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if let hkInjectError {
+                    Text(hkInjectError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
                 }
             }
 
@@ -121,6 +154,30 @@ struct DebugView: View {
         .onChange(of: connectivity.sessionsRevision) { _, _ in
             WakeLog.debug(.ui, "sessionsRevision changed — reload")
             reload()
+        }
+    }
+
+    private func injectHealthKitFixture() {
+        hkInjectMessage = nil
+        hkInjectError = nil
+        isInjectingHealthKit = true
+        Task {
+            do {
+                let summary = try await HealthKitDebugInjector.inject(healthStore: healthStore)
+                await MainActor.run {
+                    hkInjectMessage = summary
+                    hkInjectError = nil
+                    isInjectingHealthKit = false
+                    WakeLog.debug(.ui, "HK inject OK: \(summary)")
+                }
+            } catch {
+                await MainActor.run {
+                    hkInjectError = error.localizedDescription
+                    hkInjectMessage = nil
+                    isInjectingHealthKit = false
+                    WakeLog.error(.ui, "HK inject: \(error.localizedDescription)")
+                }
+            }
         }
     }
 
