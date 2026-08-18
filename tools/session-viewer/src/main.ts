@@ -25,6 +25,12 @@ import {
   trackExtent,
 } from './draw'
 import { codeAt, deriveSession, nearestLocation } from './sessionStats'
+import {
+  type ExportSource,
+  buildWindowExport,
+  downloadTransferPackage,
+  summarizeExport,
+} from './exportSession'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = `
@@ -37,6 +43,7 @@ app.innerHTML = `
       <label class="file">Open export JSON
         <input id="json" type="file" accept="application/json,.json" />
       </label>
+      <button type="button" id="exportJson" class="export-btn" disabled title="Download start/end window as session JSON">Export JSON</button>
     </div>
     <button type="button" id="playPause" class="play-btn" disabled title="Space">Play</button>
   </header>
@@ -49,7 +56,7 @@ app.innerHTML = `
     <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
     <div class="metric"><span class="metric-label">Riding</span><span class="metric-value" data-k="riding">—</span></div>
   </div>
-  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow lap. Space = play/pause realtime.</p>
+  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow lap. Space = play/pause realtime. Export JSON = current start/end window, all streams.</p>
   <div class="range-row">
     <span>Start</span>
     <input id="start" type="range" disabled />
@@ -82,6 +89,7 @@ const startLabel = document.querySelector<HTMLSpanElement>('#startLabel')!
 const endLabel = document.querySelector<HTMLSpanElement>('#endLabel')!
 const playheadLabel = document.querySelector<HTMLSpanElement>('#playheadLabel')!
 const playPauseBtn = document.querySelector<HTMLButtonElement>('#playPause')!
+const exportJsonBtn = document.querySelector<HTMLButtonElement>('#exportJson')!
 const trackCanvas = document.querySelector<HTMLCanvasElement>('#track')!
 const speedCanvas = document.querySelector<HTMLCanvasElement>('#speed')!
 const accuracyCanvas = document.querySelector<HTMLCanvasElement>('#accuracy')!
@@ -95,6 +103,7 @@ let allSegments: Segment[] = []
 let derived: DerivedSession | null = null
 let selectedId: string | null = null
 let sourceLabel = ''
+let exportSource: ExportSource = { kind: 'memory' }
 let persistTimer: number | null = null
 let playing = false
 let rafId: number | null = null
@@ -242,6 +251,7 @@ function wireSliders(): void {
   endSlider.disabled = false
   playheadSlider.disabled = false
   playPauseBtn.disabled = false
+  exportJsonBtn.disabled = false
   startSlider.min = String(span.startMs)
   startSlider.max = String(span.endMs)
   endSlider.min = String(span.startMs)
@@ -360,6 +370,7 @@ window.addEventListener('keydown', (ev) => {
   const target = ev.target as HTMLElement | null
   if (target instanceof HTMLInputElement && target.type === 'file') return
   if (target instanceof HTMLTextAreaElement) return
+  if (target instanceof HTMLButtonElement) return
   ev.preventDefault()
   togglePlay()
 })
@@ -403,7 +414,9 @@ document.querySelector<HTMLInputElement>('#folder')!.addEventListener('change', 
   if (!files?.length) return
   statusEl.textContent = 'Loading folder…'
   try {
-    applyPackage(await loadSessionFolder(files), 'folder')
+    const loaded = await loadSessionFolder(files)
+    exportSource = { kind: 'folder', files: Array.from(files) }
+    applyPackage(loaded, 'folder')
   } catch (err) {
     statusEl.textContent = err instanceof Error ? err.message : String(err)
   }
@@ -416,11 +429,32 @@ document.querySelector<HTMLInputElement>('#json')!.addEventListener('change', as
   if (!file) return
   statusEl.textContent = 'Loading export…'
   try {
-    applyPackage(await loadExportJson(file), file.name)
+    const loaded = await loadExportJson(file)
+    exportSource = { kind: 'json', file }
+    applyPackage(loaded, file.name)
   } catch (err) {
     statusEl.textContent = err instanceof Error ? err.message : String(err)
   }
   input.value = ''
+})
+
+exportJsonBtn.addEventListener('click', () => {
+  void (async () => {
+    if (!pkg || !windowRange) return
+    exportJsonBtn.disabled = true
+    statusEl.textContent = 'Exporting window…'
+    try {
+      const sliced = await buildWindowExport(exportSource, pkg, windowRange)
+      downloadTransferPackage(sliced)
+      const lean =
+        exportSource.kind === 'memory' ? ' · lean (reopen folder/JSON for motion/health)' : ''
+      statusEl.textContent = `Exported ${summarizeExport(sliced)}${lean}`
+    } catch (err) {
+      statusEl.textContent = err instanceof Error ? err.message : String(err)
+    } finally {
+      exportJsonBtn.disabled = !pkg
+    }
+  })()
 })
 
 window.addEventListener('resize', () => {
@@ -430,6 +464,7 @@ window.addEventListener('resize', () => {
 void loadCachedSession()
   .then((cached) => {
     if (!cached?.package?.manifest) return
+    exportSource = { kind: 'memory' }
     applyPackage(
       cached.package,
       cached.label || 'restored',

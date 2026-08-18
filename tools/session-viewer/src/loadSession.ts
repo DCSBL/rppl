@@ -74,7 +74,7 @@ function groupByDir(files: File[]): Map<string, File[]> {
   return map
 }
 
-function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
+export function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
   return raw
     .map((event) => ({
       ...event,
@@ -83,7 +83,7 @@ function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
     .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
 }
 
-async function parseJsonl(file: File | undefined): Promise<unknown[]> {
+export async function parseJsonl(file: File | undefined): Promise<unknown[]> {
   if (!file) return []
   const text = await file.text()
   const out: unknown[] = []
@@ -95,12 +95,12 @@ async function parseJsonl(file: File | undefined): Promise<unknown[]> {
   return out
 }
 
-function basename(path: string): string {
+export function basename(path: string): string {
   const parts = path.split(/[/\\]/)
   return parts[parts.length - 1] ?? path
 }
 
-function dirname(path: string): string {
+export function dirname(path: string): string {
   const parts = path.split(/[/\\]/)
   parts.pop()
   return parts.join('/') || '.'
