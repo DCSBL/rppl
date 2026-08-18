@@ -124,6 +124,13 @@ struct LogbookSessionDetailView: View {
                         LogbookFormatting.duration(stats.inactiveDuration),
                         label: "Inactive"
                     )
+                    if stats.waterTemperatureAvailable {
+                        statTile(
+                            stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
+                                ?? TemperatureFormat.placeholder,
+                            label: "Water temp"
+                        )
+                    }
                     if let calories = stats.activeEnergyKilocalories {
                         statTile(
                             LogbookFormatting.kilocalories(calories),
@@ -245,11 +252,17 @@ struct LogbookSessionDetailView: View {
             }
             try Task.checkCancellation()
 
+            let water = try await runStoreIO {
+                try store.readWaterTemperatureSamples(sessionId: sessionId)
+            }
+            try Task.checkCancellation()
+
             let stats = SessionStatsBuilder.build(
                 manifest: loadedManifest,
                 detections: detections,
                 locations: locations,
-                health: health
+                health: health,
+                water: water
             )
             let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
             let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: stats.rides)
