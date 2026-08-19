@@ -332,7 +332,6 @@ export function drawSpeed(
     '#a78bfa',
     `walk ${thresholds.walkBandSpeedKmh} km/h`,
   )
-
   if (!points.length) {
     drawCentered(ctx, w, h, 'No usable speed in window')
     drawPlayheadCursor(ctx, frame, range, playheadMs)

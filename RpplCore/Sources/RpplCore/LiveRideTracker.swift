@@ -14,6 +14,8 @@ public struct LiveRideTracker: Sendable {
     public private(set) var didCompleteRide = false
     /// Sum of finished ride meters plus current ride (ride-gated session distance).
     public private(set) var sessionRideMeters = 0.0
+    /// Sum of finished ride durations (includes a ride closed at session stop).
+    public private(set) var sessionRidingDuration: TimeInterval = 0
     public private(set) var currentSpeedKmh: Double?
     /// Crossing-based laps for the current ride (0 while inactive after finish until next enter).
     public var currentRideLapCount: Int { lapTracker.lapCount }
@@ -47,6 +49,7 @@ public struct LiveRideTracker: Sendable {
         lastRideLapCount = 0
         didCompleteRide = false
         sessionRideMeters = 0
+        sessionRidingDuration = 0
         finishedRideMeters = 0
         currentSpeedKmh = nil
         trackedCode = DetectionCodes.inactive
@@ -152,6 +155,7 @@ public struct LiveRideTracker: Sendable {
         }
         lastRideLapCount = lapTracker.lapCount
         didCompleteRide = true
+        sessionRidingDuration += lastRideDuration
         finishedRideMeters += currentRideMeters
         currentRideMeters = 0
         isRideOngoing = false

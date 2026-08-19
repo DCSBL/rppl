@@ -49,10 +49,14 @@ struct DebugView: View {
             }
 
             Section("HealthKit inject") {
-                Text("Ride / rest = numbered intervals (kcal, time, HR). Other encodings stay in code for later.")
+                Text("Writes one waterSports workout matching Watch save (HR, energy, ride distance, route, ride/dock intervals). Fitness may hide distance/speed tiles; logbook shows max/avg from GPS. Re-request permissions if inject fails.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                injectButton("Ride / rest intervals", style: .workRest)
+                Button("Inject session into Health") {
+                    WakeLog.debug(.ui, "tap HK inject waterSports")
+                    injectHealthKitFixture()
+                }
+                .disabled(isInjectingHealthKit)
                 if isInjectingHealthKit {
                     HStack(spacing: 8) {
                         ProgressView()
@@ -153,26 +157,18 @@ struct DebugView: View {
         }
     }
 
-    private func injectButton(_ title: String, style: HealthKitDebugInjector.Style) -> some View {
-        Button(title) {
-            WakeLog.debug(.ui, "tap HK inject \(style.rawValue)")
-            injectHealthKitFixture(style: style)
-        }
-        .disabled(isInjectingHealthKit)
-    }
-
-    private func injectHealthKitFixture(style: HealthKitDebugInjector.Style) {
+    private func injectHealthKitFixture() {
         hkInjectMessage = nil
         hkInjectError = nil
         isInjectingHealthKit = true
         Task {
             do {
-                let summary = try await HealthKitDebugInjector.inject(healthStore: healthStore, style: style)
+                let result = try await HealthKitDebugInjector.inject(healthStore: healthStore)
                 await MainActor.run {
-                    hkInjectMessage = summary
+                    hkInjectMessage = result
                     hkInjectError = nil
                     isInjectingHealthKit = false
-                    WakeLog.debug(.ui, "HK inject OK: \(summary)")
+                    WakeLog.debug(.ui, "HK inject OK: \(result)")
                 }
             } catch {
                 await MainActor.run {
