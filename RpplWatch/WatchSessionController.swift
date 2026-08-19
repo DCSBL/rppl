@@ -653,7 +653,7 @@ final class WatchSessionController: NSObject {
         session.beginNewActivity(
             configuration: config,
             date: date,
-            metadata: ["nl.dcsbl.rppl.detectionCode": code]
+            metadata: [WorkoutMetadataKeys.detectionCode: code]
         )
         hkRideActivityOpen = true
     }
@@ -765,10 +765,7 @@ final class WatchSessionController: NSObject {
     }
 
     private func startWorkout() async throws {
-        let config = HKWorkoutConfiguration()
-        // waterSports MET model for wakeboarding. Fitness may omit distance/speed tiles (DCS-44).
-        config.activityType = .waterSports
-        config.locationType = .outdoor
+        let config = HealthKitWorkoutPolicy.makeConfiguration()
 
         let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
         let builder = session.associatedWorkoutBuilder()
@@ -788,7 +785,7 @@ final class WatchSessionController: NSObject {
             HKMetadataKeyWorkoutBrandName: "Rppl",
         ]
         if let sessionId = manifest?.sessionId {
-            metadata["nl.dcsbl.rppl.sessionId"] = sessionId
+            metadata[WorkoutMetadataKeys.sessionId] = sessionId
         }
         if let activityCode = manifest?.activityCode, !activityCode.isEmpty {
             metadata[AppConstants.hkMetadataActivityCode] = activityCode
@@ -835,8 +832,8 @@ final class WatchSessionController: NSObject {
 
         do {
             var closingMetadata: [String: Any] = [
-                "nl.dcsbl.rppl.rideCount": liveRideTracker.rideCount,
-                "nl.dcsbl.rppl.totalDistanceMeters": hkRideDistanceMeters
+                WorkoutMetadataKeys.rideCount: liveRideTracker.rideCount,
+                WorkoutMetadataKeys.totalDistanceMeters: hkRideDistanceMeters
             ]
             if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
                 distanceMeters: hkRideDistanceMeters,
@@ -983,14 +980,14 @@ final class WatchSessionController: NSObject {
     /// Interval distance + speed on ride HKWorkoutActivity rows (not cable loop laps).
     private func attachRideMetricsToActivities(_ builder: HKLiveWorkoutBuilder) async throws {
         for activity in builder.workoutActivities {
-            let code = activity.metadata?["nl.dcsbl.rppl.detectionCode"] as? String
+            let code = activity.metadata?[WorkoutMetadataKeys.detectionCode] as? String
             guard code == DetectionCodes.riding else { continue }
             guard let ride = hkRides.first(where: {
                 abs($0.startedAt.timeIntervalSince(activity.startDate)) < 1
             }) else { continue }
 
             var metadata: [String: Any] = [
-                "nl.dcsbl.rppl.distanceMeters": ride.meters
+                WorkoutMetadataKeys.rideDistanceMeters: ride.meters
             ]
             if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
                 distanceMeters: ride.meters,
