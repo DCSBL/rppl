@@ -13,6 +13,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var transferState: TransferState
     /// True when Watch had water-submersion hardware at session start (Ultra).
     public var waterTemperatureAvailable: Bool?
+    /// Opaque activity code (`wakeboard`, …). Localized titles are display-only.
+    public var activityCode: String?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -32,7 +34,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         startedAt: Date = Date(),
         endedAt: Date? = nil,
         transferState: TransferState = .recording,
-        waterTemperatureAvailable: Bool? = nil
+        waterTemperatureAvailable: Bool? = nil,
+        activityCode: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -45,6 +48,7 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.endedAt = endedAt
         self.transferState = transferState
         self.waterTemperatureAvailable = waterTemperatureAvailable
+        self.activityCode = activityCode
     }
 }
 

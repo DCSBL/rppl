@@ -4,6 +4,9 @@ public enum AppConstants {
     public static let appGroupID = "group.nl.dcsbl.dev.rppl"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
+    /// Opaque last-started activity code (`wakeboard`, …). Never a localized title.
+    public static let lastActivityCodeDefaultsKey = "nl.dcsbl.rppl.lastActivityCode"
+    public static let hkMetadataActivityCode = "nl.dcsbl.rppl.activityCode"
 
     public static var documentsSessionsRoot: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]

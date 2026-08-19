@@ -240,7 +240,7 @@ private struct SessionCard: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     (
-                        Text("Wakeboarding")
+                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
                             .foregroundStyle(Color.rpplText)
                         + (entry.highlights.isEmpty
                             ? Text("")

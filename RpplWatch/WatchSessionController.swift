@@ -14,6 +14,10 @@ final class WatchSessionController: NSObject {
     var isRunning = false
     /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
     var isStopping = false
+    /// True while permissions / HK start run — stay on the tapped picker card.
+    var isStarting = false
+    /// Opaque code of the activity card currently starting.
+    var startingActivityCode: String?
     /// Product pause: sensors/timers halted; distinct from detection `inactive`.
     var isProductPaused = false
     var detectionCode = DetectionCodes.inactive
@@ -217,15 +221,21 @@ final class WatchSessionController: NSObject {
         )
     }
 
-    func startSession() async {
-        guard !isRunning, !isStopping else {
-            WakeLog.debug(.session, "startSession ignored — running=\(isRunning) stopping=\(isStopping)")
+    func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
+        guard !isRunning, !isStopping, !isStarting else {
+            WakeLog.debug(
+                .session,
+                "startSession ignored — running=\(isRunning) stopping=\(isStopping) starting=\(isStarting)"
+            )
             return
         }
-        WakeLog.debug(.session, "startSession begin")
+        let code = activityCode.isEmpty ? ActivityCodes.wakeboard : activityCode
+        WakeLog.debug(.session, "startSession begin activity=\(code)")
         errorText = nil
         statusText = String(localized: "Starting…")
         recordingMode = "none"
+        isStarting = true
+        startingActivityCode = code
 
         await requestPermissions()
 
@@ -240,7 +250,8 @@ final class WatchSessionController: NSObject {
             buildNumber: info.infoDictionary?["CFBundleVersion"] as? String ?? "1",
             watchModel: WatchSessionController.deviceModel(),
             systemVersion: WKInterfaceDevice.current().systemVersion,
-            waterTemperatureAvailable: waterTemperatureAvailable
+            waterTemperatureAvailable: waterTemperatureAvailable,
+            activityCode: code
         )
         self.manifest = manifest
         WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")
@@ -253,8 +264,11 @@ final class WatchSessionController: NSObject {
             errorText = String(localized: "Store: \(error.localizedDescription)")
             statusText = String(localized: "Failed")
             WakeLog.error(.store, "createSession: \(error.localizedDescription)")
+            isStarting = false
+            startingActivityCode = nil
             return
         }
+        ActivityCodes.rememberLastUsed(code)
 
         let workoutStarted = await startWorkoutIfAuthorized()
         if workoutStarted {
@@ -290,6 +304,8 @@ final class WatchSessionController: NSObject {
         isProductPaused = false
         currentSegmentStartedAt = Date()
         isRunning = true
+        isStarting = false
+        startingActivityCode = nil
         if recordingMode == "workout" {
             statusText = String(localized: "Recording")
         }
@@ -482,12 +498,16 @@ final class WatchSessionController: NSObject {
 
     /// Start-workout Action Button entry: start session, or no-op if already recording.
     func handleStartWorkoutIntent() async {
-        if isRunning || isStopping {
-            WakeLog.debug(.intent, "StartCableParkSessionIntent: busy running=\(isRunning) stopping=\(isStopping) — no-op")
+        if isRunning || isStopping || isStarting {
+            WakeLog.debug(
+                .intent,
+                "StartCableParkSessionIntent: busy running=\(isRunning) stopping=\(isStopping) starting=\(isStarting) — no-op"
+            )
             return
         }
-        WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session")
-        await startSession()
+        let code = ActivityCodes.resolvedStartCode()
+        WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session activity=\(code)")
+        await startSession(activityCode: code)
     }
 
     private func logSessionStartDetection() {
@@ -758,7 +778,9 @@ final class WatchSessionController: NSObject {
         ]
         if let sessionId = manifest?.sessionId {
             metadata["nl.dcsbl.rppl.sessionId"] = sessionId
-            metadata["nl.dcsbl.rppl.activityName"] = "Cable Park"
+        }
+        if let activityCode = manifest?.activityCode, !activityCode.isEmpty {
+            metadata[AppConstants.hkMetadataActivityCode] = activityCode
         }
         try await builder.addMetadata(metadata)
 

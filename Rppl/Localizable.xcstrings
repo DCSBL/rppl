@@ -730,9 +730,6 @@
         }
       }
     },
-    "Intervals = detection rides (not cable loop laps). Compare styles in Fitness." : {
-
-    },
     "iPhone" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1454,6 +1451,9 @@
         }
       }
     },
+    "Ride / rest = numbered intervals (kcal, time, HR). Other encodings stay in code for later." : {
+
+    },
     "Ride %lld" : {
       "localizations" : {
         "en" : {
@@ -1967,6 +1967,7 @@
       }
     },
     "Wakeboarding" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2045,6 +2046,9 @@
           }
         }
       }
+    },
+    "Water temp" : {
+
     },
     "WC activated" : {
       "localizations" : {
