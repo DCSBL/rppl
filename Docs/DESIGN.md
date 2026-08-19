@@ -6,9 +6,17 @@ How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngi
 
 ```mermaid
 flowchart TB
-  subgraph watch [RpplWatch]
+  subgraph watch [RpplWatch Session/]
     WSC[WatchSessionController]
+    Life[WatchSessionLifecycle]
+    Det[WatchDetectionCoordinator]
+    HK[WatchHealthKitCoordinator]
+    Sens[WatchSensorSampler]
     Intent[StartCableParkSessionIntent]
+    WSC --> Life
+    WSC --> Det
+    WSC --> HK
+    WSC --> Sens
   end
 
   subgraph core [RpplCore]
