@@ -8,7 +8,7 @@ struct SessionMapView: View {
     /// Style toggle only on the session map card — not ride maps.
     var showsStyleToggle: Bool = false
 
-    @AppStorage(AppSettings.Key.mapUsesSatellite) private var usesSatellite = false
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
     @State private var fitted: MapTrackFit?
     @State private var showReset = false
