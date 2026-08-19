@@ -91,6 +91,9 @@ enum HealthKitDebugInjector {
                 doubleValue: SpeedUnits.metersPerSecond(fromKilometersPerHour: maxKmh)
             )
         }
+        metadata[HKMetadataKeyWeatherTemperature] = HKQuantity(unit: .degreeCelsius(), doubleValue: 22)
+        metadata[HKMetadataKeyWeatherHumidity] = HKQuantity(unit: .percent(), doubleValue: 65)
+        metadata[HKMetadataKeyWeatherCondition] = NSNumber(value: HKWeatherCondition.partlyCloudy.rawValue)
         try await addMetadata(metadata, builder: builder)
 
         try await addHeartRateSamples(from: package.health, builder: builder)

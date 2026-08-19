@@ -127,6 +127,9 @@ final class WatchSessionController: NSObject {
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
     private var sessionWaterSamples: [WaterTemperatureSample] = []
+    private var airWeatherSnapshot: AirWeatherSnapshot?
+    private var airWeatherFetchTask: Task<Void, Never>?
+    private var airWeatherAttempted = false
 
     private let workoutType = HKObjectType.workoutType()
     private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
@@ -298,6 +301,7 @@ final class WatchSessionController: NSObject {
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
         resetWaterTemperatureTracking()
+        resetAirWeather()
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil
@@ -366,6 +370,7 @@ final class WatchSessionController: NSObject {
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
         resetWaterTemperatureTracking()
+        resetAirWeather()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         hkRides = []
@@ -843,6 +848,7 @@ final class WatchSessionController: NSObject {
                 )
             }
             try await builder.addMetadata(closingMetadata)
+            await attachAirWeatherMetadata(to: builder)
             try await builder.endCollection(at: stoppedDate)
             do {
                 try await addRideDistanceSamples(to: builder)
@@ -878,6 +884,58 @@ final class WatchSessionController: NSObject {
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
         hkRideActivityOpen = false
+    }
+
+    private func resetAirWeather() {
+        airWeatherFetchTask?.cancel()
+        airWeatherFetchTask = nil
+        airWeatherSnapshot = nil
+        airWeatherAttempted = false
+    }
+
+    private func requestAirWeatherIfNeeded(from location: CLLocation) {
+        guard recordingMode == "workout" else { return }
+        guard !airWeatherAttempted else { return }
+        guard AirWeatherKit.isUsable(location) else { return }
+        airWeatherAttempted = true
+        let loc = location
+        airWeatherFetchTask = Task { [weak self] in
+            let snapshot = await AirWeatherKit.fetch(location: loc)
+            guard let self, !Task.isCancelled else { return }
+            self.airWeatherSnapshot = snapshot
+            self.airWeatherFetchTask = nil
+            if snapshot != nil {
+                WakeLog.debug(.workout, "air weather cached")
+            }
+        }
+    }
+
+    private func attachAirWeatherMetadata(to builder: HKLiveWorkoutBuilder) async {
+        if airWeatherSnapshot == nil, let task = airWeatherFetchTask {
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask { await task.value }
+                group.addTask {
+                    try? await Task.sleep(for: .seconds(AirWeatherKit.fetchTimeout))
+                }
+                await group.next()
+                group.cancelAll()
+            }
+        }
+        if airWeatherSnapshot == nil, let loc = latestLocation, AirWeatherKit.isUsable(loc) {
+            airWeatherFetchTask?.cancel()
+            airWeatherFetchTask = nil
+            airWeatherSnapshot = await AirWeatherKit.fetch(location: loc)
+        }
+        guard let snapshot = airWeatherSnapshot else {
+            WakeLog.debug(.workout, "air weather skipped — none cached")
+            return
+        }
+        do {
+            try await builder.addMetadata(snapshot.healthKitMetadata)
+            WakeLog.debug(.workout, "air weather metadata attached")
+        } catch {
+            WakeLog.error(.workout, "air weather metadata: \(error.localizedDescription)")
+        }
     }
 
     private func recordFinishedHkRide(endedAt: Date) {
@@ -1207,6 +1265,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             locationCount += 1
             processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)
+            requestAirWeatherIfNeeded(from: loc)
         }
     }
 

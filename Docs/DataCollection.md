@@ -60,6 +60,8 @@ If Health denies workout sharing (common after tapping Don’t Allow, or flaky o
 
 Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as ride distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not generic water sports — Rppl does not switch activity type for temperature. JSONL remains the source for in-app stats.
 
+Air weather: Watch fetches WeatherKit current conditions from the first usable GPS fix (retry at stop, ~8 s timeout). On save it attaches `HKMetadataKeyWeatherTemperature`, `HKMetadataKeyWeatherHumidity`, and `HKMetadataKeyWeatherCondition`. Fail open — missing weather never blocks `finishWorkout()`. Distinct from Ultra water-temperature samples. Requires the Watch WeatherKit entitlement (and App ID capability).
+
 ## Action Button (Ultra)
 
 Optional start only:
