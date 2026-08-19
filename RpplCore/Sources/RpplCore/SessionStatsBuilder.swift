@@ -69,6 +69,7 @@ public enum SessionStatsBuilder {
                 locations: rideLocations,
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
+            let peak = LocationSpeedStats.peakSpeedKmh(from: rideLocations)
             rides.append(
                 RideSegmentStats(
                     index: index + 1,
@@ -78,7 +79,8 @@ public enum SessionStatsBuilder {
                     distanceMeters: distance,
                     lapCount: laps,
                     sustainedSpeedKmh: sustained,
-                    averageSpeedKmh: average
+                    averageSpeedKmh: average,
+                    peakSpeedKmh: peak
                 )
             )
             totalDistance += distance

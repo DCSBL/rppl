@@ -13,7 +13,6 @@ struct LogbookSessionDetailView: View {
     @State private var sessionStats: SessionStats?
     @State private var mapTracks: [[LocationSample]] = []
     @State private var allLocations: [LocationSample] = []
-    @State private var topSpeedKmh: Double?
     @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
     @State private var loadTask: Task<Void, Never>?
@@ -59,6 +58,12 @@ struct LogbookSessionDetailView: View {
     private var navigationTitle: String {
         guard let manifest else { return String(localized: "Session") }
         return LogbookFormatting.sessionDate(manifest.startedAt)
+    }
+
+    private var displayedMaxSpeedKmh: Double? {
+        guard let stats = sessionStats else { return nil }
+        return stats.maxSpeedKmh
+            ?? SessionLocationHelpers.peakSpeedKmh(rides: stats.rides, locations: allLocations)
     }
 
     @ViewBuilder
@@ -110,8 +115,12 @@ struct LogbookSessionDetailView: View {
                         label: "Distance"
                     )
                     statTile(
-                        topSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
-                        label: "Top speed"
+                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        label: "Max speed"
+                    )
+                    statTile(
+                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        label: "Avg speed"
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
                     statTile("\(stats.totalLapCount)", label: "Laps")
@@ -275,11 +284,6 @@ struct LogbookSessionDetailView: View {
             sessionStats = stats
             allLocations = sortedLocations
             mapTracks = mapPoints
-            topSpeedKmh = stats.topSpeedKmh
-                ?? SessionLocationHelpers.sustainedSpeedKmh(
-                    rides: stats.rides,
-                    locations: sortedLocations
-                )
             cityName = await SessionCityResolver.shared.cityName(
                 sessionId: sessionId,
                 locations: sortedLocations
@@ -316,8 +320,8 @@ private struct RideDetailCard: View {
     let ride: RideSegmentStats
     let locations: [LocationSample]
 
-    private var topSpeedKmh: Double? {
-        ride.sustainedSpeedKmh ?? SessionLocationHelpers.sustainedSpeedKmh(from: locations)
+    private var maxSpeedKmh: Double? {
+        SessionLocationHelpers.peakSpeedKmh(for: ride, locations: locations)
     }
 
     private var averageSpeedKmh: Double? {
@@ -370,8 +374,8 @@ private struct RideDetailCard: View {
                 )
                 rideStatTile("\(ride.lapCount)", label: "Laps")
                 rideStatTile(
-                    topSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
-                    label: "Top speed"
+                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    label: "Max speed"
                 )
                 rideStatTile(
                     averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",

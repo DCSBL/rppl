@@ -43,9 +43,13 @@ final class PermissionsModel {
         let distance = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
         let waterTemp = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
         let route = HKSeriesType.workoutRoute()
-        let read: Set<HKObjectType> = [heartRate, energy, basal, workout, distance, waterTemp]
+        let read: Set<HKObjectType> = [
+            heartRate, energy, basal, workout, distance, waterTemp
+        ]
         // Mirror Watch share types so Health prompts stay consistent across the pair.
-        let share: Set<HKSampleType> = [workout, heartRate, energy, basal, distance, waterTemp, route]
+        let share: Set<HKSampleType> = [
+            workout, heartRate, energy, basal, distance, waterTemp, route
+        ]
         do {
             try await healthStore.requestAuthorization(toShare: share, read: read)
             switch healthStore.authorizationStatus(for: workout) {

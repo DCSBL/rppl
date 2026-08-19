@@ -20,7 +20,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
 | Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
-| HealthKit | Save workout via `finishWorkout()` · HK session stays running · ride + dock HK activities · ride-scoped energy/distance · mirror HR/energy into files |
+| HealthKit | Save workout via `finishWorkout()` · `waterSports` (wakeboard MET) · HK session stays running · ride + dock HK activities · ride-scoped energy · ride-gated distance samples + GPS route · HR/energy mirrored into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
 | Water Lock | On at session start |
 | Identity | Anonymous `testerId` in UserDefaults / App Group |

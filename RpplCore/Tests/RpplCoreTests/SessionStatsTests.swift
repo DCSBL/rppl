@@ -181,9 +181,9 @@ struct SessionStatsBuilderTests {
             detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
         ]
         let locations = [
-            location(at: 20, lat: 52.0, lon: 5.0),
-            location(at: 21, lat: 52.0001, lon: 5.0),
-            location(at: 22, lat: 52.0002, lon: 5.0),
+            location(at: 20, lat: 52.0, lon: 5.0, speedMps: 5),
+            location(at: 21, lat: 52.0001, lon: 5.0, speedMps: 8),
+            location(at: 22, lat: 52.0002, lon: 5.0, speedMps: 6),
         ]
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(200)),
@@ -195,6 +195,10 @@ struct SessionStatsBuilderTests {
         #expect(stats.rides.count == 1)
         #expect(stats.rides[0].duration == 90)
         #expect(stats.rides[0].distanceMeters > 10)
+        #expect(stats.rides[0].peakSpeedKmh != nil)
+        #expect(abs((stats.rides[0].peakSpeedKmh ?? 0) - SpeedUnits.kilometersPerHour(fromMetersPerSecond: 8)) < 0.5)
+        #expect(stats.maxSpeedKmh != nil)
+        #expect(stats.averageSpeedKmh != nil)
         #expect(stats.ridingDuration == 90)
         #expect(stats.inactiveDuration == 110)
         #expect(abs(stats.ridingInactiveRatio - 90.0 / 200.0) < 0.001)
@@ -476,6 +480,28 @@ struct LiveRideTrackerTests {
         #expect(tracker.didCompleteRide)
         #expect(tracker.lastRideDuration == 45)
         #expect(!tracker.isRideOngoing)
+        #expect(tracker.sessionRidingDuration == 45)
+    }
+
+    @Test func sessionRidingDurationSumsFinishedRides() {
+        var tracker = LiveRideTracker()
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 0)]
+        )
+        tracker.update(
+            currentCode: DetectionCodes.inactive,
+            lastConfident: DetectionCodes.inactive,
+            events: [detection(code: DetectionCodes.inactive, at: 40)]
+        )
+        tracker.update(
+            currentCode: DetectionCodes.riding,
+            lastConfident: DetectionCodes.riding,
+            events: [detection(code: DetectionCodes.riding, at: 50)]
+        )
+        tracker.closeOpenRide(at: t0.addingTimeInterval(80))
+        #expect(tracker.sessionRidingDuration == 70)
     }
 
     @Test func closeOpenRideRecordsDuration() {
@@ -488,6 +514,7 @@ struct LiveRideTrackerTests {
         tracker.closeOpenRide(at: t0.addingTimeInterval(30))
         #expect(tracker.didCompleteRide)
         #expect(tracker.lastRideDuration == 30)
+        #expect(tracker.sessionRidingDuration == 30)
         #expect(!tracker.isRideOngoing)
     }
 
@@ -507,6 +534,7 @@ struct LiveRideTrackerTests {
         #expect(!tracker.didCompleteRide)
         #expect(tracker.lastRideDuration == 0)
         #expect(tracker.lastRideMeters == 0)
+        #expect(tracker.sessionRidingDuration == 0)
     }
 }
 
@@ -543,5 +571,13 @@ struct LocationSpeedStatsTests {
         // Spike during pause is accepted by filter but outside ride window → not in session peak.
         #expect(rawAll != nil)
         #expect((rawAll ?? 0) > (sessionPeak ?? 0))
+    }
+
+    @Test func averageSpeedMetersPerSecondIsDistanceOverDuration() {
+        #expect(
+            LocationSpeedStats.averageSpeedMetersPerSecond(distanceMeters: 1000, duration: 50) == 20
+        )
+        #expect(LocationSpeedStats.averageSpeedMetersPerSecond(distanceMeters: 0, duration: 50) == nil)
+        #expect(LocationSpeedStats.averageSpeedMetersPerSecond(distanceMeters: 1000, duration: 0) == nil)
     }
 }

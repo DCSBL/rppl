@@ -5,6 +5,8 @@ import { toMs } from './analysisPrep'
 export const thresholds = {
   rideEnterSpeedKmh: 20,
   rideEnterHold: 3.0,
+  walkBandSpeedKmh: 8,
+  rideEnterHoldFromWalk: 4.0,
   stoppedSpeedKmh: 4,
   rideExitHold: 3.0,
   gapUnsureHold: 3.0,

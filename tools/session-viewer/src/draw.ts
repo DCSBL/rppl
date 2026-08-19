@@ -312,7 +312,7 @@ export function drawSpeed(
     maxV,
     thresholds.rideEnterSpeedKmh,
     '#34d399',
-    `enter ${thresholds.rideEnterSpeedKmh} km/h × ${thresholds.rideEnterHold}s`,
+    `enter ${thresholds.rideEnterSpeedKmh} km/h × ${thresholds.rideEnterHold}s (walk ${thresholds.rideEnterHoldFromWalk}s)`,
   )
   drawSpeedGate(
     ctx,
@@ -323,7 +323,15 @@ export function drawSpeed(
     '#60a5fa',
     `exit ${thresholds.stoppedSpeedKmh} km/h × ${thresholds.rideExitHold}s`,
   )
-
+  drawSpeedGate(
+    ctx,
+    frame,
+    minV,
+    maxV,
+    thresholds.walkBandSpeedKmh,
+    '#a78bfa',
+    `walk ${thresholds.walkBandSpeedKmh} km/h`,
+  )
   if (!points.length) {
     drawCentered(ctx, w, h, 'No usable speed in window')
     drawPlayheadCursor(ctx, frame, range, playheadMs)

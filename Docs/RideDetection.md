@@ -39,7 +39,7 @@ Unknown future codes must round-trip as strings — do not invent a closed Swift
 ```text
 session start ──► inactive
                     │
-        speed ≥20 km/h for 3s
+        speed ≥20 km/h for 3s (4s from walk)
                     ▼
                   riding ◄──── lookback: usable fast again within 60s
                     │
@@ -98,7 +98,7 @@ Bad ticks still advance time; they just do not count as “fast” or “slow”
 
 While speed is usable:
 
-- **highSpeed** — speed ≥ enter threshold (20 km/h)
+- **highSpeed** — speed ≥ enter threshold (20 km/h). If that hold **starts** at/below **8 km/h** (walk band), enter needs **4.0 s** instead of 3.0 s.
 - **stopped** — speed ≤ exit threshold (4 km/h)
 
 While speed is unusable:
@@ -129,7 +129,7 @@ Default order in `DetectionEngine.defaultDetectors`:
 | 2 | `water_exit` | `riding` or `unsure` + Ultra `submerged` | `inactive` |
 | 3 | `gps_gap` | `riding` + unusable ≥ **3 s** | `unsure` |
 | 4 | `ride_exit` | `riding` + usable slow ≤4 km/h × **3 s** | `inactive` |
-| 5 | `ride_enter` | `inactive` + usable fast ≥20 km/h × **3 s** | `riding` |
+| 5 | `ride_enter` | `inactive` + usable fast ≥20 km/h × **3 s** (× **4 s** if hold started from ≤8 km/h) | `riding` |
 
 **Why water before gap:** a fall in water often kills GPS. Ultra can say “submerged” even when speed is garbage — end the ride immediately instead of waiting on the unsure timer.
 
@@ -146,6 +146,7 @@ Authoritative defaults: `DetectionThresholds` in RpplCore.
 | Constant | Default | Role |
 |----------|---------|------|
 | Ride enter | ≥ **20** km/h × **3.0** s | `inactive` → `riding` |
+| Ride enter from walk | ≥ **20** km/h × **4.0** s | Same, if highSpeed started at/below **8** km/h |
 | Ride exit | ≤ **4** km/h × **3.0** s | `riding` → `inactive` (usable GPS only) |
 | GPS gap | unusable × **3.0** s | `riding` → `unsure` |
 | Same-ride / timeout window | **60** s | lookback merge vs force `inactive` |
@@ -185,7 +186,7 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
 ## Common park stories → what the engine does
 
 1. **Clean stop at dock**
-   Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥20×3s → new `riding`.
+   Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥20×3s (×4s from walk) → new `riding`.
 
 2. **Fall, Ultra**
    `submerged` while riding → `water_exit` → `inactive` immediately. Swim 8 minutes, walk back, start again → new ride (by design).

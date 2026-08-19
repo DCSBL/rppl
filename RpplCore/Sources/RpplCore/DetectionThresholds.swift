@@ -4,6 +4,10 @@ import Foundation
 public struct DetectionThresholds: Equatable, Sendable {
     public var rideEnterSpeedKmh: Double
     public var rideEnterHold: TimeInterval
+    /// Last usable speed at/below this (km/h) when highSpeed starts → use `rideEnterHoldFromWalk`.
+    public var walkBandSpeedKmh: Double
+    /// Longer enter hold after a walk-band start (dock GPS spikes).
+    public var rideEnterHoldFromWalk: TimeInterval
     public var stoppedSpeedKmh: Double
     public var rideExitHold: TimeInterval
     /// Riding + unusable GPS for this long → `unsure`.
@@ -17,6 +21,8 @@ public struct DetectionThresholds: Equatable, Sendable {
     public init(
         rideEnterSpeedKmh: Double = 20,
         rideEnterHold: TimeInterval = 3.0,
+        walkBandSpeedKmh: Double = 8,
+        rideEnterHoldFromWalk: TimeInterval = 4.0,
         stoppedSpeedKmh: Double = 4,
         rideExitHold: TimeInterval = 3.0,
         gapUnsureHold: TimeInterval = 3.0,
@@ -27,6 +33,8 @@ public struct DetectionThresholds: Equatable, Sendable {
     ) {
         self.rideEnterSpeedKmh = rideEnterSpeedKmh
         self.rideEnterHold = rideEnterHold
+        self.walkBandSpeedKmh = walkBandSpeedKmh
+        self.rideEnterHoldFromWalk = rideEnterHoldFromWalk
         self.stoppedSpeedKmh = stoppedSpeedKmh
         self.rideExitHold = rideExitHold
         self.gapUnsureHold = gapUnsureHold
@@ -44,5 +52,9 @@ public struct DetectionThresholds: Equatable, Sendable {
 
     public var stoppedSpeedMps: Double {
         SpeedUnits.metersPerSecond(fromKilometersPerHour: stoppedSpeedKmh)
+    }
+
+    public var walkBandSpeedMps: Double {
+        SpeedUnits.metersPerSecond(fromKilometersPerHour: walkBandSpeedKmh)
     }
 }

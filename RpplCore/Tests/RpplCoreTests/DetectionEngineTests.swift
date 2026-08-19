@@ -120,6 +120,32 @@ struct DetectionEngineTests {
         #expect(engine.currentCode == DetectionCodes.inactive)
     }
 
+    @Test func walkBandStartNeedsLongerHold() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 6))
+        _ = engine.process(tick(at: 1, speedKmh: 22))
+        // 3.0 s is enough from a non-walk start, not from walk band.
+        #expect(engine.process(tick(at: 4.0, speedKmh: 22)).isEmpty)
+        #expect(engine.currentCode == DetectionCodes.inactive)
+        let events = engine.process(tick(at: 5.0, speedKmh: 22))
+        #expect(events.first?.code == DetectionCodes.riding)
+        #expect(events.first?.reason.contains("from=walk") == true)
+    }
+
+    @Test func walkBumpThenSlowdownDoesNotEnterRide() {
+        // 14:10 dock GPS spike: 6.7 → 21.5 ×2s then decay below enter.
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 63, speedKmh: 6.7))
+        _ = engine.process(tick(at: 64, speedKmh: 21.5))
+        _ = engine.process(tick(at: 65, speedKmh: 21.5))
+        _ = engine.process(tick(at: 66, speedKmh: 19.9))
+        _ = engine.process(tick(at: 67, speedKmh: 18.2))
+        _ = engine.process(tick(at: 70, speedKmh: 14))
+        #expect(engine.currentCode == DetectionCodes.inactive)
+    }
+
     @Test func waterSubmergedEndsRideActivityStillIgnored() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
@@ -306,7 +332,7 @@ struct DetectionEngineTests {
         #expect(pause.first?.code == DetectionCodes.inactive)
 
         _ = engine.process(tick(at: 30, speedKmh: 22))
-        let ride2 = engine.process(tick(at: 33.1, speedKmh: 22))
+        let ride2 = engine.process(tick(at: 34.1, speedKmh: 22))
         #expect(ride2.first?.code == DetectionCodes.riding)
         #expect(ride2.first?.detectorId == "ride_enter")
     }
