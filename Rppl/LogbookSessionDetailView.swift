@@ -241,47 +241,20 @@ struct LogbookSessionDetailView: View {
         let sessionId = sessionId
 
         do {
-            let loadedManifest = try await runStoreIO {
-                try store.readManifest(sessionId: sessionId)
+            let bundle = try await StoreIO.runOffMain {
+                try SessionLoader.load(store: store, sessionId: sessionId)
             }
             try Task.checkCancellation()
 
-            let detections = try await runStoreIO {
-                try store.readDetections(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let locations = try await runStoreIO {
-                try store.readLocationSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let health = try await runStoreIO {
-                try store.readHealthSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let water = try await runStoreIO {
-                try store.readWaterTemperatureSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let stats = SessionStatsBuilder.build(
-                manifest: loadedManifest,
-                detections: detections,
-                locations: locations,
-                health: health,
-                water: water
-            )
-            let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: stats.rides)
+            let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
+            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: bundle.stats.rides)
             let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
             let mapPoints = rideTracks.map {
                 SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
             }
 
-            manifest = loadedManifest
-            sessionStats = stats
+            manifest = bundle.manifest
+            sessionStats = bundle.stats
             allLocations = sortedLocations
             mapTracks = mapPoints
             cityName = await SessionCityResolver.shared.cityName(
@@ -297,21 +270,6 @@ struct LogbookSessionDetailView: View {
             loadPhase = .failed
             loadTask = nil
             WakeLog.error(.store, "LogbookSessionDetail load: \(error.localizedDescription)")
-        }
-    }
-
-    private func runStoreIO<T: Sendable>(
-        _ work: @Sendable @escaping () throws -> T
-    ) async throws -> T {
-        try await withThrowingTaskGroup(of: T.self) { group in
-            group.addTask(priority: .userInitiated) {
-                try work()
-            }
-            guard let value = try await group.next() else {
-                throw CancellationError()
-            }
-            group.cancelAll()
-            return value
         }
     }
 }
