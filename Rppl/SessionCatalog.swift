@@ -116,8 +116,8 @@ final class SessionCatalog {
                 health: health,
                 water: water
             )
-            let topSpeedKmh = stats.topSpeedKmh
-                ?? SessionLocationHelpers.sustainedSpeedKmh(
+            let topSpeedKmh = stats.maxSpeedKmh
+                ?? SessionLocationHelpers.peakSpeedKmh(
                     rides: stats.rides,
                     locations: locations
                 )

@@ -156,7 +156,7 @@ struct LogbookView: View {
                     value: catalog.isLoading || totals.topSpeedKmh <= 0
                         ? "—"
                         : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh),
-                    label: "Top Speed"
+                    label: "Max Speed"
                 )
             }
 

@@ -89,6 +89,14 @@ struct SessionDetailView: View {
                     LabeledContent("Duration", value: Self.formatDuration(stats.totalDuration))
                     LabeledContent("Distance", value: DistanceFormat.meters(stats.totalDistanceMeters))
                     LabeledContent(
+                        "Max speed",
+                        value: stats.maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—"
+                    )
+                    LabeledContent(
+                        "Avg speed",
+                        value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—"
+                    )
+                    LabeledContent(
                         "Active calories",
                         value: stats.activeEnergyKilocalories.map(LogbookFormatting.kilocalories) ?? "—"
                     )
@@ -134,6 +142,8 @@ struct SessionDetailView: View {
                             Text(
                                 "\(DistanceFormat.meters(ride.distanceMeters)) · \(LogbookFormatting.lapCount(ride.lapCount))"
                             )
+                            .font(.caption)
+                            Text(Self.rideSpeedLine(ride))
                             .font(.caption)
                             Text(Self.formatDuration(ride.duration))
                                 .font(.caption2)
@@ -431,6 +441,17 @@ struct SessionDetailView: View {
             group.cancelAll()
             return value
         }
+    }
+
+    private static func rideSpeedLine(_ ride: RideSegmentStats) -> String {
+        var parts: [String] = []
+        if let max = SessionLocationHelpers.peakSpeedKmh(for: ride) {
+            parts.append("max \(LogbookFormatting.speedKilometersPerHour(max))")
+        }
+        if let avg = SessionLocationHelpers.averageSpeedKmh(for: ride) {
+            parts.append("avg \(LogbookFormatting.speedKilometersPerHour(avg))")
+        }
+        return parts.isEmpty ? "—" : parts.joined(separator: " · ")
     }
 
     private static func formatDuration(_ interval: TimeInterval) -> String {

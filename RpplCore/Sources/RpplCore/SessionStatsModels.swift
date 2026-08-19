@@ -14,6 +14,8 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
     public var sustainedSpeedKmh: Double?
     /// Trimmed path average (km/h); see `LocationSpeedStats.trimmedAverageSpeedKmh`.
     public var averageSpeedKmh: Double?
+    /// Peak usable GPS sample speed (km/h); see `LocationSpeedStats.peakSpeedKmh`.
+    public var peakSpeedKmh: Double?
     /// Record badges for this ride within the session (empty if none).
     public var highlights: [RideHighlight]
 
@@ -26,6 +28,7 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
         lapCount: Int = 0,
         sustainedSpeedKmh: Double? = nil,
         averageSpeedKmh: Double? = nil,
+        peakSpeedKmh: Double? = nil,
         highlights: [RideHighlight] = []
     ) {
         self.index = index
@@ -36,6 +39,7 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
         self.lapCount = lapCount
         self.sustainedSpeedKmh = sustainedSpeedKmh
         self.averageSpeedKmh = averageSpeedKmh
+        self.peakSpeedKmh = peakSpeedKmh
         self.highlights = highlights
     }
 }
@@ -61,9 +65,22 @@ public struct SessionStats: Equatable, Sendable {
     /// Watch could measure (Ultra). Drives hide vs `- C`.
     public var waterTemperatureAvailable: Bool
 
-    /// Max sustained speed across rides (km/h).
+    /// Max sustained speed across rides (km/h). Used for fastest-ride highlights.
     public var topSpeedKmh: Double? {
         rides.compactMap(\.sustainedSpeedKmh).max()
+    }
+
+    /// Max usable GPS sample speed across rides (km/h).
+    public var maxSpeedKmh: Double? {
+        rides.compactMap(\.peakSpeedKmh).max()
+    }
+
+    /// Ride meters / riding duration (km/h).
+    public var averageSpeedKmh: Double? {
+        LocationSpeedStats.averageSpeedKmh(
+            distanceMeters: totalDistanceMeters,
+            duration: ridingDuration
+        )
     }
 
     /// Sum of per-ride crossing counts.
