@@ -127,9 +127,11 @@ final class WatchSessionController: NSObject {
     private var motionUpdatesStarted = false
     private var activityUpdatesStarted = false
     private var sessionWaterSamples: [WaterTemperatureSample] = []
+    #if RPPL_WEATHERKIT
     private var airWeatherSnapshot: AirWeatherSnapshot?
     private var airWeatherFetchTask: Task<Void, Never>?
     private var airWeatherAttempted = false
+    #endif
 
     private let workoutType = HKObjectType.workoutType()
     private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
@@ -301,7 +303,9 @@ final class WatchSessionController: NSObject {
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
         resetWaterTemperatureTracking()
+        #if RPPL_WEATHERKIT
         resetAirWeather()
+        #endif
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil
@@ -370,7 +374,9 @@ final class WatchSessionController: NSObject {
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
         resetWaterTemperatureTracking()
+        #if RPPL_WEATHERKIT
         resetAirWeather()
+        #endif
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         hkRides = []
@@ -848,7 +854,9 @@ final class WatchSessionController: NSObject {
                 )
             }
             try await builder.addMetadata(closingMetadata)
+            #if RPPL_WEATHERKIT
             await attachAirWeatherMetadata(to: builder)
+            #endif
             try await builder.endCollection(at: stoppedDate)
             do {
                 try await addRideDistanceSamples(to: builder)
@@ -886,6 +894,7 @@ final class WatchSessionController: NSObject {
         hkRideActivityOpen = false
     }
 
+    #if RPPL_WEATHERKIT
     private func resetAirWeather() {
         airWeatherFetchTask?.cancel()
         airWeatherFetchTask = nil
@@ -937,6 +946,7 @@ final class WatchSessionController: NSObject {
             WakeLog.error(.workout, "air weather metadata: \(error.localizedDescription)")
         }
     }
+    #endif
 
     private func recordFinishedHkRide(endedAt: Date) {
         guard let start = hkRideStartedAt else { return }
@@ -1265,7 +1275,9 @@ extension WatchSessionController: CLLocationManagerDelegate {
             locationCount += 1
             processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)
+            #if RPPL_WEATHERKIT
             requestAirWeatherIfNeeded(from: loc)
+            #endif
         }
     }
 
