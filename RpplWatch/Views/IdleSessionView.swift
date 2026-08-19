@@ -3,7 +3,7 @@ import RpplCore
 
 enum IdlePickerPage: Hashable {
     case activity(String)
-    case debug
+    case sync
 }
 
 struct IdleSessionView: View {
@@ -24,8 +24,8 @@ struct IdleSessionView: View {
                 .tag(IdlePickerPage.activity(code))
             }
 
-            IdleDebugPage(session: session, transfer: transfer)
-                .tag(IdlePickerPage.debug)
+            IdleSyncPage(session: session, transfer: transfer)
+                .tag(IdlePickerPage.sync)
         }
         .tabViewStyle(.verticalPage)
         .allowsHitTesting(canStart)

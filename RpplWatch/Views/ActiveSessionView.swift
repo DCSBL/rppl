@@ -3,7 +3,6 @@ import SwiftUI
 private enum SessionTab: Hashable {
     case controls
     case activity
-    case debug
 }
 
 struct ActiveSessionView: View {
@@ -16,8 +15,6 @@ struct ActiveSessionView: View {
                 .tag(SessionTab.controls)
             SessionRideUIPage(session: session)
                 .tag(SessionTab.activity)
-            SessionDebugPage(session: session)
-                .tag(SessionTab.debug)
         }
     }
 }

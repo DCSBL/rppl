@@ -17,6 +17,9 @@ struct LogbookSessionDetailView: View {
     @State private var loadPhase: LoadPhase = .loading
     @State private var loadTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var exportURL: URL?
+    @State private var isExporting = false
+    @State private var exportTask: Task<Void, Never>?
 
     private enum LoadPhase: Equatable {
         case loading
@@ -52,7 +55,25 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
-        .onDisappear { cancelLoad() }
+        .onDisappear {
+            cancelLoad()
+            cancelExport()
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if let exportURL {
+                    ShareLink(item: exportURL) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                } else if isExporting {
+                    ProgressView()
+                } else if loadPhase == .ready {
+                    Button("Export") {
+                        startExport()
+                    }
+                }
+            }
+        }
     }
 
     private var navigationTitle: String {
@@ -270,6 +291,51 @@ struct LogbookSessionDetailView: View {
             loadPhase = .failed
             loadTask = nil
             WakeLog.error(.store, "LogbookSessionDetail load: \(error.localizedDescription)")
+        }
+    }
+
+    private func startExport() {
+        guard exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        isExporting = true
+        exportTask = Task(priority: .utility) {
+            await prepareExport()
+        }
+    }
+
+    private func cancelExport() {
+        exportTask?.cancel()
+        exportTask = nil
+        isExporting = false
+    }
+
+    private func prepareExport() async {
+        let store = store
+        let sessionId = sessionId
+        WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
+
+        do {
+            try await StoreIO.runOffMain {
+                let package = try store.buildTransferPackage(sessionId: sessionId)
+                try Task.checkCancellation()
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                encoder.outputFormatting = [.sortedKeys]
+                try encoder.encode(package).write(to: url, options: [.atomic])
+            }
+            try Task.checkCancellation()
+            exportURL = url
+            isExporting = false
+            exportTask = nil
+            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
+        } catch is CancellationError {
+            isExporting = false
+            exportTask = nil
+        } catch {
+            errorText = error.localizedDescription
+            isExporting = false
+            exportTask = nil
+            WakeLog.error(.store, "export: \(error.localizedDescription)")
         }
     }
 }
