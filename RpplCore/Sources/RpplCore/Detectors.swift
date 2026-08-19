@@ -38,10 +38,13 @@ public struct RideEnterDetector: Detector {
     public func evaluate(_ ctx: DetectionEvalContext) -> DetectionSignal? {
         guard ctx.currentCode == DetectionCodes.inactive else { return nil }
         guard ctx.speedUsable else { return nil }
-        guard let held = ctx.held(.highSpeed), held >= ctx.thresholds.rideEnterHold else { return nil }
+        guard let held = ctx.held(.highSpeed) else { return nil }
+        let required = ctx.holds.requiredRideEnterHold(ctx.thresholds)
+        guard held >= required else { return nil }
+        let from = ctx.holds.highSpeedFromWalk ? "walk" : "inactive"
         let reason =
             "ride_enter speed=\(ctx.speedKmhText())>=\(ctx.fmt(ctx.thresholds.rideEnterSpeedKmh))"
-            + " for \(ctx.fmt(held))s from=inactive"
+            + " for \(ctx.fmt(held))s from=\(from)"
         return DetectionSignal(kind: .enterRide, detectorId: id, reason: reason)
     }
 }

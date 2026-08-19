@@ -73,15 +73,15 @@ public struct DetectionEngine: Sendable {
     public mutating func process(_ tick: DetectionTick) -> [DetectionEvent] {
         let outcome = filter.evaluate(tick, previousUsableSpeedMps: previousUsableSpeedMps)
         lastFilterRejection = outcome.rejectionReason
-        if let usable = outcome.usableSpeedMps {
-            previousUsableSpeedMps = usable
-        }
-
         holds.update(
             timestamp: tick.timestamp,
             usableSpeedMps: outcome.usableSpeedMps,
+            previousUsableSpeedMps: previousUsableSpeedMps,
             thresholds: thresholds
         )
+        if let usable = outcome.usableSpeedMps {
+            previousUsableSpeedMps = usable
+        }
 
         var events: [DetectionEvent] = []
 
