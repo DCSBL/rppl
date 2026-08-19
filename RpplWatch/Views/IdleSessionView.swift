@@ -1,63 +1,43 @@
 import SwiftUI
 import RpplCore
 
+enum IdlePickerPage: Hashable {
+    case activity(String)
+    case debug
+}
+
 struct IdleSessionView: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
+    @State private var page = IdlePickerPage.activity(ActivityCodes.pickerLandingCode())
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                StartCircleButton(enabled: !session.isStopping && !session.isRunning) {
-                    WakeLog.debug(.ui, "tap Start session")
-                    Task { await session.startSession() }
+        TabView(selection: $page) {
+            ForEach(ActivityCodes.pickerCodes, id: \.self) { code in
+                ActivityStartPage(
+                    code: code,
+                    isStarting: session.isStarting && session.startingActivityCode == code,
+                    enabled: canStart
+                ) {
+                    start(code)
                 }
-                .padding(.top, 8)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    SyncStatusIndicator(
-                        state: transfer.syncState,
-                        pendingCount: transfer.pendingTransferCount,
-                        footnote: transfer.lastMessage
-                    )
-
-                    if session.statusText != "Idle" {
-                        Text(session.statusText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Button("Request permissions") {
-                        WakeLog.debug(.ui, "tap Request permissions")
-                        Task { await session.requestPermissions() }
-                    }
-
-                    Button("Retry transfers") {
-                        WakeLog.debug(.ui, "tap Retry transfers")
-                        transfer.transferPending()
-                    }
-
-                    Group {
-                        Text(session.healthAuthStatus)
-                        Text("Location: \(session.locationAuthStatus)")
-                        Text("Motion: \(session.motionAvailability)")
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-
-                    if let error = session.errorText {
-                        Text(error)
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    }
-
-                    Text("Action Button: Workout › Rppl (start only)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .tag(IdlePickerPage.activity(code))
             }
-            .padding(.horizontal, 4)
+
+            IdleDebugPage(session: session, transfer: transfer)
+                .tag(IdlePickerPage.debug)
         }
+        .tabViewStyle(.verticalPage)
+        .allowsHitTesting(canStart)
+    }
+
+    private var canStart: Bool {
+        !session.isStarting && !session.isStopping && !session.isRunning
+    }
+
+    private func start(_ code: String) {
+        WakeLog.debug(.ui, "tap start activity=\(code)")
+        page = .activity(code)
+        Task { await session.startSession(activityCode: code) }
     }
 }

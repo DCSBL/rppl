@@ -1,0 +1,93 @@
+import SwiftUI
+import RpplCore
+
+struct IdleDebugPage: View {
+    @Bindable var session: WatchSessionController
+    @Bindable var transfer: WatchTransferService
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            debugStack(compact: false)
+            ScrollView {
+                debugStack(compact: true)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .containerBackground(Color.rpplDarkTeal.gradient, for: .tabView)
+    }
+
+    private func debugStack(compact: Bool) -> some View {
+        VStack(spacing: compact ? 6 : 10) {
+            SyncStatusIndicator(
+                state: transfer.syncState,
+                pendingCount: transfer.pendingTransferCount,
+                footnote: compact ? nil : transfer.lastMessage
+            )
+
+            if session.statusText != String(localized: "Idle") {
+                Text(session.statusText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+            }
+
+            HStack(spacing: 16) {
+                debugCircle(
+                    systemImage: "lock.shield",
+                    label: String(localized: "Permissions")
+                ) {
+                    WakeLog.debug(.ui, "tap Request permissions")
+                    Task { await session.requestPermissions() }
+                }
+                debugCircle(
+                    systemImage: "arrow.clockwise",
+                    label: String(localized: "Retry transfers")
+                ) {
+                    WakeLog.debug(.ui, "tap Retry transfers")
+                    transfer.transferPending()
+                }
+            }
+
+            if !compact {
+                Group {
+                    Text(session.healthAuthStatus)
+                    Text("Location: \(session.locationAuthStatus)")
+                    Text("Motion: \(session.motionAvailability)")
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            }
+
+            if let error = session.errorText {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func debugCircle(systemImage: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Color.rpplDarkTeal)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.rpplSkySurge))
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(Color.rpplAliceBlue)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+}

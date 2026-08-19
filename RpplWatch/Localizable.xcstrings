@@ -37,6 +37,7 @@
       }
     },
     "Action Button: Workout › Rppl (start only)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -612,6 +613,22 @@
         }
       }
     },
+    "Permissions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechten"
+          }
+        }
+      }
+    },
     "Permissions updated" : {
       "localizations" : {
         "en" : {
@@ -709,6 +726,7 @@
       }
     },
     "Request permissions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -933,6 +951,7 @@
       }
     },
     "Start" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -982,6 +1001,7 @@
       }
     },
     "Start session" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1042,6 +1062,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starten…"
+          }
+        }
+      }
+    },
+    "Starts a session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts a session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start een sessie"
           }
         }
       }
@@ -1269,6 +1305,9 @@
           }
         }
       }
+    },
+    "Water" : {
+
     },
     "Water Lock" : {
       "localizations" : {
