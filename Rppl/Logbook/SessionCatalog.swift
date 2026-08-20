@@ -54,8 +54,8 @@ final class SessionCatalog {
 
     private func load(store: SessionFileStore) async {
         do {
-            let ids = try await runStoreIO { try store.listSessionIDs() }
-            let manifests = try await runStoreIO {
+            let ids = try await StoreIO.runOffMain { try store.listSessionIDs() }
+            let manifests = try await StoreIO.runOffMain {
                 try ids.compactMap { try store.readManifest(sessionId: $0) }
                     .sorted { $0.startedAt > $1.startedAt }
             }
@@ -104,25 +104,15 @@ final class SessionCatalog {
     }
 
     private func buildEntry(store: SessionFileStore, manifest: SessionManifest) async throws -> SessionEntry {
-        let bundle = try await runStoreIO {
-            let detections = try store.readDetections(sessionId: manifest.sessionId)
-            let locations = try store.readLocationSamples(sessionId: manifest.sessionId)
-            let health = try store.readHealthSamples(sessionId: manifest.sessionId)
-            let water = try store.readWaterTemperatureSamples(sessionId: manifest.sessionId)
-            let stats = SessionStatsBuilder.build(
-                manifest: manifest,
-                detections: detections,
-                locations: locations,
-                health: health,
-                water: water
-            )
-            let topSpeedKmh = stats.maxSpeedKmh
-                ?? SessionLocationHelpers.peakSpeedKmh(
-                    rides: stats.rides,
-                    locations: locations
-                )
-            return (stats: stats, topSpeedKmh: topSpeedKmh, locations: locations)
+        let bundle = try await StoreIO.runOffMain {
+            try SessionLoader.load(store: store, sessionId: manifest.sessionId)
         }
+
+        let topSpeedKmh = bundle.stats.maxSpeedKmh
+            ?? SessionLocationHelpers.peakSpeedKmh(
+                rides: bundle.stats.rides,
+                locations: bundle.locations
+            )
 
         let cityName = await SessionCityResolver.shared.cityName(
             sessionId: manifest.sessionId,
@@ -132,24 +122,9 @@ final class SessionCatalog {
         return SessionEntry(
             manifest: manifest,
             stats: bundle.stats,
-            topSpeedKmh: bundle.topSpeedKmh,
+            topSpeedKmh: topSpeedKmh,
             cityName: cityName,
             highlights: []
         )
-    }
-
-    private func runStoreIO<T: Sendable>(
-        _ work: @Sendable @escaping () throws -> T
-    ) async throws -> T {
-        try await withThrowingTaskGroup(of: T.self) { group in
-            group.addTask(priority: .userInitiated) {
-                try work()
-            }
-            guard let value = try await group.next() else {
-                throw CancellationError()
-            }
-            group.cancelAll()
-            return value
-        }
     }
 }

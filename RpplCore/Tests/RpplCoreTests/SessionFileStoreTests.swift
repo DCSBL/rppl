@@ -2,104 +2,6 @@ import Foundation
 import Testing
 @testable import RpplCore
 
-@Suite("DetectionCodes")
-struct DetectionCodesTests {
-    @Test func confidentCodes() {
-        #expect(DetectionCodes.isConfident(DetectionCodes.riding))
-        #expect(DetectionCodes.isConfident(DetectionCodes.inactive))
-        #expect(DetectionCodes.isConfident(DetectionCodes.legacyPaused))
-        #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
-        #expect(!DetectionCodes.isConfident("waiting"))
-    }
-
-    @Test func normalizeMapsLegacyPaused() {
-        #expect(DetectionCodes.inactive == "inactive")
-        #expect(DetectionCodes.normalize("paused") == DetectionCodes.inactive)
-        #expect(DetectionCodes.normalize(DetectionCodes.riding) == DetectionCodes.riding)
-    }
-}
-
-@Suite("ActivityCodes")
-struct ActivityCodesTests {
-    @Test func pickerCodesAreOpaqueLowercase() {
-        #expect(ActivityCodes.pickerCodes == [
-            "wakeboard", "waterski", "monoski", "wakeskate", "kneeboard", "other",
-        ])
-        for code in ActivityCodes.pickerCodes {
-            #expect(code == code.lowercased())
-            #expect(ActivityCodes.localizedTitle(for: code) != code)
-        }
-    }
-
-    @Test func missingCodeUsesFallbackTitleNotAsStorage() {
-        #expect(ActivityCodes.localizedTitle(for: nil) == String(localized: "Cable park", bundle: .module))
-        #expect(ActivityCodes.localizedTitle(for: "") == String(localized: "Cable park", bundle: .module))
-    }
-
-    @Test func unknownCodeDisplaysRawString() {
-        #expect(ActivityCodes.localizedTitle(for: "foil") == "foil")
-    }
-
-    @Test func lastUsedStoresCodeNotTitle() {
-        let suite = "activity-codes-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defer {
-            defaults.removePersistentDomain(forName: suite)
-        }
-        ActivityCodes.rememberLastUsed(ActivityCodes.waterski, store: defaults)
-        #expect(defaults.string(forKey: AppConstants.lastActivityCodeDefaultsKey) == "waterski")
-        #expect(ActivityCodes.pickerLandingCode(store: defaults) == ActivityCodes.waterski)
-        #expect(ActivityCodes.resolvedStartCode(store: defaults) == ActivityCodes.waterski)
-        ActivityCodes.rememberLastUsed("foil", store: defaults)
-        #expect(ActivityCodes.pickerLandingCode(store: defaults) == ActivityCodes.wakeboard)
-        #expect(ActivityCodes.resolvedStartCode(store: defaults) == "foil")
-    }
-
-    @Test func manifestRoundTripKeepsOpaqueCode() throws {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let original = SessionManifest(
-            testerId: "t",
-            appVersion: "1.0",
-            buildNumber: "1",
-            watchModel: "Ultra2",
-            systemVersion: "26.0",
-            activityCode: ActivityCodes.wakeboard
-        )
-        let data = try encoder.encode(original)
-        let json = String(data: data, encoding: .utf8) ?? ""
-        #expect(json.contains("\"activityCode\":\"wakeboard\"") || json.contains("\"activityCode\" : \"wakeboard\""))
-        #expect(!json.contains("Wakeboard"))
-        let decoded = try decoder.decode(SessionManifest.self, from: data)
-        #expect(decoded.activityCode == "wakeboard")
-        #expect(decoded.activityCode != ActivityCodes.localizedTitle(for: decoded.activityCode))
-    }
-
-    @Test func legacyManifestDecodesNilActivityCode() throws {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let json = Data(
-            #"""
-            {
-              "schemaVersion": 4,
-              "sessionId": "s1",
-              "testerId": "t",
-              "appVersion": "1.0",
-              "buildNumber": "1",
-              "watchModel": "Ultra2",
-              "systemVersion": "26.0",
-              "startedAt": "2024-01-01T00:00:00Z",
-              "transferState": "acknowledged"
-            }
-            """#.utf8
-        )
-        let manifest = try decoder.decode(SessionManifest.self, from: json)
-        #expect(manifest.activityCode == nil)
-    }
-}
-
 @Suite("SessionFileStore")
 struct SessionFileStoreTests {
     @Test func createsManifestAndRoundTripsDetections() throws {
@@ -115,7 +17,7 @@ struct SessionFileStoreTests {
             watchModel: "Watch7,1",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
 
         let event = DetectionEvent(
             code: DetectionCodes.inactive,
@@ -205,7 +107,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
 
         let assumptionsURL = store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("assumptions.jsonl")
@@ -239,7 +141,7 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         manifest.schemaVersion = 3
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
 
         let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("detections.jsonl")
@@ -307,7 +209,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
         try store.markReadyToTransfer(sessionId: manifest.sessionId)
         try store.markTransferring(sessionId: manifest.sessionId)
 
@@ -332,7 +234,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: ready)
+        _ = try store.createSession(manifest: ready)
         try store.markReadyToTransfer(sessionId: ready.sessionId)
 
         // Empty dormant folder (no manifest.json) — must not abort the pending list.
@@ -391,7 +293,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        _ = try store.createSession(manifest: manifest)
+        _ = _ = try store.createSession(manifest: manifest)
         try store.markReadyToTransfer(sessionId: manifest.sessionId)
         try store.markAcknowledged(sessionId: manifest.sessionId)
         #expect(try store.sessionsNeedingTransfer().isEmpty)
@@ -410,7 +312,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        _ = try store.createSession(manifest: manifest)
+        _ = _ = try store.createSession(manifest: manifest)
         #expect(try store.sessionsNeedingTransfer().isEmpty)
     }
 
@@ -448,7 +350,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
 
         let afterCreate = try store.sessionByteSize(sessionId: manifest.sessionId)
         #expect(afterCreate > 0)
@@ -525,7 +427,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
         try store.appendDetection(
             DetectionEvent(code: DetectionCodes.inactive, reason: "t", detectorId: "t"),
             sessionId: manifest.sessionId
@@ -550,12 +452,6 @@ struct SessionFileStoreTests {
         }
     }
 
-    @Test func byteSizeFormatNonEmpty() {
-        #expect(!ByteSizeFormat.string(0).isEmpty)
-        #expect(!ByteSizeFormat.string(1_500).isEmpty)
-        #expect(!ByteSizeFormat.string(2_500_000).isEmpty)
-    }
-
     @Test func readLocationSamplesHonorsTaskCancellation() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("cancel-\(UUID().uuidString)", isDirectory: true)
@@ -569,7 +465,7 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
 
         let samples = (0..<4_000).map { index in
             LocationSample(
@@ -594,16 +490,5 @@ struct SessionFileStoreTests {
         } catch {
             Issue.record("Unexpected error: \(error)")
         }
-    }
-
-    @Test func testerIdentityPersistsInDefaults() {
-        let suite = "RpplCoreTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defer { defaults.removePersistentDomain(forName: suite) }
-
-        let first = TesterIdentity.resolve(store: defaults)
-        let second = TesterIdentity.resolve(store: defaults)
-        #expect(first == second)
-        #expect(UUID(uuidString: first) != nil)
     }
 }

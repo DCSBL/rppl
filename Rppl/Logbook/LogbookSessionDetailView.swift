@@ -17,6 +17,9 @@ struct LogbookSessionDetailView: View {
     @State private var loadPhase: LoadPhase = .loading
     @State private var loadTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var exportURL: URL?
+    @State private var isExporting = false
+    @State private var exportTask: Task<Void, Never>?
 
     private enum LoadPhase: Equatable {
         case loading
@@ -52,7 +55,25 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
-        .onDisappear { cancelLoad() }
+        .onDisappear {
+            cancelLoad()
+            cancelExport()
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if let exportURL {
+                    ShareLink(item: exportURL) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                } else if isExporting {
+                    ProgressView()
+                } else if loadPhase == .ready {
+                    Button("Export") {
+                        startExport()
+                    }
+                }
+            }
+        }
     }
 
     private var navigationTitle: String {
@@ -241,47 +262,20 @@ struct LogbookSessionDetailView: View {
         let sessionId = sessionId
 
         do {
-            let loadedManifest = try await runStoreIO {
-                try store.readManifest(sessionId: sessionId)
+            let bundle = try await StoreIO.runOffMain {
+                try SessionLoader.load(store: store, sessionId: sessionId)
             }
             try Task.checkCancellation()
 
-            let detections = try await runStoreIO {
-                try store.readDetections(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let locations = try await runStoreIO {
-                try store.readLocationSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let health = try await runStoreIO {
-                try store.readHealthSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let water = try await runStoreIO {
-                try store.readWaterTemperatureSamples(sessionId: sessionId)
-            }
-            try Task.checkCancellation()
-
-            let stats = SessionStatsBuilder.build(
-                manifest: loadedManifest,
-                detections: detections,
-                locations: locations,
-                health: health,
-                water: water
-            )
-            let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: stats.rides)
+            let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
+            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: bundle.stats.rides)
             let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
             let mapPoints = rideTracks.map {
                 SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
             }
 
-            manifest = loadedManifest
-            sessionStats = stats
+            manifest = bundle.manifest
+            sessionStats = bundle.stats
             allLocations = sortedLocations
             mapTracks = mapPoints
             cityName = await SessionCityResolver.shared.cityName(
@@ -300,18 +294,48 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private func runStoreIO<T: Sendable>(
-        _ work: @Sendable @escaping () throws -> T
-    ) async throws -> T {
-        try await withThrowingTaskGroup(of: T.self) { group in
-            group.addTask(priority: .userInitiated) {
-                try work()
+    private func startExport() {
+        guard exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        isExporting = true
+        exportTask = Task(priority: .utility) {
+            await prepareExport()
+        }
+    }
+
+    private func cancelExport() {
+        exportTask?.cancel()
+        exportTask = nil
+        isExporting = false
+    }
+
+    private func prepareExport() async {
+        let store = store
+        let sessionId = sessionId
+        WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
+
+        do {
+            try await StoreIO.runOffMain {
+                let package = try store.buildTransferPackage(sessionId: sessionId)
+                try Task.checkCancellation()
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                encoder.outputFormatting = [.sortedKeys]
+                try encoder.encode(package).write(to: url, options: [.atomic])
             }
-            guard let value = try await group.next() else {
-                throw CancellationError()
-            }
-            group.cancelAll()
-            return value
+            try Task.checkCancellation()
+            exportURL = url
+            isExporting = false
+            exportTask = nil
+            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
+        } catch is CancellationError {
+            isExporting = false
+            exportTask = nil
+        } catch {
+            errorText = error.localizedDescription
+            isExporting = false
+            exportTask = nil
+            WakeLog.error(.store, "export: \(error.localizedDescription)")
         }
     }
 }

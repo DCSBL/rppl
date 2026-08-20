@@ -1,22 +1,22 @@
 import SwiftUI
 import RpplCore
 
-struct IdleDebugPage: View {
+struct IdleSyncPage: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
 
     var body: some View {
         ViewThatFits(in: .vertical) {
-            debugStack(compact: false)
+            syncStack(compact: false)
             ScrollView {
-                debugStack(compact: true)
+                syncStack(compact: true)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .containerBackground(Color.rpplDarkTeal.gradient, for: .tabView)
     }
 
-    private func debugStack(compact: Bool) -> some View {
+    private func syncStack(compact: Bool) -> some View {
         VStack(spacing: compact ? 6 : 10) {
             SyncStatusIndicator(
                 state: transfer.syncState,
@@ -33,32 +33,20 @@ struct IdleDebugPage: View {
             }
 
             HStack(spacing: 16) {
-                debugCircle(
+                syncCircle(
                     systemImage: "lock.shield",
                     label: String(localized: "Permissions")
                 ) {
                     WakeLog.debug(.ui, "tap Request permissions")
                     Task { await session.requestPermissions() }
                 }
-                debugCircle(
+                syncCircle(
                     systemImage: "arrow.clockwise",
                     label: String(localized: "Retry transfers")
                 ) {
                     WakeLog.debug(.ui, "tap Retry transfers")
                     transfer.transferPending()
                 }
-            }
-
-            if !compact {
-                Group {
-                    Text(session.healthAuthStatus)
-                    Text("Location: \(session.locationAuthStatus)")
-                    Text("Motion: \(session.motionAvailability)")
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
             }
 
             if let error = session.errorText {
@@ -72,7 +60,7 @@ struct IdleDebugPage: View {
         .padding(.horizontal, 4)
     }
 
-    private func debugCircle(systemImage: String, label: String, action: @escaping () -> Void) -> some View {
+    private func syncCircle(systemImage: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: systemImage)
