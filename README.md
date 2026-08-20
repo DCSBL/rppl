@@ -79,10 +79,10 @@ Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & detection: [Doc
 
 ## Bundle IDs (current `.dev` builds)
 
-- iOS: `nl.dcsbl.dev.rppl`
-- watchOS: `nl.dcsbl.dev.rppl.watchkitapp` (must be `{iOS}.watchkitapp`)
+- iOS: `nl.dcsbl.rppl`
+- watchOS: `nl.dcsbl.rppl.watchkitapp` (must be `{iOS}.watchkitapp`)
 - Companion: Watch → iPhone ID above
-- App Group: `group.nl.dcsbl.dev.rppl`
+- App Group: `group.nl.dcsbl.rppl`
 
 ## Agents
 

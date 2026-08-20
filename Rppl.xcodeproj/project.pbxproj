@@ -400,7 +400,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Rppl/Info.plist;
@@ -431,7 +431,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -457,7 +457,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Rppl/Info.plist;
@@ -488,7 +488,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -631,7 +631,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -655,7 +655,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -678,7 +678,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -701,7 +701,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -722,7 +722,7 @@
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RpplWatch/Info.plist;
@@ -732,14 +732,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.dev.rppl;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -762,7 +762,7 @@
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZBB5RH99X8;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RpplWatch/Info.plist;
@@ -772,14 +772,14 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.dev.rppl;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.dev.rppl.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

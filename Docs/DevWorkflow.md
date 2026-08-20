@@ -72,8 +72,8 @@ WatchConnectivity only pairs apps when IDs match Apple’s rule:
 
 | Role | Bundle ID (dev) |
 |------|-----------------|
-| iPhone | `nl.dcsbl.dev.rppl` |
-| Watch | `nl.dcsbl.dev.rppl.watchkitapp` |
+| iPhone | `nl.dcsbl.rppl` |
+| Watch | `nl.dcsbl.rppl.watchkitapp` |
 | Companion key | Watch `WKCompanionAppBundleIdentifier` = iPhone ID |
 
 **Preferred (install both, debug Watch):**

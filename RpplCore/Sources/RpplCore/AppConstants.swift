@@ -1,7 +1,7 @@
 import Foundation
 
 public enum AppConstants {
-    public static let appGroupID = "group.nl.dcsbl.dev.rppl"
+    public static let appGroupID = "group.nl.dcsbl.rppl"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
     /// Opaque last-started activity code (`wakeboard`, …). Never a localized title.

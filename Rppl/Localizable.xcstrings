@@ -7,9 +7,6 @@
     " - %@" : {
 
     },
-    "– %@" : {
-
-    },
     "— laps" : {
       "localizations" : {
         "en" : {
@@ -70,16 +67,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · %@"
-          }
-        }
-      }
-    },
-    "%@… · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@… · %2$@"
           }
         }
       }
@@ -373,6 +360,7 @@
       }
     },
     "Cancelled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -389,6 +377,7 @@
       }
     },
     "Computing stats…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -421,6 +410,7 @@
       }
     },
     "Debug" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -485,6 +475,7 @@
       }
     },
     "Detections (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -549,6 +540,7 @@
       }
     },
     "Ended" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -564,7 +556,11 @@
         }
       }
     },
+    "Export" : {
+
+    },
     "Export session JSON" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -597,6 +593,7 @@
       }
     },
     "GPS points" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -613,6 +610,7 @@
       }
     },
     "Health" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -643,9 +641,6 @@
           }
         }
       }
-    },
-    "HealthKit inject" : {
-
     },
     "Import failed: %@" : {
       "localizations" : {
@@ -710,9 +705,6 @@
           }
         }
       }
-    },
-    "Injecting…" : {
-
     },
     "Internal testing only" : {
       "localizations" : {
@@ -780,6 +772,7 @@
       }
     },
     "Load cancelled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -796,6 +789,7 @@
       }
     },
     "Load failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -812,6 +806,7 @@
       }
     },
     "Loading detections…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -828,6 +823,7 @@
       }
     },
     "Loading GPS track…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -844,6 +840,7 @@
       }
     },
     "Loading GPS…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -860,6 +857,7 @@
       }
     },
     "Loading manifest…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -972,6 +970,7 @@
       }
     },
     "Manifest" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -988,6 +987,7 @@
       }
     },
     "Map" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1004,6 +1004,7 @@
       }
     },
     "Map loads after detections" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1020,6 +1021,7 @@
       }
     },
     "Map shows %lld of %lld points" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1034,6 +1036,12 @@
           }
         }
       }
+    },
+    "Max speed" : {
+
+    },
+    "Max Speed" : {
+
     },
     "Most laps" : {
       "localizations" : {
@@ -1068,6 +1076,7 @@
       }
     },
     "Motion" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1084,6 +1093,7 @@
       }
     },
     "No detections in this session." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1100,6 +1110,7 @@
       }
     },
     "No GPS points" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1196,6 +1207,7 @@
       }
     },
     "No sessions yet. Record on Apple Watch, then bring phone nearby." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1212,6 +1224,7 @@
       }
     },
     "OS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1276,6 +1289,7 @@
       }
     },
     "Preparing export…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1308,6 +1322,7 @@
       }
     },
     "Ready" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1340,6 +1355,7 @@
       }
     },
     "Refresh sync status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1356,6 +1372,7 @@
       }
     },
     "Reload" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1372,6 +1389,7 @@
       }
     },
     "Request permissions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1420,6 +1438,7 @@
       }
     },
     "Retry" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1436,6 +1455,7 @@
       }
     },
     "revision" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1450,9 +1470,6 @@
           }
         }
       }
-    },
-    "Ride / rest = numbered intervals (kcal, time, HR). Other encodings stay in code for later." : {
-
     },
     "Ride %lld" : {
       "localizations" : {
@@ -1487,6 +1504,7 @@
       }
     },
     "Rides (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1551,6 +1569,7 @@
       }
     },
     "Samples" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1567,6 +1586,7 @@
       }
     },
     "Schema" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1614,7 +1634,11 @@
         }
       }
     },
+    "Share" : {
+
+    },
     "Share export" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1663,6 +1687,7 @@
       }
     },
     "Size" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1695,6 +1720,7 @@
       }
     },
     "Started" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1711,6 +1737,7 @@
       }
     },
     "Summary" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1727,6 +1754,7 @@
       }
     },
     "Sync" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1759,6 +1787,7 @@
       }
     },
     "Sync status, permissions, and manual session inspection." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1775,6 +1804,7 @@
       }
     },
     "Synced data" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1807,6 +1837,7 @@
       }
     },
     "Tester" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1855,6 +1886,7 @@
       }
     },
     "Top speed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1871,6 +1903,7 @@
       }
     },
     "Top Speed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1919,6 +1952,7 @@
       }
     },
     "Transfer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1984,6 +2018,7 @@
       }
     },
     "Watch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

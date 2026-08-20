@@ -4,12 +4,12 @@ import OSLog
 /// Shared action/debug logging for Watch + iPhone.
 ///
 /// Uses `Logger.debug` / `Logger.error` so Console.app can filter by subsystem
-/// `nl.dcsbl.dev.rppl`. In DEBUG builds also `print`s so Xcode’s debug console
+/// `nl.dcsbl.rppl`. In DEBUG builds also `print`s so Xcode’s debug console
 /// always shows lines without enabling “Include Debug Messages”.
 ///
 /// Do **not** log high-frequency sensor samples (GPS / 25 Hz motion / HR ticks).
 public enum WakeLog {
-    public static let subsystem = "nl.dcsbl.dev.rppl"
+    public static let subsystem = "nl.dcsbl.rppl"
 
     public enum Category: String {
         case session

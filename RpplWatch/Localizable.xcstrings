@@ -70,6 +70,7 @@
       }
     },
     "Confident: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -86,6 +87,7 @@
       }
     },
     "Debug" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -214,6 +216,7 @@
       }
     },
     "Filter: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -246,6 +249,7 @@
       }
     },
     "GPS %lld  MOT %lld  DET %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -262,6 +266,7 @@
       }
     },
     "GPS accuracy: %.0f m" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -454,6 +459,7 @@
       }
     },
     "Location: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -486,6 +492,7 @@
       }
     },
     "Mode: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -502,6 +509,7 @@
       }
     },
     "Motion skipped" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -518,6 +526,7 @@
       }
     },
     "Motion: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -678,6 +687,7 @@
       }
     },
     "Raw code: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1163,6 +1173,7 @@
       }
     },
     "Stored %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1291,6 +1302,7 @@
       }
     },
     "Unsure (raw: %@)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
