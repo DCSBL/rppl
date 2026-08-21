@@ -81,6 +81,8 @@ struct SessionFileStoreTests {
         try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
+        #expect(package.derived != nil)
+        #expect(package.derived?.isCurrentAnalyzer == true)
         try watchStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
 
         let phoneStore = SessionFileStore(rootURL: phoneRoot)
@@ -92,6 +94,10 @@ struct SessionFileStoreTests {
         let water = try phoneStore.readWaterTemperatureSamples(sessionId: manifest.sessionId)
         #expect(water.count == 1)
         #expect(water[0].celsius == 19.5)
+        let phoneDerived = try phoneStore.readDerivedView(sessionId: manifest.sessionId)
+        #expect(phoneDerived != nil)
+        #expect(phoneDerived?.analyzerVersion == SessionAnalyzer.version)
+        #expect(phoneDerived?.stats == package.derived?.stats)
     }
 
     @Test func migratesLegacyAssumptionsFile() throws {

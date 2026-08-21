@@ -445,6 +445,13 @@ public final class SessionFileStore: @unchecked Sendable {
         var imported = package.manifest
         imported.transferState = .acknowledged
         try phoneStore.writeManifest(imported)
+
+        let sessionId = package.manifest.sessionId
+        if let derived = package.derived, derived.isCurrentAnalyzer {
+            try phoneStore.writeDerivedView(derived, sessionId: sessionId)
+        } else {
+            try phoneStore.ensureDerivedView(sessionId: sessionId)
+        }
     }
 
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
@@ -460,6 +467,7 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
             detections: detections,
@@ -467,7 +475,8 @@ public final class SessionFileStore: @unchecked Sendable {
             motion: motion,
             motionFramesZlib: motionFrames,
             health: health,
-            water: water
+            water: water,
+            derived: derived
         )
     }
 
@@ -604,6 +613,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var health: [HealthMetricSample]
     /// Sparse Ultra water-temperature samples (`water-000.jsonl`). Empty on older packages.
     public var water: [WaterTemperatureSample]
+    /// Fast view sidecar when present (Watch Stop / current analyzer).
+    public var derived: DerivedSessionView?
 
     public init(
         manifest: SessionManifest,
@@ -612,7 +623,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motion: [MotionSample] = [],
         motionFramesZlib: Data? = nil,
         health: [HealthMetricSample],
-        water: [WaterTemperatureSample] = []
+        water: [WaterTemperatureSample] = [],
+        derived: DerivedSessionView? = nil
     ) {
         self.manifest = manifest
         self.detections = detections
@@ -621,6 +633,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.motionFramesZlib = motionFramesZlib
         self.health = health
         self.water = water
+        self.derived = derived
     }
 
     public init(from decoder: Decoder) throws {
@@ -640,6 +653,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
+        derived = try container.decodeIfPresent(DerivedSessionView.self, forKey: .derived)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -656,10 +670,13 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         if !water.isEmpty {
             try container.encode(water, forKey: .water)
         }
+        if let derived {
+            try container.encode(derived, forKey: .derived)
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, derived
     }
 }
 

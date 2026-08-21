@@ -185,6 +185,12 @@ extension WatchSessionController {
         do {
             try store.markReadyToTransfer(sessionId: manifest.sessionId)
             WakeLog.debug(.store, "markReadyToTransfer \(manifest.sessionId.prefix(8))…")
+            do {
+                _ = try store.ensureDerivedView(sessionId: manifest.sessionId)
+                WakeLog.debug(.store, "derived view written \(manifest.sessionId.prefix(8))…")
+            } catch {
+                WakeLog.error(.store, "ensureDerivedView: \(error.localizedDescription)")
+            }
         } catch {
             errorText = String(localized: "Mark transfer: \(error.localizedDescription)")
             WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
