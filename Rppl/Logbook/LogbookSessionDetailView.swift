@@ -20,9 +20,12 @@ struct LogbookSessionDetailView: View {
     @State private var sessionStats: SessionStats?
     @State private var mapTracks: [[LocationSample]] = []
     @State private var allLocations: [LocationSample] = []
+    @State private var mapFrame: MapTrackFrame?
+    @State private var tracksLoading = false
     @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
     @State private var loadTask: Task<Void, Never>?
+    @State private var tracksTask: Task<Void, Never>?
     @State private var errorText: String?
     @State private var exportURL: URL?
     @State private var isExporting = false
@@ -116,16 +119,28 @@ struct LogbookSessionDetailView: View {
 
     @ViewBuilder
     private var sessionMap: some View {
-        if mapTracks.isEmpty {
-            mapPlaceholder(sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
+        if mapTracks.isEmpty, mapFrame == nil {
+            mapPlaceholder(
+                tracksLoading
+                    ? "Loading GPS…"
+                    : (sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
+            )
         } else {
             SessionMapView(
                 tracks: mapTracks,
                 allowsInteraction: true,
-                showsStyleToggle: true
+                showsStyleToggle: true,
+                preferredFrame: mapFrame
             )
                 .frame(height: 300)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(alignment: .center) {
+                    if tracksLoading, mapTracks.isEmpty {
+                        ProgressView()
+                            .padding(12)
+                            .background(.ultraThinMaterial, in: Capsule())
+                    }
+                }
         }
     }
 
@@ -282,6 +297,8 @@ struct LogbookSessionDetailView: View {
     private func cancelLoad() {
         loadTask?.cancel()
         loadTask = nil
+        tracksTask?.cancel()
+        tracksTask = nil
     }
 
     private func loadSession() async {
@@ -289,28 +306,51 @@ struct LogbookSessionDetailView: View {
         let store = store
 
         do {
-            let bundle = try await StoreIO.runOffMain {
-                try Self.loadBundle(source: source, store: store)
-            }
-            try Task.checkCancellation()
+            switch source {
+            case .store(let sessionId):
+                guard let store else {
+                    throw SessionStoreError.ioFailure("Session store missing")
+                }
+                let summary = try await StoreIO.runOffMain {
+                    try SessionLoader.loadSummary(store: store, sessionId: sessionId)
+                }
+                try Task.checkCancellation()
+                manifest = summary.manifest
+                sessionStats = summary.stats
+                mapFrame = summary.mapFrame
+                cityName = summary.cityName
+                if cityName == nil {
+                    let peek = try await StoreIO.runOffMain {
+                        try store.peekLocationSamples(sessionId: sessionId)
+                    }
+                    cityName = await SessionCityResolver.shared.cityName(
+                        sessionId: sessionId,
+                        locations: peek
+                    )
+                    if let cityName {
+                        try? await StoreIO.runOffMain {
+                            try store.updateDerivedCityName(cityName, sessionId: sessionId)
+                        }
+                    }
+                } else if let cityName {
+                    SessionCityResolver.shared.remember(sessionId: sessionId, cityName: cityName)
+                }
+                loadPhase = .ready
+                loadTask = nil
+                tracksLoading = true
+                tracksTask = Task(priority: .utility) {
+                    await loadTracks(store: store, sessionId: sessionId, rides: summary.stats.rides)
+                }
 
-            let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
-            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: bundle.stats.rides)
-            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
-            let mapPoints = rideTracks.map {
-                SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
+            case .bundledExample:
+                let bundle = try await StoreIO.runOffMain {
+                    try Self.loadBundledExample()
+                }
+                try Task.checkCancellation()
+                applyFullBundle(bundle)
+                loadPhase = .ready
+                loadTask = nil
             }
-
-            manifest = bundle.manifest
-            sessionStats = bundle.stats
-            allLocations = sortedLocations
-            mapTracks = mapPoints
-            cityName = await SessionCityResolver.shared.cityName(
-                sessionId: bundle.manifest.sessionId,
-                locations: sortedLocations
-            )
-            loadPhase = .ready
-            loadTask = nil
         } catch is CancellationError {
             loadTask = nil
         } catch {
@@ -321,27 +361,61 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private static func loadBundle(
-        source: LogbookSessionDetailSource,
-        store: SessionFileStore?
-    ) throws -> SessionLoadBundle {
-        switch source {
-        case .store(let sessionId):
-            guard let store else {
-                throw SessionStoreError.ioFailure("Session store missing")
+    private func loadTracks(
+        store: SessionFileStore,
+        sessionId: String,
+        rides: [RideSegmentStats]
+    ) async {
+        do {
+            let locations = try await StoreIO.runOffMain {
+                try store.readLocationSamples(sessionId: sessionId)
             }
-            return try SessionLoader.load(store: store, sessionId: sessionId)
-        case .bundledExample:
-            guard let url = Bundle.main.url(
-                forResource: exampleFileName,
-                withExtension: "json",
-                subdirectory: "Exports"
-            ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
-                throw SessionStoreError.ioFailure("Bundled example session missing")
+            try Task.checkCancellation()
+            let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
+            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: rides)
+            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
+            let mapPoints = rideTracks.map {
+                SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
             }
-            WakeLog.debug(.ui, "example session load (ephemeral)")
-            return try SessionLoader.load(packageURL: url)
+            allLocations = sortedLocations
+            mapTracks = mapPoints
+            tracksLoading = false
+            tracksTask = nil
+        } catch is CancellationError {
+            tracksTask = nil
+            tracksLoading = false
+        } catch {
+            tracksLoading = false
+            tracksTask = nil
+            WakeLog.error(.store, "LogbookSessionDetail tracks: \(error.localizedDescription)")
         }
+    }
+
+    private func applyFullBundle(_ bundle: SessionLoadBundle) {
+        let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
+        let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: bundle.stats.rides)
+        let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
+        let mapPoints = rideTracks.map {
+            SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
+        }
+        manifest = bundle.manifest
+        sessionStats = bundle.stats
+        allLocations = sortedLocations
+        mapTracks = mapPoints
+        mapFrame = bundle.mapFrame
+        cityName = bundle.cityName
+    }
+
+    private static func loadBundledExample() throws -> SessionLoadBundle {
+        guard let url = Bundle.main.url(
+            forResource: exampleFileName,
+            withExtension: "json",
+            subdirectory: "Exports"
+        ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
+            throw SessionStoreError.ioFailure("Bundled example session missing")
+        }
+        WakeLog.debug(.ui, "example session load (ephemeral)")
+        return try SessionLoader.load(packageURL: url)
     }
 
     private func startExport() {

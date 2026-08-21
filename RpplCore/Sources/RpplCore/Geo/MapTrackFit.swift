@@ -1,5 +1,32 @@
 import Foundation
 
+/// Device-agnostic track framing (persist in `derived/view.json`).
+/// Viewers compute `MapTrackFit.cameraDistanceMeters` for their map size.
+public struct MapTrackFrame: Codable, Equatable, Sendable {
+    public var centerLatitude: Double
+    public var centerLongitude: Double
+    /// MapKit heading in degrees, always in `[-maxHeadingDegrees, maxHeadingDegrees]`.
+    public var headingDegrees: Double
+    /// Padded track width along camera-right, meters.
+    public var spanWidthMeters: Double
+    /// Padded track height along camera-up, meters.
+    public var spanHeightMeters: Double
+
+    public init(
+        centerLatitude: Double,
+        centerLongitude: Double,
+        headingDegrees: Double,
+        spanWidthMeters: Double,
+        spanHeightMeters: Double
+    ) {
+        self.centerLatitude = centerLatitude
+        self.centerLongitude = centerLongitude
+        self.headingDegrees = headingDegrees
+        self.spanWidthMeters = spanWidthMeters
+        self.spanHeightMeters = spanHeightMeters
+    }
+}
+
 /// Camera parameters to frame GPS tracks on a MapKit map (pitch 0).
 public struct MapTrackFit: Equatable, Sendable {
     public var centerLatitude: Double
@@ -34,18 +61,12 @@ public enum MapTrackFitter {
     /// Approximate MapKit pitch-0 half vertical FOV (radians) for distance estimate.
     private static let halfVerticalFOVRadians = 15.0 * .pi / 180.0
 
-    public static func fit(
+    /// Geo frame from coordinates (no view size). Persist this; fit per device later.
+    public static func frame(
         locations: [(latitude: Double, longitude: Double)],
-        viewWidth: Double,
-        viewHeight: Double,
         paddingFactor: Double = defaultPaddingFactor
-    ) -> MapTrackFit? {
-        guard locations.count >= 2,
-              viewWidth > 1,
-              viewHeight > 1
-        else {
-            return nil
-        }
+    ) -> MapTrackFrame? {
+        guard locations.count >= 2 else { return nil }
 
         var sumLat = 0.0
         var sumLon = 0.0
@@ -66,33 +87,62 @@ public enum MapTrackFitter {
             points.append((e, n))
         }
 
-        // Align principal axis with screen-horizontal (right), then clamp to ±90.
         let heading = clampedHeadingDegrees(principalHeadingDegrees(points) - 90)
-        let frame = cameraFrameBounds(points: points, headingDegrees: heading)
+        let bounds = cameraFrameBounds(points: points, headingDegrees: heading)
         let pad = max(paddingFactor, 1.0)
-        let paddedWidth = max(frame.width * pad, 12)
-        let paddedHeight = max(frame.height * pad, 12)
-        let metersPerPoint = max(paddedWidth / viewWidth, paddedHeight / viewHeight)
+        let paddedWidth = max(bounds.width * pad, 12)
+        let paddedHeight = max(bounds.height * pad, 12)
+
+        let centerE = bounds.midE
+        let centerN = bounds.midN
+        let centerLat = meanLat + centerN / metersPerDegreeLat
+        let centerLon = meanLon + centerE / metersPerDegreeLon
+
+        return MapTrackFrame(
+            centerLatitude: centerLat,
+            centerLongitude: centerLon,
+            headingDegrees: heading,
+            spanWidthMeters: paddedWidth,
+            spanHeightMeters: paddedHeight
+        )
+    }
+
+    public static func fit(
+        frame: MapTrackFrame,
+        viewWidth: Double,
+        viewHeight: Double
+    ) -> MapTrackFit? {
+        guard viewWidth > 1, viewHeight > 1 else { return nil }
+        let metersPerPoint = max(
+            frame.spanWidthMeters / viewWidth,
+            frame.spanHeightMeters / viewHeight
+        )
         let visibleHeightMeters = metersPerPoint * viewHeight
         let distance = max(
             minimumCameraDistanceMeters,
             (visibleHeightMeters / 2) / tan(halfVerticalFOVRadians)
         )
-
-        let centerE = frame.midE
-        let centerN = frame.midN
-        let centerLat = meanLat + centerN / metersPerDegreeLat
-        let centerLon = meanLon + centerE / metersPerDegreeLon
-
         return MapTrackFit(
-            centerLatitude: centerLat,
-            centerLongitude: centerLon,
-            headingDegrees: heading,
+            centerLatitude: frame.centerLatitude,
+            centerLongitude: frame.centerLongitude,
+            headingDegrees: frame.headingDegrees,
             cameraDistanceMeters: distance
         )
     }
 
-    /// Flatten ride/session tracks into coordinate pairs for `fit`.
+    public static func fit(
+        locations: [(latitude: Double, longitude: Double)],
+        viewWidth: Double,
+        viewHeight: Double,
+        paddingFactor: Double = defaultPaddingFactor
+    ) -> MapTrackFit? {
+        guard let frame = frame(locations: locations, paddingFactor: paddingFactor) else {
+            return nil
+        }
+        return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight)
+    }
+
+    /// Flatten ride/session tracks into coordinate pairs for `fit` / `frame`.
     public static func coordinates(
         fromTracks tracks: [[LocationSample]]
     ) -> [(latitude: Double, longitude: Double)] {

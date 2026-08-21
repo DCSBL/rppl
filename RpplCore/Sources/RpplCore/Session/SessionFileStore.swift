@@ -26,6 +26,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 ///   water-000.jsonl (optional; Ultra submerged water temperature)
+///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
 /// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
@@ -82,6 +83,94 @@ public final class SessionFileStore: @unchecked Sendable {
         } catch {
             throw SessionStoreError.invalidManifest
         }
+    }
+
+    // MARK: - Derived view (`derived/view.json`)
+
+    public func derivedViewURL(sessionId: String) -> URL {
+        sessionDirectory(for: sessionId)
+            .appendingPathComponent("derived", isDirectory: true)
+            .appendingPathComponent("view.json")
+    }
+
+    public func readDerivedView(sessionId: String) throws -> DerivedSessionView? {
+        let url = derivedViewURL(sessionId: sessionId)
+        guard fileManager.fileExists(atPath: url.path) else { return nil }
+        let data = try Data(contentsOf: url)
+        return try decoder.decode(DerivedSessionView.self, from: data)
+    }
+
+    public func writeDerivedView(_ view: DerivedSessionView, sessionId: String) throws {
+        let dir = sessionDirectory(for: sessionId).appendingPathComponent("derived", isDirectory: true)
+        try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        let data = try encoder.encode(view)
+        try data.write(to: derivedViewURL(sessionId: sessionId), options: [.atomic])
+    }
+
+    /// Phone-only city write-back; does not change stats / mapFrame.
+    public func updateDerivedCityName(_ cityName: String, sessionId: String) throws {
+        guard var view = try readDerivedView(sessionId: sessionId) else { return }
+        view.cityName = cityName
+        try writeDerivedView(view, sessionId: sessionId)
+    }
+
+    /// First `limit` location samples for cheap geocode without full GPS parse.
+    public func peekLocationSamples(sessionId: String, limit: Int = 48, chunkIndex: Int = 0) throws -> [LocationSample] {
+        let name = String(format: "location-%03d.jsonl", chunkIndex)
+        return try readJSONL(LocationSample.self, from: name, sessionId: sessionId, limit: limit)
+    }
+
+    /// Returns current derived view, rebuilding from raw when missing or analyzer stale.
+    /// Preserves phone-only `cityName` across rebuilds when present.
+    @discardableResult
+    public func ensureDerivedView(sessionId: String) throws -> DerivedSessionView {
+        if let existing = try readDerivedView(sessionId: sessionId), existing.isCurrentAnalyzer {
+            return existing
+        }
+        let previousCity = try readDerivedView(sessionId: sessionId)?.cityName
+        let rebuilt = try buildDerivedView(sessionId: sessionId, cityName: previousCity)
+        try writeDerivedView(rebuilt, sessionId: sessionId)
+        return rebuilt
+    }
+
+    /// Force rebuild from raw (tests / future tooling). Does not touch HealthKit.
+    @discardableResult
+    public func reanalyzeSession(sessionId: String) throws -> DerivedSessionView {
+        let previousCity = try readDerivedView(sessionId: sessionId)?.cityName
+        let rebuilt = try buildDerivedView(sessionId: sessionId, cityName: previousCity)
+        try writeDerivedView(rebuilt, sessionId: sessionId)
+        return rebuilt
+    }
+
+    public func buildDerivedView(
+        sessionId: String,
+        cityName: String? = nil
+    ) throws -> DerivedSessionView {
+        let manifest = try readManifest(sessionId: sessionId)
+        let detections = try readDetections(sessionId: sessionId)
+        let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
+        let health = (try? readHealthSamples(sessionId: sessionId)) ?? []
+        let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest,
+            detections: detections,
+            locations: locations,
+            health: health,
+            water: water
+        )
+        let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let mapFrame = MapTrackFitter.frame(locations: coords)
+        if manifest.schemaVersion < SessionSchema.currentVersion {
+            var updated = manifest
+            updated.schemaVersion = SessionSchema.currentVersion
+            try writeManifest(updated)
+        }
+        return DerivedSessionView(
+            analyzerVersion: SessionAnalyzer.version,
+            stats: stats,
+            mapFrame: mapFrame,
+            cityName: cityName
+        )
     }
 
     public func appendDetection(_ event: DetectionEvent, sessionId: String) throws {
@@ -369,6 +458,13 @@ public final class SessionFileStore: @unchecked Sendable {
         var imported = package.manifest
         imported.transferState = .acknowledged
         try phoneStore.writeManifest(imported)
+
+        let sessionId = package.manifest.sessionId
+        if let derived = package.derived, derived.isCurrentAnalyzer {
+            try phoneStore.writeDerivedView(derived, sessionId: sessionId)
+        } else {
+            try phoneStore.ensureDerivedView(sessionId: sessionId)
+        }
     }
 
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
@@ -384,6 +480,7 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
             detections: detections,
@@ -391,7 +488,8 @@ public final class SessionFileStore: @unchecked Sendable {
             motion: motion,
             motionFramesZlib: motionFrames,
             health: health,
-            water: water
+            water: water,
+            derived: derived
         )
     }
 
@@ -466,21 +564,28 @@ public final class SessionFileStore: @unchecked Sendable {
         try handle.write(contentsOf: data)
     }
 
-    private func readJSONL<T: Decodable>(_ type: T.Type, from fileName: String, sessionId: String) throws -> [T] {
+    private func readJSONL<T: Decodable>(
+        _ type: T.Type,
+        from fileName: String,
+        sessionId: String,
+        limit: Int? = nil
+    ) throws -> [T] {
         let url = sessionDirectory(for: sessionId).appendingPathComponent(fileName)
         guard fileManager.fileExists(atPath: url.path) else { return [] }
         let data = try Data(contentsOf: url)
-        return try decodeJSONL(type, from: data)
+        return try decodeJSONL(type, from: data, limit: limit)
     }
 
-    private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data) throws -> [T] {
+    private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data, limit: Int? = nil) throws -> [T] {
         guard let text = String(data: data, encoding: .utf8) else {
             throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL")
         }
         let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
         var result: [T] = []
-        result.reserveCapacity(lines.count)
+        let cap = limit.map { min($0, lines.count) } ?? lines.count
+        result.reserveCapacity(cap)
         for (index, line) in lines.enumerated() {
+            if let limit, result.count >= limit { break }
             if index.isMultiple(of: 256), Task.isCancelled {
                 throw CancellationError()
             }
@@ -528,6 +633,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var health: [HealthMetricSample]
     /// Sparse Ultra water-temperature samples (`water-000.jsonl`). Empty on older packages.
     public var water: [WaterTemperatureSample]
+    /// Fast view sidecar when present (Watch Stop / current analyzer).
+    public var derived: DerivedSessionView?
 
     public init(
         manifest: SessionManifest,
@@ -536,7 +643,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motion: [MotionSample] = [],
         motionFramesZlib: Data? = nil,
         health: [HealthMetricSample],
-        water: [WaterTemperatureSample] = []
+        water: [WaterTemperatureSample] = [],
+        derived: DerivedSessionView? = nil
     ) {
         self.manifest = manifest
         self.detections = detections
@@ -545,6 +653,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.motionFramesZlib = motionFramesZlib
         self.health = health
         self.water = water
+        self.derived = derived
     }
 
     public init(from decoder: Decoder) throws {
@@ -564,6 +673,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
+        derived = try container.decodeIfPresent(DerivedSessionView.self, forKey: .derived)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -580,10 +690,13 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         if !water.isEmpty {
             try container.encode(water, forKey: .water)
         }
+        if let derived {
+            try container.encode(derived, forKey: .derived)
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, derived
     }
 }
 

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Derived ride record badges (not detection taxonomy).
-public enum RideHighlight: String, Sendable, Equatable, CaseIterable {
+public enum RideHighlight: String, Sendable, Equatable, Codable, CaseIterable {
     case longest
     case longestTime
     case fastest

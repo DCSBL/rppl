@@ -104,24 +104,33 @@ final class SessionCatalog {
     }
 
     private func buildEntry(store: SessionFileStore, manifest: SessionManifest) async throws -> SessionEntry {
-        let bundle = try await StoreIO.runOffMain {
-            try SessionLoader.load(store: store, sessionId: manifest.sessionId)
+        let summary = try await StoreIO.runOffMain {
+            try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
         }
 
-        let topSpeedKmh = bundle.stats.maxSpeedKmh
-            ?? SessionLocationHelpers.peakSpeedKmh(
-                rides: bundle.stats.rides,
-                locations: bundle.locations
-            )
+        let topSpeedKmh = summary.stats.maxSpeedKmh ?? summary.stats.topSpeedKmh
 
-        let cityName = await SessionCityResolver.shared.cityName(
-            sessionId: manifest.sessionId,
-            locations: bundle.locations
-        )
+        var cityName = summary.cityName
+        if cityName == nil {
+            let peek = try await StoreIO.runOffMain {
+                try store.peekLocationSamples(sessionId: manifest.sessionId)
+            }
+            cityName = await SessionCityResolver.shared.cityName(
+                sessionId: manifest.sessionId,
+                locations: peek
+            )
+            if let cityName {
+                try? await StoreIO.runOffMain {
+                    try store.updateDerivedCityName(cityName, sessionId: manifest.sessionId)
+                }
+            }
+        } else if let cityName {
+            SessionCityResolver.shared.remember(sessionId: manifest.sessionId, cityName: cityName)
+        }
 
         return SessionEntry(
-            manifest: manifest,
-            stats: bundle.stats,
+            manifest: summary.manifest,
+            stats: summary.stats,
             topSpeedKmh: topSpeedKmh,
             cityName: cityName,
             highlights: []

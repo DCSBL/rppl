@@ -1,7 +1,7 @@
 import Foundation
 
 /// One detected ride segment (enter → exit or session end).
-public struct RideSegmentStats: Equatable, Sendable, Identifiable {
+public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var id: Int { index }
     public var index: Int
     public var startedAt: Date
@@ -44,8 +44,9 @@ public struct RideSegmentStats: Equatable, Sendable, Identifiable {
     }
 }
 
-/// Derived session summary from detections + GPS + health (not persisted).
-public struct SessionStats: Equatable, Sendable {
+/// Derived session summary from detections + GPS + health.
+/// Persisted in `derived/view.json` when present (see `DerivedSessionView`).
+public struct SessionStats: Codable, Equatable, Sendable {
     public var startedAt: Date
     public var endedAt: Date
     public var totalDuration: TimeInterval

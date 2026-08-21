@@ -32,7 +32,7 @@ Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tr
 - Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
 
 ## Architecture rules
 
