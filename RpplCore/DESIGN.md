@@ -62,7 +62,7 @@ classDiagram
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `DetectionThresholds`, `TemperatureFormat` | Thresholds authored in **km/h**; GPS compare in m/s |
-| Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Built from detections + GPS + health + water; today in-memory only — target persist `derived/view.json` ([SessionStorage.md](../Docs/SessionStorage.md)) |
+| Derived stats | `SessionStatsBuilder`, `DerivedSessionView`, `SessionAnalyzer`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Persist `derived/view.json`; rebuild when `SessionAnalyzer.version` stale ([SessionStorage.md](../Docs/SessionStorage.md)) |
 
 Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown codes must round-trip.
 

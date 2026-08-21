@@ -26,6 +26,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 ///   water-000.jsonl (optional; Ultra submerged water temperature)
+///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
 /// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
@@ -82,6 +83,81 @@ public final class SessionFileStore: @unchecked Sendable {
         } catch {
             throw SessionStoreError.invalidManifest
         }
+    }
+
+    // MARK: - Derived view (`derived/view.json`)
+
+    public func derivedViewURL(sessionId: String) -> URL {
+        sessionDirectory(for: sessionId)
+            .appendingPathComponent("derived", isDirectory: true)
+            .appendingPathComponent("view.json")
+    }
+
+    public func readDerivedView(sessionId: String) throws -> DerivedSessionView? {
+        let url = derivedViewURL(sessionId: sessionId)
+        guard fileManager.fileExists(atPath: url.path) else { return nil }
+        let data = try Data(contentsOf: url)
+        return try decoder.decode(DerivedSessionView.self, from: data)
+    }
+
+    public func writeDerivedView(_ view: DerivedSessionView, sessionId: String) throws {
+        let dir = sessionDirectory(for: sessionId).appendingPathComponent("derived", isDirectory: true)
+        try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        let data = try encoder.encode(view)
+        try data.write(to: derivedViewURL(sessionId: sessionId), options: [.atomic])
+    }
+
+    /// Returns current derived view, rebuilding from raw when missing or analyzer stale.
+    /// Preserves phone-only `cityName` across rebuilds when present.
+    @discardableResult
+    public func ensureDerivedView(sessionId: String) throws -> DerivedSessionView {
+        if let existing = try readDerivedView(sessionId: sessionId), existing.isCurrentAnalyzer {
+            return existing
+        }
+        let previousCity = try readDerivedView(sessionId: sessionId)?.cityName
+        let rebuilt = try buildDerivedView(sessionId: sessionId, cityName: previousCity)
+        try writeDerivedView(rebuilt, sessionId: sessionId)
+        return rebuilt
+    }
+
+    /// Force rebuild from raw (tests / future tooling). Does not touch HealthKit.
+    @discardableResult
+    public func reanalyzeSession(sessionId: String) throws -> DerivedSessionView {
+        let previousCity = try readDerivedView(sessionId: sessionId)?.cityName
+        let rebuilt = try buildDerivedView(sessionId: sessionId, cityName: previousCity)
+        try writeDerivedView(rebuilt, sessionId: sessionId)
+        return rebuilt
+    }
+
+    public func buildDerivedView(
+        sessionId: String,
+        cityName: String? = nil
+    ) throws -> DerivedSessionView {
+        let manifest = try readManifest(sessionId: sessionId)
+        let detections = try readDetections(sessionId: sessionId)
+        let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
+        let health = (try? readHealthSamples(sessionId: sessionId)) ?? []
+        let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest,
+            detections: detections,
+            locations: locations,
+            health: health,
+            water: water
+        )
+        let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let mapFrame = MapTrackFitter.frame(locations: coords)
+        if manifest.schemaVersion < SessionSchema.currentVersion {
+            var updated = manifest
+            updated.schemaVersion = SessionSchema.currentVersion
+            try writeManifest(updated)
+        }
+        return DerivedSessionView(
+            analyzerVersion: SessionAnalyzer.version,
+            stats: stats,
+            mapFrame: mapFrame,
+            cityName: cityName
+        )
     }
 
     public func appendDetection(_ event: DetectionEvent, sessionId: String) throws {

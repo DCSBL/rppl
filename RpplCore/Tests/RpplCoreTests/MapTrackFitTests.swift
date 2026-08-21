@@ -70,6 +70,20 @@ struct MapTrackFitTests {
         #expect(loose.cameraDistanceMeters > tight.cameraDistanceMeters)
     }
 
+    @Test func frameFitsDifferentViewSizes() {
+        let locations = verticalLoopPoints()
+        let frame = MapTrackFitter.frame(locations: locations)
+        #expect(frame != nil)
+        guard let frame else { return }
+        let phone = MapTrackFitter.fit(frame: frame, viewWidth: 390, viewHeight: 300)
+        let tall = MapTrackFitter.fit(frame: frame, viewWidth: 200, viewHeight: 400)
+        #expect(phone != nil && tall != nil)
+        guard let phone, let tall else { return }
+        #expect(phone.centerLatitude == frame.centerLatitude)
+        #expect(tall.headingDegrees == frame.headingDegrees)
+        #expect(phone.cameraDistanceMeters != tall.cameraDistanceMeters)
+    }
+
     private func verticalLoopPoints() -> [(latitude: Double, longitude: Double)] {
         // Ellipse: major axis N–S, minor E–W.
         (0..<36).map { i in
