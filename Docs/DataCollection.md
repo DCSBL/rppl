@@ -35,7 +35,7 @@ Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (o
 
 Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights are **computed on demand** from detections + GPS + health + water — not written to disk. Watch shows live ride count / meters / speed during recording (and water temp on the inactive overview); iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
 
-Water temperature is a session metric (mean of persisted samples). Ultra sets `manifest.waterTemperatureAvailable`; the UI hides the tile on unsupported watches, shows `- C` until the first sample, then the average. Submersion is when the Watch can measure; the value stays relevant while riding.
+Water temperature is a session metric (mean of persisted samples). Ultra sets `manifest.waterTemperatureAvailable`; the UI hides the tile on unsupported watches, shows `- C` until the first sample, then the average. Submersion is when the Watch can measure; the value stays relevant while riding. Watch target needs the **Shallow Depth and Pressure** entitlement (`com.apple.developer.submerged-shallow-depth-and-pressure`) and `underwater-depth` in `WKBackgroundModes`, plus `NSMotionUsageDescription` — without the entitlement, `CMWaterSubmersionManager` reports `CMErrorNotEntitled` and never delivers submerged / water-temp events.
 
 ## HealthKit policy
 

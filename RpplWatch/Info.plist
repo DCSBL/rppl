@@ -9,6 +9,7 @@
 	<key>WKBackgroundModes</key>
 	<array>
 		<string>workout-processing</string>
+		<string>underwater-depth</string>
 	</array>
 </dict>
 </plist>
