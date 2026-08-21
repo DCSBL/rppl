@@ -19,6 +19,16 @@ struct LogbookView: View {
                 }
 
                 Section {
+                    SyncStatusIndicator(
+                        state: connectivity.syncState,
+                        pendingCount: connectivity.pendingAckCount
+                    )
+                    .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
+                Section {
                     totalsCard
                         .listRowInsets(LogbookLayout.rowInsets(top: 4, bottom: 12))
                         .listRowBackground(Color.clear)
@@ -118,6 +128,7 @@ struct LogbookView: View {
                 Text("This permanently removes the session from this iPhone. This cannot be undone.")
             }
             .onAppear {
+                connectivity.refreshSyncState()
                 catalog.reload(store: connectivity.store)
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in

@@ -21,7 +21,7 @@ struct SyncStatusIndicator: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if pendingCount > 0 {
-                    Text("Pending transfers: \(pendingCount)")
+                    Text("Pending: \(pendingCount)")
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
