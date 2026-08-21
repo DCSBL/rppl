@@ -49,8 +49,8 @@ Previously skipped here; now tracked. Full first-run flow still a later build �
 | Item | Status |
 |------|--------|
 | Keep example session CTA | Shipped (empty Logbook) |
-| Stronger “Watch required / start on Watch” iPhone copy | Follow-up PR |
-| Defer Watch permission prompts off cold launch | Follow-up PR |
+| Stronger “Watch required / start on Watch” iPhone copy | #58 |
+| Defer Watch permission prompts off cold launch | #57 |
 | Multi-step branded onboarding | Deferred (alpha) |
 
 ## Sync: background WC + completion notice
@@ -60,9 +60,10 @@ Watch→phone session packages already use **`WCSession.transferFile`** (system 
 | Item | Status |
 |------|--------|
 | Background-capable transfer APIs | Already in code |
-| Re-queue pending on Watch become-active / scene active | Follow-up PR |
-| Local notification on Watch when phone **acks** (sync complete) | Follow-up PR |
-| Notification auth in context (at transfer / stop), not cold launch | Follow-up PR |
+| Re-queue pending on Watch become-active / scene active | #56 |
+| Local notification on Watch when phone **acks** (sync complete) | #56 |
+| Notification auth in context (at transfer / stop), not cold launch | #56 |
+| Skip duplicate outstanding WC file transfers | #56 |
 
 Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may suppress Watch banners (system). Keep data until ack (hard constraint).
 
