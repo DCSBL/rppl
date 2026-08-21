@@ -107,6 +107,19 @@ public final class SessionFileStore: @unchecked Sendable {
         try data.write(to: derivedViewURL(sessionId: sessionId), options: [.atomic])
     }
 
+    /// Phone-only city write-back; does not change stats / mapFrame.
+    public func updateDerivedCityName(_ cityName: String, sessionId: String) throws {
+        guard var view = try readDerivedView(sessionId: sessionId) else { return }
+        view.cityName = cityName
+        try writeDerivedView(view, sessionId: sessionId)
+    }
+
+    /// First `limit` location samples for cheap geocode without full GPS parse.
+    public func peekLocationSamples(sessionId: String, limit: Int = 48, chunkIndex: Int = 0) throws -> [LocationSample] {
+        let name = String(format: "location-%03d.jsonl", chunkIndex)
+        return try readJSONL(LocationSample.self, from: name, sessionId: sessionId, limit: limit)
+    }
+
     /// Returns current derived view, rebuilding from raw when missing or analyzer stale.
     /// Preserves phone-only `cityName` across rebuilds when present.
     @discardableResult
@@ -551,21 +564,28 @@ public final class SessionFileStore: @unchecked Sendable {
         try handle.write(contentsOf: data)
     }
 
-    private func readJSONL<T: Decodable>(_ type: T.Type, from fileName: String, sessionId: String) throws -> [T] {
+    private func readJSONL<T: Decodable>(
+        _ type: T.Type,
+        from fileName: String,
+        sessionId: String,
+        limit: Int? = nil
+    ) throws -> [T] {
         let url = sessionDirectory(for: sessionId).appendingPathComponent(fileName)
         guard fileManager.fileExists(atPath: url.path) else { return [] }
         let data = try Data(contentsOf: url)
-        return try decodeJSONL(type, from: data)
+        return try decodeJSONL(type, from: data, limit: limit)
     }
 
-    private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data) throws -> [T] {
+    private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data, limit: Int? = nil) throws -> [T] {
         guard let text = String(data: data, encoding: .utf8) else {
             throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL")
         }
         let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
         var result: [T] = []
-        result.reserveCapacity(lines.count)
+        let cap = limit.map { min($0, lines.count) } ?? lines.count
+        result.reserveCapacity(cap)
         for (index, line) in lines.enumerated() {
+            if let limit, result.count >= limit { break }
             if index.isMultiple(of: 256), Task.isCancelled {
                 throw CancellationError()
             }
