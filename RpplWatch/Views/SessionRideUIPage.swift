@@ -114,7 +114,10 @@ struct SessionRideUIPage: View {
                 Image(systemName: "heart.fill")
                     .font(.caption2)
                     .foregroundStyle(.red)
+                    .accessibilityHidden(true)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(heartRateAccessibilityLabel)
 
             statusLine(primary: "Riding", color: .blue)
         }
@@ -166,7 +169,12 @@ struct SessionRideUIPage: View {
                         Image(systemName: "heart.fill")
                             .font(.caption2)
                             .foregroundStyle(.red)
+                            .accessibilityHidden(true)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(
+                        String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+                    )
                 }
 
                 Divider()
@@ -213,5 +221,12 @@ struct SessionRideUIPage: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var heartRateAccessibilityLabel: String {
+        if let hr = session.lastHeartRate {
+            return String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+        }
+        return String(localized: "Heart rate unavailable")
     }
 }
