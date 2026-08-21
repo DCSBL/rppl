@@ -7,6 +7,8 @@ struct SessionMapView: View {
     var allowsInteraction: Bool = false
     /// Style toggle only on the session map card — not ride maps.
     var showsStyleToggle: Bool = false
+    /// Device-agnostic frame from `derived/view.json` for first paint before tracks load.
+    var preferredFrame: MapTrackFrame? = nil
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
@@ -16,21 +18,25 @@ struct SessionMapView: View {
     init(
         locations: [LocationSample],
         allowsInteraction: Bool = false,
-        showsStyleToggle: Bool = false
+        showsStyleToggle: Bool = false,
+        preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = locations.count >= 2 ? [locations] : []
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
+        self.preferredFrame = preferredFrame
     }
 
     init(
         tracks: [[LocationSample]],
         allowsInteraction: Bool = false,
-        showsStyleToggle: Bool = false
+        showsStyleToggle: Bool = false,
+        preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = tracks.filter { $0.count >= 2 }
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
+        self.preferredFrame = preferredFrame
     }
 
     private var interactionModes: MapInteractionModes {
@@ -101,7 +107,18 @@ struct SessionMapView: View {
                 showReset = false
                 updateFit(for: geo.size, forceApply: true)
             }
+            .onChange(of: preferredFrameSignature) { _, _ in
+                if tracks.isEmpty {
+                    showReset = false
+                    updateFit(for: geo.size, forceApply: true)
+                }
+            }
         }
+    }
+
+    private var preferredFrameSignature: String {
+        guard let preferredFrame else { return "nil" }
+        return "\(preferredFrame.centerLatitude)-\(preferredFrame.centerLongitude)-\(preferredFrame.headingDegrees)-\(preferredFrame.spanWidthMeters)"
     }
 
     private var trackSignature: String {
@@ -132,11 +149,23 @@ struct SessionMapView: View {
 
     private func updateFit(for size: CGSize, forceApply: Bool) {
         let coords = MapTrackFitter.coordinates(fromTracks: tracks)
-        guard let next = MapTrackFitter.fit(
-            locations: coords,
-            viewWidth: Double(size.width),
-            viewHeight: Double(size.height)
-        ) else {
+        let next: MapTrackFit?
+        if coords.count >= 2 {
+            next = MapTrackFitter.fit(
+                locations: coords,
+                viewWidth: Double(size.width),
+                viewHeight: Double(size.height)
+            )
+        } else if let preferredFrame {
+            next = MapTrackFitter.fit(
+                frame: preferredFrame,
+                viewWidth: Double(size.width),
+                viewHeight: Double(size.height)
+            )
+        } else {
+            next = nil
+        }
+        guard let next else {
             fitted = nil
             position = .automatic
             return

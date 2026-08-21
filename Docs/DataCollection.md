@@ -35,9 +35,7 @@ Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (o
 
 Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights come from `SessionStatsBuilder` in RpplCore (detections + GPS + health + water).
 
-**Today:** computed on demand in memory — not written to disk. Phone catalog/detail full-parse raw streams each open.
-
-**Target (DCSBL-47):** persist fast view under `derived/view.json` after Stop / import; phone list and detail basics read that file; raw stays for regeneration when `analyzerVersion` bumps. Map first-paint uses a stored geo frame; GPS polyline can load after appear. Layout and rules: [SessionStorage.md](SessionStorage.md).
+After Stop / import, Core writes `derived/view.json` (`SessionAnalyzer.version` + stats + `MapTrackFrame`). Phone logbook list and detail basics read that file; GPS polyline loads after detail appear. Rebuild when analyzer version is stale or sidecar missing. Layout: [SessionStorage.md](SessionStorage.md).
 
 Watch live UI still uses in-memory trackers while recording. Past sessions stay phone-only.
 

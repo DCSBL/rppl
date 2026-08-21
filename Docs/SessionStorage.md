@@ -2,7 +2,7 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v4 on disk today)
+## Current layout (schema v5)
 
 ```text
 <root>/<sessionId>/
@@ -12,9 +12,11 @@ On-disk layout for Watch and iPhone session packages. Streams and HealthKit poli
   motion-000.jsonl.zlib   # or legacy motion-000.jsonl
   health-000.jsonl
   water-000.jsonl         # optional Ultra
+  derived/
+    view.json             # analyzerVersion + SessionStats + MapTrackFrame?
 ```
 
-Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore).
+Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages without `derived/` rebuild on open.
 
 **Roots**
 
@@ -53,15 +55,12 @@ City name is phone-only (geocode cache). Not part of Watch↔phone equality.
 
 ## Derived stats today
 
-`SessionStatsBuilder` runs **on demand** in memory. Catalog and detail both full-parse detections + GPS + health + water. No on-disk cache. Motion never loaded for logbook UI.
+`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Detail map uses stored `MapTrackFrame` first; GPS polyline loads async.
 
-## Target: fast view files (schema v5+)
+## Fast view files
 
 ```text
-<root>/<sessionId>/
-  …raw streams unchanged…
-  derived/
-    view.json    # analyzerVersion + SessionStats + MapTrackFrame?
+derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName phone-optional
 ```
 
 | Rule | Detail |
