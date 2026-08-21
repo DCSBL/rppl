@@ -46,7 +46,9 @@ struct LogbookView: View {
                                     .foregroundStyle(Color.rpplAccent)
                             }
                         } description: {
-                            Text("Record on Apple Watch, then bring your iPhone nearby.")
+                            Text(
+                                "Recording needs Apple Watch. Open Rppl on Watch, start a cable-park session, then keep iPhone nearby to sync. No Watch? Browse the example."
+                            )
                         } actions: {
                             Button("Show example session") {
                                 showExampleSession = true
@@ -131,7 +133,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Cable park sessions")
+            Text("Cable park sessions · Watch records")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
