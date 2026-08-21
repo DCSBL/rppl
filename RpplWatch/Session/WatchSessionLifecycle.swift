@@ -256,6 +256,7 @@ extension WatchSessionController {
         elapsed = computeElapsed(at: Date())
         isProductPaused = true
         statusText = String(localized: "Paused")
+        WKInterfaceDevice.current().play(.stop)
         WakeLog.debug(.session, "pauseSession done")
     }
 
