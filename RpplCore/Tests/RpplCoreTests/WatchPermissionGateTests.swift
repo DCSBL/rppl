@@ -13,13 +13,13 @@ struct WatchPermissionGateTests {
         )
     }
 
-    @Test func allReadyWhenAuthorizedOrUnavailable() {
+    @Test func areAllReadyWhenAuthorizedOrUnavailable() {
         let states: [WatchPermissionKind: WatchPermissionState] = [
             .location: .authorized,
             .health: .authorized,
             .motion: .unavailable
         ]
-        #expect(WatchPermissionOrder.allReady(states))
+        #expect(WatchPermissionOrder.areAllReady(states))
         #expect(!WatchPermissionState.denied.isReady)
         #expect(WatchPermissionState.unavailable.isReady)
     }

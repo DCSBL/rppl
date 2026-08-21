@@ -67,7 +67,7 @@ public enum WatchPermissionOrder {
         return revoked + remaining
     }
 
-    public static func allReady(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
+    public static func areAllReady(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
         WatchPermissionKind.allCases.allSatisfy { states[$0]?.isReady == true }
     }
 

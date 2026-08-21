@@ -57,7 +57,7 @@ final class WatchSessionController: NSObject {
     }
 
     var areRecordingPermissionsReady: Bool {
-        WatchPermissionOrder.allReady(permissionStates)
+        WatchPermissionOrder.areAllReady(permissionStates)
     }
 
     /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
