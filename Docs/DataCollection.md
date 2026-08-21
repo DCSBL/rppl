@@ -14,7 +14,7 @@ Engine: `DetectionEngine` in RpplCore (filter → holds → detectors → lookba
 
 Manual Action Button labels are **removed**. Ultra Action Button may still **start** a session via Workout intent.
 
-Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · thresholds: [Phase3.md](Phase3.md).
+Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · storage: [SessionStorage.md](SessionStorage.md) · thresholds: [Phase3.md](Phase3.md).
 
 ## Streams
 
@@ -31,9 +31,15 @@ Schema **v3**: detections replace labels/assumptions. Legacy `assumptions.jsonl`
 
 Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (one-time per session package).
 
-## Derived stats (not a stream)
+## Derived stats
 
-Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights are **computed on demand** from detections + GPS + health + water — not written to disk. Watch shows live ride count / meters / speed during recording (and water temp on the inactive overview); iPhone session detail shows summary + per-ride list via `SessionStatsBuilder` in RpplCore.
+Ride distance, duration, ride count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights come from `SessionStatsBuilder` in RpplCore (detections + GPS + health + water).
+
+**Today:** computed on demand in memory — not written to disk. Phone catalog/detail full-parse raw streams each open.
+
+**Target (DCSBL-47):** persist fast view under `derived/view.json` after Stop / import; phone list and detail basics read that file; raw stays for regeneration when `analyzerVersion` bumps. Map first-paint uses a stored geo frame; GPS polyline can load after appear. Layout and rules: [SessionStorage.md](SessionStorage.md).
+
+Watch live UI still uses in-memory trackers while recording. Past sessions stay phone-only.
 
 Water temperature is a session metric (mean of persisted samples). Ultra sets `manifest.waterTemperatureAvailable`; the UI hides the tile on unsupported watches, shows `- C` until the first sample, then the average. Submersion is when the Watch can measure; the value stays relevant while riding.
 

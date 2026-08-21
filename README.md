@@ -55,7 +55,7 @@ Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). **Intern guide (start/
 RpplCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
 RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
 Rppl/         iPhone permissions, sync receive, map, export
-Docs/                DataCollection, DevWorkflow, Phase3, Ideas, DESIGN (system)
+Docs/                DataCollection, SessionStorage, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit lint; pre-push xcode gate
 ```
 
