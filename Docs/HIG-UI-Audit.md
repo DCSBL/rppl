@@ -5,17 +5,20 @@ Skip: onboarding, app icons / marketing assets.
 
 Sibling PRs in this pass ship the clear, low-ambiguity fixes. Items below stay open until product decides or device testing lands.
 
-## Shipped in this pass (see sibling PRs)
+## Shipped in this pass (sibling PRs)
 
-| Fix | Why (HIG) |
-|-----|-----------|
-| Watch Stop confirmation | Workouts / Feedback — confirm irreversible end |
-| Phone export + delete failure alerts | Feedback — surface failed actions |
-| Phone Logbook sync status | Feedback — companion connection in-context |
-| Resume on paused metrics page | Gestures — visible control, not swipe-only |
-| Start / Stop / Pause haptics | Playing haptics — Start/Stop for explicit control |
-| MDI + control VoiceOver labels; idle sync stays tappable while starting | Accessibility |
-| Ride timer Dynamic Type (drop fixed pt) | Typography / Accessibility |
+| Fix | PR | Why (HIG) |
+|-----|----|-----------|
+| HIG backlog (this doc) | #48 | Track deferred decisions |
+| Watch Stop confirmation | #49 | Workouts / Feedback — confirm irreversible end |
+| Phone export + delete failure alerts | #50 | Feedback — surface failed actions |
+| Phone Logbook sync status | #51 | Feedback — companion connection in-context |
+| Resume on paused metrics page | #52 | Gestures — visible control, not swipe-only |
+| Start / Stop / Pause haptics | #53 | Playing haptics — Start/Stop for explicit control |
+| MDI + control VoiceOver labels; idle sync stays tappable while starting | #54 | Accessibility |
+| Ride timer Dynamic Type (drop fixed pt) | #55 | Typography / Accessibility |
+
+Graphite stack unavailable — these are independent PRs off `main`. Merge order flexible; `#52`, `#54`, and `#55` all touch `SessionRideUIPage.swift` (expect small conflicts).
 
 ## Open — needs product / device decision
 
