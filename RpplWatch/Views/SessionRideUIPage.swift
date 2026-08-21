@@ -45,10 +45,14 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
 
-                Text("Swipe for Resume")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                Button("Resume") {
+                    WakeLog.debug(.ui, "tap Resume from paused metrics")
+                    session.resumeSession()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(session.isStopping)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
