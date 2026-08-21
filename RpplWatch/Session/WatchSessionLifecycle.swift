@@ -284,6 +284,7 @@ extension WatchSessionController {
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
+        WKInterfaceDevice.current().play(.start)
         WakeLog.debug(.session, "resumeSession done")
     }
 
