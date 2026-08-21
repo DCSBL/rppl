@@ -24,6 +24,7 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
             WakeLog.debug(.lifecycle, "WKApplication.didBecomeActive")
             transfer.refreshSyncState()
+            transfer.transferPending()
         }
     }
 }
