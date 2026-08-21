@@ -43,6 +43,23 @@ final class WatchSessionController: NSObject {
     var healthAuthStatus = "unknown"
     var locationAuthStatus = "unknown"
     var motionAvailability = "unknown"
+    /// Structured gate states for Watch permissions onboarding.
+    var locationPermission: WatchPermissionState = .notDetermined
+    var healthPermission: WatchPermissionState = .notDetermined
+    var motionPermission: WatchPermissionState = .notDetermined
+
+    var permissionStates: [WatchPermissionKind: WatchPermissionState] {
+        [
+            .location: locationPermission,
+            .health: healthPermission,
+            .motion: motionPermission
+        ]
+    }
+
+    var areRecordingPermissionsReady: Bool {
+        WatchPermissionOrder.allReady(permissionStates)
+    }
+
     /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
     var recordingMode = "none"
     var motionRecordingEnabled = false

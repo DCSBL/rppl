@@ -1,0 +1,257 @@
+import SwiftUI
+import WatchKit
+import RpplCore
+
+struct PermissionsOnboardingView: View {
+    @Bindable var session: WatchSessionController
+    @State private var rowOrder: [WatchPermissionKind] = []
+    @State private var frozenStates: [WatchPermissionKind: WatchPermissionState] = [:]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(rowOrder, id: \.self) { kind in
+                        NavigationLink {
+                            PermissionDetailView(kind: kind, session: session)
+                        } label: {
+                            PermissionRowView(
+                                kind: kind,
+                                state: session.permissionStates[kind] ?? .notDetermined
+                            )
+                        }
+                    }
+                } header: {
+                    Text("Permissions")
+                } footer: {
+                    Text("Allow each item to record on Apple Watch.")
+                }
+            }
+            .navigationTitle("Rppl")
+        }
+        .onAppear {
+            session.refreshPermissionStatus()
+            bootstrapOrderIfNeeded()
+        }
+        .onChange(of: session.locationPermission) { _, _ in
+            handleStateChange()
+        }
+        .onChange(of: session.healthPermission) { _, _ in
+            handleStateChange()
+        }
+        .onChange(of: session.motionPermission) { _, _ in
+            handleStateChange()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
+            session.refreshPermissionStatus()
+            handleStateChange()
+        }
+    }
+
+    private func bootstrapOrderIfNeeded() {
+        let states = session.permissionStates
+        if rowOrder.isEmpty {
+            rowOrder = WatchPermissionOrder.initialOrder(states: states)
+            frozenStates = states
+            return
+        }
+        handleStateChange()
+    }
+
+    private func handleStateChange() {
+        let next = session.permissionStates
+        guard !rowOrder.isEmpty else {
+            rowOrder = WatchPermissionOrder.initialOrder(states: next)
+            frozenStates = next
+            return
+        }
+        rowOrder = WatchPermissionOrder.orderPreserving(
+            current: rowOrder,
+            previous: frozenStates,
+            next: next
+        )
+        frozenStates = next
+    }
+}
+
+private struct PermissionRowView: View {
+    let kind: WatchPermissionKind
+    let state: WatchPermissionState
+
+    var body: some View {
+        HStack {
+            Label {
+                Text(kind.title)
+            } icon: {
+                Image(systemName: kind.systemImage)
+            }
+            Spacer(minLength: 8)
+            Image(systemName: statusSymbol)
+                .foregroundStyle(statusColor)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(kind.title), \(state.accessibilityLabel)")
+    }
+
+    private var statusSymbol: String {
+        switch state {
+        case .authorized: return "checkmark.circle.fill"
+        case .unavailable: return "checkmark.circle"
+        case .notDetermined: return "questionmark.circle"
+        case .denied: return "xmark.circle.fill"
+        }
+    }
+
+    private var statusColor: Color {
+        switch state {
+        case .authorized: return .green
+        case .unavailable: return .secondary
+        case .notDetermined: return .orange
+        case .denied: return .red
+        }
+    }
+}
+
+struct PermissionDetailView: View {
+    let kind: WatchPermissionKind
+    @Bindable var session: WatchSessionController
+    @State private var isRequesting = false
+
+    private var state: WatchPermissionState {
+        session.permissionStates[kind] ?? .notDetermined
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Label(kind.title, systemImage: kind.systemImage)
+                statusLine
+            }
+
+            Section("Why needed") {
+                Text(kind.whyNeededPlaceholder)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if state == .denied {
+                Section("How to fix") {
+                    Text(kind.howToFixPlaceholder)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if state == .notDetermined {
+                Section {
+                    Button {
+                        Task { await request() }
+                    } label: {
+                        if isRequesting {
+                            ProgressView()
+                        } else {
+                            Text("Allow \(kind.title)")
+                        }
+                    }
+                    .disabled(isRequesting)
+                }
+            }
+        }
+        .navigationTitle(kind.title)
+        .onAppear {
+            if state == .notDetermined {
+                Task { await request() }
+            }
+        }
+    }
+
+    private var statusLine: some View {
+        switch state {
+        case .authorized:
+            Text("Allowed")
+                .foregroundStyle(.green)
+        case .unavailable:
+            Text("Not available on this Watch — skipped")
+                .foregroundStyle(.secondary)
+        case .notDetermined:
+            Text("Not decided yet")
+                .foregroundStyle(.orange)
+        case .denied:
+            Text("Denied")
+                .foregroundStyle(.red)
+        }
+    }
+
+    private func request() async {
+        guard !isRequesting else { return }
+        isRequesting = true
+        defer { isRequesting = false }
+        switch kind {
+        case .location:
+            await session.requestLocationPermission()
+        case .health:
+            await session.requestHealthPermission()
+        case .motion:
+            await session.requestMotionPermission()
+        }
+    }
+}
+
+extension WatchPermissionKind {
+    var title: String {
+        switch self {
+        case .location: return String(localized: "Location")
+        case .health: return String(localized: "Health")
+        case .motion: return String(localized: "Motion")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .location: return "location.fill"
+        case .health: return "heart.fill"
+        case .motion: return "figure.walk.motion"
+        }
+    }
+
+    /// Placeholder copy — replace with final product strings later.
+    var whyNeededPlaceholder: String {
+        switch self {
+        case .location:
+            return String(localized: "Placeholder: GPS tracks rides and distance at the cable park.")
+        case .health:
+            return String(localized: "Placeholder: Saves the workout to Fitness and records heart rate.")
+        case .motion:
+            return String(localized: "Placeholder: Helps detect riding vs resting at the dock.")
+        }
+    }
+
+    var howToFixPlaceholder: String {
+        switch self {
+        case .location:
+            return String(
+                localized: "Placeholder: On iPhone open Settings › Privacy & Security › Location Services › Rppl and allow While Using."
+            )
+        case .health:
+            return String(
+                localized: "Placeholder: On iPhone open Settings › Health › Data Access & Devices › Rppl and turn on workout access."
+            )
+        case .motion:
+            return String(
+                localized: "Placeholder: On iPhone open Settings › Privacy & Security › Motion & Fitness and enable Rppl."
+            )
+        }
+    }
+}
+
+extension WatchPermissionState {
+    var accessibilityLabel: String {
+        switch self {
+        case .authorized: return String(localized: "allowed")
+        case .unavailable: return String(localized: "unavailable, skipped")
+        case .notDetermined: return String(localized: "not decided")
+        case .denied: return String(localized: "denied")
+        }
+    }
+}

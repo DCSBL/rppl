@@ -8,27 +8,54 @@ import RpplCore
 // MARK: - Lifecycle
 extension WatchSessionController {
     func refreshPermissionStatus() {
-        locationAuthStatus = Self.locationLabel(locationManager.authorizationStatus)
+        let loc = locationManager.authorizationStatus
+        locationAuthStatus = Self.locationLabel(loc)
+        locationPermission = Self.locationPermissionState(loc)
 
-        if motionManager.isDeviceMotionAvailable {
+        if CMMotionActivityManager.isActivityAvailable() {
+            switch CMMotionActivityManager.authorizationStatus() {
+            case .notDetermined:
+                motionPermission = .notDetermined
+                motionAvailability = "activity: notDetermined"
+            case .restricted, .denied:
+                motionPermission = .denied
+                motionAvailability = "activity: denied"
+            case .authorized:
+                motionPermission = .authorized
+                motionAvailability = motionManager.isDeviceMotionAvailable
+                    ? "deviceMotion available"
+                    : "activity authorized"
+            @unknown default:
+                motionPermission = .notDetermined
+                motionAvailability = "activity: unknown"
+            }
+        } else if motionManager.isDeviceMotionAvailable {
+            // No activity auth surface — device motion alone does not prompt; treat ready.
+            motionPermission = .authorized
             motionAvailability = "deviceMotion available"
         } else {
+            motionPermission = .unavailable
             motionAvailability = "unavailable (skipped)"
         }
 
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
+            healthPermission = .unavailable
             return
         }
         switch healthStore.authorizationStatus(for: workoutType) {
         case .notDetermined:
             healthAuthStatus = String(localized: "workout: notDetermined")
+            healthPermission = .notDetermined
         case .sharingDenied:
             healthAuthStatus = String(localized: "workout: denied — enable in Settings › Health")
+            healthPermission = .denied
         case .sharingAuthorized:
             healthAuthStatus = String(localized: "workout: authorized")
+            healthPermission = .authorized
         @unknown default:
             healthAuthStatus = String(localized: "workout: unknown")
+            healthPermission = .notDetermined
         }
     }
 
@@ -36,28 +63,73 @@ extension WatchSessionController {
     func requestPermissions() async {
         WakeLog.debug(.permissions, "requestPermissions begin")
         errorText = nil
-        locationManager.requestWhenInUseAuthorization()
+        await requestLocationPermission()
+        await requestHealthPermission()
+        await requestMotionPermission()
+        statusText = String(localized: "Permissions updated")
+        WakeLog.debug(
+            .permissions,
+            "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
+        )
+    }
 
+    func requestLocationPermission() async {
+        errorText = nil
+        locationManager.requestWhenInUseAuthorization()
+        // Authorization callback updates via delegate; refresh snapshot now too.
+        refreshPermissionStatus()
+    }
+
+    func requestHealthPermission() async {
+        errorText = nil
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
+            healthPermission = .unavailable
             WakeLog.debug(.permissions, "Health unavailable")
-            refreshPermissionStatus()
             return
         }
-
         do {
             try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
-            statusText = String(localized: "Permissions updated")
             WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {
             errorText = String(localized: "Health auth: \(error.localizedDescription)")
             WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
         }
         refreshPermissionStatus()
-        WakeLog.debug(
-            .permissions,
-            "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
-        )
+    }
+
+    func requestMotionPermission() async {
+        errorText = nil
+        guard CMMotionActivityManager.isActivityAvailable() else {
+            refreshPermissionStatus()
+            return
+        }
+        if CMMotionActivityManager.authorizationStatus() != .notDetermined {
+            refreshPermissionStatus()
+            return
+        }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let manager = CMMotionActivityManager()
+            let now = Date()
+            manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
+                continuation.resume()
+            }
+        }
+        refreshPermissionStatus()
+        WakeLog.debug(.permissions, "Motion authorization queried status=\(motionAvailability)")
+    }
+
+    static func locationPermissionState(_ status: CLAuthorizationStatus) -> WatchPermissionState {
+        switch status {
+        case .notDetermined:
+            return .notDetermined
+        case .restricted, .denied:
+            return .denied
+        case .authorizedAlways, .authorizedWhenInUse:
+            return .authorized
+        @unknown default:
+            return .notDetermined
+        }
     }
 
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
