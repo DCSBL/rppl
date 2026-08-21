@@ -1654,6 +1654,22 @@
         }
       }
     },
+    "Show example session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show example session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toon voorbeeldsessie"
+          }
+        }
+      }
+    },
     "Show satellite map" : {
       "localizations" : {
         "en" : {

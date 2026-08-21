@@ -35,6 +35,45 @@ public enum SessionLoader {
         let locations = try store.readLocationSamples(sessionId: sessionId)
         let health = try store.readHealthSamples(sessionId: sessionId)
         let water = try store.readWaterTemperatureSamples(sessionId: sessionId)
+        let byteSize = try store.sessionByteSize(sessionId: sessionId)
+        return makeBundle(
+            manifest: manifest,
+            detections: detections,
+            locations: locations,
+            health: health,
+            water: water,
+            byteSize: byteSize
+        )
+    }
+
+    /// In-memory load from a Share export / WC package (no disk write).
+    public static func load(package: SessionTransferPackage) -> SessionLoadBundle {
+        makeBundle(
+            manifest: package.manifest,
+            detections: package.detections,
+            locations: package.locations,
+            health: package.health,
+            water: package.water,
+            byteSize: 0
+        )
+    }
+
+    public static func load(packageURL: URL) throws -> SessionLoadBundle {
+        let data = try Data(contentsOf: packageURL)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let package = try decoder.decode(SessionTransferPackage.self, from: data)
+        return load(package: package)
+    }
+
+    private static func makeBundle(
+        manifest: SessionManifest,
+        detections: [DetectionEvent],
+        locations: [LocationSample],
+        health: [HealthMetricSample],
+        water: [WaterTemperatureSample],
+        byteSize: Int64
+    ) -> SessionLoadBundle {
         let stats = SessionStatsBuilder.build(
             manifest: manifest,
             detections: detections,
@@ -42,7 +81,6 @@ public enum SessionLoader {
             health: health,
             water: water
         )
-        let byteSize = try store.sessionByteSize(sessionId: sessionId)
         return SessionLoadBundle(
             manifest: manifest,
             detections: detections,

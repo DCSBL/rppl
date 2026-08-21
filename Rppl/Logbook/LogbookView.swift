@@ -6,6 +6,7 @@ struct LogbookView: View {
     @State private var catalog = SessionCatalog()
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
+    @State private var showExampleSession = false
 
     var body: some View {
         NavigationStack {
@@ -46,6 +47,13 @@ struct LogbookView: View {
                             }
                         } description: {
                             Text("Record on Apple Watch, then bring your iPhone nearby.")
+                        } actions: {
+                            Button("Show example session") {
+                                showExampleSession = true
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .tint(Color.rpplAccent)
                         }
                         .foregroundStyle(Color.rpplText)
                         .listRowInsets(LogbookLayout.rowInsets())
@@ -88,6 +96,10 @@ struct LogbookView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
             .tint(Color.rpplAccent)
+            .navigationDestination(isPresented: $showExampleSession) {
+                LogbookSessionDetailView(source: .bundledExample)
+                    .toolbar(.visible, for: .navigationBar)
+            }
             .confirmationDialog(
                 "Delete Session?",
                 isPresented: $showDeleteConfirmation,

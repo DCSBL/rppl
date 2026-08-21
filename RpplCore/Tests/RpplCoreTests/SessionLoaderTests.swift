@@ -34,4 +34,35 @@ struct SessionLoaderTests {
         #expect(bundle.stats.rideCount == 0)
         #expect(bundle.byteSize >= 0)
     }
+
+    @Test func loadPackageBuildsStatsWithoutStore() {
+        let manifest = SessionManifest(
+            testerId: "tester-1",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Watch7,1",
+            systemVersion: "26.0",
+            activityCode: "Example session"
+        )
+        let package = SessionTransferPackage(
+            manifest: manifest,
+            detections: [
+                DetectionEvent(
+                    code: DetectionCodes.inactive,
+                    reason: "session_start",
+                    detectorId: "session_start",
+                    speedMps: nil,
+                    motionActivity: "stationary"
+                ),
+            ],
+            locations: [],
+            health: [],
+            water: []
+        )
+        let bundle = SessionLoader.load(package: package)
+        #expect(bundle.manifest.activityCode == "Example session")
+        #expect(bundle.detections.count == 1)
+        #expect(bundle.stats.rideCount == 0)
+        #expect(bundle.byteSize == 0)
+    }
 }

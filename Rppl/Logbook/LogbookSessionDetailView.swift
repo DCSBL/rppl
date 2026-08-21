@@ -2,12 +2,19 @@ import SwiftUI
 import MapKit
 import RpplCore
 
+enum LogbookSessionDetailSource: Equatable {
+    case store(sessionId: String)
+    /// Bundled Share export — viewed in memory only; not written to the phone store.
+    case bundledExample
+}
+
 struct LogbookSessionDetailView: View {
-    let sessionId: String
-    let store: SessionFileStore
+    let source: LogbookSessionDetailSource
+    var store: SessionFileStore?
 
     private static let sessionMapPointBudget = 800
     private static let rideMapPointBudget = 200
+    private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
 
     @State private var manifest: SessionManifest?
     @State private var sessionStats: SessionStats?
@@ -25,6 +32,21 @@ struct LogbookSessionDetailView: View {
         case loading
         case ready
         case failed
+    }
+
+    init(sessionId: String, store: SessionFileStore) {
+        self.source = .store(sessionId: sessionId)
+        self.store = store
+    }
+
+    init(source: LogbookSessionDetailSource) {
+        self.source = source
+        self.store = nil
+    }
+
+    private var allowsExport: Bool {
+        if case .store = source { return true }
+        return false
     }
 
     var body: some View {
@@ -61,15 +83,17 @@ struct LogbookSessionDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if let exportURL {
-                    ShareLink(item: exportURL) {
-                        Label("Share", systemImage: "square.and.arrow.up")
-                    }
-                } else if isExporting {
-                    ProgressView()
-                } else if loadPhase == .ready {
-                    Button("Export") {
-                        startExport()
+                if allowsExport {
+                    if let exportURL {
+                        ShareLink(item: exportURL) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+                    } else if isExporting {
+                        ProgressView()
+                    } else if loadPhase == .ready {
+                        Button("Export") {
+                            startExport()
+                        }
                     }
                 }
             }
@@ -77,6 +101,9 @@ struct LogbookSessionDetailView: View {
     }
 
     private var navigationTitle: String {
+        if case .bundledExample = source {
+            return ActivityCodes.localizedTitle(for: manifest?.activityCode ?? "Example session")
+        }
         guard let manifest else { return String(localized: "Session") }
         return LogbookFormatting.sessionDate(manifest.startedAt)
     }
@@ -258,12 +285,12 @@ struct LogbookSessionDetailView: View {
     }
 
     private func loadSession() async {
+        let source = source
         let store = store
-        let sessionId = sessionId
 
         do {
             let bundle = try await StoreIO.runOffMain {
-                try SessionLoader.load(store: store, sessionId: sessionId)
+                try Self.loadBundle(source: source, store: store)
             }
             try Task.checkCancellation()
 
@@ -279,7 +306,7 @@ struct LogbookSessionDetailView: View {
             allLocations = sortedLocations
             mapTracks = mapPoints
             cityName = await SessionCityResolver.shared.cityName(
-                sessionId: sessionId,
+                sessionId: bundle.manifest.sessionId,
                 locations: sortedLocations
             )
             loadPhase = .ready
@@ -294,8 +321,31 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    private static func loadBundle(
+        source: LogbookSessionDetailSource,
+        store: SessionFileStore?
+    ) throws -> SessionLoadBundle {
+        switch source {
+        case .store(let sessionId):
+            guard let store else {
+                throw SessionStoreError.ioFailure("Session store missing")
+            }
+            return try SessionLoader.load(store: store, sessionId: sessionId)
+        case .bundledExample:
+            guard let url = Bundle.main.url(
+                forResource: exampleFileName,
+                withExtension: "json",
+                subdirectory: "Exports"
+            ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
+                throw SessionStoreError.ioFailure("Bundled example session missing")
+            }
+            WakeLog.debug(.ui, "example session load (ephemeral)")
+            return try SessionLoader.load(packageURL: url)
+        }
+    }
+
     private func startExport() {
-        guard exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
         isExporting = true
         exportTask = Task(priority: .utility) {
             await prepareExport()
@@ -309,8 +359,7 @@ struct LogbookSessionDetailView: View {
     }
 
     private func prepareExport() async {
-        let store = store
-        let sessionId = sessionId
+        guard case .store(let sessionId) = source, let store else { return }
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
 

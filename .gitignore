@@ -4,5 +4,5 @@ DerivedData/
 xcuserdata/
 RpplCore/.build/
 .swiftpm/
-Exports/
+/Exports/
 .worktrees/
