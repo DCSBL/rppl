@@ -1,6 +1,6 @@
 import Foundation
 
-/// Builds derived session stats from on-disk streams (not persisted).
+/// Builds derived session stats from on-disk streams (`derived/view.json` when ensured).
 public enum SessionStatsBuilder {
     public static func build(
         manifest: SessionManifest,

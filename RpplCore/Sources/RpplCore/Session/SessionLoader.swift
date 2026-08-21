@@ -8,6 +8,8 @@ public struct SessionLoadBundle: Sendable {
     public let water: [WaterTemperatureSample]
     public let stats: SessionStats
     public let byteSize: Int64
+    public let mapFrame: MapTrackFrame?
+    public let cityName: String?
 
     public init(
         manifest: SessionManifest,
@@ -16,7 +18,9 @@ public struct SessionLoadBundle: Sendable {
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
         stats: SessionStats,
-        byteSize: Int64
+        byteSize: Int64,
+        mapFrame: MapTrackFrame? = nil,
+        cityName: String? = nil
     ) {
         self.manifest = manifest
         self.detections = detections
@@ -25,7 +29,26 @@ public struct SessionLoadBundle: Sendable {
         self.water = water
         self.stats = stats
         self.byteSize = byteSize
+        self.mapFrame = mapFrame
+        self.cityName = cityName
     }
+}
+
+/// List / detail first-paint without loading location streams.
+public struct SessionSummaryBundle: Sendable {
+    public let manifest: SessionManifest
+    public let derived: DerivedSessionView
+    public let byteSize: Int64
+
+    public init(manifest: SessionManifest, derived: DerivedSessionView, byteSize: Int64) {
+        self.manifest = manifest
+        self.derived = derived
+        self.byteSize = byteSize
+    }
+
+    public var stats: SessionStats { derived.stats }
+    public var mapFrame: MapTrackFrame? { derived.mapFrame }
+    public var cityName: String? { derived.cityName }
 }
 
 public enum SessionLoader {
@@ -36,14 +59,52 @@ public enum SessionLoader {
         let health = try store.readHealthSamples(sessionId: sessionId)
         let water = try store.readWaterTemperatureSamples(sessionId: sessionId)
         let byteSize = try store.sessionByteSize(sessionId: sessionId)
-        return makeBundle(
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest,
+            detections: detections,
+            locations: locations,
+            health: health,
+            water: water
+        )
+        let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let mapFrame = MapTrackFitter.frame(locations: coords)
+        let existing = try store.readDerivedView(sessionId: sessionId)
+        let cityName = existing?.cityName
+        if existing == nil || existing?.isCurrentAnalyzer != true {
+            try store.writeDerivedView(
+                DerivedSessionView(
+                    analyzerVersion: SessionAnalyzer.version,
+                    stats: stats,
+                    mapFrame: mapFrame,
+                    cityName: cityName
+                ),
+                sessionId: sessionId
+            )
+            if manifest.schemaVersion < SessionSchema.currentVersion {
+                var updated = manifest
+                updated.schemaVersion = SessionSchema.currentVersion
+                try store.writeManifest(updated)
+            }
+        }
+        return SessionLoadBundle(
             manifest: manifest,
             detections: detections,
             locations: locations,
             health: health,
             water: water,
-            byteSize: byteSize
+            stats: stats,
+            byteSize: byteSize,
+            mapFrame: mapFrame,
+            cityName: cityName
         )
+    }
+
+    /// Manifest + derived stats/frame only (ensures sidecar). No location/health parse when fresh.
+    public static func loadSummary(store: SessionFileStore, sessionId: String) throws -> SessionSummaryBundle {
+        let manifest = try store.readManifest(sessionId: sessionId)
+        let derived = try store.ensureDerivedView(sessionId: sessionId)
+        let byteSize = try store.sessionByteSize(sessionId: sessionId)
+        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: byteSize)
     }
 
     /// In-memory load from a Share export / WC package (no disk write).
@@ -54,7 +115,9 @@ public enum SessionLoader {
             locations: package.locations,
             health: package.health,
             water: package.water,
-            byteSize: 0
+            byteSize: 0,
+            mapFrame: nil,
+            cityName: nil
         )
     }
 
@@ -72,7 +135,9 @@ public enum SessionLoader {
         locations: [LocationSample],
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
-        byteSize: Int64
+        byteSize: Int64,
+        mapFrame: MapTrackFrame?,
+        cityName: String?
     ) -> SessionLoadBundle {
         let stats = SessionStatsBuilder.build(
             manifest: manifest,
@@ -88,7 +153,9 @@ public enum SessionLoader {
             health: health,
             water: water,
             stats: stats,
-            byteSize: byteSize
+            byteSize: byteSize,
+            mapFrame: mapFrame,
+            cityName: cityName
         )
     }
 }

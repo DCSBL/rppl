@@ -37,6 +37,11 @@ final class SessionCityResolver {
         cache.removeValue(forKey: sessionId)
     }
 
+    /// Seed RAM cache from phone-only derived `cityName` without geocoding.
+    func remember(sessionId: String, cityName: String) {
+        cache[sessionId] = cityName
+    }
+
     /// `locality` is the city; ignore `name` (often a venue) and country/admin fields.
     private static func city(from placemark: CLPlacemark?) -> String? {
         guard let placemark else { return nil }

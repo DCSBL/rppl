@@ -2,7 +2,7 @@
 
 Pure Swift package: models, session IO, sync resolvers, and the **DetectionEngine** (filter → holds → detectors → lookback). No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
 
-Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · Phase 3: [../Docs/Phase3.md](../Docs/Phase3.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
+Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · storage: [../Docs/SessionStorage.md](../Docs/SessionStorage.md) · Phase 3: [../Docs/Phase3.md](../Docs/Phase3.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
 
 ## Module map
 
@@ -62,7 +62,7 @@ classDiagram
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `DetectionThresholds`, `TemperatureFormat` | Thresholds authored in **km/h**; GPS compare in m/s |
-| Derived stats | `SessionStatsBuilder`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Recomputed from detections + GPS + health + water; not persisted |
+| Derived stats | `SessionStatsBuilder`, `DerivedSessionView`, `SessionAnalyzer`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Persist `derived/view.json`; rebuild when `SessionAnalyzer.version` stale ([SessionStorage.md](../Docs/SessionStorage.md)) |
 
 Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown codes must round-trip.
 
