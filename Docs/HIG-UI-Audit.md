@@ -22,6 +22,7 @@ Sibling PRs in the first pass shipped clear interaction fixes. Items below stay 
 | iPhone “Watch required” / how-to-start copy | #58 | Onboarding / Feedback |
 | Watch permissions onboarding checklist | #59 | Onboarding |
 | iPhone About permissions list; ask after first sync | #60 | Onboarding / Feedback |
+| Drop TabBarLeadingAligner (Liquid Glass) | #61 | WWDC25-356 — no private platter pin |
 
 Graphite stack unavailable — these are independent PRs off `main` (except #60 stacks on #59). `#52`, `#54`, and `#55` all touch `SessionRideUIPage.swift` (expect small conflicts).
 
