@@ -136,6 +136,11 @@ final class PhoneConnectivityService: NSObject {
         let sessionId = sessionIdHint ?? package.manifest.sessionId
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
+        // Mark first sync before any permission sheets — sync/ack already finished above.
+        UserDefaults.standard.set(true, forKey: AppSettingsKey.didImportSessionFromWatch)
+        Task {
+            await PhonePermissionsController.shared.requestAfterFirstSyncIfNeeded()
+        }
     }
 }
 
