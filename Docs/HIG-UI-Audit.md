@@ -17,8 +17,13 @@ Sibling PRs in the first pass shipped clear interaction fixes. Items below stay 
 | Start / Stop / Pause haptics | #53 | Playing haptics — Start/Stop for explicit control |
 | MDI + control VoiceOver labels; idle sync stays tappable while starting | #54 | Accessibility |
 | Ride timer Dynamic Type (drop fixed pt) | #55 | Typography / Accessibility |
+| Watch sync-complete notification + background re-queue | #56 | Feedback / WC background |
+| Defer Watch permission sheets until start | #57 | Onboarding — request in context |
+| iPhone “Watch required” / how-to-start copy | #58 | Onboarding / Feedback |
+| Watch permissions onboarding checklist | #59 | Onboarding |
+| iPhone About permissions list; ask after first sync | #60 | Onboarding / Feedback |
 
-Graphite stack unavailable — these are independent PRs off `main`. `#52`, `#54`, and `#55` all touch `SessionRideUIPage.swift` (expect small conflicts).
+Graphite stack unavailable — these are independent PRs off `main` (except #60 stacks on #59). `#52`, `#54`, and `#55` all touch `SessionRideUIPage.swift` (expect small conflicts).
 
 ## Onboarding (product lock + HIG)
 
@@ -51,6 +56,8 @@ Previously skipped here; now tracked. Full first-run flow still a later build �
 | Keep example session CTA | Shipped (empty Logbook) |
 | Stronger “Watch required / start on Watch” iPhone copy | #58 |
 | Defer Watch permission prompts off cold launch | #57 |
+| Watch permissions onboarding checklist | #59 |
+| iPhone About permissions list; ask after first sync | #60 |
 | Multi-step branded onboarding | Deferred (alpha) |
 
 ## Sync: background WC + completion notice
@@ -89,7 +96,9 @@ No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep prim
 
 [`TabBarLeadingAligner.swift`](../Rppl/App/TabBarLeadingAligner.swift) walks UIKit for a `"Platter"` subview and mutates its frame so the floating tab bar hugs the leading edge. Fragile vs iOS 26 tab-bar internals; nonstandard.
 
-**Open questions:** keep visual preference and accept breakage risk, drop the hack (accept centered capsule), or find a supported API / different chrome?
+**Decision (WWDC25-356):** Drop the hack. Accept system-centered floating tab capsule. Hierarchy comes from layout/grouping, not private UIKit frame edits. See Liquid Glass section below.
+
+**Status:** Follow-up PR removes `TabBarLeadingAligner` + ContentView wiring.
 
 ### Watch: brand colors vs system appearance
 
@@ -109,8 +118,31 @@ HIG Workouts: auto-discard or ask if the session ends after only a few seconds. 
 
 **Open questions:** threshold duration? Always ask vs auto-discard? How this interacts with phone transfer / “never delete until ack”.
 
+## Liquid Glass / WWDC25-356 notes
+
+Source: [Get to know the new design system (WWDC25-356)](https://developer.apple.com/videos/play/wwdc2025/356/). Companion: Meet Liquid Glass.
+
+Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 26.
+
+| Takeaway | Rppl action |
+|----------|-------------|
+| Strip custom bar backgrounds / borders; hierarchy from layout + grouping | Drop `TabBarLeadingAligner`; avoid fighting floating tab platter |
+| Content first; chrome floats above without stealing focus | Keep Logbook maps/sessions as content; light sync chrome; prefer scroll edge effects over hard dividers |
+| Concentric corner radii for nested shapes | Audit session cards (icon well inside card) + map overlays |
+| Shared anatomy across devices; same symbols | Keep mirrored Location/Health/Motion lists + SF Symbols on Watch + iPhone |
+| Bolder left-aligned type in alerts / onboarding | Stick to system `List` + semantic text on permission gates |
+| Toolbar: group by function; primary separate/tinted | Export/Share stay system; soften forced `toolbarBackground` on About |
+| Dedicated Search tab pattern (later) | If Logbook search lands, prefer system Search tab over stuffing nav |
+
+### Still open after 356
+
+- Concentric radii on Logbook cards
+- Soften About nav bar background vs Liquid Glass
+- Watch brand teal vs system appearance (unchanged product question)
+
 ## Reference links
 
+- [Get to know the new design system (WWDC25-356)](https://developer.apple.com/videos/play/wwdc2025/356/)
 - [Onboarding](https://developer.apple.com/design/human-interface-guidelines/onboarding)
 - [Designing for watchOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos)
 - [Workouts](https://developer.apple.com/design/human-interface-guidelines/workouts)
