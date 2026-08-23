@@ -19,14 +19,16 @@ struct LogbookView: View {
                         .listRowSeparator(.hidden)
                 }
 
-                Section {
-                    SyncStatusIndicator(
-                        state: connectivity.syncState,
-                        pendingCount: connectivity.pendingAckCount
-                    )
-                    .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
+                if connectivity.pendingAckCount > 0 {
+                    Section {
+                        SyncStatusIndicator(
+                            state: connectivity.syncState,
+                            pendingCount: connectivity.pendingAckCount
+                        )
+                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
                 }
 
                 Section {
