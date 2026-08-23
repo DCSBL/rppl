@@ -28,7 +28,7 @@ extension View {
         background(
             color,
             in: .rect(
-                corners: .concentric(minimum: LogbookLayout.nestedMinimumCornerRadius),
+                corners: .concentric(minimum: .fixed(LogbookLayout.nestedMinimumCornerRadius)),
                 isUniform: true
             )
         )
@@ -38,7 +38,7 @@ extension View {
     func logbookNestedClip() -> some View {
         clipShape(
             .rect(
-                corners: .concentric(minimum: LogbookLayout.nestedMinimumCornerRadius),
+                corners: .concentric(minimum: .fixed(LogbookLayout.nestedMinimumCornerRadius)),
                 isUniform: true
             )
         )
