@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CCAA15043038B52200B3DC2A /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCAA15033038B52200B3DC2A /* AppIcon.icon */; };
+		CCAA15053038B52200B3DC2A /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCAA15033038B52200B3DC2A /* AppIcon.icon */; };
 		CCF3D6C7302921A800AF3518 /* RpplWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CCF3D6C0302921A800AF3518 /* RpplWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CCF3D6D1302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* RpplCore */; };
 		CCF3D6D2302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* RpplCore */; };
@@ -52,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CCAA15033038B52200B3DC2A /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		CCF3D691302921A500AF3518 /* Rppl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rppl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6A2302921A800AF3518 /* RpplTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,6 +150,7 @@
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
+				CCAA15033038B52200B3DC2A /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -316,6 +320,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCAA15053038B52200B3DC2A /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,6 +342,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCAA15043038B52200B3DC2A /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +403,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -454,6 +461,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -718,7 +726,9 @@
 		CCF3D6CA302921A800AF3518 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -758,7 +768,9 @@
 		CCF3D6CB302921A800AF3518 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
