@@ -31,8 +31,8 @@ repos:
         additional_dependencies: ["tomli"]
         exclude: ^Rppl/Resources/Exports/
         args:
-          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,alle,mis"
+          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als"
         stages: [pre-commit]
 
   - repo: local
