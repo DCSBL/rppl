@@ -1,8 +1,13 @@
 {
   "sourceLanguage": "en",
+  "version": "1.0",
   "strings": {
-    "": {},
-    " - %@": {},
+    "": {
+      "localizations": {}
+    },
+    " - %@": {
+      "localizations": {}
+    },
     "%@ · %@": {
       "localizations": {
         "en": {
@@ -179,6 +184,54 @@
         }
       }
     },
+    "- laps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- laps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- rondes"
+          }
+        }
+      }
+    },
+    "- rides": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- rides"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- ritten"
+          }
+        }
+      }
+    },
+    "- total rides": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- total rides"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- ritten totaal"
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "en": {
@@ -239,6 +292,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actieve calorieën"
+          }
+        }
+      }
+    },
+    "Allow %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sta %@ toe"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toegestaan"
           }
         }
       }
@@ -373,6 +458,22 @@
         }
       }
     },
+    "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegevens blijven op je apparaat, in de Gezondheid-app (als dat is toegestaan), en in je iCloud-back-up als je dat apparaat back-upt."
+          }
+        }
+      }
+    },
     "Debug": {
       "extractionState": "stale",
       "localizations": {
@@ -434,6 +535,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessie verwijderen?"
+          }
+        }
+      }
+    },
+    "Denied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denied"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geweigerd"
           }
         }
       }
@@ -520,7 +637,25 @@
         }
       }
     },
-    "Export": {},
+    "Export": {
+      "localizations": {}
+    },
+    "Export Session?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Session?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie exporteren?"
+          }
+        }
+      }
+    },
     "Export session JSON": {
       "extractionState": "stale",
       "localizations": {
@@ -603,6 +738,22 @@
         }
       }
     },
+    "How to fix": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to fix"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoe te herstellen"
+          }
+        }
+      }
+    },
     "Import failed: %@": {
       "localizations": {
         "en": {
@@ -615,6 +766,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Import mislukt: %@"
+          }
+        }
+      }
+    },
+    "Imported %@ - Watch not reachable for ack (will retry when reachable)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported %@ - Watch not reachable for ack (will retry when reachable)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geïmporteerd %@ - Watch niet bereikbaar voor ack (opnieuw wanneer bereikbaar)"
           }
         }
       }
@@ -647,23 +814,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Inactief"
-          }
-        }
-      }
-    },
-    "iPhone": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone"
           }
         }
       }
@@ -734,23 +884,6 @@
         }
       }
     },
-    "Loading detections…": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading detections…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detecties laden…"
-          }
-        }
-      }
-    },
     "Loading GPS track…": {
       "extractionState": "stale",
       "localizations": {
@@ -785,6 +918,23 @@
         }
       }
     },
+    "Loading detections…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading detections…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detecties laden…"
+          }
+        }
+      }
+    },
     "Loading manifest…": {
       "extractionState": "stale",
       "localizations": {
@@ -802,22 +952,6 @@
         }
       }
     },
-    "Loading session…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading session…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sessie laden…"
-          }
-        }
-      }
-    },
     "Loading sessions…": {
       "localizations": {
         "en": {
@@ -830,6 +964,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessies laden…"
+          }
+        }
+      }
+    },
+    "Loading session…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading session…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie laden…"
           }
         }
       }
@@ -966,8 +1116,12 @@
         }
       }
     },
-    "Max speed": {},
-    "Max Speed": {},
+    "Max Speed": {
+      "localizations": {}
+    },
+    "Max speed": {
+      "localizations": {}
+    },
     "Most laps": {
       "localizations": {
         "en": {
@@ -1012,23 +1166,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Beweging"
-          }
-        }
-      }
-    },
-    "No detections in this session.": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No detections in this session."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen detecties in deze sessie."
           }
         }
       }
@@ -1078,6 +1215,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen GPS-spoor voor deze rit"
+          }
+        }
+      }
+    },
+    "No detections in this session.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detections in this session."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen detecties in deze sessie."
           }
         }
       }
@@ -1147,6 +1301,38 @@
         }
       }
     },
+    "Not available on this device": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not available on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet beschikbaar op dit apparaat"
+          }
+        }
+      }
+    },
+    "Not decided yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not decided yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog niet besloten"
+          }
+        }
+      }
+    },
     "OS": {
       "extractionState": "stale",
       "localizations": {
@@ -1160,6 +1346,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "OS"
+          }
+        }
+      }
+    },
+    "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open op iPhone Instellingen > Gezondheid > Gegevenstoegang en apparaten > Rppl en zet de categorieën aan die je wilt toestaan."
+          }
+        }
+      }
+    },
+    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl en kies Bij gebruik van de app."
+          }
+        }
+      }
+    },
+    "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Beweging en fitness en schakel Rppl in."
+          }
+        }
+      }
+    },
+    "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optioneel. Laat de iPhone Gezondheidsgegevens lezen voor begeleidende weergaven. Workouts worden op Apple Watch opgenomen, en dit uitzetten blokkeert het synchroniseren van sessies niet."
+          }
+        }
+      }
+    },
+    "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optioneel. Laat de iPhone kaartcontext voor je sessies tonen. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen, dus sync werkt nog steeds als je dit uitzet."
+          }
+        }
+      }
+    },
+    "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optioneel. Laat de iPhone bewegingsgegevens gebruiken bij het bekijken van een sessie. Dit is niet nodig om sessies vanaf de Watch te synchroniseren."
           }
         }
       }
@@ -1241,6 +1523,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Privacy"
+          }
+        }
+      }
+    },
+    "Privacy first": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy first"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy eerst"
           }
         }
       }
@@ -1378,23 +1676,6 @@
         }
       }
     },
-    "revision": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "revision"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "revisie"
-          }
-        }
-      }
-    },
     "Ride %lld": {
       "localizations": {
         "en": {
@@ -1460,22 +1741,6 @@
         }
       }
     },
-    "rppl": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "rppl"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "rppl"
-          }
-        }
-      }
-    },
     "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac.": {
       "localizations": {
         "en": {
@@ -1488,6 +1753,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rppl verzamelt kabelpark-wakeboardsessies van Apple Watch voor analyse op iPhone en Mac."
+          }
+        }
+      }
+    },
+    "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl verwerkt je sessie op je Watch en iPhone. We uploaden geen ritten naar een Rppl-cloud en delen je gegevens niet met anderen."
+          }
+        }
+      }
+    },
+    "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt ritten en pauzes van een hele parkdag in één sessie. Gebruik iPhone om sessies, kaarten en exports te bekijken."
           }
         }
       }
@@ -1574,7 +1871,25 @@
         }
       }
     },
-    "Share": {},
+    "Share": {
+      "localizations": {}
+    },
+    "Share all raw, unfiltered and unanonymous data as a file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share all raw, unfiltered and unanonymous data as a file."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel alle ruwe, ongefilterde en niet-geanonimiseerde data als bestand."
+          }
+        }
+      }
+    },
     "Share export": {
       "extractionState": "stale",
       "localizations": {
@@ -1588,38 +1903,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Export delen"
-          }
-        }
-      }
-    },
-    "Something went wrong while deleting the session.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something went wrong while deleting the session."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Er ging iets mis bij het verwijderen van de sessie."
-          }
-        }
-      }
-    },
-    "Something went wrong while preparing the export.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something went wrong while preparing the export."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Er ging iets mis bij het voorbereiden van de export."
           }
         }
       }
@@ -1685,6 +1968,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Grootte"
+          }
+        }
+      }
+    },
+    "Something went wrong while deleting the session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong while deleting the session."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er ging iets mis bij het verwijderen van de sessie."
+          }
+        }
+      }
+    },
+    "Something went wrong while preparing the export.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong while preparing the export."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er ging iets mis bij het voorbereiden van de export."
           }
         }
       }
@@ -1806,6 +2121,22 @@
         }
       }
     },
+    "TOTAL": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOTAL"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOTAAL"
+          }
+        }
+      }
+    },
     "Terms": {
       "localizations": {
         "en": {
@@ -1818,6 +2149,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voorwaarden"
+          }
+        }
+      }
+    },
+    "Terms & Privacy policy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms & Privacy policy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorwaarden en privacybeleid"
+          }
+        }
+      }
+    },
+    "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze machtigingen worden gevraagd na je eerste Watch-sync, niet wanneer je de app opent. Sessies synchroniseren en stadsnamen tonen werkt ook zonder. Stadsnamen komen uit GPS die op de Watch is opgenomen, niet uit de live locatie van de iPhone."
           }
         }
       }
@@ -1854,23 +2217,6 @@
         }
       }
     },
-    "Top speed": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Top speed"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Topsnelheid"
-          }
-        }
-      }
-    },
     "Top Speed": {
       "extractionState": "stale",
       "localizations": {
@@ -1888,18 +2234,19 @@
         }
       }
     },
-    "TOTAL": {
+    "Top speed": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "TOTAL"
+            "value": "Top speed"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "TOTAAL"
+            "value": "Topsnelheid"
           }
         }
       }
@@ -1953,6 +2300,22 @@
         }
       }
     },
+    "Understood": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Understood"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrepen"
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "en": {
@@ -1969,73 +2332,6 @@
         }
       }
     },
-    "Wakeboarding": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wakeboarding"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wakeboarden"
-          }
-        }
-      }
-    },
-    "Watch": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch"
-          }
-        }
-      }
-    },
-    "Watch reachable": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch reachable"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch bereikbaar"
-          }
-        }
-      }
-    },
-    "Watch state updated": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch state updated"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watch-status bijgewerkt"
-          }
-        }
-      }
-    },
-    "Water temp": {},
     "WC activated": {
       "localizations": {
         "en": {
@@ -2100,338 +2396,36 @@
         }
       }
     },
-    "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports.": {
+    "Wakeboarding": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
+            "value": "Wakeboarding"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt ritten en pauzes van een hele parkdag in één sessie. Gebruik iPhone om sessies, kaarten en exports te bekijken."
+            "value": "Wakeboarden"
           }
         }
       }
     },
-    "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location.": {
+    "Watch": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location."
+            "value": "Watch"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deze machtigingen worden gevraagd na je eerste Watch-sync, niet wanneer je de app opent. Sessies synchroniseren en stadsnamen tonen werkt ook zonder. Stadsnamen komen uit GPS die op de Watch is opgenomen, niet uit de live locatie van de iPhone."
-          }
-        }
-      }
-    },
-    "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Laat de iPhone kaartcontext voor je sessies tonen. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen, dus sync werkt nog steeds als je dit uitzet."
-          }
-        }
-      }
-    },
-    "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Laat de iPhone Gezondheidsgegevens lezen voor begeleidende weergaven. Workouts worden op Apple Watch opgenomen, en dit uitzetten blokkeert het synchroniseren van sessies niet."
-          }
-        }
-      }
-    },
-    "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Laat de iPhone bewegingsgegevens gebruiken bij het bekijken van een sessie. Dit is niet nodig om sessies vanaf de Watch te synchroniseren."
-          }
-        }
-      }
-    },
-    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl en kies Bij gebruik van de app."
-          }
-        }
-      }
-    },
-    "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Gezondheid > Gegevenstoegang en apparaten > Rppl en zet de categorieën aan die je wilt toestaan."
-          }
-        }
-      }
-    },
-    "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Beweging en fitness en schakel Rppl in."
-          }
-        }
-      }
-    },
-    "Not available on this device": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not available on this device"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet beschikbaar op dit apparaat"
-          }
-        }
-      }
-    },
-    "Not decided yet": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not decided yet"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog niet besloten"
-          }
-        }
-      }
-    },
-    "How to fix": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How to fix"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hoe te herstellen"
-          }
-        }
-      }
-    },
-    "Privacy first": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Privacy first"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Privacy eerst"
-          }
-        }
-      }
-    },
-    "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl verwerkt je sessie op je Watch en iPhone. We uploaden geen ritten naar een Rppl-cloud en delen je gegevens niet met anderen."
-          }
-        }
-      }
-    },
-    "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gegevens blijven op je apparaat, in de Gezondheid-app (als dat is toegestaan), en in je iCloud-back-up als je dat apparaat back-upt."
-          }
-        }
-      }
-    },
-    "Terms & Privacy policy": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terms & Privacy policy"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voorwaarden en privacybeleid"
-          }
-        }
-      }
-    },
-    "Allowed": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allowed"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toegestaan"
-          }
-        }
-      }
-    },
-    "Denied": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denied"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geweigerd"
-          }
-        }
-      }
-    },
-    "- laps": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- laps"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- rondes"
-          }
-        }
-      }
-    },
-    "- rides": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- rides"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- ritten"
-          }
-        }
-      }
-    },
-    "- total rides": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- total rides"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "- ritten totaal"
-          }
-        }
-      }
-    },
-    "Imported %@ - Watch not reachable for ack (will retry when reachable)": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imported %@ - Watch not reachable for ack (will retry when reachable)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geïmporteerd %@ - Watch niet bereikbaar voor ack (opnieuw wanneer bereikbaar)"
+            "value": "Watch"
           }
         }
       }
@@ -2452,6 +2446,41 @@
         }
       }
     },
+    "Watch reachable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch reachable"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch bereikbaar"
+          }
+        }
+      }
+    },
+    "Watch state updated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch state updated"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch-status bijgewerkt"
+          }
+        }
+      }
+    },
+    "Water temp": {
+      "localizations": {}
+    },
     "allowed": {
       "localizations": {
         "en": {
@@ -2464,38 +2493,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "toegestaan"
-          }
-        }
-      }
-    },
-    "unavailable, skipped": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "unavailable, skipped"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "niet beschikbaar, overgeslagen"
-          }
-        }
-      }
-    },
-    "not decided": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "not decided"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "niet besloten"
           }
         }
       }
@@ -2516,22 +2513,87 @@
         }
       }
     },
-    "Allow %@": {
+    "iPhone": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allow %@"
+            "value": "iPhone"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sta %@ toe"
+            "value": "iPhone"
+          }
+        }
+      }
+    },
+    "not decided": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not decided"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "niet besloten"
+          }
+        }
+      }
+    },
+    "revision": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "revision"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "revisie"
+          }
+        }
+      }
+    },
+    "rppl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rppl"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rppl"
+          }
+        }
+      }
+    },
+    "unavailable, skipped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unavailable, skipped"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "niet beschikbaar, overgeslagen"
           }
         }
       }
     }
-  },
-  "version": "1.0"
+  }
 }

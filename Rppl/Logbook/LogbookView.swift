@@ -124,10 +124,9 @@ struct LogbookView: View {
                 LogbookSessionDetailView(source: .bundledExample)
                     .toolbar(.visible, for: .navigationBar)
             }
-            .confirmationDialog(
+            .alert(
                 "Delete Session?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
+                isPresented: $showDeleteConfirmation
             ) {
                 Button("Delete Permanently", role: .destructive) {
                     if let sessionId = pendingDeleteSessionId {
@@ -278,7 +277,7 @@ struct LogbookView: View {
             actionErrorText = description.isEmpty
                 ? String(localized: "Something went wrong while deleting the session.")
                 : description
-            // confirmationDialog still dismissing — defer so the error alert is not swallowed.
+            // Delete confirm alert still dismissing — defer so the error alert is not swallowed.
             Task { @MainActor in
                 showActionError = true
             }
