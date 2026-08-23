@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Combined Terms of Use and Privacy Policy (single document).
+/// Keep body copy aligned with repo root `LEGAL.md`.
 struct LegalTermsPrivacyView: View {
     var body: some View {
         List {

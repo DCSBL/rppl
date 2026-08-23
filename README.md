@@ -88,9 +88,12 @@ Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & detection: [Doc
 
 Hobby project (Netherlands). No Rppl cloud: session data is processed on your Watch and iPhone. It stays on your devices, in Apple Health when you allow it, and in your iCloud backup if you back up that device. We do not sell or share your data unless you explicitly choose to (for example export, or a connection you enable).
 
-Full Terms & Privacy (one document, English, Dutch/EU law): **iPhone app → rppl → Legal → Terms & Privacy policy**. Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
+| Doc | Role |
+|-----|------|
+| [LEGAL.md](LEGAL.md) | Full Terms & Privacy (English; Dutch/EU law). Same substance as in-app **rppl → Legal**. |
+| [LICENSE](LICENSE) | Source code (MIT). Separate from app Terms & Privacy. |
 
-Source code license: [LICENSE](LICENSE) (MIT). App use and privacy are governed by the in-app Terms & Privacy policy.
+Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
 
 ## Agents
 
