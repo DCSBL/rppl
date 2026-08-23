@@ -69,7 +69,7 @@ struct LogbookView: View {
                             }
                         } description: {
                             Text(
-                                "Recording needs Apple Watch. Open Rppl on Watch, start a cable-park session, then keep iPhone nearby to sync. No Watch? Browse the example."
+                                "Record a park day on Apple Watch. Or browse the example session."
                             )
                         } actions: {
                             Button("Show example session") {
@@ -164,7 +164,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Cable park sessions · Watch records")
+            Text("Park days and rides")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -199,7 +199,7 @@ struct LogbookView: View {
                         totalDivider(horizontal: true)
                         totalMetric(value: distanceValue, label: "Distance")
                         totalDivider(horizontal: true)
-                        totalMetric(value: maxSpeedValue, label: "Max Speed")
+                        totalMetric(value: maxSpeedValue, label: "Max speed")
                     }
                 } else {
                     HStack(spacing: 0) {
@@ -207,7 +207,7 @@ struct LogbookView: View {
                         totalDivider(horizontal: false)
                         totalMetric(value: distanceValue, label: "Distance")
                         totalDivider(horizontal: false)
-                        totalMetric(value: maxSpeedValue, label: "Max Speed")
+                        totalMetric(value: maxSpeedValue, label: "Max speed")
                     }
                 }
             }
@@ -217,7 +217,7 @@ struct LogbookView: View {
 
             Text(
                 catalog.isLoading
-                    ? String(localized: "- total rides")
+                    ? "—"
                     : LogbookFormatting.totalsFooter(
                         rides: totals.totalRuns,
                         laps: totals.totalLaps
@@ -355,12 +355,12 @@ private struct SessionCard: View {
     }
 
     private var ridesText: String {
-        guard let stats = entry.stats else { return String(localized: "- rides") }
+        guard let stats = entry.stats else { return "—" }
         return LogbookFormatting.rideCount(stats.rideCount)
     }
 
     private var lapsText: String {
-        guard let stats = entry.stats else { return String(localized: "- laps") }
+        guard let stats = entry.stats else { return "—" }
         return LogbookFormatting.lapCount(stats.totalLapCount)
     }
 

@@ -21,7 +21,7 @@ struct PhonePermissionsListSection: View {
             Text("Permissions")
         } footer: {
             Text(
-                "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location."
+                "Asked after your first session arrives from Watch. City names come from Watch GPS stored with each session, not from live iPhone location."
             )
         }
         .onAppear { permissions.refresh() }
@@ -157,15 +157,15 @@ extension WatchPermissionKind {
         switch self {
         case .location:
             return String(
-                localized: "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off."
+                localized: "Optional. Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session."
             )
         case .health:
             return String(
-                localized: "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions."
+                localized: "Optional. Lets iPhone read Health for session details. Workouts are recorded on Apple Watch."
             )
         case .motion:
             return String(
-                localized: "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch."
+                localized: "Optional. Lets iPhone use motion when you review a session."
             )
         }
     }

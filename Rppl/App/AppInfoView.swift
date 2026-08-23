@@ -29,7 +29,7 @@ struct AppInfoView: View {
 
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Privacy first")
+                        Text("On your devices")
                             .font(.body.weight(.semibold))
                         Text(
                             "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
