@@ -75,28 +75,6 @@ On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner reuses the s
 
 To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`**.
 
-### Release → Xcode Cloud (prep)
-
-- Workflow: [`.github/workflows/release-xcode-cloud.yml`](../.github/workflows/release-xcode-cloud.yml)
-- Script: [`scripts/ci/trigger-xcode-cloud.sh`](../scripts/ci/trigger-xcode-cloud.sh)
-
-On GitHub Release **published** (and manual `workflow_dispatch`), GitHub Actions calls the App Store Connect API (`POST /v1/ciBuildRuns`) to start an Xcode Cloud workflow for the release tag. Builds started via the API are treated as **manual** starts in Xcode Cloud.
-
-**Not live yet:** until secrets exist, the job exits 0 with a notice so releases are not blocked.
-
-When Xcode Cloud is available:
-
-1. Create an App Store Connect API key (Keys with access to Xcode Cloud / CI).
-2. In App Store Connect, create the Test + Release Xcode Cloud workflow; copy its workflow UUID.
-3. Add repository secrets:
-   - `APP_STORE_CONNECT_ISSUER_ID`
-   - `APP_STORE_CONNECT_KEY_ID`
-   - `APP_STORE_CONNECT_PRIVATE_KEY` (`.p8` PEM body)
-   - `XCODE_CLOUD_WORKFLOW_ID`
-4. Publish a GitHub Release (or run the workflow manually with a branch/tag name).
-
-References: [Start a build (`ciBuildRuns`)](https://developer.apple.com/documentation/appstoreconnectapi/post-v1-cibuildruns), WWDC24 “Extend your Xcode Cloud workflows”.
-
 ## Notes
 
 - Commit stays light (hygiene + spell + lint). First push after app/Core source changes still pays for `xcodebuild`; later pushes with the same inputs skip it. Core-test-only pushes skip the app build.
