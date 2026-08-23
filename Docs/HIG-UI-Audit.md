@@ -103,6 +103,8 @@ Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may sup
 
 **Locked:** Audit nested shapes (icon well inside card); fix radii for Liquid Glass.
 
+**Shipped:** Logbook cards use `containerShape` + nested `.rect(corners: .concentric…)` (session/ride cards, stat tiles, ride maps). Session-card icon well dropped earlier (#76); nest still applies to detail tiles/maps. See [`LogbookLayout.swift`](../Rppl/Logbook/LogbookLayout.swift).
+
 ### Shipped / dropped
 
 | Item | Status |
@@ -113,6 +115,7 @@ Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may sup
 | Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
 | Soften About `toolbarBackground` | Dropped (alpha polish) |
+| Logbook concentric corner radii | Shipped (this PR); [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48) |
 
 ## Liquid Glass / WWDC25-356 notes
 
@@ -124,7 +127,7 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 |----------|-------------|
 | Strip custom bar backgrounds / borders; hierarchy from layout + grouping | Drop `TabBarLeadingAligner`; avoid fighting floating tab platter |
 | Content first; chrome floats above without stealing focus | Keep Logbook maps/sessions as content; light sync chrome; prefer scroll edge effects over hard dividers |
-| Concentric corner radii for nested shapes | Audit session cards (icon well inside card) + map overlays |
+| Concentric corner radii for nested shapes | Shipped — Logbook cards `containerShape` + nested concentric rects |
 | Shared anatomy across devices; same symbols | Keep mirrored Location/Health/Motion lists + SF Symbols on Watch + iPhone |
 | Bolder left-aligned type in alerts / onboarding | Stick to system `List` + semantic text on permission gates |
 | Toolbar: group by function; primary separate/tinted | Export/Share stay system; soften forced `toolbarBackground` on About |
@@ -132,7 +135,6 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 
 ### Still open after 356
 
-- Concentric radii on Logbook cards → [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48)
 - Soften About nav bar background — dropped (alpha polish)
 
 ## Reference links

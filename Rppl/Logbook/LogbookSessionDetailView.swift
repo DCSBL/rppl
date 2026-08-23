@@ -145,7 +145,8 @@ struct LogbookSessionDetailView: View {
                 preferredFrame: mapFrame
             )
                 .frame(height: 300)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+                .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
                 .overlay(alignment: .center) {
                     if tracksLoading, mapTracks.isEmpty {
                         ProgressView()
@@ -229,9 +230,8 @@ struct LogbookSessionDetailView: View {
                     }
                 }
             }
-            .padding(16)
             .foregroundStyle(Color.rpplText)
-            .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .logbookCardChrome()
         }
     }
 
@@ -287,7 +287,7 @@ struct LogbookSessionDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+        .logbookNestedBackground(Color.rpplFill)
     }
 
     private func mapPlaceholder(_ message: LocalizedStringKey) -> some View {
@@ -295,7 +295,7 @@ struct LogbookSessionDetailView: View {
             .font(.subheadline)
             .foregroundStyle(Color.rpplMuted)
             .frame(maxWidth: .infinity, minHeight: 120)
-            .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.rpplFill, in: .rect(cornerRadius: LogbookLayout.cardCornerRadius))
     }
 
     private func startLoadIfNeeded() {
@@ -507,13 +507,13 @@ private struct RideDetailCard: View {
             if locations.count >= 2 {
                 SessionMapView(locations: locations)
                     .frame(height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .logbookNestedClip()
             } else {
                 Text("No GPS track for this ride")
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+                    .logbookNestedBackground(Color.rpplFill)
             }
 
             LazyVGrid(
@@ -548,8 +548,7 @@ private struct RideDetailCard: View {
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
     private func rideStatTile(_ value: String, label: LocalizedStringKey) -> some View {
@@ -565,7 +564,7 @@ private struct RideDetailCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10))
+        .logbookNestedBackground(Color.rpplFill)
     }
 }
 
