@@ -35,6 +35,21 @@ struct AppInfoView: View {
                             .foregroundStyle(Color.rpplMuted)
                     }
                 }
+
+                Section {
+                    Image("icon-simple")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 48, height: 48)
+                        .foregroundStyle(Color.rpplMuted.opacity(0.4))
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 24)
+                        .padding(.bottom, 8)
+                        .accessibilityHidden(true)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
             .scrollContentBackground(.hidden)
             .background(Color.rpplBackground)

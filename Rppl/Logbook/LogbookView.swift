@@ -52,9 +52,12 @@ struct LogbookView: View {
                             Label {
                                 Text("No sessions yet")
                             } icon: {
-                                MDIIconView(icon: .skiWater)
+                                Image("icon-simple")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
                                     .frame(width: 48, height: 48)
-                                    .foregroundStyle(Color.rpplAccent)
+                                    .foregroundStyle(Color.rpplMuted.opacity(0.45))
                             }
                         } description: {
                             Text(
