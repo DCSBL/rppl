@@ -95,7 +95,7 @@ After `stopSession`, UI returns to idle with no summary. HIG Workouts expects re
 
 **Locked:** At accessibility sizes, switch stats to **2×2 grid**; Totals strip stacks vertically.
 
-**Status:** Shipped — `dynamicTypeSize.isAccessibilitySize` layout branch in Logbook.
+**Status:** Shipped #80 — `dynamicTypeSize.isAccessibilitySize` layout branch in Logbook.
 
 ### Watch: tiny-session discard / cancel (Medium)
 
