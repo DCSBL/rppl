@@ -368,9 +368,9 @@ private struct SessionCard: View {
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                // Keep priority: rides → distance → laps
-                statLabel("flag.checkered", value: ridesText)
+                // Display order matches roomy row; keep priority still rides → distance → laps.
                 statLabel("water.waves", value: distanceText)
+                statLabel("flag.checkered", value: ridesText)
                 statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
         } else {
@@ -385,11 +385,11 @@ private struct SessionCard: View {
 
     private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
         HStack(spacing: 12) {
-            // Keep priority: rides → distance → laps
-            statLabel("flag.checkered", value: ridesText)
+            // Display: distance → rides → laps. Drop order (lowest first): laps → distance.
             if includeDistance {
                 statLabel("water.waves", value: distanceText)
             }
+            statLabel("flag.checkered", value: ridesText)
             if includeLaps {
                 statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
