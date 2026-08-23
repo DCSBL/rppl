@@ -38,7 +38,7 @@ Motion activity logged on ticks; unused by detectors. Non-Ultra uses GPS gap pat
 
 ## Input
 
-iPhone Share export is pretty-printed `SessionTransferPackage` JSON (`manifest`, `detections`, `locations`, plus motion/health when present).
+iPhone Share export is pretty-printed raw `SessionTransferPackage` JSON (`manifest` with `testerId`, `detections`, `locations` with precise GPS, plus motion/health/water/derived when present). Privacy copy: phone App Info → Privacy & export; [DataCollection.md](DataCollection.md#export).
 
 ## Order
 

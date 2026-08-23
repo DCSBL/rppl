@@ -23,7 +23,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 | HealthKit | Save workout via `finishWorkout()` · `waterSports` (wakeboard MET) · HK session stays running · ride + dock HK activities · ride-scoped energy · ride-gated distance samples + GPS route · HR/energy mirrored into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
 | Water Lock | On at session start |
-| Identity | Anonymous `testerId` in UserDefaults / App Group |
+| Identity | Random install-scoped `testerId` (UUID) in App Group / UserDefaults · reset on reinstall |
 | Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
 
 **Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.

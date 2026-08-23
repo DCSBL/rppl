@@ -84,4 +84,16 @@ Phone may be away during the session. After **Stop session**, Watch queues a WC 
 
 ## Export
 
-On iPhone: open a session → **Export session JSON** (Share/AirDrop to Mac for manual analysis). Export includes `detections`.
+On iPhone: open a session → **Export** → Share/AirDrop. Export is the raw, unfiltered `SessionTransferPackage` JSON so testers can share corpora for analysis. It includes:
+
+| Payload | Contents |
+|---------|----------|
+| `manifest` | Session meta + random `testerId` (install-scoped UUID; new on reinstall) |
+| `detections` | Ride / inactive / unsure transitions |
+| `locations` | GPS with precise lat/lon (not anonymized) |
+| `motion` / `motionFramesZlib` | Device motion when present |
+| `health` | Mirrored heart rate and energy |
+| `water` | Ultra water temperature when present |
+| `derived` | Fast view stats / map frame when present |
+
+No cloud upload. Sharing an export is the user’s responsibility; the team may *ask* for a copy when analytics look wrong, but sending remains optional. In-app copy: phone **Privacy & export** (App Info).
