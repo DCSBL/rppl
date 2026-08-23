@@ -84,7 +84,7 @@ Phone may be away during the session. After **Stop session**, Watch queues a WC 
 
 ## Export
 
-On iPhone: open a session → **Export** → Share/AirDrop. Export is the raw, unfiltered `SessionTransferPackage` JSON so testers can share corpora for analysis. It includes:
+On iPhone: open a session → **Export** → Share/AirDrop. Payload is pretty-printed `SessionTransferPackage` JSON:
 
 | Payload | Contents |
 |---------|----------|
@@ -96,4 +96,4 @@ On iPhone: open a session → **Export** → Share/AirDrop. Export is the raw, u
 | `water` | Ultra water temperature when present |
 | `derived` | Fast view stats / map frame when present |
 
-No cloud upload. Sharing an export is the user’s responsibility; the team may *ask* for a copy when analytics look wrong, but sending remains optional. In-app copy: phone **Privacy & export** (App Info).
+User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → rppl → Legal → Terms & Privacy policy**.

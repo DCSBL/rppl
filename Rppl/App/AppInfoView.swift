@@ -1,5 +1,4 @@
 import SwiftUI
-import RpplCore
 
 struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
@@ -27,28 +26,30 @@ struct AppInfoView: View {
                 PhonePermissionsListSection(permissions: permissions)
 
                 Section {
-                    Text(
-                        """
-                        Rppl does not upload session data to the cloud. Recordings stay on your Watch and iPhone until you choose to export them.
-
-                        Export exists so you can share raw, unfiltered session data for analysis. An export includes session metadata (with a random tester ID), ride/pause detections, GPS locations (precise coordinates — not anonymized), device motion, heart rate and energy, water temperature when available, and derived stats.
-
-                        A unique random tester ID is created on first app launch and stored on this device. Reinstalling the app generates a new ID.
-
-                        If you share an export (AirDrop, Files, email, or any other channel), you are responsible for who receives it and how it is used. We may ask for a copy when analytics look wrong — sending one is always your choice.
-                        """
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-                    .listRowBackground(Color.clear)
-                } header: {
-                    Text("Privacy & export")
-                }
-
-                Section("Terms") {
-                    Text("Internal alpha testing only. Not a consumer product release.")
-                        .font(.footnote)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Privacy first")
+                            .font(.body.weight(.semibold))
+                        Text(
+                            "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
+                        )
+                        .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
+                        Text(
+                            "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(Color.rpplMuted)
+                    }
+                    .padding(.vertical, 4)
+                    .accessibilityElement(children: .combine)
+
+                    NavigationLink {
+                        LegalTermsPrivacyView()
+                    } label: {
+                        Text("Terms & Privacy policy")
+                    }
+                } header: {
+                    Text("Legal")
                 }
 
                 Section {
