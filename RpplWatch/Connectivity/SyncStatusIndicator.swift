@@ -33,6 +33,9 @@ struct SyncStatusIndicator: View {
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "Sync \(shortTitle)"))
+        .accessibilityValue(state.detail)
     }
 
     private var shortTitle: String {

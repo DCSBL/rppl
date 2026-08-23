@@ -7,6 +7,7 @@ struct LogbookView: View {
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var actionErrorText: String?
 
     var body: some View {
         NavigationStack {
@@ -16,6 +17,16 @@ struct LogbookView: View {
                         .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                }
+
+                Section {
+                    SyncStatusIndicator(
+                        state: connectivity.syncState,
+                        pendingCount: connectivity.pendingAckCount
+                    )
+                    .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
 
                 Section {
@@ -46,7 +57,9 @@ struct LogbookView: View {
                                     .foregroundStyle(Color.rpplAccent)
                             }
                         } description: {
-                            Text("Record on Apple Watch, then bring your iPhone nearby.")
+                            Text(
+                                "Recording needs Apple Watch. Open Rppl on Watch, start a cable-park session, then keep iPhone nearby to sync. No Watch? Browse the example."
+                            )
                         } actions: {
                             Button("Show example session") {
                                 showExampleSession = true
@@ -117,7 +130,19 @@ struct LogbookView: View {
             } message: {
                 Text("This permanently removes the session from this iPhone. This cannot be undone.")
             }
+            .alert(
+                "Could Not Delete Session",
+                isPresented: Binding(
+                    get: { actionErrorText != nil },
+                    set: { if !$0 { actionErrorText = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { actionErrorText = nil }
+            } message: {
+                Text(actionErrorText ?? "")
+            }
             .onAppear {
+                connectivity.refreshSyncState()
                 catalog.reload(store: connectivity.store)
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
@@ -131,7 +156,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Cable park sessions")
+            Text("Cable park sessions · Watch records")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -233,6 +258,7 @@ struct LogbookView: View {
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
+            actionErrorText = error.localizedDescription
             WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }

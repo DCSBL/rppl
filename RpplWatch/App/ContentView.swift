@@ -27,6 +27,7 @@ struct ContentView: View {
             WakeLog.debug(.lifecycle, "WKApplication.didBecomeActive")
             transfer.refreshSyncState()
             session.refreshPermissionStatus()
+            transfer.transferPending()
         }
     }
 }

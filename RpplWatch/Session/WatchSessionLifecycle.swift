@@ -227,6 +227,7 @@ extension WatchSessionController {
         logSessionStartDetection()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
+        WKInterfaceDevice.current().play(.start)
 
         startBackgroundLoops()
         WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
@@ -275,6 +276,7 @@ extension WatchSessionController {
         statusText = String(localized: "Transferring…")
         WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
         statusText = String(localized: "Stopped — waiting for phone ack")
+        WKInterfaceDevice.current().play(.stop)
         WakeLog.debug(.session, "stopSession done — awaiting phone ack")
         storedByteSize = 0
         currentRideDuration = 0
@@ -326,6 +328,7 @@ extension WatchSessionController {
         elapsed = computeElapsed(at: Date())
         isProductPaused = true
         statusText = String(localized: "Paused")
+        WKInterfaceDevice.current().play(.stop)
         WakeLog.debug(.session, "pauseSession done")
     }
 
@@ -353,6 +356,7 @@ extension WatchSessionController {
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
+        WKInterfaceDevice.current().play(.start)
         WakeLog.debug(.session, "resumeSession done")
     }
 

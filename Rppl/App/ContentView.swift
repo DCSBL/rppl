@@ -20,11 +20,6 @@ struct ContentView: View {
         }
         .tint(Color.rpplAccent)
         .tabBarMinimizeBehavior(.onScrollDown)
-        .background {
-            TabBarLeadingAligner()
-                .frame(width: 0, height: 0)
-                .allowsHitTesting(false)
-        }
     }
 }
 

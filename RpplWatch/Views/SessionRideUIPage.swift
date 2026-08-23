@@ -28,8 +28,10 @@ struct SessionRideUIPage: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text(SessionFormatters.elapsed(session.elapsed))
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).bold())
                     .monospacedDigit()
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
                     .foregroundStyle(.secondary)
 
                 Text("Session clock frozen")
@@ -45,10 +47,14 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
 
-                Text("Swipe for Resume")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                Button("Resume") {
+                    WakeLog.debug(.ui, "tap Resume from paused metrics")
+                    session.resumeSession()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(session.isStopping)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
@@ -60,7 +66,7 @@ struct SessionRideUIPage: View {
     private var ridingView: some View {
         VStack(spacing: 4) {
             Text(SessionFormatters.segmentDuration(session.currentRideDuration))
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(.largeTitle, design: .rounded).bold())
                 .monospacedDigit()
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
@@ -114,7 +120,10 @@ struct SessionRideUIPage: View {
                 Image(systemName: "heart.fill")
                     .font(.caption2)
                     .foregroundStyle(.red)
+                    .accessibilityHidden(true)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(heartRateAccessibilityLabel)
 
             statusLine(primary: "Riding", color: .blue)
         }
@@ -166,7 +175,12 @@ struct SessionRideUIPage: View {
                         Image(systemName: "heart.fill")
                             .font(.caption2)
                             .foregroundStyle(.red)
+                            .accessibilityHidden(true)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(
+                        String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+                    )
                 }
 
                 Divider()
@@ -213,5 +227,12 @@ struct SessionRideUIPage: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var heartRateAccessibilityLabel: String {
+        if let hr = session.lastHeartRate {
+            return String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+        }
+        return String(localized: "Heart rate unavailable")
     }
 }

@@ -13,6 +13,8 @@ final class PhoneConnectivityService: NSObject {
     var sessionsRevision = 0
     /// Raw WCSession flags for device-pair debugging (shown under Sync).
     var wcDebugSummary = "WC —"
+    /// Acks queued because Watch was unreachable (or send failed).
+    var pendingAckCount: Int { pendingAcks.count }
 
     let store: SessionFileStore
     private var pendingAcks = Set<String>()
