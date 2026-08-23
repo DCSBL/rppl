@@ -27,6 +27,7 @@ struct LogbookSessionDetailView: View {
     @State private var loadTask: Task<Void, Never>?
     @State private var tracksTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var showExportError = false
     @State private var exportErrorText: String?
     @State private var exportURL: URL?
     @State private var isExporting = false
@@ -104,14 +105,12 @@ struct LogbookSessionDetailView: View {
         }
         .alert(
             "Could Not Export",
-            isPresented: Binding(
-                get: { exportErrorText != nil },
-                set: { if !$0 { exportErrorText = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) { exportErrorText = nil }
-        } message: {
-            Text(exportErrorText ?? "")
+            isPresented: $showExportError,
+            presenting: exportErrorText
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
         }
     }
 
@@ -432,6 +431,8 @@ struct LogbookSessionDetailView: View {
 
     private func startExport() {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        showExportError = false
+        exportErrorText = nil
         isExporting = true
         exportTask = Task(priority: .utility) {
             await prepareExport()
@@ -445,7 +446,12 @@ struct LogbookSessionDetailView: View {
     }
 
     private func prepareExport() async {
-        guard case .store(let sessionId) = source, let store else { return }
+        guard case .store(let sessionId) = source, let store else {
+            presentExportFailure(
+                String(localized: "Session store missing. Try again from the logbook.")
+            )
+            return
+        }
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
 
@@ -460,18 +466,36 @@ struct LogbookSessionDetailView: View {
             }
             try Task.checkCancellation()
             exportURL = url
-            isExporting = false
-            exportTask = nil
+            finishExportTask()
             WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
         } catch is CancellationError {
-            isExporting = false
-            exportTask = nil
+            finishExportTask()
         } catch {
-            exportErrorText = error.localizedDescription
-            isExporting = false
-            exportTask = nil
+            presentExportFailure(Self.userFacingMessage(for: error))
             WakeLog.error(.store, "export: \(error.localizedDescription)")
         }
+    }
+
+    private func finishExportTask() {
+        isExporting = false
+        exportTask = nil
+    }
+
+    private func presentExportFailure(_ message: String) {
+        finishExportTask()
+        exportErrorText = message
+        // Present after toolbar ProgressView → Export swap so SwiftUI does not drop the alert.
+        Task { @MainActor in
+            showExportError = true
+        }
+    }
+
+    private static func userFacingMessage(for error: Error) -> String {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty {
+            return String(localized: "Something went wrong while preparing the export.")
+        }
+        return description
     }
 }
 

@@ -7,6 +7,7 @@ struct LogbookView: View {
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var showActionError = false
     @State private var actionErrorText: String?
 
     var body: some View {
@@ -135,14 +136,12 @@ struct LogbookView: View {
             }
             .alert(
                 "Could Not Delete Session",
-                isPresented: Binding(
-                    get: { actionErrorText != nil },
-                    set: { if !$0 { actionErrorText = nil } }
-                )
-            ) {
-                Button("OK", role: .cancel) { actionErrorText = nil }
-            } message: {
-                Text(actionErrorText ?? "")
+                isPresented: $showActionError,
+                presenting: actionErrorText
+            ) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { message in
+                Text(message)
             }
             .onAppear {
                 connectivity.refreshSyncState()
@@ -261,7 +260,14 @@ struct LogbookView: View {
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
-            actionErrorText = error.localizedDescription
+            let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+            actionErrorText = description.isEmpty
+                ? String(localized: "Something went wrong while deleting the session.")
+                : description
+            // confirmationDialog still dismissing — defer so the error alert is not swallowed.
+            Task { @MainActor in
+                showActionError = true
+            }
             WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }
