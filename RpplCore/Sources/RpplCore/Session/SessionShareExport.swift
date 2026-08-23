@@ -5,16 +5,13 @@ import Foundation
 /// Filename: `rppl_<timestamp>_<location>.json` — UTC start time, city slug (or `unknown`).
 /// Body: pretty-printed; top-level `manifest` first (no `sortedKeys`).
 public enum SessionShareExport {
-    private static let timestampFormatter: ISO8601DateFormatter = {
+    /// Share filename: `rppl_<ISO8601-UTC-with-colons-as-dashes>_<location>.json`.
+    public static func fileName(startedAt: Date, locationName: String?) -> String {
+        // Local formatter — `ISO8601DateFormatter` is not Sendable; avoid static shared state.
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        return formatter
-    }()
-
-    /// Share filename: `rppl_<ISO8601-UTC-with-colons-as-dashes>_<location>.json`.
-    public static func fileName(startedAt: Date, locationName: String?) -> String {
-        let raw = timestampFormatter.string(from: startedAt)
+        let raw = formatter.string(from: startedAt)
         let timestamp = raw
             .replacingOccurrences(of: ":", with: "-")
             .replacingOccurrences(of: ".", with: "-")
