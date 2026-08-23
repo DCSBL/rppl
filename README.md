@@ -90,7 +90,7 @@ Hobby project (Netherlands). No Rppl cloud: session data is processed on your Wa
 
 | Doc | Role |
 |-----|------|
-| [LEGAL.md](LEGAL.md) | Full Terms & Privacy (English; Dutch/EU law). Same substance as in-app **rppl → Legal**. |
+| [LEGAL.md](LEGAL.md) | Full Terms & Privacy (canonical). Bundled into the iPhone app; edit this file, pre-commit syncs `Rppl/Resources/LEGAL.md`. |
 | [LICENSE](LICENSE) | Source: PolyForm Noncommercial — copy/modify for noncommercial use; no selling the app or other commercial use. Separate from app Terms & Privacy. |
 
 Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
