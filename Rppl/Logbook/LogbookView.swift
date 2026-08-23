@@ -296,75 +296,52 @@ private struct SessionCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    (
-                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                            .foregroundStyle(Color.rpplText)
-                        + (entry.highlights.isEmpty
-                            ? Text("")
-                            : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
-                                .foregroundStyle(Color.rpplMuted))
-                    )
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.75)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                    Text(timeRangeText)
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                }
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                (
+                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                        .foregroundStyle(Color.rpplText)
+                    + (entry.highlights.isEmpty
+                        ? Text("")
+                        : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
+                            .foregroundStyle(Color.rpplMuted))
+                )
+                .font(.headline)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer(minLength: 8)
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(LogbookFormatting.sessionDate(entry.manifest.startedAt))
-                        .font(.subheadline)
-                        .foregroundStyle(Color.rpplMuted)
-
-                    Text(entry.cityName ?? "-")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                }
+                Text(entry.cityName ?? "-")
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+                    .lineLimit(1)
             }
+
+            Text(sessionMetaText)
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
                 .overlay(Color.rpplFill)
 
-            Group {
-                if useAccessibilityLayout {
-                    VStack(spacing: 12) {
-                        HStack(spacing: 12) {
-                            statLabel("clock", value: durationText)
-                            statLabel("water.waves", value: distanceText)
-                        }
-                        HStack(spacing: 12) {
-                            statLabel("flag.checkered", value: ridesText)
-                            statLabel("arrow.triangle.2.circlepath", value: lapsText)
-                        }
-                    }
-                } else {
-                    HStack(spacing: 12) {
-                        statLabel("clock", value: durationText)
-                        statLabel("water.waves", value: distanceText)
-                        statLabel("flag.checkered", value: ridesText)
-                        statLabel("arrow.triangle.2.circlepath", value: lapsText)
-                    }
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(Color.rpplMuted)
+            sessionStatsSummary
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .logbookCardChrome()
     }
 
-    private var timeRangeText: String {
-        LogbookFormatting.sessionTimeRange(
+    private var sessionMetaText: String {
+        let date = LogbookFormatting.sessionDate(entry.manifest.startedAt)
+        let range = LogbookFormatting.sessionTimeRange(
             start: entry.manifest.startedAt,
             end: entry.manifest.endedAt ?? entry.stats?.endedAt
         )
+        return "\(date) · \(range) · \(durationText)"
     }
 
     private var durationText: String {
@@ -387,12 +364,48 @@ private struct SessionCard: View {
         return LogbookFormatting.lapCount(stats.totalLapCount)
     }
 
+    @ViewBuilder
+    private var sessionStatsSummary: some View {
+        if useAccessibilityLayout {
+            VStack(alignment: .leading, spacing: 8) {
+                // Display order matches roomy row; keep priority still rides → distance → laps.
+                statLabel("water.waves", value: distanceText)
+                statLabel("flag.checkered", value: ridesText)
+                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+            }
+        } else {
+            // Drop lowest-priority stats first when width is tight (laps → distance → rides).
+            ViewThatFits(in: .horizontal) {
+                statsRow(includeDistance: true, includeLaps: true)
+                statsRow(includeDistance: true, includeLaps: false)
+                statsRow(includeDistance: false, includeLaps: false)
+            }
+        }
+    }
+
+    private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
+        HStack(spacing: 12) {
+            // Display: distance → rides → laps. Drop order (lowest first): laps → distance.
+            if includeDistance {
+                statLabel("water.waves", value: distanceText)
+            }
+            statLabel("flag.checkered", value: ridesText)
+            if includeLaps {
+                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+            }
+        }
+    }
+
     private func statLabel(_ symbol: String, value: String) -> some View {
-        Label(value, systemImage: symbol)
-            .labelStyle(.titleAndIcon)
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-            .frame(maxWidth: useAccessibilityLayout ? .infinity : nil, alignment: .leading)
+        HStack(alignment: .center, spacing: 4) {
+            Image(systemName: symbol)
+                .imageScale(.small)
+            Text(value)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityElement(children: .combine)
     }
 }
 
