@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import RpplCore
 
 /// Always-visible companion permission rows (About). Fixed Location → Health → Motion order.
@@ -70,6 +71,7 @@ private struct PhonePermissionRowView: View {
 struct PhonePermissionDetailView: View {
     let kind: WatchPermissionKind
     @Bindable var permissions: PhonePermissionsController
+    @Environment(\.openURL) private var openURL
     @State private var isRequesting = false
 
     private var state: WatchPermissionState {
@@ -91,6 +93,17 @@ struct PhonePermissionDetailView: View {
                     Text(kind.phoneHowToFix)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                    Button {
+                        Task { await request(force: true) }
+                    } label: {
+                        Text("Try Again")
+                    }
+                    .disabled(isRequesting)
+                    Button {
+                        openFixURL()
+                    } label: {
+                        Text(kind.phoneOpenSettingsTitle)
+                    }
                 } header: {
                     Text("How to fix")
                 }
@@ -99,7 +112,7 @@ struct PhonePermissionDetailView: View {
             if state == .notDetermined {
                 Section {
                     Button {
-                        Task { await request() }
+                        Task { await request(force: false) }
                     } label: {
                         if isRequesting {
                             ProgressView()
@@ -128,11 +141,17 @@ struct PhonePermissionDetailView: View {
         }
     }
 
-    private func request() async {
+    private func request(force: Bool) async {
         guard !isRequesting else { return }
         isRequesting = true
         defer { isRequesting = false }
-        await permissions.request(kind)
+        await permissions.request(kind, force: force)
+    }
+
+    private func openFixURL() {
+        if let url = kind.phoneSettingsURL {
+            openURL(url)
+        }
     }
 }
 
@@ -157,15 +176,15 @@ extension WatchPermissionKind {
         switch self {
         case .location:
             return String(
-                localized: "Optional. Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session."
+                localized: "Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session."
             )
         case .health:
             return String(
-                localized: "Optional. Lets iPhone read Health for session details. Workouts are recorded on Apple Watch."
+                localized: "Lets iPhone read Health for session details. Workouts are recorded on Apple Watch."
             )
         case .motion:
             return String(
-                localized: "Optional. Lets iPhone use motion when you review a session."
+                localized: "Lets iPhone use motion when you review a session."
             )
         }
     }
@@ -178,12 +197,32 @@ extension WatchPermissionKind {
             )
         case .health:
             return String(
-                localized: "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow."
+                localized: "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow. You can also open Health from the button below."
             )
         case .motion:
             return String(
                 localized: "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl."
             )
+        }
+    }
+
+    var phoneOpenSettingsTitle: String {
+        switch self {
+        case .health:
+            return String(localized: "Open Health")
+        case .location, .motion:
+            return String(localized: "Open Settings")
+        }
+    }
+
+    /// Deep link for the denied-state fix button. Health prefers the Health app; others use app Settings.
+    var phoneSettingsURL: URL? {
+        switch self {
+        case .health:
+            return URL(string: "x-apple-health://")
+                ?? URL(string: UIApplication.openSettingsURLString)
+        case .location, .motion:
+            return URL(string: UIApplication.openSettingsURLString)
         }
     }
 }

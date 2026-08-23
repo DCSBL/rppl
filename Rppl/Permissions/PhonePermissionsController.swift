@@ -90,11 +90,11 @@ final class PhonePermissionsController: NSObject {
         WakeLog.debug(.permissions, "post-sync permission asks done")
     }
 
-    func request(_ kind: WatchPermissionKind) async {
+    func request(_ kind: WatchPermissionKind, force: Bool = false) async {
         switch kind {
         case .location: await requestLocation()
-        case .health: await requestHealth()
-        case .motion: await requestMotion()
+        case .health: await requestHealth(force: force)
+        case .motion: await requestMotion(force: force)
         }
     }
 
@@ -104,9 +104,13 @@ final class PhonePermissionsController: NSObject {
         refresh()
     }
 
-    private func requestHealth() async {
+    private func requestHealth(force: Bool) async {
         guard HKHealthStore.isHealthDataAvailable() else {
             healthPermission = .unavailable
+            return
+        }
+        refresh()
+        if !force, healthPermission != .notDetermined {
             return
         }
         // Read-oriented ask. Phone does not save workouts; denial must not block WC sync.
@@ -121,15 +125,17 @@ final class PhonePermissionsController: NSObject {
         refresh()
     }
 
-    private func requestMotion() async {
+    private func requestMotion(force: Bool) async {
         guard CMMotionActivityManager.isActivityAvailable() else {
             motionPermission = .unavailable
             return
         }
-        guard CMMotionActivityManager.authorizationStatus() == .notDetermined else {
+        let status = CMMotionActivityManager.authorizationStatus()
+        if !force, status != .notDetermined {
             refresh()
             return
         }
+        // Motion has no re-prompt API after deny; querying still refreshes status when possible.
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             let manager = CMMotionActivityManager()
             let now = Date()

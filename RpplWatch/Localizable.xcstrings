@@ -1046,22 +1046,6 @@
         }
       }
     },
-    "On iPhone, open Settings > Health > Data Access & Devices > Rppl and turn on workout access.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Health > Data Access & Devices > Rppl and turn on workout access."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Gezondheid > Gegevenstoegang en apparaten > Rppl en zet workout-toegang aan."
-          }
-        }
-      }
-    },
     "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App.": {
       "localizations": {
         "en": {
@@ -2347,6 +2331,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Timers gepauzeerd"
+          }
+        }
+      }
+    },
+    "Waiting for system permission popups. This can take a few seconds on first launch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for system permission popups. This can take a few seconds on first launch."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachten op systeemmachtigingen. Dit kan bij de eerste start een paar seconden duren."
+          }
+        }
+      }
+    },
+    "Waiting for the system popup…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the system popup…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachten op de systeempopup…"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw proberen"
+          }
+        }
+      }
+    },
+    "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open op iPhone de Gezondheid-app > Delen > Apps > Rppl en zet workouttoegang aan. Of: Instellingen > Gezondheid > Toegang tot gegevens en apparaten > Rppl."
           }
         }
       }

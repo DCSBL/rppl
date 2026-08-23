@@ -52,6 +52,9 @@ final class WatchSessionController: NSObject {
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
     var motionPermission: WatchPermissionState = .notDetermined
+    /// True while an auto or manual system permission sheet sequence is in flight.
+    /// Kept separate from ProgressView so the list stays interactive while HealthKit warms up.
+    var isPromptingPermissions = false
 
     var permissionStates: [WatchPermissionKind: WatchPermissionState] {
         [
