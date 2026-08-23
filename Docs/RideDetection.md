@@ -4,7 +4,7 @@ How Rppl decides “you’re on a ride” vs “you’re waiting at the dock” 
 
 If you only read one thing: **codes are plain strings**, logic lives in **`RpplCore`**, Watch only feeds ticks and shows UI. Tune and test with `cd RpplCore && swift test` — no phone required.
 
-Deeper UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Threshold table: [Phase3.md](Phase3.md). On-disk streams: [DataCollection.md](DataCollection.md).
+Deeper UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). On-disk streams: [DataCollection.md](DataCollection.md). Authoritative defaults: `DetectionThresholds` in RpplCore (table below).
 
 ---
 
