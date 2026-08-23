@@ -104,7 +104,7 @@ final class WatchTransferService: NSObject {
 
     private func transfer(sessionId: String, store: SessionFileStore) throws {
         guard WCSession.default.activationState == .activated else {
-            lastMessage = String(localized: "WC not activated — will retry")
+            lastMessage = String(localized: "WC not activated - will retry")
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — WC not activated")
             refreshSyncState()
             return
@@ -156,7 +156,7 @@ extension WatchTransferService: WCSessionDelegate {
                 WakeLog.debug(.sync, "iPhone reachable")
                 transferPending()
             } else {
-                lastMessage = String(localized: "iPhone not reachable — transfers will queue")
+                lastMessage = String(localized: "iPhone not reachable - transfers will queue")
                 WakeLog.debug(.sync, "iPhone not reachable — queue transfers")
             }
         }
@@ -232,7 +232,7 @@ extension WatchTransferService: WCSessionDelegate {
                     WakeLog.debug(.store, "re-queued readyToTransfer \(sessionId.prefix(8))…")
                 }
             } else {
-                lastMessage = String(localized: "File delivered — awaiting phone ack")
+                lastMessage = String(localized: "File delivered - awaiting phone ack")
                 WakeLog.debug(
                     .transfer,
                     "delivered \(sessionId.map { String($0.prefix(8)) } ?? "?")… — awaiting ack"

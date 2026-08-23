@@ -174,12 +174,12 @@ struct LogbookView: View {
 
     private var totalsCard: some View {
         let totals = catalog.totals
-        let sessionsValue = catalog.isLoading ? "—" : "\(totals.sessionCount)"
+        let sessionsValue = catalog.isLoading ? "-" : "\(totals.sessionCount)"
         let distanceValue = catalog.isLoading
-            ? "—"
+            ? "-"
             : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters)
         let maxSpeedValue = catalog.isLoading || totals.topSpeedKmh <= 0
-            ? "—"
+            ? "-"
             : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
 
         return VStack(alignment: .leading, spacing: 16) {
@@ -218,7 +218,7 @@ struct LogbookView: View {
 
             Text(
                 catalog.isLoading
-                    ? String(localized: "— total rides")
+                    ? String(localized: "- total rides")
                     : LogbookFormatting.totalsFooter(
                         rides: totals.totalRuns,
                         laps: totals.totalLaps
@@ -325,7 +325,7 @@ private struct SessionCard: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
 
-                    Text(entry.cityName ?? "—")
+                    Text(entry.cityName ?? "-")
                         .font(.caption)
                         .foregroundStyle(Color.rpplMuted)
                 }
@@ -369,22 +369,22 @@ private struct SessionCard: View {
     }
 
     private var durationText: String {
-        guard let stats = entry.stats else { return "—" }
+        guard let stats = entry.stats else { return "-" }
         return LogbookFormatting.duration(stats.totalDuration)
     }
 
     private var distanceText: String {
-        guard let stats = entry.stats else { return "—" }
+        guard let stats = entry.stats else { return "-" }
         return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
     }
 
     private var ridesText: String {
-        guard let stats = entry.stats else { return String(localized: "— rides") }
+        guard let stats = entry.stats else { return String(localized: "- rides") }
         return LogbookFormatting.rideCount(stats.rideCount)
     }
 
     private var lapsText: String {
-        guard let stats = entry.stats else { return String(localized: "— laps") }
+        guard let stats = entry.stats else { return String(localized: "- laps") }
         return LogbookFormatting.lapCount(stats.totalLapCount)
     }
 

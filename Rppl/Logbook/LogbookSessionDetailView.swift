@@ -176,7 +176,7 @@ struct LogbookSessionDetailView: View {
                     }
 
                     LabeledContent("Location") {
-                        Text(cityName ?? "—")
+                        Text(cityName ?? "-")
                     }
                 }
 
@@ -190,11 +190,11 @@ struct LogbookSessionDetailView: View {
                         label: "Distance"
                     )
                     statTile(
-                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                         label: "Max speed"
                     )
                     statTile(
-                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                         label: "Avg speed"
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
@@ -557,11 +557,11 @@ private struct RideDetailCard: View {
                 )
                 rideStatTile("\(ride.lapCount)", label: "Laps")
                 rideStatTile(
-                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Max speed"
                 )
                 rideStatTile(
-                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Avg speed"
                 )
             }

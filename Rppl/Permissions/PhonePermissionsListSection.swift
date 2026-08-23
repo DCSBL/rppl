@@ -21,7 +21,7 @@ struct PhonePermissionsListSection: View {
             Text("Permissions")
         } footer: {
             Text(
-                "Asked after the first Watch sync — not at launch. Sync and city names work without these; city uses session GPS from the Watch, not live iPhone location."
+                "These permissions are requested after your first Watch sync, not when you open the app. Syncing sessions and showing city names work without them. City names come from GPS recorded on the Watch, not from the iPhone’s live location."
             )
         }
         .onAppear { permissions.refresh() }
@@ -81,19 +81,18 @@ struct PhonePermissionDetailView: View {
             Section {
                 Label(kind.phoneTitle, systemImage: kind.phoneSystemImage)
                 statusLine
-            }
-
-            Section("Why needed") {
                 Text(kind.phoneWhyNeeded)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
 
             if state == .denied {
-                Section("How to fix") {
+                Section {
                     Text(kind.phoneHowToFix)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                } header: {
+                    Text("How to fix")
                 }
             }
 
@@ -121,7 +120,7 @@ struct PhonePermissionDetailView: View {
         case .authorized:
             Text("Allowed").foregroundStyle(.green)
         case .unavailable:
-            Text("Not available — skipped").foregroundStyle(.secondary)
+            Text("Not available on this device").foregroundStyle(.secondary)
         case .notDetermined:
             Text("Not decided yet").foregroundStyle(.orange)
         case .denied:
@@ -158,15 +157,15 @@ extension WatchPermissionKind {
         switch self {
         case .location:
             return String(
-                localized: "Placeholder: Optional for map context. City/spot names use Watch session GPS already on disk — not a live iPhone location fix."
+                localized: "Optional. Lets the iPhone show map context for your sessions. City and spot names already come from Watch GPS stored with each session, so sync still works if you turn this off."
             )
         case .health:
             return String(
-                localized: "Placeholder: Optional Health read for companion views. Workouts are recorded on Apple Watch; denying Health here does not block sync."
+                localized: "Optional. Lets the iPhone read Health data for companion views. Workouts are recorded on Apple Watch, and turning this off does not block syncing sessions."
             )
         case .motion:
             return String(
-                localized: "Placeholder: Optional Motion access for future review tools. Not required to sync sessions from Watch."
+                localized: "Optional. Lets the iPhone use motion data when reviewing a session. It is not required to sync sessions from the Watch."
             )
         }
     }
@@ -175,15 +174,15 @@ extension WatchPermissionKind {
         switch self {
         case .location:
             return String(
-                localized: "Placeholder: Settings › Privacy & Security › Location Services › Rppl › While Using."
+                localized: "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App."
             )
         case .health:
             return String(
-                localized: "Placeholder: Settings › Health › Data Access & Devices › Rppl."
+                localized: "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow."
             )
         case .motion:
             return String(
-                localized: "Placeholder: Settings › Privacy & Security › Motion & Fitness › Rppl."
+                localized: "On iPhone, open Settings > Privacy & Security > Motion & Fitness, then enable Rppl."
             )
         }
     }

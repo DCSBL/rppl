@@ -4,9 +4,9 @@ struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
 
     private var versionFooter: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        let date = Bundle.main.infoDictionary?["RpplBuildDate"] as? String ?? "—"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
+        let date = Bundle.main.infoDictionary?["RpplBuildDate"] as? String ?? "-"
         return "\(version) (\(build) - \(date))"
     }
 
@@ -15,7 +15,7 @@ struct AppInfoView: View {
             List {
                 Section {
                     Text(
-                        "Rppl tracks cable-park wakeboarding on Apple Watch — rides, pauses, and a full park day as one session. iPhone is for viewing, maps, and export."
+                        "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
                     )
                     .font(.subheadline)
                     .foregroundStyle(Color.rpplMuted)
