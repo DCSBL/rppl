@@ -133,6 +133,8 @@ extension WatchSessionController {
     }
 
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
+        endedSessionSummary = nil
+
         guard !isRunning, !isStopping, !isStarting else {
             WakeLog.debug(
                 .session,
@@ -206,6 +208,8 @@ extension WatchSessionController {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        sessionStartLatitude = nil
+        sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
         #if RPPL_WEATHERKIT
@@ -279,10 +283,27 @@ extension WatchSessionController {
         motionRecordingEnabled = false
 
         statusText = String(localized: "Transferring…")
-        WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
+        let stoppedSessionId = manifest.sessionId
+        WatchTransferService.shared.enqueueTransfer(sessionId: stoppedSessionId, store: store)
         statusText = String(localized: "Stopped — waiting for phone ack")
+
+        let finalDuration = computeElapsed(at: Date())
+        endedSessionSummary = EndedSessionSummary(
+            sessionId: stoppedSessionId,
+            duration: finalDuration,
+            rideCount: liveRideTracker.rideCount,
+            distanceMeters: liveRideTracker.sessionRideMeters,
+            lastRideDuration: liveRideTracker.lastRideDuration,
+            lastRideMeters: liveRideTracker.lastRideMeters,
+            lastRideLapCount: liveRideTracker.lastRideLapCount,
+            didCompleteRide: liveRideTracker.didCompleteRide,
+            startLatitude: sessionStartLatitude,
+            startLongitude: sessionStartLongitude
+        )
+
         WKInterfaceDevice.current().play(.stop)
-        WakeLog.debug(.session, "stopSession done — awaiting phone ack")
+        WakeLog.debug(.session, "stopSession done — summary shown sessionId=\(stoppedSessionId.prefix(8))…")
+        liveRideTracker.reset()
         storedByteSize = 0
         currentRideDuration = 0
         currentInactiveDuration = 0
@@ -307,6 +328,8 @@ extension WatchSessionController {
         pausedAccumulated = 0
         productPausedAt = nil
         isProductPaused = false
+        sessionStartLatitude = nil
+        sessionStartLongitude = nil
         self.manifest = nil
         isRunning = false
         isStopping = false
@@ -368,6 +391,22 @@ extension WatchSessionController {
     func enableWaterLock() {
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.ui, "Water Lock enabled (manual)")
+    }
+
+    func dismissSessionSummary() {
+        guard endedSessionSummary != nil else { return }
+        WakeLog.debug(.ui, "dismiss session summary")
+        endedSessionSummary = nil
+        statusText = String(localized: "Idle")
+    }
+
+    func captureSessionStartCoordinate(from sample: LocationSample) {
+        guard sessionStartLatitude == nil else { return }
+        guard sample.horizontalAccuracy >= 0,
+              sample.horizontalAccuracy <= DetectionThresholds.default.maxHorizontalAccuracyM
+        else { return }
+        sessionStartLatitude = sample.latitude
+        sessionStartLongitude = sample.longitude
     }
 
     /// Cycle debug simulation: detected → inactive → ride → detected.

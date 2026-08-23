@@ -47,6 +47,8 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
 
+                lastRideSection
+
                 Button("Resume") {
                     WakeLog.debug(.ui, "tap Resume from paused metrics")
                     session.resumeSession()
@@ -126,9 +128,41 @@ struct SessionRideUIPage: View {
             .accessibilityLabel(heartRateAccessibilityLabel)
 
             statusLine(primary: "Riding", color: .blue)
+
+            if session.didCompleteRide {
+                lastRideCompactLine
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 4)
+    }
+
+    private var lastRideCompactLine: some View {
+        HStack(spacing: 4) {
+            Text("Last")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(
+                "\(SessionFormatters.segmentDuration(session.lastRideDuration)) · "
+                    + "\(SessionFormatters.distance(session.lastRideMeters)) · "
+                    + "\(session.lastRideLapCount)"
+            )
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
+            .minimumScaleFactor(0.7)
+            .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(lastRideAccessibilityLabel)
+    }
+
+    private var lastRideAccessibilityLabel: String {
+        String(
+            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideLapCount) laps"
+        )
     }
 
     // MARK: - Inactive (scrollable overview)
@@ -186,31 +220,36 @@ struct SessionRideUIPage: View {
                 Divider()
                     .padding(.vertical, 2)
 
-                Text("Last ride")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                if session.didCompleteRide {
-                    SessionMetricRow(
-                        label: "Duration",
-                        value: SessionFormatters.segmentDuration(session.lastRideDuration)
-                    )
-                    SessionMetricRow(
-                        label: "Distance",
-                        value: SessionFormatters.distance(session.lastRideMeters)
-                    )
-                    SessionMetricRow(
-                        label: "Laps",
-                        value: "\(session.lastRideLapCount)"
-                    )
-                } else {
-                    Text("No rides yet")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                lastRideSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
+        }
+    }
+
+    @ViewBuilder
+    private var lastRideSection: some View {
+        Text("Last ride")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+
+        if session.didCompleteRide {
+            SessionMetricRow(
+                label: "Duration",
+                value: SessionFormatters.segmentDuration(session.lastRideDuration)
+            )
+            SessionMetricRow(
+                label: "Distance",
+                value: SessionFormatters.distance(session.lastRideMeters)
+            )
+            SessionMetricRow(
+                label: "Laps",
+                value: "\(session.lastRideLapCount)"
+            )
+        } else {
+            Text("No rides yet")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
