@@ -107,14 +107,14 @@ struct LegalTermsPrivacyView: View {
             }
 
             Section {
-                // Placeholder — replace with Duco’s personal copy when ready.
-                Text("Coming soon.")
+                Text(LegalNoteFromDuco.dutch)
+                    .font(.body)
+                Text(LegalNoteFromDuco.english)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("A note from Duco — text coming soon")
+                    .padding(.top, 8)
             } header: {
                 Text("A note from Duco")
-            } footer: {
-                Text("Personal message from the developer — text will be added here.")
             }
         }
         .scrollContentBackground(.hidden)
@@ -148,6 +148,30 @@ struct LegalTermsPrivacyView: View {
                 .foregroundStyle(Color.rpplAccent)
         }
     }
+}
+
+/// Keep aligned with repo root `LEGAL.md` (“A note from Duco”).
+private enum LegalNoteFromDuco {
+    // Proofread only (spelling/grammar): abonnementen, last, professionele, anderen.
+    static let dutch = """
+        Hi! Mijn naam is Duco. Sinds dit jaar ben ik vaak bij een kabelpark te vinden om te wakeboarden. De gewone Apple Workout app is helaas te basis, waardoor ik op zoek gegaan ben naar een betere tracker. Het huidige aanbod voldeed helaas niet aan mijn verwachtingen; te complex of juist te gelimiteerd, verplichte abonnementen en de last van het opvragen van data. Dat moest anders.
+
+        Mijn professionele achtergrond zit in embedded software, dus het maken van een iOS app is nieuw. Hoewel ik graag zelf met de code aan de haal ga, is deze app vrijwel volledig met behulp van AI tot stand gekomen. Na meerdere testsessies durf ik deze app openbaar te maken, in de hoop dat anderen er wat aan hebben!
+
+        Ik hoop dat je net als ik veel plezier hebt met het bijhouden van je sessies!
+
+        -- Duco
+        """
+
+    static let english = """
+        Hi! My name is Duco. Since this year I’ve often been at a cable park to wakeboard. The regular Apple Workout app is unfortunately too basic, so I went looking for a better tracker. The current offering unfortunately didn’t meet my expectations; too complex or too limited, mandatory subscriptions and the burden of requesting data. That had to be different.
+
+        My professional background is in embedded software, so making an iOS app is new. Although I like to dig into the code myself, this app was created almost entirely with the help of AI. After several test sessions I dare to make this app public, in the hope that others get something out of it!
+
+        I hope that, like me, you enjoy tracking your sessions!
+
+        -- Duco
+        """
 }
 
 #Preview {
