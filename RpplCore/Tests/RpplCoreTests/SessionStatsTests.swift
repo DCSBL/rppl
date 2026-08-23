@@ -71,18 +71,18 @@ struct GeoDistanceTests {
     }
 
     @Test func rejectsImpliedSpeedAbovePlausible() {
-        // ~20 m in 1 s ≈ 72 km/h implied; high reported speed keeps maxStep ≥ 20 m.
+        // ~24 m in 1 s ≈ 86 km/h implied; above the 80 km/h ceiling.
         let from = location(
             at: 0,
             lat: 52.0,
             lon: 5.0,
-            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 40)
+            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 85)
         )
         let to = location(
             at: 1,
-            lat: 52.00018,
+            lat: 52.00022,
             lon: 5.0,
-            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 40)
+            speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 85)
         )
         let step = GeoDistance.meters(
             fromLat: from.latitude,
@@ -543,7 +543,7 @@ struct LocationSpeedStatsTests {
     @Test func peakIgnoresImplausibleSpike() {
         let locations = [
             location(at: 0, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 30)),
-            location(at: 1, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 80)),
+            location(at: 1, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 85)),
             location(at: 2, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 28)),
         ]
         let peak = LocationSpeedStats.peakSpeedKmh(from: locations)

@@ -89,7 +89,7 @@ Speed is **unusable** (detectors that need speed ignore it) if any of:
 
 - speed is nil
 - accuracy &lt; 0 or &gt; **25 m**
-- speed &gt; **45 km/h** (implausible for us)
+- speed &gt; **80 km/h** (implausible for us)
 - speed jumped ≥ **30 km/h** vs last usable sample
 
 Bad ticks still advance time; they just do not count as “fast” or “slow” holds.
@@ -151,7 +151,7 @@ Authoritative defaults: `DetectionThresholds` in RpplCore.
 | GPS gap | unusable × **3.0** s | `riding` → `unsure` |
 | Same-ride / timeout window | **60** s | lookback merge vs force `inactive` |
 | Accuracy gate | **25** m | worse → unusable for speed rules |
-| Implausible / jump | **45** / **30** km/h | filter spikes |
+| Implausible / jump | **80** / **30** km/h | filter spikes |
 
 Internal comparisons use m/s; `reason` strings on events print **km/h** so exports are human-readable.
 
@@ -177,7 +177,7 @@ Detection decides **when** rides start/stop. Stats **derive** meters and speeds 
 |-------|--------------------|
 | `LiveRideTracker` (Watch live UI) | Accrue distance/speed only while code is confidently `riding`. Unsure freezes meters. Session distance = sum of ride meters. |
 | `SessionStatsBuilder` (phone / export) | Ride windows = attributed `riding` phases. **`unsure` counts as inactive for windows** (ride ends at gap). Lookback supersede restores one continuous ride when the unsure line is superseded. |
-| Peak speed | Filtered like detection (accuracy / 45 / jump). Session top = max over **ride windows**, not whole-day GPS. |
+| Peak speed | Filtered like detection (accuracy / 80 / jump). Session top = max over **ride windows**, not whole-day GPS. |
 
 So: walking the dock while `inactive` must not grow distance. A GPS spike between rides must not become “session top speed.”
 

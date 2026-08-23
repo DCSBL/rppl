@@ -412,11 +412,21 @@ struct GpsSignalFilterTests {
     @Test func rejectsImplausibleSpeed() {
         let filter = GpsSignalFilter()
         let outcome = filter.evaluate(
-            tick(at: 0, speedKmh: 50),
+            tick(at: 0, speedKmh: 85),
             previousUsableSpeedMps: nil
         )
         #expect(outcome.usableSpeedMps == nil)
         #expect(outcome.rejectionReason?.contains("implausible") == true)
+    }
+
+    @Test func acceptsFastCableSpeedBelowCeiling() {
+        let filter = GpsSignalFilter()
+        let outcome = filter.evaluate(
+            tick(at: 0, speedKmh: 75),
+            previousUsableSpeedMps: nil
+        )
+        #expect(outcome.usableSpeedMps != nil)
+        #expect(outcome.rejectionReason == nil)
     }
 
     @Test func rejectsSpeedJump() {
