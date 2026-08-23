@@ -32,6 +32,8 @@ struct LogbookSessionDetailView: View {
     @State private var exportURL: URL?
     @State private var isExporting = false
     @State private var exportTask: Task<Void, Never>?
+    @State private var showExportExplainer = false
+    @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private enum LoadPhase: Equatable {
         case loading
@@ -97,11 +99,23 @@ struct LogbookSessionDetailView: View {
                         ProgressView()
                     } else if loadPhase == .ready {
                         Button("Export") {
-                            startExport()
+                            requestExport()
                         }
                     }
                 }
             }
+        }
+        .alert(
+            "Export Session?",
+            isPresented: $showExportExplainer
+        ) {
+            Button("Understood") {
+                didUnderstandExport = true
+                startExport()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Share all raw, unfiltered and unanonymous data as a file.")
         }
         .alert(
             "Could Not Export",
@@ -427,6 +441,15 @@ struct LogbookSessionDetailView: View {
         }
         WakeLog.debug(.ui, "example session load (ephemeral)")
         return try SessionLoader.load(packageURL: url)
+    }
+
+    private func requestExport() {
+        guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        if didUnderstandExport {
+            startExport()
+        } else {
+            showExportExplainer = true
+        }
     }
 
     private func startExport() {

@@ -591,6 +591,22 @@
     "Export" : {
 
     },
+    "Export Session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Session?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie exporteren?"
+          }
+        }
+      }
+    },
     "Export session JSON" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1685,6 +1701,22 @@
     "Share" : {
 
     },
+    "Share all raw, unfiltered and unanonymous data as a file." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share all raw, unfiltered and unanonymous data as a file."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deel alle ruwe, ongefilterde en niet-geanonimiseerde data als bestand."
+          }
+        }
+      }
+    },
     "Share export" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2076,6 +2108,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Probeer het later opnieuw."
+          }
+        }
+      }
+    },
+    "Understood" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Understood"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrepen"
           }
         }
       }
