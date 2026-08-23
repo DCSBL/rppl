@@ -1,9 +1,11 @@
 # HIG UI / interaction backlog
 
-Apple HIG audit notes for Rppl Watch + iPhone (UI and interaction only).  
+Apple HIG audit notes for Rppl Watch + iPhone (UI and interaction only).
 App icons / marketing assets stay out of scope.
 
-Sibling PRs in the first pass shipped clear interaction fixes. Items below stay open until product decides, device testing lands, or a follow-up PR ships.
+Sibling PRs in the first pass shipped clear interaction fixes. Follow-ups tracked in Linear [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48); Watch brand colors in [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance).
+
+Housekeeping: example session CTA [DCSBL-48](https://linear.app/dcsbl/issue/DCSBL-48) Done; left-float tab bar [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled (#61).
 
 ## Shipped in first pass (sibling PRs)
 
@@ -75,49 +77,52 @@ Watch→phone session packages already use **`WCSession.transferFile`** (system 
 
 Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may suppress Watch banners (system). Keep data until ack (hard constraint).
 
-## Open — needs product / device decision
+## Open follow-ups ([DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48))
 
-### Watch: session end summary
+### Watch: session end summary (High)
 
 After `stopSession`, UI returns to idle with no summary. HIG Workouts expects recorded stats when a session ends.
 
-**Open questions:** what to show (duration / distance / rides only vs transfer status)? When does transfer UI take over? Auto-dismiss vs Done button?
+**Locked:** Show duration, ride count, distance; secondary sync line (“Syncing…” / “Synced”); **Done** returns to idle; no auto-dismiss.
 
 **Touches:** Watch lifecycle + new summary view; coordinate with transfer / ack copy.
 
-### Watch: Always On / reduced luminance
+### iPhone: Logbook card crowding at large Dynamic Type (High)
+
+[`SessionCard`](../Rppl/Logbook/LogbookView.swift) packs four caption stats in one `HStack`; Totals uses a three-metric strip.
+
+**Locked:** At accessibility sizes, switch stats to **2×2 grid**; Totals strip stacks vertically.
+
+### Watch: tiny-session discard / cancel (Medium)
+
+HIG Workouts: auto-discard or ask if the session ends after only a few seconds. Not implemented.
+
+**Locked:** If duration < ~30s **and** zero rides, confirm discard on Watch. Never silent-delete; keep-until-phone-ack still applies to real transfers.
+
+### Watch: Always On / reduced luminance (Low)
 
 No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep primary metric, stable layout (don’t remove controls).
 
-**Blocked on:** wrist Always On device check (Ultra + non-Ultra). Prefer ship after a park-day glance test.
+**Locked design; ship blocked on:** park-day Always On wrist test (Ultra + non-Ultra).
 
 **Touches:** [`SessionRideUIPage.swift`](../RpplWatch/Views/SessionRideUIPage.swift), [`SessionControlsPage.swift`](../RpplWatch/Views/SessionControlsPage.swift).
 
-### iPhone: `TabBarLeadingAligner` private platter pin
+### Logbook concentric corner radii (Low)
 
-[`TabBarLeadingAligner.swift`](../Rppl/App/TabBarLeadingAligner.swift) walks UIKit for a `"Platter"` subview and mutates its frame so the floating tab bar hugs the leading edge. Fragile vs iOS 26 tab-bar internals; nonstandard.
+**Locked:** Audit nested shapes (icon well inside card); fix radii for Liquid Glass.
 
-**Decision (WWDC25-356):** Drop the hack. Accept system-centered floating tab capsule. Hierarchy comes from layout/grouping, not private UIKit frame edits. See Liquid Glass section below.
-
-**Status:** Follow-up PR removes `TabBarLeadingAligner` + ContentView wiring.
-
-### Watch: brand colors vs system appearance
+### Watch: brand colors vs system appearance ([DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance))
 
 [`RpplColor.swift`](../RpplWatch/Theme/RpplColor.swift) uses hardcoded RGB; idle pages force dark teal while the active ride UI uses system `.primary` / `.secondary`.
 
 **Open questions:** move to asset catalog with light/dark (+ Increase Contrast), or keep forced “park night” brand on idle only?
 
-### iPhone: Logbook card crowding at large Dynamic Type
+### Shipped / dropped
 
-[`SessionCard`](../Rppl/Logbook/LogbookView.swift) packs four caption stats in one `HStack`; Totals uses a three-metric strip. Likely clips or wraps badly above default sizes.
-
-**Open questions:** 2×2 grid vs horizontal scroll vs hide secondary stats at accessibility sizes? Needs a large-type screenshot pass before picking a layout.
-
-### Watch: tiny-session discard / cancel
-
-HIG Workouts: auto-discard or ask if the session ends after only a few seconds. Not implemented.
-
-**Open questions:** threshold duration? Always ask vs auto-discard? How this interacts with phone transfer / “never delete until ack”.
+| Item | Status |
+|------|--------|
+| `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
+| Soften About `toolbarBackground` | Dropped (alpha polish) |
 
 ## Liquid Glass / WWDC25-356 notes
 
@@ -137,9 +142,9 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 
 ### Still open after 356
 
-- Concentric radii on Logbook cards
-- Soften About nav bar background vs Liquid Glass
-- Watch brand teal vs system appearance (unchanged product question)
+- Concentric radii on Logbook cards → [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48)
+- Watch brand teal vs system appearance → [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance)
+- Soften About nav bar background — dropped (alpha polish)
 
 ## Reference links
 
