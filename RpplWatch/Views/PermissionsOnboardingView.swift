@@ -24,7 +24,7 @@ struct PermissionsOnboardingView: View {
                 } header: {
                     Text("Permissions")
                 } footer: {
-                    Text("Allow each item to record on Apple Watch.")
+                    Text("Allow each permission so Rppl can record your park session on Apple Watch.")
                 }
             }
             .navigationTitle("Rppl")
@@ -127,19 +127,18 @@ struct PermissionDetailView: View {
             Section {
                 Label(kind.title, systemImage: kind.systemImage)
                 statusLine
-            }
-
-            Section("Why needed") {
-                Text(kind.whyNeededPlaceholder)
+                Text(kind.whyNeeded)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
 
             if state == .denied {
-                Section("How to fix") {
-                    Text(kind.howToFixPlaceholder)
+                Section {
+                    Text(kind.howToFix)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                } header: {
+                    Text("How to fix")
                 }
             }
 
@@ -172,7 +171,7 @@ struct PermissionDetailView: View {
             Text("Allowed")
                 .foregroundStyle(.green)
         case .unavailable:
-            Text("Not available on this Watch — skipped")
+            Text("Not available on this Watch")
                 .foregroundStyle(.secondary)
         case .notDetermined:
             Text("Not decided yet")
@@ -215,31 +214,30 @@ extension WatchPermissionKind {
         }
     }
 
-    /// Placeholder copy — replace with final product strings later.
-    var whyNeededPlaceholder: String {
+    var whyNeeded: String {
         switch self {
         case .location:
-            return String(localized: "Placeholder: GPS tracks rides and distance at the cable park.")
+            return String(localized: "Required to record GPS during your park session so Rppl can track rides and distance.")
         case .health:
-            return String(localized: "Placeholder: Saves the workout to Fitness and records heart rate.")
+            return String(localized: "Required to save the workout to Fitness and record heart rate while you ride.")
         case .motion:
-            return String(localized: "Placeholder: Helps detect riding vs resting at the dock.")
+            return String(localized: "Helps tell when you are riding versus resting at the dock.")
         }
     }
 
-    var howToFixPlaceholder: String {
+    var howToFix: String {
         switch self {
         case .location:
             return String(
-                localized: "Placeholder: On iPhone open Settings › Privacy & Security › Location Services › Rppl and allow While Using."
+                localized: "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App."
             )
         case .health:
             return String(
-                localized: "Placeholder: On iPhone open Settings › Health › Data Access & Devices › Rppl and turn on workout access."
+                localized: "On iPhone, open Settings > Health > Data Access & Devices > Rppl and turn on workout access."
             )
         case .motion:
             return String(
-                localized: "Placeholder: On iPhone open Settings › Privacy & Security › Motion & Fitness and enable Rppl."
+                localized: "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl."
             )
         }
     }

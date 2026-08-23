@@ -4,26 +4,26 @@
 
 Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and automatic ride/pause detection. Phone stays view-only: sync, map, export. Analysis happens on Mac.
 
-Alpha first. Ugly is fine. Lost park days are not.
+Reliable checkpoints over pretty UI. Lost park days are not OK.
 
 ## Why this exists
 
-Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl collects **sensor corpora** from instructed testers so later phases can measure ride length, rounds, and balance. No tricks yet. No App Store polish yet.
+Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl records sensor data on Watch so later analysis can measure ride length, rounds, and balance. Trick detection is out of scope for now.
 
 ## MVP (Phases 1–2) — distilled
 
 | Locked choice | Decision |
 |---------------|----------|
 | Platforms | iPhone + Watch only · iOS / watchOS **26+** |
-| Test gear | iPhone 16 Pro + Apple Watch Ultra 2 |
-| Audience | Alpha testers · data collection > product UX |
+| Reference gear | iPhone 16 Pro + Apple Watch Ultra 2 |
+| Audience | Riders · reliable capture over flashy UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
 | Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
 | HealthKit | Save workout via `finishWorkout()` · `waterSports` (wakeboard MET) · HK session stays running · ride + dock HK activities · ride-scoped energy · ride-gated distance samples + GPS route · HR/energy mirrored into files |
 | Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
 | Water Lock | On at session start |
-| Identity | Random install-scoped `testerId` (UUID) in App Group / UserDefaults · reset on reinstall |
+| Identity | Random install-scoped ID (`testerId` field) in App Group / UserDefaults · reset on reinstall |
 | Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
 
 **Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.

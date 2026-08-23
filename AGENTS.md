@@ -25,7 +25,7 @@ _Only use linear issues when one is given by the user_
 
 ## Product north star
 
-Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tracker yet.
+**Data collector** for cable-park wakeboarding — Watch records; reliable checkpoints over flashy UX.
 
 - Watch records; iPhone views/exports; Mac analyzes.
 - Prefer reliable checkpoints over pretty UI.

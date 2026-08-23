@@ -1,120 +1,120 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "Bundle display name",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl"
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Bundle display name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Rppl"
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Rppl"
           }
         }
       }
     },
-    "NSHealthShareUsageDescription" : {
-      "comment" : "Privacy - Health Share Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha."
+    "NSHealthShareUsageDescription": {
+      "comment": "Privacy - Health Share Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl leest hartslag en energie tijdens kabelparksessies voor alpha-datacollectie. Workouts worden in deze alpha niet in Gezondheid opgeslagen."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl leest hartslag en energie tijdens kabelparksessies zodat je ze op iPhone kunt bekijken."
           }
         }
       }
     },
-    "NSHealthUpdateUsageDescription" : {
-      "comment" : "Privacy - Health Update Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl does not write workouts to Health during alpha testing."
+    "NSHealthUpdateUsageDescription": {
+      "comment": "Privacy - Health Update Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl schrijft tijdens alpha-testen geen workouts naar Gezondheid."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl gebruikt Gezondheid op iPhone voor sessieweergave. Workouts worden vanaf Apple Watch opgeslagen."
           }
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location Always and When In Use Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl may use location to display session tracks."
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "comment": "Privacy - Location Always and When In Use Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl may use location to display session tracks."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl kan locatie gebruiken om sessiesporen te tonen."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl kan locatie gebruiken om sessiesporen te tonen."
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location When In Use Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map."
+    "NSLocationWhenInUseUsageDescription": {
+      "comment": "Privacy - Location When In Use Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl shows GPS tracks from Apple Watch sessions on the map."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl toont GPS-sporen van Apple Watch-sessies op de kaart."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl toont GPS-sporen van Apple Watch-sessies op de kaart."
           }
         }
       }
     },
-    "NSMotionUsageDescription" : {
-      "comment" : "Privacy - Motion Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl uses motion APIs when reviewing session context on iPhone."
+    "NSMotionUsageDescription": {
+      "comment": "Privacy - Motion Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl uses motion APIs when reviewing session context on iPhone."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl gebruikt bewegings-API’s bij het bekijken van sessiecontext op iPhone."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl gebruikt bewegings-API’s bij het bekijken van sessiecontext op iPhone."
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

@@ -48,7 +48,7 @@ extension WatchSessionController {
             healthAuthStatus = String(localized: "workout: notDetermined")
             healthPermission = .notDetermined
         case .sharingDenied:
-            healthAuthStatus = String(localized: "workout: denied — enable in Settings › Health")
+            healthAuthStatus = String(localized: "workout: denied - enable in Settings › Health")
             healthPermission = .denied
         case .sharingAuthorized:
             healthAuthStatus = String(localized: "workout: authorized")
@@ -275,7 +275,7 @@ extension WatchSessionController {
         statusText = String(localized: "Transferring…")
         let stoppedSessionId = manifest.sessionId
         WatchTransferService.shared.enqueueTransfer(sessionId: stoppedSessionId, store: store)
-        statusText = String(localized: "Stopped — waiting for phone ack")
+        statusText = String(localized: "Stopped - waiting for phone ack")
 
         let finalDuration = computeElapsed(at: Date())
         endedSessionSummary = EndedSessionSummary(

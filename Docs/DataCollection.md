@@ -1,6 +1,6 @@
 # Data collection (Phase 2+)
 
-Alpha collector for cable-park wakeboarding. Tracking runs only on Apple Watch.
+Cable-park wakeboarding data collector. Tracking runs only on Apple Watch.
 
 ## Detection codes (auto)
 
@@ -88,7 +88,7 @@ On iPhone: open a session → **Export** → Share/AirDrop. Payload is pretty-pr
 
 | Payload | Contents |
 |---------|----------|
-| `manifest` | Session meta + random `testerId` (install-scoped UUID; new on reinstall) |
+| `manifest` | Session meta + random install ID (`testerId` field; UUID; new on reinstall) |
 | `detections` | Ride / inactive / unsure transitions |
 | `locations` | GPS with precise lat/lon (not anonymized) |
 | `motion` / `motionFramesZlib` | Device motion when present |

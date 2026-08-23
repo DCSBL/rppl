@@ -117,7 +117,7 @@ extension WatchSessionController {
         refreshPermissionStatus()
         let status = healthStore.authorizationStatus(for: workoutType)
         if status == .sharingDenied {
-            errorText = String(localized: "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout.")
+            errorText = String(localized: "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout.")
             WakeLog.debug(.workout, "sharingDenied — sensors-only")
             return false
         }

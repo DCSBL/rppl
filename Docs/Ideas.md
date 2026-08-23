@@ -7,7 +7,7 @@ Short backlog for later phases. Not a design doc. Do not implement items marked 
 - **Park profiles** — Per-park metadata: orientation, dock/start location, obstacles, cable layout. Used later to geofence “waiting” / failed starts near the dock, hardcode or learn a start point, and give detectors park-specific priors. Out of scope until after detector v1. Do not build profile files, editors, or geofence hardcoding yet.
 - **Non-Ultra auto-swim** — Speed-only fall→`swimming` without `CMWaterSubmersionManager`. v0 requires Ultra `submerged`.
 - **Knots / mph display** — Thresholds authored in km/h; convert at GPS edge to m/s. Extra unit labels later for Mac viz only.
-- **Manual / Action Button labeling** — Removed from alpha. Optional live override UX later if product asks.
+- **Manual / Action Button labeling** — Removed. Optional live override UX later if product asks.
 
 ## Detection hypotheses (ride/pause MVP shipped)
 

@@ -12,7 +12,7 @@ final class PhoneConnectivityService: NSObject {
     var syncState: SyncConnectionState = .notActivated
     var sessionsRevision = 0
     /// Raw WCSession flags for device-pair debugging (shown under Sync).
-    var wcDebugSummary = "WC —"
+    var wcDebugSummary = "WC -"
     /// Acks queued because Watch was unreachable (or send failed).
     var pendingAckCount: Int { pendingAcks.count }
 
@@ -68,7 +68,7 @@ final class PhoneConnectivityService: NSObject {
         WakeLog.debug(.ack, "queued userInfo \(sessionId.prefix(8))…")
 
         guard WCSession.default.isReachable else {
-            status = String(localized: "Imported \(sessionId.prefix(8)) — Watch not reachable for ack (will retry when reachable)")
+            status = String(localized: "Imported \(sessionId.prefix(8)) - Watch not reachable for ack (will retry when reachable)")
             pendingAcks.insert(sessionId)
             WakeLog.debug(.ack, "defer live \(sessionId.prefix(8))… — Watch unreachable pending=\(pendingAcks.count)")
             refreshSyncState()
@@ -195,7 +195,7 @@ extension PhoneConnectivityService: WCSessionDelegate {
                 WakeLog.debug(.sync, "Watch reachable")
                 flushPendingAcks()
             } else {
-                status = String(localized: "Watch not reachable — transfers still queue")
+                status = String(localized: "Watch not reachable - transfers still queue")
                 WakeLog.debug(.sync, "Watch not reachable")
             }
         }
