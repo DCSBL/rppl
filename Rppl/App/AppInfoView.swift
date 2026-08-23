@@ -25,15 +25,31 @@ struct AppInfoView: View {
 
                 PhonePermissionsListSection(permissions: permissions)
 
-                Section("Legal") {
-                    LabeledContent("Privacy") {
-                        Text("Alpha — no cloud upload")
-                            .foregroundStyle(Color.rpplMuted)
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Privacy first")
+                            .font(.body.weight(.semibold))
+                        Text(
+                            "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(Color.rpplMuted)
+                        Text(
+                            "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(Color.rpplMuted)
                     }
-                    LabeledContent("Terms") {
-                        Text("Internal testing only")
-                            .foregroundStyle(Color.rpplMuted)
+                    .padding(.vertical, 4)
+                    .accessibilityElement(children: .combine)
+
+                    NavigationLink {
+                        LegalTermsPrivacyView()
+                    } label: {
+                        Text("Terms & Privacy policy")
                     }
+                } header: {
+                    Text("Legal")
                 }
 
                 Section {
