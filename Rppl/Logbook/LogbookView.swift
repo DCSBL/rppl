@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import RpplCore
 
 struct LogbookView: View {
@@ -8,6 +9,7 @@ struct LogbookView: View {
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
     @State private var actionErrorText: String?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         NavigationStack {
@@ -89,6 +91,20 @@ struct LogbookView: View {
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     WakeLog.debug(.ui, "swipe delete \(entry.manifest.sessionId.prefix(8))…")
+                                    // #region agent log
+                                    agentDebugLog(
+                                        hypothesisId: "A,B,D",
+                                        location: "LogbookView.swift:swipeDelete",
+                                        message: "swipe delete requested confirmationDialog",
+                                        data: [
+                                            "sessionIdPrefix": String(entry.manifest.sessionId.prefix(8)),
+                                            "entryCount": catalog.entries.count,
+                                            "presentationAPI": "confirmationDialog",
+                                            "modifierHost": "List_inside_NavigationStack",
+                                            "sizeClass": horizontalSizeClass == .regular ? "regular" : "compact"
+                                        ]
+                                    )
+                                    // #endregion
                                     pendingDeleteSessionId = entry.manifest.sessionId
                                     showDeleteConfirmation = true
                                 } label: {
@@ -122,12 +138,31 @@ struct LogbookView: View {
                 titleVisibility: .visible
             ) {
                 Button("Delete Permanently", role: .destructive) {
+                    // #region agent log
+                    agentDebugLog(
+                        hypothesisId: "E",
+                        location: "LogbookView.swift:confirmDelete",
+                        message: "user confirmed delete via confirmationDialog",
+                        data: [
+                            "sessionIdPrefix": pendingDeleteSessionId.map { String($0.prefix(8)) } ?? "nil",
+                            "presentationAPI": "confirmationDialog"
+                        ]
+                    )
+                    // #endregion
                     if let sessionId = pendingDeleteSessionId {
                         deleteSession(sessionId)
                     }
                     pendingDeleteSessionId = nil
                 }
                 Button("Cancel", role: .cancel) {
+                    // #region agent log
+                    agentDebugLog(
+                        hypothesisId: "A",
+                        location: "LogbookView.swift:cancelDelete",
+                        message: "user canceled confirmationDialog",
+                        data: ["presentationAPI": "confirmationDialog"]
+                    )
+                    // #endregion
                     pendingDeleteSessionId = nil
                 }
             } message: {
@@ -147,12 +182,80 @@ struct LogbookView: View {
             .onAppear {
                 connectivity.refreshSyncState()
                 catalog.reload(store: connectivity.store)
+                // #region agent log
+                agentDebugLog(
+                    hypothesisId: "A,C",
+                    location: "LogbookView.swift:onAppear",
+                    message: "Logbook appeared; delete uses confirmationDialog (iPhone bottom sheet)",
+                    data: [
+                        "presentationAPI": "confirmationDialog",
+                        "expectedIPhoneStyle": "bottomActionSheet",
+                        "centeredAlternative": "alert",
+                        "sizeClass": horizontalSizeClass == .regular ? "regular" : "compact",
+                        "idiom": UIDevice.current.userInterfaceIdiom == .pad ? "pad" : "phone"
+                    ]
+                )
+                // #endregion
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
                 catalog.reload(store: connectivity.store)
             }
+            .onChange(of: showDeleteConfirmation) { _, isPresented in
+                // #region agent log
+                agentDebugLog(
+                    hypothesisId: "A,B,C,D",
+                    location: "LogbookView.swift:showDeleteConfirmation",
+                    message: isPresented ? "confirmationDialog presenting" : "confirmationDialog dismissed",
+                    data: [
+                        "isPresented": isPresented,
+                        "pendingSessionIdPrefix": pendingDeleteSessionId.map { String($0.prefix(8)) } ?? "nil",
+                        "presentationAPI": "confirmationDialog",
+                        "modifierHost": "List_inside_NavigationStack_not_row",
+                        "sizeClass": horizontalSizeClass == .regular ? "regular" : "compact",
+                        "note": "SwiftUI confirmationDialog on compact = bottom sheet; no row anchor"
+                    ]
+                )
+                // #endregion
+            }
         }
     }
+
+    // #region agent log
+    private func agentDebugLog(
+        hypothesisId: String,
+        location: String,
+        message: String,
+        data: [String: Any]
+    ) {
+        var payload: [String: Any] = [
+            "sessionId": "ed3251",
+            "runId": "pre-fix",
+            "hypothesisId": hypothesisId,
+            "location": location,
+            "message": message,
+            "timestamp": Int(Date().timeIntervalSince1970 * 1000),
+            "data": data
+        ]
+        guard let body = try? JSONSerialization.data(withJSONObject: payload) else { return }
+        // File sink (Simulator shares host FS for absolute Mac paths in practice via ingest)
+        let path = "/Users/ducosebel/Development/rppl/.cursor/debug-ed3251.log"
+        if let handle = FileHandle(forWritingAtPath: path) {
+            defer { try? handle.close() }
+            try? handle.seekToEnd()
+            try? handle.write(contentsOf: body)
+            try? handle.write(contentsOf: Data("\n".utf8))
+        } else {
+            FileManager.default.createFile(atPath: path, contents: body + Data("\n".utf8))
+        }
+        guard let url = URL(string: "http://127.0.0.1:7587/ingest/a62eff6e-0d4d-4266-b71b-b6c8b7fef170") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("ed3251", forHTTPHeaderField: "X-Debug-Session-Id")
+        req.httpBody = body
+        URLSession.shared.dataTask(with: req).resume()
+    }
+    // #endregion
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
