@@ -91,7 +91,7 @@ Hobby project (Netherlands). No Rppl cloud: session data is processed on your Wa
 | Doc | Role |
 |-----|------|
 | [LEGAL.md](LEGAL.md) | Full Terms & Privacy (English; Dutch/EU law). Same substance as in-app **rppl → Legal**. |
-| [LICENSE](LICENSE) | Source code (MIT). Separate from app Terms & Privacy. |
+| [LICENSE](LICENSE) | Source: PolyForm Noncommercial — copy/modify for noncommercial use; no selling the app or other commercial use. Separate from app Terms & Privacy. |
 
 Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
 

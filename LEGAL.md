@@ -2,7 +2,7 @@
 
 **Rppl** — one document for terms of use and privacy. Written in English; Dutch and EU law apply. Developer: Duco Sebel (the Netherlands).
 
-Source code is licensed separately under [LICENSE](LICENSE) (MIT). This document governs **app use and personal data**.
+Source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: copy and modify for noncommercial use only; selling the app or other commercial use is not allowed). This document governs **app use and personal data**.
 
 In-app copy: **iPhone → rppl → Legal → Terms & Privacy policy**. Keep that UI in sync with this file.
 
