@@ -19,7 +19,8 @@ export type ExportSource =
   | { kind: 'memory' }
 
 function downloadJson(filename: string, payload: unknown): void {
-  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+  // Pretty-print; insertion order keeps `manifest` first when callers build objects that way.
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -28,11 +29,23 @@ function downloadJson(filename: string, payload: unknown): void {
   URL.revokeObjectURL(url)
 }
 
-export function exportFilename(pkg: SessionTransferPackage): string {
-  const id = pkg.manifest.sessionId.replace(/[^\w.-]+/g, '').slice(0, 8) || 'session'
+function sanitizeLocation(locationName: string | null | undefined): string {
+  const trimmed = (locationName ?? '').trim()
+  if (!trimmed) return 'unknown'
+  const slug = trimmed
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return slug || 'unknown'
+}
+
+/** Match phone Share: `rppl_<startedAt>_<location>.json`. */
+export function exportFilename(
+  pkg: SessionTransferPackage,
+  locationName?: string | null,
+): string {
   const start = pkg.manifest.startedAt.replace(/[:.]/g, '-')
-  const end = (pkg.manifest.endedAt ?? '').replace(/[:.]/g, '-')
-  return `rppl-${id}-${start}_${end}.json`
+  const location = sanitizeLocation(locationName)
+  return `rppl_${start}_${location}.json`
 }
 
 async function filesForSession(files: File[], sessionId: string): Promise<File[]> {
