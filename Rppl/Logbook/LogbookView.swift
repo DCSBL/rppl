@@ -7,6 +7,7 @@ struct LogbookView: View {
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var actionErrorText: String?
 
     var body: some View {
         NavigationStack {
@@ -127,6 +128,17 @@ struct LogbookView: View {
             } message: {
                 Text("This permanently removes the session from this iPhone. This cannot be undone.")
             }
+            .alert(
+                "Could Not Delete Session",
+                isPresented: Binding(
+                    get: { actionErrorText != nil },
+                    set: { if !$0 { actionErrorText = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { actionErrorText = nil }
+            } message: {
+                Text(actionErrorText ?? "")
+            }
             .onAppear {
                 connectivity.refreshSyncState()
                 catalog.reload(store: connectivity.store)
@@ -244,6 +256,7 @@ struct LogbookView: View {
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
+            actionErrorText = error.localizedDescription
             WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }

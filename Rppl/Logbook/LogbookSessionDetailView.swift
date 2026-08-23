@@ -27,6 +27,7 @@ struct LogbookSessionDetailView: View {
     @State private var loadTask: Task<Void, Never>?
     @State private var tracksTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var exportErrorText: String?
     @State private var exportURL: URL?
     @State private var isExporting = false
     @State private var exportTask: Task<Void, Never>?
@@ -100,6 +101,17 @@ struct LogbookSessionDetailView: View {
                     }
                 }
             }
+        }
+        .alert(
+            "Could Not Export",
+            isPresented: Binding(
+                get: { exportErrorText != nil },
+                set: { if !$0 { exportErrorText = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { exportErrorText = nil }
+        } message: {
+            Text(exportErrorText ?? "")
         }
     }
 
@@ -455,7 +467,7 @@ struct LogbookSessionDetailView: View {
             isExporting = false
             exportTask = nil
         } catch {
-            errorText = error.localizedDescription
+            exportErrorText = error.localizedDescription
             isExporting = false
             exportTask = nil
             WakeLog.error(.store, "export: \(error.localizedDescription)")
