@@ -53,6 +53,9 @@ final class WatchTransferService: NSObject {
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {
         WakeLog.debug(.transfer, "enqueue \(sessionId.prefix(8))…")
         self.store = store
+        Task {
+            await WatchSyncNotifier.requestAuthorizationIfNeeded()
+        }
         transferPending()
     }
 
@@ -92,6 +95,14 @@ final class WatchTransferService: NSObject {
             lastMessage = String(localized: "WC not activated — will retry")
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — WC not activated")
             refreshSyncState()
+            return
+        }
+
+        let alreadyQueued = WCSession.default.outstandingFileTransfers.contains { fileTransfer in
+            (fileTransfer.file.metadata?[AppConstants.wcSessionFileMetaSessionID] as? String) == sessionId
+        }
+        if alreadyQueued {
+            WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — already in WC queue")
             return
         }
 
@@ -183,6 +194,7 @@ extension WatchTransferService: WCSessionDelegate {
             lastMessage = String(localized: "Acked \(ack.prefix(8))")
             WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
             refreshPendingCount()
+            WatchSyncNotifier.notifySyncCompleted(sessionId: ack)
         } catch {
             lastMessage = String(localized: "Ack failed: \(error.localizedDescription)")
             WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
