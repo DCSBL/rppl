@@ -15,6 +15,9 @@ concurrency:
   group: pr-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   SWIFTLINT_VERSION: "0.65.1"
   # sha256 of swiftlint_linux_amd64.zip @ SWIFTLINT_VERSION
@@ -30,16 +33,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect changed paths
+      - name: Detect Swift changes
         id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            swift:
-              - '**/*.swift'
-              - '.swiftlint.yml'
-              - 'scripts/git-hooks/run-swiftlint.sh'
-              - '.pre-commit-config.yaml'
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$base" "$head" \
+            | grep -E '(^|/)(\.swiftlint\.yml|\.pre-commit-config\.yaml)$|\.swift$|scripts/git-hooks/run-swiftlint\.sh$' \
+            >/dev/null; then
+            echo "swift=true" >> "$GITHUB_OUTPUT"
+            echo "Swift / SwiftLint-related paths changed"
+          else
+            echo "swift=false" >> "$GITHUB_OUTPUT"
+            echo "No Swift / SwiftLint-related paths changed"
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
