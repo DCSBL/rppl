@@ -27,6 +27,7 @@ struct LogbookSessionDetailView: View {
     @State private var loadTask: Task<Void, Never>?
     @State private var tracksTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var showExportError = false
     @State private var exportErrorText: String?
     @State private var exportURL: URL?
     @State private var isExporting = false
@@ -104,14 +105,12 @@ struct LogbookSessionDetailView: View {
         }
         .alert(
             "Could Not Export",
-            isPresented: Binding(
-                get: { exportErrorText != nil },
-                set: { if !$0 { exportErrorText = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) { exportErrorText = nil }
-        } message: {
-            Text(exportErrorText ?? "")
+            isPresented: $showExportError,
+            presenting: exportErrorText
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
         }
     }
 
@@ -145,7 +144,8 @@ struct LogbookSessionDetailView: View {
                 preferredFrame: mapFrame
             )
                 .frame(height: 300)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+                .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
                 .overlay(alignment: .center) {
                     if tracksLoading, mapTracks.isEmpty {
                         ProgressView()
@@ -229,9 +229,8 @@ struct LogbookSessionDetailView: View {
                     }
                 }
             }
-            .padding(16)
             .foregroundStyle(Color.rpplText)
-            .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .logbookCardChrome()
         }
     }
 
@@ -287,7 +286,7 @@ struct LogbookSessionDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+        .logbookNestedBackground(Color.rpplFill)
     }
 
     private func mapPlaceholder(_ message: LocalizedStringKey) -> some View {
@@ -295,7 +294,7 @@ struct LogbookSessionDetailView: View {
             .font(.subheadline)
             .foregroundStyle(Color.rpplMuted)
             .frame(maxWidth: .infinity, minHeight: 120)
-            .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.rpplFill, in: .rect(cornerRadius: LogbookLayout.cardCornerRadius))
     }
 
     private func startLoadIfNeeded() {
@@ -432,6 +431,8 @@ struct LogbookSessionDetailView: View {
 
     private func startExport() {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        showExportError = false
+        exportErrorText = nil
         isExporting = true
         exportTask = Task(priority: .utility) {
             await prepareExport()
@@ -445,7 +446,12 @@ struct LogbookSessionDetailView: View {
     }
 
     private func prepareExport() async {
-        guard case .store(let sessionId) = source, let store else { return }
+        guard case .store(let sessionId) = source, let store else {
+            presentExportFailure(
+                String(localized: "Session store missing. Try again from the logbook.")
+            )
+            return
+        }
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
 
@@ -460,18 +466,36 @@ struct LogbookSessionDetailView: View {
             }
             try Task.checkCancellation()
             exportURL = url
-            isExporting = false
-            exportTask = nil
+            finishExportTask()
             WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
         } catch is CancellationError {
-            isExporting = false
-            exportTask = nil
+            finishExportTask()
         } catch {
-            exportErrorText = error.localizedDescription
-            isExporting = false
-            exportTask = nil
+            presentExportFailure(Self.userFacingMessage(for: error))
             WakeLog.error(.store, "export: \(error.localizedDescription)")
         }
+    }
+
+    private func finishExportTask() {
+        isExporting = false
+        exportTask = nil
+    }
+
+    private func presentExportFailure(_ message: String) {
+        finishExportTask()
+        exportErrorText = message
+        // Present after toolbar ProgressView → Export swap so SwiftUI does not drop the alert.
+        Task { @MainActor in
+            showExportError = true
+        }
+    }
+
+    private static func userFacingMessage(for error: Error) -> String {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty {
+            return String(localized: "Something went wrong while preparing the export.")
+        }
+        return description
     }
 }
 
@@ -507,13 +531,13 @@ private struct RideDetailCard: View {
             if locations.count >= 2 {
                 SessionMapView(locations: locations)
                     .frame(height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .logbookNestedClip()
             } else {
                 Text("No GPS track for this ride")
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+                    .logbookNestedBackground(Color.rpplFill)
             }
 
             LazyVGrid(
@@ -548,8 +572,7 @@ private struct RideDetailCard: View {
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
     private func rideStatTile(_ value: String, label: LocalizedStringKey) -> some View {
@@ -565,7 +588,7 @@ private struct RideDetailCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10))
+        .logbookNestedBackground(Color.rpplFill)
     }
 }
 

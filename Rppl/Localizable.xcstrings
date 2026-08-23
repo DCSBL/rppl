@@ -393,6 +393,38 @@
         }
       }
     },
+    "Could Not Delete Session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could Not Delete Session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie verwijderen mislukt"
+          }
+        }
+      }
+    },
+    "Could Not Export" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could Not Export"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporteren mislukt"
+          }
+        }
+      }
+    },
     "Could not load session" : {
       "localizations" : {
         "en" : {
@@ -1618,6 +1650,22 @@
         }
       }
     },
+    "Session store missing. Try again from the logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session store missing. Try again from the logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
+          }
+        }
+      }
+    },
     "Sessions" : {
       "localizations" : {
         "en" : {
@@ -1650,6 +1698,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Export delen"
+          }
+        }
+      }
+    },
+    "Something went wrong while deleting the session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong while deleting the session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er ging iets mis bij het verwijderen van de sessie."
+          }
+        }
+      }
+    },
+    "Something went wrong while preparing the export." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong while preparing the export."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er ging iets mis bij het voorbereiden van de export."
           }
         }
       }

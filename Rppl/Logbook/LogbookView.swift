@@ -3,13 +3,19 @@ import UIKit
 import RpplCore
 
 struct LogbookView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var catalog = SessionCatalog()
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var showActionError = false
     @State private var actionErrorText: String?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var useAccessibilityLayout: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
 
     var body: some View {
         NavigationStack {
@@ -21,14 +27,16 @@ struct LogbookView: View {
                         .listRowSeparator(.hidden)
                 }
 
-                Section {
-                    SyncStatusIndicator(
-                        state: connectivity.syncState,
-                        pendingCount: connectivity.pendingAckCount
-                    )
-                    .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
+                if connectivity.pendingAckCount > 0 {
+                    Section {
+                        SyncStatusIndicator(
+                            state: connectivity.syncState,
+                            pendingCount: connectivity.pendingAckCount
+                        )
+                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
                 }
 
                 Section {
@@ -170,14 +178,12 @@ struct LogbookView: View {
             }
             .alert(
                 "Could Not Delete Session",
-                isPresented: Binding(
-                    get: { actionErrorText != nil },
-                    set: { if !$0 { actionErrorText = nil } }
-                )
-            ) {
-                Button("OK", role: .cancel) { actionErrorText = nil }
-            } message: {
-                Text(actionErrorText ?? "")
+                isPresented: $showActionError,
+                presenting: actionErrorText
+            ) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { message in
+                Text(message)
             }
             .onAppear {
                 connectivity.refreshSyncState()
@@ -271,6 +277,14 @@ struct LogbookView: View {
 
     private var totalsCard: some View {
         let totals = catalog.totals
+        let sessionsValue = catalog.isLoading ? "—" : "\(totals.sessionCount)"
+        let distanceValue = catalog.isLoading
+            ? "—"
+            : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters)
+        let maxSpeedValue = catalog.isLoading || totals.topSpeedKmh <= 0
+            ? "—"
+            : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
+
         return VStack(alignment: .leading, spacing: 16) {
             Label {
                 Text("TOTAL")
@@ -282,25 +296,24 @@ struct LogbookView: View {
             .foregroundStyle(Color.rpplAccent)
             .labelStyle(.titleAndIcon)
 
-            HStack(spacing: 0) {
-                totalMetric(
-                    value: catalog.isLoading ? "—" : "\(totals.sessionCount)",
-                    label: "Sessions"
-                )
-                totalDivider
-                totalMetric(
-                    value: catalog.isLoading
-                        ? "—"
-                        : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters),
-                    label: "Distance"
-                )
-                totalDivider
-                totalMetric(
-                    value: catalog.isLoading || totals.topSpeedKmh <= 0
-                        ? "—"
-                        : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh),
-                    label: "Max Speed"
-                )
+            Group {
+                if useAccessibilityLayout {
+                    VStack(spacing: 12) {
+                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalDivider(horizontal: true)
+                        totalMetric(value: distanceValue, label: "Distance")
+                        totalDivider(horizontal: true)
+                        totalMetric(value: maxSpeedValue, label: "Max Speed")
+                    }
+                } else {
+                    HStack(spacing: 0) {
+                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalDivider(horizontal: false)
+                        totalMetric(value: distanceValue, label: "Distance")
+                        totalDivider(horizontal: false)
+                        totalMetric(value: maxSpeedValue, label: "Max Speed")
+                    }
+                }
             }
 
             Divider()
@@ -317,14 +330,14 @@ struct LogbookView: View {
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
         }
-        .padding(20)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .logbookCardChrome()
     }
 
-    private var totalDivider: some View {
+    private func totalDivider(horizontal: Bool) -> some View {
         Rectangle()
             .fill(Color.rpplFill)
-            .frame(width: 1, height: 44)
+            .frame(width: horizontal ? nil : 1, height: horizontal ? 1 : 44)
+            .frame(maxWidth: horizontal ? .infinity : nil)
     }
 
     private func totalMetric(value: String, label: LocalizedStringKey) -> some View {
@@ -364,14 +377,26 @@ struct LogbookView: View {
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
-            actionErrorText = error.localizedDescription
+            let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+            actionErrorText = description.isEmpty
+                ? String(localized: "Something went wrong while deleting the session.")
+                : description
+            // confirmationDialog still dismissing — defer so the error alert is not swallowed.
+            Task { @MainActor in
+                showActionError = true
+            }
             WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }
 }
 
 private struct SessionCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
+
+    private var useAccessibilityLayout: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -412,17 +437,31 @@ private struct SessionCard: View {
             Divider()
                 .overlay(Color.rpplFill)
 
-            HStack(spacing: 12) {
-                statLabel("clock", value: durationText)
-                statLabel("water.waves", value: distanceText)
-                statLabel("flag.checkered", value: ridesText)
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+            Group {
+                if useAccessibilityLayout {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            statLabel("clock", value: durationText)
+                            statLabel("water.waves", value: distanceText)
+                        }
+                        HStack(spacing: 12) {
+                            statLabel("flag.checkered", value: ridesText)
+                            statLabel("arrow.triangle.2.circlepath", value: lapsText)
+                        }
+                    }
+                } else {
+                    HStack(spacing: 12) {
+                        statLabel("clock", value: durationText)
+                        statLabel("water.waves", value: distanceText)
+                        statLabel("flag.checkered", value: ridesText)
+                        statLabel("arrow.triangle.2.circlepath", value: lapsText)
+                    }
+                }
             }
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
     private var timeRangeText: String {
@@ -457,14 +496,7 @@ private struct SessionCard: View {
             .labelStyle(.titleAndIcon)
             .lineLimit(1)
             .minimumScaleFactor(0.75)
-    }
-}
-
-private enum LogbookLayout {
-    static let horizontalInset: CGFloat = 16
-
-    static func rowInsets(top: CGFloat = 8, bottom: CGFloat = 8) -> EdgeInsets {
-        EdgeInsets(top: top, leading: 0, bottom: bottom, trailing: 0)
+            .frame(maxWidth: useAccessibilityLayout ? .infinity : nil, alignment: .leading)
     }
 }
 

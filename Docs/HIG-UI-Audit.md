@@ -81,11 +81,9 @@ Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may sup
 
 ### Watch: session end summary (High)
 
-After `stopSession`, UI returns to idle with no summary. HIG Workouts expects recorded stats when a session ends.
+**Shipped** (session-end summary after Stop).
 
-**Locked:** Show duration, ride count, distance; secondary sync line (“Syncing…” / “Synced”); **Done** returns to idle; no auto-dismiss.
 
-**Touches:** Watch lifecycle + new summary view; coordinate with transfer / ack copy.
 
 ### iPhone: Logbook card crowding at large Dynamic Type (High)
 
@@ -93,31 +91,31 @@ After `stopSession`, UI returns to idle with no summary. HIG Workouts expects re
 
 **Locked:** At accessibility sizes, switch stats to **2×2 grid**; Totals strip stacks vertically.
 
+**Status:** Shipped #80 — `dynamicTypeSize.isAccessibilitySize` layout branch in Logbook.
+
 ### Watch: tiny-session discard / cancel (Medium)
 
-HIG Workouts: auto-discard or ask if the session ends after only a few seconds. Not implemented.
+**Shipped.** If duration < ~30s **and** zero rides, Stop offers Discard / Keep / Cancel. Discard deletes local package (no transfer, no Health save). Keep uses normal stop + transfer; keep-until-phone-ack unchanged. Never silent-delete.
 
-**Locked:** If duration < ~30s **and** zero rides, confirm discard on Watch. Never silent-delete; keep-until-phone-ack still applies to real transfers.
-
-### Watch: Always On / reduced luminance (Low)
-
-No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep primary metric, stable layout (don’t remove controls).
-
-**Locked design; ship blocked on:** park-day Always On wrist test (Ultra + non-Ultra).
-
-**Touches:** [`SessionRideUIPage.swift`](../RpplWatch/Views/SessionRideUIPage.swift), [`SessionControlsPage.swift`](../RpplWatch/Views/SessionControlsPage.swift).
+**Touches:** `TinySessionPolicy` (Core), `SessionControlsPage`, `discardSession` / `discardWorkoutWithoutSaving`.
 
 ### Logbook concentric corner radii (Low)
 
 **Locked:** Audit nested shapes (icon well inside card); fix radii for Liquid Glass.
 
+**Shipped:** Logbook cards use `containerShape` + nested `.rect(corners: .concentric…)` (session/ride cards, stat tiles, ride maps). Session-card icon well dropped earlier (#76); nest still applies to detail tiles/maps. See [`LogbookLayout.swift`](../Rppl/Logbook/LogbookLayout.swift).
+
 ### Shipped / dropped
 
 | Item | Status |
 |------|--------|
+| Watch session-end summary | Shipped |
+| Watch tiny-session discard | Shipped (DCSBL-51 Medium) |
+| Watch Always On / reduced luminance | Shipped — `isLuminanceReduced` dims secondary chrome; primary metric full; controls stay (Ride + Controls pages) |
 | Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
 | Soften About `toolbarBackground` | Dropped (alpha polish) |
+| Logbook concentric corner radii | Shipped (this PR); [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48) |
 
 ## Liquid Glass / WWDC25-356 notes
 
@@ -129,7 +127,7 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 |----------|-------------|
 | Strip custom bar backgrounds / borders; hierarchy from layout + grouping | Drop `TabBarLeadingAligner`; avoid fighting floating tab platter |
 | Content first; chrome floats above without stealing focus | Keep Logbook maps/sessions as content; light sync chrome; prefer scroll edge effects over hard dividers |
-| Concentric corner radii for nested shapes | Audit session cards (icon well inside card) + map overlays |
+| Concentric corner radii for nested shapes | Shipped — Logbook cards `containerShape` + nested concentric rects |
 | Shared anatomy across devices; same symbols | Keep mirrored Location/Health/Motion lists + SF Symbols on Watch + iPhone |
 | Bolder left-aligned type in alerts / onboarding | Stick to system `List` + semantic text on permission gates |
 | Toolbar: group by function; primary separate/tinted | Export/Share stay system; soften forced `toolbarBackground` on About |
@@ -137,7 +135,6 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 
 ### Still open after 356
 
-- Concentric radii on Logbook cards → [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48)
 - Soften About nav bar background — dropped (alpha polish)
 
 ## Reference links

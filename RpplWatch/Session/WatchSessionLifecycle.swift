@@ -248,17 +248,7 @@ extension WatchSessionController {
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
-        isStopping = true
-        statusText = String(localized: "Stopping…")
-        if isProductPaused {
-            if let productPausedAt {
-                pausedAccumulated += Date().timeIntervalSince(productPausedAt)
-            }
-            productPausedAt = nil
-            isProductPaused = false
-        }
-        flushTask?.cancel()
-        timerTask?.cancel()
+        beginSessionTeardown(status: String(localized: "Stopping…"))
 
         stopSensors()
         liveRideTracker.closeOpenRide()
@@ -303,6 +293,58 @@ extension WatchSessionController {
 
         WKInterfaceDevice.current().play(.stop)
         WakeLog.debug(.session, "stopSession done — summary shown sessionId=\(stoppedSessionId.prefix(8))…")
+        clearSessionRuntimeState()
+    }
+
+    /// Confirmed tiny-session discard: delete local package, no transfer, no Health save.
+    /// Keep-until-phone-ack still applies only when the rider chooses Keep (transfer).
+    func discardSession() async {
+        guard isRunning, !isStopping, let manifest, let store else {
+            WakeLog.debug(.session, "discardSession ignored — running=\(isRunning) stopping=\(isStopping)")
+            return
+        }
+        let sessionId = manifest.sessionId
+        WakeLog.debug(.session, "discardSession begin \(sessionId.prefix(8))…")
+        beginSessionTeardown(status: String(localized: "Discarding…"))
+
+        stopSensors()
+        liveRideTracker.closeOpenRide()
+        // No flush — package will be deleted; never queue transfer for discard.
+
+        await discardWorkoutWithoutSaving()
+        recordingMode = "none"
+        motionRecordingEnabled = false
+
+        do {
+            try store.deleteSession(sessionId: sessionId)
+            WakeLog.debug(.store, "deleteSession discarded \(sessionId.prefix(8))…")
+        } catch {
+            errorText = String(localized: "Discard: \(error.localizedDescription)")
+            WakeLog.error(.store, "deleteSession: \(error.localizedDescription)")
+        }
+
+        endedSessionSummary = nil
+        statusText = String(localized: "Idle")
+        WKInterfaceDevice.current().play(.stop)
+        WakeLog.debug(.session, "discardSession done \(sessionId.prefix(8))…")
+        clearSessionRuntimeState()
+    }
+
+    private func beginSessionTeardown(status: String) {
+        isStopping = true
+        statusText = status
+        if isProductPaused {
+            if let productPausedAt {
+                pausedAccumulated += Date().timeIntervalSince(productPausedAt)
+            }
+            productPausedAt = nil
+            isProductPaused = false
+        }
+        flushTask?.cancel()
+        timerTask?.cancel()
+    }
+
+    private func clearSessionRuntimeState() {
         liveRideTracker.reset()
         storedByteSize = 0
         currentRideDuration = 0

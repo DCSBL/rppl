@@ -4,16 +4,18 @@ import RpplCore
 struct SessionControlsPage: View {
     @Bindable var session: WatchSessionController
     @State private var showStopConfirmation = false
+    @State private var showDiscardConfirmation = false
 
     var body: some View {
+        // Always On: keep every control visible and full-brightness (stable layout; don’t remove).
         VStack(spacing: 8) {
             if session.isStopping {
-                ProgressView("Stopping…")
+                ProgressView(session.statusText)
                     .progressViewStyle(.circular)
             } else {
                 Button("Stop", role: .destructive) {
                     WakeLog.debug(.ui, "tap Stop session")
-                    showStopConfirmation = true
+                    presentStopFlow()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
@@ -57,6 +59,33 @@ struct SessionControlsPage: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Stops recording and queues transfer to iPhone.")
+        }
+        .confirmationDialog(
+            "Discard Session?",
+            isPresented: $showDiscardConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Discard", role: .destructive) {
+                WakeLog.debug(.ui, "confirm Discard tiny session")
+                Task { await session.discardSession() }
+            }
+            Button("Keep") {
+                WakeLog.debug(.ui, "confirm Keep tiny session (transfer)")
+                Task { await session.stopSession() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone.")
+        }
+    }
+
+    private func presentStopFlow() {
+        let duration = session.computeElapsed(at: Date())
+        if TinySessionPolicy.shouldOfferDiscard(duration: duration, rideCount: session.rideCount) {
+            WakeLog.debug(.ui, "tiny session — offer discard duration=\(Int(duration))s rides=\(session.rideCount)")
+            showDiscardConfirmation = true
+        } else {
+            showStopConfirmation = true
         }
     }
 }
