@@ -2,7 +2,7 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v5)
+## Current layout (schema v6)
 
 ```text
 <root>/<sessionId>/
@@ -31,7 +31,7 @@ Same folder shape after WC import. ~10 MB/h typical with motion.
 
 | File | Role | Approx |
 |------|------|--------|
-| `manifest.json` | Meta, transfer state, activity, water-temp capability | once |
+| `manifest.json` | Meta, transfer state, activity, water-temp capability, Watch wrist/crown settings | once |
 | `detections.jsonl` | Ride/inactive/unsure transitions | sparse |
 | `location-*.jsonl` | GPS | CL updates |
 | `motion-*.jsonl.zlib` | Device motion | ~25 Hz |

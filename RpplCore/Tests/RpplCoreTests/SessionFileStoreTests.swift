@@ -38,6 +38,42 @@ struct SessionFileStoreTests {
         #expect(detections[0].detectorId == "session_start")
     }
 
+    @Test func manifestWearSettingsRoundTripThroughTransfer() throws {
+        let watchRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wear-\(UUID().uuidString)", isDirectory: true)
+        let phoneRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wear-phone-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+
+        let watchStore = SessionFileStore(rootURL: watchRoot)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0",
+            wristLocation: "left",
+            crownOrientation: "right"
+        )
+        try watchStore.createSession(manifest: manifest)
+        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
+
+        let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
+        #expect(package.manifest.wristLocation == "left")
+        #expect(package.manifest.crownOrientation == "right")
+
+        try watchStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+
+        let phoneStore = SessionFileStore(rootURL: phoneRoot)
+        let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
+        #expect(phoneManifest.wristLocation == "left")
+        #expect(phoneManifest.crownOrientation == "right")
+        #expect(phoneManifest.schemaVersion == SessionSchema.currentVersion)
+    }
+
     @Test func transferPackageRoundTripPreservesSamples() throws {
         let watchRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("watch-\(UUID().uuidString)", isDirectory: true)
