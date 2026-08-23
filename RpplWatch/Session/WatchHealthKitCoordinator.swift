@@ -258,6 +258,31 @@ extension WatchSessionController {
         }
 
         session.end()
+        clearWorkoutSessionRefs()
+    }
+
+    /// User-confirmed tiny-session discard: no Health save, no phone transfer.
+    func discardWorkoutWithoutSaving() async {
+        guard let session = workoutSession else {
+            clearWorkoutSessionRefs()
+            return
+        }
+        WakeLog.debug(.workout, "discardWorkout begin")
+        let requestEnd = Date()
+        endRideActivity(at: requestEnd)
+        if session.state != .stopped {
+            _ = await withCheckedContinuation { continuation in
+                workoutStoppedContinuation = continuation
+                session.stopActivity(with: requestEnd)
+            }
+        }
+        workoutBuilder?.discardWorkout()
+        session.end()
+        clearWorkoutSessionRefs()
+        WakeLog.debug(.workout, "discardWorkout OK — no Health save")
+    }
+
+    private func clearWorkoutSessionRefs() {
         workoutSession = nil
         workoutBuilder = nil
         workoutDataSource = nil
