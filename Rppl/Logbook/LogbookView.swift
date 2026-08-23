@@ -273,12 +273,6 @@ private struct SessionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                MDIIconView(icon: .skiWater)
-                    .frame(width: 22, height: 22)
-                    .foregroundStyle(Color.rpplAccent)
-                    .frame(width: 40, height: 40)
-                    .background(Color.rpplAccent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-
                 VStack(alignment: .leading, spacing: 4) {
                     (
                         Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
