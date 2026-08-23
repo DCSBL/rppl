@@ -3,6 +3,7 @@ import RpplCore
 
 struct SessionControlsPage: View {
     @Bindable var session: WatchSessionController
+    @State private var showStopConfirmation = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -12,7 +13,7 @@ struct SessionControlsPage: View {
             } else {
                 Button("Stop", role: .destructive) {
                     WakeLog.debug(.ui, "tap Stop session")
-                    Task { await session.stopSession() }
+                    showStopConfirmation = true
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
@@ -44,5 +45,18 @@ struct SessionControlsPage: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.horizontal, 4)
+        .confirmationDialog(
+            "End Session?",
+            isPresented: $showStopConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("End Session", role: .destructive) {
+                WakeLog.debug(.ui, "confirm Stop session")
+                Task { await session.stopSession() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Stops recording and queues transfer to iPhone.")
+        }
     }
 }
