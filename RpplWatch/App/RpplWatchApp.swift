@@ -20,6 +20,7 @@ struct RpplWatchApp: App {
 
     init() {
         WakeLog.debug(.lifecycle, "RpplWatchApp init")
+        _ = TesterIdentity.resolve()
         WatchTransferService.shared.activate()
     }
 }
