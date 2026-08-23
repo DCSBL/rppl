@@ -81,13 +81,9 @@ Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may sup
 
 ### Watch: session end summary (High)
 
-After `stopSession`, UI returns to idle with no summary. HIG Workouts expects recorded stats when a session ends.
+**Shipped** (session-end summary after Stop).
 
-**Locked:** Show duration, ride count, distance; secondary sync line (“Syncing…” / “Synced”); **Done** returns to idle; no auto-dismiss.
 
-**Status:** Shipped #79.
-
-**Touches:** Watch lifecycle + new summary view; coordinate with transfer / ack copy.
 
 ### iPhone: Logbook card crowding at large Dynamic Type (High)
 
@@ -99,9 +95,9 @@ After `stopSession`, UI returns to idle with no summary. HIG Workouts expects re
 
 ### Watch: tiny-session discard / cancel (Medium)
 
-HIG Workouts: auto-discard or ask if the session ends after only a few seconds. Not implemented.
+**Shipped.** If duration < ~30s **and** zero rides, Stop offers Discard / Keep / Cancel. Discard deletes local package (no transfer, no Health save). Keep uses normal stop + transfer; keep-until-phone-ack unchanged. Never silent-delete.
 
-**Locked:** If duration < ~30s **and** zero rides, confirm discard on Watch. Never silent-delete; keep-until-phone-ack still applies to real transfers.
+**Touches:** `TinySessionPolicy` (Core), `SessionControlsPage`, `discardSession` / `discardWorkoutWithoutSaving`.
 
 ### Logbook concentric corner radii (Low)
 
@@ -111,6 +107,8 @@ HIG Workouts: auto-discard or ask if the session ends after only a few seconds. 
 
 | Item | Status |
 |------|--------|
+| Watch session-end summary | Shipped |
+| Watch tiny-session discard | Shipped (DCSBL-51 Medium) |
 | Watch Always On / reduced luminance | Shipped — `isLuminanceReduced` dims secondary chrome; primary metric full; controls stay (Ride + Controls pages) |
 | Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
