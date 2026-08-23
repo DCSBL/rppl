@@ -85,6 +85,8 @@ After `stopSession`, UI returns to idle with no summary. HIG Workouts expects re
 
 **Locked:** Show duration, ride count, distance; secondary sync line (“Syncing…” / “Synced”); **Done** returns to idle; no auto-dismiss.
 
+**Status:** Shipped #79.
+
 **Touches:** Watch lifecycle + new summary view; coordinate with transfer / ack copy.
 
 ### iPhone: Logbook card crowding at large Dynamic Type (High)
@@ -92,6 +94,8 @@ After `stopSession`, UI returns to idle with no summary. HIG Workouts expects re
 [`SessionCard`](../Rppl/Logbook/LogbookView.swift) packs four caption stats in one `HStack`; Totals uses a three-metric strip.
 
 **Locked:** At accessibility sizes, switch stats to **2×2 grid**; Totals strip stacks vertically.
+
+**Status:** Shipped #80 — `dynamicTypeSize.isAccessibilitySize` layout branch in Logbook.
 
 ### Watch: tiny-session discard / cancel (Medium)
 
