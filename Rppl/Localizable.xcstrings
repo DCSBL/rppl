@@ -2594,6 +2594,118 @@
           }
         }
       }
+    },
+    "Import": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importeren"
+          }
+        }
+      }
+    },
+    "Import session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import session"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie importeren"
+          }
+        }
+      }
+    },
+    "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies een sessie-export-JSON via Bestanden. Geïmporteerde sessies verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
+          }
+        }
+      }
+    },
+    "Could Not Import Session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could Not Import Session"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie importeren mislukt"
+          }
+        }
+      }
+    },
+    "Session Imported": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session Imported"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie geïmporteerd"
+          }
+        }
+      }
+    },
+    "The session is in your logbook. It was not written to Health.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The session is in your logbook. It was not written to Health."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De sessie staat in je logboek. Er is niets naar Gezondheid geschreven."
+          }
+        }
+      }
+    },
+    "Something went wrong while importing the session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong while importing the session."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er ging iets mis tijdens het importeren van de sessie."
+          }
+        }
+      }
     }
   }
 }

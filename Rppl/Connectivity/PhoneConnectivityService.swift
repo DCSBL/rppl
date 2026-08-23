@@ -116,6 +116,8 @@ final class PhoneConnectivityService: NSObject {
             for id in ids {
                 let manifest = try store.readManifest(sessionId: id)
                 guard manifest.transferState == .acknowledged else { continue }
+                // File imports never came from Watch — do not rebroadcast ack.
+                guard manifest.imported == nil else { continue }
                 WCSession.default.transferUserInfo([AppConstants.wcAckMessageKey: id])
                 count += 1
             }
@@ -143,6 +145,28 @@ final class PhoneConnectivityService: NSObject {
         Task {
             await PhonePermissionsController.shared.requestAfterFirstSyncIfNeeded()
         }
+    }
+
+    /// Import a Share export JSON from Files. No Watch ack, no HealthKit, no post-sync permission trigger.
+    func importExportedSession(from url: URL) async throws {
+        WakeLog.debug(.transfer, "export-file import begin")
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        let store = self.store
+        let sessionId = try await StoreIO.runOffMain {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let package = try decoder.decode(SessionTransferPackage.self, from: data)
+            try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
+            return package.manifest.sessionId
+        }
+        sessionsRevision += 1
+        WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
     }
 }
 

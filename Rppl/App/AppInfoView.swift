@@ -1,7 +1,15 @@
 import SwiftUI
+import UniformTypeIdentifiers
+import RpplCore
 
 struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
+    @State private var connectivity = PhoneConnectivityService.shared
+    @State private var showImporter = false
+    @State private var isImporting = false
+    @State private var showImportError = false
+    @State private var importErrorText: String?
+    @State private var showImportSuccess = false
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -26,6 +34,27 @@ struct AppInfoView: View {
                 }
 
                 PhonePermissionsListSection(permissions: permissions)
+
+                if AppReleaseChannel.allowsDebugTools {
+                    Section {
+                        Button {
+                            showImporter = true
+                        } label: {
+                            if isImporting {
+                                ProgressView()
+                            } else {
+                                Label("Import session", systemImage: "square.and.arrow.down")
+                            }
+                        }
+                        .disabled(isImporting)
+                    } header: {
+                        Text("Import")
+                    } footer: {
+                        Text(
+                            "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
+                        )
+                    }
+                }
 
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
@@ -82,7 +111,64 @@ struct AppInfoView: View {
             .toolbarBackground(Color.rpplBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
+            .fileImporter(
+                isPresented: $showImporter,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                handleImportResult(result)
+            }
+            .alert(
+                "Could Not Import Session",
+                isPresented: $showImportError,
+                presenting: importErrorText
+            ) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { message in
+                Text(message)
+            }
+            .alert("Session Imported", isPresented: $showImportSuccess) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("The session is in your logbook. It was not written to Health.")
+            }
         }
+    }
+
+    private func handleImportResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case .failure(let error):
+            presentImportFailure(error.localizedDescription)
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            isImporting = true
+            Task {
+                do {
+                    try await connectivity.importExportedSession(from: url)
+                    isImporting = false
+                    showImportSuccess = true
+                } catch {
+                    isImporting = false
+                    presentImportFailure(Self.userFacingMessage(for: error))
+                    WakeLog.error(.transfer, "export-file import: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func presentImportFailure(_ message: String) {
+        importErrorText = message
+        Task { @MainActor in
+            showImportError = true
+        }
+    }
+
+    private static func userFacingMessage(for error: Error) -> String {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty {
+            return String(localized: "Something went wrong while importing the session.")
+        }
+        return description
     }
 }
 
