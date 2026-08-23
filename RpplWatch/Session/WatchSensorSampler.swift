@@ -14,6 +14,7 @@ extension WatchSessionController {
         } else {
             locationManager.allowsBackgroundLocationUpdates = false
         }
+        applySensorSamplingMode(dense: SensorSamplingMode.isDense(currentCode: detectionCode))
         locationManager.startUpdatingLocation()
         WakeLog.debug(.session, "location updates started auth=\(locationAuthStatus)")
     }
@@ -26,7 +27,17 @@ extension WatchSessionController {
             WakeLog.debug(.session, "device motion unavailable — skipped")
             return
         }
-        motionManager.deviceMotionUpdateInterval = 1.0 / 25.0
+        startDeviceMotionUpdates(interval: motionUpdateInterval(dense: sensorSamplingDense))
+        motionRecordingEnabled = true
+        motionAvailability = "recording"
+        WakeLog.debug(
+            .session,
+            "device motion recording @\(Int(1.0 / motionUpdateInterval(dense: sensorSamplingDense)))Hz (zlib JSONL)"
+        )
+    }
+
+    private func startDeviceMotionUpdates(interval: TimeInterval) {
+        motionManager.deviceMotionUpdateInterval = interval
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let self, let motion, self.isRunning, !self.isProductPaused else { return }
             let sample = MotionSample(
@@ -45,9 +56,47 @@ extension WatchSessionController {
             self.motionCount += 1
         }
         motionUpdatesStarted = true
-        motionRecordingEnabled = true
-        motionAvailability = "recording"
-        WakeLog.debug(.session, "device motion recording @25Hz (zlib JSONL)")
+    }
+
+    func applySensorSamplingMode(dense: Bool) {
+        guard sensorSamplingDense != dense else { return }
+        sensorSamplingDense = dense
+        if dense {
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+            locationManager.distanceFilter = kCLDistanceFilterNone
+        } else {
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.distanceFilter = 8
+        }
+        if isRunning, !isProductPaused {
+            if motionUpdatesStarted {
+                motionManager.stopDeviceMotionUpdates()
+                motionUpdatesStarted = false
+            }
+            if motionManager.isDeviceMotionAvailable {
+                startDeviceMotionUpdates(interval: motionUpdateInterval(dense: dense))
+                motionRecordingEnabled = true
+            }
+        }
+        WakeLog.debug(.session, "sensor sampling dense=\(dense)")
+    }
+
+    private func motionUpdateInterval(dense: Bool) -> TimeInterval {
+        dense ? (1.0 / 25.0) : 1.0
+    }
+
+    func appendToLocationRing(_ sample: LocationSample) {
+        recentLocationRing.append(sample)
+        let cutoff = sample.timestamp.addingTimeInterval(-Self.locationRingMaxAge)
+        recentLocationRing.removeAll { $0.timestamp < cutoff }
+    }
+
+    func replayLocationRingForRideEnter(holdStart: Date) {
+        let samples = recentLocationRing
+            .filter { $0.timestamp >= holdStart }
+            .sorted { $0.timestamp < $1.timestamp }
+        guard !samples.isEmpty else { return }
+        liveRideTracker.replayLocationsForRideEnter(samples, from: holdStart)
     }
 
     func startActivityUpdatesIfAvailable() {
@@ -222,4 +271,5 @@ extension WatchSessionController {
 
     static let waterTempPersistInterval: TimeInterval = 15
     static let waterTempLogDeltaC = 2.0
+    static let locationRingMaxAge: TimeInterval = 5
 }

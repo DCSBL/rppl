@@ -120,6 +120,34 @@ struct DetectionEngineTests {
         #expect(engine.currentCode == DetectionCodes.inactive)
     }
 
+    @Test func rideEnterBackdatesToHoldStart() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 22))
+        _ = engine.process(tick(at: 2.0, speedKmh: 22))
+        let events = engine.process(tick(at: 3.1, speedKmh: 22))
+        #expect(events.first?.code == DetectionCodes.riding)
+        #expect(events.first?.timestamp == t0)
+        #expect(events.first?.reason.contains("backfill_from") == true)
+    }
+
+    @Test func midSessionStartEntersRideAtFastCableSpeed() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 55))
+        let events = engine.process(tick(at: 3.0, speedKmh: 55))
+        #expect(events.first?.code == DetectionCodes.riding)
+        #expect(events.first?.detectorId == "ride_enter")
+    }
+
+    @Test func midSessionStartEntersRideNearCeiling() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 78))
+        let events = engine.process(tick(at: 3.0, speedKmh: 78))
+        #expect(events.first?.code == DetectionCodes.riding)
+    }
+
     @Test func walkBandStartNeedsLongerHold() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
@@ -131,6 +159,7 @@ struct DetectionEngineTests {
         let events = engine.process(tick(at: 5.0, speedKmh: 22))
         #expect(events.first?.code == DetectionCodes.riding)
         #expect(events.first?.reason.contains("from=walk") == true)
+        #expect(events.first?.timestamp == t0.addingTimeInterval(1))
     }
 
     @Test func walkBumpThenSlowdownDoesNotEnterRide() {
@@ -146,44 +175,51 @@ struct DetectionEngineTests {
         #expect(engine.currentCode == DetectionCodes.inactive)
     }
 
-    @Test func waterSubmergedEndsRideActivityStillIgnored() {
+    @Test func submergedWhileInactiveDoesNotEnterRide() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
-        // Dock: submerged + walking must not invent swim/walk codes.
         #expect(
             engine.process(
                 tick(at: 0, speedKmh: 3, water: "submerged", activity: "walking")
             ).isEmpty
         )
         #expect(engine.currentCode == DetectionCodes.inactive)
+    }
 
+    @Test func submergedWhileRidingDoesNotEndRide() {
+        var engine = DetectionEngine()
         enterRiding(&engine)
         #expect(engine.currentCode == DetectionCodes.riding)
 
-        let exited = engine.process(
+        let whileRiding = engine.process(
             tick(at: 5, speedKmh: 18, water: "submerged", activity: "walking")
         )
-        #expect(exited.first?.code == DetectionCodes.inactive)
-        #expect(exited.first?.detectorId == "water_exit")
-        #expect(exited.first?.waterSubmersionState == "submerged")
-        #expect(exited.first?.motionActivity == "walking")
-        #expect(engine.lastConfidentCode == DetectionCodes.inactive)
+        #expect(whileRiding.isEmpty)
+        #expect(engine.currentCode == DetectionCodes.riding)
+        #expect(engine.lastConfidentCode == DetectionCodes.riding)
 
-        // Later start is a new ride (no long water same-ride glue).
-        _ = engine.process(tick(at: 120, speedKmh: 22, water: "notSubmerged"))
-        let enter = engine.process(tick(at: 123.1, speedKmh: 22, water: "notSubmerged"))
-        #expect(enter.first?.code == DetectionCodes.riding)
-        #expect(enter.first?.detectorId == "ride_enter")
-        #expect(enter.first?.supersedesId == nil)
+        _ = engine.process(tick(at: 8, speedKmh: 2))
+        let exited = engine.process(tick(at: 11.1, speedKmh: 1))
+        #expect(exited.first?.code == DetectionCodes.inactive)
+        #expect(exited.first?.detectorId == "ride_exit")
     }
 
-    @Test func waterExitFromUnsure() {
+    @Test func submergedWhileUnsureDoesNotEndRide() {
         var engine = DetectionEngine()
         enterRiding(&engine)
         _ = enterUnsureFromRide(&engine)
-        let exited = engine.process(tick(at: 10, speedKmh: nil, water: "submerged"))
-        #expect(exited.first?.code == DetectionCodes.inactive)
-        #expect(exited.first?.detectorId == "water_exit")
+        let events = engine.process(tick(at: 10, speedKmh: nil, water: "submerged"))
+        #expect(events.isEmpty)
+        #expect(engine.currentCode == DetectionCodes.unsure)
+    }
+
+    @Test func fallViaGpsGapEndsRide() {
+        var engine = DetectionEngine()
+        enterRiding(&engine)
+        _ = enterUnsureFromRide(&engine)
+        let timedOut = engine.process(tick(at: 6.1 + 60, speedKmh: nil))
+        #expect(timedOut.first?.code == DetectionCodes.inactive)
+        #expect(timedOut.first?.detectorId == "unsure_timeout")
     }
 
     @Test func rideExitAfterStoppedHold() {
@@ -412,11 +448,21 @@ struct GpsSignalFilterTests {
     @Test func rejectsImplausibleSpeed() {
         let filter = GpsSignalFilter()
         let outcome = filter.evaluate(
-            tick(at: 0, speedKmh: 50),
+            tick(at: 0, speedKmh: 85),
             previousUsableSpeedMps: nil
         )
         #expect(outcome.usableSpeedMps == nil)
         #expect(outcome.rejectionReason?.contains("implausible") == true)
+    }
+
+    @Test func acceptsFastCableSpeedBelowCeiling() {
+        let filter = GpsSignalFilter()
+        let outcome = filter.evaluate(
+            tick(at: 0, speedKmh: 75),
+            previousUsableSpeedMps: nil
+        )
+        #expect(outcome.usableSpeedMps != nil)
+        #expect(outcome.rejectionReason == nil)
     }
 
     @Test func rejectsSpeedJump() {

@@ -20,8 +20,8 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 
 | Stream | Approx rate | File |
 |--------|-------------|------|
-| GPS | Core Location updates | `location-000.jsonl` |
-| deviceMotion | ~25 Hz → framed zlib JSONL | `motion-000.jsonl.zlib` |
+| GPS | Core Location; sparse while `inactive` (~10 m, 8 m filter), dense while riding/unsure | `location-000.jsonl` |
+| deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
 | Detections | on transitions / revisions | `detections.jsonl` |

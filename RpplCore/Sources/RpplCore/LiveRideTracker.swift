@@ -102,6 +102,19 @@ public struct LiveRideTracker: Sendable {
         refreshSessionMeters()
     }
 
+    /// Replay buffered GPS fixes that fall inside a backdated ride-enter window.
+    public mutating func replayLocationsForRideEnter(_ samples: [LocationSample], from holdStart: Date) {
+        guard isRideOngoing else { return }
+        let ordered = samples
+            .filter { $0.timestamp >= holdStart }
+            .sorted { $0.timestamp < $1.timestamp }
+        guard !ordered.isEmpty else { return }
+        previousLocation = nil
+        for sample in ordered {
+            addLocation(sample)
+        }
+    }
+
     /// Add distance and speed from a new GPS fix.
     public mutating func addLocation(_ sample: LocationSample) {
         let attributedRiding = Self.attributesAsRiding(

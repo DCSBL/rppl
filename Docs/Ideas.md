@@ -20,7 +20,7 @@ GPS samples store m/s; detection thresholds + `reason` strings use **km/h**. Str
 | Unusable GPS × 3 s while `riding` | `unsure` | Fall flake; not pause |
 | Unsure &lt; 60 s + speed returns high | `riding` (supersede) | Same ride lookback |
 | Unsure ≥ 60 s | `inactive` | Next enter = new ride |
-| Water / motion activity | Ultra `submerged` → `inactive` | Motion still logged only |
+| Water / motion activity | logged only | No detection decisions |
 
 ## Other notes
 

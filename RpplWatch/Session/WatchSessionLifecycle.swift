@@ -192,10 +192,6 @@ extension WatchSessionController {
         }
         WakeLog.debug(.session, "recordingMode=\(recordingMode)")
 
-        startLocation()
-        startMotionIfAvailable()
-        startActivityUpdatesIfAvailable()
-
         detectionCode = DetectionCodes.inactive
         lastConfidentCode = DetectionCodes.inactive
         lastPersistedConfidentCode = DetectionCodes.inactive
@@ -210,10 +206,17 @@ extension WatchSessionController {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
         #if RPPL_WEATHERKIT
         resetAirWeather()
         #endif
+        sensorSamplingDense = false
+
+        startLocation()
+        startMotionIfAvailable()
+        startActivityUpdatesIfAvailable()
+
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil

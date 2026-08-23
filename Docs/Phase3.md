@@ -30,9 +30,9 @@ Pure engine: `RpplCore` (`DetectionEngine`, `DetectionThresholds`, `SpeedUnits`)
 | GPS gap → unsure | unusable × 3.0 s while riding | Not immediate pause |
 | Same-ride merge | unsure age &lt; 60 s | Lookback supersede if speed returns high |
 | Unsure timeout | ≥60 s | Force `inactive` → next enter is new ride |
-| Water exit | `submerged` while riding/unsure | Ultra fall → `inactive`; next enter = new ride |
+| Water exit | logged only | Ultra submerged no longer ends rides (DCSBL-26) |
 | GPS accuracy gate | >25 m skips speed | |
-| Implausible / jump | >45 km/h / ≥30 km/h jump | |
+| Implausible / jump | >80 km/h / ≥30 km/h jump | |
 
 Motion activity logged on ticks; unused by detectors. Non-Ultra uses GPS gap path (no water).
 

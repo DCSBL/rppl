@@ -133,6 +133,9 @@ final class WatchSessionController: NSObject {
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []
     var healthBuffer: [HealthMetricSample] = []
+    /// Recent GPS fixes for backdating live ride meters on `ride_enter`.
+    var recentLocationRing: [LocationSample] = []
+    var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?
     var timerTask: Task<Void, Never>?
     var startedAt: Date?

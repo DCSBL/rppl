@@ -107,10 +107,10 @@ flowchart LR
   merge --> event
 ```
 
-1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 45 km/h, jump ≥ 30 km/h vs last usable).
+1. **Filter** — drop flaky GPS for *speed* rules (nil speed, accuracy &lt; 0 or &gt; 25 m, implausible &gt; 80 km/h, jump ≥ 30 km/h vs last usable).
 2. **Hold clock** — `highSpeed`, `stopped`, `unusable`.
-3. **Lookback** — while `unsure`, usable fast within 60 s supersedes same ride; usable slow → inactive; ≥ 60 s → timeout to inactive (new ride later). Ultra `submerged` → inactive via `water_exit`.
-4. **Detectors** — ordered plugins; first match wins (`unsure_timeout`, `water_exit`, `gps_gap`, `ride_exit`, `ride_enter`).
+3. **Lookback** — while `unsure`, usable fast within 60 s supersedes same ride; usable slow → inactive; ≥ 60 s → timeout to inactive (new ride later).
+4. **Detectors** — ordered plugins; first match wins (`unsure_timeout`, `gps_gap`, `ride_exit`, `ride_enter`).
 
 Session start: `makeSessionStartEvent()` → `inactive` + `reason=session_start`.
 

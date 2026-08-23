@@ -25,7 +25,7 @@ Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages
 | Watch | Documents/`Sessions` |
 | Phone | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
-Same folder shape after WC import. ~10 MB/h typical with motion.
+Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
 
 ## What is stored (raw)
 
@@ -34,7 +34,7 @@ Same folder shape after WC import. ~10 MB/h typical with motion.
 | `manifest.json` | Meta, transfer state, activity, water-temp capability, Watch wrist/crown settings | once |
 | `detections.jsonl` | Ride/inactive/unsure transitions | sparse |
 | `location-*.jsonl` | GPS | CL updates |
-| `motion-*.jsonl.zlib` | Device motion | ~25 Hz |
+| `motion-*.jsonl.zlib` | Device motion | **1 Hz** inactive, **25 Hz** riding/unsure |
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
 
