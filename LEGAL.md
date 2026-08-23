@@ -42,15 +42,34 @@ In-app copy: **iPhone → rppl → Legal → Terms & Privacy policy**. Keep that
 
 **Never shared by us.** Your data remains yours. We do not sell, rent, or share it with third parties unless you explicitly choose to, for example by exporting/sharing a session yourself.
 
+### Export / sharing
+
+Export exists so you can share **raw, unfiltered** session data for analysis. Rppl does not upload exports to a Rppl cloud; sharing only happens when you use Share, AirDrop, Files, email, or another channel you choose.
+
+An export can include:
+
+- Session metadata, including a random install-scoped tester ID
+- Ride / pause (inactive) detections
+- GPS locations with **precise coordinates (not anonymized)**
+- Device motion
+- Heart rate and energy (when Health access was allowed)
+- Water temperature when available
+- Derived session stats
+
+A unique random tester ID is created on first app launch and stored on your device. Reinstalling the app generates a new ID. It is not a name or account.
+
+If you share an export, **you** choose who receives it and remain responsible for that share and how the data is used afterward. We may **ask** for a copy when analytics look wrong — sending one is always **fully your choice**.
+
 ## What the app collects & Third-Party APIs
 
 Collected only to process your cable-park activity on your devices:
 
-- GPS location (routes, speed, ride detection)
+- GPS location (routes, speed, ride detection) — precise coordinates; not anonymized in storage or export
 - Accelerometer and gyroscope / device motion
 - Heart rate and energy estimates (via HealthKit when allowed)
 - Automatic ride / inactive detections derived from the sensors above
-- An anonymous on-device tester identifier (not a name or account)
+- Water temperature when available (Apple Watch Ultra)
+- A random install-scoped tester identifier created on first launch (not a name or account; new ID after reinstall)
 
 Apple HealthKit data is used only to support health and fitness features (workout recording and related metrics), not for advertising or data brokering. We do not upload this information to a Rppl server. Transfer between Watch and iPhone uses Apple Watch Connectivity on your devices.
 
