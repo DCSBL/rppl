@@ -9,12 +9,11 @@ struct ActivityStartPage: View {
 
     var body: some View {
         GeometryReader { geo in
-            let iconSide = min(max(geo.size.height * 0.28, 36), 88)
             let chevronSide = min(max(min(geo.size.width, geo.size.height) * 0.22, 36), 52)
             let showClock = geo.size.height >= 200
 
             Button(action: action) {
-                cardStack(iconSide: iconSide, chevronSide: chevronSide, showClock: showClock)
+                cardStack(chevronSide: chevronSide, showClock: showClock)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .buttonStyle(.plain)
@@ -25,7 +24,7 @@ struct ActivityStartPage: View {
         .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
 
-    private func cardStack(iconSide: CGFloat, chevronSide: CGFloat, showClock: Bool) -> some View {
+    private func cardStack(chevronSide: CGFloat, showClock: Bool) -> some View {
         VStack(spacing: 6) {
             if showClock {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -38,11 +37,6 @@ struct ActivityStartPage: View {
             }
 
             Spacer(minLength: 0)
-
-            MDIIconView(icon: .skiWater)
-                .frame(width: iconSide, height: iconSide)
-                .foregroundStyle(Color.rpplIdleAccent)
-                .accessibilityHidden(true)
 
             Text(ActivityCodes.localizedTitle(for: code))
                 .font(.headline)
