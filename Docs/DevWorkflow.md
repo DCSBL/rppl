@@ -77,8 +77,8 @@ To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) 
 
 ### Release → Xcode Cloud (prep)
 
-Workflow: [`.github/workflows/release-xcode-cloud.yml`](../.github/workflows/release-xcode-cloud.yml).  
-Script: [`scripts/ci/trigger-xcode-cloud.sh`](../scripts/ci/trigger-xcode-cloud.sh).
+- Workflow: [`.github/workflows/release-xcode-cloud.yml`](../.github/workflows/release-xcode-cloud.yml)
+- Script: [`scripts/ci/trigger-xcode-cloud.sh`](../scripts/ci/trigger-xcode-cloud.sh)
 
 On GitHub Release **published** (and manual `workflow_dispatch`), GitHub Actions calls the App Store Connect API (`POST /v1/ciBuildRuns`) to start an Xcode Cloud workflow for the release tag. Builds started via the API are treated as **manual** starts in Xcode Cloud.
 
