@@ -84,6 +84,14 @@ Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & detection: [Doc
 - Companion: Watch → iPhone ID above
 - App Group: `group.nl.dcsbl.rppl`
 
+## Privacy & legal
+
+Hobby project (Netherlands). No Rppl cloud: session data is processed on your Watch and iPhone. It stays on your devices, in Apple Health when you allow it, and in your iCloud backup if you back up that device. We do not sell or share your data unless you explicitly choose to (for example export, or a connection you enable).
+
+Full Terms & Privacy (one document, English, Dutch/EU law): **iPhone app → rppl → Legal → Terms & Privacy policy**. Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
+
+Source code license: [LICENSE](LICENSE) (MIT). App use and privacy are governed by the in-app Terms & Privacy policy.
+
 ## Agents
 
 Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior. Library shape: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System layers: [Docs/DESIGN.md](Docs/DESIGN.md).
