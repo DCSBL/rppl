@@ -13,7 +13,7 @@ struct IdleSyncPage: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .containerBackground(Color.rpplDarkTeal.gradient, for: .tabView)
+        .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
 
     private func syncStack(compact: Bool) -> some View {
@@ -65,12 +65,12 @@ struct IdleSyncPage: View {
             VStack(spacing: 4) {
                 Image(systemName: systemImage)
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(Color.rpplDarkTeal)
+                    .foregroundStyle(Color.rpplIdleAccentForeground)
                     .frame(width: 40, height: 40)
-                    .background(Circle().fill(Color.rpplSkySurge))
+                    .background(Circle().fill(Color.rpplIdleAccent))
                 Text(label)
                     .font(.caption2)
-                    .foregroundStyle(Color.rpplAliceBlue)
+                    .foregroundStyle(Color.rpplIdlePrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
             }

@@ -22,7 +22,7 @@ struct ActivityStartPage: View {
             .accessibilityLabel(ActivityCodes.localizedTitle(for: code))
             .accessibilityHint(String(localized: "Starts a session"))
         }
-        .containerBackground(Color.rpplDarkTeal.gradient, for: .tabView)
+        .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
 
     private func cardStack(iconSide: CGFloat, chevronSide: CGFloat, showClock: Bool) -> some View {
@@ -31,7 +31,7 @@ struct ActivityStartPage: View {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     Text(context.date, style: .time)
                         .font(.title3.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(Color.rpplAliceBlue)
+                        .foregroundStyle(Color.rpplIdlePrimary)
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                 }
@@ -41,12 +41,12 @@ struct ActivityStartPage: View {
 
             MDIIconView(icon: .skiWater)
                 .frame(width: iconSide, height: iconSide)
-                .foregroundStyle(Color.rpplSkySurge)
+                .foregroundStyle(Color.rpplIdleAccent)
                 .accessibilityHidden(true)
 
             Text(ActivityCodes.localizedTitle(for: code))
                 .font(.headline)
-                .foregroundStyle(Color.rpplAliceBlue)
+                .foregroundStyle(Color.rpplIdlePrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .padding(.horizontal, 4)
@@ -61,14 +61,14 @@ struct ActivityStartPage: View {
     private func startControl(side: CGFloat) -> some View {
         if isStarting {
             ProgressView()
-                .tint(Color.rpplSkySurge)
+                .tint(Color.rpplIdleAccent)
                 .frame(width: side, height: side)
         } else {
             Image(systemName: "chevron.right")
                 .font(.title3.weight(.bold))
-                .foregroundStyle(Color.rpplDarkTeal)
+                .foregroundStyle(Color.rpplIdleAccentForeground)
                 .frame(width: side, height: side)
-                .background(Circle().fill(Color.rpplSkySurge))
+                .background(Circle().fill(Color.rpplIdleAccent))
         }
     }
 }
