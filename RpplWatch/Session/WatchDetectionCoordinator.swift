@@ -60,6 +60,7 @@ extension WatchSessionController {
             lastConfident: code,
             events: [event]
         )
+        applySensorSamplingMode(dense: SensorSamplingMode.isDense(currentCode: code))
         persistDetection(event)
         WakeLog.debug(.ui, "sim detection=\(code)")
     }
@@ -113,6 +114,7 @@ extension WatchSessionController {
         for event in events where event.code == DetectionCodes.riding && event.detectorId == "ride_enter" {
             replayLocationRingForRideEnter(holdStart: event.timestamp)
         }
+        applySensorSamplingMode(dense: SensorSamplingMode.isDense(currentCode: detectionCode))
         guard !events.isEmpty else { return }
         for event in events {
             persistDetection(event)

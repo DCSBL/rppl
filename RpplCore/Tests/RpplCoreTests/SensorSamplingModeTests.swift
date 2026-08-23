@@ -2,6 +2,15 @@ import Foundation
 import Testing
 @testable import RpplCore
 
+@Suite("SensorSamplingMode")
+struct SensorSamplingModeTests {
+    @Test func denseWhileRidingOrUnsure() {
+        #expect(SensorSamplingMode.isDense(currentCode: DetectionCodes.riding))
+        #expect(SensorSamplingMode.isDense(currentCode: DetectionCodes.unsure))
+        #expect(!SensorSamplingMode.isDense(currentCode: DetectionCodes.inactive))
+    }
+}
+
 @Suite("LiveRideTrackerBackfill")
 struct LiveRideTrackerBackfillTests {
     private let t0 = Date(timeIntervalSince1970: 1_700_000_000)
