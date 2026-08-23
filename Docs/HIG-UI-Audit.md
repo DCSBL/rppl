@@ -3,7 +3,7 @@
 Apple HIG audit notes for Rppl Watch + iPhone (UI and interaction only).
 App icons / marketing assets stay out of scope.
 
-Sibling PRs in the first pass shipped clear interaction fixes. Follow-ups tracked in Linear [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48); Watch brand colors in [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance).
+Sibling PRs in the first pass shipped clear interaction fixes. Follow-ups tracked in Linear [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48).
 
 Housekeeping: example session CTA [DCSBL-48](https://linear.app/dcsbl/issue/DCSBL-48) Done; left-float tab bar [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled (#61).
 
@@ -111,16 +111,11 @@ No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep prim
 
 **Locked:** Audit nested shapes (icon well inside card); fix radii for Liquid Glass.
 
-### Watch: brand colors vs system appearance ([DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance))
-
-[`RpplColor.swift`](../RpplWatch/Theme/RpplColor.swift) uses hardcoded RGB; idle pages force dark teal while the active ride UI uses system `.primary` / `.secondary`.
-
-**Open questions:** move to asset catalog with light/dark (+ Increase Contrast), or keep forced “park night” brand on idle only?
-
 ### Shipped / dropped
 
 | Item | Status |
 |------|--------|
+| Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
 | Soften About `toolbarBackground` | Dropped (alpha polish) |
 
@@ -143,7 +138,6 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 ### Still open after 356
 
 - Concentric radii on Logbook cards → [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48)
-- Watch brand teal vs system appearance → [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance)
 - Soften About nav bar background — dropped (alpha polish)
 
 ## Reference links
