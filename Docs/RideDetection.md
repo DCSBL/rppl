@@ -200,6 +200,9 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
 5. **Cable stopped mid-run, long wait in water**
    We prioritize ending/starting cleanly over “same ride after 10 minutes.” Water exit + 60 s window intentionally **do not** keep that as one ride.
 
+6. **Late Start mid-run**
+   Session starts `inactive` while already on cable. Usable fast GPS (≥20 km/h × hold) still enters `riding` within a few seconds. Pre-session time/meters are lost; `ride_enter` backdates to hold start when possible.
+
 ---
 
 ## Where to change code

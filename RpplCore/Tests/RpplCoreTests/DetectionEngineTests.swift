@@ -112,6 +112,23 @@ struct DetectionEngineTests {
         #expect(events.first?.code == DetectionCodes.riding)
     }
 
+    @Test func midSessionStartEntersRideAtFastCableSpeed() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 55))
+        let events = engine.process(tick(at: 3.0, speedKmh: 55))
+        #expect(events.first?.code == DetectionCodes.riding)
+        #expect(events.first?.detectorId == "ride_enter")
+    }
+
+    @Test func midSessionStartEntersRideNearCeiling() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 78))
+        let events = engine.process(tick(at: 3.0, speedKmh: 78))
+        #expect(events.first?.code == DetectionCodes.riding)
+    }
+
     @Test func walkBandSpeedDoesNotEnterRide() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
