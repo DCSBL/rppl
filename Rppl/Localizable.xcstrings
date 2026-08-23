@@ -1,109 +1,105 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-
-    },
-    " - %@" : {
-
-    },
-    "— laps" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— laps"
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    " - %@": {},
+    "— laps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— laps"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— rondes"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— rondes"
           }
         }
       }
     },
-    "— rides" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— rides"
+    "— rides": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— rides"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— ritten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— ritten"
           }
         }
       }
     },
-    "— total rides" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— total rides"
+    "— total rides": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— total rides"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— ritten totaal"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— ritten totaal"
           }
         }
       }
     },
-    "%@ · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %@"
+    "%@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
           }
         }
       }
     },
-    "%lld laps" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld lap"
+    "%lld laps": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lap"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld laps"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld laps"
                 }
               }
             }
           }
         },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ronde"
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ronde"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld rondes"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rondes"
                 }
               }
             }
@@ -111,79 +107,39 @@
         }
       }
     },
-    "%lld rides" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ride"
+    "%lld rides": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ride"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld rides"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rides"
                 }
               }
             }
           }
         },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld rit"
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rit"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ritten"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%lld total" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total"
-                }
-              }
-            }
-          }
-        },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld totaal"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld totaal"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ritten"
                 }
               }
             }
@@ -191,39 +147,39 @@
         }
       }
     },
-    "%lld total rides" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total ride"
+    "%lld total": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld total"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total rides"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld total"
                 }
               }
             }
           }
         },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld rit totaal"
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld totaal"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ritten totaal"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld totaal"
                 }
               }
             }
@@ -231,2020 +187,2001 @@
         }
       }
     },
-    "About" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About"
+    "%lld total rides": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld total ride"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld total rides"
+                }
+              }
+            }
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Over"
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rit totaal"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ritten totaal"
+                }
+              }
+            }
           }
         }
       }
     },
-    "Ack send failed: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ack send failed: %@"
+    "About": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ack verzenden mislukt: %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Over"
           }
         }
       }
     },
-    "Acked %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acked %@"
+    "Ack send failed: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ack send failed: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ack %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ack verzenden mislukt: %@"
           }
         }
       }
     },
-    "Active calories" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Active calories"
+    "Acked %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acked %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actieve calorieën"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ack %@"
           }
         }
       }
     },
-    "Alpha — no cloud upload" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alpha — no cloud upload"
+    "Active calories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active calories"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alpha — geen cloud-upload"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actieve calorieën"
           }
         }
       }
     },
-    "Avg speed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avg speed"
+    "Avg speed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avg speed"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gem. snelheid"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gem. snelheid"
           }
         }
       }
     },
-    "Cable park sessions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cable park sessions"
+    "Cable park sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cable park sessions"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kabelpark-sessies"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kabelpark-sessies"
           }
         }
       }
     },
-    "Cancel" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
+    "Cancel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuleren"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuleren"
           }
         }
       }
     },
-    "Cancelled" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelled"
+    "Cancelled": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geannuleerd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geannuleerd"
           }
         }
       }
     },
-    "Computing stats…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Computing stats…"
+    "Computing stats…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computing stats…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stats berekenen…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stats berekenen…"
           }
         }
       }
     },
-    "Could Not Delete Session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could Not Delete Session"
+    "Could Not Delete Session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could Not Delete Session"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie verwijderen mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie verwijderen mislukt"
           }
         }
       }
     },
-    "Could Not Export" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could Not Export"
+    "Could Not Export": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could Not Export"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exporteren mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporteren mislukt"
           }
         }
       }
     },
-    "Could not load session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not load session"
+    "Could not load session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load session"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie laden mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie laden mislukt"
           }
         }
       }
     },
-    "Debug" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Debug"
+    "Debug": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Debug"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug"
           }
         }
       }
     },
-    "Delete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
+    "Delete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verwijderen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijderen"
           }
         }
       }
     },
-    "Delete Permanently" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete Permanently"
+    "Delete Permanently": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Permanently"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Definitief verwijderen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Definitief verwijderen"
           }
         }
       }
     },
-    "Delete Session?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete Session?"
+    "Delete Session?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Session?"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie verwijderen?"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie verwijderen?"
           }
         }
       }
     },
-    "Detections (%lld)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detections (%lld)"
+    "Detections (%lld)": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detections (%lld)"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detecties (%lld)"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detecties (%lld)"
           }
         }
       }
     },
-    "Distance" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distance"
+    "Distance": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afstand"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afstand"
           }
         }
       }
     },
-    "Duration" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duration"
+    "Duration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duur"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duur"
           }
         }
       }
     },
-    "End" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "End"
+    "End": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einde"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einde"
           }
         }
       }
     },
-    "Ended" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ended"
+    "Ended": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beëindigd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beëindigd"
           }
         }
       }
     },
-    "Export" : {
-
-    },
-    "Export session JSON" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export session JSON"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie-JSON exporteren"
-          }
-        }
-      }
-    },
-    "Fastest" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fastest"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snelste"
-          }
-        }
-      }
-    },
-    "GPS points" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS points"
+    "Export": {},
+    "Export session JSON": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export session JSON"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS-punten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie-JSON exporteren"
           }
         }
       }
     },
-    "Health" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Health"
+    "Fastest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fastest"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gezondheid"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snelste"
           }
         }
       }
     },
-    "Health, location, and motion permissions are requested when needed for sync and viewing session data." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Health, location, and motion permissions are requested when needed for sync and viewing session data."
+    "GPS points": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS points"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gezondheid-, locatie- en bewegingsmachtigingen worden gevraagd wanneer nodig voor sync en sessiegegevens."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS-punten"
           }
         }
       }
     },
-    "Import failed: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import failed: %@"
+    "Health": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import mislukt: %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gezondheid"
           }
         }
       }
     },
-    "Imported %@ — Watch not reachable for ack (will retry when reachable)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imported %@ — Watch not reachable for ack (will retry when reachable)"
+    "Health, location, and motion permissions are requested when needed for sync and viewing session data.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health, location, and motion permissions are requested when needed for sync and viewing session data."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geïmporteerd %@ — Watch niet bereikbaar voor ack (opnieuw wanneer bereikbaar)"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gezondheid-, locatie- en bewegingsmachtigingen worden gevraagd wanneer nodig voor sync en sessiegegevens."
           }
         }
       }
     },
-    "Imported session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imported session"
+    "Import failed: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import failed: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie geïmporteerd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import mislukt: %@"
           }
         }
       }
     },
-    "Inactive" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inactive"
+    "Imported %@ — Watch not reachable for ack (will retry when reachable)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported %@ — Watch not reachable for ack (will retry when reachable)"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inactief"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geïmporteerd %@ — Watch niet bereikbaar voor ack (opnieuw wanneer bereikbaar)"
           }
         }
       }
     },
-    "Internal testing only" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Internal testing only"
+    "Imported session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported session"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alleen intern testen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie geïmporteerd"
           }
         }
       }
     },
-    "iPhone" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+    "Inactive": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inactive"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inactief"
           }
         }
       }
     },
-    "Laps" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laps"
+    "iPhone": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rondes"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
           }
         }
       }
     },
-    "Legal" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Legal"
+    "Laps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laps"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Juridisch"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rondes"
           }
         }
       }
     },
-    "Load cancelled" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load cancelled"
+    "Legal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legal"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laden geannuleerd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juridisch"
           }
         }
       }
     },
-    "Load failed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load failed"
+    "Load cancelled": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load cancelled"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laden mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laden geannuleerd"
           }
         }
       }
     },
-    "Loading detections…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading detections…"
+    "Load failed": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load failed"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detecties laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laden mislukt"
           }
         }
       }
     },
-    "Loading GPS track…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading GPS track…"
+    "Loading detections…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading detections…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS-spoor laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detecties laden…"
           }
         }
       }
     },
-    "Loading GPS…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading GPS…"
+    "Loading GPS track…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading GPS track…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS-spoor laden…"
           }
         }
       }
     },
-    "Loading manifest…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading manifest…"
+    "Loading GPS…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading GPS…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manifest laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS laden…"
           }
         }
       }
     },
-    "Loading session…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading session…"
+    "Loading manifest…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading manifest…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manifest laden…"
           }
         }
       }
     },
-    "Loading sessions…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading sessions…"
+    "Loading session…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading session…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessies laden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie laden…"
           }
         }
       }
     },
-    "Location" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Location"
+    "Loading sessions…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading sessions…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Locatie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessies laden…"
           }
         }
       }
     },
-    "Logbook" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Logbook"
+    "Location": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Logboek"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locatie"
           }
         }
       }
     },
-    "Longest" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Longest"
+    "Logbook": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logbook"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Langste"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logboek"
           }
         }
       }
     },
-    "Longest time" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Longest time"
+    "Longest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Langste tijd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste"
           }
         }
       }
     },
-    "Manifest" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manifest"
+    "Longest time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest time"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manifest"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste tijd"
           }
         }
       }
     },
-    "Map" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Map"
+    "Manifest": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manifest"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaart"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manifest"
           }
         }
       }
     },
-    "Map loads after detections" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Map loads after detections"
+    "Map": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaart laadt na detecties"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart"
           }
         }
       }
     },
-    "Map shows %lld of %lld points" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Map shows %lld of %lld points"
+    "Map loads after detections": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map loads after detections"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaart toont %lld van %lld punten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart laadt na detecties"
           }
         }
       }
-    },
-    "Max speed" : {
-
     },
-    "Max Speed" : {
-
-    },
-    "Most laps" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Most laps"
+    "Map shows %lld of %lld points": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map shows %lld of %lld points"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meeste rondes"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart toont %lld van %lld punten"
           }
         }
       }
     },
-    "Most water time" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Most water time"
+    "Max speed": {},
+    "Max Speed": {},
+    "Most laps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most laps"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meeste watertijd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meeste rondes"
           }
         }
       }
     },
-    "Motion" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Motion"
+    "Most water time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most water time"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beweging"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meeste watertijd"
           }
         }
       }
     },
-    "No detections in this session." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No detections in this session."
+    "Motion": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motion"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen detecties in deze sessie."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beweging"
           }
         }
       }
     },
-    "No GPS points" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No GPS points"
+    "No detections in this session.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detections in this session."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen GPS-punten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen detecties in deze sessie."
           }
         }
       }
     },
-    "No GPS track" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No GPS track"
+    "No GPS points": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No GPS points"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen GPS-spoor"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen GPS-punten"
           }
         }
       }
     },
-    "No GPS track for this ride" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No GPS track for this ride"
+    "No GPS track": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No GPS track"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen GPS-spoor voor deze rit"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen GPS-spoor"
           }
         }
       }
     },
-    "No ride GPS" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No ride GPS"
+    "No GPS track for this ride": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No GPS track for this ride"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen GPS van ritten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen GPS-spoor voor deze rit"
           }
         }
       }
     },
-    "No rides detected." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No rides detected."
+    "No ride GPS": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No ride GPS"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen ritten gedetecteerd."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen GPS van ritten"
           }
         }
       }
     },
-    "No sessions yet" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No sessions yet"
+    "No rides detected.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rides detected."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nog geen sessies"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen ritten gedetecteerd."
           }
         }
       }
     },
-    "No sessions yet. Record on Apple Watch, then bring phone nearby." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No sessions yet. Record on Apple Watch, then bring phone nearby."
+    "No sessions yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sessions yet"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nog geen sessies. Neem op met Apple Watch en breng je telefoon in de buurt."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen sessies"
           }
         }
       }
     },
-    "OS" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OS"
+    "No sessions yet. Record on Apple Watch, then bring phone nearby.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sessions yet. Record on Apple Watch, then bring phone nearby."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OS"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen sessies. Neem op met Apple Watch en breng je telefoon in de buurt."
           }
         }
       }
     },
-    "Pending transfers: %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pending transfers: %lld"
+    "OS": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OS"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Openstaande transfers: %lld"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OS"
           }
         }
       }
     },
-    "Permissions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permissions"
+    "Pending transfers: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending transfers: %lld"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Machtigingen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Openstaande transfers: %lld"
           }
         }
       }
     },
-    "Platform" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Platform"
+    "Permissions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissions"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Platform"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machtigingen"
           }
         }
       }
     },
-    "Preparing export…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparing export…"
+    "Platform": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platform"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export voorbereiden…"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platform"
           }
         }
       }
     },
-    "Privacy" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privacy"
+    "Preparing export…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing export…"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privacy"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export voorbereiden…"
           }
         }
       }
     },
-    "Ready" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ready"
+    "Privacy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klaar"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
           }
         }
       }
     },
-    "Record on Apple Watch, then bring your iPhone nearby." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record on Apple Watch, then bring your iPhone nearby."
+    "Ready": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neem op met Apple Watch en breng je iPhone in de buurt."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klaar"
           }
         }
       }
     },
-    "Refresh sync status" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refresh sync status"
+    "Record on Apple Watch, then bring your iPhone nearby.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record on Apple Watch, then bring your iPhone nearby."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncstatus vernieuwen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neem op met Apple Watch en breng je iPhone in de buurt."
           }
         }
       }
     },
-    "Reload" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reload"
+    "Refresh sync status": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh sync status"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Herladen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncstatus vernieuwen"
           }
         }
       }
     },
-    "Request permissions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Request permissions"
+    "Reload": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Machtigingen vragen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herladen"
           }
         }
       }
     },
-    "Reset" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset"
+    "Request permissions": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request permissions"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machtigingen vragen"
           }
         }
       }
     },
-    "Reset map" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset map"
+    "Reset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaart resetten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
           }
         }
       }
     },
-    "Retry" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retry"
+    "Reset map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset map"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opnieuw"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart resetten"
           }
         }
       }
     },
-    "revision" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "revision"
+    "Retry": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "revisie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw"
           }
         }
       }
     },
-    "Ride %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ride %lld"
+    "revision": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "revision"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rit %lld"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "revisie"
           }
         }
       }
     },
-    "Rides" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rides"
+    "Ride %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ride %lld"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritten"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rit %lld"
           }
         }
       }
     },
-    "Rides (%lld)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rides (%lld)"
+    "Rides": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rides"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritten (%lld)"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ritten"
           }
         }
       }
     },
-    "Riding" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Riding"
+    "Rides (%lld)": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rides (%lld)"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rijden"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ritten (%lld)"
           }
         }
       }
     },
-    "rppl" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "rppl"
+    "Riding": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riding"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "rppl"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rijden"
           }
         }
       }
     },
-    "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac."
+    "rppl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rppl"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl verzamelt kabelpark-wakeboardsessies van Apple Watch voor analyse op iPhone en Mac."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rppl"
           }
         }
       }
     },
-    "Samples" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Samples"
+    "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Samples"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl verzamelt kabelpark-wakeboardsessies van Apple Watch voor analyse op iPhone en Mac."
           }
         }
       }
     },
-    "Schema" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schema"
+    "Samples": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samples"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schema"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samples"
           }
         }
       }
     },
-    "Session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session"
+    "Schema": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schema"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schema"
           }
         }
       }
     },
-    "Session store missing. Try again from the logbook." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session store missing. Try again from the logbook."
+    "Session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessie-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie"
           }
         }
       }
     },
-    "Sessions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessions"
+    "Session store missing. Try again from the logbook.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session store missing. Try again from the logbook."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessies"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessie-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
           }
         }
       }
     },
-    "Share" : {
-
-    },
-    "Share export" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share export"
+    "Sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessions"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export delen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessies"
           }
         }
       }
     },
-    "Something went wrong while deleting the session." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Something went wrong while deleting the session."
+    "Share": {},
+    "Share export": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share export"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Er ging iets mis bij het verwijderen van de sessie."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export delen"
           }
         }
       }
     },
-    "Something went wrong while preparing the export." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Something went wrong while preparing the export."
+    "Something went wrong while deleting the session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong while deleting the session."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Er ging iets mis bij het voorbereiden van de export."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er ging iets mis bij het verwijderen van de sessie."
           }
         }
       }
     },
-    "Show example session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show example session"
+    "Something went wrong while preparing the export.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong while preparing the export."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toon voorbeeldsessie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er ging iets mis bij het voorbereiden van de export."
           }
         }
       }
     },
-    "Show satellite map" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show satellite map"
+    "Show example session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show example session"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Satellietkaart tonen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon voorbeeldsessie"
           }
         }
       }
     },
-    "Show standard map" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show standard map"
+    "Show satellite map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show satellite map"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standaardkaart tonen"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Satellietkaart tonen"
           }
         }
       }
     },
-    "Size" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Size"
+    "Show standard map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show standard map"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grootte"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standaardkaart tonen"
           }
         }
       }
     },
-    "Start" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start"
+    "Size": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grootte"
           }
         }
       }
     },
-    "Started" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Started"
+    "Start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestart"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
           }
         }
       }
     },
-    "Summary" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Summary"
+    "Started": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Samenvatting"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestart"
           }
         }
       }
     },
-    "Sync" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync"
+    "Summary": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summary"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samenvatting"
           }
         }
       }
     },
-    "Sync %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync %@"
+    "Sync": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync"
           }
         }
       }
     },
-    "Sync status, permissions, and manual session inspection." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync status, permissions, and manual session inspection."
+    "Sync %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncstatus, machtigingen en handmatige sessie-inspectie."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync %@"
           }
         }
       }
     },
-    "Synced data" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synced data"
+    "Sync status, permissions, and manual session inspection.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync status, permissions, and manual session inspection."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gesynchroniseerde data"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncstatus, machtigingen en handmatige sessie-inspectie."
           }
         }
       }
     },
-    "Terms" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terms"
+    "Synced data": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced data"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voorwaarden"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesynchroniseerde data"
           }
         }
       }
     },
-    "Tester" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tester"
+    "Terms": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tester"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorwaarden"
           }
         }
       }
     },
-    "This permanently removes the session from this iPhone. This cannot be undone." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This permanently removes the session from this iPhone. This cannot be undone."
+    "This permanently removes the session from this iPhone. This cannot be undone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently removes the session from this iPhone. This cannot be undone."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dit verwijdert de sessie permanent van deze iPhone. Dit kan niet ongedaan worden gemaakt."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit verwijdert de sessie permanent van deze iPhone. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
     },
-    "Time" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time"
+    "Time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tijd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tijd"
           }
         }
       }
     },
-    "Top speed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Top speed"
+    "Top speed": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top speed"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Topsnelheid"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topsnelheid"
           }
         }
       }
     },
-    "Top Speed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Top Speed"
+    "Top Speed": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Speed"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Topsnelheid"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topsnelheid"
           }
         }
       }
     },
-    "TOTAL" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TOTAL"
+    "TOTAL": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOTAL"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TOTAAL"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOTAAL"
           }
         }
       }
     },
-    "Total calories" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total calories"
+    "Total calories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total calories"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totale calorieën"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totale calorieën"
           }
         }
       }
     },
-    "Transfer" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transfer"
+    "Transfer": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transfer"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer"
           }
         }
       }
     },
-    "Try again later." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try again later."
+    "Try again later.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again later."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Probeer het later opnieuw."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probeer het later opnieuw."
           }
         }
       }
     },
-    "Version" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version"
+    "Version": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versie"
           }
         }
       }
     },
-    "Wakeboarding" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wakeboarding"
+    "Wakeboarding": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakeboarding"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wakeboarden"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakeboarden"
           }
         }
       }
     },
-    "Watch" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch"
+    "Watch": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
           }
         }
       }
     },
-    "Watch not reachable — transfers still queue" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch not reachable — transfers still queue"
+    "Watch not reachable — transfers still queue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch not reachable — transfers still queue"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch niet bereikbaar — transfers blijven in wachtrij"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch niet bereikbaar — transfers blijven in wachtrij"
           }
         }
       }
     },
-    "Watch reachable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch reachable"
+    "Watch reachable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch reachable"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch bereikbaar"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch bereikbaar"
           }
         }
       }
     },
-    "Watch state updated" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch state updated"
+    "Watch state updated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch state updated"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch-status bijgewerkt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch-status bijgewerkt"
           }
         }
       }
-    },
-    "Water temp" : {
-
     },
-    "WC activated" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC activated"
+    "Water temp": {},
+    "WC activated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC activated"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC geactiveerd"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC geactiveerd"
           }
         }
       }
     },
-    "WC error: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC error: %@"
+    "WC error: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC error: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC-fout: %@"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC-fout: %@"
           }
         }
       }
     },
-    "WC idle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC idle"
+    "WC idle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC idle"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC inactief"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC inactief"
           }
         }
       }
     },
-    "WC unsupported" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC unsupported"
+    "WC unsupported": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC unsupported"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WC niet ondersteund"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WC niet ondersteund"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

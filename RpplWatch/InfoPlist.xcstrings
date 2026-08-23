@@ -1,120 +1,120 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "Bundle display name",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl"
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Bundle display name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "RpplWatch"
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "RpplWatch"
           }
         }
       }
     },
-    "NSHealthShareUsageDescription" : {
-      "comment" : "Privacy - Health Share Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health."
+    "NSHealthShareUsageDescription": {
+      "comment": "Privacy - Health Share Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven. Alpha-builds slaan de voltooide workout nog niet op in Gezondheid."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven en hartslag kan worden vastgelegd."
           }
         }
       }
     },
-    "NSHealthUpdateUsageDescription" : {
-      "comment" : "Privacy - Health Update Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing."
+    "NSHealthUpdateUsageDescription": {
+      "comment": "Privacy - Health Update Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl saves your cable-park workout to Health when the session ends."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl vraagt schrijfrechten voor workouts alleen om een live sessie voor sensors te draaien; voltooide workouts worden tijdens alpha niet opgeslagen."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de sessie eindigt."
           }
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location Always and When In Use Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl records GPS for the full park session, including when the wrist is down."
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "comment": "Privacy - Location Always and When In Use Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records GPS for the full park session, including when the wrist is down."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl neemt GPS op voor de hele parksessie, ook als de pols omlaag is."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt GPS op voor de hele parksessie, ook als de pols omlaag is."
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location When In Use Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection."
+    "NSLocationWhenInUseUsageDescription": {
+      "comment": "Privacy - Location When In Use Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records GPS during cable-park wakeboarding sessions."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl neemt GPS op tijdens kabelpark-wakeboardsessies voor alpha-datacollectie."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt GPS op tijdens kabelpark-wakeboardsessies."
           }
         }
       }
     },
-    "NSMotionUsageDescription" : {
-      "comment" : "Privacy - Motion Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl records device motion to collect alpha training data for start/swim/walk detection."
+    "NSMotionUsageDescription": {
+      "comment": "Privacy - Motion Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl records device motion to help detect riding versus resting at the dock."
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl neemt apparaatbeweging op om alpha-trainingsdata te verzamelen voor start/zwem/loop-detectie."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rppl neemt apparaatbeweging op om rijden versus rusten bij de steiger te helpen detecteren."
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
