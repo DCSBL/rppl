@@ -27,7 +27,7 @@ struct IdleSyncPage: View {
             if session.statusText != String(localized: "Idle") {
                 Text(session.statusText)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.rpplIdlePrimary.opacity(0.85))
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
             }
@@ -69,8 +69,8 @@ struct IdleSyncPage: View {
                     .frame(width: 40, height: 40)
                     .background(Circle().fill(Color.rpplIdleAccent))
                 Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(Color.rpplIdlePrimary)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.rpplIdleAccent)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
             }

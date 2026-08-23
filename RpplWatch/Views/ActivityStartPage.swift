@@ -25,7 +25,7 @@ struct ActivityStartPage: View {
     }
 
     private func cardStack(chevronSide: CGFloat, showClock: Bool) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             if showClock {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     Text(context.date, style: .time)
@@ -36,19 +36,21 @@ struct ActivityStartPage: View {
                 }
             }
 
-            Spacer(minLength: 0)
+            Spacer(minLength: 4)
 
             Text(ActivityCodes.localizedTitle(for: code))
-                .font(.headline)
+                .font(.title2.weight(.bold))
                 .foregroundStyle(Color.rpplIdlePrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 4)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.65)
+                .padding(.horizontal, 6)
 
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
 
             startControl(side: chevronSide)
         }
+        .padding(.vertical, 4)
     }
 
     @ViewBuilder

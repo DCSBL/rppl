@@ -5,7 +5,7 @@ enum LogbookLayout {
 
     /// Outer session / totals / detail cards (Liquid Glass nest base).
     static let cardCornerRadius: CGFloat = 24
-    static let cardPadding: CGFloat = 12
+    static let cardPadding: CGFloat = 16
 
     /// Fallback when a nested shape sits far from the card corners (e.g. grid tiles).
     static let nestedMinimumCornerRadius: CGFloat = 8
