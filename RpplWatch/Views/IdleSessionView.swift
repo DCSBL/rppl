@@ -29,6 +29,7 @@ struct IdleSessionView: View {
                 .tag(IdlePickerPage.sync)
         }
         .tabViewStyle(.verticalPage)
+        .preferredColorScheme(.dark)
     }
 
     private var canStart: Bool {
