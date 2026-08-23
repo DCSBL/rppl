@@ -214,8 +214,7 @@ struct LogbookView: View {
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
         }
-        .padding(20)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .logbookCardChrome()
     }
 
     private var totalDivider: some View {
@@ -318,8 +317,7 @@ private struct SessionCard: View {
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
     private var timeRangeText: String {
@@ -354,14 +352,6 @@ private struct SessionCard: View {
             .labelStyle(.titleAndIcon)
             .lineLimit(1)
             .minimumScaleFactor(0.75)
-    }
-}
-
-private enum LogbookLayout {
-    static let horizontalInset: CGFloat = 16
-
-    static func rowInsets(top: CGFloat = 8, bottom: CGFloat = 8) -> EdgeInsets {
-        EdgeInsets(top: top, leading: 0, bottom: bottom, trailing: 0)
     }
 }
 
