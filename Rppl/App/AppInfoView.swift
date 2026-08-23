@@ -16,11 +16,15 @@ struct AppInfoView: View {
             } header: {
                 Text("About")
             } footer: {
-                Text("Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac.")
+                Text(
+                    "Apple Watch is required to record. iPhone is for viewing, maps, and export only — open Rppl on your Watch and start a cable-park session."
+                )
             }
 
             Section("Permissions") {
-                Text("Health, location, and motion permissions are requested when needed for sync and viewing session data.")
+                Text(
+                    "The Watch app requests Health, location, and motion when you start a session. iPhone does not record workouts."
+                )
                     .font(.subheadline)
                     .foregroundStyle(Color.rpplMuted)
             }
