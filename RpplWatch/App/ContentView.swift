@@ -18,8 +18,9 @@ struct ContentView: View {
             WakeLog.debug(.lifecycle, "Watch ContentView onAppear")
             transfer.activate()
             transfer.refreshSyncState()
+            // Refresh labels only — do not present Health/location sheets at cold launch.
+            // Sheets fire from startSession and Idle Sync "Permissions".
             session.refreshPermissionStatus()
-            Task { await session.requestPermissions() }
         }
         .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
             WakeLog.debug(.lifecycle, "WKApplication.didBecomeActive")
