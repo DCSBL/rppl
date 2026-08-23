@@ -2,7 +2,7 @@
 
 Pure Swift package: models, session IO, sync resolvers, and the **DetectionEngine** (filter → holds → detectors → lookback). No UIKit/SwiftUI, WCSession, HealthKit, or CoreLocation. Covered by `swift test`.
 
-Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · storage: [../Docs/SessionStorage.md](../Docs/SessionStorage.md) · Phase 3: [../Docs/Phase3.md](../Docs/Phase3.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
+Product context: [../README.md](../README.md) · streams: [../Docs/DataCollection.md](../Docs/DataCollection.md) · storage: [../Docs/SessionStorage.md](../Docs/SessionStorage.md) · detection: [../Docs/RideDetection.md](../Docs/RideDetection.md) · system map: [../Docs/DESIGN.md](../Docs/DESIGN.md).
 
 ## Module map
 

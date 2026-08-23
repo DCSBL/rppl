@@ -36,7 +36,7 @@ struct SessionRideUIPage: View {
                     .lineLimit(1)
                     .foregroundStyle(.primary)
 
-                Text("Session clock frozen")
+                Text("Timers paused")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .alwaysOnSecondaryChrome(isLuminanceReduced)
@@ -227,7 +227,7 @@ struct SessionRideUIPage: View {
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel(
-                        String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+                        String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
                     )
                     .alwaysOnSupportingMetric(isLuminanceReduced)
                 }
@@ -289,7 +289,7 @@ struct SessionRideUIPage: View {
 
     private var heartRateAccessibilityLabel: String {
         if let hr = session.lastHeartRate {
-            return String(localized: "Heart rate \(String(format: "%.0f", hr)) beats per minute")
+            return String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
         }
         return String(localized: "Heart rate unavailable")
     }
