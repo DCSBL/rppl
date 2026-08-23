@@ -84,7 +84,14 @@ Phone may be away during the session. After **Stop session**, Watch queues a WC 
 
 ## Export
 
-On iPhone: open a session → **Export** → Share/AirDrop. Payload is pretty-printed `SessionTransferPackage` JSON:
+On iPhone: open a session → **Export** → Share/AirDrop. File name:
+
+`rppl_<startedAt-UTC>_<location>.json`
+
+- `startedAt-UTC`: session start, ISO-8601 with `:` / `.` replaced by `-` (e.g. `2024-01-01T00-00-00Z`)
+- `location`: city slug from derived `cityName` (filesystem-safe); `unknown` when missing
+
+Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manifest` first** (encode order; not `sortedKeys`):
 
 | Payload | Contents |
 |---------|----------|

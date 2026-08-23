@@ -476,21 +476,24 @@ struct LogbookSessionDetailView: View {
             return
         }
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
+        let resolvedCity = cityName
 
         do {
-            try await StoreIO.runOffMain {
+            let url = try await StoreIO.runOffMain {
                 let package = try store.buildTransferPackage(sessionId: sessionId)
                 try Task.checkCancellation()
-                let encoder = JSONEncoder()
-                encoder.dateEncodingStrategy = .iso8601
-                encoder.outputFormatting = [.sortedKeys]
-                try encoder.encode(package).write(to: url, options: [.atomic])
+                let fileName = SessionShareExport.fileName(
+                    startedAt: package.manifest.startedAt,
+                    locationName: package.derived?.cityName ?? resolvedCity
+                )
+                let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+                try SessionShareExport.encode(package).write(to: exportURL, options: [.atomic])
+                return exportURL
             }
             try Task.checkCancellation()
             exportURL = url
             finishExportTask()
-            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
+            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))… \(url.lastPathComponent)")
         } catch is CancellationError {
             finishExportTask()
         } catch {
