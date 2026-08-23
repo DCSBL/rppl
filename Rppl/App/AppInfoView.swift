@@ -3,24 +3,26 @@ import SwiftUI
 struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
 
-    private var appVersion: String {
+    private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        return "\(version) (\(build))"
+        let date = Bundle.main.infoDictionary?["RpplBuildDate"] as? String ?? "—"
+        return "\(version) (\(build) - \(date))"
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    LabeledContent("Version", value: appVersion)
-                    LabeledContent("Platform", value: "iPhone")
+                    Text(
+                        "Rppl tracks cable-park wakeboarding on Apple Watch — rides, pauses, and a full park day as one session. iPhone is for viewing, maps, and export."
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(Color.rpplMuted)
+                    .padding(.vertical, 4)
+                    .accessibilityElement(children: .combine)
                 } header: {
                     Text("About")
-                } footer: {
-                    Text(
-                        "Apple Watch is required to record. iPhone is for viewing, maps, and export only — open Rppl on your Watch and start a cable-park session."
-                    )
                 }
 
                 PhonePermissionsListSection(permissions: permissions)
@@ -53,16 +55,23 @@ struct AppInfoView: View {
                 }
 
                 Section {
-                    Image("icon-simple")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .foregroundStyle(Color.rpplMuted.opacity(0.4))
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 24)
-                        .padding(.bottom, 8)
-                        .accessibilityHidden(true)
+                    VStack(spacing: 8) {
+                        Image("icon-simple")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 48, height: 48)
+                            .foregroundStyle(Color.rpplMuted.opacity(0.4))
+                            .accessibilityHidden(true)
+
+                        Text(versionFooter)
+                            .font(.footnote)
+                            .foregroundStyle(Color.rpplMuted.opacity(0.7))
+                            .accessibilityLabel("Version \(versionFooter)")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
