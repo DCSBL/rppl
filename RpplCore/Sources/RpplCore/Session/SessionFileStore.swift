@@ -475,6 +475,23 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
+    /// Phone-only import of a Share export JSON. Stamps `manifest.imported`, replaces same `sessionId`
+    /// if already on disk. Does not touch HealthKit or Watch Connectivity.
+    public func importExportedPackage(
+        _ package: SessionTransferPackage,
+        intoPhoneStore phoneRoot: URL,
+        importedAt: Date = Date()
+    ) throws {
+        let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
+        let sessionId = package.manifest.sessionId
+        if fileManager.fileExists(atPath: phoneStore.sessionDirectory(for: sessionId).path) {
+            try phoneStore.deleteSession(sessionId: sessionId)
+        }
+        var stamped = package
+        stamped.manifest.imported = importedAt
+        try importTransferPackage(stamped, intoPhoneStore: phoneRoot)
+    }
+
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
         let manifest = try readManifest(sessionId: sessionId)
         let detections = try readDetections(sessionId: sessionId)

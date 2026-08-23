@@ -19,6 +19,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var wristLocation: String?
     /// Watch settings Digital Crown side at session start (`left` / `right`). Nil for older sessions.
     public var crownOrientation: String?
+    /// When set, session was imported from an export JSON on phone (not Watch WC transfer). No HealthKit.
+    public var imported: Date?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -41,7 +43,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         waterTemperatureAvailable: Bool? = nil,
         activityCode: String? = nil,
         wristLocation: String? = nil,
-        crownOrientation: String? = nil
+        crownOrientation: String? = nil,
+        imported: Date? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -57,6 +60,7 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.activityCode = activityCode
         self.wristLocation = wristLocation
         self.crownOrientation = crownOrientation
+        self.imported = imported
     }
 }
 

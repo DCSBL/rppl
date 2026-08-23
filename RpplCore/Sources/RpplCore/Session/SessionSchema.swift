@@ -6,5 +6,6 @@ public enum SessionSchema {
     /// v4: detection code `paused` → `inactive`.
     /// v5: optional `derived/view.json` (stats + map frame); raw streams unchanged.
     /// v6: optional manifest `wristLocation` + `crownOrientation` (Watch wear settings at start).
-    public static let currentVersion = 6
+    /// v7: optional manifest `imported` (phone file-import timestamp; nil for Watch/WC sessions).
+    public static let currentVersion = 7
 }
