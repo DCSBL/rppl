@@ -28,8 +28,10 @@ struct SessionRideUIPage: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text(SessionFormatters.elapsed(session.elapsed))
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).bold())
                     .monospacedDigit()
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
                     .foregroundStyle(.secondary)
 
                 Text("Session clock frozen")
@@ -60,7 +62,7 @@ struct SessionRideUIPage: View {
     private var ridingView: some View {
         VStack(spacing: 4) {
             Text(SessionFormatters.segmentDuration(session.currentRideDuration))
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(.largeTitle, design: .rounded).bold())
                 .monospacedDigit()
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
