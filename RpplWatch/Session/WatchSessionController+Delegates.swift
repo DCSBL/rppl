@@ -30,6 +30,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             )
             locationBuffer.append(sample)
             locationCount += 1
+            captureSessionStartCoordinate(from: sample)
             appendToLocationRing(sample)
             processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)

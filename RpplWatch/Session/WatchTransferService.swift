@@ -11,6 +11,8 @@ final class WatchTransferService: NSObject {
     var lastMessage = String(localized: "WC idle")
     var syncState: SyncConnectionState = .notActivated
     var pendingTransferCount = 0
+    /// Bumps on ack / pending refresh so summary sync line re-renders.
+    private(set) var syncStatusRevision = 0
 
     private var store: SessionFileStore?
     private let tempDir: URL
@@ -48,6 +50,16 @@ final class WatchTransferService: NSObject {
     func refreshPendingCount() {
         let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         pendingTransferCount = (try? fileStore.sessionsNeedingTransfer().count) ?? 0
+        syncStatusRevision &+= 1
+    }
+
+    /// Locked summary copy: Syncing… until phone ack, then Synced.
+    func isSessionSynced(sessionId: String) -> Bool {
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        guard let manifest = try? fileStore.readManifest(sessionId: sessionId) else {
+            return false
+        }
+        return manifest.transferState == .acknowledged
     }
 
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {

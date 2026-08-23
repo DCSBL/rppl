@@ -12,6 +12,11 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
+    /// Post-stop summary until Done; takes precedence over idle in ContentView.
+    var endedSessionSummary: EndedSessionSummary?
+    /// First usable GPS fix this session — start pin on end summary map.
+    var sessionStartLatitude: Double?
+    var sessionStartLongitude: Double?
     /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
     var isStopping = false
     /// True while permissions / HK start run — stay on the tapped picker card.

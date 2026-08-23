@@ -8,7 +8,13 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if session.isRunning {
+            if let summary = session.endedSessionSummary {
+                SessionEndSummaryView(
+                    summary: summary,
+                    session: session,
+                    transfer: transfer
+                )
+            } else if session.isRunning {
                 ActiveSessionView(session: session)
             } else if session.areRecordingPermissionsReady {
                 IdleSessionView(session: session, transfer: transfer)
