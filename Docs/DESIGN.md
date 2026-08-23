@@ -71,7 +71,7 @@ sequenceDiagram
 - Codes: `riding` / `inactive` / `unsure`.
 - Manual labels removed.
 
-Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](Phase3.md).
+Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [RideDetection.md](RideDetection.md).
 
 ## Hard constraints (unchanged)
 

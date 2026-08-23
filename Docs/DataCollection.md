@@ -1,4 +1,4 @@
-# Data collection (Phase 2+)
+# Data collection
 
 Cable-park wakeboarding data collector. Tracking runs only on Apple Watch.
 
@@ -14,7 +14,7 @@ Engine: `DetectionEngine` in RpplCore (filter → holds → detectors → lookba
 
 Manual Action Button labels are **removed**. Ultra Action Button may still **start** a session via Workout intent.
 
-Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · storage: [SessionStorage.md](SessionStorage.md) · thresholds: [Phase3.md](Phase3.md).
+Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · storage: [SessionStorage.md](SessionStorage.md) · thresholds: [RideDetection.md](RideDetection.md).
 
 ## Streams
 
@@ -74,7 +74,7 @@ Optional start only:
 2. App › **Rppl** (Cable Park)
 3. Press starts the session when idle; press while recording is a **no-op**
 
-Requires an active HealthKit workout path for Workout intent registration. Cycle Label is obsolete — see [Postmortems/ActionButtonCycleLabel.md](Postmortems/ActionButtonCycleLabel.md).
+Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
 ## Transfer
 

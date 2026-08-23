@@ -32,7 +32,7 @@ _Only use linear issues when one is given by the user_
 - Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Detection thresholds: [Docs/RideDetection.md](Docs/RideDetection.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
 
 ## Architecture rules
 
@@ -73,7 +73,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 | Task | Start here |
 |------|------------|
-| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [Docs/RideDetection.md](Docs/RideDetection.md) · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
@@ -82,21 +82,19 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
-| Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
 
 ## Out of scope unless explicitly asked
 
 - GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
-- CloudKit sync (Phase 4)
+- CloudKit sync
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
-- Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
-- Mac viz, Core Assumer threshold invention, or park profiles until explicitly requested ([Docs/Phase3.md](Docs/Phase3.md), [Docs/Ideas.md](Docs/Ideas.md))
+- Park profiles / dock geofence hardcoding (Linear: DCSBL-56)
+- Mac timeline viz or inventing detector thresholds without an explicit ask (Linear: DCSBL-60)
 
 ## When unsure
 
-Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (product pause, phone labeling, deleting Watch data early), **stop and ask**. Do not invent Phase 3 detector thresholds or park profiles without an explicit code ask — follow [Docs/Phase3.md](Docs/Phase3.md).
+Prefer the locked Defaults in README over inventing product behavior. If a change forks UX (product pause, phone labeling, deleting Watch data early), **stop and ask**. Do not invent detector thresholds or park profiles without an explicit code ask — follow [Docs/RideDetection.md](Docs/RideDetection.md) and `DetectionThresholds` in Core.

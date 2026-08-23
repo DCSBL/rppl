@@ -72,9 +72,9 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName
 | Mid-record | No derived write; live metrics stay RAM |
 | Crash | No new resume; do not regress today’s crash = dead |
 
-Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations. Distilled-only (drop raw) and Finder/USB Documents sharing are **out of this work**.
+Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
-## Non-goals (this issue)
+## Out of scope
 
 - `UIFileSharingEnabled` / Files over USB
 - Delete raw / distilled-only mode

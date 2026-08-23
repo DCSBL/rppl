@@ -10,14 +10,14 @@ Reliable checkpoints over pretty UI. Lost park days are not OK.
 
 Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl records sensor data on Watch so later analysis can measure ride length, rounds, and balance. Trick detection is out of scope for now.
 
-## MVP (Phases 1–2) — distilled
+## Product lock
 
 | Locked choice | Decision |
 |---------------|----------|
 | Platforms | iPhone + Watch only · iOS / watchOS **26+** |
 | Reference gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Riders · reliable capture over flashy UX |
-| Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **no pause** |
+| Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **product Pause** allowed (≠ detection `inactive`) |
 | Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export · **no label editor** |
 | HealthKit | Save workout via `finishWorkout()` · `waterSports` (wakeboard MET) · HK session stays running · ride + dock HK activities · ride-scoped energy · ride-gated distance samples + GPS route · HR/energy mirrored into files |
@@ -28,7 +28,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 
 **Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.
 
-### Detection (Phase 3)
+### Detection
 
 Watch runs a pure Core **detector + merger** (`DetectionEngine`) that writes opaque codes into `detections.jsonl`:
 
@@ -42,12 +42,7 @@ Writes **only on transitions** (+ `session_start`) and lookback revisions (`supe
 
 Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 60 s same ride). Ultra `submerged` logged only; motion activity logged only.
 
-Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). **Intern guide (start/stop detection):** [Docs/RideDetection.md](Docs/RideDetection.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
-
-### Later
-
-- **Phase 3 continued** — Mac timeline viz (detections lane, threshold scrubbers), ride-length / rounds metrics · [Docs/Phase3.md](Docs/Phase3.md) · [Docs/Ideas.md](Docs/Ideas.md)
-- **Phase 4** — Product UI, CloudKit sync, heatmap polish
+Thresholds + intern guide: [Docs/RideDetection.md](Docs/RideDetection.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
 
 ## Repo layout
 
@@ -55,7 +50,7 @@ Thresholds and roadmap: [Docs/Phase3.md](Docs/Phase3.md). **Intern guide (start/
 RpplCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
 RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
 Rppl/         iPhone permissions, sync receive, map, export
-Docs/                DataCollection, SessionStorage, DevWorkflow, Phase3, Ideas, DESIGN (system)
+Docs/         DataCollection, SessionStorage, DevWorkflow, RideDetection, DESIGN
 scripts/git-hooks/   pre-commit lint; pre-push xcode gate
 .github/workflows/   PR pre-commit checks (Linux)
 ```
