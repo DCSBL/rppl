@@ -30,6 +30,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             )
             locationBuffer.append(sample)
             locationCount += 1
+            appendToLocationRing(sample)
             processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)
             #if RPPL_WEATHERKIT

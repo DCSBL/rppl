@@ -110,6 +110,9 @@ extension WatchSessionController {
             lastConfident: lastConfidentCode,
             events: events
         )
+        for event in events where event.code == DetectionCodes.riding && event.detectorId == "ride_enter" {
+            replayLocationRingForRideEnter(holdStart: event.timestamp)
+        }
         guard !events.isEmpty else { return }
         for event in events {
             persistDetection(event)

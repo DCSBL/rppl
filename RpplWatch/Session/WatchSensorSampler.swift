@@ -50,6 +50,20 @@ extension WatchSessionController {
         WakeLog.debug(.session, "device motion recording @25Hz (zlib JSONL)")
     }
 
+    func appendToLocationRing(_ sample: LocationSample) {
+        recentLocationRing.append(sample)
+        let cutoff = sample.timestamp.addingTimeInterval(-Self.locationRingMaxAge)
+        recentLocationRing.removeAll { $0.timestamp < cutoff }
+    }
+
+    func replayLocationRingForRideEnter(holdStart: Date) {
+        let samples = recentLocationRing
+            .filter { $0.timestamp >= holdStart }
+            .sorted { $0.timestamp < $1.timestamp }
+        guard !samples.isEmpty else { return }
+        liveRideTracker.replayLocationsForRideEnter(samples, from: holdStart)
+    }
+
     func startActivityUpdatesIfAvailable() {
         activityUpdatesStarted = false
         guard CMMotionActivityManager.isActivityAvailable() else {
@@ -222,4 +236,5 @@ extension WatchSessionController {
 
     static let waterTempPersistInterval: TimeInterval = 15
     static let waterTempLogDeltaC = 2.0
+    static let locationRingMaxAge: TimeInterval = 5
 }

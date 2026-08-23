@@ -112,6 +112,25 @@ struct DetectionEngineTests {
         #expect(events.first?.code == DetectionCodes.riding)
     }
 
+    @Test func walkBandSpeedDoesNotEnterRide() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        #expect(engine.process(tick(at: 0, speedKmh: 8)).isEmpty)
+        #expect(engine.process(tick(at: 5, speedKmh: 8)).isEmpty)
+        #expect(engine.currentCode == DetectionCodes.inactive)
+    }
+
+    @Test func rideEnterBackdatesToHoldStart() {
+        var engine = DetectionEngine()
+        _ = engine.makeSessionStartEvent(at: t0)
+        _ = engine.process(tick(at: 0, speedKmh: 22))
+        _ = engine.process(tick(at: 2.0, speedKmh: 22))
+        let events = engine.process(tick(at: 3.1, speedKmh: 22))
+        #expect(events.first?.code == DetectionCodes.riding)
+        #expect(events.first?.timestamp == t0)
+        #expect(events.first?.reason.contains("backfill_from") == true)
+    }
+
     @Test func midSessionStartEntersRideAtFastCableSpeed() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
@@ -129,14 +148,6 @@ struct DetectionEngineTests {
         #expect(events.first?.code == DetectionCodes.riding)
     }
 
-    @Test func walkBandSpeedDoesNotEnterRide() {
-        var engine = DetectionEngine()
-        _ = engine.makeSessionStartEvent(at: t0)
-        #expect(engine.process(tick(at: 0, speedKmh: 8)).isEmpty)
-        #expect(engine.process(tick(at: 5, speedKmh: 8)).isEmpty)
-        #expect(engine.currentCode == DetectionCodes.inactive)
-    }
-
     @Test func walkBandStartNeedsLongerHold() {
         var engine = DetectionEngine()
         _ = engine.makeSessionStartEvent(at: t0)
@@ -148,6 +159,7 @@ struct DetectionEngineTests {
         let events = engine.process(tick(at: 5.0, speedKmh: 22))
         #expect(events.first?.code == DetectionCodes.riding)
         #expect(events.first?.reason.contains("from=walk") == true)
+        #expect(events.first?.timestamp == t0.addingTimeInterval(1))
     }
 
     @Test func walkBumpThenSlowdownDoesNotEnterRide() {

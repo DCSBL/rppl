@@ -210,6 +210,7 @@ extension WatchSessionController {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
         #if RPPL_WEATHERKIT
         resetAirWeather()
