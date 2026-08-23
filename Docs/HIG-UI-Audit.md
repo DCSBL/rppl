@@ -45,7 +45,7 @@ Previously skipped here; now tracked. Full first-run flow still a later build �
 **Keep**
 
 - Example session on empty Logbook — explore maps/stats **before** first real workout.
-- No forced multi-page onboarding carousel for alpha.
+- No forced multi-page onboarding carousel.
 
 **Fix**
 
@@ -61,7 +61,7 @@ Previously skipped here; now tracked. Full first-run flow still a later build �
 | Defer Watch permission prompts off cold launch | #57 |
 | Watch permissions onboarding checklist | #59 |
 | iPhone About permissions list; ask after first sync | #60 |
-| Multi-step branded onboarding | Deferred (alpha) |
+| Multi-step branded onboarding | Deferred |
 
 ## Sync: background WC + completion notice
 
@@ -114,7 +114,7 @@ Caveats: delivery can stall until Watch↔iPhone connect; phone unlocked may sup
 | Watch Always On / reduced luminance | Shipped — `isLuminanceReduced` dims secondary chrome; primary metric full; controls stay (Ride + Controls pages) |
 | Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
-| Soften About `toolbarBackground` | Dropped (alpha polish) |
+| Soften About `toolbarBackground` | Dropped |
 | Logbook concentric corner radii | Shipped (this PR); [DCSBL-51](https://linear.app/dcsbl/issue/DCSBL-51/hig-ui-follow-ups-pr-48) |
 
 ## Liquid Glass / WWDC25-356 notes
@@ -135,7 +135,7 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 
 ### Still open after 356
 
-- Soften About nav bar background — dropped (alpha polish)
+- Soften About nav bar background — dropped
 
 ## Reference links
 
@@ -157,4 +157,4 @@ Not about WC/HealthKit — still shapes how Rppl should sit on iOS 26 / watchOS 
 - Complications / Live Activities
 - Activity rings chrome
 - Park profiles / detection thresholds
-- Long branded onboarding carousel (alpha)
+- Long branded onboarding carousel

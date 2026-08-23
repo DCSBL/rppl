@@ -48,7 +48,7 @@ Export exists so you can share **raw, unfiltered** session data for analysis. Rp
 
 An export can include:
 
-- Session metadata, including a random install-scoped tester ID
+- Session metadata, including a random install-scoped identifier
 - Ride / pause (inactive) detections
 - GPS locations with **precise coordinates (not anonymized)**
 - Device motion
@@ -56,7 +56,7 @@ An export can include:
 - Water temperature when available
 - Derived session stats
 
-A unique random tester ID is created on first app launch and stored on your device. Reinstalling the app generates a new ID. It is not a name or account.
+A unique random install identifier is created on first app launch and stored on your device. Reinstalling the app generates a new ID. It is not a name or account.
 
 If you share an export, **you** choose who receives it and remain responsible for that share and how the data is used afterward. We may **ask** for a copy when analytics look wrong — sending one is always **fully your choice**.
 
@@ -69,7 +69,7 @@ Collected only to process your cable-park activity on your devices:
 - Heart rate and energy estimates (via HealthKit when allowed)
 - Automatic ride / inactive detections derived from the sensors above
 - Water temperature when available (Apple Watch Ultra)
-- A random install-scoped tester identifier created on first launch (not a name or account; new ID after reinstall)
+- A random install-scoped identifier created on first launch (not a name or account; new ID after reinstall)
 
 Apple HealthKit data is used only to support health and fitness features (workout recording and related metrics), not for advertising or data brokering. We do not upload this information to a Rppl server. Transfer between Watch and iPhone uses Apple Watch Connectivity on your devices.
 

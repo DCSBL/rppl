@@ -4,7 +4,7 @@ Library UML (filter / holds / detectors): [../RpplCore/DESIGN.md](../RpplCore/DE
 
 ## Goal
 
-Detect **rides** and **pauses** from GPS speed in real time so testers need no Action Button labeling. Codes stay opaque strings (`riding`, `inactive`, `unsure`).
+Detect **rides** and **pauses** from GPS speed in real time so riders need no Action Button labeling. Codes stay opaque strings (`riding`, `inactive`, `unsure`).
 
 ## Detection stream (live now)
 
