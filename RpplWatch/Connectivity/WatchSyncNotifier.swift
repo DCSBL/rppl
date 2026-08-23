@@ -4,8 +4,13 @@ import WatchKit
 import RpplCore
 
 /// Local notifications for Watch→phone sync outcomes.
+@MainActor
 enum WatchSyncNotifier {
     private static let categoryId = "rppl.sync"
+    private static let coalesceNanoseconds: UInt64 = 750_000_000
+
+    private static var pendingSessionIds: Set<String> = []
+    private static var coalesceTask: Task<Void, Never>?
 
     /// Request alert permission in context (first transfer), not at cold launch.
     static func requestAuthorizationIfNeeded() async {
@@ -26,36 +31,54 @@ enum WatchSyncNotifier {
         }
     }
 
-    /// Fire when phone ack confirms the session is safe on iPhone.
+    /// Queue a sync-complete alert for a session that newly reached phone ack.
+    /// Rapid acks coalesce into one banner (singular or plural).
     static func notifySyncCompleted(sessionId: String) {
-        Task {
-            let center = UNUserNotificationCenter.current()
-            let settings = await center.notificationSettings()
-            guard settings.authorizationStatus == .authorized
-                || settings.authorizationStatus == .provisional
-            else {
-                WakeLog.debug(.sync, "skip sync notify — not authorized")
-                return
-            }
+        pendingSessionIds.insert(sessionId)
+        coalesceTask?.cancel()
+        coalesceTask = Task {
+            try? await Task.sleep(nanoseconds: coalesceNanoseconds)
+            guard !Task.isCancelled else { return }
+            let ids = pendingSessionIds
+            pendingSessionIds.removeAll()
+            guard !ids.isEmpty else { return }
+            await presentSyncCompleted(sessionCount: ids.count)
+        }
+    }
 
-            let content = UNMutableNotificationContent()
+    private static func presentSyncCompleted(sessionCount: Int) async {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .authorized
+            || settings.authorizationStatus == .provisional
+        else {
+            WakeLog.debug(.sync, "skip sync notify — not authorized")
+            return
+        }
+
+        let content = UNMutableNotificationContent()
+        if sessionCount <= 1 {
             content.title = String(localized: "Session synced")
             content.body = String(localized: "Park day is on your iPhone.")
-            content.sound = .default
-            content.categoryIdentifier = categoryId
-            content.userInfo = [AppConstants.wcAckMessageKey: sessionId]
-
-            let request = UNNotificationRequest(
-                identifier: "rppl.sync.\(sessionId)",
-                content: content,
-                trigger: nil
+        } else {
+            content.title = String(localized: "Sessions synced")
+            content.body = String(
+                localized: "\(sessionCount) park days are on your iPhone."
             )
-            do {
-                try await center.add(request)
-                WakeLog.debug(.sync, "scheduled sync notify \(sessionId.prefix(8))…")
-            } catch {
-                WakeLog.error(.sync, "sync notify: \(error.localizedDescription)")
-            }
+        }
+        content.sound = .default
+        content.categoryIdentifier = categoryId
+
+        let request = UNNotificationRequest(
+            identifier: "rppl.sync.batch.\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        do {
+            try await center.add(request)
+            WakeLog.debug(.sync, "scheduled sync notify count=\(sessionCount)")
+        } catch {
+            WakeLog.error(.sync, "sync notify: \(error.localizedDescription)")
         }
     }
 }
