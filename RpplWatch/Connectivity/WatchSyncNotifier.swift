@@ -62,9 +62,7 @@ enum WatchSyncNotifier {
             content.body = String(localized: "Park day is on your iPhone.")
         } else {
             content.title = String(localized: "Sessions synced")
-            content.body = String(
-                localized: "\(sessionCount) park days are on your iPhone."
-            )
+            content.body = String(format: String(localized: "%lld park days are on your iPhone."), sessionCount)
         }
         content.sound = .default
         content.categoryIdentifier = categoryId

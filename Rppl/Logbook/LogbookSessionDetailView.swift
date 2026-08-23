@@ -115,7 +115,7 @@ struct LogbookSessionDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Share all raw, unfiltered and unanonymous data as a file.")
+            Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
         }
         .alert(
             "Could Not Export",
@@ -226,7 +226,7 @@ struct LogbookSessionDetailView: View {
                         statTile(
                             stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
                                 ?? TemperatureFormat.placeholder,
-                            label: "Water temp"
+                            label: "Water temperature"
                         )
                     }
                     if let calories = stats.activeEnergyKilocalories {
