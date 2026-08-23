@@ -81,13 +81,14 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 | Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
+| GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
 
 ## Out of scope unless explicitly asked
 
-- GitHub Actions CI (can mirror `xcode-gate` later)
+- GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
 - CloudKit sync (Phase 4)

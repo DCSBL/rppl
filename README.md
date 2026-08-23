@@ -57,6 +57,7 @@ RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
 Rppl/         iPhone permissions, sync receive, map, export
 Docs/                DataCollection, SessionStorage, DevWorkflow, Phase3, Ideas, DESIGN (system)
 scripts/git-hooks/   pre-commit lint; pre-push xcode gate
+.github/workflows/   PR pre-commit checks (Linux)
 ```
 
 ## Quick start

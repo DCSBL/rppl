@@ -60,6 +60,21 @@ Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
 - Skip heavy gate on push: `SKIP=xcode-gate git push ...`
 - Skip all hooks: `git commit --no-verify` / `git push --no-verify` (do not use as normal workflow)
 
+## GitHub Actions
+
+### PR checks (Linux)
+
+Workflow: [`.github/workflows/pr-checks.yml`](../.github/workflows/pr-checks.yml).
+
+On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner reuses the same **commit-stage** pre-commit hooks (hygiene, codespell, SwiftLint, legal sync). It does **not** run `xcode-gate` / `swift test` / `xcodebuild` (macOS + Xcode only; slow on CI).
+
+- Caches `~/.cache/pre-commit` and the SwiftLint Linux binary.
+- Runs `pre-commit run --from-ref <base> --to-ref <head>` so hooks only see PR-changed files.
+- SwiftLint install is a **step-level** skip when the PR has no Swift / SwiftLint config changes. The job always reports a status, so you can mark `pre-commit` as a required check without skipped-job merge blocks.
+- Hooks with no matching files are skipped by pre-commit (exit 0).
+
+To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`**.
+
 ## Notes
 
 - Commit stays light (hygiene + spell + lint). First push after app/Core source changes still pays for `xcodebuild`; later pushes with the same inputs skip it. Core-test-only pushes skip the app build.

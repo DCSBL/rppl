@@ -1,0 +1,104 @@
+# Light PR checks on Linux — mirrors local pre-commit (hygiene, codespell, SwiftLint).
+# No unit tests / xcode-gate (macOS / Xcode only).
+#
+# Required-check friendly: this job always runs. Individual steps skip when the
+# PR has no matching file changes (a skipped *job* would block merge when the
+# check is required; a skipped *step* does not).
+
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SWIFTLINT_VERSION: "0.65.1"
+  # sha256 of swiftlint_linux_amd64.zip @ SWIFTLINT_VERSION
+  SWIFTLINT_SHA256: "caeed6f4a679c35539ffaf124f6c4ab4a8416917f7d8796279dc52b74026059d"
+
+jobs:
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Swift changes
+        id: filter
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$base" "$head" \
+            | grep -E '(^|/)(\.swiftlint\.yml|\.pre-commit-config\.yaml)$|\.swift$|scripts/git-hooks/run-swiftlint\.sh$' \
+            >/dev/null; then
+            echo "swift=true" >> "$GITHUB_OUTPUT"
+            echo "Swift / SwiftLint-related paths changed"
+          else
+            echo "swift=false" >> "$GITHUB_OUTPUT"
+            echo "No Swift / SwiftLint-related paths changed"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      - name: Install pre-commit
+        run: pip install --user "pre-commit==4.2.0"
+
+      - name: Cache SwiftLint
+        if: steps.filter.outputs.swift == 'true'
+        id: cache-swiftlint
+        uses: actions/cache@v4
+        with:
+          path: tools/bin/swiftlint
+          key: swiftlint-${{ runner.os }}-${{ env.SWIFTLINT_VERSION }}-${{ env.SWIFTLINT_SHA256 }}
+
+      - name: Install SwiftLint
+        if: steps.filter.outputs.swift == 'true' && steps.cache-swiftlint.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p tools/bin
+          curl -fsSL -o /tmp/swiftlint.zip \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/swiftlint_linux_amd64.zip"
+          echo "${SWIFTLINT_SHA256}  /tmp/swiftlint.zip" | sha256sum --check
+          # Static binary avoids needing a full Swift toolchain / SourceKit on the runner.
+          unzip -qo /tmp/swiftlint.zip swiftlint-static -d /tmp/swiftlint-extract
+          install -m 755 /tmp/swiftlint-extract/swiftlint-static tools/bin/swiftlint
+          tools/bin/swiftlint version
+
+      - name: Skip SwiftLint install (no Swift changes)
+        if: steps.filter.outputs.swift != 'true'
+        run: echo "No Swift / SwiftLint config changes — SwiftLint step skipped (pre-commit will skip the hook)."
+
+      - name: Run pre-commit (changed files only)
+        run: |
+          set -euo pipefail
+          export PATH="${GITHUB_WORKSPACE}/tools/bin:${HOME}/.local/bin:${PATH}"
+          # Commit-stage hooks only (excludes xcode-gate / pre-push).
+          # Hooks with no matching files in the PR range are skipped by pre-commit
+          # (exit 0) — safe when this check is required on the branch.
+          python -m pre_commit run \
+            --show-diff-on-failure \
+            --color=always \
+            --from-ref "${{ github.event.pull_request.base.sha }}" \
+            --to-ref "${{ github.event.pull_request.head.sha }}"
