@@ -335,10 +335,33 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        _ = _ = try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
         try store.markReadyToTransfer(sessionId: manifest.sessionId)
-        try store.markAcknowledged(sessionId: manifest.sessionId)
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
         #expect(try store.sessionsNeedingTransfer().isEmpty)
+    }
+
+    @Test func markAcknowledgedIsIdempotent() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ack-idem-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markTransferring(sessionId: manifest.sessionId)
+
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).transferState == .acknowledged)
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == false)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).transferState == .acknowledged)
     }
 
     @Test func recordingSessionNotPending() throws {

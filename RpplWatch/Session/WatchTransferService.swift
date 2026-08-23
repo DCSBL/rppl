@@ -202,11 +202,17 @@ extension WatchTransferService: WCSessionDelegate {
         WakeLog.debug(.ack, "received ack \(ack.prefix(8))…")
         let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         do {
-            try store.markAcknowledged(sessionId: ack)
+            let newlyAcknowledged = try store.markAcknowledged(sessionId: ack)
             lastMessage = String(localized: "Acked \(ack.prefix(8))")
-            WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
+            WakeLog.debug(
+                .ack,
+                "markAcknowledged OK \(ack.prefix(8))… newly=\(newlyAcknowledged)"
+            )
             refreshPendingCount()
-            WatchSyncNotifier.notifySyncCompleted(sessionId: ack)
+            // Phone rebroadcasts / dual-channel acks must not spam banners.
+            if newlyAcknowledged {
+                WatchSyncNotifier.notifySyncCompleted(sessionId: ack)
+            }
         } catch {
             lastMessage = String(localized: "Ack failed: \(error.localizedDescription)")
             WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
