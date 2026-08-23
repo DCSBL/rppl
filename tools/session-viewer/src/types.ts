@@ -9,6 +9,10 @@ export interface SessionManifest {
   startedAt: string
   endedAt?: string | null
   transferState: string
+  /** Watch settings wrist side at session start (`left` / `right`). */
+  wristLocation?: string | null
+  /** Watch settings Digital Crown side at session start (`left` / `right`). */
+  crownOrientation?: string | null
 }
 
 export interface LocationSample {

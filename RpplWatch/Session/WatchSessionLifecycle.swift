@@ -162,7 +162,9 @@ extension WatchSessionController {
             watchModel: WatchSessionController.deviceModel(),
             systemVersion: WKInterfaceDevice.current().systemVersion,
             waterTemperatureAvailable: waterTemperatureAvailable,
-            activityCode: code
+            activityCode: code,
+            wristLocation: WatchSessionController.wristLocationCode(),
+            crownOrientation: WatchSessionController.crownOrientationCode()
         )
         self.manifest = manifest
         WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")

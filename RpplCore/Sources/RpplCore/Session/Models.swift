@@ -15,6 +15,10 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var waterTemperatureAvailable: Bool?
     /// Opaque activity code (`wakeboard`, …). Localized titles are display-only.
     public var activityCode: String?
+    /// Watch settings wrist side at session start (`left` / `right`). Nil for older sessions.
+    public var wristLocation: String?
+    /// Watch settings Digital Crown side at session start (`left` / `right`). Nil for older sessions.
+    public var crownOrientation: String?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -35,7 +39,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         endedAt: Date? = nil,
         transferState: TransferState = .recording,
         waterTemperatureAvailable: Bool? = nil,
-        activityCode: String? = nil
+        activityCode: String? = nil,
+        wristLocation: String? = nil,
+        crownOrientation: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -49,6 +55,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.transferState = transferState
         self.waterTemperatureAvailable = waterTemperatureAvailable
         self.activityCode = activityCode
+        self.wristLocation = wristLocation
+        self.crownOrientation = crownOrientation
     }
 }
 

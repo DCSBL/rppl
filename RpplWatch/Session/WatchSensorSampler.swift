@@ -203,6 +203,23 @@ extension WatchSessionController {
         return String(cString: machine)
     }
 
+    /// User Watch setting at session start — CoreMotion axes stay hardware-fixed.
+    static func wristLocationCode() -> String {
+        switch WKInterfaceDevice.current().wristLocation {
+        case .left: return "left"
+        case .right: return "right"
+        @unknown default: return "unknown"
+        }
+    }
+
+    static func crownOrientationCode() -> String {
+        switch WKInterfaceDevice.current().crownOrientation {
+        case .left: return "left"
+        case .right: return "right"
+        @unknown default: return "unknown"
+        }
+    }
+
     static let waterTempPersistInterval: TimeInterval = 15
     static let waterTempLogDeltaC = 2.0
 }

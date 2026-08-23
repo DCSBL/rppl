@@ -79,6 +79,13 @@ app.innerHTML = `
   <div id="detail">Scrub playhead or click chart / track for point detail.</div>
 `
 
+function wearSettingsLabel(manifest: AnalysisPackage['manifest']): string {
+  const wrist = manifest.wristLocation
+  const crown = manifest.crownOrientation
+  if (!wrist && !crown) return ''
+  return ` · wrist ${wrist ?? '?'} · crown ${crown ?? '?'}`
+}
+
 const statusEl = document.querySelector<HTMLDivElement>('#status')!
 const summaryEl = document.querySelector<HTMLDivElement>('#summary')!
 const detailEl = document.querySelector<HTMLDivElement>('#detail')!
@@ -232,7 +239,9 @@ function applyPackage(
     savedPlayhead ?? windowRange.startMs,
     windowRange,
   )
-  statusEl.textContent = `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections`
+  statusEl.textContent =
+    `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections`
+    + wearSettingsLabel(next.manifest)
   updateSummary(derived)
   wireSliders()
   render()
