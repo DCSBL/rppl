@@ -6,6 +6,7 @@ struct SessionControlsPage: View {
     @State private var showStopConfirmation = false
 
     var body: some View {
+        // Always On: keep every control visible and full-brightness (stable layout; don’t remove).
         VStack(spacing: 8) {
             if session.isStopping {
                 ProgressView("Stopping…")

@@ -99,14 +99,6 @@ HIG Workouts: auto-discard or ask if the session ends after only a few seconds. 
 
 **Locked:** If duration < ~30s **and** zero rides, confirm discard on Watch. Never silent-delete; keep-until-phone-ack still applies to real transfers.
 
-### Watch: Always On / reduced luminance (Low)
-
-No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep primary metric, stable layout (don’t remove controls).
-
-**Locked design; ship blocked on:** park-day Always On wrist test (Ultra + non-Ultra).
-
-**Touches:** [`SessionRideUIPage.swift`](../RpplWatch/Views/SessionRideUIPage.swift), [`SessionControlsPage.swift`](../RpplWatch/Views/SessionControlsPage.swift).
-
 ### Logbook concentric corner radii (Low)
 
 **Locked:** Audit nested shapes (icon well inside card); fix radii for Liquid Glass.
@@ -115,6 +107,7 @@ No `isLuminanceReduced` handling. HIG Always On: dim secondary chrome, keep prim
 
 | Item | Status |
 |------|--------|
+| Watch Always On / reduced luminance | Shipped — `isLuminanceReduced` dims secondary chrome; primary metric full; controls stay (Ride + Controls pages) |
 | Watch idle brand colors vs system appearance | Shipped [DCSBL-52](https://linear.app/dcsbl/issue/DCSBL-52/watch-idle-brand-colors-vs-system-appearance) |
 | `TabBarLeadingAligner` private platter pin | Shipped #61; [DCSBL-23](https://linear.app/dcsbl/issue/DCSBL-23) Canceled |
 | Soften About `toolbarBackground` | Dropped (alpha polish) |
