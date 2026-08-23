@@ -1,0 +1,76 @@
+# Trigger Xcode Cloud on GitHub Release (prep).
+#
+# When App Store Connect / Xcode Cloud secrets are not yet configured, the job
+# succeeds with a notice so releases are not blocked. Once secrets exist, this
+# dispatches the configured Xcode Cloud workflow for the release tag via
+# App Store Connect API POST /v1/ciBuildRuns.
+#
+# Required repository secrets (when enabling):
+#   APP_STORE_CONNECT_ISSUER_ID
+#   APP_STORE_CONNECT_KEY_ID
+#   APP_STORE_CONNECT_PRIVATE_KEY   # .p8 PEM body
+#   XCODE_CLOUD_WORKFLOW_ID         # Test+Release workflow UUID from App Store Connect
+#
+# Docs: Docs/DevWorkflow.md (GitHub Actions / Xcode Cloud)
+
+name: Release — Xcode Cloud
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: "Branch or tag name for Xcode Cloud to build"
+        required: true
+        default: main
+      reference_kind:
+        description: "Optional: BRANCH or TAG (blank = auto)"
+        required: false
+        default: ""
+
+concurrency:
+  group: release-xcode-cloud-${{ github.event.release.tag_name || inputs.git_reference || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  trigger-xcode-cloud:
+    name: Trigger Xcode Cloud
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyJWT
+        run: pip install --user "PyJWT[crypto]==2.10.1"
+
+      - name: Resolve git reference
+        id: ref
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "name=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "kind=TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${{ inputs.git_reference }}" >> "$GITHUB_OUTPUT"
+            echo "kind=${{ inputs.reference_kind }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger Xcode Cloud workflow
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          XCODE_CLOUD_WORKFLOW_ID: ${{ secrets.XCODE_CLOUD_WORKFLOW_ID }}
+          GIT_REFERENCE_NAME: ${{ steps.ref.outputs.name }}
+          GIT_REFERENCE_KIND: ${{ steps.ref.outputs.kind }}
+        run: |
+          set -euo pipefail
+          export PATH="${HOME}/.local/bin:${PATH}"
+          chmod +x scripts/ci/trigger-xcode-cloud.sh
+          scripts/ci/trigger-xcode-cloud.sh
