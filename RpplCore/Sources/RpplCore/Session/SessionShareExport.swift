@@ -19,12 +19,44 @@ public enum SessionShareExport {
         return "rppl_\(timestamp)_\(location).json"
     }
 
-    /// Pretty-printed package bytes; encode order keeps `manifest` as the first key.
+    /// Pretty-printed package bytes; top-level `manifest` is always the first key.
+    ///
+    /// `JSONEncoder` does not preserve `encode(_:forKey:)` order unless `.sortedKeys` is set,
+    /// and `.sortedKeys` would place `detections` before `manifest`. Assemble the object
+    /// manually so Share files stay human-scannable.
     public static func encode(_ package: SessionTransferPackage) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted]
-        return try encoder.encode(package)
+
+        var fields: [(key: String, value: String)] = []
+        fields.append(("manifest", try encodeFragment(package.manifest, encoder: encoder)))
+        fields.append(("detections", try encodeFragment(package.detections, encoder: encoder)))
+        fields.append(("locations", try encodeFragment(package.locations, encoder: encoder)))
+        if let motionFramesZlib = package.motionFramesZlib, !motionFramesZlib.isEmpty {
+            fields.append(("motionFramesZlib", try encodeFragment(motionFramesZlib, encoder: encoder)))
+        } else {
+            fields.append(("motion", try encodeFragment(package.motion, encoder: encoder)))
+        }
+        fields.append(("health", try encodeFragment(package.health, encoder: encoder)))
+        if !package.water.isEmpty {
+            fields.append(("water", try encodeFragment(package.water, encoder: encoder)))
+        }
+        if let derived = package.derived {
+            fields.append(("derived", try encodeFragment(derived, encoder: encoder)))
+        }
+
+        var lines: [String] = ["{"]
+        for (index, field) in fields.enumerated() {
+            let indented = indentFragment(field.value, by: 2)
+            let suffix = index == fields.count - 1 ? "" : ","
+            lines.append("  \"\(field.key)\": \(indented)\(suffix)")
+        }
+        lines.append("}")
+        guard let data = (lines.joined(separator: "\n") + "\n").data(using: .utf8) else {
+            throw EncodeError.utf8ConversionFailed
+        }
+        return data
     }
 
     /// Filesystem-safe location segment; empty / nil → `unknown`.
@@ -48,5 +80,28 @@ public enum SessionShareExport {
         }
         let slug = String(String.UnicodeScalarView(scalars))
         return slug.isEmpty ? "unknown" : slug
+    }
+
+    private enum EncodeError: Error {
+        case utf8ConversionFailed
+    }
+
+    private static func encodeFragment<T: Encodable>(_ value: T, encoder: JSONEncoder) throws -> String {
+        let data = try encoder.encode(value)
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw EncodeError.utf8ConversionFailed
+        }
+        return string
+    }
+
+    /// Pretty fragments are multi-line; bump indent on every line after the first so nesting
+    /// under the top-level key stays aligned.
+    private static func indentFragment(_ json: String, by spaces: Int) -> String {
+        let pad = String(repeating: " ", count: spaces)
+        let parts = json.split(separator: "\n", omittingEmptySubsequences: false)
+        guard parts.count > 1 else { return json }
+        return parts.enumerated().map { index, line in
+            index == 0 ? String(line) : pad + line
+        }.joined(separator: "\n")
     }
 }
