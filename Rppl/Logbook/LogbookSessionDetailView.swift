@@ -90,17 +90,16 @@ struct LogbookSessionDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if allowsExport {
-                    if let exportURL {
-                        ShareLink(item: exportURL) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-                    } else if isExporting {
+                if allowsExport, loadPhase == .ready {
+                    if isExporting {
                         ProgressView()
-                    } else if loadPhase == .ready {
-                        Button("Export") {
+                    } else {
+                        Button {
                             requestExport()
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
                         }
+                        .accessibilityLabel(Text("Export"))
                     }
                 }
             }
@@ -454,6 +453,10 @@ struct LogbookSessionDetailView: View {
 
     private func startExport() {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        if let exportURL {
+            presentShareSheet(for: exportURL)
+            return
+        }
         showExportError = false
         exportErrorText = nil
         isExporting = true
@@ -466,6 +469,7 @@ struct LogbookSessionDetailView: View {
         exportTask?.cancel()
         exportTask = nil
         isExporting = false
+        exportURL = nil
     }
 
     private func prepareExport() async {
@@ -493,6 +497,7 @@ struct LogbookSessionDetailView: View {
             try Task.checkCancellation()
             exportURL = url
             finishExportTask()
+            presentShareSheet(for: url)
             WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))… \(url.lastPathComponent)")
         } catch is CancellationError {
             finishExportTask()
@@ -507,10 +512,17 @@ struct LogbookSessionDetailView: View {
         exportTask = nil
     }
 
+    private func presentShareSheet(for url: URL) {
+        // Present after toolbar ProgressView → icon swap so the share sheet is not dropped.
+        Task { @MainActor in
+            ActivitySharePresenter.present(items: [url])
+        }
+    }
+
     private func presentExportFailure(_ message: String) {
         finishExportTask()
         exportErrorText = message
-        // Present after toolbar ProgressView → Export swap so SwiftUI does not drop the alert.
+        // Present after toolbar ProgressView → icon swap so SwiftUI does not drop the alert.
         Task { @MainActor in
             showExportError = true
         }

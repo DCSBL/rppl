@@ -84,7 +84,7 @@ Phone may be away during the session. After **Stop session**, Watch queues a WC 
 
 ## Export
 
-On iPhone: open a session → **Export** → Share/AirDrop. File name:
+On iPhone: open a session → tap the share icon → prepare (spinner) → system Share sheet (AirDrop / Files / …). File name:
 
 `rppl_<startedAt-UTC>_<location>.json`
 
