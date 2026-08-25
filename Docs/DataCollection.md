@@ -103,4 +103,4 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 | `water` | Ultra water temperature when present |
 | `derived` | Fast view stats / map frame when present |
 
-User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → rppl → Legal → Terms & Privacy policy**.
+User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.

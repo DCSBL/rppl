@@ -35,7 +35,7 @@ struct ContentView: View {
                 AppInfoView()
             } label: {
                 Label {
-                    Text("rppl")
+                    Text("Rppl")
                 } icon: {
                     AppTabIcons.rppl
                 }
