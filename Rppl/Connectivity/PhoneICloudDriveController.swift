@@ -76,6 +76,9 @@ final class PhoneICloudDriveController: NSObject {
     func start() {
         refreshAvailability()
         applyPreferredRootIfNeeded(reason: "start")
+        Task { @MainActor in
+            await uploadLocalOnlyPackagesIfNeeded(reason: "start")
+        }
         restartMetadataQueryIfNeeded()
     }
 
@@ -104,6 +107,7 @@ final class PhoneICloudDriveController: NSObject {
             }
         } else {
             applyPreferredRootIfNeeded(reason: "enable")
+            await uploadLocalOnlyPackagesIfNeeded(reason: "enable")
             restartMetadataQueryIfNeeded()
         }
     }
@@ -141,6 +145,46 @@ final class PhoneICloudDriveController: NSObject {
                 from: current,
                 copyMissing: true,
                 reason: reason
+            )
+            await uploadLocalOnlyPackagesIfNeeded(reason: reason)
+        }
+    }
+
+    /// Push every App Group / Documents package into iCloud Documents when sync is on.
+    /// Runs on start/enable even if the live root is already ubiquity (upgrade / leftover local).
+    private func uploadLocalOnlyPackagesIfNeeded(reason: String) async {
+        guard isSyncEnabled, let cloudRoot = iCloudSessionsRoot else { return }
+        let localRoot = AppConstants.localPhoneSessionsRoot
+        guard localRoot.standardizedFileURL != cloudRoot.standardizedFileURL,
+              fileManager.fileExists(atPath: localRoot.path)
+        else {
+            // Already living in Drive — accept whatever is on the live root so the logbook
+            // includes pre-existing packages after an upgrade.
+            if PhoneConnectivityService.shared.store.rootURL.standardizedFileURL
+                == cloudRoot.standardizedFileURL {
+                let ids = Set(
+                    (try? SessionRootMigrator.sessionIDs(in: cloudRoot)) ?? []
+                )
+                acceptSessions(ids)
+            }
+            return
+        }
+        do {
+            try fileManager.createDirectory(at: cloudRoot, withIntermediateDirectories: true)
+            let copied = try await coordinatedCopyMissing(from: localRoot, to: cloudRoot)
+            if !copied.isEmpty {
+                WakeLog.debug(.store, "iCloud upload-all \(reason) copied=\(copied.count)")
+                acceptSessions(Set(copied))
+                PhoneConnectivityService.shared.bumpSessionsRevision()
+            }
+            // Accept full cloud inventory after upload so this phone’s logbook matches Drive.
+            let cloudIDs = Set((try? SessionRootMigrator.sessionIDs(in: cloudRoot)) ?? [])
+            acceptSessions(cloudIDs)
+        } catch {
+            statusMessage = error.localizedDescription
+            WakeLog.error(
+                .store,
+                "iCloud upload-all \(reason) failed: \(error.localizedDescription)"
             )
         }
     }
