@@ -104,7 +104,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sta elke machtiging toe zodat Rppl je parksessie op Apple Watch kan opnemen."
+            "value": "Sta elke machtiging toe zodat Rppl je park session op Apple Watch kan opnemen."
           }
         }
       }
@@ -282,7 +282,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie verwijderen?"
+            "value": "Session verwijderen?"
           }
         }
       }
@@ -410,7 +410,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie beëindigen"
+            "value": "Session beëindigen"
           }
         }
       }
@@ -426,7 +426,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie beëindigen?"
+            "value": "Session beëindigen?"
           }
         }
       }
@@ -621,7 +621,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helpt te bepalen of je rijdt of rust bij de steiger."
+            "value": "Helpt te bepalen of je aan het riden bent of rust bij de dock."
           }
         }
       }
@@ -813,7 +813,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laatste rit"
+            "value": "Laatste ride"
           }
         }
       }
@@ -829,7 +829,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laatste rit %1$@, %2$@, %3$lld rondes"
+            "value": "Laatste ride %1$@, %2$@, %3$lld rondes"
           }
         }
       }
@@ -993,7 +993,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nog geen ritten"
+            "value": "Nog geen rides"
           }
         }
       }
@@ -1299,7 +1299,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nodig om GPS tijdens je parksessie op te nemen zodat Rppl ritten en afstand kan volgen."
+            "value": "Nodig om GPS tijdens je park session op te nemen zodat Rppl rides en afstand kan volgen."
           }
         }
       }
@@ -1315,7 +1315,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nodig om de workout in Fitness op te slaan en hartslag tijdens het rijden vast te leggen."
+            "value": "Nodig om de workout in Fitness op te slaan en hartslag tijdens het riden vast te leggen."
           }
         }
       }
@@ -1363,7 +1363,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "RIT"
+            "value": "RIDE"
           }
         }
       }
@@ -1379,7 +1379,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ritten"
+            "value": "Rides"
           }
         }
       }
@@ -1395,7 +1395,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rijden"
+            "value": "Riding"
           }
         }
       }
@@ -1412,7 +1412,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl-sessie"
+            "value": "Rppl session"
           }
         }
       }
@@ -1460,7 +1460,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie"
+            "value": "Session"
           }
         }
       }
@@ -1476,7 +1476,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie voltooid"
+            "value": "Session voltooid"
           }
         }
       }
@@ -1492,7 +1492,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Startlocatie van sessie"
+            "value": "Startlocatie van session"
           }
         }
       }
@@ -1508,7 +1508,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kaart van startlocatie van sessie"
+            "value": "Kaart van startlocatie van session"
           }
         }
       }
@@ -1524,7 +1524,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie gesynchroniseerd"
+            "value": "Session gesynchroniseerd"
           }
         }
       }
@@ -1540,7 +1540,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessies gesynchroniseerd"
+            "value": "Sessions gesynchroniseerd"
           }
         }
       }
@@ -1604,7 +1604,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sim: Rit"
+            "value": "Sim: Ride"
           }
         }
       }
@@ -1653,7 +1653,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Start kabelparksessie"
+            "value": "Start kabelpark session"
           }
         }
       }
@@ -1670,7 +1670,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie starten"
+            "value": "Session starten"
           }
         }
       }
@@ -1686,7 +1686,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie starten"
+            "value": "Session starten"
           }
         }
       }
@@ -1703,7 +1703,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Start sessie in \\(.applicationName)"
+            "value": "Start session in \\(.applicationName)"
           }
         }
       }
@@ -1735,7 +1735,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Start een sessie"
+            "value": "Start een session"
           }
         }
       }
@@ -1751,7 +1751,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Start een Rppl-opnamesessie in het kabelpark."
+            "value": "Start een Rppl recording session in het kabelpark."
           }
         }
       }
@@ -2057,7 +2057,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Korter dan 30 seconden en geen ritten. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
+            "value": "Korter dan 30 seconden en geen rides. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
           }
         }
       }

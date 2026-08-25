@@ -95,13 +95,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld rit"
+                  "value": "%lld ride"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld ritten"
+                  "value": "%lld rides"
                 }
               }
             }
@@ -175,13 +175,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld rit totaal"
+                  "value": "%lld ride totaal"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld ritten totaal"
+                  "value": "%lld rides totaal"
                 }
               }
             }
@@ -296,7 +296,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wordt gevraagd nadat je eerste sessie vanaf de Watch binnenkomt. Stadsnamen komen uit Watch-GPS bij elke sessie, niet uit de live locatie van de iPhone."
+            "value": "Wordt gevraagd nadat je eerste session vanaf de Watch binnenkomt. Stadsnamen komen uit Watch-GPS bij elke session, niet uit de live locatie van de iPhone."
           }
         }
       }
@@ -328,7 +328,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kabelparksessies"
+            "value": "Kabelpark sessions"
           }
         }
       }
@@ -377,7 +377,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kies een sessie-export-JSON via Bestanden. Geïmporteerde sessies verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
+            "value": "Kies een session-export-JSON via Bestanden. Geïmporteerde sessions verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
           }
         }
       }
@@ -409,7 +409,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie verwijderen mislukt"
+            "value": "Session verwijderen mislukt"
           }
         }
       }
@@ -441,7 +441,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie importeren mislukt"
+            "value": "Session importeren mislukt"
           }
         }
       }
@@ -457,7 +457,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie laden mislukt"
+            "value": "Session laden mislukt"
           }
         }
       }
@@ -538,7 +538,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie verwijderen?"
+            "value": "Session verwijderen?"
           }
         }
       }
@@ -668,7 +668,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie exporteren?"
+            "value": "Session exporteren?"
           }
         }
       }
@@ -685,7 +685,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie-JSON exporteren"
+            "value": "Session-JSON exporteren"
           }
         }
       }
@@ -701,7 +701,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exporteert het volledige sessiebestand: ruwe sensorgegevens, niets gefilterd of geanonimiseerd."
+            "value": "Exporteert het volledige session-bestand: ruwe sensorgegevens, niets gefilterd of geanonimiseerd."
           }
         }
       }
@@ -814,7 +814,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie importeren"
+            "value": "Session importeren"
           }
         }
       }
@@ -846,7 +846,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie geïmporteerd"
+            "value": "Session geïmporteerd"
           }
         }
       }
@@ -910,7 +910,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laat iPhone Gezondheid lezen voor sessiedetails. Workouts worden op Apple Watch opgenomen."
+            "value": "Laat iPhone Gezondheid lezen voor session-details. Workouts worden op Apple Watch opgenomen."
           }
         }
       }
@@ -926,7 +926,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laat iPhone beweging gebruiken wanneer je een sessie bekijkt."
+            "value": "Laat iPhone beweging gebruiken wanneer je een session bekijkt."
           }
         }
       }
@@ -1043,7 +1043,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessies laden…"
+            "value": "Sessions laden…"
           }
         }
       }
@@ -1059,7 +1059,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie laden…"
+            "value": "Session laden…"
           }
         }
       }
@@ -1303,7 +1303,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen GPS-spoor voor deze rit"
+            "value": "Geen GPS-spoor voor deze ride"
           }
         }
       }
@@ -1320,7 +1320,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen detecties in deze sessie."
+            "value": "Geen detecties in deze session."
           }
         }
       }
@@ -1336,7 +1336,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen GPS van ritten"
+            "value": "Geen GPS van rides"
           }
         }
       }
@@ -1352,7 +1352,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen ritten gedetecteerd."
+            "value": "Geen rides gedetecteerd."
           }
         }
       }
@@ -1368,7 +1368,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nog geen sessies"
+            "value": "Nog geen sessions"
           }
         }
       }
@@ -1545,7 +1545,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Parkdagen en ritten"
+            "value": "Parkdagen en rides"
           }
         }
       }
@@ -1678,7 +1678,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Neem een parkdag op met Apple Watch. Of bekijk de voorbeeldsessie."
+            "value": "Neem een parkdag op met Apple Watch. Of bekijk de voorbeeld-session."
           }
         }
       }
@@ -1811,7 +1811,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rit %lld"
+            "value": "Ride %lld"
           }
         }
       }
@@ -1827,7 +1827,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ritten"
+            "value": "Rides"
           }
         }
       }
@@ -1844,7 +1844,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ritten (%lld)"
+            "value": "Rides (%lld)"
           }
         }
       }
@@ -1860,7 +1860,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rijden"
+            "value": "Riding"
           }
         }
       }
@@ -1877,7 +1877,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl verzamelt kabelpark-wakeboardsessies van Apple Watch voor analyse op iPhone en Mac."
+            "value": "Rppl verzamelt kabelpark-wakeboard sessions van Apple Watch voor analyse op iPhone en Mac."
           }
         }
       }
@@ -1893,7 +1893,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl verwerkt je sessie op je Watch en iPhone. We uploaden geen ritten naar een Rppl-cloud en delen je gegevens niet met anderen."
+            "value": "Rppl verwerkt je session op je Watch en iPhone. We uploaden geen rides naar een Rppl-cloud en delen je gegevens niet met anderen."
           }
         }
       }
@@ -1909,7 +1909,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt ritten en pauzes van een hele parkdag in één sessie. Gebruik iPhone om sessies, kaarten en exports te bekijken."
+            "value": "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt rides en pauzes van een hele parkdag in één session. Gebruik iPhone om sessions, kaarten en exports te bekijken."
           }
         }
       }
@@ -1959,7 +1959,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie"
+            "value": "Session"
           }
         }
       }
@@ -1975,7 +1975,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie geïmporteerd"
+            "value": "Session geïmporteerd"
           }
         }
       }
@@ -1991,7 +1991,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessie-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
+            "value": "Session-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
           }
         }
       }
@@ -2007,7 +2007,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessies"
+            "value": "Sessions"
           }
         }
       }
@@ -2056,7 +2056,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toon voorbeeldsessie"
+            "value": "Toon voorbeeld-session"
           }
         }
       }
@@ -2104,7 +2104,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toont kaarten bij je sessies. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen."
+            "value": "Toont kaarten bij je sessions. Stads- en spotnamen komen al uit Watch-GPS die bij elke session is opgeslagen."
           }
         }
       }
@@ -2137,7 +2137,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Er ging iets fout bij het verwijderen van de sessie."
+            "value": "Er ging iets fout bij het verwijderen van de session."
           }
         }
       }
@@ -2153,7 +2153,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Er ging iets mis tijdens het importeren van de sessie."
+            "value": "Er ging iets mis tijdens het importeren van de session."
           }
         }
       }
@@ -2269,7 +2269,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Syncstatus, machtigingen en handmatige sessie-inspectie."
+            "value": "Syncstatus, machtigingen en handmatige session-inspectie."
           }
         }
       }
@@ -2367,7 +2367,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "De sessie staat in je logboek. Er is niets naar Gezondheid geschreven."
+            "value": "De session staat in je logboek. Er is niets naar Gezondheid geschreven."
           }
         }
       }
@@ -2383,7 +2383,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dit verwijdert de sessie permanent van deze iPhone. Dit kan niet ongedaan worden gemaakt."
+            "value": "Dit verwijdert de session permanent van deze iPhone. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
