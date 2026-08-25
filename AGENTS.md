@@ -125,7 +125,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
-- CloudKit sync
+- CloudKit sync (Documents in iCloud for the phone logbook is in scope; prefer native ubiquity APIs)
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding (Linear: DCSBL-56)

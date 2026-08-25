@@ -4,12 +4,14 @@ import RpplCore
 struct LogbookView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var connectivity = PhoneConnectivityService.shared
+    @State private var iCloud = PhoneICloudDriveController.shared
     @State private var catalog = SessionCatalog()
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
     @State private var showActionError = false
     @State private var actionErrorText: String?
+    @State private var showICloudImport = false
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -138,7 +140,9 @@ struct LogbookView: View {
                     pendingDeleteSessionId = nil
                 }
             } message: {
-                Text("This permanently removes the session from this iPhone. This cannot be undone.")
+                Text(
+                    "This permanently removes the session from this iPhone and from iCloud Drive when sync is on. This cannot be undone."
+                )
             }
             .alert(
                 "Could Not Delete Session",
@@ -149,14 +153,51 @@ struct LogbookView: View {
             } message: { message in
                 Text(message)
             }
+            .sheet(isPresented: $showICloudImport) {
+                ICloudSessionImportView(
+                    summaries: iCloud.pendingImportSummaries,
+                    onImport: { ids in
+                        showICloudImport = false
+                        Task {
+                            await iCloud.importSelectedRemoteSessions(ids)
+                            catalog.reload(
+                                store: connectivity.store,
+                                acceptedSessionIDs: iCloud.logbookFilterIDs
+                            )
+                        }
+                    },
+                    onCancel: {
+                        iCloud.dismissImportOffer()
+                        showICloudImport = false
+                    }
+                )
+            }
             .onAppear {
                 connectivity.refreshSyncState()
-                catalog.reload(store: connectivity.store)
+                reloadCatalog()
+                if iCloud.shouldOfferImport {
+                    showICloudImport = true
+                }
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
-                catalog.reload(store: connectivity.store)
+                reloadCatalog()
+            }
+            .onChange(of: iCloud.shouldOfferImport) { _, offer in
+                if offer, !iCloud.pendingImportSummaries.isEmpty {
+                    showICloudImport = true
+                }
+            }
+            .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
+                reloadCatalog()
             }
         }
+    }
+
+    private func reloadCatalog() {
+        catalog.reload(
+            store: connectivity.store,
+            acceptedSessionIDs: iCloud.logbookFilterIDs
+        )
     }
 
     private var header: some View {
@@ -269,9 +310,10 @@ struct LogbookView: View {
         WakeLog.debug(.ui, "confirm delete \(sessionId.prefix(8))…")
         do {
             try connectivity.store.deleteSession(sessionId: sessionId)
+            PhoneICloudDriveController.shared.unacceptSession(sessionId)
             SessionCityResolver.shared.invalidate(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
-            catalog.reload(store: connectivity.store)
+            reloadCatalog()
         } catch {
             let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
             actionErrorText = description.isEmpty

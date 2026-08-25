@@ -16,15 +16,36 @@ final class PhoneConnectivityService: NSObject {
     /// Acks queued because Watch was unreachable (or send failed).
     var pendingAckCount: Int { pendingAcks.count }
 
-    let store: SessionFileStore
+    private(set) var store: SessionFileStore
     private var pendingAcks = Set<String>()
+    private var rootReplaceLock = false
 
     override init() {
-        let root = AppConstants.appGroupSessionsRoot ?? AppConstants.documentsSessionsRoot
+        let root = AppConstants.localPhoneSessionsRoot
         store = SessionFileStore(rootURL: root)
         try? store.ensureRootExists()
         super.init()
         activate()
+    }
+
+    /// Swap live session root (App Group ↔ iCloud Documents). Serializes against imports.
+    func replaceStoreRoot(_ rootURL: URL) {
+        guard !rootReplaceLock else { return }
+        rootReplaceLock = true
+        defer { rootReplaceLock = false }
+        if store.rootURL.standardizedFileURL == rootURL.standardizedFileURL {
+            try? store.ensureRootExists()
+            return
+        }
+        let next = SessionFileStore(rootURL: rootURL)
+        try? next.ensureRootExists()
+        store = next
+        sessionsRevision += 1
+        WakeLog.debug(.store, "phone store root → \(rootURL.lastPathComponent)")
+    }
+
+    func bumpSessionsRevision() {
+        sessionsRevision += 1
     }
 
     func activate() {
@@ -138,6 +159,7 @@ final class PhoneConnectivityService: NSObject {
         try store.importTransferPackage(package, intoPhoneStore: store.rootURL)
         sessionsRevision += 1
         let sessionId = sessionIdHint ?? package.manifest.sessionId
+        PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
         // Mark first sync before any permission sheets — sync/ack already finished above.

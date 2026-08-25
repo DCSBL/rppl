@@ -5,6 +5,8 @@ import RpplCore
 struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
     @State private var connectivity = PhoneConnectivityService.shared
+    @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var showDisableDeleteConfirm = false
     @State private var showImporter = false
     @State private var isImporting = false
     @State private var showImportError = false
@@ -57,6 +59,38 @@ struct AppInfoView: View {
                 }
 
                 Section {
+                    Toggle(
+                        "iCloud Drive",
+                        isOn: Binding(
+                            get: { iCloud.isSyncEnabled },
+                            set: { newValue in
+                                if newValue {
+                                    Task {
+                                        await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                                    }
+                                } else {
+                                    showDisableDeleteConfirm = true
+                                }
+                            }
+                        )
+                    )
+                    .disabled(!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
+                    .tint(Color.rpplAccent)
+
+                    if let status = iCloud.statusMessage {
+                        Text(status)
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                } header: {
+                    Text("Data")
+                } footer: {
+                    Text(
+                        "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on."
+                    )
+                }
+
+                Section {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("On your devices")
                             .font(.body.weight(.semibold))
@@ -66,7 +100,7 @@ struct AppInfoView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
                         Text(
-                            "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
+                            "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore."
                         )
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
@@ -111,6 +145,27 @@ struct AppInfoView: View {
             .toolbarBackground(Color.rpplBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
+            .confirmationDialog(
+                "Turn Off iCloud Drive?",
+                isPresented: $showDisableDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete iCloud Copies", role: .destructive) {
+                    Task {
+                        await iCloud.setSyncEnabled(false, deleteICloudCopies: true)
+                    }
+                }
+                Button("Keep iCloud Copies") {
+                    Task {
+                        await iCloud.setSyncEnabled(false, deleteICloudCopies: false)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
+                )
+            }
             .fileImporter(
                 isPresented: $showImporter,
                 allowedContentTypes: [.json],

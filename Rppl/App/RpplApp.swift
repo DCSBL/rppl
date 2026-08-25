@@ -14,6 +14,8 @@ struct RpplApp: App {
             if phase == .active {
                 PhoneConnectivityService.shared.refreshSyncState()
                 PhoneConnectivityService.shared.flushPendingAcks()
+                PhoneICloudDriveController.shared.refreshAvailability()
+                PhoneICloudDriveController.shared.applyPreferredRootIfNeeded(reason: "active")
             }
         }
     }
@@ -22,5 +24,6 @@ struct RpplApp: App {
         WakeLog.debug(.lifecycle, "RpplApp init")
         _ = TesterIdentity.resolve()
         PhoneConnectivityService.shared.activate()
+        PhoneICloudDriveController.shared.start()
     }
 }
