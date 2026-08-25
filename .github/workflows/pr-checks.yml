@@ -1,5 +1,5 @@
-# Light PR checks on Linux — mirrors local pre-commit (hygiene, codespell, SwiftLint).
-# No unit tests / xcode-gate (macOS / Xcode only).
+# PR checks on Linux — pre-commit (hygiene, codespell, SwiftLint) + RpplCore unit tests.
+# No xcode-gate / xcodebuild (macOS / Xcode only).
 #
 # Required-check friendly: this job always runs. Individual steps skip when the
 # PR has no matching file changes (a skipped *job* would block merge when the
@@ -102,3 +102,44 @@ jobs:
             --color=always \
             --from-ref "${{ github.event.pull_request.base.sha }}" \
             --to-ref "${{ github.event.pull_request.head.sha }}"
+
+  core-tests:
+    name: RpplCore tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Core changes
+        id: filter
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$base" "$head" \
+            | grep -E '^RpplCore/' >/dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No RpplCore changes — skipping tests"
+          fi
+
+      - name: Setup Swift
+        if: steps.filter.outputs.changed == 'true'
+        uses: swift-actions/setup-swift@v3
+        with:
+          swift-version: "6.2"
+
+      - name: Cache SPM
+        if: steps.filter.outputs.changed == 'true'
+        uses: actions/cache@v4
+        with:
+          path: RpplCore/.build
+          key: spm-${{ runner.os }}-${{ hashFiles('RpplCore/Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Run tests
+        if: steps.filter.outputs.changed == 'true'
+        working-directory: RpplCore
+        run: swift test
