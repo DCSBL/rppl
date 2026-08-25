@@ -52,20 +52,18 @@ struct SessionShareExportTests {
         let text = try #require(String(data: data, encoding: .utf8))
 
         #expect(text.contains("\n"))
-        #expect(text.hasPrefix("{\n"))
+        #expect(text.hasPrefix("{\n  \"manifest\""))
 
-        let manifestKey = text.range(of: "\"manifest\"")
-        let detectionsKey = text.range(of: "\"detections\"")
-        let locationsKey = text.range(of: "\"locations\"")
-        #expect(manifestKey != nil)
-        #expect(detectionsKey != nil)
-        #expect(locationsKey != nil)
-        if let manifestKey, let detectionsKey, let locationsKey {
-            #expect(manifestKey.lowerBound < detectionsKey.lowerBound)
-            #expect(manifestKey.lowerBound < locationsKey.lowerBound)
-        }
+        let manifestKey = try #require(text.range(of: "\"manifest\""))
+        let detectionsKey = try #require(text.range(of: "\"detections\""))
+        let locationsKey = try #require(text.range(of: "\"locations\""))
+        #expect(manifestKey.lowerBound < detectionsKey.lowerBound)
+        #expect(manifestKey.lowerBound < locationsKey.lowerBound)
 
-        // sortedKeys would put "detections" before "manifest".
-        #expect(text.contains("\n  \"manifest\""))
+        // JSONEncoder key order is unstable without sortedKeys; sortedKeys puts
+        // "detections" before "manifest". Encode must force manifest-first.
+        let again = try SessionShareExport.encode(package)
+        let againText = try #require(String(data: again, encoding: .utf8))
+        #expect(againText.hasPrefix("{\n  \"manifest\""))
     }
 }

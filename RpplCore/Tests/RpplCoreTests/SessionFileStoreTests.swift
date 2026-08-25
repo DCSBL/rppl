@@ -136,6 +136,54 @@ struct SessionFileStoreTests {
         #expect(phoneDerived?.stats == package.derived?.stats)
     }
 
+    @Test func importExportedPackageStampsImportedAndReplaces() throws {
+        let sourceRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("export-src-\(UUID().uuidString)", isDirectory: true)
+        let phoneRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("export-phone-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: sourceRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+
+        let sourceStore = SessionFileStore(rootURL: sourceRoot)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try sourceStore.createSession(manifest: manifest)
+        try sourceStore.appendDetection(
+            DetectionEvent(
+                code: DetectionCodes.riding,
+                reason: "ride_enter",
+                detectorId: "ride_enter"
+            ),
+            sessionId: manifest.sessionId
+        )
+        try sourceStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        let package = try sourceStore.buildTransferPackage(sessionId: manifest.sessionId)
+
+        let phoneStore = SessionFileStore(rootURL: phoneRoot)
+        // Seed an older copy so re-import must replace without duplicating detections.
+        try sourceStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+        #expect(try phoneStore.readManifest(sessionId: manifest.sessionId).imported == nil)
+
+        let importedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        try sourceStore.importExportedPackage(
+            package,
+            intoPhoneStore: phoneRoot,
+            importedAt: importedAt
+        )
+
+        let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
+        #expect(phoneManifest.imported == importedAt)
+        #expect(phoneManifest.transferState == .acknowledged)
+        #expect(try phoneStore.readDetections(sessionId: manifest.sessionId).count == 1)
+    }
+
     @Test func migratesLegacyAssumptionsFile() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("migrate-\(UUID().uuidString)", isDirectory: true)
