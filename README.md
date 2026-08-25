@@ -14,6 +14,7 @@ Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not o
 
 | Locked choice | Decision |
 |---------------|----------|
+| Brand | **Rppl** (capital R; never `RPPL` / `rppl` in user-facing copy) |
 | Platforms | iPhone + Watch only · iOS / watchOS **26+** |
 | Reference gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Riders · reliable capture over flashy UX |

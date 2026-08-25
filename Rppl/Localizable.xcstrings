@@ -2795,18 +2795,18 @@
         }
       }
     },
-    "rppl": {
+    "Rppl": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "rppl"
+            "value": "Rppl"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "rppl"
+            "value": "Rppl"
           }
         }
       }

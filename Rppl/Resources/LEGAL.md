@@ -30,7 +30,7 @@ I hope that, like me, you enjoy tracking your sessions!
 
 Source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: copy and modify for noncommercial use only; selling the app or other commercial use is not allowed). This document governs **app use and personal data**.
 
-In-app copy: **iPhone → rppl → Legal → Terms & Privacy policy**. Keep that UI in sync with this file.
+In-app copy: **iPhone → Rppl → Legal → Terms & Privacy policy**. Keep that UI in sync with this file.
 
 ## Privacy
 
