@@ -81,10 +81,10 @@ final class PhonePermissionsController: NSObject {
             await requestLocation()
         }
         if healthPermission == .notDetermined {
-            await requestHealth()
+            await requestHealth(force: true)
         }
         if motionPermission == .notDetermined {
-            await requestMotion()
+            await requestMotion(force: true)
         }
         refresh()
         WakeLog.debug(.permissions, "post-sync permission asks done")
