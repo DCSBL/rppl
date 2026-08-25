@@ -26,7 +26,7 @@ struct ContentView: View {
             WakeLog.debug(.lifecycle, "Watch ContentView onAppear")
             transfer.activate()
             transfer.refreshSyncState()
-            // Do not present permission sheets here — PermissionsOnboardingView owns asks.
+            // PermissionsOnboardingView auto-presents system sheets on first boot.
             session.refreshPermissionStatus()
         }
         .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in

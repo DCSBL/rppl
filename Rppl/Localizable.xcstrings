@@ -1359,22 +1359,6 @@
         }
       }
     },
-    "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Gezondheid > Gegevenstoegang en apparaten > Rppl en zet de categorieën aan die je wilt toestaan."
-          }
-        }
-      }
-    },
     "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, then choose While Using the App.": {
       "localizations": {
         "en": {
@@ -2588,54 +2572,6 @@
         }
       }
     },
-    "Optional. Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Toont kaarten bij je sessies. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen."
-          }
-        }
-      }
-    },
-    "Optional. Lets iPhone read Health for session details. Workouts are recorded on Apple Watch.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Lets iPhone read Health for session details. Workouts are recorded on Apple Watch."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Laat iPhone Gezondheid lezen voor sessiedetails. Workouts worden op Apple Watch opgenomen."
-          }
-        }
-      }
-    },
-    "Optional. Lets iPhone use motion when you review a session.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional. Lets iPhone use motion when you review a session."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optioneel. Laat iPhone beweging gebruiken wanneer je een sessie bekijkt."
-          }
-        }
-      }
-    },
     "Asked after your first session arrives from Watch. City names come from Watch GPS stored with each session, not from live iPhone location.": {
       "localizations": {
         "en": {
@@ -2664,6 +2600,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "Watertemperatuur"
+          }
+        }
+      }
+    },
+    "Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont kaarten bij je sessies. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen."
+          }
+        }
+      }
+    },
+    "Lets iPhone read Health for session details. Workouts are recorded on Apple Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets iPhone read Health for session details. Workouts are recorded on Apple Watch."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laat iPhone Gezondheid lezen voor sessiedetails. Workouts worden op Apple Watch opgenomen."
+          }
+        }
+      }
+    },
+    "Lets iPhone use motion when you review a session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets iPhone use motion when you review a session."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laat iPhone beweging gebruiken wanneer je een sessie bekijkt."
+          }
+        }
+      }
+    },
+    "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow. You can also open Health from the button below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPhone, open Settings > Health > Data Access & Devices > Rppl, then turn on the categories you want to allow. You can also open Health from the button below."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open op iPhone Instellingen > Gezondheid > Toegang tot gegevens en apparaten > Rppl en zet de gewenste categorieën aan. Gebruik de knop hieronder voor de Gezondheid-app."
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw proberen"
+          }
+        }
+      }
+    },
+    "Open Health": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Health"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Gezondheid"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Instellingen"
           }
         }
       }

@@ -20,7 +20,7 @@ public enum WatchPermissionState: String, Sendable, Codable, Hashable {
 }
 
 extension WatchPermissionState {
-    /// Gate may proceed past this permission.
+    /// Gate may proceed past this permission when the kind is required.
     public var isReady: Bool {
         switch self {
         case .authorized, .unavailable:
@@ -33,6 +33,24 @@ extension WatchPermissionState {
     /// Needs attention in the permissions list (sort toward top on fresh load).
     public var needsAttention: Bool {
         !isReady
+    }
+}
+
+extension WatchPermissionKind {
+    /// Whether this permission can keep the Watch recording onboarding gate closed.
+    ///
+    /// - Location: required (GPS).
+    /// - Health: prompt while undetermined; after deny, sensors-only recording is allowed.
+    /// - Motion: never blocks (helps dock/ride hints; device motion still records).
+    public func blocksRecording(when state: WatchPermissionState) -> Bool {
+        switch self {
+        case .location:
+            return !state.isReady
+        case .health:
+            return state == .notDetermined
+        case .motion:
+            return false
+        }
     }
 }
 
@@ -68,7 +86,9 @@ public enum WatchPermissionOrder {
     }
 
     public static func areAllReady(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
-        WatchPermissionKind.allCases.allSatisfy { states[$0]?.isReady == true }
+        WatchPermissionKind.allCases.allSatisfy { kind in
+            !kind.blocksRecording(when: states[kind] ?? .notDetermined)
+        }
     }
 
     private static func ensureComplete(_ current: [WatchPermissionKind]) -> [WatchPermissionKind] {

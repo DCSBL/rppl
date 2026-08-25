@@ -6,6 +6,7 @@ struct PermissionsOnboardingView: View {
     @Bindable var session: WatchSessionController
     @State private var rowOrder: [WatchPermissionKind] = []
     @State private var frozenStates: [WatchPermissionKind: WatchPermissionState] = [:]
+    @State private var didStartAutoPrompt = false
 
     var body: some View {
         NavigationStack {
@@ -24,7 +25,7 @@ struct PermissionsOnboardingView: View {
                 } header: {
                     Text("Permissions")
                 } footer: {
-                    Text("Allow each permission so Rppl can record your park session on Apple Watch.")
+                    Text(footerText)
                 }
             }
             .navigationTitle("Rppl")
@@ -32,6 +33,7 @@ struct PermissionsOnboardingView: View {
         .onAppear {
             session.refreshPermissionStatus()
             bootstrapOrderIfNeeded()
+            startAutoPromptIfNeeded()
         }
         .onChange(of: session.locationPermission) { _, _ in
             handleStateChange()
@@ -46,6 +48,17 @@ struct PermissionsOnboardingView: View {
             session.refreshPermissionStatus()
             handleStateChange()
         }
+    }
+
+    private var footerText: String {
+        if session.isPromptingPermissions {
+            return String(
+                localized: "Waiting for system permission popups. This can take a few seconds on first launch."
+            )
+        }
+        return String(
+            localized: "Allow each permission so Rppl can record your park session on Apple Watch."
+        )
     }
 
     private func bootstrapOrderIfNeeded() {
@@ -71,6 +84,15 @@ struct PermissionsOnboardingView: View {
             next: next
         )
         frozenStates = next
+    }
+
+    /// First boot: fire system sheets from the list — no row tap required.
+    private func startAutoPromptIfNeeded() {
+        guard !didStartAutoPrompt else { return }
+        didStartAutoPrompt = true
+        Task {
+            await session.promptUndeterminedPermissionsInOrder()
+        }
     }
 }
 
@@ -116,7 +138,6 @@ private struct PermissionRowView: View {
 struct PermissionDetailView: View {
     let kind: WatchPermissionKind
     @Bindable var session: WatchSessionController
-    @State private var isRequesting = false
 
     private var state: WatchPermissionState {
         session.permissionStates[kind] ?? .notDetermined
@@ -137,6 +158,12 @@ struct PermissionDetailView: View {
                     Text(kind.howToFix)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                    Button {
+                        Task { await request(force: true) }
+                    } label: {
+                        Text("Try Again")
+                    }
+                    .disabled(session.isPromptingPermissions)
                 } header: {
                     Text("How to fix")
                 }
@@ -145,24 +172,20 @@ struct PermissionDetailView: View {
             if state == .notDetermined {
                 Section {
                     Button {
-                        Task { await request() }
+                        Task { await request(force: false) }
                     } label: {
-                        if isRequesting {
-                            ProgressView()
-                        } else {
-                            Text("Allow \(kind.title)")
-                        }
+                        Text("Allow \(kind.title)")
                     }
-                    .disabled(isRequesting)
+                    .disabled(session.isPromptingPermissions)
+                    if session.isPromptingPermissions {
+                        Text("Waiting for the system popup…")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }
         .navigationTitle(kind.title)
-        .onAppear {
-            if state == .notDetermined {
-                Task { await request() }
-            }
-        }
     }
 
     private var statusLine: some View {
@@ -182,15 +205,12 @@ struct PermissionDetailView: View {
         }
     }
 
-    private func request() async {
-        guard !isRequesting else { return }
-        isRequesting = true
-        defer { isRequesting = false }
+    private func request(force: Bool) async {
         switch kind {
         case .location:
             await session.requestLocationPermission()
         case .health:
-            await session.requestHealthPermission()
+            await session.requestHealthPermission(force: force)
         case .motion:
             await session.requestMotionPermission()
         }
@@ -233,7 +253,7 @@ extension WatchPermissionKind {
             )
         case .health:
             return String(
-                localized: "On iPhone, open Settings > Health > Data Access & Devices > Rppl and turn on workout access."
+                localized: "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl."
             )
         case .motion:
             return String(
