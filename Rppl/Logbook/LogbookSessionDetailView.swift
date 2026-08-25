@@ -438,8 +438,8 @@ struct LogbookSessionDetailView: View {
         ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
             throw SessionStoreError.ioFailure("Bundled example session missing")
         }
-        WakeLog.debug(.ui, "example session load (ephemeral)")
-        return try SessionLoader.load(packageURL: url)
+        WakeLog.debug(.ui, "example session load (ephemeral, timeline → now)")
+        return try SessionLoader.loadExample(packageURL: url, now: Date())
     }
 
     private func requestExport() {

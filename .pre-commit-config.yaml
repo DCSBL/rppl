@@ -32,7 +32,7 @@ repos:
         exclude: ^Rppl/Resources/Exports/
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen"
         stages: [pre-commit]
 
   - repo: local

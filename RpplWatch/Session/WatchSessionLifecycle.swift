@@ -63,14 +63,37 @@ extension WatchSessionController {
     func requestPermissions() async {
         WakeLog.debug(.permissions, "requestPermissions begin")
         errorText = nil
-        await requestLocationPermission()
-        await requestHealthPermission()
-        await requestMotionPermission()
+        await promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: true)
         statusText = String(localized: "Permissions updated")
         WakeLog.debug(
             .permissions,
             "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
         )
+    }
+
+    /// First-boot / onboarding: present system sheets without requiring a row tap.
+    /// Health first — its sheet is slow to appear; starting it ASAP avoids a spinner freeze on tap.
+    func promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: Bool = false) async {
+        guard !isPromptingPermissions else { return }
+        isPromptingPermissions = true
+        defer { isPromptingPermissions = false }
+
+        errorText = nil
+        refreshPermissionStatus()
+
+        // Brief yield so the permissions list can paint before HealthKit blocks on its sheet.
+        try? await Task.sleep(for: .milliseconds(150))
+
+        if healthPermission == .notDetermined
+            || (includeDeniedHealthRetry && healthPermission == .denied) {
+            await requestHealthPermission(force: includeDeniedHealthRetry && healthPermission == .denied)
+        }
+        if locationPermission == .notDetermined {
+            await requestLocationPermission()
+        }
+        if motionPermission == .notDetermined {
+            await requestMotionPermission()
+        }
     }
 
     func requestLocationPermission() async {
@@ -80,7 +103,9 @@ extension WatchSessionController {
         refreshPermissionStatus()
     }
 
-    func requestHealthPermission() async {
+    /// - Parameter force: When true, call HealthKit again even if previously denied (re-request /
+    ///   Settings return path). System may still omit the sheet after a hard deny.
+    func requestHealthPermission(force: Bool = false) async {
         errorText = nil
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
@@ -88,7 +113,14 @@ extension WatchSessionController {
             WakeLog.debug(.permissions, "Health unavailable")
             return
         }
+        refreshPermissionStatus()
+        if !force, healthPermission != .notDetermined {
+            WakeLog.debug(.permissions, "Health skip request status=\(healthPermission.rawValue)")
+            return
+        }
         do {
+            // Kick the request off the tightest MainActor turn so WatchKit can show the sheet
+            // without the UI sitting on a ProgressView for several seconds first.
             try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
             WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {

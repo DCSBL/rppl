@@ -24,6 +24,38 @@ struct WatchPermissionGateTests {
         #expect(WatchPermissionState.unavailable.isReady)
     }
 
+    @Test func motionNeverBlocksRecordingGate() {
+        let states: [WatchPermissionKind: WatchPermissionState] = [
+            .location: .authorized,
+            .health: .authorized,
+            .motion: .denied
+        ]
+        #expect(WatchPermissionOrder.areAllReady(states))
+        #expect(!WatchPermissionKind.motion.blocksRecording(when: .notDetermined))
+        #expect(!WatchPermissionKind.motion.blocksRecording(when: .denied))
+    }
+
+    @Test func healthDeniedAllowsSensorsOnlyGate() {
+        let states: [WatchPermissionKind: WatchPermissionState] = [
+            .location: .authorized,
+            .health: .denied,
+            .motion: .notDetermined
+        ]
+        #expect(WatchPermissionOrder.areAllReady(states))
+        #expect(WatchPermissionKind.health.blocksRecording(when: .notDetermined))
+        #expect(!WatchPermissionKind.health.blocksRecording(when: .denied))
+    }
+
+    @Test func locationDeniedBlocksGate() {
+        let states: [WatchPermissionKind: WatchPermissionState] = [
+            .location: .denied,
+            .health: .authorized,
+            .motion: .authorized
+        ]
+        #expect(!WatchPermissionOrder.areAllReady(states))
+        #expect(WatchPermissionKind.location.blocksRecording(when: .denied))
+    }
+
     @Test func preservingOrderDoesNotMoveAcceptedDuringSession() {
         let current: [WatchPermissionKind] = [.motion, .location, .health]
         let previous: [WatchPermissionKind: WatchPermissionState] = [
