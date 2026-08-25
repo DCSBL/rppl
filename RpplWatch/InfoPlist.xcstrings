@@ -59,7 +59,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de sessie eindigt."
+            "value": "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de session eindigt."
           }
         }
       }
@@ -76,7 +76,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl neemt GPS op voor de hele parksessie, ook als de pols omlaag is."
+            "value": "Rppl neemt GPS op voor de hele park session, ook als de pols omlaag is."
           }
         }
       }
@@ -93,7 +93,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl neemt GPS op tijdens kabelpark-wakeboardsessies."
+            "value": "Rppl neemt GPS op tijdens kabelpark-wakeboard sessions."
           }
         }
       }
@@ -110,7 +110,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl neemt apparaatbeweging op om rijden versus rusten bij de steiger te helpen detecteren."
+            "value": "Rppl neemt apparaatbeweging op om riding versus rusten bij de dock te helpen detecteren."
           }
         }
       }

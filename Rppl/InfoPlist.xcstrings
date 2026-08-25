@@ -42,7 +42,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl leest hartslag en energie tijdens kabelparksessies zodat je ze op iPhone kunt bekijken."
+            "value": "Rppl leest hartslag en energie tijdens kabelpark sessions zodat je ze op iPhone kunt bekijken."
           }
         }
       }
@@ -59,7 +59,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl gebruikt Gezondheid op iPhone voor sessieweergave. Workouts worden vanaf Apple Watch opgeslagen."
+            "value": "Rppl gebruikt Gezondheid op iPhone voor session-weergave. Workouts worden vanaf Apple Watch opgeslagen."
           }
         }
       }
@@ -76,7 +76,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl kan locatie gebruiken om sessiesporen te tonen."
+            "value": "Rppl kan locatie gebruiken om session-sporen te tonen."
           }
         }
       }
@@ -93,7 +93,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl toont GPS-sporen van Apple Watch-sessies op de kaart."
+            "value": "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart."
           }
         }
       }
@@ -110,7 +110,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rppl gebruikt bewegings-API’s bij het bekijken van sessiecontext op iPhone."
+            "value": "Rppl gebruikt bewegings-API’s bij het bekijken van session-context op iPhone."
           }
         }
       }

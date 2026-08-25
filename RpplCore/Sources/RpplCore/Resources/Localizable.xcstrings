@@ -204,7 +204,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koppel een Apple Watch om sessies te synchroniseren."
+            "value" : "Koppel een Apple Watch om sessions te synchroniseren."
           }
         }
       }
@@ -253,7 +253,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rijden"
+            "value" : "Riding"
           }
         }
       }
@@ -269,7 +269,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessie inactief — open de app opnieuw."
+            "value" : "Session inactief — open de app opnieuw."
           }
         }
       }
