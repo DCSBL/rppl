@@ -3,6 +3,9 @@ import UniformTypeIdentifiers
 import RpplCore
 
 struct AppInfoView: View {
+    @Binding var navigation: LogbookNavigationRequest
+    @Binding var selectedTab: AppTab
+
     @State private var permissions = PhonePermissionsController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
@@ -11,7 +14,8 @@ struct AppInfoView: View {
     @State private var isImporting = false
     @State private var showImportError = false
     @State private var importErrorText: String?
-    @State private var showImportSuccess = false
+    @State private var showAlreadyImportedAlert = false
+    @State private var pendingDuplicateSessionId: String?
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -59,23 +63,34 @@ struct AppInfoView: View {
                 }
 
                 Section {
-                    Toggle(
-                        "iCloud Drive",
-                        isOn: Binding(
-                            get: { iCloud.isSyncEnabled },
-                            set: { newValue in
-                                if newValue {
-                                    Task {
-                                        await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                    HStack {
+                        Toggle(
+                            "iCloud Drive",
+                            isOn: Binding(
+                                get: { iCloud.isSyncEnabled },
+                                set: { newValue in
+                                    if newValue {
+                                        Task {
+                                            await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                                            await iCloud.prepareImportReview()
+                                        }
+                                    } else {
+                                        showDisableDeleteConfirm = true
                                     }
-                                } else {
-                                    showDisableDeleteConfirm = true
                                 }
-                            }
+                            )
                         )
-                    )
-                    .disabled(!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
-                    .tint(Color.rpplAccent)
+                        .disabled(
+                            iCloud.isApplyingSyncChange
+                                || (!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
+                        )
+                        .tint(Color.rpplAccent)
+
+                        if iCloud.isApplyingSyncChange {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+                    }
 
                     if let status = iCloud.statusMessage {
                         Text(status)
@@ -182,10 +197,23 @@ struct AppInfoView: View {
             } message: { message in
                 Text(message)
             }
-            .alert("Session Imported", isPresented: $showImportSuccess) {
-                Button("OK", role: .cancel) {}
+            .alert(
+                "Already in logbook",
+                isPresented: $showAlreadyImportedAlert
+            ) {
+                Button("Cancel", role: .cancel) {
+                    pendingDuplicateSessionId = nil
+                }
+                Button("Show") {
+                    if let sessionId = pendingDuplicateSessionId {
+                        navigation.openSessionId = sessionId
+                        navigation.highlightSessionId = sessionId
+                        selectedTab = .logbook
+                    }
+                    pendingDuplicateSessionId = nil
+                }
             } message: {
-                Text("The session is in your logbook. It was not written to Health.")
+                Text("This session is already in your logbook.")
             }
         }
     }
@@ -199,9 +227,18 @@ struct AppInfoView: View {
             isImporting = true
             Task {
                 do {
-                    try await connectivity.importExportedSession(from: url)
+                    let sessionId = try await connectivity.peekExportedSessionId(from: url)
+                    if connectivity.hasSession(sessionId: sessionId) {
+                        isImporting = false
+                        pendingDuplicateSessionId = sessionId
+                        showAlreadyImportedAlert = true
+                        return
+                    }
+                    let importedId = try await connectivity.importExportedSession(from: url)
                     isImporting = false
-                    showImportSuccess = true
+                    navigation.openSessionId = importedId
+                    navigation.highlightSessionId = importedId
+                    selectedTab = .logbook
                 } catch {
                     isImporting = false
                     presentImportFailure(Self.userFacingMessage(for: error))
@@ -228,7 +265,8 @@ struct AppInfoView: View {
 }
 
 #Preview {
-    NavigationStack {
-        AppInfoView()
-    }
+    AppInfoView(
+        navigation: .constant(LogbookNavigationRequest()),
+        selectedTab: .constant(.app)
+    )
 }

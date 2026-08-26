@@ -1,7 +1,13 @@
 import SwiftUI
 import RpplCore
 
+private struct SessionDetailRoute: Identifiable, Hashable {
+    let id: String
+}
+
 struct LogbookView: View {
+    @Binding var navigation: LogbookNavigationRequest
+
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
@@ -11,7 +17,8 @@ struct LogbookView: View {
     @State private var showExampleSession = false
     @State private var showActionError = false
     @State private var actionErrorText: String?
-    @State private var showICloudImport = false
+    @State private var detailRoute: SessionDetailRoute?
+    @State private var highlightSessionId: String?
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -93,8 +100,14 @@ struct LogbookView: View {
                                     sessionId: entry.manifest.sessionId,
                                     store: connectivity.store
                                 )
+                                .onDisappear {
+                                    flashHighlight(entry.manifest.sessionId)
+                                }
                             } label: {
-                                SessionCard(entry: entry)
+                                SessionCard(
+                                    entry: entry,
+                                    isHighlighted: highlightSessionId == entry.manifest.sessionId
+                                )
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
@@ -126,6 +139,12 @@ struct LogbookView: View {
                 LogbookSessionDetailView(source: .bundledExample)
                     .toolbar(.visible, for: .navigationBar)
             }
+            .navigationDestination(item: $detailRoute) { route in
+                LogbookSessionDetailView(sessionId: route.id, store: connectivity.store)
+                    .onDisappear {
+                        flashHighlight(route.id)
+                    }
+            }
             .alert(
                 "Delete Session?",
                 isPresented: $showDeleteConfirmation
@@ -153,42 +172,47 @@ struct LogbookView: View {
             } message: { message in
                 Text(message)
             }
-            .sheet(isPresented: $showICloudImport) {
-                ICloudSessionImportView(
-                    summaries: iCloud.pendingImportSummaries,
-                    onImport: { ids in
-                        showICloudImport = false
-                        Task {
-                            await iCloud.importSelectedRemoteSessions(ids)
-                            catalog.reload(
-                                store: connectivity.store,
-                                acceptedSessionIDs: iCloud.logbookFilterIDs
-                            )
-                        }
-                    },
-                    onCancel: {
-                        iCloud.dismissImportOffer()
-                        showICloudImport = false
-                    }
-                )
-            }
             .onAppear {
                 connectivity.refreshSyncState()
                 reloadCatalog()
-                if iCloud.shouldOfferImport {
-                    showICloudImport = true
-                }
+                consumeNavigationRequests()
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
                 reloadCatalog()
             }
-            .onChange(of: iCloud.shouldOfferImport) { _, offer in
-                if offer, !iCloud.pendingImportSummaries.isEmpty {
-                    showICloudImport = true
-                }
-            }
             .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
                 reloadCatalog()
+            }
+            .onChange(of: navigation.openSessionId) { _, _ in
+                consumeNavigationRequests()
+            }
+            .onChange(of: navigation.highlightSessionId) { _, sessionId in
+                if let sessionId {
+                    flashHighlight(sessionId)
+                    navigation.highlightSessionId = nil
+                }
+            }
+        }
+    }
+
+    private func consumeNavigationRequests() {
+        if let sessionId = navigation.openSessionId {
+            detailRoute = SessionDetailRoute(id: sessionId)
+            navigation.openSessionId = nil
+            flashHighlight(sessionId)
+        }
+        if let sessionId = navigation.highlightSessionId {
+            flashHighlight(sessionId)
+            navigation.highlightSessionId = nil
+        }
+    }
+
+    private func flashHighlight(_ sessionId: String) {
+        highlightSessionId = sessionId
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            if highlightSessionId == sessionId {
+                highlightSessionId = nil
             }
         }
     }
@@ -319,7 +343,6 @@ struct LogbookView: View {
             actionErrorText = description.isEmpty
                 ? String(localized: "Something went wrong while deleting the session.")
                 : description
-            // Delete confirm alert still dismissing — defer so the error alert is not swallowed.
             Task { @MainActor in
                 showActionError = true
             }
@@ -331,6 +354,7 @@ struct LogbookView: View {
 private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
+    var isHighlighted = false
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -375,6 +399,11 @@ private struct SessionCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .logbookCardChrome()
+        .background(
+            RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
+                .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
+        )
+        .animation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 
     private var sessionMetaText: String {
@@ -410,13 +439,11 @@ private struct SessionCard: View {
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                // Display order matches roomy row; keep priority still rides → distance → laps.
                 statLabel("water.waves", value: distanceText)
                 statLabel("flag.checkered", value: ridesText)
                 statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
         } else {
-            // Drop lowest-priority stats first when width is tight (laps → distance → rides).
             ViewThatFits(in: .horizontal) {
                 statsRow(includeDistance: true, includeLaps: true)
                 statsRow(includeDistance: true, includeLaps: false)
@@ -427,7 +454,6 @@ private struct SessionCard: View {
 
     private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
         HStack(spacing: 12) {
-            // Display: distance → rides → laps. Drop order (lowest first): laps → distance.
             if includeDistance {
                 statLabel("water.waves", value: distanceText)
             }
@@ -452,5 +478,5 @@ private struct SessionCard: View {
 }
 
 #Preview {
-    LogbookView()
+    LogbookView(navigation: .constant(LogbookNavigationRequest()))
 }

@@ -15,76 +15,89 @@ struct ICloudSessionImportView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Button {
-                        if allSelected {
-                            selected.removeAll()
-                        } else {
-                            selected = Set(summaries.map(\.sessionId))
-                        }
-                    } label: {
-                        Text(allSelected ? "Deselect All" : "Select All")
-                            .font(.body.weight(.semibold))
+            Group {
+                if summaries.isEmpty {
+                    ContentUnavailableView {
+                        Label("No sessions to import", systemImage: "icloud")
+                    } description: {
+                        Text("Every park day in iCloud Drive is already in this iPhone logbook.")
                     }
-                    .tint(Color.rpplAccent)
-                }
-
-                Section {
-                    ForEach(summaries) { summary in
-                        Button {
-                            toggle(summary.sessionId)
-                        } label: {
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(
-                                    systemName: selected.contains(summary.sessionId)
-                                        ? "checkmark.circle.fill"
-                                        : "circle"
-                                )
-                                .foregroundStyle(
-                                    selected.contains(summary.sessionId)
-                                        ? Color.rpplAccent
-                                        : Color.rpplMuted
-                                )
-                                .font(.title3)
-
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(summary.cityName ?? "-")
-                                        .font(.headline)
-                                        .foregroundStyle(Color.rpplText)
-                                    Text(dateLine(summary))
-                                        .font(.subheadline)
-                                        .foregroundStyle(Color.rpplMuted)
-                                    Text(statsLine(summary))
-                                        .font(.caption)
-                                        .foregroundStyle(Color.rpplMuted)
+                    .foregroundStyle(Color.rpplText)
+                } else {
+                    List {
+                        Section {
+                            Button {
+                                if allSelected {
+                                    selected.removeAll()
+                                } else {
+                                    selected = Set(summaries.map(\.sessionId))
                                 }
-                                Spacer(minLength: 0)
+                            } label: {
+                                Text(allSelected ? "Deselect All" : "Select All")
+                                    .font(.body.weight(.semibold))
                             }
-                            .contentShape(Rectangle())
+                            .tint(Color.rpplAccent)
                         }
-                        .buttonStyle(.plain)
+
+                        Section {
+                            ForEach(summaries) { summary in
+                                Button {
+                                    toggle(summary.sessionId)
+                                } label: {
+                                    HStack(alignment: .top, spacing: 12) {
+                                        Image(
+                                            systemName: selected.contains(summary.sessionId)
+                                                ? "checkmark.circle.fill"
+                                                : "circle"
+                                        )
+                                        .foregroundStyle(
+                                            selected.contains(summary.sessionId)
+                                                ? Color.rpplAccent
+                                                : Color.rpplMuted
+                                        )
+                                        .font(.title3)
+
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(summary.cityName ?? "-")
+                                                .font(.headline)
+                                                .foregroundStyle(Color.rpplText)
+                                            Text(dateLine(summary))
+                                                .font(.subheadline)
+                                                .foregroundStyle(Color.rpplMuted)
+                                            Text(statsLine(summary))
+                                                .font(.caption)
+                                                .foregroundStyle(Color.rpplMuted)
+                                        }
+                                        Spacer(minLength: 0)
+                                    }
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        } footer: {
+                            Text(
+                                "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook."
+                            )
+                        }
                     }
-                } footer: {
-                    Text(
-                        "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook."
-                    )
+                    .scrollContentBackground(.hidden)
                 }
             }
-            .scrollContentBackground(.hidden)
             .background(Color.rpplBackground)
             .navigationTitle("Import from iCloud")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Not Now") { onCancel() }
+                    Button(summaries.isEmpty ? "Done" : "Not Now") { onCancel() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Import") {
-                        onImport(selected)
+                if !summaries.isEmpty {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Import") {
+                            onImport(selected)
+                        }
+                        .disabled(selected.isEmpty)
+                        .fontWeight(.semibold)
                     }
-                    .disabled(selected.isEmpty)
-                    .fontWeight(.semibold)
                 }
             }
             .tint(Color.rpplAccent)

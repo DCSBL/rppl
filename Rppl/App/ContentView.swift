@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-private enum AppTab: Hashable {
+enum AppTab: Hashable {
     case logbook
     case app
 }
@@ -24,15 +24,21 @@ private enum AppTabIcons {
 
 struct ContentView: View {
     @State private var selectedTab: AppTab = .logbook
+    @State private var logbookNavigation = LogbookNavigationRequest()
+    @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var showICloudImport = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Logbook", systemImage: "book.fill", value: AppTab.logbook) {
-                LogbookView()
+                LogbookView(navigation: $logbookNavigation)
             }
 
             Tab(value: AppTab.app) {
-                AppInfoView()
+                AppInfoView(
+                    navigation: $logbookNavigation,
+                    selectedTab: $selectedTab
+                )
             } label: {
                 Label {
                     Text("Rppl")
@@ -43,6 +49,32 @@ struct ContentView: View {
         }
         .tint(Color.rpplAccent)
         .tabBarMinimizeBehavior(.onScrollDown)
+        .sheet(isPresented: $showICloudImport) {
+            ICloudSessionImportView(
+                summaries: iCloud.pendingImportSummaries,
+                onImport: { ids in
+                    showICloudImport = false
+                    iCloud.dismissImportReview()
+                    Task {
+                        await iCloud.importSelectedRemoteSessions(ids)
+                    }
+                },
+                onCancel: {
+                    iCloud.dismissImportOffer()
+                    showICloudImport = false
+                }
+            )
+        }
+        .onChange(of: iCloud.showImportReviewAfterEnable) { _, show in
+            if show {
+                showICloudImport = true
+            }
+        }
+        .onChange(of: iCloud.shouldOfferImport) { _, offer in
+            if offer, !iCloud.suppressImportOffer {
+                showICloudImport = true
+            }
+        }
     }
 }
 

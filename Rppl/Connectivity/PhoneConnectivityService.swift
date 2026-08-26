@@ -23,8 +23,8 @@ final class PhoneConnectivityService: NSObject {
     override init() {
         let root = AppConstants.localPhoneSessionsRoot
         store = SessionFileStore(rootURL: root)
-        try? store.ensureRootExists()
         super.init()
+        try? store.ensureRootExists()
         activate()
     }
 
@@ -169,9 +169,34 @@ final class PhoneConnectivityService: NSObject {
         }
     }
 
+    func hasSession(sessionId: String) -> Bool {
+        (try? store.listSessionIDs().contains(sessionId)) ?? false
+    }
+
+    /// Reads the session id from an export JSON without importing.
+    func peekExportedSessionId(from url: URL) async throws -> String {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        return try await StoreIO.runOffMain {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let package = try decoder.decode(SessionTransferPackage.self, from: data)
+            return package.manifest.sessionId
+        }
+    }
+
     /// Import a Share export JSON from Files. No Watch ack, no HealthKit, no post-sync permission trigger.
-    func importExportedSession(from url: URL) async throws {
+    @discardableResult
+    func importExportedSession(from url: URL) async throws -> String {
         WakeLog.debug(.transfer, "export-file import begin")
+        PhoneICloudDriveController.shared.beginImportOfferSuppression()
+        defer { PhoneICloudDriveController.shared.endImportOfferSuppression() }
+
         let accessing = url.startAccessingSecurityScopedResource()
         defer {
             if accessing {
@@ -188,7 +213,9 @@ final class PhoneConnectivityService: NSObject {
             return package.manifest.sessionId
         }
         sessionsRevision += 1
+        PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
+        return sessionId
     }
 }
 

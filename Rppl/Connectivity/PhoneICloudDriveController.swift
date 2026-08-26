@@ -19,8 +19,14 @@ final class PhoneICloudDriveController: NSObject {
     private(set) var statusMessage: String?
     /// Remote packages found via metadata query that need an import choice.
     private(set) var pendingImportSummaries: [RemoteSessionSummary] = []
-    /// Present import picker when remote-only set appears.
+    /// Present import picker when remote-only set appears (background discovery).
     private(set) var shouldOfferImport = false
+    /// After user toggles sync on — show import review even when nothing to import.
+    private(set) var showImportReviewAfterEnable = false
+    /// True while enable/disable migration runs (Settings spinner).
+    private(set) var isApplyingSyncChange = false
+    /// Blocks auto-presenting import sheet during manual JSON import / root churn.
+    private(set) var suppressImportOffer = false
     /// Logbook shows only these session ids while Drive sync is on (Ask-before-import).
     private(set) var acceptedSessionIDs: Set<String> = []
 
@@ -41,8 +47,8 @@ final class PhoneICloudDriveController: NSObject {
             kvs.synchronize()
         }
         isSyncEnabled = kvs.bool(forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
-        UserDefaults.standard.set(isSyncEnabled, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         super.init()
+        UserDefaults.standard.set(isSyncEnabled, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         acceptedSessionIDs = loadAcceptedIDs()
 
         NotificationCenter.default.addObserver(
@@ -84,6 +90,10 @@ final class PhoneICloudDriveController: NSObject {
 
     /// Toggle from Settings. When turning off, caller asks whether to delete Drive copies.
     func setSyncEnabled(_ enabled: Bool, deleteICloudCopies: Bool) async {
+        guard !isApplyingSyncChange else { return }
+        isApplyingSyncChange = true
+        defer { isApplyingSyncChange = false }
+
         isSyncEnabled = enabled
         kvs.set(enabled, forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
         kvs.synchronize()
@@ -94,8 +104,8 @@ final class PhoneICloudDriveController: NSObject {
             stopMetadataQuery()
             pendingImportSummaries = []
             shouldOfferImport = false
+            showImportReviewAfterEnable = false
             let cloudRoot = iCloudSessionsRoot
-            // Always copy down before leaving Drive so the App Group logbook stays complete.
             await migrateLiveRoot(
                 to: AppConstants.localPhoneSessionsRoot,
                 from: cloudRoot,
@@ -110,6 +120,27 @@ final class PhoneICloudDriveController: NSObject {
             await uploadLocalOnlyPackagesIfNeeded(reason: "enable")
             restartMetadataQueryIfNeeded()
         }
+    }
+
+    /// Wait for metadata gather (cap ~3s) then prompt import review (may be empty).
+    func prepareImportReview() async {
+        for _ in 0..<30 {
+            if metadataHasGathered { break }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+        showImportReviewAfterEnable = true
+    }
+
+    func beginImportOfferSuppression() {
+        suppressImportOffer = true
+    }
+
+    func endImportOfferSuppression() {
+        suppressImportOffer = false
+    }
+
+    func dismissImportReview() {
+        showImportReviewAfterEnable = false
     }
 
     func refreshAvailability() {
@@ -150,22 +181,15 @@ final class PhoneICloudDriveController: NSObject {
         }
     }
 
-    /// Push every App Group / Documents package into iCloud Documents when sync is on.
-    /// Runs on start/enable even if the live root is already ubiquity (upgrade / leftover local).
     private func uploadLocalOnlyPackagesIfNeeded(reason: String) async {
         guard isSyncEnabled, let cloudRoot = iCloudSessionsRoot else { return }
         let localRoot = AppConstants.localPhoneSessionsRoot
         guard localRoot.standardizedFileURL != cloudRoot.standardizedFileURL,
               fileManager.fileExists(atPath: localRoot.path)
         else {
-            // Already living in Drive — accept whatever is on the live root so the logbook
-            // includes pre-existing packages after an upgrade.
             if PhoneConnectivityService.shared.store.rootURL.standardizedFileURL
                 == cloudRoot.standardizedFileURL {
-                let ids = Set(
-                    (try? SessionRootMigrator.sessionIDs(in: cloudRoot)) ?? []
-                )
-                acceptSessions(ids)
+                reconcileAcceptedWithDisk()
             }
             return
         }
@@ -174,12 +198,9 @@ final class PhoneICloudDriveController: NSObject {
             let copied = try await coordinatedCopyMissing(from: localRoot, to: cloudRoot)
             if !copied.isEmpty {
                 WakeLog.debug(.store, "iCloud upload-all \(reason) copied=\(copied.count)")
-                acceptSessions(Set(copied))
                 PhoneConnectivityService.shared.bumpSessionsRevision()
             }
-            // Accept full cloud inventory after upload so this phone’s logbook matches Drive.
-            let cloudIDs = Set((try? SessionRootMigrator.sessionIDs(in: cloudRoot)) ?? [])
-            acceptSessions(cloudIDs)
+            reconcileAcceptedWithDisk(in: cloudRoot)
         } catch {
             statusMessage = error.localizedDescription
             WakeLog.error(
@@ -189,7 +210,6 @@ final class PhoneICloudDriveController: NSObject {
         }
     }
 
-    /// User confirmed import of selected remote session ids.
     func importSelectedRemoteSessions(_ sessionIds: Set<String>) async {
         guard let root = iCloudSessionsRoot else { return }
         for sessionId in sessionIds {
@@ -206,9 +226,9 @@ final class PhoneICloudDriveController: NSObject {
         dismissedRemoteIDs.formUnion(pendingImportSummaries.map(\.sessionId))
         shouldOfferImport = false
         pendingImportSummaries = []
+        showImportReviewAfterEnable = false
     }
 
-    /// Watch import / local create — always part of this phone’s logbook.
     func acceptSession(_ sessionId: String) {
         acceptSessions([sessionId])
     }
@@ -220,7 +240,6 @@ final class PhoneICloudDriveController: NSObject {
         persistAcceptedIDs()
     }
 
-    /// Ids the logbook should show. `nil` = show every package on disk (sync off).
     var logbookFilterIDs: Set<String>? {
         isSyncEnabled && isICloudAvailable ? acceptedSessionIDs : nil
     }
@@ -241,7 +260,21 @@ final class PhoneICloudDriveController: NSObject {
 
     private func acceptSessions(_ ids: Set<String>) {
         guard !ids.isEmpty else { return }
-        acceptedSessionIDs = acceptedSessionIDs.union(ids)
+        acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
+            previousAccepted: acceptedSessionIDs,
+            localIDs: ids
+        )
+        persistAcceptedIDs()
+    }
+
+    private func reconcileAcceptedWithDisk(in root: URL? = nil) {
+        let scanRoot = root ?? PhoneConnectivityService.shared.store.rootURL
+        let disk = Set((try? SessionRootMigrator.sessionIDs(in: scanRoot)) ?? [])
+        guard !disk.isEmpty else { return }
+        acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
+            previousAccepted: acceptedSessionIDs,
+            localIDs: disk
+        )
         persistAcceptedIDs()
     }
 
@@ -265,8 +298,7 @@ final class PhoneICloudDriveController: NSObject {
             if isSyncEnabled,
                let cloud = iCloudSessionsRoot,
                destination.standardizedFileURL == cloud.standardizedFileURL {
-                let ids = Set((try? SessionRootMigrator.sessionIDs(in: destination)) ?? [])
-                acceptSessions(ids)
+                reconcileAcceptedWithDisk(in: destination)
             }
             statusMessage = nil
             PhoneConnectivityService.shared.bumpSessionsRevision()
@@ -383,8 +415,11 @@ final class PhoneICloudDriveController: NSObject {
             let sessionId = sessionDir.lastPathComponent
             remoteIDs.insert(sessionId)
 
-            guard !acceptedSessionIDs.contains(sessionId),
-                  !dismissedRemoteIDs.contains(sessionId)
+            guard ICloudLogbookPolicy.remoteImportCandidates(
+                remoteMetadata: [sessionId],
+                accepted: acceptedSessionIDs,
+                dismissed: dismissedRemoteIDs
+            ).contains(sessionId)
             else {
                 continue
             }
@@ -401,24 +436,27 @@ final class PhoneICloudDriveController: NSObject {
             }
         }
 
-        // Peer delete: accepted package gone from Drive → drop local + unaccept.
-        if metadataHasGathered, !remoteIDs.isEmpty {
-            let missingFromRemote = acceptedSessionIDs.subtracting(remoteIDs)
-            for sessionId in missingFromRemote {
-                try? store.deleteSession(sessionId: sessionId)
-                unacceptSession(sessionId)
-                WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
-            }
-            if !missingFromRemote.isEmpty {
-                PhoneConnectivityService.shared.bumpSessionsRevision()
-            }
+        let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
+        let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
+            accepted: acceptedSessionIDs,
+            remoteMetadata: remoteIDs,
+            localOnDisk: localOnDisk,
+            metadataGatherComplete: metadataHasGathered
+        )
+        for sessionId in peerDeletes {
+            try? store.deleteSession(sessionId: sessionId)
+            unacceptSession(sessionId)
+            WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
+        }
+        if !peerDeletes.isEmpty {
+            PhoneConnectivityService.shared.bumpSessionsRevision()
         }
 
         pendingImportSummaries = Dictionary(grouping: candidates, by: \.sessionId)
             .compactMap(\.value.first)
             .sorted { $0.startedAt > $1.startedAt }
 
-        shouldOfferImport = !pendingImportSummaries.isEmpty
+        shouldOfferImport = !suppressImportOffer && !pendingImportSummaries.isEmpty
     }
 
     private func readSummaryCoordinated(at sessionDir: URL) -> RemoteSessionSummary? {
