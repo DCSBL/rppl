@@ -35,7 +35,7 @@ Locked choices for product behavior. Prefer these over inventing UX. Full hard c
 | Audience | Riders · reliable capture over flashy UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · product Pause allowed (≠ detection `inactive`) |
 | Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
-| Phone | View-only list / map / Share-Export · no label editor |
+| Phone | View-only list / map / Share-Export |
 | HealthKit | Save via `finishWorkout()` · `waterSports` · session stays running · ride + dock activities · ride-scoped energy · ride-gated distance + GPS route · HR/energy mirrored into files |
 | Transfer | Phone may be away · WC after Stop · never delete Watch data until phone ack |
 | Water Lock | On at session start |
