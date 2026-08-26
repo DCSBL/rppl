@@ -9,7 +9,7 @@ public enum SessionStatsBuilder {
         health: [HealthMetricSample],
         water: [WaterTemperatureSample] = [],
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
-        lapThresholds: LapThresholds = .default
+        setThresholds: SetThresholds = .default
     ) -> SessionStats {
         let sessionStart = manifest.startedAt
         let sessionEnd = manifest.endedAt ?? inferSessionEnd(
@@ -39,9 +39,9 @@ public enum SessionStatsBuilder {
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
         var rides: [RideSegmentStats] = []
         var totalDistance = 0.0
-        var lapTracker = LapRideTracker(thresholds: lapThresholds)
+        var setTracker = SetRideTracker(thresholds: setThresholds)
         if Self.hasInactivePhase(phases, before: rideWindows.first?.start ?? sessionEnd) {
-            lapTracker.noteInactive()
+            setTracker.noteInactive()
         }
 
         for (index, window) in rideWindows.enumerated() {
@@ -52,13 +52,13 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let duration = window.end.timeIntervalSince(window.start)
-            lapTracker.beginRide()
+            setTracker.beginRide()
             for sample in sortedLocations where sample.timestamp >= window.start
                 && sample.timestamp <= window.end {
-                lapTracker.addLocation(sample)
+                setTracker.addLocation(sample)
             }
-            let laps = lapTracker.lapCount
-            lapTracker.endRide()
+            let sets = setTracker.setCount
+            setTracker.endRide()
             let rideLocations = RideLocationFilter.samples(
                 in: sortedLocations,
                 from: window.start,
@@ -77,7 +77,7 @@ public enum SessionStatsBuilder {
                     endedAt: window.end,
                     duration: max(0, duration),
                     distanceMeters: distance,
-                    lapCount: laps,
+                    setCount: sets,
                     sustainedSpeedKmh: sustained,
                     averageSpeedKmh: average,
                     peakSpeedKmh: peak

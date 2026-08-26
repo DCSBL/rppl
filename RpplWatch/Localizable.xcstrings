@@ -754,34 +754,34 @@
         }
       }
     },
-    "Laps": {
+    "Sets": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laps"
+            "value": "Sets"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rondes"
+            "value": "Sets"
           }
         }
       }
     },
-    "LAPS": {
+    "SETS": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "LAPS"
+            "value": "SETS"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "RONDES"
+            "value": "SETS"
           }
         }
       }
@@ -818,18 +818,18 @@
         }
       }
     },
-    "Last ride %@, %@, %lld laps": {
+    "Last ride %@, %@, %lld sets": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last ride %1$@, %2$@, %3$lld laps"
+            "value": "Last ride %1$@, %2$@, %3$lld sets"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laatste ride %1$@, %2$@, %3$lld rondes"
+            "value": "Laatste ride %1$@, %2$@, %3$lld sets"
           }
         }
       }

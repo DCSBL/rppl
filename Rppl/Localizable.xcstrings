@@ -33,7 +33,7 @@
         }
       }
     },
-    "%lld laps" : {
+    "%lld sets" : {
       "localizations" : {
         "en" : {
           "variations" : {
@@ -41,13 +41,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld lap"
+                  "value" : "%lld set"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld laps"
+                  "value" : "%lld sets"
                 }
               }
             }
@@ -59,13 +59,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld ronde"
+                  "value" : "%lld set"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld rondes"
+                  "value" : "%lld sets"
                 }
               }
             }
@@ -925,18 +925,18 @@
         }
       }
     },
-    "Laps" : {
+    "Sets" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laps"
+            "value" : "Sets"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rondes"
+            "value" : "Sets"
           }
         }
       }
@@ -1270,18 +1270,18 @@
         }
       }
     },
-    "Most laps" : {
+    "Most sets" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Most laps"
+            "value" : "Most sets"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste rondes"
+            "value" : "Meeste sets"
           }
         }
       }

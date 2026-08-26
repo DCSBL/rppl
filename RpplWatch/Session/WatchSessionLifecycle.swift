@@ -317,7 +317,7 @@ extension WatchSessionController {
             distanceMeters: liveRideTracker.sessionRideMeters,
             lastRideDuration: liveRideTracker.lastRideDuration,
             lastRideMeters: liveRideTracker.lastRideMeters,
-            lastRideLapCount: liveRideTracker.lastRideLapCount,
+            lastRideSetCount: liveRideTracker.lastRideSetCount,
             didCompleteRide: liveRideTracker.didCompleteRide,
             startLatitude: sessionStartLatitude,
             startLongitude: sessionStartLongitude

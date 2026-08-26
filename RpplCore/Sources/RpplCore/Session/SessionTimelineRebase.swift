@@ -120,7 +120,7 @@ public enum SessionTimelineRebase {
             endedAt: ride.endedAt.addingTimeInterval(delta),
             duration: ride.duration,
             distanceMeters: ride.distanceMeters,
-            lapCount: ride.lapCount,
+            setCount: ride.setCount,
             sustainedSpeedKmh: ride.sustainedSpeedKmh,
             averageSpeedKmh: ride.averageSpeedKmh,
             peakSpeedKmh: ride.peakSpeedKmh,

@@ -5,18 +5,18 @@ public struct SessionHighlightInput: Equatable, Sendable {
     public var id: String
     public var totalDuration: TimeInterval
     public var ridingDuration: TimeInterval
-    public var lapCount: Int
+    public var setCount: Int
 
     public init(
         id: String,
         totalDuration: TimeInterval,
         ridingDuration: TimeInterval,
-        lapCount: Int
+        setCount: Int
     ) {
         self.id = id
         self.totalDuration = totalDuration
         self.ridingDuration = ridingDuration
-        self.lapCount = lapCount
+        self.setCount = setCount
     }
 }
 
@@ -26,7 +26,7 @@ public enum HighlightAssigner {
     public static let rideOrder: [RideHighlight] = [.longest, .longestTime, .fastest]
 
     /// Fixed display order for session badges.
-    public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps]
+    public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostSets]
 
     public static func assignRideHighlights(_ rides: [RideSegmentStats]) -> [RideSegmentStats] {
         guard rides.count >= 2 else {
@@ -76,8 +76,8 @@ public enum HighlightAssigner {
             byId[water.id, default: []].append(.mostWaterTime)
         }
 
-        if let laps = uniqueMaxSession(sessions, value: \.lapCount) {
-            byId[laps.id, default: []].append(.mostLaps)
+        if let sets = uniqueMaxSession(sessions, value: \.setCount) {
+            byId[sets.id, default: []].append(.mostSets)
         }
 
         return byId
