@@ -38,9 +38,11 @@ Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer
 
 When generating, translating, or rewriting product copy about wakeboarding / cable parks **in any language**, keep authentic community slang and English jargon. Do not replace core terms with literal local equivalents — that reads amateurish in cable-park culture.
 
-**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
+**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `set` / `sets` (one cable loop / round — not “laps”), `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
 
-**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* / *laps* for sets, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+
+Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webzine/wakeboarding-glossary.html) (**Set**: a round of wakeboard).
 
 Applies to UI strings (`.xcstrings`), Info.plist usage text, App Store / marketing copy, and agent-written prose — not to detection code identifiers in Core (those stay opaque English strings per hard constraint 4).
 
@@ -56,7 +58,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Hard constraints (do not “helpfully” break)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never `HKWorkoutEvent.lap` unless Fitness can show a lap count. See hard constraint 3.
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never `HKWorkoutEvent.lap` unless Fitness can show a lap count (Apple API name — product cable rounds are **sets**, not laps). See hard constraint 3.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.

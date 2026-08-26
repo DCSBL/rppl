@@ -111,13 +111,13 @@ struct SessionRideUIPage: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text("\(session.currentRideLapCount)")
+                    Text("\(session.currentRideSetCount)")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                         .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("LAPS")
+                    Text("SETS")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)
@@ -156,7 +156,7 @@ struct SessionRideUIPage: View {
             Text(
                 "\(SessionFormatters.segmentDuration(session.lastRideDuration)) · "
                     + "\(SessionFormatters.distance(session.lastRideMeters)) · "
-                    + "\(session.lastRideLapCount)"
+                    + "\(session.lastRideSetCount)"
             )
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -173,7 +173,7 @@ struct SessionRideUIPage: View {
 
     private var lastRideAccessibilityLabel: String {
         String(
-            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideLapCount) laps"
+            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideSetCount) sets"
         )
     }
 
@@ -260,8 +260,8 @@ struct SessionRideUIPage: View {
                 value: SessionFormatters.distance(session.lastRideMeters)
             )
             SessionMetricRow(
-                label: "Laps",
-                value: "\(session.lastRideLapCount)"
+                label: "Sets",
+                value: "\(session.lastRideSetCount)"
             )
         } else {
             Text("No rides yet")

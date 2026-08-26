@@ -51,12 +51,12 @@ app.innerHTML = `
   <div id="summary" class="summary" hidden>
     <div class="metric"><span class="metric-label">Distance</span><span class="metric-value" data-k="distance">—</span></div>
     <div class="metric"><span class="metric-label">Rides</span><span class="metric-value" data-k="rides">—</span></div>
-    <div class="metric"><span class="metric-label">Laps</span><span class="metric-value" data-k="laps">—</span></div>
+    <div class="metric"><span class="metric-label">Sets</span><span class="metric-value" data-k="sets">—</span></div>
     <div class="metric"><span class="metric-label">Peak</span><span class="metric-value" data-k="peak">—</span></div>
     <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
     <div class="metric"><span class="metric-label">Riding</span><span class="metric-value" data-k="riding">—</span></div>
   </div>
-  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow lap. Space = play/pause realtime. Export JSON = current start/end window, all streams.</p>
+  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow set. Space = play/pause realtime. Export JSON = current start/end window, all streams.</p>
   <div class="range-row">
     <span>Start</span>
     <input id="start" type="range" disabled />
@@ -147,7 +147,7 @@ function updateSummary(d: DerivedSession): void {
   summaryEl.hidden = false
   setMetric('distance', formatDistanceKm(d.totalDistanceMeters))
   setMetric('rides', String(d.rides.length))
-  setMetric('laps', String(d.totalLapCount))
+  setMetric('sets', String(d.totalSetCount))
   setMetric('peak', formatSpeed(d.peakSpeedKmh))
   setMetric('avg', formatSpeed(d.averageSpeedKmh))
   setMetric('riding', formatDuration(d.ridingDurationMs))

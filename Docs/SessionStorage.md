@@ -44,7 +44,7 @@ Raw is the regeneration source when analyzers change. Export / WC transfer carri
 
 | Surface | Needs | Skip for UI |
 |---------|-------|-------------|
-| Phone list | Summary stats (distance, duration, rides, laps, speeds, highlights inputs) | Motion; full GPS parse |
+| Phone list | Summary stats (distance, duration, rides, sets, speeds, highlights inputs) | Motion; full GPS parse |
 | Phone detail basics | Same stats + per-ride splits | Motion |
 | Phone map | Stored geo frame for first camera; GPS polyline after appear | Motion |
 | Re-analysis | Raw detections + locations (+ health/water for tiles; motion if detectors need it) | — |

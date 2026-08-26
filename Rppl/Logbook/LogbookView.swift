@@ -220,7 +220,7 @@ struct LogbookView: View {
                     ? "—"
                     : LogbookFormatting.totalsFooter(
                         rides: totals.totalRuns,
-                        laps: totals.totalLaps
+                        sets: totals.totalSets
                     )
             )
                 .font(.caption)
@@ -359,39 +359,39 @@ private struct SessionCard: View {
         return LogbookFormatting.rideCount(stats.rideCount)
     }
 
-    private var lapsText: String {
+    private var setsText: String {
         guard let stats = entry.stats else { return "—" }
-        return LogbookFormatting.lapCount(stats.totalLapCount)
+        return LogbookFormatting.setCount(stats.totalSetCount)
     }
 
     @ViewBuilder
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                // Display order matches roomy row; keep priority still rides → distance → laps.
+                // Display order matches roomy row; keep priority still rides → distance → sets.
                 statLabel("water.waves", value: distanceText)
                 statLabel("flag.checkered", value: ridesText)
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+                statLabel("arrow.triangle.2.circlepath", value: setsText)
             }
         } else {
-            // Drop lowest-priority stats first when width is tight (laps → distance → rides).
+            // Drop lowest-priority stats first when width is tight (sets → distance → rides).
             ViewThatFits(in: .horizontal) {
-                statsRow(includeDistance: true, includeLaps: true)
-                statsRow(includeDistance: true, includeLaps: false)
-                statsRow(includeDistance: false, includeLaps: false)
+                statsRow(includeDistance: true, includeSets: true)
+                statsRow(includeDistance: true, includeSets: false)
+                statsRow(includeDistance: false, includeSets: false)
             }
         }
     }
 
-    private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
+    private func statsRow(includeDistance: Bool, includeSets: Bool) -> some View {
         HStack(spacing: 12) {
-            // Display: distance → rides → laps. Drop order (lowest first): laps → distance.
+            // Display: distance → rides → sets. Drop order (lowest first): sets → distance.
             if includeDistance {
                 statLabel("water.waves", value: distanceText)
             }
             statLabel("flag.checkered", value: ridesText)
-            if includeLaps {
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+            if includeSets {
+                statLabel("arrow.triangle.2.circlepath", value: setsText)
             }
         }
     }

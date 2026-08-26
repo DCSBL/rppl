@@ -8,8 +8,8 @@ public struct LiveRideTracker: Sendable {
     public private(set) var lastRideMeters = 0.0
     /// Duration of the most recently finished ride; `0` until the first ride ends.
     public private(set) var lastRideDuration: TimeInterval = 0
-    /// Laps of the most recently finished ride; `0` until the first ride ends.
-    public private(set) var lastRideLapCount = 0
+    /// Sets of the most recently finished ride; `0` until the first ride ends.
+    public private(set) var lastRideSetCount = 0
     /// True after at least one ride has finished (including zero-meter rides).
     public private(set) var didCompleteRide = false
     /// Sum of finished ride meters plus current ride (ride-gated session distance).
@@ -17,8 +17,8 @@ public struct LiveRideTracker: Sendable {
     /// Sum of finished ride durations (includes a ride closed at session stop).
     public private(set) var sessionRidingDuration: TimeInterval = 0
     public private(set) var currentSpeedKmh: Double?
-    /// Crossing-based laps for the current ride (0 while inactive after finish until next enter).
-    public var currentRideLapCount: Int { lapTracker.lapCount }
+    /// Crossing-based sets for the current ride (0 while inactive after finish until next enter).
+    public var currentRideSetCount: Int { setTracker.setCount }
 
     private var trackedCode = DetectionCodes.inactive
     private var trackedLastConfident = DetectionCodes.inactive
@@ -26,18 +26,18 @@ public struct LiveRideTracker: Sendable {
     private var finishedRideMeters = 0.0
     private var rideStartedAt: Date?
     private let maxHorizontalAccuracyM: Double
-    private var lapTracker: LapRideTracker
+    private var setTracker: SetRideTracker
 
     public init(
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
-        lapThresholds: LapThresholds = .default
+        setThresholds: SetThresholds = .default
     ) {
         self.maxHorizontalAccuracyM = maxHorizontalAccuracyM
-        var thresholds = lapThresholds
+        var thresholds = setThresholds
         thresholds.maxHorizontalAccuracyM = maxHorizontalAccuracyM
-        var laps = LapRideTracker(thresholds: thresholds)
-        laps.noteInactive()
-        self.lapTracker = laps
+        var sets = SetRideTracker(thresholds: thresholds)
+        sets.noteInactive()
+        self.setTracker = sets
     }
 
     public mutating func reset() {
@@ -46,7 +46,7 @@ public struct LiveRideTracker: Sendable {
         currentRideMeters = 0
         lastRideMeters = 0
         lastRideDuration = 0
-        lastRideLapCount = 0
+        lastRideSetCount = 0
         didCompleteRide = false
         sessionRideMeters = 0
         sessionRidingDuration = 0
@@ -56,9 +56,9 @@ public struct LiveRideTracker: Sendable {
         trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
         rideStartedAt = nil
-        lapTracker.reset()
-        // Session starts inactive so the first dock→ride may score laps.
-        lapTracker.noteInactive()
+        setTracker.reset()
+        // Session starts inactive so the first dock→ride may score sets.
+        setTracker.noteInactive()
     }
 
     /// Call after each detection engine tick (with zero or more events).
@@ -95,7 +95,7 @@ public struct LiveRideTracker: Sendable {
         }
         trackedLastConfident = DetectionCodes.normalize(lastConfident)
         isRideOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
-        lapTracker.updateRiding(isRideOngoing)
+        setTracker.updateRiding(isRideOngoing)
         if trackedCode != DetectionCodes.riding {
             currentSpeedKmh = nil
         }
@@ -122,7 +122,7 @@ public struct LiveRideTracker: Sendable {
             lastConfident: trackedLastConfident
         )
         if attributedRiding {
-            lapTracker.addLocation(sample)
+            setTracker.addLocation(sample)
         }
 
         // Meters and display speed only while confidently riding — not during unsure gaps.
@@ -163,10 +163,10 @@ public struct LiveRideTracker: Sendable {
         } else {
             lastRideDuration = 0
         }
-        if lapTracker.isRideActive {
-            lapTracker.endRide()
+        if setTracker.isRideActive {
+            setTracker.endRide()
         }
-        lastRideLapCount = lapTracker.lapCount
+        lastRideSetCount = setTracker.setCount
         didCompleteRide = true
         sessionRidingDuration += lastRideDuration
         finishedRideMeters += currentRideMeters
