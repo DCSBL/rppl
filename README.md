@@ -1,97 +1,136 @@
-# Rppl
+<p align="center">
+  <img src="assets/rppl.svg" alt="Rppl" width="140">
+</p>
 
-**Cable-park wakeboarding, captured on Watch — rides and pauses detected.**
+<h1 align="center">Rppl</h1>
 
-Native iPhone + Apple Watch app that records a full park day as one continuous workout session: GPS, motion, heart rate, and automatic ride/pause detection. Phone stays view-only: sync, map, export. Analysis happens on Mac.
+<p align="center">
+  <a href="https://github.com/DCSBL/rppl/actions/workflows/pr-checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/DCSBL/rppl/pr-checks.yml?branch=main&label=PR%20checks" alt="PR checks"></a>
+  <img src="https://img.shields.io/badge/iOS-26%2B-black?logo=apple&logoColor=white" alt="iOS 26+">
+  <img src="https://img.shields.io/badge/watchOS-26%2B-black?logo=apple&logoColor=white" alt="watchOS 26+">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift">
+  <img src="https://img.shields.io/badge/privacy-on%20device-0B6E4F" alt="Privacy: on device">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20NC-blue" alt="PolyForm Noncommercial"></a>
+</p>
+
+<p align="center"><strong>Cable-park wakeboarding, captured on Watch.</strong><br>
+Rides and pauses detected. Phone syncs, maps, exports. No cloud. No subscriptions.</p>
+
+## What it does
+
+Watch records a full park day as one continuous workout: GPS, motion, heart rate, live ride / inactive / unsure detection. iPhone is view-only. Analysis stays on your Mac (or wherever you export).
 
 Reliable checkpoints over pretty UI. Lost park days are not OK.
 
-## Why this exists
+## A note from Duco
 
-Cable parks are repetitive loops — dock, ride, fall, swim, walk back — not open-water freestyle. Rppl records sensor data on Watch so later analysis can measure ride length, rounds, and balance. Trick detection is out of scope for now.
+Hi! My name is Duco. Since this year I’ve often been at a cable park to wakeboard. The regular Apple Workout app is too basic, so I went looking for a better tracker. What I found was either too complex, too limited, full of subscriptions, or hungry for my data. That had to be different.
 
-## Product lock
+My background is embedded software, so iOS is new territory. This app was built almost entirely with AI help. After several test sessions I dare to make it public, in the hope that others get something out of it.
 
-| Locked choice | Decision |
-|---------------|----------|
-| Brand | **Rppl** (capital R; never `RPPL` / `rppl` in user-facing copy) |
-| Platforms | iPhone + Watch only · iOS / watchOS **26+** |
-| Reference gear | iPhone 16 Pro + Apple Watch Ultra 2 |
-| Audience | Riders · reliable capture over flashy UX |
-| Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · **product Pause** allowed (≠ detection `inactive`) |
-| Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
-| Phone | View-only list / map / Share-Export · **no label editor** |
-| HealthKit | Save workout via `finishWorkout()` · `waterSports` (wakeboard MET) · HK session stays running · ride + dock HK activities · ride-scoped energy · ride-gated distance samples + GPS route · HR/energy mirrored into files |
-| Transfer | Phone may be away · WC after Stop · **never delete Watch data until phone ack** |
-| Water Lock | On at session start |
-| Identity | Random install-scoped ID (`testerId` field) in App Group / UserDefaults · reset on reinstall |
-| Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
+I hope that, like me, you enjoy tracking your sessions!
 
-**Park-day ready when:** Start/Stop + Water Lock, checkpointed GPS/motion/HR, live detection with reasons, reliable WC transfer + ack, iPhone export, Core tests green.
+-- Duco
 
-### Detection
+(Dutch original in [LEGAL.md](LEGAL.md).)
 
-Watch runs a pure Core **detector + merger** (`DetectionEngine`) that writes opaque codes into `detections.jsonl`:
+## Product lock (short)
 
-| Code | Meaning |
-|------|---------|
-| `inactive` | Not riding (dock / swim / walk / wait) |
-| `riding` | On the cable / skimming at ride speed |
-| `unsure` | Mid-ride GPS soft; primary UI keeps last confident code |
+| | |
+|---|---|
+| Brand | **Rppl** (capital R; never `RPPL` / `rppl` in UI copy) |
+| Platforms | iPhone + Watch · iOS / watchOS **26+** |
+| Session | One workout per park day · Start / Stop on Watch · product Pause allowed |
+| Detection | Live codes into `detections.jsonl` · no manual labels |
+| Phone | View / map / export only |
+| Transfer | Never delete Watch data until phone ack |
+| Core | Pure logic in `RpplCore` · `swift test` |
 
-Writes **only on transitions** (+ `session_start`) and lookback revisions (`supersedesId`). Speeds in `reason` strings use **km/h**. Offline: `DetectionEngine.replay(ticks:)` / `replay(locations:)`.
+Full hard constraints: [AGENTS.md](AGENTS.md) · thresholds: [Docs/RideDetection.md](Docs/RideDetection.md).
 
-Pipeline: GPS filter → hold clocks → detectors (`ride_enter`, `ride_exit`, `gps_gap`, `unsure_timeout`) → merger lookback (&lt; 60 s same ride). Ultra `submerged` logged only; motion activity logged only.
+## Leeswijzer
 
-Thresholds + intern guide: [Docs/RideDetection.md](Docs/RideDetection.md). Library UML: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System map: [Docs/DESIGN.md](Docs/DESIGN.md).
+Where to look, without reading the whole tree:
 
-## Repo layout
+| Want… | Open |
+|-------|------|
+| Product / agent rules | [AGENTS.md](AGENTS.md) |
+| Layers Watch / iPhone / Core | [Docs/DESIGN.md](Docs/DESIGN.md) |
+| DetectionEngine UML | [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Streams, HK, transfer, export | [Docs/DataCollection.md](Docs/DataCollection.md) |
+| On-disk session layout | [Docs/SessionStorage.md](Docs/SessionStorage.md) |
+| Ride / pause thresholds | [Docs/RideDetection.md](Docs/RideDetection.md) |
+| Xcode, hooks, `make check` | [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
+| Terms & privacy | [LEGAL.md](LEGAL.md) |
 
 ```
-RpplCore/     Shared models, IO, DetectionEngine (SPM + Swift Testing) · DESIGN.md
-RpplWatch/    Session engine, sensors, StartWorkoutIntent, WC send
-Rppl/         iPhone permissions, sync receive, map, export
-Docs/         DataCollection, SessionStorage, DevWorkflow, RideDetection, DESIGN
-scripts/git-hooks/   pre-commit lint; pre-push xcode gate
-.github/workflows/   PR pre-commit checks (Linux)
+RpplCore/     models, IO, DetectionEngine (SPM + Swift Testing)
+RpplWatch/    session, sensors, HealthKit, WC send
+Rppl/         permissions, sync receive, map, export
+Docs/         design + domain docs above
 ```
 
 ## Quick start
 
 1. Open `Rppl.xcodeproj` in Xcode 26+.
-2. Device pair (recommended): scheme **RpplWatch**, destination **iPhone + Watch**, Cmd+R — installs companion + Watch together. Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
-3. Or phone-first: scheme **Rppl** (embeds Watch) → physical iPhone → Cmd+R, then open Watch app.
-4. Simulator is weak for HealthKit / motion / WC — prefer the device pair.
-5. Ultra Action Button (optional): **Settings → Action Button → Workout → Rppl** starts a session only.
-
-Dev gate (lint on commit; Core tests + incremental `xcodebuild` on push when app/build files change; `make check` adds analyze):
+2. Prefer scheme **RpplWatch**, destination **iPhone + Watch**, Cmd+R.
+3. Simulator is weak for HealthKit / motion / WC. Use devices.
 
 ```bash
 brew install pre-commit swiftlint codespell
-pre-commit install   # installs pre-commit + pre-push
+pre-commit install
 make check
 ```
 
-Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md) · streams & detection: [Docs/DataCollection.md](Docs/DataCollection.md) · Core design: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+More: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
 
-## Bundle IDs (current `.dev` builds)
+Bundle IDs (`.dev`): `nl.dcsbl.rppl` · Watch `nl.dcsbl.rppl.watchkitapp` · App Group `group.nl.dcsbl.rppl`.
 
-- iOS: `nl.dcsbl.rppl`
-- watchOS: `nl.dcsbl.rppl.watchkitapp` (must be `{iOS}.watchkitapp`)
-- Companion: Watch → iPhone ID above
-- App Group: `group.nl.dcsbl.rppl`
+## Contribute
 
-## Privacy & legal
+Bugs and ideas: [open an issue](https://github.com/DCSBL/rppl/issues).  
+Suggested changes: open a PR. Small, focused diffs beat kitchen-sink branches.
 
-Hobby project (Netherlands). No Rppl cloud: session data is processed on your Watch and iPhone. It stays on your devices, in Apple Health when you allow it, and in your iCloud backup if you back up that device. We do not sell or share your data unless you explicitly choose to (for example export, or a connection you enable).
+**What fits**
+
+- Fixes that protect capture, sync, ack, or export
+- Core logic with tests (`cd RpplCore && swift test`)
+- Docs that match reality
+- UI only when it helps ride data, not decoration
+
+**What usually does not**
+
+- Cloud sync, accounts, subscriptions
+- Trick taxonomy or closed detection enums (codes stay opaque strings)
+- Phone-side label editors
+- Inventing detector thresholds without measurement
+
+**Quality bar**
+
+- Prefer pure logic in `RpplCore` so tests run without device APIs
+- Pre-commit (hygiene, codespell, SwiftLint) and push gate must stay green
+- Wakeboard slang stays authentic in every locale (see [AGENTS.md](AGENTS.md))
+
+**AI-assisted PRs**
+
+AI tools are welcome. Autonomous drive-by PRs are not. If AI wrote it, you still own it: you must be able to explain the change in your own words, and you run the tests. Same bar whether you typed every line or vibed it. Inspired by the [Open Home Foundation AI policy](https://developers.home-assistant.io/blog/2026/07/20/ai-policy/).
+
+Test. Test. Test.
+
+## Privacy & license
+
+Hobby project (Netherlands). No Rppl cloud. Session data stays on your devices, in Apple Health when allowed, and in your backups. We do not sell your data.
 
 | Doc | Role |
 |-----|------|
-| [LEGAL.md](LEGAL.md) | Full Terms & Privacy (canonical). Bundled into the iPhone app; edit this file, pre-commit syncs `Rppl/Resources/LEGAL.md`. |
-| [LICENSE](LICENSE) | Source: PolyForm Noncommercial — copy/modify for noncommercial use; no selling the app or other commercial use. Separate from app Terms & Privacy. |
+| [LEGAL.md](LEGAL.md) | Terms & Privacy (canonical; synced into the iPhone app) |
+| [LICENSE](LICENSE) | PolyForm Noncommercial: copy/modify for noncommercial use only |
 
 Contact: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl).
 
-## Agents
+## Handy extras
 
-Coding agents: read [AGENTS.md](AGENTS.md) before changing architecture or session/sync behavior. Library shape: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). System layers: [Docs/DESIGN.md](Docs/DESIGN.md).
+- Coding agents: read [AGENTS.md](AGENTS.md) before touching session, sync, or HealthKit flow.
+- Ultra Action Button: Settings → Action Button → Workout → Rppl (starts a session only).
+- Export is raw on purpose: great for Mac analysis, so share deliberately.
+- When unsure about product behavior, prefer the locks above over inventing UX.
