@@ -1,6 +1,6 @@
 # System design
 
-How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngine UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product lock: [../README.md](../README.md).
+How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngine UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product defaults: [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Layers
 
