@@ -62,38 +62,18 @@ Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
 
 Bundle IDs (`.dev` builds): `nl.dcsbl.rppl` · Watch `nl.dcsbl.rppl.watchkitapp` · App Group `group.nl.dcsbl.rppl`.
 
-## What we accept
+## Ideas and pull requests
 
-**Fits**
+Open an issue for bugs or ideas, or a PR with a suggested change. All ideas are welcome; some will fit the project today and some will not. That is fine. I will consider them.
 
-- Fixes that protect capture, sync, ack, or export
-- Core logic with tests (`cd RpplCore && swift test`)
-- Docs that match reality
-- UI only when it helps ride data, not decoration
+What matters for a change:
 
-**Usually does not**
+1. **Explainable.** You can describe what changed and why, in your own words. AI help is fine; drive-by autonomous PRs are not. Same bar whether you typed every line or vibed it. Inspired by the [Open Home Foundation AI policy](https://developers.home-assistant.io/blog/2026/07/20/ai-policy/).
+2. **Documented.** Update the relevant docs when behavior or layout changes (see the reading guide above).
+3. **Tested.** Cover it with automated tests where that makes sense (`cd RpplCore && swift test` for Core logic), or say clearly how you tested it by hand on device.
 
-- Cloud sync, accounts, subscriptions
-- Trick taxonomy or closed detection enums (codes stay opaque strings)
-- Phone-side label editors
-- Inventing detector thresholds without measurement
-
-**Quality**
-
-- Prefer pure logic in `RpplCore` so tests run without device APIs
-- Pre-commit (hygiene, codespell, SwiftLint) and the push gate must stay green
-- Wakeboard slang stays authentic in every locale (see [AGENTS.md](AGENTS.md))
-
-Small, focused pull requests beat kitchen-sink branches.
-
-## AI-assisted contributions
-
-AI tools are welcome. Autonomous drive-by PRs are not. If AI wrote it, you still own it: explain the change in your own words, and run the tests. Same bar whether you typed every line or vibed it.
-
-Inspired by the [Open Home Foundation AI policy](https://developers.home-assistant.io/blog/2026/07/20/ai-policy/).
-
-Test. Test. Test.
+Also keep pre-commit and the push gate green, and keep wakeboard slang authentic in every locale ([AGENTS.md](AGENTS.md)). Small, focused PRs are easier to review.
 
 ## Coding agents
 
-Read [AGENTS.md](AGENTS.md) before changing session, sync, or HealthKit flow. When unsure about product behavior, follow the defaults above and stop to ask if a change forks UX (product pause, phone labeling, deleting Watch data early).
+Read [AGENTS.md](AGENTS.md) before changing session, sync, or HealthKit flow. When unsure about product behavior, follow the defaults above and stop to ask if a change forks UX.
