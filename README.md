@@ -88,7 +88,7 @@ Bundle IDs (`.dev`): `nl.dcsbl.rppl` · Watch `nl.dcsbl.rppl.watchkitapp` · App
 
 ## Contribute
 
-Bugs and ideas: [open an issue](https://github.com/DCSBL/rppl/issues).  
+Bugs and ideas: [open an issue](https://github.com/DCSBL/rppl/issues).
 Suggested changes: open a PR. Small, focused diffs beat kitchen-sink branches.
 
 **What fits**
