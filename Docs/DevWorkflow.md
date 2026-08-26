@@ -66,14 +66,20 @@ Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
 
 Workflow: [`.github/workflows/pr-checks.yml`](../.github/workflows/pr-checks.yml).
 
-On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner reuses the same **commit-stage** pre-commit hooks (hygiene, codespell, SwiftLint, legal sync). It does **not** run `xcode-gate` / `swift test` / `xcodebuild` (macOS + Xcode only; slow on CI).
+On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner runs two jobs:
 
-- Caches `~/.cache/pre-commit` and the SwiftLint Linux binary.
+1. **pre-commit** — same **commit-stage** hooks (hygiene, codespell, SwiftLint, legal sync).
+2. **RpplCore tests** — `cd RpplCore && swift test` when the PR touches `RpplCore/`.
+
+It does **not** run `xcode-gate` / `xcodebuild` (macOS + Xcode only).
+
+- Both jobs use `fetch-depth: 0` so `git diff` / `--from-ref` can see base and head SHAs (a depth-1 checkout made Core change detection fail with `bad object` and silently skip tests).
+- Caches `~/.cache/pre-commit`, the SwiftLint Linux binary, and SPM `.build`.
 - Runs `pre-commit run --from-ref <base> --to-ref <head>` so hooks only see PR-changed files.
-- SwiftLint install is a **step-level** skip when the PR has no Swift / SwiftLint config changes. The job always reports a status, so you can mark `pre-commit` as a required check without skipped-job merge blocks.
+- SwiftLint install and Core `swift test` are **step-level** skips when the PR has no matching paths. Jobs always report a status, so you can mark them as required checks without skipped-job merge blocks.
 - Hooks with no matching files are skipped by pre-commit (exit 0).
 
-To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`**.
+To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status checks **`pre-commit`** and **`RpplCore tests`**.
 
 ## Notes
 

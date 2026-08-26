@@ -39,7 +39,10 @@ jobs:
           set -euo pipefail
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
-          if git diff --name-only "$base" "$head" \
+          # Resolve outside `if` so a failed `git diff` (missing SHAs) aborts
+          # under `set -e` instead of looking like "no changes".
+          changed_files="$(git diff --name-only "$base" "$head")"
+          if printf '%s\n' "$changed_files" \
             | grep -E '(^|/)(\.swiftlint\.yml|\.pre-commit-config\.yaml)$|\.swift$|scripts/git-hooks/run-swiftlint\.sh$' \
             >/dev/null; then
             echo "swift=true" >> "$GITHUB_OUTPUT"
@@ -109,6 +112,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Need base + head SHAs for the change filter (default depth-1
+          # checkout only has the merge commit → `git diff` "bad object",
+          # and the `if` then falsely reports no RpplCore changes).
+          fetch-depth: 0
 
       - name: Detect Core changes
         id: filter
@@ -116,9 +124,12 @@ jobs:
           set -euo pipefail
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
-          if git diff --name-only "$base" "$head" \
-            | grep -E '^RpplCore/' >/dev/null; then
+          # Resolve outside `if` so a failed `git diff` (missing SHAs) aborts
+          # under `set -e` instead of looking like "no changes".
+          changed_files="$(git diff --name-only "$base" "$head")"
+          if printf '%s\n' "$changed_files" | grep -E '^RpplCore/' >/dev/null; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "RpplCore paths changed — running tests"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No RpplCore changes — skipping tests"
