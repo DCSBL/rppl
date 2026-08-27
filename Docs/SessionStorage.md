@@ -61,9 +61,23 @@ Raw is the regeneration source when analyzers change. Export / WC transfer carri
 | Phone map | Stored geo frame for first camera; GPS polyline after appear | Motion |
 | Re-analysis | Raw detections + locations (+ health/water for tiles; motion if detectors need it) | — |
 | Watch live | RAM / live trackers while recording | Derived files |
-| Watch history | **Out** — active session + sync status only; past sessions phone-only |
+| Watch logbook | `manifest.json` + `derived/view.json` (mirrors phone after sync) | Raw streams (pruned post-ack) |
 
-City name is phone-only (geocode cache). Not part of Watch↔phone equality.
+City name is phone-only (geocode cache). Phone pushes it to Watch via view sync. Not part of Watch→phone WC package equality.
+
+## Watch distilled logbook
+
+After phone **ack**, Watch may **prune raw streams** and keep only:
+
+```text
+manifest.json
+derived/view.json
+```
+
+- **Source of truth:** iPhone logbook (phone pushes `viewUpdate`; delete on phone → `viewDelete` on Watch).
+- **Resync:** event-driven — phone pushes on import / geocode / re-analyze; Watch requests diff when logbook opens or app becomes active (reachable only). No polling timers.
+- **Pending sync** (`readyToTransfer` / `transferring`): full raw kept until ack; logbook shows session with sync dot when derived exists.
+- **Broken** (no readable derived): omitted from Watch list.
 
 ## Derived stats today
 
@@ -91,7 +105,7 @@ Raw remains required to regenerate `derived/` after analyzer bumps or storage mi
 ## Out of scope
 
 - `UIFileSharingEnabled` / Files over USB
-- Delete raw / distilled-only mode
+- Raw stream sync phone → Watch (view sync carries derived only)
 - CloudKit
-- Watch past-session viewer
+- Watch logbook edit / delete (view-only mirror of phone)
 - New crash / HK workout recovery features
