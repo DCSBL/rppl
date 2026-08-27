@@ -83,7 +83,7 @@ enum SessionMapSnapshotRenderer {
     }
 
     private static func applyCamera(
-        to options: MKMapSnapshotter.Options,
+        to options: inout MKMapSnapshotter.Options,
         frame: MapTrackFrame,
         size: CGSize
     ) {
