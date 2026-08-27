@@ -42,6 +42,47 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.peakSpeedKmh = peakSpeedKmh
         self.highlights = highlights
     }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        index = try container.decode(Int.self, forKey: .index)
+        startedAt = try container.decode(Date.self, forKey: .startedAt)
+        endedAt = try container.decode(Date.self, forKey: .endedAt)
+        duration = try container.decode(TimeInterval.self, forKey: .duration)
+        distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
+        // Forward migrate pre-slang `lapCount` → `setCount` (analyzer v1 sidecars / transfers).
+        if let sets = try container.decodeIfPresent(Int.self, forKey: .setCount) {
+            setCount = sets
+        } else {
+            setCount = try container.decodeIfPresent(Int.self, forKey: .lapCount) ?? 0
+        }
+        sustainedSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .sustainedSpeedKmh)
+        averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
+        peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
+        highlights = try container.decodeIfPresent([RideHighlight].self, forKey: .highlights) ?? []
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(index, forKey: .index)
+        try container.encode(startedAt, forKey: .startedAt)
+        try container.encode(endedAt, forKey: .endedAt)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(distanceMeters, forKey: .distanceMeters)
+        try container.encode(setCount, forKey: .setCount)
+        try container.encodeIfPresent(sustainedSpeedKmh, forKey: .sustainedSpeedKmh)
+        try container.encodeIfPresent(averageSpeedKmh, forKey: .averageSpeedKmh)
+        try container.encodeIfPresent(peakSpeedKmh, forKey: .peakSpeedKmh)
+        try container.encode(highlights, forKey: .highlights)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case index, startedAt, endedAt, duration, distanceMeters
+        case setCount
+        /// Legacy key from analyzer v1 / pre-slang rename.
+        case lapCount
+        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, highlights
+    }
 }
 
 /// Derived session summary from detections + GPS + health.

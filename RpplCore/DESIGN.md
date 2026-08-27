@@ -85,7 +85,7 @@ Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown
 
 ### Sets (crossing-based)
 
-`SetRideTracker` counts assumed start crossings per ride: leave beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter `startSafeRadiusM` → +1. Injectable `SetThresholds` (defaults: safe 50 m / exit 70 m / min path 200 m). Bad GPS ignored via `GeoDistance.acceptsStep`. Scoring only after a prior pause (mid-ride session start skipped). FSM runs only while attributed riding; pause freezes the count. `RideSegmentStats.setCount` is derived only (not persisted). Same tracker powers offline stats and live Watch UI.
+`SetRideTracker` counts assumed start crossings per ride: leave beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter `startSafeRadiusM` → +1. Injectable `SetThresholds` (defaults: safe 50 m / exit 70 m / min path 200 m). Bad GPS ignored via `GeoDistance.acceptsStep`. Scoring only after a prior pause (mid-ride session start skipped). FSM runs only while attributed riding; pause freezes the count. `RideSegmentStats.setCount` lives in derived `view.json` only (raw GPS + detections regenerate it). Decode accepts legacy `lapCount`. Same tracker powers offline stats and live Watch UI.
 
 ## Detection pipeline
 

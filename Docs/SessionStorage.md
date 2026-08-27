@@ -74,6 +74,8 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
+**Forward compat:** `RideSegmentStats` accepts legacy JSON key `lapCount` as `setCount` (slang rename). Encode writes `setCount` only. Stale `analyzerVersion` still triggers rebuild; unreadable sidecars are treated as missing so `ensureDerivedView` regenerates from raw.
+
 ## Out of scope
 
 - `UIFileSharingEnabled` / Files over USB
