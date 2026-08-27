@@ -64,26 +64,10 @@ enum SessionMapSnapshotRenderer {
                 longitudinalMeters: distanceMeters * 2
             )
         case let .frame(frame):
-            let center = CLLocationCoordinate2D(
-                latitude: frame.centerLatitude,
-                longitude: frame.centerLongitude
-            )
-            options.region = MKCoordinateRegion(
-                center: center,
-                latitudinalMeters: max(frame.spanHeightMeters, 120),
-                longitudinalMeters: max(frame.spanWidthMeters, 120)
-            )
+            applyCamera(to: &options, frame: frame, size: size)
         case let .sessionTracks(data, _, frame):
             if let frame {
-                let center = CLLocationCoordinate2D(
-                    latitude: frame.centerLatitude,
-                    longitude: frame.centerLongitude
-                )
-                options.region = MKCoordinateRegion(
-                    center: center,
-                    latitudinalMeters: max(frame.spanHeightMeters, 120),
-                    longitudinalMeters: max(frame.spanWidthMeters, 120)
-                )
+                applyCamera(to: &options, frame: frame, size: size)
             } else {
                 options.region = region(for: data, paddingFactor: 1.25)
             }
@@ -96,6 +80,28 @@ enum SessionMapSnapshotRenderer {
         case let .sessionTracks(data, style, _):
             return drawTracks(on: snapshot, data: data, style: style)
         }
+    }
+
+    private static func applyCamera(
+        to options: MKMapSnapshotter.Options,
+        frame: MapTrackFrame,
+        size: CGSize
+    ) {
+        let center = CLLocationCoordinate2D(
+            latitude: frame.centerLatitude,
+            longitude: frame.centerLongitude
+        )
+        let distance = MapTrackFitter.fit(
+            frame: frame,
+            viewWidth: Double(size.width),
+            viewHeight: Double(size.height)
+        )?.cameraDistanceMeters ?? max(frame.spanWidthMeters, frame.spanHeightMeters, 120)
+        options.camera = MKMapCamera(
+            lookingAtCenter: center,
+            fromDistance: distance,
+            pitch: 0,
+            heading: frame.headingDegrees
+        )
     }
 
     private static func region(for data: SessionMapTrackData, paddingFactor: Double) -> MKCoordinateRegion {

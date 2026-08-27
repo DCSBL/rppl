@@ -8,8 +8,10 @@ struct SessionMapView: View {
     /// Session overview distilled tracks (averaged / heatmap).
     var sessionMapData: SessionMapTrackData? = nil
     var allowsInteraction: Bool = false
-    /// Satellite + track-style toggles on interactive session maps.
+    /// Satellite toggle on interactive maps.
     var showsStyleToggle: Bool = false
+    /// Track-style toggle (averaged / heatmap); session overview only.
+    var showsTrackStyleToggle: Bool = true
     var preferredFrame: MapTrackFrame? = nil
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -22,12 +24,14 @@ struct SessionMapView: View {
         locations: [LocationSample],
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
+        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = locations.count >= 2 ? [locations] : []
         self.sessionMapData = nil
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
+        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
     }
 
@@ -35,12 +39,14 @@ struct SessionMapView: View {
         tracks: [[LocationSample]],
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
+        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = tracks.filter { $0.count >= 2 }
         self.sessionMapData = nil
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
+        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
     }
 
@@ -48,12 +54,14 @@ struct SessionMapView: View {
         sessionMapData: SessionMapTrackData,
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
+        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = []
         self.sessionMapData = sessionMapData
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
+        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
     }
 
@@ -86,26 +94,13 @@ struct SessionMapView: View {
                 showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
             }
             .overlay(alignment: .topLeading) {
-                if showsStyleToggle {
+                if showsStyleToggle || (showsTrackStyleToggle && sessionMapData != nil) {
                     mapControlCluster
                 }
             }
             .overlay(alignment: .bottomTrailing) {
                 if allowsInteraction, showReset {
-                    Button {
-                        applyFittedCamera(animated: true)
-                        showReset = false
-                    } label: {
-                        Text("Reset")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Color.rpplText)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(.ultraThinMaterial, in: Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .padding(10)
-                    .accessibilityLabel("Reset map")
+                    resetButton
                 }
             }
             .onAppear {
@@ -114,12 +109,12 @@ struct SessionMapView: View {
             .onChange(of: geo.size) { _, newSize in
                 updateFit(for: newSize, forceApply: !showReset)
             }
-            .onChange(of: contentSignature) { _, _ in
+            .onChange(of: dataSignature) { _, _ in
                 showReset = false
                 updateFit(for: geo.size, forceApply: true)
             }
             .onChange(of: preferredFrameSignature) { _, _ in
-                if fitCoordinates.count < 2 {
+                if fitCoordinates.count < 2, preferredFrame != nil {
                     showReset = false
                     updateFit(for: geo.size, forceApply: true)
                 }
@@ -176,12 +171,31 @@ struct SessionMapView: View {
 
     private var mapControlCluster: some View {
         HStack(spacing: 8) {
-            mapStyleToggle
-            if sessionMapData != nil {
+            if showsStyleToggle {
+                mapStyleToggle
+            }
+            if showsTrackStyleToggle, sessionMapData != nil {
                 trackStyleToggle
             }
         }
         .padding(10)
+    }
+
+    private var resetButton: some View {
+        Button {
+            applyFittedCamera(animated: true)
+            showReset = false
+        } label: {
+            Image(systemName: "arrow.counterclockwise")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.rpplText)
+                .frame(width: 36, height: 36)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(.trailing, 16)
+        .padding(.bottom, 16)
+        .accessibilityLabel("Reset map")
     }
 
     private var mapStyleToggle: some View {
@@ -229,9 +243,10 @@ struct SessionMapView: View {
         return "\(preferredFrame.centerLatitude)-\(preferredFrame.centerLongitude)-\(preferredFrame.headingDegrees)-\(preferredFrame.spanWidthMeters)"
     }
 
-    private var contentSignature: String {
+    /// Excludes track style so toggling averaged / heatmap does not refit the camera.
+    private var dataSignature: String {
         if let sessionMapData {
-            return "session-\(trackStyleRaw)-\(sessionMapData.averagedTrack.count)-\(sessionMapData.heatmapTracks.count)"
+            return "session-\(sessionMapData.averagedTrack.count)-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
         let count = tracks.reduce(0) { $0 + $1.count }
         return "rides-\(tracks.count)-\(count)"
@@ -239,15 +254,8 @@ struct SessionMapView: View {
 
     private var fitCoordinates: [(latitude: Double, longitude: Double)] {
         if let sessionMapData {
-            switch trackStyle {
-            case .averaged:
-                return sessionMapData.averagedTrack.map {
-                    (latitude: $0.latitude, longitude: $0.longitude)
-                }
-            case .heatmap:
-                return sessionMapData.heatmapTracks.flatMap { track in
-                    track.map { (latitude: $0.latitude, longitude: $0.longitude) }
-                }
+            return sessionMapData.allFitCoordinates.map {
+                (latitude: $0.latitude, longitude: $0.longitude)
             }
         }
         return MapTrackFitter.coordinates(fromTracks: tracks)
@@ -278,11 +286,16 @@ struct SessionMapView: View {
     }
 
     private func updateFit(for size: CGSize, forceApply: Bool) {
-        let coords = fitCoordinates
         let next: MapTrackFit?
-        if coords.count >= 2 {
+        if let preferredFrame, fitCoordinates.count >= 2 || sessionMapData != nil {
             next = MapTrackFitter.fit(
-                locations: coords,
+                frame: preferredFrame,
+                viewWidth: Double(size.width),
+                viewHeight: Double(size.height)
+            )
+        } else if fitCoordinates.count >= 2 {
+            next = MapTrackFitter.fit(
+                locations: fitCoordinates,
                 viewWidth: Double(size.width),
                 viewHeight: Double(size.height)
             )

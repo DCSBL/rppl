@@ -128,10 +128,6 @@ struct WatchSessionMapPreview: View {
                 )
             }
 
-            if mapTracks != nil {
-                trackStyleToggle
-            }
-
             if let cityName, !cityName.isEmpty {
                 Text(cityName)
                     .font(.caption)
@@ -149,26 +145,6 @@ struct WatchSessionMapPreview: View {
             mapFrame: mapFrame,
             startDistanceMeters: startMapDistanceMeters
         )
-    }
-
-    private var trackStyleToggle: some View {
-        Button {
-            trackStyleRaw = trackStyle == .averaged
-                ? SessionMapTrackStyle.heatmap.rawValue
-                : SessionMapTrackStyle.averaged.rawValue
-        } label: {
-            Label(
-                trackStyle == .averaged
-                    ? String(localized: "Heatmap")
-                    : String(localized: "Averaged track"),
-                systemImage: trackStyle == .averaged
-                    ? "square.3.layers.3d"
-                    : "point.topleft.down.curvedto.point.bottomright.up"
-            )
-            .font(.caption2.weight(.semibold))
-        }
-        .buttonStyle(.bordered)
-        .tint(Color.rpplIdleAccent)
     }
 }
 
