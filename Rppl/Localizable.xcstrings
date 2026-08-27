@@ -2853,6 +2853,152 @@
           }
         }
       }
+    },
+    "Already in logbook": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Already in logbook"
+          }
+        }
+      }
+    },
+    "Could not import session": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not import session"
+          }
+        }
+      }
+    },
+    "Data": {},
+    "Date unknown": {},
+    "Delete iCloud Copies": {},
+    "Deselect All": {},
+    "Done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "Every park day in iCloud Drive is already in this iPhone logbook.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every park day in iCloud Drive is already in this iPhone logbook."
+          }
+        }
+      }
+    },
+    "iCloud Drive": {},
+    "iCloud Drive unavailable": {},
+    "Import from iCloud": {},
+    "Keep iCloud Copies": {},
+    "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on.": {},
+    "No sessions to import": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sessions to import"
+          }
+        }
+      }
+    },
+    "Not Now": {},
+    "Select All": {},
+    "Show": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        }
+      }
+    },
+    "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files.": {},
+    "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook.": {},
+    "This permanently removes the session from this iPhone and from iCloud Drive when sync is on. This cannot be undone.": {},
+    "This session is already in your logbook.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session is already in your logbook."
+          }
+        }
+      }
+    },
+    "Turn Off iCloud Drive?": {},
+    "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore.": {},
+    "Could not read this session export. Re-export from Rppl and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read this session export. Re-export from Rppl and try again."
+          }
+        }
+      }
+    },
+    "This export is missing %@. Re-export from a current Rppl build, or pick a different file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This export is missing %@. Re-export from a current Rppl build, or pick a different file."
+          }
+        }
+      }
+    },
+    "This export has an empty value at %@. Re-export from Rppl and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This export has an empty value at %@. Re-export from Rppl and try again."
+          }
+        }
+      }
+    },
+    "This export has an unexpected value at %@. Re-export from Rppl and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This export has an unexpected value at %@. Re-export from Rppl and try again."
+          }
+        }
+      }
+    },
+    "This export looks corrupted at %@. Re-export from Rppl and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This export looks corrupted at %@. Re-export from Rppl and try again."
+          }
+        }
+      }
+    },
+    "This file is not a Rppl session export JSON.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file is not a Rppl session export JSON."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

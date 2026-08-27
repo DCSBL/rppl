@@ -134,7 +134,7 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 - GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
-- CloudKit sync
+- CloudKit sync (Documents in iCloud for the phone logbook is in scope; prefer native ubiquity APIs)
 - Auto-format rewriting **Swift** in hooks (lint-only; `.xcstrings` are an exception — Xcode-aligned via `scripts/format-xcstrings.py`)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding (Linear: DCSBL-56)

@@ -46,7 +46,7 @@ I hope that, like me, you enjoy tracking your sessions!
 
 ## Privacy & license
 
-Hobby project from the Netherlands. No Rppl cloud. We do not sell your data.
+Hobby project from the Netherlands. No Rppl cloud. Phone logbook can live in your iCloud Drive Documents when sync is on (default). We do not sell your data.
 
 | Doc | Role |
 |-----|------|
