@@ -8,12 +8,18 @@ struct SessionEndSummaryView: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
 
+    private static let store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+
+    @State private var mapTracks: SessionMapTrackData?
+    @State private var mapFrame: MapTrackFrame?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 WatchSessionMapPreview(
+                    mapTracks: mapTracks,
                     startCoordinate: startCoordinate,
-                    mapFrame: nil
+                    mapFrame: mapFrame
                 )
 
                 Text("Session complete")
@@ -66,13 +72,56 @@ struct SessionEndSummaryView: View {
         .onAppear {
             transfer.refreshPendingCount()
         }
+        .task {
+            await loadMapTracks()
+        }
     }
 
     private var startCoordinate: CLLocationCoordinate2D? {
+        if let mapTracks {
+            return CLLocationCoordinate2D(
+                latitude: mapTracks.start.latitude,
+                longitude: mapTracks.start.longitude
+            )
+        }
         guard let latitude = summary.startLatitude, let longitude = summary.startLongitude else {
             return nil
         }
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    private func loadMapTracks() async {
+        if let derived = try? await StoreIO.runOffMain {
+            try Self.store.readDerivedView(sessionId: summary.sessionId)
+        } {
+            mapFrame = derived.mapFrame
+            if let tracks = derived.mapTracks {
+                mapTracks = tracks
+                return
+            }
+        }
+
+        guard Self.store.hasRawStreams(sessionId: summary.sessionId) else { return }
+        let built = try? await StoreIO.runOffMain { () -> (SessionMapTrackData?, MapTrackFrame?) in
+            let locations = try Self.store.readLocationSamples(sessionId: summary.sessionId)
+            let detections = try Self.store.readDetections(sessionId: summary.sessionId)
+            let manifest = try Self.store.readManifest(sessionId: summary.sessionId)
+            let stats = SessionStatsBuilder.build(
+                manifest: manifest,
+                detections: detections,
+                locations: locations,
+                health: [],
+                water: []
+            )
+            let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
+            let frame = MapTrackFitter.frame(locations: coords)
+            let tracks = SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
+            return (tracks, frame)
+        }
+        if let built {
+            mapTracks = built.0
+            mapFrame = built.1
+        }
     }
 
     private var syncLine: some View {

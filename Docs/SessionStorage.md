@@ -58,7 +58,7 @@ Raw is the regeneration source when analyzers change. Export / WC transfer carri
 |---------|-------|-------------|
 | Phone list | Summary stats (distance, duration, rides, laps, speeds, highlights inputs) | Motion; full GPS parse |
 | Phone detail basics | Same stats + per-ride splits | Motion |
-| Phone map | Stored geo frame for first camera; GPS polyline after appear | Motion |
+| Phone map | Stored geo frame + distilled `mapTracks`; live GPS refines on phone | Motion |
 | Re-analysis | Raw detections + locations (+ health/water for tiles; motion if detectors need it) | — |
 | Watch live | RAM / live trackers while recording | Derived files |
 | Watch logbook | `manifest.json` + `derived/view.json` (mirrors phone after sync) | Raw streams (pruned post-ack) |
@@ -81,12 +81,12 @@ derived/view.json
 
 ## Derived stats today
 
-`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Detail map uses stored `MapTrackFrame` first; GPS polyline loads async.
+`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Session map uses distilled `mapTracks` (averaged + heatmap polylines) and `MapTrackFrame` for camera; phone may rebuild from raw when derived is stale.
 
 ## Fast view files
 
 ```text
-derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName phone-optional
+derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTracks?; cityName phone-optional
 ```
 
 | Rule | Detail |
@@ -94,7 +94,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName
 | Write | After Watch **Stop**; phone import keep if `analyzerVersion` matches else rebuild from raw (same `RpplCore`) |
 | Transfer | Include `derived` when present so Watch and iPhone stay aligned |
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
-| Map | Store device-agnostic `MapTrackFrame` (center, heading, geographic span). Phone computes camera distance for its map view size |
+| Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (averaged loop, heatmap ride paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
 | Crash | No new resume; do not regress today’s crash = dead |
 
