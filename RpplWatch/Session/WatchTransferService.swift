@@ -144,6 +144,7 @@ extension WatchTransferService: WCSessionDelegate {
                 lastMessage = String(localized: "WC activated")
                 WakeLog.debug(.sync, "WC activated state=\(activationState.rawValue)")
                 transferPending()
+                WatchViewSyncService.shared.requestViewSyncIfReachable()
             }
         }
     }
@@ -155,6 +156,7 @@ extension WatchTransferService: WCSessionDelegate {
                 lastMessage = String(localized: "iPhone reachable")
                 WakeLog.debug(.sync, "iPhone reachable")
                 transferPending()
+                WatchViewSyncService.shared.requestViewSyncIfReachable()
             } else {
                 lastMessage = String(localized: "iPhone not reachable - transfers will queue")
                 WakeLog.debug(.sync, "iPhone not reachable — queue transfers")
@@ -171,7 +173,11 @@ extension WatchTransferService: WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         Task { @MainActor in
-            applyAckMessage(message)
+            if message[AppConstants.wcAckMessageKey] != nil {
+                applyAckMessage(message)
+                return
+            }
+            WatchViewSyncService.shared.handleIncomingMessage(message)
         }
     }
 
@@ -181,15 +187,30 @@ extension WatchTransferService: WCSessionDelegate {
         didReceiveMessage message: [String: Any],
         replyHandler: @escaping ([String: Any]) -> Void
     ) {
-        replyHandler([AppConstants.wcAckMessageKey: "ok"])
-        Task { @MainActor in
-            applyAckMessage(message)
+        if message[AppConstants.wcAckMessageKey] != nil {
+            replyHandler([AppConstants.wcAckMessageKey: "ok"])
+            Task { @MainActor in
+                applyAckMessage(message)
+            }
+            return
         }
+        if WatchViewSyncCodec.messageType(in: message) != nil {
+            replyHandler([:])
+            Task { @MainActor in
+                WatchViewSyncService.shared.handleIncomingMessage(message)
+            }
+            return
+        }
+        replyHandler([:])
     }
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         Task { @MainActor in
-            applyAckMessage(userInfo)
+            if userInfo[AppConstants.wcAckMessageKey] != nil {
+                applyAckMessage(userInfo)
+                return
+            }
+            WatchViewSyncService.shared.handleIncomingMessage(userInfo)
         }
     }
 
@@ -212,6 +233,7 @@ extension WatchTransferService: WCSessionDelegate {
             // Phone rebroadcasts / dual-channel acks must not spam banners.
             if newlyAcknowledged {
                 WatchSyncNotifier.notifySyncCompleted(sessionId: ack)
+                WatchViewSyncService.shared.pruneAfterAck(sessionId: ack)
             }
         } catch {
             lastMessage = String(localized: "Ack failed: \(error.localizedDescription)")

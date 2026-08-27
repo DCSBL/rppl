@@ -34,6 +34,7 @@ struct ContentView: View {
             transfer.refreshSyncState()
             session.refreshPermissionStatus()
             transfer.transferPending()
+            WatchViewSyncService.shared.requestViewSyncIfReachable()
         }
     }
 }
