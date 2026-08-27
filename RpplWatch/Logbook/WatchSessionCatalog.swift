@@ -34,7 +34,7 @@ final class WatchSessionCatalog {
 
     private func load() async {
         do {
-            let loaded = try await StoreIO.runOffMain { try Self.loadEntries(store: store) }
+            let loaded = try await StoreIO.runOffMain { try Self.loadEntries(store: self.store) }
             try Task.checkCancellation()
             entries = loaded
             isLoading = false
