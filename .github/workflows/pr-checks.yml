@@ -135,9 +135,10 @@ jobs:
             echo "No RpplCore changes — skipping tests"
           fi
 
+      # Pin v2: setup-swift@v3 fails GPG verify (swift-actions/setup-swift#798).
       - name: Setup Swift
         if: steps.filter.outputs.changed == 'true'
-        uses: swift-actions/setup-swift@v3
+        uses: swift-actions/setup-swift@v2.4.0
         with:
           swift-version: "6.2"
 
