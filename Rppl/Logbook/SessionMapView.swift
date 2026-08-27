@@ -71,7 +71,11 @@ struct SessionMapView: View {
             }
             .mapStyle(mapStyle)
             .onMapCameraChange(frequency: .onEnd) { context in
-                guard allowsInteraction, let fitted else { return }
+                guard allowsInteraction else { return }
+                // Compass / gestures can move the map without updating `$position`.
+                // Keep the binding in sync so Reset always writes a real change.
+                position = .camera(context.camera)
+                guard let fitted else { return }
                 showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
             }
             .overlay(alignment: .topLeading) {
