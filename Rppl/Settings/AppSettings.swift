@@ -9,7 +9,7 @@ enum AppSettingsKey {
     static let didRequestPostSyncPermissions = "rppl.didRequestPostSyncPermissions"
     /// First-time Export disclosure (raw / non-anonymized share) accepted.
     static let didUnderstandExport = "rppl.didUnderstandExport"
-    /// Local cache of iCloud Drive logbook sync (source of truth: NSUbiquitousKeyValueStore).
+    /// Local iCloud Drive logbook sync preference (default on).
     static let iCloudDriveSyncEnabled = "rppl.iCloudDriveSyncEnabled"
     /// Session ids accepted into this phone’s logbook (Ask-before-import; local only).
     static let iCloudAcceptedSessionIDs = "rppl.iCloudAcceptedSessionIds"

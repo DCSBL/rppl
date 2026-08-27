@@ -10,8 +10,6 @@ public enum AppConstants {
     /// Opaque last-started activity code (`wakeboard`, …). Never a localized title.
     public static let lastActivityCodeDefaultsKey = "nl.dcsbl.rppl.lastActivityCode"
     public static let hkMetadataActivityCode = "nl.dcsbl.rppl.activityCode"
-    /// `NSUbiquitousKeyValueStore` key — phone iCloud Drive logbook sync (default on).
-    public static let iCloudDriveSyncEnabledKVSKey = "rppl.iCloudDriveSyncEnabled"
 
     public static var documentsSessionsRoot: URL {
         sessionsRoot(

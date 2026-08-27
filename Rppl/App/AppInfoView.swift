@@ -63,33 +63,7 @@ struct AppInfoView: View {
                 }
 
                 Section {
-                    HStack {
-                        Toggle(
-                            "iCloud Drive",
-                            isOn: Binding(
-                                get: { iCloud.isSyncEnabled },
-                                set: { newValue in
-                                if newValue {
-                                    Task {
-                                        await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
-                                    }
-                                } else {
-                                        showDisableDeleteConfirm = true
-                                    }
-                                }
-                            )
-                        )
-                        .disabled(
-                            iCloud.isApplyingSyncChange
-                                || (!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
-                        )
-                        .tint(Color.rpplAccent)
-
-                        if iCloud.isApplyingSyncChange {
-                            ProgressView()
-                                .controlSize(.small)
-                        }
-                    }
+                    iCloudDriveRow
 
                     if let status = iCloud.statusMessage {
                         Text(status)
@@ -159,20 +133,15 @@ struct AppInfoView: View {
             .toolbarBackground(Color.rpplBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
-            .confirmationDialog(
+            .alert(
                 "Turn Off iCloud Drive?",
-                isPresented: $showDisableDeleteConfirm,
-                titleVisibility: .visible
+                isPresented: $showDisableDeleteConfirm
             ) {
                 Button("Delete iCloud Copies", role: .destructive) {
-                    Task {
-                        await iCloud.setSyncEnabled(false, deleteICloudCopies: true)
-                    }
+                    beginDisableSync(deleteCopies: true)
                 }
                 Button("Keep iCloud Copies") {
-                    Task {
-                        await iCloud.setSyncEnabled(false, deleteICloudCopies: false)
-                    }
+                    beginDisableSync(deleteCopies: false)
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
@@ -214,6 +183,49 @@ struct AppInfoView: View {
             } message: {
                 Text("This session is already in your logbook.")
             }
+        }
+    }
+
+    @ViewBuilder
+    private var iCloudDriveRow: some View {
+        if iCloud.isApplyingSyncChange {
+            HStack {
+                Text("iCloud Drive")
+                Spacer()
+                ProgressView()
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("iCloud Drive")
+            .accessibilityValue("Updating")
+        } else {
+            Toggle(
+                "iCloud Drive",
+                isOn: Binding(
+                    get: { iCloud.isSyncEnabled },
+                    set: { newValue in
+                        if newValue {
+                            iCloud.markApplyingSyncChangeForUI()
+                            Task {
+                                await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                            }
+                        } else {
+                            showDisableDeleteConfirm = true
+                        }
+                    }
+                )
+            )
+            .disabled(!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
+            .tint(Color.rpplAccent)
+        }
+    }
+
+    private func beginDisableSync(deleteCopies: Bool) {
+        showDisableDeleteConfirm = false
+        iCloud.markApplyingSyncChangeForUI()
+        Task { @MainActor in
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(100))
+            await iCloud.setSyncEnabled(false, deleteICloudCopies: deleteCopies)
         }
     }
 

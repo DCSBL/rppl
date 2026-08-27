@@ -14,8 +14,10 @@ struct RpplApp: App {
             if phase == .active {
                 PhoneConnectivityService.shared.refreshSyncState()
                 PhoneConnectivityService.shared.flushPendingAcks()
-                PhoneICloudDriveController.shared.refreshAvailability()
-                PhoneICloudDriveController.shared.applyPreferredRootIfNeeded(reason: "active")
+                Task { @MainActor in
+                    await PhoneICloudDriveController.shared.refreshAvailability()
+                    PhoneICloudDriveController.shared.applyPreferredRootIfNeeded(reason: "active")
+                }
             }
         }
     }

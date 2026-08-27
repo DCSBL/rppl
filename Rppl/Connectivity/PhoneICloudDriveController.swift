@@ -12,7 +12,7 @@ import Observation
 final class PhoneICloudDriveController: NSObject {
     static let shared = PhoneICloudDriveController()
 
-    /// User preference (KVS). Default on.
+    /// User preference (UserDefaults). Default on.
     private(set) var isSyncEnabled: Bool
     /// Ubiquity container resolved (nil until identity / entitlement ready).
     private(set) var isICloudAvailable = false
@@ -35,18 +35,18 @@ final class PhoneICloudDriveController: NSObject {
     private var rootSwitchTask: Task<Void, Never>?
     private var isSwitchingRoot = false
     private var metadataHasGathered = false
+    private var suppressMetadataRebuild = false
 
-    private let kvs = NSUbiquitousKeyValueStore.default
     private let fileManager = FileManager.default
+    private var defaults: UserDefaults { .standard }
 
     override init() {
-        if kvs.object(forKey: AppConstants.iCloudDriveSyncEnabledKVSKey) == nil {
-            kvs.set(true, forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
-            kvs.synchronize()
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: AppSettingsKey.iCloudDriveSyncEnabled) == nil {
+            defaults.set(true, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         }
-        isSyncEnabled = kvs.bool(forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
+        isSyncEnabled = defaults.bool(forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         super.init()
-        UserDefaults.standard.set(isSyncEnabled, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         acceptedSessionIDs = loadAcceptedIDs()
 
         NotificationCenter.default.addObserver(
@@ -55,14 +55,9 @@ final class PhoneICloudDriveController: NSObject {
             name: NSNotification.Name.NSUbiquityIdentityDidChange,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(kvsDidChange(_:)),
-            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
-            object: kvs
-        )
-        kvs.synchronize()
-        refreshAvailability()
+        Task { @MainActor in
+            await refreshAvailability()
+        }
     }
 
     var iCloudSessionsRoot: URL? {
@@ -78,31 +73,40 @@ final class PhoneICloudDriveController: NSObject {
     }
 
     func start() {
-        refreshAvailability()
-        applyPreferredRootIfNeeded(reason: "start")
         Task { @MainActor in
+            await refreshAvailability()
+            applyPreferredRootIfNeeded(reason: "start")
             await uploadLocalOnlyPackagesIfNeeded(reason: "start")
+            await restartMetadataQueryIfNeeded()
         }
-        restartMetadataQueryIfNeeded()
+    }
+
+    /// Call synchronously from Settings before `Task { await setSyncEnabled }` so the spinner replaces the toggle immediately.
+    func markApplyingSyncChangeForUI() {
+        isApplyingSyncChange = true
     }
 
     /// Toggle from Settings. When turning off, caller asks whether to delete Drive copies.
     func setSyncEnabled(_ enabled: Bool, deleteICloudCopies: Bool) async {
-        guard !isApplyingSyncChange else { return }
-        isApplyingSyncChange = true
+        if !isApplyingSyncChange {
+            isApplyingSyncChange = true
+        }
         defer { isApplyingSyncChange = false }
 
-        isSyncEnabled = enabled
-        kvs.set(enabled, forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
-        kvs.synchronize()
-        UserDefaults.standard.set(enabled, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
+        // Paint spinner before ubiquity / file I/O (first enable can block for seconds).
+        try? await Task.sleep(for: .milliseconds(50))
 
-        refreshAvailability()
         if !enabled {
-            stopMetadataQuery()
+            let cloudRoot = iCloudSessionsRoot
+            isSyncEnabled = false
+            defaults.set(false, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
+
+            suppressMetadataRebuild = true
+            defer { suppressMetadataRebuild = false }
+
             pendingImportSummaries = []
             shouldOfferImport = false
-            let cloudRoot = iCloudSessionsRoot
+            await stopMetadataQuery()
             await migrateLiveRoot(
                 to: AppConstants.localPhoneSessionsRoot,
                 from: cloudRoot,
@@ -113,9 +117,25 @@ final class PhoneICloudDriveController: NSObject {
                 await coordinatedRemoveAll(at: cloudRoot)
             }
         } else {
-            applyPreferredRootIfNeeded(reason: "enable")
+            isSyncEnabled = true
+            defaults.set(true, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
+
+            await refreshAvailability()
+            let preferred = preferredSessionsRoot()
+            let current = PhoneConnectivityService.shared.store.rootURL
+            if preferred.standardizedFileURL != current.standardizedFileURL {
+                await migrateLiveRoot(
+                    to: preferred,
+                    from: current,
+                    copyMissing: true,
+                    reason: "enable"
+                )
+            } else {
+                try? await Self.ensureDirectoryExists(preferred)
+                try? PhoneConnectivityService.shared.store.ensureRootExists()
+            }
             await uploadLocalOnlyPackagesIfNeeded(reason: "enable")
-            restartMetadataQueryIfNeeded()
+            await restartMetadataQueryIfNeeded()
         }
     }
 
@@ -127,11 +147,10 @@ final class PhoneICloudDriveController: NSObject {
         suppressImportOffer = false
     }
 
-    func refreshAvailability() {
+    func refreshAvailability() async {
         let token = fileManager.ubiquityIdentityToken
-        let container = fileManager.url(
-            forUbiquityContainerIdentifier: AppConstants.iCloudContainerIdentifier
-        )
+        // First call can block for seconds — keep off MainActor.
+        let container = await Self.resolveUbiquityContainerURL()
         ubiquityContainerURL = container
         isICloudAvailable = token != nil && container != nil
         if !isICloudAvailable {
@@ -143,6 +162,23 @@ final class PhoneICloudDriveController: NSObject {
             .store,
             "iCloud available=\(isICloudAvailable) enabled=\(isSyncEnabled) container=\(container != nil)"
         )
+    }
+
+    private static func resolveUbiquityContainerURL() async -> URL? {
+        await Task.detached(priority: .userInitiated) {
+            FileManager.default.url(
+                forUbiquityContainerIdentifier: AppConstants.iCloudContainerIdentifier
+            )
+        }.value
+    }
+
+    private static func ensureDirectoryExists(_ url: URL) async throws {
+        try await Task.detached(priority: .userInitiated) {
+            try FileManager.default.createDirectory(
+                at: url,
+                withIntermediateDirectories: true
+            )
+        }.value
     }
 
     func applyPreferredRootIfNeeded(reason: String) {
@@ -168,23 +204,26 @@ final class PhoneICloudDriveController: NSObject {
     private func uploadLocalOnlyPackagesIfNeeded(reason: String) async {
         guard isSyncEnabled, let cloudRoot = iCloudSessionsRoot else { return }
         let localRoot = AppConstants.localPhoneSessionsRoot
+        let localExists = await Task.detached(priority: .userInitiated) {
+            FileManager.default.fileExists(atPath: localRoot.path)
+        }.value
         guard localRoot.standardizedFileURL != cloudRoot.standardizedFileURL,
-              fileManager.fileExists(atPath: localRoot.path)
+              localExists
         else {
             if PhoneConnectivityService.shared.store.rootURL.standardizedFileURL
                 == cloudRoot.standardizedFileURL {
-                reconcileAcceptedWithDisk()
+                await reconcileAcceptedWithDisk()
             }
             return
         }
         do {
-            try fileManager.createDirectory(at: cloudRoot, withIntermediateDirectories: true)
+            try await Self.ensureDirectoryExists(cloudRoot)
             let copied = try await coordinatedCopyMissing(from: localRoot, to: cloudRoot)
             if !copied.isEmpty {
                 WakeLog.debug(.store, "iCloud upload-all \(reason) copied=\(copied.count)")
                 PhoneConnectivityService.shared.bumpSessionsRevision()
             }
-            reconcileAcceptedWithDisk(in: cloudRoot)
+            await reconcileAcceptedWithDisk(in: cloudRoot)
         } catch {
             statusMessage = error.localizedDescription
             WakeLog.error(
@@ -250,9 +289,11 @@ final class PhoneICloudDriveController: NSObject {
         persistAcceptedIDs()
     }
 
-    private func reconcileAcceptedWithDisk(in root: URL? = nil) {
+    private func reconcileAcceptedWithDisk(in root: URL? = nil) async {
         let scanRoot = root ?? PhoneConnectivityService.shared.store.rootURL
-        let disk = Set((try? SessionRootMigrator.sessionIDs(in: scanRoot)) ?? [])
+        let disk = await Task.detached(priority: .userInitiated) {
+            Set((try? SessionRootMigrator.sessionIDs(in: scanRoot)) ?? [])
+        }.value
         guard !disk.isEmpty else { return }
         acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
             previousAccepted: acceptedSessionIDs,
@@ -270,18 +311,23 @@ final class PhoneICloudDriveController: NSObject {
         isSwitchingRoot = true
         defer { isSwitchingRoot = false }
         do {
-            try fileManager.createDirectory(at: destination, withIntermediateDirectories: true)
-            if copyMissing, let source, fileManager.fileExists(atPath: source.path) {
-                let copied = try await coordinatedCopyMissing(from: source, to: destination)
-                if !copied.isEmpty {
-                    WakeLog.debug(.store, "iCloud migrate \(reason) copied=\(copied.count)")
+            try await Self.ensureDirectoryExists(destination)
+            if copyMissing, let source {
+                let sourceExists = await Task.detached(priority: .userInitiated) {
+                    FileManager.default.fileExists(atPath: source.path)
+                }.value
+                if sourceExists {
+                    let copied = try await coordinatedCopyMissing(from: source, to: destination)
+                    if !copied.isEmpty {
+                        WakeLog.debug(.store, "iCloud migrate \(reason) copied=\(copied.count)")
+                    }
                 }
             }
             PhoneConnectivityService.shared.replaceStoreRoot(destination)
             if isSyncEnabled,
                let cloud = iCloudSessionsRoot,
                destination.standardizedFileURL == cloud.standardizedFileURL {
-                reconcileAcceptedWithDisk(in: destination)
+                await reconcileAcceptedWithDisk(in: destination)
             }
             statusMessage = nil
             PhoneConnectivityService.shared.bumpSessionsRevision()
@@ -292,32 +338,20 @@ final class PhoneICloudDriveController: NSObject {
     }
 
     @objc private func ubiquityIdentityChanged() {
-        refreshAvailability()
-        if isSyncEnabled {
-            applyPreferredRootIfNeeded(reason: "identity")
-            restartMetadataQueryIfNeeded()
+        Task { @MainActor in
+            await refreshAvailability()
+            if isSyncEnabled {
+                applyPreferredRootIfNeeded(reason: "identity")
+                await restartMetadataQueryIfNeeded()
+            }
         }
     }
 
-    @objc private func kvsDidChange(_ note: Notification) {
-        let enabled = kvs.bool(forKey: AppConstants.iCloudDriveSyncEnabledKVSKey)
-        guard enabled != isSyncEnabled else { return }
-        isSyncEnabled = enabled
-        UserDefaults.standard.set(enabled, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
-        if enabled {
-            applyPreferredRootIfNeeded(reason: "kvs")
-            restartMetadataQueryIfNeeded()
-        } else {
-            stopMetadataQuery()
-            applyPreferredRootIfNeeded(reason: "kvs-off")
-        }
-    }
-
-    private func restartMetadataQueryIfNeeded() {
-        stopMetadataQuery()
+    private func restartMetadataQueryIfNeeded() async {
+        await stopMetadataQuery()
         metadataHasGathered = false
         guard isSyncEnabled, isICloudAvailable, let root = iCloudSessionsRoot else { return }
-        try? fileManager.createDirectory(at: root, withIntermediateDirectories: true)
+        try? await Self.ensureDirectoryExists(root)
 
         let query = NSMetadataQuery()
         query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
@@ -344,22 +378,26 @@ final class PhoneICloudDriveController: NSObject {
         WakeLog.debug(.store, "NSMetadataQuery started for Sessions manifests")
     }
 
-    private func stopMetadataQuery() {
-        if let query = metadataQuery {
-            query.stop()
-            NotificationCenter.default.removeObserver(
-                self,
-                name: .NSMetadataQueryDidFinishGathering,
-                object: query
-            )
-            NotificationCenter.default.removeObserver(
-                self,
-                name: .NSMetadataQueryDidUpdate,
-                object: query
-            )
+    private func stopMetadataQuery() async {
+        guard let query = metadataQuery else {
+            metadataHasGathered = false
+            return
         }
         metadataQuery = nil
         metadataHasGathered = false
+        NotificationCenter.default.removeObserver(
+            self,
+            name: .NSMetadataQueryDidFinishGathering,
+            object: query
+        )
+        NotificationCenter.default.removeObserver(
+            self,
+            name: .NSMetadataQueryDidUpdate,
+            object: query
+        )
+        await Task.detached(priority: .userInitiated) {
+            query.stop()
+        }.value
     }
 
     @objc private func metadataQueryDidFinishGathering(_ note: Notification) {
@@ -375,6 +413,7 @@ final class PhoneICloudDriveController: NSObject {
     }
 
     private func rebuildPendingImportsFromQuery() {
+        guard !suppressMetadataRebuild else { return }
         guard isSyncEnabled, let root = iCloudSessionsRoot, let query = metadataQuery else {
             pendingImportSummaries = []
             shouldOfferImport = false
