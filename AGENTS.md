@@ -108,6 +108,11 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 - **`cd RpplCore && swift test`:** source of truth on macOS / Xcode Cloud. On Linux it currently fails (`import Compression` — Apple framework). Do not treat that failure as a Cloud Agent environment bug; keep Core pure where possible, but do not invent Linux shims unless explicitly asked.
 - Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
 
+## Apple platform
+
+- Active Apple Developer account; iCloud Documents container `iCloud.nl.dcsbl.rppl` is configured for phone logbook sync ([`PhoneICloudDriveController.swift`](Rppl/Connectivity/PhoneICloudDriveController.swift)).
+- CloudKit (record-based sync) remains out of scope — prefer native ubiquity / iCloud Drive Documents APIs for the logbook.
+
 ## Git / commits
 
 - User often wants **frequent commits** after meaningful chunks. Ask if unclear; when asked, follow user git rules (no force-push, no `--no-verify` unless requested, HEREDOC messages).
