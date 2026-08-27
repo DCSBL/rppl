@@ -20,8 +20,8 @@ struct WatchLogbookListView: View {
     @State private var showExampleSession = false
 
     var body: some View {
-        let _ = viewSync.catalogRevision
-        let _ = transfer.syncStatusRevision
+        _ = viewSync.catalogRevision
+        _ = transfer.syncStatusRevision
         return List {
             if catalog.isLoading, catalog.entries.isEmpty {
                 HStack {
