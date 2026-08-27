@@ -16,6 +16,7 @@ This project uses **caveman** mode for agent ↔ human chat.
 - Always work on a worktree
 - Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
 - A worktree will be squashed and merged via a GitHub PR by human.
+- **PR title** (not necessarily each commit): `<component>(<type>): <short description>` — e.g. `watch(feat): …`, `slang(fix): …`. See [contributions/agent.md](contributions/agent.md).
 - Each commit triggers light `pre-commit` hooks; each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
 
 ## Linear issues
@@ -80,6 +81,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - User often wants **frequent commits** after meaningful chunks. Ask if unclear; when asked, follow user git rules (no force-push, no `--no-verify` unless requested, HEREDOC messages).
 - Do not commit secrets, `Exports/`, DerivedData, or `tools/bin` binaries (gitignored).
 - Commit messages: normal prose, Conventional Commits style OK; not caveman.
+- PR titles use component-first format: [contributions/agent.md](contributions/agent.md).
 
 ## What to touch for common tasks
 

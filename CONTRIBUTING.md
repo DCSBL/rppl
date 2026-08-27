@@ -77,3 +77,5 @@ Also keep pre-commit and the push gate green, and keep wakeboard slang authentic
 ## Coding agents
 
 Read [AGENTS.md](AGENTS.md) before changing session, sync, or HealthKit flow. When unsure about product behavior, follow the defaults above and stop to ask if a change forks UX.
+
+**PR titles** (not necessarily each commit): `<component>(<type>): <short description>` — e.g. `watch(feat): …`, `slang(fix): …`. Details and component/type tables: [contributions/agent.md](contributions/agent.md).
