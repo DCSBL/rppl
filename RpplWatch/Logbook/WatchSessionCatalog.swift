@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import RpplCore
 
-struct WatchSessionEntry: Identifiable, Sendable {
+struct WatchSessionEntry: Identifiable, Equatable, Sendable {
     let manifest: SessionManifest
     let stats: SessionStats
     let cityName: String?
