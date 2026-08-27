@@ -536,18 +536,18 @@
         }
       }
     },
-    "Delete Permanently" : {
+    "Delete from Rppl" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete Permanently"
+            "value" : "Delete from Rppl"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definitief verwijderen"
+            "value" : "Verwijderen uit Rppl"
           }
         }
       }
@@ -2481,18 +2481,34 @@
         }
       }
     },
-    "This permanently removes the session from this iPhone. This cannot be undone." : {
+    "Permanently removes this session from Rppl on this iPhone and from iCloud Drive. This cannot be undone." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This permanently removes the session from this iPhone. This cannot be undone."
+            "value" : "Permanently removes this session from Rppl on this iPhone and from iCloud Drive. This cannot be undone."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dit verwijdert de session permanent van deze iPhone. Dit kan niet ongedaan worden gemaakt."
+            "value" : "Verwijdert deze session permanent uit Rppl op deze iPhone en uit iCloud Drive. Dit kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
+    "Permanently removes this session from Rppl on this iPhone. This cannot be undone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permanently removes this session from Rppl on this iPhone. This cannot be undone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijdert deze session permanent uit Rppl op deze iPhone. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
@@ -2927,7 +2943,6 @@
     },
     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files.": {},
     "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook.": {},
-    "This permanently removes the session from this iPhone and from iCloud Drive when sync is on. This cannot be undone.": {},
     "This session is already in your logbook.": {
       "localizations": {
         "en": {
