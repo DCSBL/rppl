@@ -1,11 +1,11 @@
 import Foundation
 
-/// Average multiple ride tracks into one representative cable loop.
+/// Pick the most common ride path across laps (medoid), not a mean that collapses loops.
 public enum CableTrackRepresentative {
     public static let defaultSampleCount = 64
 
-    /// One path per ride resampled to equal arc length, then lat/lon (and speed) averaged per index.
-    public static func average(
+    /// Medoid lap: resample, circularly align, then pick the track closest to all others.
+    public static func mostCommonPath(
         tracks: [[LocationSample]],
         sampleCount: Int = defaultSampleCount
     ) -> [LocationSample]? {
@@ -18,28 +18,29 @@ public enum CableTrackRepresentative {
         }
 
         let resampled = valid.map { resampleByArcLength($0, count: sampleCount) }
-        let baseTime = valid.first?.first?.timestamp ?? Date(timeIntervalSince1970: 0)
-        var averaged: [LocationSample] = []
-        averaged.reserveCapacity(sampleCount)
+        let aligned = alignTracksCircularly(resampled)
 
-        for index in 0..<sampleCount {
-            let points = resampled.map { $0[index] }
-            let latitude = points.map(\.latitude).reduce(0, +) / Double(points.count)
-            let longitude = points.map(\.longitude).reduce(0, +) / Double(points.count)
-            let speeds = points.compactMap(\.speed).filter { $0 >= 0 }
-            let speed = speeds.isEmpty ? nil : speeds.reduce(0, +) / Double(speeds.count)
-            let accuracy = points.map(\.horizontalAccuracy).reduce(0, +) / Double(points.count)
-            averaged.append(
-                LocationSample(
-                    timestamp: baseTime.addingTimeInterval(TimeInterval(index)),
-                    latitude: latitude,
-                    longitude: longitude,
-                    horizontalAccuracy: accuracy,
-                    speed: speed
-                )
-            )
+        var bestIndex = 0
+        var bestCost = Double.infinity
+        for index in aligned.indices {
+            var cost = 0.0
+            for other in aligned.indices where other != index {
+                cost += meanPointDistanceMeters(aligned[index], aligned[other])
+            }
+            if cost < bestCost {
+                bestCost = cost
+                bestIndex = index
+            }
         }
-        return averaged
+        return aligned[bestIndex]
+    }
+
+    /// Backward-compatible entry point; uses medoid path selection.
+    public static func average(
+        tracks: [[LocationSample]],
+        sampleCount: Int = defaultSampleCount
+    ) -> [LocationSample]? {
+        mostCommonPath(tracks: tracks, sampleCount: sampleCount)
     }
 
     /// Median of each ride's first GPS point (common dock / cut-in).
@@ -50,6 +51,64 @@ public enum CableTrackRepresentative {
         let longitudes = starts.map(\.longitude).sorted()
         let mid = starts.count / 2
         return MapCoordinate(latitude: latitudes[mid], longitude: longitudes[mid])
+    }
+
+    // MARK: - Alignment
+
+    static func alignTracksCircularly(_ tracks: [[LocationSample]]) -> [[LocationSample]] {
+        guard let reference = tracks.first else { return tracks }
+        return tracks.enumerated().map { index, track in
+            guard index > 0 else { return track }
+            return bestCircularMatch(reference: reference, candidate: track)
+        }
+    }
+
+    static func bestCircularMatch(
+        reference: [LocationSample],
+        candidate: [LocationSample]
+    ) -> [LocationSample] {
+        guard reference.count == candidate.count, reference.count >= 2 else { return candidate }
+
+        var bestTrack = candidate
+        var bestDistance = meanPointDistanceMeters(reference, candidate)
+
+        for offset in 0..<candidate.count {
+            let rotated = rotate(candidate, by: offset)
+            let forward = meanPointDistanceMeters(reference, rotated)
+            if forward < bestDistance {
+                bestDistance = forward
+                bestTrack = rotated
+            }
+
+            let reversed = Array(rotated.reversed())
+            let backward = meanPointDistanceMeters(reference, reversed)
+            if backward < bestDistance {
+                bestDistance = backward
+                bestTrack = reversed
+            }
+        }
+        return bestTrack
+    }
+
+    static func rotate(_ track: [LocationSample], by offset: Int) -> [LocationSample] {
+        guard !track.isEmpty else { return track }
+        let normalized = ((offset % track.count) + track.count) % track.count
+        guard normalized > 0 else { return track }
+        return Array(track[normalized...]) + Array(track[..<normalized])
+    }
+
+    static func meanPointDistanceMeters(_ left: [LocationSample], _ right: [LocationSample]) -> Double {
+        guard left.count == right.count, !left.isEmpty else { return .infinity }
+        var total = 0.0
+        for index in left.indices {
+            total += GeoDistance.meters(
+                fromLat: left[index].latitude,
+                fromLon: left[index].longitude,
+                toLat: right[index].latitude,
+                toLon: right[index].longitude
+            )
+        }
+        return total / Double(left.count)
     }
 
     // MARK: - Arc-length resample

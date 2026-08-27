@@ -45,4 +45,16 @@ public struct SessionMapTrackData: Codable, Equatable, Sendable {
     public var hasRenderableTrack: Bool {
         averagedTrack.count >= 2 || heatmapTracks.contains { $0.count >= 2 }
     }
+
+    /// All polylines for camera framing — union keeps zoom stable when toggling display mode.
+    public var allFitCoordinates: [MapCoordinate] {
+        var coords = averagedTrack
+        for track in heatmapTracks where track.count >= 2 {
+            coords.append(contentsOf: track)
+        }
+        if coords.isEmpty, averagedTrack.count == 1 {
+            coords = [start]
+        }
+        return coords
+    }
 }

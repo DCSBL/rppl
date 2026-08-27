@@ -31,20 +31,20 @@ struct SessionMapTrackBuilderTests {
         }
     }
 
-    @Test func identicalTracksAverageToSamePath() {
+    @Test func identicalTracksPickSamePath() {
         let track = straightTrack(latStart: 52.0, lon: 5.0, count: 20)
-        let averaged = CableTrackRepresentative.average(tracks: [track, track])!
-        #expect(averaged.count == CableTrackRepresentative.defaultSampleCount)
-        #expect(abs(averaged[0].latitude - track[0].latitude) < 1e-5)
-        #expect(abs(averaged.last!.latitude - track.last!.latitude) < 1e-4)
+        let picked = CableTrackRepresentative.mostCommonPath(tracks: [track, track])!
+        #expect(picked.count == CableTrackRepresentative.defaultSampleCount)
+        #expect(abs(picked[0].latitude - track[0].latitude) < 1e-5)
+        #expect(abs(picked.last!.latitude - track.last!.latitude) < 1e-4)
     }
 
-    @Test func offsetTracksAverageBetween() {
+    @Test func medoidPicksNearestRealTrack() {
         let low = straightTrack(latStart: 52.0, lon: 5.0, count: 20)
         let high = straightTrack(latStart: 52.0002, lon: 5.0, count: 20)
-        let averaged = CableTrackRepresentative.average(tracks: [low, high])!
-        let midLat = (low[10].latitude + high[10].latitude) / 2
-        #expect(abs(averaged[32].latitude - midLat) < 0.00005)
+        let picked = CableTrackRepresentative.mostCommonPath(tracks: [low, high, high])!
+        let midLat = picked[32].latitude
+        #expect(abs(midLat - high[10].latitude) < abs(midLat - low[10].latitude))
     }
 
     @Test func commonStartUsesMedian() {
