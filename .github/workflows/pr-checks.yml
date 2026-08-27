@@ -1,4 +1,5 @@
-# PR checks on Linux — pre-commit (hygiene, codespell, SwiftLint) + RpplCore unit tests.
+# PR checks on Linux — pre-commit only (hygiene, codespell, SwiftLint).
+# RpplCore unit tests run via Xcode Cloud (not GitHub Actions).
 # No xcode-gate / xcodebuild (macOS / Xcode only).
 #
 # Required-check friendly: this job always runs. Individual steps skip when the
@@ -105,60 +106,3 @@ jobs:
             --color=always \
             --from-ref "${{ github.event.pull_request.base.sha }}" \
             --to-ref "${{ github.event.pull_request.head.sha }}"
-
-  core-tests:
-    name: RpplCore tests
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # Need base + head SHAs for the change filter (default depth-1
-          # checkout only has the merge commit → `git diff` "bad object",
-          # and the `if` then falsely reports no RpplCore changes).
-          fetch-depth: 0
-
-      - name: Detect Core changes
-        id: filter
-        run: |
-          set -euo pipefail
-          base="${{ github.event.pull_request.base.sha }}"
-          head="${{ github.event.pull_request.head.sha }}"
-          # Resolve outside `if` so a failed `git diff` (missing SHAs) aborts
-          # under `set -e` instead of looking like "no changes".
-          changed_files="$(git diff --name-only "$base" "$head")"
-          # Also run when this workflow changes so Setup Swift / test steps stay exercised.
-          if printf '%s\n' "$changed_files" \
-            | grep -E '^RpplCore/|^\.github/workflows/pr-checks\.yml$' >/dev/null; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "RpplCore or pr-checks workflow changed — running tests"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No RpplCore / pr-checks workflow changes — skipping tests"
-          fi
-
-      # Pin v2: setup-swift@v3 fails GPG verify (swift-actions/setup-swift#798).
-      - name: Setup Swift
-        if: steps.filter.outputs.changed == 'true'
-        uses: swift-actions/setup-swift@v2.4.0
-        with:
-          swift-version: "6.2"
-
-      # Headers for CZlib (RpplCore Linux zlib fallback; Apple uses Compression).
-      - name: Install zlib headers
-        if: steps.filter.outputs.changed == 'true'
-        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
-
-      - name: Cache SPM
-        if: steps.filter.outputs.changed == 'true'
-        uses: actions/cache@v4
-        with:
-          path: RpplCore/.build
-          key: spm-${{ runner.os }}-${{ hashFiles('RpplCore/Package.resolved') }}
-          restore-keys: |
-            spm-${{ runner.os }}-
-
-      - name: Run tests
-        if: steps.filter.outputs.changed == 'true'
-        working-directory: RpplCore
-        run: swift test

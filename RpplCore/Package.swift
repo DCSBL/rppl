@@ -15,20 +15,7 @@ let package = Package(
     targets: [
         .target(
             name: "RpplCore",
-            dependencies: [
-                // Apple platforms use Compression; Linux CI links system zlib.
-                .target(name: "CZlib", condition: .when(platforms: [.linux])),
-            ],
             resources: [.process("Resources")]
-        ),
-        .systemLibrary(
-            name: "CZlib",
-            path: "Sources/CZlib",
-            pkgConfig: "zlib",
-            providers: [
-                .apt(["zlib1g-dev"]),
-                .brew(["zlib"]),
-            ]
         ),
         .testTarget(
             name: "RpplCoreTests",
