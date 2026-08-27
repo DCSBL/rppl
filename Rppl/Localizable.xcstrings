@@ -2186,6 +2186,38 @@
         }
       }
     },
+    "Show averaged track" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show averaged track"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemiddelde track tonen"
+          }
+        }
+      }
+    },
+    "Show heatmap" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show heatmap"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heatmap tonen"
+          }
+        }
+      }
+    },
     "Show standard map" : {
       "localizations" : {
         "en" : {

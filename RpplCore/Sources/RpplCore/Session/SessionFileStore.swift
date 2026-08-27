@@ -165,6 +165,7 @@ public final class SessionFileStore: @unchecked Sendable {
         )
         let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let mapFrame = MapTrackFitter.frame(locations: coords)
+        let mapTracks = SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
         if manifest.schemaVersion < SessionSchema.currentVersion {
             var updated = manifest
             updated.schemaVersion = SessionSchema.currentVersion
@@ -174,6 +175,7 @@ public final class SessionFileStore: @unchecked Sendable {
             analyzerVersion: SessionAnalyzer.version,
             stats: stats,
             mapFrame: mapFrame,
+            mapTracks: mapTracks,
             cityName: cityName
         )
     }

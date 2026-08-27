@@ -17,6 +17,7 @@ struct WatchSessionDetailView: View {
     @State private var stats: SessionStats?
     @State private var cityName: String?
     @State private var mapFrame: MapTrackFrame?
+    @State private var mapTracks: SessionMapTrackData?
     @State private var startCoordinate: CLLocationCoordinate2D?
     @State private var loadPhase: LoadPhase
     @State private var errorText: String?
@@ -33,6 +34,7 @@ struct WatchSessionDetailView: View {
         _stats = State(initialValue: entry.stats)
         _cityName = State(initialValue: entry.cityName)
         _mapFrame = State(initialValue: entry.mapFrame)
+        _mapTracks = State(initialValue: entry.mapTracks)
         _loadPhase = State(initialValue: .ready)
     }
 
@@ -44,6 +46,7 @@ struct WatchSessionDetailView: View {
             _stats = State(initialValue: entry.stats)
             _cityName = State(initialValue: entry.cityName)
             _mapFrame = State(initialValue: entry.mapFrame)
+            _mapTracks = State(initialValue: entry.mapTracks)
             _loadPhase = State(initialValue: .ready)
         case .bundledExample:
             _loadPhase = State(initialValue: .loading)
@@ -83,6 +86,7 @@ struct WatchSessionDetailView: View {
     @ViewBuilder
     private var detailContent: some View {
         WatchSessionMapPreview(
+            mapTracks: mapTracks,
             startCoordinate: startCoordinate,
             mapFrame: mapFrame,
             cityName: cityName
@@ -142,23 +146,51 @@ struct WatchSessionDetailView: View {
     private func loadIfNeeded() async {
         switch source {
         case .entry(let entry):
-            await loadStartCoordinateIfAvailable(sessionId: entry.manifest.sessionId)
+            await loadMapDataIfNeeded(sessionId: entry.manifest.sessionId, stats: entry.stats)
         case .bundledExample:
             await loadExample()
         }
     }
 
-    private func loadStartCoordinateIfAvailable(sessionId: String) async {
-        guard startCoordinate == nil else { return }
-        guard Self.store.hasRawStreams(sessionId: sessionId) else { return }
-        let peek = try? await StoreIO.runOffMain {
-            try Self.store.peekLocationSamples(sessionId: sessionId, limit: 1)
+    private func loadMapDataIfNeeded(sessionId: String, stats: SessionStats) async {
+        if mapTracks == nil {
+            if let derived = try? await StoreIO.runOffMain({
+                try Self.store.readDerivedView(sessionId: sessionId)
+            }) {
+                mapFrame = derived.mapFrame
+                if let tracks = derived.mapTracks {
+                    mapTracks = tracks
+                }
+            }
         }
-        if let first = peek?.first {
-            startCoordinate = CLLocationCoordinate2D(
-                latitude: first.latitude,
-                longitude: first.longitude
-            )
+
+        if mapTracks == nil, Self.store.hasRawStreams(sessionId: sessionId) {
+            let built = try? await StoreIO.runOffMain {
+                let locations = try Self.store.readLocationSamples(sessionId: sessionId)
+                return SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
+            }
+            if let built {
+                mapTracks = built
+            }
+        }
+
+        if startCoordinate == nil {
+            if let mapTracks {
+                startCoordinate = CLLocationCoordinate2D(
+                    latitude: mapTracks.start.latitude,
+                    longitude: mapTracks.start.longitude
+                )
+            } else if Self.store.hasRawStreams(sessionId: sessionId) {
+                let peek = try? await StoreIO.runOffMain {
+                    try Self.store.peekLocationSamples(sessionId: sessionId, limit: 1)
+                }
+                if let first = peek?.first {
+                    startCoordinate = CLLocationCoordinate2D(
+                        latitude: first.latitude,
+                        longitude: first.longitude
+                    )
+                }
+            }
         }
     }
 
@@ -172,7 +204,16 @@ struct WatchSessionDetailView: View {
             stats = bundle.stats
             cityName = bundle.cityName
             mapFrame = bundle.mapFrame
-            if let first = bundle.locations.first {
+            mapTracks = SessionMapTrackBuilder.build(
+                locations: bundle.locations,
+                rides: bundle.stats.rides
+            )
+            if let mapTracks {
+                startCoordinate = CLLocationCoordinate2D(
+                    latitude: mapTracks.start.latitude,
+                    longitude: mapTracks.start.longitude
+                )
+            } else if let first = bundle.locations.first {
                 startCoordinate = CLLocationCoordinate2D(
                     latitude: first.latitude,
                     longitude: first.longitude

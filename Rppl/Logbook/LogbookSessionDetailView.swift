@@ -19,6 +19,7 @@ struct LogbookSessionDetailView: View {
     @State private var manifest: SessionManifest?
     @State private var sessionStats: SessionStats?
     @State private var mapTracks: [[LocationSample]] = []
+    @State private var sessionMapTrackData: SessionMapTrackData?
     @State private var allLocations: [LocationSample] = []
     @State private var mapFrame: MapTrackFrame?
     @State private var tracksLoading = false
@@ -143,29 +144,57 @@ struct LogbookSessionDetailView: View {
 
     @ViewBuilder
     private var sessionMap: some View {
-        if mapTracks.isEmpty, mapFrame == nil {
+        if sessionMapTrackData == nil, mapFrame == nil {
             mapPlaceholder(
                 tracksLoading
                     ? "Loading GPS…"
                     : (sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
             )
-        } else {
-            SessionMapView(
-                tracks: mapTracks,
-                allowsInteraction: true,
-                showsStyleToggle: true,
-                preferredFrame: mapFrame
-            )
-                .frame(height: 300)
-                .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
-                .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
-                .overlay(alignment: .center) {
-                    if tracksLoading, mapTracks.isEmpty {
-                        ProgressView()
-                            .padding(12)
-                            .background(.ultraThinMaterial, in: Capsule())
-                    }
+        } else if let sessionMapTrackData {
+            ZStack(alignment: .topLeading) {
+                SessionMapView(
+                    sessionMapData: sessionMapTrackData,
+                    allowsInteraction: false,
+                    preferredFrame: mapFrame
+                )
+                .allowsHitTesting(false)
+
+                NavigationLink {
+                    SessionMapFullscreenView(
+                        sessionMapData: sessionMapTrackData,
+                        title: navigationTitle,
+                        preferredFrame: mapFrame
+                    )
+                } label: {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+
+                SessionMapControlCluster(
+                    showsStyleToggle: true,
+                    showsTrackStyleToggle: true,
+                    hasSessionData: true
+                )
+                .padding(10)
+            }
+            .frame(height: 300)
+            .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+            .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(String(localized: "Session map"))
+            .accessibilityHint(String(localized: "Shows full-screen map"))
+            .overlay(alignment: .center) {
+                if tracksLoading, sessionMapTrackData.averagedTrack.isEmpty {
+                    ProgressView()
+                        .padding(12)
+                        .background(.ultraThinMaterial, in: Capsule())
+                }
+            }
+        } else {
+            mapPlaceholder("No GPS track")
         }
     }
 
@@ -342,6 +371,7 @@ struct LogbookSessionDetailView: View {
                 manifest = summary.manifest
                 sessionStats = summary.stats
                 mapFrame = summary.mapFrame
+                sessionMapTrackData = summary.mapTracks
                 cityName = summary.cityName
                 if cityName == nil {
                     let peek = try await StoreIO.runOffMain {
@@ -403,6 +433,12 @@ struct LogbookSessionDetailView: View {
             }
             allLocations = sortedLocations
             mapTracks = mapPoints
+            if sessionMapTrackData == nil {
+                sessionMapTrackData = SessionMapTrackBuilder.build(
+                    locations: sortedLocations,
+                    rides: rides
+                )
+            }
             tracksLoading = false
             tracksTask = nil
         } catch is CancellationError {
@@ -427,6 +463,10 @@ struct LogbookSessionDetailView: View {
         allLocations = sortedLocations
         mapTracks = mapPoints
         mapFrame = bundle.mapFrame
+        sessionMapTrackData = SessionMapTrackBuilder.build(
+            locations: sortedLocations,
+            rides: bundle.stats.rides
+        )
         cityName = bundle.cityName
     }
 
