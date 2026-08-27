@@ -266,8 +266,7 @@ extension WatchSessionController {
         }
 
         logSessionStartDetection()
-        WKInterfaceDevice.current().enableWaterLock()
-        WakeLog.debug(.session, "Water Lock enabled")
+        await enableWaterLockWhenWorkoutActive()
         WKInterfaceDevice.current().play(.start)
 
         startBackgroundLoops()
@@ -462,7 +461,24 @@ extension WatchSessionController {
         WakeLog.debug(.session, "resumeSession done")
     }
 
-    func enableWaterLock() {
+    func enableWaterLockWhenWorkoutActive() async {
+        guard recordingMode == "workout" else {
+            WakeLog.debug(.session, "Water Lock skipped — sensors-only mode")
+            return
+        }
+        guard await waitForWorkoutSessionRunning() else {
+            WakeLog.debug(.session, "Water Lock skipped — HK workout not running")
+            return
+        }
+        WKInterfaceDevice.current().enableWaterLock()
+        WakeLog.debug(.session, "Water Lock enabled")
+    }
+
+    func enableWaterLock() async {
+        guard await waitForWorkoutSessionRunning(timeoutSeconds: 2) else {
+            WakeLog.debug(.ui, "Water Lock skipped — HK workout not active")
+            return
+        }
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.ui, "Water Lock enabled (manual)")
     }

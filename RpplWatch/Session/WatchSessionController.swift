@@ -105,6 +105,7 @@ final class WatchSessionController: NSObject {
     /// True while an HK ride activity is open (ended on detection `inactive`).
     var hkRideActivityOpen = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
+    var workoutRunningContinuation: CheckedContinuation<Void, Never>?
     var hkRideDistanceMeters = 0.0
     var hkRideDistanceAnchorMeters = 0.0
     /// Ride windows for HealthKit distance samples and interval metadata.

@@ -112,6 +112,35 @@ extension WatchSessionController {
         }
     }
 
+    /// Waits until `workoutSession` reaches `.running`, or times out.
+    func waitForWorkoutSessionRunning(timeoutSeconds: TimeInterval = 5) async -> Bool {
+        guard let session = workoutSession else { return false }
+        if session.state == .running { return true }
+
+        return await withTaskGroup(of: Bool.self) { group in
+            group.addTask { @MainActor in
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    self.workoutRunningContinuation = continuation
+                    if session.state == .running {
+                        self.workoutRunningContinuation = nil
+                        continuation.resume()
+                    }
+                }
+                return true
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                return false
+            }
+            guard let first = await group.next() else { return false }
+            group.cancelAll()
+            if !first {
+                workoutRunningContinuation = nil
+            }
+            return first
+        }
+    }
+
     /// Returns true if an HK workout session is running.
     func startWorkoutIfAuthorized() async -> Bool {
         refreshPermissionStatus()
@@ -289,6 +318,7 @@ extension WatchSessionController {
         workoutConfiguration = nil
         workoutRouteBuilder = nil
         workoutStoppedContinuation = nil
+        workoutRunningContinuation = nil
         hkRideActivityOpen = false
     }
 

@@ -40,7 +40,7 @@ struct SessionControlsPage: View {
 
             Button("Water Lock") {
                 WakeLog.debug(.ui, "tap Water Lock")
-                session.enableWaterLock()
+                Task { await session.enableWaterLock() }
             }
             .buttonStyle(.bordered)
             .disabled(session.isStopping)
