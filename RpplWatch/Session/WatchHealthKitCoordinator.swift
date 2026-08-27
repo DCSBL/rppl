@@ -227,9 +227,7 @@ extension WatchSessionController {
                 )
             }
             try await builder.addMetadata(closingMetadata)
-            #if RPPL_WEATHERKIT
             await attachAirWeatherMetadata(to: builder)
-            #endif
             try await builder.endCollection(at: stoppedDate)
             do {
                 try await addRideDistanceSamples(to: builder)
@@ -292,7 +290,6 @@ extension WatchSessionController {
         hkRideActivityOpen = false
     }
 
-    #if RPPL_WEATHERKIT
     func resetAirWeather() {
         airWeatherFetchTask?.cancel()
         airWeatherFetchTask = nil
@@ -344,7 +341,6 @@ extension WatchSessionController {
             WakeLog.error(.workout, "air weather metadata: \(error.localizedDescription)")
         }
     }
-    #endif
 
     func recordFinishedHkRide(endedAt: Date) {
         guard let start = hkRideStartedAt else { return }
