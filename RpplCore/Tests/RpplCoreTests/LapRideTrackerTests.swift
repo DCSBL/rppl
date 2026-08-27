@@ -51,9 +51,9 @@ private func pathSamples(
     return samples
 }
 
-@Suite("SetRideTracker")
-struct SetRideTrackerTests {
-    private let tight = SetThresholds(
+@Suite("LapRideTracker")
+struct LapRideTrackerTests {
+    private let tight = LapThresholds(
         startSafeRadiusM: 30,
         exitRadiusM: 40,
         minPathBeforeCrossingM: 80,
@@ -61,7 +61,7 @@ struct SetRideTrackerTests {
     )
 
     @Test func leaveWithoutReturnIsZero() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         let samples = pathSamples(
@@ -76,11 +76,11 @@ struct SetRideTrackerTests {
             tracker.addLocation(sample)
         }
         tracker.endRide()
-        #expect(tracker.setCount == 0)
+        #expect(tracker.lapCount == 0)
     }
 
     @Test func oneFullCrossingCountsOne() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         // Rectangle ~111m x ~111m → path ~444m > 80m min; return to start.
@@ -97,13 +97,13 @@ struct SetRideTrackerTests {
         for sample in samples {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 1)
+        #expect(tracker.lapCount == 1)
         tracker.endRide()
-        #expect(tracker.setCount == 1)
+        #expect(tracker.lapCount == 1)
     }
 
     @Test func twoCrossingsCountTwo() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         let loop: [(Double, Double)] = [
@@ -119,11 +119,11 @@ struct SetRideTrackerTests {
         for sample in samples {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 2)
+        #expect(tracker.lapCount == 2)
     }
 
     @Test func nearStartWobbleDoesNotCount() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         // Leave slightly then return without enough path.
@@ -138,11 +138,11 @@ struct SetRideTrackerTests {
         for sample in samples {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 0)
+        #expect(tracker.lapCount == 0)
     }
 
     @Test func midRideStartIgnoredUntilInactive() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         // No noteInactive — first ride ignored.
         tracker.beginRide()
         let loop = pathSamples(
@@ -158,7 +158,7 @@ struct SetRideTrackerTests {
         for sample in loop {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 0)
+        #expect(tracker.lapCount == 0)
         tracker.endRide()
 
         // After endRide, pause is implied — second ride scores.
@@ -172,11 +172,11 @@ struct SetRideTrackerTests {
         ]) {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 1)
+        #expect(tracker.lapCount == 1)
     }
 
     @Test func badAccuracyDoesNotTeleportSet() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         tracker.addLocation(location(at: 0, lat: 52.0, lon: 5.0))
@@ -190,14 +190,14 @@ struct SetRideTrackerTests {
         }
         // Flaky fix at start — ignored by accuracy gate.
         tracker.addLocation(location(at: 50, lat: 52.0, lon: 5.0, accuracy: 80))
-        #expect(tracker.setCount == 0)
+        #expect(tracker.lapCount == 0)
         // Teleport jump to start with good accuracy but huge step — rejected.
         tracker.addLocation(location(at: 51, lat: 52.0, lon: 5.0, accuracy: 10))
-        #expect(tracker.setCount == 0)
+        #expect(tracker.lapCount == 0)
     }
 
     @Test func inactiveFreezesFurtherCrossings() {
-        var tracker = SetRideTracker(thresholds: tight)
+        var tracker = LapRideTracker(thresholds: tight)
         tracker.noteInactive()
         tracker.beginRide()
         for sample in pathSamples(startOffset: 0, points: [
@@ -209,10 +209,10 @@ struct SetRideTrackerTests {
         ]) {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 1)
+        #expect(tracker.lapCount == 1)
         tracker.endRide()
-        #expect(tracker.setCount == 1)
-        // GPS near start after pause must not add sets.
+        #expect(tracker.lapCount == 1)
+        // GPS near start after pause must not add laps.
         for sample in pathSamples(startOffset: 100, points: [
             (52.0, 5.0),
             (52.001, 5.0),
@@ -222,13 +222,13 @@ struct SetRideTrackerTests {
         ]) {
             tracker.addLocation(sample)
         }
-        #expect(tracker.setCount == 1)
+        #expect(tracker.lapCount == 1)
     }
 }
 
-@Suite("SetRideTracker session stats")
-struct SetSessionStatsTests {
-    @Test func builderAttachesSetCount() {
+@Suite("LapRideTracker session stats")
+struct LapSessionStatsTests {
+    @Test func builderAttachesLapCount() {
         let detections = [
             DetectionEvent(
                 id: "s",
@@ -277,13 +277,13 @@ struct SetSessionStatsTests {
             detections: detections,
             locations: locations,
             health: [],
-            setThresholds: SetThresholds(
+            lapThresholds: LapThresholds(
                 startSafeRadiusM: 30,
                 exitRadiusM: 40,
                 minPathBeforeCrossingM: 80
             )
         )
         #expect(stats.rides.count == 1)
-        #expect(stats.rides[0].setCount == 1)
+        #expect(stats.rides[0].lapCount == 1)
     }
 }

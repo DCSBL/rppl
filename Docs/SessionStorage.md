@@ -44,7 +44,7 @@ Raw is the regeneration source when analyzers change. Export / WC transfer carri
 
 | Surface | Needs | Skip for UI |
 |---------|-------|-------------|
-| Phone list | Summary stats (distance, duration, rides, sets, speeds, highlights inputs) | Motion; full GPS parse |
+| Phone list | Summary stats (distance, duration, rides, laps, speeds, highlights inputs) | Motion; full GPS parse |
 | Phone detail basics | Same stats + per-ride splits | Motion |
 | Phone map | Stored geo frame for first camera; GPS polyline after appear | Motion |
 | Re-analysis | Raw detections + locations (+ health/water for tiles; motion if detectors need it) | — |
@@ -73,6 +73,8 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName
 | Crash | No new resume; do not regress today’s crash = dead |
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
+
+**Forward compat:** `RideSegmentStats` canonical key is `lapCount`. Decode also accepts intermediate slang mis-key `setCount` (circuit crossings briefly mislabeled). Encode writes `lapCount` only. Stale `analyzerVersion` still triggers rebuild; unreadable sidecars are treated as missing so `ensureDerivedView` regenerates from raw.
 
 ## Out of scope
 

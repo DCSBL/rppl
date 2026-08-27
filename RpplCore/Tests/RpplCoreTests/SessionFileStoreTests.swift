@@ -286,6 +286,60 @@ struct SessionFileStoreTests {
         #expect(package.water.isEmpty)
     }
 
+    @Test func transferPackageForwardMigratesDerivedSetCount() throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let json = Data(
+            #"""
+            {
+              "manifest": {
+                "schemaVersion": 5,
+                "sessionId": "s-lap",
+                "testerId": "t",
+                "appVersion": "1.0",
+                "buildNumber": "1",
+                "watchModel": "Ultra2",
+                "systemVersion": "26.0",
+                "startedAt": "2024-01-01T00:00:00Z",
+                "endedAt": "2024-01-01T00:10:00Z",
+                "transferState": "readyToTransfer"
+              },
+              "detections": [],
+              "locations": [],
+              "health": [],
+              "derived": {
+                "analyzerVersion": 1,
+                "stats": {
+                  "startedAt": "2024-01-01T00:00:00Z",
+                  "endedAt": "2024-01-01T00:10:00Z",
+                  "totalDuration": 600,
+                  "totalDistanceMeters": 0,
+                  "rideCount": 1,
+                  "ridingDuration": 300,
+                  "inactiveDuration": 300,
+                  "ridingInactiveRatio": 0.5,
+                  "waterTemperatureAvailable": false,
+                  "rides": [
+                    {
+                      "index": 0,
+                      "startedAt": "2024-01-01T00:01:00Z",
+                      "endedAt": "2024-01-01T00:06:00Z",
+                      "duration": 300,
+                      "distanceMeters": 800,
+                      "setCount": 4,
+                      "highlights": []
+                    }
+                  ]
+                }
+              }
+            }
+            """#.utf8
+        )
+        let package = try decoder.decode(SessionTransferPackage.self, from: json)
+        #expect(package.derived?.stats.rides.first?.lapCount == 4)
+        #expect(package.derived?.isCurrentAnalyzer == false)
+    }
+
     @Test func failedTransferDoesNotDropReadySessions() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("xfer-\(UUID().uuidString)", isDirectory: true)

@@ -8,7 +8,7 @@ struct EndedSessionSummary: Equatable, Sendable {
     let distanceMeters: Double
     let lastRideDuration: TimeInterval
     let lastRideMeters: Double
-    let lastRideSetCount: Int
+    let lastRideLapCount: Int
     let didCompleteRide: Bool
     let startLatitude: Double?
     let startLongitude: Double?

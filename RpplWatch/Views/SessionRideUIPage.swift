@@ -111,13 +111,13 @@ struct SessionRideUIPage: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text("\(session.currentRideSetCount)")
+                    Text("\(session.currentRideLapCount)")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                         .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("SETS")
+                    Text("LAPS")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)
@@ -156,7 +156,7 @@ struct SessionRideUIPage: View {
             Text(
                 "\(SessionFormatters.segmentDuration(session.lastRideDuration)) · "
                     + "\(SessionFormatters.distance(session.lastRideMeters)) · "
-                    + "\(session.lastRideSetCount)"
+                    + "\(session.lastRideLapCount)"
             )
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -173,7 +173,7 @@ struct SessionRideUIPage: View {
 
     private var lastRideAccessibilityLabel: String {
         String(
-            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideSetCount) sets"
+            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideLapCount) laps"
         )
     }
 
@@ -260,8 +260,8 @@ struct SessionRideUIPage: View {
                 value: SessionFormatters.distance(session.lastRideMeters)
             )
             SessionMetricRow(
-                label: "Sets",
-                value: "\(session.lastRideSetCount)"
+                label: "Laps",
+                value: "\(session.lastRideLapCount)"
             )
         } else {
             Text("No rides yet")

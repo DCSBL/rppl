@@ -754,34 +754,34 @@
         }
       }
     },
-    "Sets": {
+    "Laps": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sets"
+            "value": "Laps"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sets"
+            "value": "Laps"
           }
         }
       }
     },
-    "SETS": {
+    "LAPS": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "SETS"
+            "value": "LAPS"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "SETS"
+            "value": "LAPS"
           }
         }
       }
@@ -818,18 +818,18 @@
         }
       }
     },
-    "Last ride %@, %@, %lld sets": {
+    "Last ride %@, %@, %lld laps": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last ride %1$@, %2$@, %3$lld sets"
+            "value": "Last ride %1$@, %2$@, %3$lld laps"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laatste ride %1$@, %2$@, %3$lld sets"
+            "value": "Laatste ride %1$@, %2$@, %3$lld laps"
           }
         }
       }
