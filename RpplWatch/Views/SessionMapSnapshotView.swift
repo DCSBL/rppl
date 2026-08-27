@@ -52,7 +52,7 @@ enum SessionMapSnapshotRenderer {
         size: CGSize,
         scale: CGFloat
     ) async throws -> UIImage {
-        let options = MKMapSnapshotter.Options()
+        var options = MKMapSnapshotter.Options()
         options.size = size
         options.scale = scale
 
