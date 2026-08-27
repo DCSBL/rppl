@@ -16,6 +16,20 @@ enum SessionMapSnapshotSource: Sendable {
             return "f:\(frame.centerLatitude),\(frame.centerLongitude):\(frame.spanWidthMeters):\(frame.spanHeightMeters)"
         }
     }
+
+    static func sessionMap(
+        startCoordinate: CLLocationCoordinate2D?,
+        mapFrame: MapTrackFrame?,
+        startDistanceMeters: CLLocationDistance = 500
+    ) -> SessionMapSnapshotSource? {
+        if let startCoordinate {
+            return .coordinate(startCoordinate, distanceMeters: startDistanceMeters)
+        }
+        if let mapFrame {
+            return .frame(mapFrame)
+        }
+        return nil
+    }
 }
 
 enum SessionMapSnapshotRenderer {

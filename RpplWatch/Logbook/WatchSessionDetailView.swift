@@ -82,16 +82,11 @@ struct WatchSessionDetailView: View {
 
     @ViewBuilder
     private var detailContent: some View {
-        SessionMapStripView(
+        WatchSessionMapPreview(
             startCoordinate: startCoordinate,
-            mapFrame: mapFrame
+            mapFrame: mapFrame,
+            cityName: cityName
         )
-
-        if let cityName, !cityName.isEmpty {
-            Text(cityName)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
 
         if let stats {
             Text(WatchLogbookFormatting.sessionDateTimeLine(

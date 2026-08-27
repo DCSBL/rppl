@@ -34,7 +34,7 @@ private struct WatchRideRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Ride \(ride.index + 1)")
+            Text("Ride \(ride.index)")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
 

@@ -116,23 +116,32 @@ private struct WatchSessionRow: View {
                         value: "\(entry.stats.rideCount)"
                     )
                 }
-
-                if let cityName = entry.cityName, !cityName.isEmpty {
-                    Text(cityName)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if let mapSource = rowMapSource {
-                SessionMapSnapshotView(
-                    source: mapSource,
-                    size: CGSize(width: 56, height: 56),
-                    cornerRadius: 10,
-                    showsPin: true
-                )
+                VStack(spacing: 4) {
+                    NavigationLink {
+                        WatchSessionMapFullscreenView(source: mapSource)
+                    } label: {
+                        SessionMapSnapshotView(
+                            source: mapSource,
+                            size: CGSize(width: 56, height: 56),
+                            cornerRadius: 10,
+                            showsPin: true
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    if let cityName = entry.cityName, !cityName.isEmpty {
+                        Text(cityName)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 56)
+                    }
+                }
             }
         }
         .padding(.vertical, 4)

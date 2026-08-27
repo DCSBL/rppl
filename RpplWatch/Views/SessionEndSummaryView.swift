@@ -11,7 +11,7 @@ struct SessionEndSummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                SessionMapStripView(
+                WatchSessionMapPreview(
                     startCoordinate: startCoordinate,
                     mapFrame: nil
                 )
