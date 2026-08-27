@@ -56,6 +56,10 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
     ) {
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
+            if toState == .running, let continuation = workoutRunningContinuation {
+                workoutRunningContinuation = nil
+                continuation.resume()
+            }
             if toState == .stopped, let continuation = workoutStoppedContinuation {
                 workoutStoppedContinuation = nil
                 continuation.resume(returning: date)

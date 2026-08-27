@@ -264,8 +264,7 @@ extension WatchSessionController {
         }
 
         logSessionStartDetection()
-        WKInterfaceDevice.current().enableWaterLock()
-        WakeLog.debug(.session, "Water Lock enabled")
+        await enableWaterLockWhenWorkoutActive()
         WKInterfaceDevice.current().play(.start)
 
         startBackgroundLoops()
@@ -458,9 +457,50 @@ extension WatchSessionController {
         WakeLog.debug(.session, "resumeSession done")
     }
 
-    func enableWaterLock() {
+    /// True when an HK workout session exists and Water Lock can be toggled on.
+    var canEnableWaterLock: Bool {
+        guard recordingMode == "workout", let session = workoutSession else { return false }
+        switch session.state {
+        case .running, .paused:
+            return true
+        default:
+            return false
+        }
+    }
+
+    func refreshWaterLockState() {
+        let enabled = WKInterfaceDevice.current().isWaterLockEnabled
+        guard isWaterLockEnabled != enabled else { return }
+        isWaterLockEnabled = enabled
+        WakeLog.debug(.ui, "Water Lock state → \(enabled)")
+    }
+
+    func enableWaterLockWhenWorkoutActive() async {
+        guard recordingMode == "workout" else {
+            WakeLog.debug(.session, "Water Lock skipped — sensors-only mode")
+            return
+        }
+        guard await waitForWorkoutSessionRunning() else {
+            WakeLog.debug(.session, "Water Lock skipped — HK workout not running")
+            return
+        }
+        await applyWaterLock(enabled: true, logCategory: .session)
+    }
+
+    func enableWaterLock() async {
+        guard !isWaterLockEnabled else { return }
+        guard await waitForWorkoutSessionRunning(timeoutSeconds: 2) else {
+            WakeLog.debug(.ui, "Water Lock skipped — HK workout not active")
+            return
+        }
+        await applyWaterLock(enabled: true, logCategory: .ui)
+    }
+
+    private func applyWaterLock(enabled: Bool, logCategory: WakeLog.Category) async {
+        guard enabled, !isWaterLockEnabled else { return }
         WKInterfaceDevice.current().enableWaterLock()
-        WakeLog.debug(.ui, "Water Lock enabled (manual)")
+        refreshWaterLockState()
+        WakeLog.debug(logCategory, "Water Lock enabled")
     }
 
     func dismissSessionSummary() {
