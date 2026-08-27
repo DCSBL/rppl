@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 import RpplCore
 import WatchKit
+import UIKit
 
 /// Static map thumbnail for Watch — SwiftUI `Map` often renders blank in small/scroll layouts.
 enum SessionMapSnapshotSource: Equatable, Sendable {
