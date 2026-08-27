@@ -567,9 +567,28 @@ private struct RideDetailCard: View {
             }
 
             if locations.count >= 2 {
-                SessionMapView(locations: locations)
-                    .frame(height: 168)
-                    .logbookNestedClip()
+                ZStack {
+                    SessionMapView(locations: locations)
+                        .allowsHitTesting(false)
+
+                    NavigationLink {
+                        SessionMapFullscreenView(
+                            locations: locations,
+                            title: String(localized: "Ride \(ride.index)")
+                        )
+                    } label: {
+                        Color.clear
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .frame(height: 168)
+                .logbookNestedClip()
+                .accessibilityElement(children: .ignore)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityLabel(String(localized: "Ride \(ride.index)"))
+                .accessibilityHint(String(localized: "Shows full-screen map"))
             } else {
                 Text("No GPS track for this ride")
                     .font(.caption)

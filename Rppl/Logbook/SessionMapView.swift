@@ -5,7 +5,7 @@ import RpplCore
 struct SessionMapView: View {
     let tracks: [[LocationSample]]
     var allowsInteraction: Bool = false
-    /// Style toggle only on the session map card — not ride maps.
+    /// Style toggle on interactive maps (session card, fullscreen); not ride thumbnails.
     var showsStyleToggle: Bool = false
     /// Device-agnostic frame from `derived/view.json` for first paint before tracks load.
     var preferredFrame: MapTrackFrame? = nil
@@ -211,5 +211,48 @@ struct SessionMapView: View {
             && lonDelta < 0.00012
             && distanceRatio < 0.1
             && pitchDelta < 4
+    }
+}
+
+/// Full-screen interactive track map (pan / zoom / pitch / rotate + style toggle).
+/// System Back dismisses when pushed on a `NavigationStack`.
+struct SessionMapFullscreenView: View {
+    let tracks: [[LocationSample]]
+    let title: String
+    var preferredFrame: MapTrackFrame? = nil
+
+    init(
+        locations: [LocationSample],
+        title: String,
+        preferredFrame: MapTrackFrame? = nil
+    ) {
+        self.tracks = locations.count >= 2 ? [locations] : []
+        self.title = title
+        self.preferredFrame = preferredFrame
+    }
+
+    init(
+        tracks: [[LocationSample]],
+        title: String,
+        preferredFrame: MapTrackFrame? = nil
+    ) {
+        self.tracks = tracks.filter { $0.count >= 2 }
+        self.title = title
+        self.preferredFrame = preferredFrame
+    }
+
+    var body: some View {
+        SessionMapView(
+            tracks: tracks,
+            allowsInteraction: true,
+            showsStyleToggle: true,
+            preferredFrame: preferredFrame
+        )
+        .ignoresSafeArea(edges: .bottom)
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.rpplBackground)
+        .tint(Color.rpplAccent)
+        .accessibilityLabel(title)
     }
 }
