@@ -28,7 +28,16 @@ Fast checks only — commit is blocked if any fail:
 
 1. Basic file hygiene (trailing whitespace, YAML/JSON, merge conflict markers)
 2. **codespell**
-3. **SwiftLint** (`--strict`, config in `.swiftlint.yml`)
+3. **Format `.xcstrings`** like Xcode (`scripts/format-xcstrings.py` — space before `:`, multi-line empty objects). Stops whole-catalog phantom diffs when Xcode rewrites a catalog after an agent/script edit.
+4. **SwiftLint** (`--strict`, config in `.swiftlint.yml`)
+
+Manual catalog format (all catalogs, or specific paths):
+
+```bash
+python3 scripts/format-xcstrings.py --all
+python3 scripts/format-xcstrings.py --check --all
+python3 scripts/format-xcstrings.py Rppl/Localizable.xcstrings
+```
 
 ## What runs on push
 

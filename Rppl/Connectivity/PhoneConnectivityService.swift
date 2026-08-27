@@ -16,15 +16,36 @@ final class PhoneConnectivityService: NSObject {
     /// Acks queued because Watch was unreachable (or send failed).
     var pendingAckCount: Int { pendingAcks.count }
 
-    let store: SessionFileStore
+    private(set) var store: SessionFileStore
     private var pendingAcks = Set<String>()
+    private var rootReplaceLock = false
 
     override init() {
-        let root = AppConstants.appGroupSessionsRoot ?? AppConstants.documentsSessionsRoot
+        let root = AppConstants.localPhoneSessionsRoot
         store = SessionFileStore(rootURL: root)
-        try? store.ensureRootExists()
         super.init()
+        try? store.ensureRootExists()
         activate()
+    }
+
+    /// Swap live session root (App Group ↔ iCloud Documents). Serializes against imports.
+    func replaceStoreRoot(_ rootURL: URL) {
+        guard !rootReplaceLock else { return }
+        rootReplaceLock = true
+        defer { rootReplaceLock = false }
+        if store.rootURL.standardizedFileURL == rootURL.standardizedFileURL {
+            try? store.ensureRootExists()
+            return
+        }
+        let next = SessionFileStore(rootURL: rootURL)
+        try? next.ensureRootExists()
+        store = next
+        sessionsRevision += 1
+        WakeLog.debug(.store, "phone store root → \(rootURL.lastPathComponent)")
+    }
+
+    func bumpSessionsRevision() {
+        sessionsRevision += 1
     }
 
     func activate() {
@@ -138,6 +159,7 @@ final class PhoneConnectivityService: NSObject {
         try store.importTransferPackage(package, intoPhoneStore: store.rootURL)
         sessionsRevision += 1
         let sessionId = sessionIdHint ?? package.manifest.sessionId
+        PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
         // Mark first sync before any permission sheets — sync/ack already finished above.
@@ -147,9 +169,18 @@ final class PhoneConnectivityService: NSObject {
         }
     }
 
+    func hasSession(sessionId: String) -> Bool {
+        (try? store.listSessionIDs().contains(sessionId)) ?? false
+    }
+
     /// Import a Share export JSON from Files. No Watch ack, no HealthKit, no post-sync permission trigger.
-    func importExportedSession(from url: URL) async throws {
+    /// Throws `SessionExportImportError.alreadyImported` when the session id is already on disk.
+    @discardableResult
+    func importExportedSession(from url: URL) async throws -> String {
         WakeLog.debug(.transfer, "export-file import begin")
+        PhoneICloudDriveController.shared.beginImportOfferSuppression()
+        defer { PhoneICloudDriveController.shared.endImportOfferSuppression() }
+
         let accessing = url.startAccessingSecurityScopedResource()
         defer {
             if accessing {
@@ -157,16 +188,88 @@ final class PhoneConnectivityService: NSObject {
             }
         }
         let store = self.store
-        let sessionId = try await StoreIO.runOffMain {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let package = try decoder.decode(SessionTransferPackage.self, from: data)
-            try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
-            return package.manifest.sessionId
+        let sessionId: String
+        do {
+            sessionId = try await StoreIO.runOffMain {
+                let data = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let package = try decoder.decode(SessionTransferPackage.self, from: data)
+                let id = package.manifest.sessionId
+                if FileManager.default.fileExists(
+                    atPath: store.sessionDirectory(for: id).path
+                ) {
+                    throw SessionExportImportError.alreadyImported(sessionId: id)
+                }
+                try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
+                return id
+            }
+        } catch let error as SessionExportImportError {
+            throw error
+        } catch {
+            throw SessionExportImportError.unreadable(SessionExportImportError.detail(for: error))
         }
         sessionsRevision += 1
+        PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
+        return sessionId
+    }
+}
+
+enum SessionExportImportError: Error {
+    case alreadyImported(sessionId: String)
+    case unreadable(String)
+
+    /// Diagnostic text for alerts — coding path + Foundation debugDescription, not vague localized strings.
+    static func detail(for error: Error) -> String {
+        if let decoding = error as? DecodingError {
+            return decodingDetail(for: decoding)
+        }
+        if let importError = error as? SessionExportImportError,
+           case .unreadable(let message) = importError {
+            return message
+        }
+        let ns = error as NSError
+        if let debug = ns.userInfo[NSDebugDescriptionErrorKey] as? String {
+            let trimmed = debug.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        let localized = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !localized.isEmpty { return localized }
+        return String(describing: error)
+    }
+
+    private static func decodingDetail(for error: DecodingError) -> String {
+        switch error {
+        case .keyNotFound(let key, let context):
+            return pathPrefixed(context, extraKey: key)
+        case .valueNotFound(_, let context):
+            return pathPrefixed(context)
+        case .typeMismatch(_, let context):
+            return pathPrefixed(context)
+        case .dataCorrupted(let context):
+            var text = pathPrefixed(context)
+            if let underlying = context.underlyingError {
+                text += " — \(underlying)"
+            }
+            return text
+        @unknown default:
+            return String(describing: error)
+        }
+    }
+
+    private static func pathPrefixed(_ context: DecodingError.Context, extraKey: CodingKey? = nil) -> String {
+        let path = codingPathString(
+            extraKey.map { context.codingPath + [$0] } ?? context.codingPath
+        )
+        let debug = context.debugDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if path.isEmpty { return debug }
+        if debug.isEmpty { return path }
+        return "\(path): \(debug)"
+    }
+
+    private static func codingPathString(_ path: [CodingKey]) -> String {
+        path.map(\.stringValue).filter { !$0.isEmpty }.joined(separator: ".")
     }
 }
 

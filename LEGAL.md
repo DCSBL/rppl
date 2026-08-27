@@ -1,6 +1,6 @@
 # Terms & Privacy Policy
 
-**Last updated:** 23 August 2026
+**Last updated:** 25 August 2026
 
 ## A note from Duco
 
@@ -36,7 +36,7 @@ In-app copy: **iPhone → Rppl → Legal → Terms & Privacy policy**. Keep that
 
 **Privacy first.** Session data is processed on your Apple Watch and iPhone to run the activity. We do not operate a Rppl cloud that receives your rides.
 
-**Stays on your side.** Data is stored on your devices, in the Apple Health app when you allow Health access, and in your iCloud backup if you back up that device.
+**Stays on your side.** Data is stored on your devices, in the Apple Health app when you allow Health access, in your iCloud Drive (Documents) when phone logbook sync is enabled (default on; you can turn it off in rppl → Data), and in your iCloud backup if you back up that device. Device backup and Documents in iCloud are different Apple features.
 
 **Legal basis (GDPR).** Our legal basis for processing your health and location data is your explicit consent, which you provide through iOS and watchOS system permission prompts.
 

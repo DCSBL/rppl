@@ -23,9 +23,21 @@ Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages
 | Target | Root |
 |--------|------|
 | Watch | Documents/`Sessions` |
-| Phone | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
+| Phone (iCloud Drive **on**, default) | Ubiquity container `iCloud.nl.dcsbl.rppl` → `Documents/Sessions` (Apple file sync) |
+| Phone (iCloud Drive **off** / unavailable) | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
 Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
+
+### Phone iCloud Drive
+
+- Preference in `NSUbiquitousKeyValueStore` (default **on**). Toggle: iPhone → rppl → Data.
+- Live `SessionFileStore` root switches to ubiquity Documents when enabled; Apple syncs creates / edits / deletes across devices.
+- Remote packages not yet accepted on this phone: `NSMetadataQuery` + multi-select import picker (location, date, rides, duration).
+- Accepted session ids are **local** (`UserDefaults`) so a second iPhone still asks before import.
+- Turn **off**: confirm whether to delete Drive copies; packages are copied back to App Group first.
+- Visible in Files under iCloud Drive → Rppl (`NSUbiquitousContainerIsDocumentScopePublic`).
+- Watch recording stays local Documents; WC import writes into the phone’s current live root.
+- Not CloudKit. Prefer `FileManager` ubiquity APIs, `NSFileCoordinator`, `NSMetadataQuery`.
 
 ## What is stored (raw)
 
@@ -80,6 +92,6 @@ Raw remains required to regenerate `derived/` after analyzer bumps or storage mi
 
 - `UIFileSharingEnabled` / Files over USB
 - Delete raw / distilled-only mode
-- iCloud sync
+- CloudKit
 - Watch past-session viewer
 - New crash / HK workout recovery features

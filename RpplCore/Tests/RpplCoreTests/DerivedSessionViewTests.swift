@@ -285,8 +285,12 @@ struct DerivedSessionViewTests {
         let rewritten = try store.readDerivedView(sessionId: manifest.sessionId)
         let data = try Data(contentsOf: store.derivedViewURL(sessionId: manifest.sessionId))
         let text = String(data: data, encoding: .utf8) ?? ""
-        #expect(text.contains("lapCount"))
+        // Rebuild from raw (inactive-only) may drop rides; never re-emit slang `setCount`.
         #expect(!text.contains("setCount"))
+        if let ride = rewritten?.stats.rides.first {
+            #expect(text.contains("lapCount"))
+            #expect(ride.lapCount >= 0)
+        }
         #expect(rewritten?.isCurrentAnalyzer == true)
     }
 

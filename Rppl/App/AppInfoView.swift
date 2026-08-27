@@ -3,13 +3,19 @@ import UniformTypeIdentifiers
 import RpplCore
 
 struct AppInfoView: View {
+    @Binding var navigation: LogbookNavigationRequest
+    @Binding var selectedTab: AppTab
+
     @State private var permissions = PhonePermissionsController.shared
     @State private var connectivity = PhoneConnectivityService.shared
+    @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var showDisableDeleteConfirm = false
     @State private var showImporter = false
     @State private var isImporting = false
     @State private var showImportError = false
     @State private var importErrorText: String?
-    @State private var showImportSuccess = false
+    @State private var showAlreadyImportedAlert = false
+    @State private var pendingDuplicateSessionId: String?
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -57,6 +63,22 @@ struct AppInfoView: View {
                 }
 
                 Section {
+                    iCloudDriveRow
+
+                    if let status = iCloud.statusMessage {
+                        Text(status)
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                } header: {
+                    Text("Data")
+                } footer: {
+                    Text(
+                        "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on."
+                    )
+                }
+
+                Section {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("On your devices")
                             .font(.body.weight(.semibold))
@@ -66,7 +88,7 @@ struct AppInfoView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
                         Text(
-                            "Data stays on your device, in the Health app (when allowed), and in your iCloud backup if you back up that device."
+                            "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore."
                         )
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
@@ -111,6 +133,22 @@ struct AppInfoView: View {
             .toolbarBackground(Color.rpplBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
+            .alert(
+                "Turn Off iCloud Drive?",
+                isPresented: $showDisableDeleteConfirm
+            ) {
+                Button("Delete iCloud Copies", role: .destructive) {
+                    beginDisableSync(deleteCopies: true)
+                }
+                Button("Keep iCloud Copies") {
+                    beginDisableSync(deleteCopies: false)
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
+                )
+            }
             .fileImporter(
                 isPresented: $showImporter,
                 allowedContentTypes: [.json],
@@ -119,7 +157,7 @@ struct AppInfoView: View {
                 handleImportResult(result)
             }
             .alert(
-                "Could Not Import Session",
+                "Could not import session",
                 isPresented: $showImportError,
                 presenting: importErrorText
             ) { _ in
@@ -127,29 +165,96 @@ struct AppInfoView: View {
             } message: { message in
                 Text(message)
             }
-            .alert("Session Imported", isPresented: $showImportSuccess) {
-                Button("OK", role: .cancel) {}
+            .alert(
+                "Already in logbook",
+                isPresented: $showAlreadyImportedAlert
+            ) {
+                Button("Cancel", role: .cancel) {
+                    pendingDuplicateSessionId = nil
+                }
+                Button("Show") {
+                    if let sessionId = pendingDuplicateSessionId {
+                        navigation.openSessionId = sessionId
+                        navigation.highlightSessionId = sessionId
+                        selectedTab = .logbook
+                    }
+                    pendingDuplicateSessionId = nil
+                }
             } message: {
-                Text("The session is in your logbook. It was not written to Health.")
+                Text("This session is already in your logbook.")
             }
+        }
+    }
+
+    @ViewBuilder
+    private var iCloudDriveRow: some View {
+        if iCloud.isApplyingSyncChange {
+            HStack {
+                Text("iCloud Drive")
+                Spacer()
+                ProgressView()
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("iCloud Drive")
+            .accessibilityValue("Updating")
+        } else {
+            Toggle(
+                "iCloud Drive",
+                isOn: Binding(
+                    get: { iCloud.isSyncEnabled },
+                    set: { newValue in
+                        if newValue {
+                            iCloud.markApplyingSyncChangeForUI()
+                            Task {
+                                await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                            }
+                        } else {
+                            showDisableDeleteConfirm = true
+                        }
+                    }
+                )
+            )
+            .disabled(!iCloud.isICloudAvailable && !iCloud.isSyncEnabled)
+            .tint(Color.rpplAccent)
+        }
+    }
+
+    private func beginDisableSync(deleteCopies: Bool) {
+        showDisableDeleteConfirm = false
+        iCloud.markApplyingSyncChangeForUI()
+        Task { @MainActor in
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(100))
+            await iCloud.setSyncEnabled(false, deleteICloudCopies: deleteCopies)
         }
     }
 
     private func handleImportResult(_ result: Result<[URL], Error>) {
         switch result {
         case .failure(let error):
-            presentImportFailure(error.localizedDescription)
+            presentImportFailure(SessionExportImportError.detail(for: error))
         case .success(let urls):
             guard let url = urls.first else { return }
             isImporting = true
             Task {
                 do {
-                    try await connectivity.importExportedSession(from: url)
+                    let importedId = try await connectivity.importExportedSession(from: url)
                     isImporting = false
-                    showImportSuccess = true
+                    navigation.openSessionId = importedId
+                    navigation.highlightSessionId = importedId
+                    selectedTab = .logbook
+                } catch let error as SessionExportImportError {
+                    isImporting = false
+                    switch error {
+                    case .alreadyImported(let sessionId):
+                        pendingDuplicateSessionId = sessionId
+                        showAlreadyImportedAlert = true
+                    case .unreadable(let message):
+                        presentImportFailure(message)
+                    }
                 } catch {
                     isImporting = false
-                    presentImportFailure(Self.userFacingMessage(for: error))
+                    presentImportFailure(SessionExportImportError.detail(for: error))
                     WakeLog.error(.transfer, "export-file import: \(error.localizedDescription)")
                 }
             }
@@ -162,18 +267,11 @@ struct AppInfoView: View {
             showImportError = true
         }
     }
-
-    private static func userFacingMessage(for error: Error) -> String {
-        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-        if description.isEmpty {
-            return String(localized: "Something went wrong while importing the session.")
-        }
-        return description
-    }
 }
 
 #Preview {
-    NavigationStack {
-        AppInfoView()
-    }
+    AppInfoView(
+        navigation: .constant(LogbookNavigationRequest()),
+        selectedTab: .constant(.app)
+    )
 }

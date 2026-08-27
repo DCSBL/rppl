@@ -44,19 +44,25 @@ final class SessionCatalog {
 
     private var loadTask: Task<Void, Never>?
 
-    func reload(store: SessionFileStore) {
+    func reload(store: SessionFileStore, acceptedSessionIDs: Set<String>? = nil) {
         loadTask?.cancel()
         isLoading = true
         loadTask = Task(priority: .userInitiated) {
-            await load(store: store)
+            await load(store: store, acceptedSessionIDs: acceptedSessionIDs)
         }
     }
 
-    private func load(store: SessionFileStore) async {
+    private func load(store: SessionFileStore, acceptedSessionIDs: Set<String>?) async {
         do {
             let ids = try await StoreIO.runOffMain { try store.listSessionIDs() }
+            let filteredIDs: [String]
+            if let acceptedSessionIDs {
+                filteredIDs = ids.filter { acceptedSessionIDs.contains($0) }
+            } else {
+                filteredIDs = ids
+            }
             let manifests = try await StoreIO.runOffMain {
-                try ids.compactMap { try store.readManifest(sessionId: $0) }
+                try filteredIDs.compactMap { try store.readManifest(sessionId: $0) }
                     .sorted { $0.startedAt > $1.startedAt }
             }
 

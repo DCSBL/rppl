@@ -127,15 +127,15 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| UI / Info.plist copy (any locale) | `*.xcstrings` · Wakeboard slang section above |
+| UI / Info.plist copy (any locale) | `*.xcstrings` · `scripts/format-xcstrings.py` · Wakeboard slang section above |
 
 ## Out of scope unless explicitly asked
 
 - GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
-- CloudKit sync
-- Auto-format rewriting files in hooks (lint-only for now)
+- CloudKit sync (Documents in iCloud for the phone logbook is in scope; prefer native ubiquity APIs)
+- Auto-format rewriting **Swift** in hooks (lint-only; `.xcstrings` are an exception — Xcode-aligned via `scripts/format-xcstrings.py`)
 - Rewriting Docs or README into caveman
 - Park profiles / dock geofence hardcoding (Linear: DCSBL-56)
 - Mac timeline viz or inventing detector thresholds without an explicit ask (Linear: DCSBL-60)

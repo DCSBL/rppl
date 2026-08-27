@@ -47,6 +47,13 @@ repos:
         files: ^(LEGAL\.md|Rppl/Resources/LEGAL\.md)$
         stages: [pre-commit]
 
+      - id: format-xcstrings
+        name: Format .xcstrings like Xcode
+        entry: python3 scripts/format-xcstrings.py
+        language: system
+        files: \.xcstrings$
+        stages: [pre-commit]
+
       - id: swiftlint
         name: SwiftLint
         entry: bash scripts/git-hooks/run-swiftlint.sh
