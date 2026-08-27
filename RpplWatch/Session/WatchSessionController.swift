@@ -12,6 +12,11 @@ final class WatchSessionController: NSObject {
     static let shared = WatchSessionController()
 
     var isRunning = false
+    /// Post-stop summary until Done; takes precedence over idle in ContentView.
+    var endedSessionSummary: EndedSessionSummary?
+    /// First usable GPS fix this session — start pin on end summary map.
+    var sessionStartLatitude: Double?
+    var sessionStartLongitude: Double?
     /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
     var isStopping = false
     /// True while permissions / HK start run — stay on the tapped picker card.
@@ -43,6 +48,26 @@ final class WatchSessionController: NSObject {
     var healthAuthStatus = "unknown"
     var locationAuthStatus = "unknown"
     var motionAvailability = "unknown"
+    /// Structured gate states for Watch permissions onboarding.
+    var locationPermission: WatchPermissionState = .notDetermined
+    var healthPermission: WatchPermissionState = .notDetermined
+    var motionPermission: WatchPermissionState = .notDetermined
+    /// True while an auto or manual system permission sheet sequence is in flight.
+    /// Kept separate from ProgressView so the list stays interactive while HealthKit warms up.
+    var isPromptingPermissions = false
+
+    var permissionStates: [WatchPermissionKind: WatchPermissionState] {
+        [
+            .location: locationPermission,
+            .health: healthPermission,
+            .motion: motionPermission
+        ]
+    }
+
+    var areRecordingPermissionsReady: Bool {
+        WatchPermissionOrder.areAllReady(permissionStates)
+    }
+
     /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
     var recordingMode = "none"
     var motionRecordingEnabled = false
@@ -50,8 +75,8 @@ final class WatchSessionController: NSObject {
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     var rideCount: Int { liveRideTracker.rideCount }
     var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
-    var currentRideLapCount: Int { liveRideTracker.currentRideLapCount }
-    var lastRideLapCount: Int { liveRideTracker.lastRideLapCount }
+    var currentRideSetCount: Int { liveRideTracker.currentRideSetCount }
+    var lastRideSetCount: Int { liveRideTracker.lastRideSetCount }
     /// Live meters while riding; frozen last-ride meters when inactive (`0 m` before first ride).
     var displayRideMeters: Double {
         liveRideTracker.isRideOngoing
@@ -116,6 +141,9 @@ final class WatchSessionController: NSObject {
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []
     var healthBuffer: [HealthMetricSample] = []
+    /// Recent GPS fixes for backdating live ride meters on `ride_enter`.
+    var recentLocationRing: [LocationSample] = []
+    var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?
     var timerTask: Task<Void, Never>?
     var startedAt: Date?

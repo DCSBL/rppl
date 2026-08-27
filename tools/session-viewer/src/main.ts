@@ -51,12 +51,12 @@ app.innerHTML = `
   <div id="summary" class="summary" hidden>
     <div class="metric"><span class="metric-label">Distance</span><span class="metric-value" data-k="distance">—</span></div>
     <div class="metric"><span class="metric-label">Rides</span><span class="metric-value" data-k="rides">—</span></div>
-    <div class="metric"><span class="metric-label">Laps</span><span class="metric-value" data-k="laps">—</span></div>
+    <div class="metric"><span class="metric-label">Sets</span><span class="metric-value" data-k="sets">—</span></div>
     <div class="metric"><span class="metric-label">Peak</span><span class="metric-value" data-k="peak">—</span></div>
     <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
     <div class="metric"><span class="metric-label">Riding</span><span class="metric-value" data-k="riding">—</span></div>
   </div>
-  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow lap. Space = play/pause realtime. Export JSON = current start/end window, all streams.</p>
+  <p class="hint">Window default first 5 min (min 60 s). Timeline: green riding · blue inactive · grey unsure · yellow set. Space = play/pause realtime. Export JSON = current start/end window, all streams.</p>
   <div class="range-row">
     <span>Start</span>
     <input id="start" type="range" disabled />
@@ -78,6 +78,13 @@ app.innerHTML = `
   <div class="panel"><canvas id="accuracy"></canvas></div>
   <div id="detail">Scrub playhead or click chart / track for point detail.</div>
 `
+
+function wearSettingsLabel(manifest: AnalysisPackage['manifest']): string {
+  const wrist = manifest.wristLocation
+  const crown = manifest.crownOrientation
+  if (!wrist && !crown) return ''
+  return ` · wrist ${wrist ?? '?'} · crown ${crown ?? '?'}`
+}
 
 const statusEl = document.querySelector<HTMLDivElement>('#status')!
 const summaryEl = document.querySelector<HTMLDivElement>('#summary')!
@@ -140,7 +147,7 @@ function updateSummary(d: DerivedSession): void {
   summaryEl.hidden = false
   setMetric('distance', formatDistanceKm(d.totalDistanceMeters))
   setMetric('rides', String(d.rides.length))
-  setMetric('laps', String(d.totalLapCount))
+  setMetric('sets', String(d.totalSetCount))
   setMetric('peak', formatSpeed(d.peakSpeedKmh))
   setMetric('avg', formatSpeed(d.averageSpeedKmh))
   setMetric('riding', formatDuration(d.ridingDurationMs))
@@ -232,7 +239,9 @@ function applyPackage(
     savedPlayhead ?? windowRange.startMs,
     windowRange,
   )
-  statusEl.textContent = `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections`
+  statusEl.textContent =
+    `${label} · ${next.manifest.sessionId} · ${next.locations.length} locs · ${next.detections.length} detections`
+    + wearSettingsLabel(next.manifest)
   updateSummary(derived)
   wireSliders()
   render()

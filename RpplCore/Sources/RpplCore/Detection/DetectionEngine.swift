@@ -36,7 +36,6 @@ public struct DetectionEngine: Sendable {
     public static var defaultDetectors: [any Detector] {
         [
             UnsureTimeoutDetector(),
-            WaterExitDetector(),
             GpsGapDetector(),
             RideExitDetector(),
             RideEnterDetector(),
@@ -188,11 +187,17 @@ public struct DetectionEngine: Sendable {
     private mutating func apply(signal: DetectionSignal, tick: DetectionTick) -> DetectionEvent? {
         switch signal.kind {
         case .enterRide:
+            let holdStart = holds.highSpeedStartedAt ?? tick.timestamp
+            var reason = signal.reason
+            if holdStart != tick.timestamp {
+                reason += " backfill_from=\(fmt(holdStart.timeIntervalSince1970))s"
+            }
             return transition(
                 to: DetectionCodes.riding,
-                reason: signal.reason,
+                reason: reason,
                 detectorId: signal.detectorId,
-                tick: tick
+                tick: tick,
+                timestamp: holdStart
             )
         case .exitRide:
             return transition(
@@ -222,20 +227,22 @@ public struct DetectionEngine: Sendable {
         to code: String,
         reason: String,
         detectorId: String,
-        tick: DetectionTick
+        tick: DetectionTick,
+        timestamp: Date? = nil
     ) -> DetectionEvent {
+        let eventTimestamp = timestamp ?? tick.timestamp
         currentCode = code
         if DetectionCodes.isConfident(code) {
             lastConfidentCode = code
             unsureEnteredAt = nil
             unsureEventId = nil
         } else if code == DetectionCodes.unsure {
-            unsureEnteredAt = tick.timestamp
+            unsureEnteredAt = eventTimestamp
         }
         holds.clear()
         let event = DetectionEvent(
             code: code,
-            timestamp: tick.timestamp,
+            timestamp: eventTimestamp,
             reason: reason,
             detectorId: detectorId,
             speedMps: tick.speedMps,

@@ -7,7 +7,7 @@ import type {
 } from './types'
 import { toMs } from './analysisPrep'
 import { acceptsStep, meters } from './geoDistance'
-import { LapRideTracker, defaultLapThresholds } from './lapRideTracker'
+import { SetRideTracker, defaultSetThresholds } from './setRideTracker'
 import { filterSpeedMps, mpsToKmh, thresholds } from './signalFilter'
 
 const RIDING = 'riding'
@@ -163,7 +163,7 @@ function averageSpeedKmh(distanceMeters: number, durationMs: number): number | n
   return mpsToKmh(mps)
 }
 
-/** Derive rides + lap counts + start anchors (offline, mirrors SessionStatsBuilder). */
+/** Derive rides + set counts + start anchors (offline, mirrors SessionStatsBuilder). */
 export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedSession {
   const sessionStartMs = toMs(pkg.manifest.startedAt)
   const sessionEndMs = Math.max(
@@ -177,9 +177,9 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
     (a, b) => toMs(a.timestamp) - toMs(b.timestamp),
   )
 
-  const lapTracker = new LapRideTracker(defaultLapThresholds)
+  const setTracker = new SetRideTracker(defaultSetThresholds)
   if (hasInactivePhase(phases, windows[0]?.startMs ?? sessionEndMs)) {
-    lapTracker.noteInactive()
+    setTracker.noteInactive()
   }
 
   const rides: RideSegment[] = []
@@ -192,17 +192,17 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       window.endMs,
       thresholds.maxHorizontalAccuracyM,
     )
-    lapTracker.beginRide()
+    setTracker.beginRide()
     for (const sample of sortedLocations) {
       const t = toMs(sample.timestamp)
       if (t < window.startMs || t > window.endMs) continue
-      lapTracker.addLocation(sample)
+      setTracker.addLocation(sample)
     }
-    const laps = lapTracker.lapCount
-    const lapAtMs = [...lapTracker.lapAtMs]
-    const startLatitude = lapTracker.startLatitude
-    const startLongitude = lapTracker.startLongitude
-    lapTracker.endRide()
+    const sets = setTracker.setCount
+    const setAtMs = [...setTracker.setAtMs]
+    const startLatitude = setTracker.startLatitude
+    const startLongitude = setTracker.startLongitude
+    setTracker.endRide()
     totalDistanceMeters += distance
     rides.push({
       index: i + 1,
@@ -210,8 +210,8 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       endMs: window.endMs,
       durationMs: Math.max(0, window.endMs - window.startMs),
       distanceMeters: distance,
-      lapCount: laps,
-      lapAtMs,
+      setCount: sets,
+      setAtMs,
       startLatitude,
       startLongitude,
     })
@@ -227,7 +227,7 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       endMs: p.endMs,
     })),
     rides,
-    totalLapCount: rides.reduce((sum, r) => sum + r.lapCount, 0),
+    totalSetCount: rides.reduce((sum, r) => sum + r.setCount, 0),
     totalDistanceMeters,
     ridingDurationMs,
     inactiveDurationMs,

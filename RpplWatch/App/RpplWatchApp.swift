@@ -11,11 +11,16 @@ struct RpplWatchApp: App {
         }
         .onChange(of: scenePhase) { _, phase in
             WakeLog.debug(.lifecycle, "scenePhase → \(String(describing: phase))")
+            if phase == .active {
+                WatchTransferService.shared.refreshSyncState()
+                WatchTransferService.shared.transferPending()
+            }
         }
     }
 
     init() {
         WakeLog.debug(.lifecycle, "RpplWatchApp init")
+        _ = TesterIdentity.resolve()
         WatchTransferService.shared.activate()
     }
 }

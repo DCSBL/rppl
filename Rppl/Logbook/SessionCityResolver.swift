@@ -2,7 +2,10 @@ import CoreLocation
 import Foundation
 import RpplCore
 
-/// Reverse-geocodes session GPS to a city name (locality only — no POI, country, or facility).
+/// Reverse-geocodes **session GPS samples** (Watch JSONL) to a city name.
+///
+/// Does **not** use `CLLocationManager`, live iPhone GPS, or Location permission.
+/// A denied/delayed Location prompt must never affect city naming or WC sync.
 @MainActor
 final class SessionCityResolver {
     static let shared = SessionCityResolver()
@@ -20,6 +23,7 @@ final class SessionCityResolver {
             return nil
         }
 
+        // Coordinate comes from imported Watch track points — not a phone location fix.
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(location)

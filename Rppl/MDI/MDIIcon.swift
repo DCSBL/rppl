@@ -5,6 +5,13 @@ import SwiftUI
 enum MDIIcon: String, CaseIterable {
     case skiWater = "ski-water"
 
+    var accessibilityLabel: String {
+        switch self {
+        case .skiWater:
+            return String(localized: "Wakeboarding")
+        }
+    }
+
     var svgPath: String {
         switch self {
         case .skiWater:
@@ -19,7 +26,7 @@ struct MDIIconView: View {
     var body: some View {
         SVGPathShape(d: icon.svgPath)
             .aspectRatio(1, contentMode: .fit)
-            .accessibilityLabel(icon.rawValue)
+            .accessibilityLabel(icon.accessibilityLabel)
     }
 }
 

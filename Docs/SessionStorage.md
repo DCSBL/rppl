@@ -2,7 +2,7 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v5)
+## Current layout (schema v6)
 
 ```text
 <root>/<sessionId>/
@@ -25,16 +25,16 @@ Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages
 | Watch | Documents/`Sessions` |
 | Phone | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
-Same folder shape after WC import. ~10 MB/h typical with motion.
+Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
 
 ## What is stored (raw)
 
 | File | Role | Approx |
 |------|------|--------|
-| `manifest.json` | Meta, transfer state, activity, water-temp capability | once |
+| `manifest.json` | Meta, transfer state, activity, water-temp capability, Watch wrist/crown settings | once |
 | `detections.jsonl` | Ride/inactive/unsure transitions | sparse |
 | `location-*.jsonl` | GPS | CL updates |
-| `motion-*.jsonl.zlib` | Device motion | ~25 Hz |
+| `motion-*.jsonl.zlib` | Device motion | **1 Hz** inactive, **25 Hz** riding/unsure |
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
 
@@ -44,7 +44,7 @@ Raw is the regeneration source when analyzers change. Export / WC transfer carri
 
 | Surface | Needs | Skip for UI |
 |---------|-------|-------------|
-| Phone list | Summary stats (distance, duration, rides, laps, speeds, highlights inputs) | Motion; full GPS parse |
+| Phone list | Summary stats (distance, duration, rides, sets, speeds, highlights inputs) | Motion; full GPS parse |
 | Phone detail basics | Same stats + per-ride splits | Motion |
 | Phone map | Stored geo frame for first camera; GPS polyline after appear | Motion |
 | Re-analysis | Raw detections + locations (+ health/water for tiles; motion if detectors need it) | — |
@@ -72,9 +72,9 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame?; cityName
 | Mid-record | No derived write; live metrics stay RAM |
 | Crash | No new resume; do not regress today’s crash = dead |
 
-Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations. Distilled-only (drop raw) and Finder/USB Documents sharing are **out of this work**.
+Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
-## Non-goals (this issue)
+## Out of scope
 
 - `UIFileSharingEnabled` / Files over USB
 - Delete raw / distilled-only mode

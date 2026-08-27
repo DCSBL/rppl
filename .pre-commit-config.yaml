@@ -31,12 +31,20 @@ repos:
         additional_dependencies: ["tomli"]
         exclude: ^Rppl/Resources/Exports/
         args:
-          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als"
+          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen"
         stages: [pre-commit]
 
   - repo: local
     hooks:
+      - id: sync-legal-md
+        name: Sync LEGAL.md into app Resources
+        entry: bash scripts/git-hooks/sync-legal-md.sh
+        language: system
+        pass_filenames: false
+        files: ^(LEGAL\.md|Rppl/Resources/LEGAL\.md)$
+        stages: [pre-commit]
+
       - id: swiftlint
         name: SwiftLint
         entry: bash scripts/git-hooks/run-swiftlint.sh

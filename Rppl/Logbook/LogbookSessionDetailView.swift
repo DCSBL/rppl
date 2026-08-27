@@ -27,9 +27,13 @@ struct LogbookSessionDetailView: View {
     @State private var loadTask: Task<Void, Never>?
     @State private var tracksTask: Task<Void, Never>?
     @State private var errorText: String?
+    @State private var showExportError = false
+    @State private var exportErrorText: String?
     @State private var exportURL: URL?
     @State private var isExporting = false
     @State private var exportTask: Task<Void, Never>?
+    @State private var showExportExplainer = false
+    @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private enum LoadPhase: Equatable {
         case loading
@@ -86,20 +90,40 @@ struct LogbookSessionDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if allowsExport {
-                    if let exportURL {
-                        ShareLink(item: exportURL) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-                    } else if isExporting {
+                if allowsExport, loadPhase == .ready {
+                    if isExporting {
                         ProgressView()
-                    } else if loadPhase == .ready {
-                        Button("Export") {
-                            startExport()
+                    } else {
+                        Button {
+                            requestExport()
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
                         }
+                        .accessibilityLabel(Text("Export"))
                     }
                 }
             }
+        }
+        .alert(
+            "Export Session?",
+            isPresented: $showExportExplainer
+        ) {
+            Button("Understood") {
+                didUnderstandExport = true
+                startExport()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
+        }
+        .alert(
+            "Could Not Export",
+            isPresented: $showExportError,
+            presenting: exportErrorText
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
         }
     }
 
@@ -133,7 +157,8 @@ struct LogbookSessionDetailView: View {
                 preferredFrame: mapFrame
             )
                 .frame(height: 300)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+                .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
                 .overlay(alignment: .center) {
                     if tracksLoading, mapTracks.isEmpty {
                         ProgressView()
@@ -164,7 +189,7 @@ struct LogbookSessionDetailView: View {
                     }
 
                     LabeledContent("Location") {
-                        Text(cityName ?? "—")
+                        Text(cityName ?? "-")
                     }
                 }
 
@@ -178,15 +203,15 @@ struct LogbookSessionDetailView: View {
                         label: "Distance"
                     )
                     statTile(
-                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                         label: "Max speed"
                     )
                     statTile(
-                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                         label: "Avg speed"
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
-                    statTile("\(stats.totalLapCount)", label: "Laps")
+                    statTile("\(stats.totalSetCount)", label: "Sets")
                     statTile(
                         "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
                             + LogbookFormatting.duration(stats.ridingDuration),
@@ -200,7 +225,7 @@ struct LogbookSessionDetailView: View {
                         statTile(
                             stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
                                 ?? TemperatureFormat.placeholder,
-                            label: "Water temp"
+                            label: "Water temperature"
                         )
                     }
                     if let calories = stats.activeEnergyKilocalories {
@@ -217,9 +242,8 @@ struct LogbookSessionDetailView: View {
                     }
                 }
             }
-            .padding(16)
             .foregroundStyle(Color.rpplText)
-            .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .logbookCardChrome()
         }
     }
 
@@ -275,7 +299,7 @@ struct LogbookSessionDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+        .logbookNestedBackground(Color.rpplFill)
     }
 
     private func mapPlaceholder(_ message: LocalizedStringKey) -> some View {
@@ -283,7 +307,7 @@ struct LogbookSessionDetailView: View {
             .font(.subheadline)
             .foregroundStyle(Color.rpplMuted)
             .frame(maxWidth: .infinity, minHeight: 120)
-            .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.rpplFill, in: .rect(cornerRadius: LogbookLayout.cardCornerRadius))
     }
 
     private func startLoadIfNeeded() {
@@ -414,12 +438,27 @@ struct LogbookSessionDetailView: View {
         ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
             throw SessionStoreError.ioFailure("Bundled example session missing")
         }
-        WakeLog.debug(.ui, "example session load (ephemeral)")
-        return try SessionLoader.load(packageURL: url)
+        WakeLog.debug(.ui, "example session load (ephemeral, timeline → now)")
+        return try SessionLoader.loadExample(packageURL: url, now: Date())
+    }
+
+    private func requestExport() {
+        guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        if didUnderstandExport {
+            startExport()
+        } else {
+            showExportExplainer = true
+        }
     }
 
     private func startExport() {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        if let exportURL {
+            presentShareSheet(for: exportURL)
+            return
+        }
+        showExportError = false
+        exportErrorText = nil
         isExporting = true
         exportTask = Task(priority: .utility) {
             await prepareExport()
@@ -430,36 +469,71 @@ struct LogbookSessionDetailView: View {
         exportTask?.cancel()
         exportTask = nil
         isExporting = false
+        exportURL = nil
     }
 
     private func prepareExport() async {
-        guard case .store(let sessionId) = source, let store else { return }
+        guard case .store(let sessionId) = source, let store else {
+            presentExportFailure(
+                String(localized: "Session store missing. Try again from the logbook.")
+            )
+            return
+        }
         WakeLog.debug(.ui, "export session \(sessionId.prefix(8))…")
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionId).json")
+        let resolvedCity = cityName
 
         do {
-            try await StoreIO.runOffMain {
+            let url = try await StoreIO.runOffMain {
                 let package = try store.buildTransferPackage(sessionId: sessionId)
                 try Task.checkCancellation()
-                let encoder = JSONEncoder()
-                encoder.dateEncodingStrategy = .iso8601
-                encoder.outputFormatting = [.sortedKeys]
-                try encoder.encode(package).write(to: url, options: [.atomic])
+                let fileName = SessionShareExport.fileName(
+                    startedAt: package.manifest.startedAt,
+                    locationName: package.derived?.cityName ?? resolvedCity
+                )
+                let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+                try SessionShareExport.encode(package).write(to: exportURL, options: [.atomic])
+                return exportURL
             }
             try Task.checkCancellation()
             exportURL = url
-            isExporting = false
-            exportTask = nil
-            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))…")
+            finishExportTask()
+            presentShareSheet(for: url)
+            WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))… \(url.lastPathComponent)")
         } catch is CancellationError {
-            isExporting = false
-            exportTask = nil
+            finishExportTask()
         } catch {
-            errorText = error.localizedDescription
-            isExporting = false
-            exportTask = nil
+            presentExportFailure(Self.userFacingMessage(for: error))
             WakeLog.error(.store, "export: \(error.localizedDescription)")
         }
+    }
+
+    private func finishExportTask() {
+        isExporting = false
+        exportTask = nil
+    }
+
+    private func presentShareSheet(for url: URL) {
+        // Present after toolbar ProgressView → icon swap so the share sheet is not dropped.
+        Task { @MainActor in
+            ActivitySharePresenter.present(items: [url])
+        }
+    }
+
+    private func presentExportFailure(_ message: String) {
+        finishExportTask()
+        exportErrorText = message
+        // Present after toolbar ProgressView → icon swap so SwiftUI does not drop the alert.
+        Task { @MainActor in
+            showExportError = true
+        }
+    }
+
+    private static func userFacingMessage(for error: Error) -> String {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty {
+            return String(localized: "Something went wrong while preparing the export.")
+        }
+        return description
     }
 }
 
@@ -495,13 +569,13 @@ private struct RideDetailCard: View {
             if locations.count >= 2 {
                 SessionMapView(locations: locations)
                     .frame(height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .logbookNestedClip()
             } else {
                 Text("No GPS track for this ride")
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 12))
+                    .logbookNestedBackground(Color.rpplFill)
             }
 
             LazyVGrid(
@@ -519,13 +593,13 @@ private struct RideDetailCard: View {
                     LogbookFormatting.distanceKilometers(ride.distanceMeters),
                     label: "Distance"
                 )
-                rideStatTile("\(ride.lapCount)", label: "Laps")
+                rideStatTile("\(ride.setCount)", label: "Sets")
                 rideStatTile(
-                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Max speed"
                 )
                 rideStatTile(
-                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "—",
+                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Avg speed"
                 )
             }
@@ -536,8 +610,7 @@ private struct RideDetailCard: View {
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
     private func rideStatTile(_ value: String, label: LocalizedStringKey) -> some View {
@@ -553,7 +626,7 @@ private struct RideDetailCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10))
+        .logbookNestedBackground(Color.rpplFill)
     }
 }
 

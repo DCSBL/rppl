@@ -22,13 +22,14 @@ struct IdleSessionView: View {
                     start(code)
                 }
                 .tag(IdlePickerPage.activity(code))
+                .allowsHitTesting(canStart)
             }
 
             IdleSyncPage(session: session, transfer: transfer)
                 .tag(IdlePickerPage.sync)
         }
         .tabViewStyle(.verticalPage)
-        .allowsHitTesting(canStart)
+        .preferredColorScheme(.dark)
     }
 
     private var canStart: Bool {

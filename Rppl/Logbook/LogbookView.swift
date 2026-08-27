@@ -2,11 +2,18 @@ import SwiftUI
 import RpplCore
 
 struct LogbookView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var catalog = SessionCatalog()
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var showActionError = false
+    @State private var actionErrorText: String?
+
+    private var useAccessibilityLayout: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,6 +23,18 @@ struct LogbookView: View {
                         .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                }
+
+                if connectivity.pendingAckCount > 0 {
+                    Section {
+                        SyncStatusIndicator(
+                            state: connectivity.syncState,
+                            pendingCount: connectivity.pendingAckCount
+                        )
+                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
                 }
 
                 Section {
@@ -41,12 +60,17 @@ struct LogbookView: View {
                             Label {
                                 Text("No sessions yet")
                             } icon: {
-                                MDIIconView(icon: .skiWater)
+                                Image("icon-simple")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
                                     .frame(width: 48, height: 48)
-                                    .foregroundStyle(Color.rpplAccent)
+                                    .foregroundStyle(Color.rpplMuted.opacity(0.45))
                             }
                         } description: {
-                            Text("Record on Apple Watch, then bring your iPhone nearby.")
+                            Text(
+                                "Record a park day on Apple Watch. Or browse the example session."
+                            )
                         } actions: {
                             Button("Show example session") {
                                 showExampleSession = true
@@ -100,10 +124,9 @@ struct LogbookView: View {
                 LogbookSessionDetailView(source: .bundledExample)
                     .toolbar(.visible, for: .navigationBar)
             }
-            .confirmationDialog(
+            .alert(
                 "Delete Session?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
+                isPresented: $showDeleteConfirmation
             ) {
                 Button("Delete Permanently", role: .destructive) {
                     if let sessionId = pendingDeleteSessionId {
@@ -117,7 +140,17 @@ struct LogbookView: View {
             } message: {
                 Text("This permanently removes the session from this iPhone. This cannot be undone.")
             }
+            .alert(
+                "Could Not Delete Session",
+                isPresented: $showActionError,
+                presenting: actionErrorText
+            ) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { message in
+                Text(message)
+            }
             .onAppear {
+                connectivity.refreshSyncState()
                 catalog.reload(store: connectivity.store)
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
@@ -131,7 +164,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Cable park sessions")
+            Text("Park days and rides")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -140,6 +173,14 @@ struct LogbookView: View {
 
     private var totalsCard: some View {
         let totals = catalog.totals
+        let sessionsValue = catalog.isLoading ? "-" : "\(totals.sessionCount)"
+        let distanceValue = catalog.isLoading
+            ? "-"
+            : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters)
+        let maxSpeedValue = catalog.isLoading || totals.topSpeedKmh <= 0
+            ? "-"
+            : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
+
         return VStack(alignment: .leading, spacing: 16) {
             Label {
                 Text("TOTAL")
@@ -151,25 +192,24 @@ struct LogbookView: View {
             .foregroundStyle(Color.rpplAccent)
             .labelStyle(.titleAndIcon)
 
-            HStack(spacing: 0) {
-                totalMetric(
-                    value: catalog.isLoading ? "—" : "\(totals.sessionCount)",
-                    label: "Sessions"
-                )
-                totalDivider
-                totalMetric(
-                    value: catalog.isLoading
-                        ? "—"
-                        : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters),
-                    label: "Distance"
-                )
-                totalDivider
-                totalMetric(
-                    value: catalog.isLoading || totals.topSpeedKmh <= 0
-                        ? "—"
-                        : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh),
-                    label: "Max Speed"
-                )
+            Group {
+                if useAccessibilityLayout {
+                    VStack(spacing: 12) {
+                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalDivider(horizontal: true)
+                        totalMetric(value: distanceValue, label: "Distance")
+                        totalDivider(horizontal: true)
+                        totalMetric(value: maxSpeedValue, label: "Max speed")
+                    }
+                } else {
+                    HStack(spacing: 0) {
+                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalDivider(horizontal: false)
+                        totalMetric(value: distanceValue, label: "Distance")
+                        totalDivider(horizontal: false)
+                        totalMetric(value: maxSpeedValue, label: "Max speed")
+                    }
+                }
             }
 
             Divider()
@@ -177,23 +217,23 @@ struct LogbookView: View {
 
             Text(
                 catalog.isLoading
-                    ? String(localized: "— total rides")
+                    ? "—"
                     : LogbookFormatting.totalsFooter(
                         rides: totals.totalRuns,
-                        laps: totals.totalLaps
+                        sets: totals.totalSets
                     )
             )
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
         }
-        .padding(20)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .logbookCardChrome()
     }
 
-    private var totalDivider: some View {
+    private func totalDivider(horizontal: Bool) -> some View {
         Rectangle()
             .fill(Color.rpplFill)
-            .frame(width: 1, height: 44)
+            .frame(width: horizontal ? nil : 1, height: horizontal ? 1 : 44)
+            .frame(maxWidth: horizontal ? .infinity : nil)
     }
 
     private func totalMetric(value: String, label: LocalizedStringKey) -> some View {
@@ -233,112 +273,139 @@ struct LogbookView: View {
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             catalog.reload(store: connectivity.store)
         } catch {
+            let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+            actionErrorText = description.isEmpty
+                ? String(localized: "Something went wrong while deleting the session.")
+                : description
+            // Delete confirm alert still dismissing — defer so the error alert is not swallowed.
+            Task { @MainActor in
+                showActionError = true
+            }
             WakeLog.error(.store, "delete session: \(error.localizedDescription)")
         }
     }
 }
 
 private struct SessionCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
+
+    private var useAccessibilityLayout: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                MDIIconView(icon: .skiWater)
-                    .frame(width: 22, height: 22)
-                    .foregroundStyle(Color.rpplAccent)
-                    .frame(width: 40, height: 40)
-                    .background(Color.rpplAccent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-                VStack(alignment: .leading, spacing: 4) {
-                    (
-                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                            .foregroundStyle(Color.rpplText)
-                        + (entry.highlights.isEmpty
-                            ? Text("")
-                            : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
-                                .foregroundStyle(Color.rpplMuted))
-                    )
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.75)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                    Text(timeRangeText)
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                }
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                (
+                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                        .foregroundStyle(Color.rpplText)
+                    + (entry.highlights.isEmpty
+                        ? Text("")
+                        : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
+                            .foregroundStyle(Color.rpplMuted))
+                )
+                .font(.headline)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer(minLength: 8)
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(LogbookFormatting.sessionDate(entry.manifest.startedAt))
-                        .font(.subheadline)
-                        .foregroundStyle(Color.rpplMuted)
-
-                    Text(entry.cityName ?? "—")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                }
+                Text(entry.cityName ?? "-")
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+                    .lineLimit(1)
             }
+
+            Text(sessionMetaText)
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
                 .overlay(Color.rpplFill)
 
-            HStack(spacing: 12) {
-                statLabel("clock", value: durationText)
-                statLabel("water.waves", value: distanceText)
-                statLabel("flag.checkered", value: ridesText)
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
-            }
-            .font(.caption)
-            .foregroundStyle(Color.rpplMuted)
+            sessionStatsSummary
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(16)
-        .background(Color.rpplCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .logbookCardChrome()
     }
 
-    private var timeRangeText: String {
-        LogbookFormatting.sessionTimeRange(
+    private var sessionMetaText: String {
+        let date = LogbookFormatting.sessionDate(entry.manifest.startedAt)
+        let range = LogbookFormatting.sessionTimeRange(
             start: entry.manifest.startedAt,
             end: entry.manifest.endedAt ?? entry.stats?.endedAt
         )
+        return "\(date) · \(range) · \(durationText)"
     }
 
     private var durationText: String {
-        guard let stats = entry.stats else { return "—" }
+        guard let stats = entry.stats else { return "-" }
         return LogbookFormatting.duration(stats.totalDuration)
     }
 
     private var distanceText: String {
-        guard let stats = entry.stats else { return "—" }
+        guard let stats = entry.stats else { return "-" }
         return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
     }
 
     private var ridesText: String {
-        guard let stats = entry.stats else { return String(localized: "— rides") }
+        guard let stats = entry.stats else { return "—" }
         return LogbookFormatting.rideCount(stats.rideCount)
     }
 
-    private var lapsText: String {
-        guard let stats = entry.stats else { return String(localized: "— laps") }
-        return LogbookFormatting.lapCount(stats.totalLapCount)
+    private var setsText: String {
+        guard let stats = entry.stats else { return "—" }
+        return LogbookFormatting.setCount(stats.totalSetCount)
+    }
+
+    @ViewBuilder
+    private var sessionStatsSummary: some View {
+        if useAccessibilityLayout {
+            VStack(alignment: .leading, spacing: 8) {
+                // Display order matches roomy row; keep priority still rides → distance → sets.
+                statLabel("water.waves", value: distanceText)
+                statLabel("flag.checkered", value: ridesText)
+                statLabel("arrow.triangle.2.circlepath", value: setsText)
+            }
+        } else {
+            // Drop lowest-priority stats first when width is tight (sets → distance → rides).
+            ViewThatFits(in: .horizontal) {
+                statsRow(includeDistance: true, includeSets: true)
+                statsRow(includeDistance: true, includeSets: false)
+                statsRow(includeDistance: false, includeSets: false)
+            }
+        }
+    }
+
+    private func statsRow(includeDistance: Bool, includeSets: Bool) -> some View {
+        HStack(spacing: 12) {
+            // Display: distance → rides → sets. Drop order (lowest first): sets → distance.
+            if includeDistance {
+                statLabel("water.waves", value: distanceText)
+            }
+            statLabel("flag.checkered", value: ridesText)
+            if includeSets {
+                statLabel("arrow.triangle.2.circlepath", value: setsText)
+            }
+        }
     }
 
     private func statLabel(_ symbol: String, value: String) -> some View {
-        Label(value, systemImage: symbol)
-            .labelStyle(.titleAndIcon)
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-    }
-}
-
-private enum LogbookLayout {
-    static let horizontalInset: CGFloat = 16
-
-    static func rowInsets(top: CGFloat = 8, bottom: CGFloat = 8) -> EdgeInsets {
-        EdgeInsets(top: top, leading: 0, bottom: bottom, trailing: 0)
+        HStack(alignment: .center, spacing: 4) {
+            Image(systemName: symbol)
+                .imageScale(.small)
+            Text(value)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityElement(children: .combine)
     }
 }
 

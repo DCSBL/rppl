@@ -1,12 +1,12 @@
 import Foundation
 
-/// Crossing-based lap counter for one ride (incremental; offline batch = same API).
+/// Crossing-based set counter for one ride (incremental; offline batch = same API).
 ///
 /// Leave start beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter
 /// `startSafeRadiusM` → +1. Bad GPS ignored. Scoring only after a prior pause
 /// (mid-ride session start skipped until pause→riding).
-public struct LapRideTracker: Sendable {
-    public private(set) var lapCount = 0
+public struct SetRideTracker: Sendable {
+    public private(set) var setCount = 0
     public private(set) var isRideActive = false
 
     private enum ZoneState: Equatable {
@@ -16,7 +16,7 @@ public struct LapRideTracker: Sendable {
         case outside
     }
 
-    private var thresholds: LapThresholds
+    private var thresholds: SetThresholds
     private var zoneState: ZoneState = .idle
     private var hasSeenInactive = false
     private var scoringThisRide = false
@@ -25,12 +25,12 @@ public struct LapRideTracker: Sendable {
     private var pathSinceLeaveM = 0.0
     private var previousLocation: LocationSample?
 
-    public init(thresholds: LapThresholds = .default) {
+    public init(thresholds: SetThresholds = .default) {
         self.thresholds = thresholds
     }
 
     public mutating func reset() {
-        lapCount = 0
+        setCount = 0
         isRideActive = false
         zoneState = .idle
         hasSeenInactive = false
@@ -41,7 +41,7 @@ public struct LapRideTracker: Sendable {
         previousLocation = nil
     }
 
-    /// Mark dock/pause so the next ride may score laps.
+    /// Mark dock/pause so the next ride may score sets.
     public mutating func noteInactive() {
         if isRideActive {
             endRide()
@@ -49,12 +49,12 @@ public struct LapRideTracker: Sendable {
         hasSeenInactive = true
     }
 
-    /// Open a ride. Laps score only if `noteInactive()` was seen earlier.
+    /// Open a ride. Sets score only if `noteInactive()` was seen earlier.
     public mutating func beginRide() {
         if isRideActive {
             endRide()
         }
-        lapCount = 0
+        setCount = 0
         isRideActive = true
         scoringThisRide = hasSeenInactive
         zoneState = scoringThisRide ? .awaitingAnchor : .idle
@@ -64,7 +64,7 @@ public struct LapRideTracker: Sendable {
         previousLocation = nil
     }
 
-    /// Freeze lap state for this ride (fall / pause / session end).
+    /// Freeze set state for this ride (fall / pause / session end).
     public mutating func endRide() {
         isRideActive = false
         scoringThisRide = false
@@ -142,7 +142,7 @@ public struct LapRideTracker: Sendable {
         case .outside:
             if distanceFromStart <= thresholds.startSafeRadiusM,
                pathSinceLeaveM >= thresholds.minPathBeforeCrossingM {
-                lapCount += 1
+                setCount += 1
                 zoneState = .atStart
                 pathSinceLeaveM = 0
             }

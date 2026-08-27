@@ -38,6 +38,42 @@ struct SessionFileStoreTests {
         #expect(detections[0].detectorId == "session_start")
     }
 
+    @Test func manifestWearSettingsRoundTripThroughTransfer() throws {
+        let watchRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wear-\(UUID().uuidString)", isDirectory: true)
+        let phoneRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wear-phone-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+
+        let watchStore = SessionFileStore(rootURL: watchRoot)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0",
+            wristLocation: "left",
+            crownOrientation: "right"
+        )
+        try watchStore.createSession(manifest: manifest)
+        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
+
+        let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
+        #expect(package.manifest.wristLocation == "left")
+        #expect(package.manifest.crownOrientation == "right")
+
+        try watchStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+
+        let phoneStore = SessionFileStore(rootURL: phoneRoot)
+        let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
+        #expect(phoneManifest.wristLocation == "left")
+        #expect(phoneManifest.crownOrientation == "right")
+        #expect(phoneManifest.schemaVersion == SessionSchema.currentVersion)
+    }
+
     @Test func transferPackageRoundTripPreservesSamples() throws {
         let watchRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("watch-\(UUID().uuidString)", isDirectory: true)
@@ -98,6 +134,54 @@ struct SessionFileStoreTests {
         #expect(phoneDerived != nil)
         #expect(phoneDerived?.analyzerVersion == SessionAnalyzer.version)
         #expect(phoneDerived?.stats == package.derived?.stats)
+    }
+
+    @Test func importExportedPackageStampsImportedAndReplaces() throws {
+        let sourceRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("export-src-\(UUID().uuidString)", isDirectory: true)
+        let phoneRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("export-phone-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: sourceRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+
+        let sourceStore = SessionFileStore(rootURL: sourceRoot)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        try sourceStore.createSession(manifest: manifest)
+        try sourceStore.appendDetection(
+            DetectionEvent(
+                code: DetectionCodes.riding,
+                reason: "ride_enter",
+                detectorId: "ride_enter"
+            ),
+            sessionId: manifest.sessionId
+        )
+        try sourceStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        let package = try sourceStore.buildTransferPackage(sessionId: manifest.sessionId)
+
+        let phoneStore = SessionFileStore(rootURL: phoneRoot)
+        // Seed an older copy so re-import must replace without duplicating detections.
+        try sourceStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+        #expect(try phoneStore.readManifest(sessionId: manifest.sessionId).imported == nil)
+
+        let importedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        try sourceStore.importExportedPackage(
+            package,
+            intoPhoneStore: phoneRoot,
+            importedAt: importedAt
+        )
+
+        let phoneManifest = try phoneStore.readManifest(sessionId: manifest.sessionId)
+        #expect(phoneManifest.imported == importedAt)
+        #expect(phoneManifest.transferState == .acknowledged)
+        #expect(try phoneStore.readDetections(sessionId: manifest.sessionId).count == 1)
     }
 
     @Test func migratesLegacyAssumptionsFile() throws {
@@ -299,10 +383,33 @@ struct SessionFileStoreTests {
             watchModel: "Ultra2",
             systemVersion: "26.0"
         )
-        _ = _ = try store.createSession(manifest: manifest)
+        _ = try store.createSession(manifest: manifest)
         try store.markReadyToTransfer(sessionId: manifest.sessionId)
-        try store.markAcknowledged(sessionId: manifest.sessionId)
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
         #expect(try store.sessionsNeedingTransfer().isEmpty)
+    }
+
+    @Test func markAcknowledgedIsIdempotent() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ack-idem-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markTransferring(sessionId: manifest.sessionId)
+
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).transferState == .acknowledged)
+        #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == false)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).transferState == .acknowledged)
     }
 
     @Test func recordingSessionNotPending() throws {

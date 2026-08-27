@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CCAA15043038B52200B3DC2A /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCAA15033038B52200B3DC2A /* AppIcon.icon */; };
+		CCAA15053038B52200B3DC2A /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCAA15033038B52200B3DC2A /* AppIcon.icon */; };
 		CCF3D6C7302921A800AF3518 /* RpplWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CCF3D6C0302921A800AF3518 /* RpplWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CCF3D6D1302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CE302921A800AF3518 /* RpplCore */; };
 		CCF3D6D2302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6CF302921A800AF3518 /* RpplCore */; };
@@ -52,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CCAA15033038B52200B3DC2A /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		CCF3D691302921A500AF3518 /* Rppl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rppl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6A2302921A800AF3518 /* RpplTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,6 +150,7 @@
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
+				CCAA15033038B52200B3DC2A /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -316,6 +320,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCAA15053038B52200B3DC2A /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,6 +342,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCAA15043038B52200B3DC2A /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +403,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -406,8 +413,8 @@
 				INFOPLIST_FILE = Rppl/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl does not write workouts to Health during alpha testing.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl may use location to display session tracks.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl uses motion APIs when reviewing session context on iPhone.";
@@ -454,6 +461,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Rppl/Rppl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -463,8 +471,8 @@
 				INFOPLIST_FILE = Rppl/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions for alpha data collection. Workouts are not saved to Health in this alpha.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl does not write workouts to Health during alpha testing.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl may use location to display session tracks.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl uses motion APIs when reviewing session context on iPhone.";
@@ -718,7 +726,9 @@
 		CCF3D6CA302921A800AF3518 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -727,11 +737,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RpplWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl saves your cable-park workout to Health when the session ends.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to help detect riding versus resting at the dock.";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -758,7 +768,9 @@
 		CCF3D6CB302921A800AF3518 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = RpplWatch/RpplWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -767,11 +779,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RpplWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl needs permission to start a water-sports workout session so sensors stay active. Alpha builds still do not save the finished workout into Health.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl requests workout write access only to run a live session for sensors; finished workouts are not saved during alpha testing.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl saves your cable-park workout to Health when the session ends.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions for alpha data collection.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to collect alpha training data for start/swim/walk detection.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl records GPS during cable-park wakeboarding sessions.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl records device motion to help detect riding versus resting at the dock.";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.dcsbl.rppl;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (

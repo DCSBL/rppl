@@ -1,7 +1,7 @@
 import Foundation
 
 /// Speed conversions for detection thresholds (authored in km/h) vs Core Location (m/s).
-/// Later: knots / mph for display only — keep GPS compare on m/s.
+/// Display units (knots / mph) stay out of Core compare path — GPS compare on m/s.
 public enum SpeedUnits {
     public static func metersPerSecond(fromKilometersPerHour kmh: Double) -> Double {
         kmh / 3.6

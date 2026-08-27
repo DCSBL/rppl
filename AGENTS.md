@@ -25,14 +25,26 @@ _Only use linear issues when one is given by the user_
 
 ## Product north star
 
-Alpha **data collector** for cable-park wakeboarding. Not a polished consumer tracker yet.
+**Data collector** for cable-park wakeboarding — Watch records; reliable checkpoints over flashy UX.
 
 - Watch records; iPhone views/exports; Mac analyzes.
 - Prefer reliable checkpoints over pretty UI.
 - Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Distilled product lock: [README.md](README.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Phase 3 roadmap: [Docs/Phase3.md](Docs/Phase3.md). Idea backlog: [Docs/Ideas.md](Docs/Ideas.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Detection thresholds: [Docs/RideDetection.md](Docs/RideDetection.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+
+## Wakeboard slang (all locales)
+
+When generating, translating, or rewriting product copy about wakeboarding / cable parks **in any language**, keep authentic community slang and English jargon. Do not replace core terms with literal local equivalents — that reads amateurish in cable-park culture.
+
+**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `set` / `sets` (one cable loop / round — not “laps”), `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
+
+**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* / *laps* for sets, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+
+Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webzine/wakeboarding-glossary.html) (**Set**: a round of wakeboard).
+
+Applies to UI strings (`.xcstrings`), Info.plist usage text, App Store / marketing copy, and agent-written prose — not to detection code identifiers in Core (those stay opaque English strings per hard constraint 4).
 
 ## Architecture rules
 
@@ -46,7 +58,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Hard constraints (do not “helpfully” break)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never `HKWorkoutEvent.lap` unless Fitness can show a lap count. See hard constraint 3.
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never `HKWorkoutEvent.lap` unless Fitness can show a lap count (Apple API name — product cable rounds are **sets**, not laps). See hard constraint 3.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
@@ -73,7 +85,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 | Task | Start here |
 |------|------------|
-| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [Docs/RideDetection.md](Docs/RideDetection.md) · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
@@ -81,21 +93,21 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 | Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
-| Phase 3 roadmap / detection plan | [Docs/Phase3.md](Docs/Phase3.md) |
+| GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| Deferred ideas (park profiles, etc.) | [Docs/Ideas.md](Docs/Ideas.md) |
+| UI / Info.plist copy (any locale) | `*.xcstrings` · Wakeboard slang section above |
 
 ## Out of scope unless explicitly asked
 
-- GitHub Actions CI (can mirror `xcode-gate` later)
+- GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
-- CloudKit sync (Phase 4)
+- CloudKit sync
 - Auto-format rewriting files in hooks (lint-only for now)
 - Rewriting Docs or README into caveman
-- Park profiles / dock geofence hardcoding ([Docs/Ideas.md](Docs/Ideas.md) Deferred)
-- Mac viz, Core Assumer threshold invention, or park profiles until explicitly requested ([Docs/Phase3.md](Docs/Phase3.md), [Docs/Ideas.md](Docs/Ideas.md))
+- Park profiles / dock geofence hardcoding (Linear: DCSBL-56)
+- Mac timeline viz or inventing detector thresholds without an explicit ask (Linear: DCSBL-60)
 
 ## When unsure
 
-Prefer the locked Defaults in the MVP plan / README over inventing product behavior. If a change forks UX (product pause, phone labeling, deleting Watch data early), **stop and ask**. Do not invent Phase 3 detector thresholds or park profiles without an explicit code ask — follow [Docs/Phase3.md](Docs/Phase3.md).
+Prefer the product defaults in [CONTRIBUTING.md](CONTRIBUTING.md) over inventing product behavior. If a change forks UX (product pause, phone labeling, deleting Watch data early), **stop and ask**. Do not invent detector thresholds or park profiles without an explicit code ask — follow [Docs/RideDetection.md](Docs/RideDetection.md) and `DetectionThresholds` in Core.

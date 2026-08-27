@@ -20,6 +20,7 @@ struct RpplApp: App {
 
     init() {
         WakeLog.debug(.lifecycle, "RpplApp init")
+        _ = TesterIdentity.resolve()
         PhoneConnectivityService.shared.activate()
     }
 }

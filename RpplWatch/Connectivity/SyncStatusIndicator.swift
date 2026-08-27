@@ -16,9 +16,10 @@ struct SyncStatusIndicator: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(shortTitle)
                     .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.rpplIdlePrimary)
                 Text(state.detail)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.rpplIdlePrimary.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
                 if pendingCount > 0 {
                     Text("Pending: \(pendingCount)")
@@ -28,11 +29,14 @@ struct SyncStatusIndicator: View {
                 if let footnote, !footnote.isEmpty {
                     Text(footnote)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.rpplIdlePrimary.opacity(0.75))
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "Sync \(shortTitle)"))
+        .accessibilityValue(state.detail)
     }
 
     private var shortTitle: String {

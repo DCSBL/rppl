@@ -11,6 +11,8 @@ final class WatchTransferService: NSObject {
     var lastMessage = String(localized: "WC idle")
     var syncState: SyncConnectionState = .notActivated
     var pendingTransferCount = 0
+    /// Bumps on ack / pending refresh so summary sync line re-renders.
+    private(set) var syncStatusRevision = 0
 
     private var store: SessionFileStore?
     private let tempDir: URL
@@ -48,11 +50,24 @@ final class WatchTransferService: NSObject {
     func refreshPendingCount() {
         let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         pendingTransferCount = (try? fileStore.sessionsNeedingTransfer().count) ?? 0
+        syncStatusRevision &+= 1
+    }
+
+    /// Locked summary copy: Syncing… until phone ack, then Synced.
+    func isSessionSynced(sessionId: String) -> Bool {
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        guard let manifest = try? fileStore.readManifest(sessionId: sessionId) else {
+            return false
+        }
+        return manifest.transferState == .acknowledged
     }
 
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {
         WakeLog.debug(.transfer, "enqueue \(sessionId.prefix(8))…")
         self.store = store
+        Task {
+            await WatchSyncNotifier.requestAuthorizationIfNeeded()
+        }
         transferPending()
     }
 
@@ -89,9 +104,17 @@ final class WatchTransferService: NSObject {
 
     private func transfer(sessionId: String, store: SessionFileStore) throws {
         guard WCSession.default.activationState == .activated else {
-            lastMessage = String(localized: "WC not activated — will retry")
+            lastMessage = String(localized: "WC not activated - will retry")
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — WC not activated")
             refreshSyncState()
+            return
+        }
+
+        let alreadyQueued = WCSession.default.outstandingFileTransfers.contains { fileTransfer in
+            (fileTransfer.file.metadata?[AppConstants.wcSessionFileMetaSessionID] as? String) == sessionId
+        }
+        if alreadyQueued {
+            WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — already in WC queue")
             return
         }
 
@@ -133,7 +156,7 @@ extension WatchTransferService: WCSessionDelegate {
                 WakeLog.debug(.sync, "iPhone reachable")
                 transferPending()
             } else {
-                lastMessage = String(localized: "iPhone not reachable — transfers will queue")
+                lastMessage = String(localized: "iPhone not reachable - transfers will queue")
                 WakeLog.debug(.sync, "iPhone not reachable — queue transfers")
             }
         }
@@ -179,10 +202,17 @@ extension WatchTransferService: WCSessionDelegate {
         WakeLog.debug(.ack, "received ack \(ack.prefix(8))…")
         let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         do {
-            try store.markAcknowledged(sessionId: ack)
+            let newlyAcknowledged = try store.markAcknowledged(sessionId: ack)
             lastMessage = String(localized: "Acked \(ack.prefix(8))")
-            WakeLog.debug(.ack, "markAcknowledged OK \(ack.prefix(8))…")
+            WakeLog.debug(
+                .ack,
+                "markAcknowledged OK \(ack.prefix(8))… newly=\(newlyAcknowledged)"
+            )
             refreshPendingCount()
+            // Phone rebroadcasts / dual-channel acks must not spam banners.
+            if newlyAcknowledged {
+                WatchSyncNotifier.notifySyncCompleted(sessionId: ack)
+            }
         } catch {
             lastMessage = String(localized: "Ack failed: \(error.localizedDescription)")
             WakeLog.error(.ack, "markAcknowledged: \(error.localizedDescription)")
@@ -208,7 +238,7 @@ extension WatchTransferService: WCSessionDelegate {
                     WakeLog.debug(.store, "re-queued readyToTransfer \(sessionId.prefix(8))…")
                 }
             } else {
-                lastMessage = String(localized: "File delivered — awaiting phone ack")
+                lastMessage = String(localized: "File delivered - awaiting phone ack")
                 WakeLog.debug(
                     .transfer,
                     "delivered \(sessionId.map { String($0.prefix(8)) } ?? "?")… — awaiting ack"

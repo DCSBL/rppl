@@ -408,10 +408,18 @@ public final class SessionFileStore: @unchecked Sendable {
         try writeManifest(manifest)
     }
 
-    public func markAcknowledged(sessionId: String) throws {
+    /// Marks the session acknowledged after phone import.
+    /// - Returns: `true` when this call newly transitioned to `.acknowledged`;
+    ///   `false` when it was already acknowledged (idempotent re-ack / heal).
+    @discardableResult
+    public func markAcknowledged(sessionId: String) throws -> Bool {
         var manifest = try readManifest(sessionId: sessionId)
+        if manifest.transferState == .acknowledged {
+            return false
+        }
         manifest.transferState = .acknowledged
         try writeManifest(manifest)
+        return true
     }
 
     /// Sessions waiting for a successful phone ack. Never delete these on transfer failure.
@@ -465,6 +473,23 @@ public final class SessionFileStore: @unchecked Sendable {
         } else {
             try phoneStore.ensureDerivedView(sessionId: sessionId)
         }
+    }
+
+    /// Phone-only import of a Share export JSON. Stamps `manifest.imported`, replaces same `sessionId`
+    /// if already on disk. Does not touch HealthKit or Watch Connectivity.
+    public func importExportedPackage(
+        _ package: SessionTransferPackage,
+        intoPhoneStore phoneRoot: URL,
+        importedAt: Date = Date()
+    ) throws {
+        let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
+        let sessionId = package.manifest.sessionId
+        if fileManager.fileExists(atPath: phoneStore.sessionDirectory(for: sessionId).path) {
+            try phoneStore.deleteSession(sessionId: sessionId)
+        }
+        var stamped = package
+        stamped.manifest.imported = importedAt
+        try importTransferPackage(stamped, intoPhoneStore: phoneRoot)
     }
 
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {

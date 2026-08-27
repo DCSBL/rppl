@@ -9,12 +9,11 @@ struct ActivityStartPage: View {
 
     var body: some View {
         GeometryReader { geo in
-            let iconSide = min(max(geo.size.height * 0.28, 36), 88)
             let chevronSide = min(max(min(geo.size.width, geo.size.height) * 0.22, 36), 52)
             let showClock = geo.size.height >= 200
 
             Button(action: action) {
-                cardStack(iconSide: iconSide, chevronSide: chevronSide, showClock: showClock)
+                cardStack(chevronSide: chevronSide, showClock: showClock)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .buttonStyle(.plain)
@@ -22,53 +21,50 @@ struct ActivityStartPage: View {
             .accessibilityLabel(ActivityCodes.localizedTitle(for: code))
             .accessibilityHint(String(localized: "Starts a session"))
         }
-        .containerBackground(Color.rpplDarkTeal.gradient, for: .tabView)
+        .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
 
-    private func cardStack(iconSide: CGFloat, chevronSide: CGFloat, showClock: Bool) -> some View {
-        VStack(spacing: 6) {
+    private func cardStack(chevronSide: CGFloat, showClock: Bool) -> some View {
+        VStack(spacing: 8) {
             if showClock {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     Text(context.date, style: .time)
                         .font(.title3.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(Color.rpplAliceBlue)
+                        .foregroundStyle(Color.rpplIdlePrimary)
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                 }
             }
 
-            Spacer(minLength: 0)
-
-            MDIIconView(icon: .skiWater)
-                .frame(width: iconSide, height: iconSide)
-                .foregroundStyle(Color.rpplSkySurge)
-                .accessibilityHidden(true)
+            Spacer(minLength: 4)
 
             Text(ActivityCodes.localizedTitle(for: code))
-                .font(.headline)
-                .foregroundStyle(Color.rpplAliceBlue)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 4)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Color.rpplIdlePrimary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.65)
+                .padding(.horizontal, 6)
 
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
 
             startControl(side: chevronSide)
         }
+        .padding(.vertical, 4)
     }
 
     @ViewBuilder
     private func startControl(side: CGFloat) -> some View {
         if isStarting {
             ProgressView()
-                .tint(Color.rpplSkySurge)
+                .tint(Color.rpplIdleAccent)
                 .frame(width: side, height: side)
         } else {
             Image(systemName: "chevron.right")
                 .font(.title3.weight(.bold))
-                .foregroundStyle(Color.rpplDarkTeal)
+                .foregroundStyle(Color.rpplIdleAccentForeground)
                 .frame(width: side, height: side)
-                .background(Circle().fill(Color.rpplSkySurge))
+                .background(Circle().fill(Color.rpplIdleAccent))
         }
     }
 }

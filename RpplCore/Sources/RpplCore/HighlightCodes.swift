@@ -11,5 +11,5 @@ public enum RideHighlight: String, Sendable, Equatable, Codable, CaseIterable {
 public enum SessionHighlight: String, Sendable, Equatable, CaseIterable {
     case longest
     case mostWaterTime
-    case mostLaps
+    case mostSets
 }

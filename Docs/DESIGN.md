@@ -1,6 +1,6 @@
 # System design
 
-How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngine UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product lock: [../README.md](../README.md).
+How Watch, iPhone, and `RpplCore` fit together. Library internals (DetectionEngine UML, store types): [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). Product defaults: [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Layers
 
@@ -71,7 +71,7 @@ sequenceDiagram
 - Codes: `riding` / `inactive` / `unsure`.
 - Manual labels removed.
 
-Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [Phase3.md](Phase3.md).
+Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [RideDetection.md](RideDetection.md).
 
 ## Hard constraints (unchanged)
 

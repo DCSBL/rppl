@@ -8,27 +8,54 @@ import RpplCore
 // MARK: - Lifecycle
 extension WatchSessionController {
     func refreshPermissionStatus() {
-        locationAuthStatus = Self.locationLabel(locationManager.authorizationStatus)
+        let loc = locationManager.authorizationStatus
+        locationAuthStatus = Self.locationLabel(loc)
+        locationPermission = Self.locationPermissionState(loc)
 
-        if motionManager.isDeviceMotionAvailable {
+        if CMMotionActivityManager.isActivityAvailable() {
+            switch CMMotionActivityManager.authorizationStatus() {
+            case .notDetermined:
+                motionPermission = .notDetermined
+                motionAvailability = "activity: notDetermined"
+            case .restricted, .denied:
+                motionPermission = .denied
+                motionAvailability = "activity: denied"
+            case .authorized:
+                motionPermission = .authorized
+                motionAvailability = motionManager.isDeviceMotionAvailable
+                    ? "deviceMotion available"
+                    : "activity authorized"
+            @unknown default:
+                motionPermission = .notDetermined
+                motionAvailability = "activity: unknown"
+            }
+        } else if motionManager.isDeviceMotionAvailable {
+            // No activity auth surface — device motion alone does not prompt; treat ready.
+            motionPermission = .authorized
             motionAvailability = "deviceMotion available"
         } else {
+            motionPermission = .unavailable
             motionAvailability = "unavailable (skipped)"
         }
 
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
+            healthPermission = .unavailable
             return
         }
         switch healthStore.authorizationStatus(for: workoutType) {
         case .notDetermined:
             healthAuthStatus = String(localized: "workout: notDetermined")
+            healthPermission = .notDetermined
         case .sharingDenied:
-            healthAuthStatus = String(localized: "workout: denied — enable in Settings › Health")
+            healthAuthStatus = String(localized: "workout: denied - enable in Settings › Health")
+            healthPermission = .denied
         case .sharingAuthorized:
             healthAuthStatus = String(localized: "workout: authorized")
+            healthPermission = .authorized
         @unknown default:
             healthAuthStatus = String(localized: "workout: unknown")
+            healthPermission = .notDetermined
         }
     }
 
@@ -36,31 +63,110 @@ extension WatchSessionController {
     func requestPermissions() async {
         WakeLog.debug(.permissions, "requestPermissions begin")
         errorText = nil
-        locationManager.requestWhenInUseAuthorization()
-
-        guard HKHealthStore.isHealthDataAvailable() else {
-            healthAuthStatus = String(localized: "Health unavailable")
-            WakeLog.debug(.permissions, "Health unavailable")
-            refreshPermissionStatus()
-            return
-        }
-
-        do {
-            try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
-            statusText = String(localized: "Permissions updated")
-            WakeLog.debug(.permissions, "Health authorization requested OK")
-        } catch {
-            errorText = String(localized: "Health auth: \(error.localizedDescription)")
-            WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
-        }
-        refreshPermissionStatus()
+        await promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: true)
+        statusText = String(localized: "Permissions updated")
         WakeLog.debug(
             .permissions,
             "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
         )
     }
 
+    /// First-boot / onboarding: present system sheets without requiring a row tap.
+    /// Health first — its sheet is slow to appear; starting it ASAP avoids a spinner freeze on tap.
+    func promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: Bool = false) async {
+        guard !isPromptingPermissions else { return }
+        isPromptingPermissions = true
+        defer { isPromptingPermissions = false }
+
+        errorText = nil
+        refreshPermissionStatus()
+
+        // Brief yield so the permissions list can paint before HealthKit blocks on its sheet.
+        try? await Task.sleep(for: .milliseconds(150))
+
+        if healthPermission == .notDetermined
+            || (includeDeniedHealthRetry && healthPermission == .denied) {
+            await requestHealthPermission(force: includeDeniedHealthRetry && healthPermission == .denied)
+        }
+        if locationPermission == .notDetermined {
+            await requestLocationPermission()
+        }
+        if motionPermission == .notDetermined {
+            await requestMotionPermission()
+        }
+    }
+
+    func requestLocationPermission() async {
+        errorText = nil
+        locationManager.requestWhenInUseAuthorization()
+        // Authorization callback updates via delegate; refresh snapshot now too.
+        refreshPermissionStatus()
+    }
+
+    /// - Parameter force: When true, call HealthKit again even if previously denied (re-request /
+    ///   Settings return path). System may still omit the sheet after a hard deny.
+    func requestHealthPermission(force: Bool = false) async {
+        errorText = nil
+        guard HKHealthStore.isHealthDataAvailable() else {
+            healthAuthStatus = String(localized: "Health unavailable")
+            healthPermission = .unavailable
+            WakeLog.debug(.permissions, "Health unavailable")
+            return
+        }
+        refreshPermissionStatus()
+        if !force, healthPermission != .notDetermined {
+            WakeLog.debug(.permissions, "Health skip request status=\(healthPermission.rawValue)")
+            return
+        }
+        do {
+            // Kick the request off the tightest MainActor turn so WatchKit can show the sheet
+            // without the UI sitting on a ProgressView for several seconds first.
+            try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
+            WakeLog.debug(.permissions, "Health authorization requested OK")
+        } catch {
+            errorText = String(localized: "Health auth: \(error.localizedDescription)")
+            WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
+        }
+        refreshPermissionStatus()
+    }
+
+    func requestMotionPermission() async {
+        errorText = nil
+        guard CMMotionActivityManager.isActivityAvailable() else {
+            refreshPermissionStatus()
+            return
+        }
+        if CMMotionActivityManager.authorizationStatus() != .notDetermined {
+            refreshPermissionStatus()
+            return
+        }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let manager = CMMotionActivityManager()
+            let now = Date()
+            manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
+                continuation.resume()
+            }
+        }
+        refreshPermissionStatus()
+        WakeLog.debug(.permissions, "Motion authorization queried status=\(motionAvailability)")
+    }
+
+    static func locationPermissionState(_ status: CLAuthorizationStatus) -> WatchPermissionState {
+        switch status {
+        case .notDetermined:
+            return .notDetermined
+        case .restricted, .denied:
+            return .denied
+        case .authorizedAlways, .authorizedWhenInUse:
+            return .authorized
+        @unknown default:
+            return .notDetermined
+        }
+    }
+
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
+        endedSessionSummary = nil
+
         guard !isRunning, !isStopping, !isStarting else {
             WakeLog.debug(
                 .session,
@@ -90,7 +196,9 @@ extension WatchSessionController {
             watchModel: WatchSessionController.deviceModel(),
             systemVersion: WKInterfaceDevice.current().systemVersion,
             waterTemperatureAvailable: waterTemperatureAvailable,
-            activityCode: code
+            activityCode: code,
+            wristLocation: WatchSessionController.wristLocationCode(),
+            crownOrientation: WatchSessionController.crownOrientationCode()
         )
         self.manifest = manifest
         WakeLog.debug(.session, "created manifest \(manifest.sessionId.prefix(8))…")
@@ -118,10 +226,6 @@ extension WatchSessionController {
         }
         WakeLog.debug(.session, "recordingMode=\(recordingMode)")
 
-        startLocation()
-        startMotionIfAvailable()
-        startActivityUpdatesIfAvailable()
-
         detectionCode = DetectionCodes.inactive
         lastConfidentCode = DetectionCodes.inactive
         lastPersistedConfidentCode = DetectionCodes.inactive
@@ -136,10 +240,19 @@ extension WatchSessionController {
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
         liveRideTracker.reset()
+        sessionStartLatitude = nil
+        sessionStartLongitude = nil
+        recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
         #if RPPL_WEATHERKIT
         resetAirWeather()
         #endif
+        sensorSamplingDense = false
+
+        startLocation()
+        startMotionIfAvailable()
+        startActivityUpdatesIfAvailable()
+
         startedAt = Date()
         pausedAccumulated = 0
         productPausedAt = nil
@@ -155,6 +268,7 @@ extension WatchSessionController {
         logSessionStartDetection()
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.session, "Water Lock enabled")
+        WKInterfaceDevice.current().play(.start)
 
         startBackgroundLoops()
         WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
@@ -166,17 +280,7 @@ extension WatchSessionController {
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
-        isStopping = true
-        statusText = String(localized: "Stopping…")
-        if isProductPaused {
-            if let productPausedAt {
-                pausedAccumulated += Date().timeIntervalSince(productPausedAt)
-            }
-            productPausedAt = nil
-            isProductPaused = false
-        }
-        flushTask?.cancel()
-        timerTask?.cancel()
+        beginSessionTeardown(status: String(localized: "Stopping…"))
 
         stopSensors()
         liveRideTracker.closeOpenRide()
@@ -201,9 +305,79 @@ extension WatchSessionController {
         motionRecordingEnabled = false
 
         statusText = String(localized: "Transferring…")
-        WatchTransferService.shared.enqueueTransfer(sessionId: manifest.sessionId, store: store)
-        statusText = String(localized: "Stopped — waiting for phone ack")
-        WakeLog.debug(.session, "stopSession done — awaiting phone ack")
+        let stoppedSessionId = manifest.sessionId
+        WatchTransferService.shared.enqueueTransfer(sessionId: stoppedSessionId, store: store)
+        statusText = String(localized: "Stopped - waiting for phone ack")
+
+        let finalDuration = computeElapsed(at: Date())
+        endedSessionSummary = EndedSessionSummary(
+            sessionId: stoppedSessionId,
+            duration: finalDuration,
+            rideCount: liveRideTracker.rideCount,
+            distanceMeters: liveRideTracker.sessionRideMeters,
+            lastRideDuration: liveRideTracker.lastRideDuration,
+            lastRideMeters: liveRideTracker.lastRideMeters,
+            lastRideSetCount: liveRideTracker.lastRideSetCount,
+            didCompleteRide: liveRideTracker.didCompleteRide,
+            startLatitude: sessionStartLatitude,
+            startLongitude: sessionStartLongitude
+        )
+
+        WKInterfaceDevice.current().play(.stop)
+        WakeLog.debug(.session, "stopSession done — summary shown sessionId=\(stoppedSessionId.prefix(8))…")
+        clearSessionRuntimeState()
+    }
+
+    /// Confirmed tiny-session discard: delete local package, no transfer, no Health save.
+    /// Keep-until-phone-ack still applies only when the rider chooses Keep (transfer).
+    func discardSession() async {
+        guard isRunning, !isStopping, let manifest, let store else {
+            WakeLog.debug(.session, "discardSession ignored — running=\(isRunning) stopping=\(isStopping)")
+            return
+        }
+        let sessionId = manifest.sessionId
+        WakeLog.debug(.session, "discardSession begin \(sessionId.prefix(8))…")
+        beginSessionTeardown(status: String(localized: "Discarding…"))
+
+        stopSensors()
+        liveRideTracker.closeOpenRide()
+        // No flush — package will be deleted; never queue transfer for discard.
+
+        await discardWorkoutWithoutSaving()
+        recordingMode = "none"
+        motionRecordingEnabled = false
+
+        do {
+            try store.deleteSession(sessionId: sessionId)
+            WakeLog.debug(.store, "deleteSession discarded \(sessionId.prefix(8))…")
+        } catch {
+            errorText = String(localized: "Discard: \(error.localizedDescription)")
+            WakeLog.error(.store, "deleteSession: \(error.localizedDescription)")
+        }
+
+        endedSessionSummary = nil
+        statusText = String(localized: "Idle")
+        WKInterfaceDevice.current().play(.stop)
+        WakeLog.debug(.session, "discardSession done \(sessionId.prefix(8))…")
+        clearSessionRuntimeState()
+    }
+
+    private func beginSessionTeardown(status: String) {
+        isStopping = true
+        statusText = status
+        if isProductPaused {
+            if let productPausedAt {
+                pausedAccumulated += Date().timeIntervalSince(productPausedAt)
+            }
+            productPausedAt = nil
+            isProductPaused = false
+        }
+        flushTask?.cancel()
+        timerTask?.cancel()
+    }
+
+    private func clearSessionRuntimeState() {
+        liveRideTracker.reset()
         storedByteSize = 0
         currentRideDuration = 0
         currentInactiveDuration = 0
@@ -228,6 +402,8 @@ extension WatchSessionController {
         pausedAccumulated = 0
         productPausedAt = nil
         isProductPaused = false
+        sessionStartLatitude = nil
+        sessionStartLongitude = nil
         self.manifest = nil
         isRunning = false
         isStopping = false
@@ -254,6 +430,7 @@ extension WatchSessionController {
         elapsed = computeElapsed(at: Date())
         isProductPaused = true
         statusText = String(localized: "Paused")
+        WKInterfaceDevice.current().play(.stop)
         WakeLog.debug(.session, "pauseSession done")
     }
 
@@ -281,12 +458,29 @@ extension WatchSessionController {
         statusText = recordingMode == "workout"
             ? String(localized: "Recording")
             : String(localized: "Sensors-only (no HK workout)")
+        WKInterfaceDevice.current().play(.start)
         WakeLog.debug(.session, "resumeSession done")
     }
 
     func enableWaterLock() {
         WKInterfaceDevice.current().enableWaterLock()
         WakeLog.debug(.ui, "Water Lock enabled (manual)")
+    }
+
+    func dismissSessionSummary() {
+        guard endedSessionSummary != nil else { return }
+        WakeLog.debug(.ui, "dismiss session summary")
+        endedSessionSummary = nil
+        statusText = String(localized: "Idle")
+    }
+
+    func captureSessionStartCoordinate(from sample: LocationSample) {
+        guard sessionStartLatitude == nil else { return }
+        guard sample.horizontalAccuracy >= 0,
+              sample.horizontalAccuracy <= DetectionThresholds.default.maxHorizontalAccuracyM
+        else { return }
+        sessionStartLatitude = sample.latitude
+        sessionStartLongitude = sample.longitude
     }
 
     /// Cycle debug simulation: detected → inactive → ride → detected.

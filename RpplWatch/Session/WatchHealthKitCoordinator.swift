@@ -117,7 +117,7 @@ extension WatchSessionController {
         refreshPermissionStatus()
         let status = healthStore.authorizationStatus(for: workoutType)
         if status == .sharingDenied {
-            errorText = String(localized: "Workout not authorized — tap Request permissions or enable in Health settings. Continuing without workout.")
+            errorText = String(localized: "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout.")
             WakeLog.debug(.workout, "sharingDenied — sensors-only")
             return false
         }
@@ -258,6 +258,31 @@ extension WatchSessionController {
         }
 
         session.end()
+        clearWorkoutSessionRefs()
+    }
+
+    /// User-confirmed tiny-session discard: no Health save, no phone transfer.
+    func discardWorkoutWithoutSaving() async {
+        guard let session = workoutSession else {
+            clearWorkoutSessionRefs()
+            return
+        }
+        WakeLog.debug(.workout, "discardWorkout begin")
+        let requestEnd = Date()
+        endRideActivity(at: requestEnd)
+        if session.state != .stopped {
+            _ = await withCheckedContinuation { continuation in
+                workoutStoppedContinuation = continuation
+                session.stopActivity(with: requestEnd)
+            }
+        }
+        workoutBuilder?.discardWorkout()
+        session.end()
+        clearWorkoutSessionRefs()
+        WakeLog.debug(.workout, "discardWorkout OK — no Health save")
+    }
+
+    private func clearWorkoutSessionRefs() {
         workoutSession = nil
         workoutBuilder = nil
         workoutDataSource = nil
@@ -353,7 +378,7 @@ extension WatchSessionController {
         }
     }
 
-    /// Interval distance + speed on ride HKWorkoutActivity rows (not cable loop laps).
+    /// Interval distance + speed on ride HKWorkoutActivity rows (not cable-park sets).
     func attachRideMetricsToActivities(_ builder: HKLiveWorkoutBuilder) async throws {
         for activity in builder.workoutActivities {
             let code = activity.metadata?[WorkoutMetadataKeys.detectionCode] as? String

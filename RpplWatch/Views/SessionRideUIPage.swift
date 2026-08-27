@@ -4,6 +4,7 @@ import RpplCore
 /// Product session UI: one-screen ride view; scrollable inactive overview.
 struct SessionRideUIPage: View {
     @Bindable var session: WatchSessionController
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
     var body: some View {
         Group {
@@ -26,15 +27,19 @@ struct SessionRideUIPage: View {
                     .font(.headline.bold())
                     .foregroundStyle(.orange)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
 
                 Text(SessionFormatters.elapsed(session.elapsed))
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).bold())
                     .monospacedDigit()
-                    .foregroundStyle(.secondary)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .foregroundStyle(.primary)
 
-                Text("Session clock frozen")
+                Text("Timers paused")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
 
                 SessionMetricRow(
                     label: "Distance",
@@ -45,10 +50,16 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
 
-                Text("Swipe for Resume")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                lastRideSection
+
+                Button("Resume") {
+                    WakeLog.debug(.ui, "tap Resume from paused metrics")
+                    session.resumeSession()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(session.isStopping)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
@@ -60,7 +71,7 @@ struct SessionRideUIPage: View {
     private var ridingView: some View {
         VStack(spacing: 4) {
             Text(SessionFormatters.segmentDuration(session.currentRideDuration))
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(.largeTitle, design: .rounded).bold())
                 .monospacedDigit()
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
@@ -68,6 +79,7 @@ struct SessionRideUIPage: View {
             Text("RIDE")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 VStack(spacing: 2) {
@@ -76,9 +88,11 @@ struct SessionRideUIPage: View {
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
+                        .alwaysOnSupportingMetric(isLuminanceReduced)
                     Text("DIST")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
 
@@ -88,21 +102,25 @@ struct SessionRideUIPage: View {
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
+                        .alwaysOnSupportingMetric(isLuminanceReduced)
                     Text("KM/H")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text("\(session.currentRideLapCount)")
+                    Text("\(session.currentRideSetCount)")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
-                    Text("LAPS")
+                        .alwaysOnSupportingMetric(isLuminanceReduced)
+                    Text("SETS")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -114,12 +132,49 @@ struct SessionRideUIPage: View {
                 Image(systemName: "heart.fill")
                     .font(.caption2)
                     .foregroundStyle(.red)
+                    .accessibilityHidden(true)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(heartRateAccessibilityLabel)
+            .alwaysOnSupportingMetric(isLuminanceReduced)
 
             statusLine(primary: "Riding", color: .blue)
+
+            if session.didCompleteRide {
+                lastRideCompactLine
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 4)
+    }
+
+    private var lastRideCompactLine: some View {
+        HStack(spacing: 4) {
+            Text("Last")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(
+                "\(SessionFormatters.segmentDuration(session.lastRideDuration)) · "
+                    + "\(SessionFormatters.distance(session.lastRideMeters)) · "
+                    + "\(session.lastRideSetCount)"
+            )
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
+            .minimumScaleFactor(0.7)
+            .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(lastRideAccessibilityLabel)
+        .alwaysOnSecondaryChrome(isLuminanceReduced)
+    }
+
+    private var lastRideAccessibilityLabel: String {
+        String(
+            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideSetCount) sets"
+        )
     }
 
     // MARK: - Inactive (scrollable overview)
@@ -132,11 +187,13 @@ struct SessionRideUIPage: View {
                 Text("Session")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
 
                 SessionMetricRow(
                     label: "Elapsed",
                     value: SessionFormatters.elapsed(session.elapsed),
-                    valueColor: .yellow
+                    valueColor: .yellow,
+                    isPrimaryMetric: true
                 )
                 SessionMetricRow(
                     label: "Distance",
@@ -166,37 +223,51 @@ struct SessionRideUIPage: View {
                         Image(systemName: "heart.fill")
                             .font(.caption2)
                             .foregroundStyle(.red)
+                            .accessibilityHidden(true)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(
+                        String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
+                    )
+                    .alwaysOnSupportingMetric(isLuminanceReduced)
                 }
 
                 Divider()
                     .padding(.vertical, 2)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-                Text("Last ride")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                if session.didCompleteRide {
-                    SessionMetricRow(
-                        label: "Duration",
-                        value: SessionFormatters.segmentDuration(session.lastRideDuration)
-                    )
-                    SessionMetricRow(
-                        label: "Distance",
-                        value: SessionFormatters.distance(session.lastRideMeters)
-                    )
-                    SessionMetricRow(
-                        label: "Laps",
-                        value: "\(session.lastRideLapCount)"
-                    )
-                } else {
-                    Text("No rides yet")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                lastRideSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
+        }
+    }
+
+    @ViewBuilder
+    private var lastRideSection: some View {
+        Text("Last ride")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .alwaysOnSecondaryChrome(isLuminanceReduced)
+
+        if session.didCompleteRide {
+            SessionMetricRow(
+                label: "Duration",
+                value: SessionFormatters.segmentDuration(session.lastRideDuration)
+            )
+            SessionMetricRow(
+                label: "Distance",
+                value: SessionFormatters.distance(session.lastRideMeters)
+            )
+            SessionMetricRow(
+                label: "Sets",
+                value: "\(session.lastRideSetCount)"
+            )
+        } else {
+            Text("No rides yet")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
         }
     }
 
@@ -213,5 +284,13 @@ struct SessionRideUIPage: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .alwaysOnSecondaryChrome(isLuminanceReduced)
+    }
+
+    private var heartRateAccessibilityLabel: String {
+        if let hr = session.lastHeartRate {
+            return String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
+        }
+        return String(localized: "Heart rate unavailable")
     }
 }

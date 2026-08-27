@@ -12,6 +12,9 @@ public struct DetectionHoldClock: Sendable, Equatable {
     /// True while `.highSpeed` is active and it started from walk-band (or nil) previous speed.
     public private(set) var highSpeedFromWalk = false
 
+    /// When the current `.highSpeed` hold started (if active).
+    public var highSpeedStartedAt: Date? { startedAt[.highSpeed] }
+
     public init() {}
 
     public mutating func clear() {

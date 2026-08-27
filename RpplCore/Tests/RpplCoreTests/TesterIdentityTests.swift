@@ -14,4 +14,14 @@ struct TesterIdentityTests {
         #expect(first == second)
         #expect(UUID(uuidString: first) != nil)
     }
+
+    @Test func createsNewIdWhenMissing() {
+        let suite = "RpplCoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        #expect(defaults.string(forKey: TesterIdentity.defaultsKey) == nil)
+        let id = TesterIdentity.resolve(store: defaults)
+        #expect(defaults.string(forKey: TesterIdentity.defaultsKey) == id)
+    }
 }

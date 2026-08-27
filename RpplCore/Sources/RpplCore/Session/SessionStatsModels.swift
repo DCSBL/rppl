@@ -8,8 +8,8 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var endedAt: Date
     public var duration: TimeInterval
     public var distanceMeters: Double
-    /// Crossing-based laps for this ride (0 until assumed return to start).
-    public var lapCount: Int
+    /// Crossing-based sets for this ride (0 until assumed return to start).
+    public var setCount: Int
     /// Best sustained-window mean speed (km/h); see `LocationSpeedStats.sustainedSpeedKmh`.
     public var sustainedSpeedKmh: Double?
     /// Trimmed path average (km/h); see `LocationSpeedStats.trimmedAverageSpeedKmh`.
@@ -25,7 +25,7 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        lapCount: Int = 0,
+        setCount: Int = 0,
         sustainedSpeedKmh: Double? = nil,
         averageSpeedKmh: Double? = nil,
         peakSpeedKmh: Double? = nil,
@@ -36,7 +36,7 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.endedAt = endedAt
         self.duration = duration
         self.distanceMeters = distanceMeters
-        self.lapCount = lapCount
+        self.setCount = setCount
         self.sustainedSpeedKmh = sustainedSpeedKmh
         self.averageSpeedKmh = averageSpeedKmh
         self.peakSpeedKmh = peakSpeedKmh
@@ -85,8 +85,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
     }
 
     /// Sum of per-ride crossing counts.
-    public var totalLapCount: Int {
-        rides.reduce(0) { $0 + $1.lapCount }
+    public var totalSetCount: Int {
+        rides.reduce(0) { $0 + $1.setCount }
     }
 
     public init(

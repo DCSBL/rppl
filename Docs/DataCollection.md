@@ -1,6 +1,6 @@
-# Data collection (Phase 2+)
+# Data collection
 
-Alpha collector for cable-park wakeboarding. Tracking runs only on Apple Watch.
+Cable-park wakeboarding data collector. Tracking runs only on Apple Watch.
 
 ## Detection codes (auto)
 
@@ -14,14 +14,14 @@ Engine: `DetectionEngine` in RpplCore (filter → holds → detectors → lookba
 
 Manual Action Button labels are **removed**. Ultra Action Button may still **start** a session via Workout intent.
 
-Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · storage: [SessionStorage.md](SessionStorage.md) · thresholds: [Phase3.md](Phase3.md).
+Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md) · storage: [SessionStorage.md](SessionStorage.md) · thresholds: [RideDetection.md](RideDetection.md).
 
 ## Streams
 
 | Stream | Approx rate | File |
 |--------|-------------|------|
-| GPS | Core Location updates | `location-000.jsonl` |
-| deviceMotion | ~25 Hz → framed zlib JSONL | `motion-000.jsonl.zlib` |
+| GPS | Core Location; sparse while `inactive` (~10 m, 8 m filter), dense while riding/unsure | `location-000.jsonl` |
+| deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
 | Detections | on transitions / revisions | `detections.jsonl` |
@@ -58,7 +58,7 @@ Do **not** dual-write walking+running or swimming distance (pollutes those Healt
 
 **Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, **pauses the HK session**, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
 
-**Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **loop laps** (`LapRideTracker`). Loop laps stay in-app / export only. Never emit `HKWorkoutEvent.lap` unless Fitness shows a lap count we can fill.
+**Rides vs sets in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **sets** (`SetRideTracker`). Sets stay in-app / export only. Never emit `HKWorkoutEvent.lap` (Apple Fitness lap API) unless Fitness shows a lap count we can fill — product term is **set**, not lap.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 
@@ -74,12 +74,33 @@ Optional start only:
 2. App › **Rppl** (Cable Park)
 3. Press starts the session when idle; press while recording is a **no-op**
 
-Requires an active HealthKit workout path for Workout intent registration. Cycle Label is obsolete — see [Postmortems/ActionButtonCycleLabel.md](Postmortems/ActionButtonCycleLabel.md).
+Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
 ## Transfer
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections` (legacy `assumptions` accepted on decode).
 
+**Tiny-session discard** (duration < ~30s and zero rides): Stop asks Discard / Keep / Cancel. Confirmed Discard deletes the Watch package and skips transfer + Health save. Keep uses the normal transfer path (ack still required before delete).
+
 ## Export
 
-On iPhone: open a session → **Export session JSON** (Share/AirDrop to Mac for manual analysis). Export includes `detections`.
+On iPhone: open a session → tap the share icon → prepare (spinner) → system Share sheet (AirDrop / Files / …). File name:
+
+`rppl_<startedAt-UTC>_<location>.json`
+
+- `startedAt-UTC`: session start, ISO-8601 with `:` / `.` replaced by `-` (e.g. `2024-01-01T00-00-00Z`)
+- `location`: city slug from derived `cityName` (filesystem-safe); `unknown` when missing
+
+Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manifest` first** (encode order; not `sortedKeys`):
+
+| Payload | Contents |
+|---------|----------|
+| `manifest` | Session meta + random install ID (`testerId` field; UUID; new on reinstall) |
+| `detections` | Ride / inactive / unsure transitions |
+| `locations` | GPS with precise lat/lon (not anonymized) |
+| `motion` / `motionFramesZlib` | Device motion when present |
+| `health` | Mirrored heart rate and energy |
+| `water` | Ultra water temperature when present |
+| `derived` | Fast view stats / map frame when present |
+
+User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.
