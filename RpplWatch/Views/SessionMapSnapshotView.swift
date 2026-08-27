@@ -2,7 +2,6 @@ import SwiftUI
 import MapKit
 import RpplCore
 import WatchKit
-import UIKit
 
 /// Static map thumbnail for Watch — SwiftUI `Map` often renders blank in small/scroll layouts.
 enum SessionMapSnapshotSource: Sendable {
@@ -23,62 +22,32 @@ enum SessionMapSnapshotRenderer {
     static func render(
         source: SessionMapSnapshotSource,
         size: CGSize,
-        scale: CGFloat,
-        showsPin: Bool
+        scale: CGFloat
     ) async throws -> UIImage {
         let options = MKMapSnapshotter.Options()
         options.size = size
         options.scale = scale
 
-        let pinCoordinate: CLLocationCoordinate2D
         switch source {
         case let .coordinate(coordinate, distanceMeters):
-            pinCoordinate = coordinate
             options.region = MKCoordinateRegion(
                 center: coordinate,
                 latitudinalMeters: distanceMeters * 2,
                 longitudinalMeters: distanceMeters * 2
             )
         case let .frame(frame):
-            pinCoordinate = CLLocationCoordinate2D(
+            let center = CLLocationCoordinate2D(
                 latitude: frame.centerLatitude,
                 longitude: frame.centerLongitude
             )
             options.region = MKCoordinateRegion(
-                center: pinCoordinate,
+                center: center,
                 latitudinalMeters: max(frame.spanHeightMeters, 120),
                 longitudinalMeters: max(frame.spanWidthMeters, 120)
             )
         }
 
-        let snapshot = try await MKMapSnapshotter(options: options).start()
-        guard showsPin else { return snapshot.image }
-        return drawPin(on: snapshot, coordinate: pinCoordinate)
-    }
-
-    private static func drawPin(
-        on snapshot: MKMapSnapshotter.Snapshot,
-        coordinate: CLLocationCoordinate2D
-    ) -> UIImage {
-        let base = snapshot.image
-        let point = snapshot.point(for: coordinate)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = base.scale
-        format.opaque = true
-        return UIGraphicsImageRenderer(size: base.size, format: format).image { _ in
-            base.draw(at: .zero)
-            let pinDiameter: CGFloat = 10
-            let pinRect = CGRect(
-                x: point.x - pinDiameter / 2,
-                y: point.y - pinDiameter,
-                width: pinDiameter,
-                height: pinDiameter
-            )
-            UIColor.systemRed.setFill()
-            UIBezierPath(ovalIn: pinRect).fill()
-            UIColor.white.setStroke()
-            UIBezierPath(ovalIn: pinRect.insetBy(dx: 0.5, dy: 0.5)).stroke()
-        }
+        return try await MKMapSnapshotter(options: options).start().image
     }
 }
 
@@ -94,9 +63,17 @@ struct SessionMapSnapshotView: View {
     var body: some View {
         Group {
             if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
+                ZStack {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                    if showsPin {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .shadow(color: .black.opacity(0.35), radius: 1, y: 1)
+                    }
+                }
             } else {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(Color.secondary.opacity(0.15))
@@ -133,13 +110,11 @@ struct SessionMapSnapshotView: View {
         }
         do {
             let scale = WKInterfaceDevice.current().screenScale
-            let rendered = try await SessionMapSnapshotRenderer.render(
+            image = try await SessionMapSnapshotRenderer.render(
                 source: source,
                 size: size,
-                scale: scale,
-                showsPin: showsPin
+                scale: scale
             )
-            image = rendered
         } catch {
             WakeLog.error(.ui, "SessionMapSnapshot failed: \(error.localizedDescription)")
             loadFailed = true
