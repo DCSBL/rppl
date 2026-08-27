@@ -44,10 +44,11 @@ struct WatchLogbookListView: View {
             } else {
                 ForEach(catalog.entries) { entry in
                     NavigationLink {
-                        WatchSessionDetailView(sessionId: entry.manifest.sessionId)
+                        WatchSessionDetailView(entry: entry)
                     } label: {
                         WatchSessionRow(entry: entry)
                     }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
                 }
             }
         }
@@ -113,7 +114,7 @@ private struct WatchSessionRow: View {
                     .lineLimit(1)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
     }
 }
 

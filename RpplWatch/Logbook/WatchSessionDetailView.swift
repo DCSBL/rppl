@@ -3,7 +3,7 @@ import MapKit
 import RpplCore
 
 enum WatchSessionDetailSource: Equatable {
-    case store(sessionId: String)
+    case entry(WatchSessionEntry)
     case bundledExample
 }
 
@@ -18,8 +18,9 @@ struct WatchSessionDetailView: View {
     @State private var cityName: String?
     @State private var mapFrame: MapTrackFrame?
     @State private var startCoordinate: CLLocationCoordinate2D?
-    @State private var loadPhase: LoadPhase = .loading
+    @State private var loadPhase: LoadPhase
     @State private var errorText: String?
+    @State private var mapDestination: SessionMapDestination?
 
     private enum LoadPhase: Equatable {
         case loading
@@ -27,52 +28,71 @@ struct WatchSessionDetailView: View {
         case failed
     }
 
-    init(sessionId: String) {
-        self.source = .store(sessionId: sessionId)
+    init(entry: WatchSessionEntry) {
+        source = .entry(entry)
+        _manifest = State(initialValue: entry.manifest)
+        _stats = State(initialValue: entry.stats)
+        _cityName = State(initialValue: entry.cityName)
+        _mapFrame = State(initialValue: entry.mapFrame)
+        _loadPhase = State(initialValue: .ready)
     }
 
     init(source: WatchSessionDetailSource) {
         self.source = source
+        switch source {
+        case .entry(let entry):
+            _manifest = State(initialValue: entry.manifest)
+            _stats = State(initialValue: entry.stats)
+            _cityName = State(initialValue: entry.cityName)
+            _mapFrame = State(initialValue: entry.mapFrame)
+            _loadPhase = State(initialValue: .ready)
+        case .bundledExample:
+            _loadPhase = State(initialValue: .loading)
+        }
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                switch loadPhase {
-                case .loading:
-                    ProgressView("Loading session…")
-                        .frame(maxWidth: .infinity, minHeight: 120)
-                case .failed:
-                    ContentUnavailableView(
-                        "Could not load session",
-                        systemImage: "exclamationmark.triangle",
-                        description: Text(errorText ?? String(localized: "Try again later."))
-                    )
-                    .frame(minHeight: 120)
-                case .ready:
-                    detailContent
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    switch loadPhase {
+                    case .loading:
+                        ProgressView("Loading session…")
+                            .frame(maxWidth: .infinity, minHeight: 120)
+                    case .failed:
+                        ContentUnavailableView(
+                            "Could not load session",
+                            systemImage: "exclamationmark.triangle",
+                            description: Text(errorText ?? String(localized: "Try again later."))
+                        )
+                        .frame(minHeight: 120)
+                    case .ready:
+                        detailContent
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 10)
+                .padding(.top, 4)
+                .padding(.bottom, 12)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 4)
-            .padding(.bottom, 8)
-        }
-        .navigationTitle(navigationTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: StartMapCoordinate.self) { coordinate in
-            SessionStartMapFullscreenView(
-                coordinate: coordinate.coordinate,
-                distanceMeters: 500
-            )
+            .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $mapDestination) { destination in
+                SessionStartMapFullscreenView(destination: destination)
+            }
         }
         .containerBackground(Color.rpplIdleBackground.gradient, for: .navigation)
         .preferredColorScheme(.dark)
-        .task { await load() }
+        .task { await loadIfNeeded() }
     }
 
     @ViewBuilder
     private var detailContent: some View {
-        SessionMapStripView(startCoordinate: startCoordinate, mapFrame: mapFrame)
+        SessionMapStripView(
+            startCoordinate: startCoordinate,
+            mapFrame: mapFrame,
+            onMapTap: { mapDestination = $0 }
+        )
 
         if let cityName, !cityName.isEmpty {
             Text(cityName)
@@ -123,7 +143,7 @@ struct WatchSessionDetailView: View {
 
             if let lastRide = stats.rides.last {
                 Divider()
-                    .padding(.vertical, 2)
+                    .padding(.vertical, 4)
 
                 Text("Last ride")
                     .font(.caption.weight(.semibold))
@@ -143,7 +163,7 @@ struct WatchSessionDetailView: View {
                 )
             } else {
                 Divider()
-                    .padding(.vertical, 2)
+                    .padding(.vertical, 4)
                 Text("No rides yet")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -159,49 +179,50 @@ struct WatchSessionDetailView: View {
         return WatchLogbookFormatting.sessionDate(manifest.startedAt)
     }
 
-    private func load() async {
+    private func loadIfNeeded() async {
+        switch source {
+        case .entry(let entry):
+            await loadStartCoordinateIfAvailable(sessionId: entry.manifest.sessionId)
+        case .bundledExample:
+            await loadExample()
+        }
+    }
+
+    private func loadStartCoordinateIfAvailable(sessionId: String) async {
+        guard startCoordinate == nil else { return }
+        guard Self.store.hasRawStreams(sessionId: sessionId) else { return }
+        let peek = try? await StoreIO.runOffMain {
+            try Self.store.peekLocationSamples(sessionId: sessionId, limit: 1)
+        }
+        if let first = peek?.first {
+            startCoordinate = CLLocationCoordinate2D(
+                latitude: first.latitude,
+                longitude: first.longitude
+            )
+        }
+    }
+
+    private func loadExample() async {
+        guard loadPhase == .loading else { return }
         do {
-            switch source {
-            case .store(let sessionId):
-                let summary = try await StoreIO.runOffMain {
-                    try SessionLoader.loadStoredSummary(store: Self.store, sessionId: sessionId)
-                }
-                manifest = summary.manifest
-                stats = summary.stats
-                cityName = summary.cityName
-                mapFrame = summary.mapFrame
-
-                let peek = try? await StoreIO.runOffMain {
-                    try Self.store.peekLocationSamples(sessionId: sessionId, limit: 1)
-                }
-                if let first = peek?.first {
-                    startCoordinate = CLLocationCoordinate2D(
-                        latitude: first.latitude,
-                        longitude: first.longitude
-                    )
-                }
-                loadPhase = .ready
-
-            case .bundledExample:
-                let bundle = try await StoreIO.runOffMain {
-                    try Self.loadBundledExample()
-                }
-                manifest = bundle.manifest
-                stats = bundle.stats
-                cityName = bundle.cityName
-                mapFrame = bundle.mapFrame
-                if let first = bundle.locations.first {
-                    startCoordinate = CLLocationCoordinate2D(
-                        latitude: first.latitude,
-                        longitude: first.longitude
-                    )
-                }
-                loadPhase = .ready
+            let bundle = try await StoreIO.runOffMain {
+                try Self.loadBundledExample()
             }
+            manifest = bundle.manifest
+            stats = bundle.stats
+            cityName = bundle.cityName
+            mapFrame = bundle.mapFrame
+            if let first = bundle.locations.first {
+                startCoordinate = CLLocationCoordinate2D(
+                    latitude: first.latitude,
+                    longitude: first.longitude
+                )
+            }
+            loadPhase = .ready
         } catch {
             errorText = error.localizedDescription
             loadPhase = .failed
-            WakeLog.error(.store, "WatchSessionDetail load: \(error.localizedDescription)")
+            WakeLog.error(.store, "WatchSessionDetail example load: \(error.localizedDescription)")
         }
     }
 
@@ -215,4 +236,8 @@ struct WatchSessionDetailView: View {
         }
         return try SessionLoader.loadExample(packageURL: url)
     }
+}
+
+extension SessionMapDestination: Identifiable {
+    var id: String { "\(latitude)-\(longitude)-\(distanceMeters)-\(headingDegrees)" }
 }

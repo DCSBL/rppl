@@ -113,8 +113,7 @@ public enum SessionLoader {
         guard let derived = try store.readDerivedView(sessionId: sessionId) else {
             throw SessionStoreError.ioFailure("Missing derived view for \(sessionId)")
         }
-        let byteSize = try store.sessionByteSize(sessionId: sessionId)
-        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: byteSize)
+        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: 0)
     }
 
     /// In-memory load from a Share export / WC package (no disk write).

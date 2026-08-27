@@ -7,7 +7,6 @@ enum PhoneWatchViewSync {
     static func makeUpdate(store: SessionFileStore, sessionId: String) throws -> WatchViewUpdate? {
         let manifest = try store.readManifest(sessionId: sessionId)
         guard manifest.transferState == .acknowledged else { return nil }
-        guard manifest.imported == nil else { return nil }
         let derived = try store.ensureDerivedView(sessionId: sessionId)
         return WatchViewUpdate(manifest: manifest, derived: derived)
     }

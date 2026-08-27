@@ -8,13 +8,16 @@ struct SessionEndSummaryView: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
 
+    @State private var mapDestination: SessionMapDestination?
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     SessionMapStripView(
                         startCoordinate: startCoordinate,
-                        mapFrame: nil
+                        mapFrame: nil,
+                        onMapTap: { mapDestination = $0 }
                     )
 
                     Text("Session complete")
@@ -83,11 +86,8 @@ struct SessionEndSummaryView: View {
                 .padding(.horizontal, 4)
                 .padding(.bottom, 8)
             }
-            .navigationDestination(for: StartMapCoordinate.self) { coordinate in
-                SessionStartMapFullscreenView(
-                    coordinate: coordinate.coordinate,
-                    distanceMeters: 500
-                )
+            .navigationDestination(item: $mapDestination) { destination in
+                SessionStartMapFullscreenView(destination: destination)
             }
         }
         .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)

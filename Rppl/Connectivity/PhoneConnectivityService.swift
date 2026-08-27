@@ -212,6 +212,7 @@ final class PhoneConnectivityService: NSObject {
         }
         sessionsRevision += 1
         PhoneICloudDriveController.shared.acceptSession(sessionId)
+        PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
         return sessionId
     }

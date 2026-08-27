@@ -6,6 +6,7 @@ struct WatchSessionEntry: Identifiable, Sendable {
     let manifest: SessionManifest
     let stats: SessionStats
     let cityName: String?
+    let mapFrame: MapTrackFrame?
     let isSynced: Bool
 
     var id: String { manifest.sessionId }
@@ -68,6 +69,7 @@ final class WatchSessionCatalog {
                     manifest: manifest,
                     stats: derived.stats,
                     cityName: derived.cityName,
+                    mapFrame: derived.mapFrame,
                     isSynced: manifest.transferState == .acknowledged
                 )
             )

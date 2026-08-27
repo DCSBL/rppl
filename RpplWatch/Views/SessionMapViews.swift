@@ -2,13 +2,33 @@ import SwiftUI
 import MapKit
 import RpplCore
 
-/// Hashable wrapper so NavigationLink can push a map coordinate.
-struct StartMapCoordinate: Hashable {
+/// Full-screen map push value (camera distance + heading differ from strip preview).
+struct SessionMapDestination: Hashable {
     let latitude: Double
     let longitude: Double
+    let distanceMeters: Double
+    let headingDegrees: Double
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    static func startPin(_ coordinate: CLLocationCoordinate2D, distanceMeters: Double = 500) -> SessionMapDestination {
+        SessionMapDestination(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            distanceMeters: distanceMeters,
+            headingDegrees: 0
+        )
+    }
+
+    static func framed(_ fit: MapTrackFit) -> SessionMapDestination {
+        SessionMapDestination(
+            latitude: fit.centerLatitude,
+            longitude: fit.centerLongitude,
+            distanceMeters: fit.cameraDistanceMeters,
+            headingDegrees: fit.headingDegrees
+        )
     }
 }
 
@@ -18,6 +38,7 @@ struct SessionMapStripView: View {
     var mapFrame: MapTrackFrame?
     var mapHeight: CGFloat = 96
     var startMapDistanceMeters: CLLocationDistance = 500
+    let onMapTap: (SessionMapDestination) -> Void
 
     var body: some View {
         Group {
@@ -33,7 +54,9 @@ struct SessionMapStripView: View {
 
     @ViewBuilder
     private func startPinStrip(coordinate: CLLocationCoordinate2D, distanceMeters: CLLocationDistance) -> some View {
-        ZStack {
+        Button {
+            onMapTap(.startPin(coordinate, distanceMeters: distanceMeters))
+        } label: {
             Map(initialPosition: .camera(MapCamera(
                 centerCoordinate: coordinate,
                 distance: distanceMeters,
@@ -44,25 +67,19 @@ struct SessionMapStripView: View {
             }
             .mapStyle(.standard)
             .allowsHitTesting(false)
-
-            NavigationLink(value: StartMapCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)) {
-                Color.clear
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+            .frame(height: mapHeight)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
-        .frame(height: mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityElement(children: .ignore)
-        .accessibilityAddTraits(.isButton)
+        .buttonStyle(.plain)
         .accessibilityLabel(String(localized: "Session start location"))
         .accessibilityHint(String(localized: "Shows full-screen map"))
     }
 
     @ViewBuilder
     private func framedStrip(fit: MapTrackFit, markerCoordinate: CLLocationCoordinate2D) -> some View {
-        ZStack {
+        Button {
+            onMapTap(.framed(fit))
+        } label: {
             Map(initialPosition: .camera(MapCamera(
                 centerCoordinate: fit.coordinate,
                 distance: fit.cameraDistanceMeters,
@@ -73,23 +90,10 @@ struct SessionMapStripView: View {
             }
             .mapStyle(.standard)
             .allowsHitTesting(false)
-
-            NavigationLink(
-                value: StartMapCoordinate(
-                    latitude: markerCoordinate.latitude,
-                    longitude: markerCoordinate.longitude
-                )
-            ) {
-                Color.clear
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+            .frame(height: mapHeight)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
-        .frame(height: mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityElement(children: .ignore)
-        .accessibilityAddTraits(.isButton)
+        .buttonStyle(.plain)
         .accessibilityLabel(String(localized: "Session map"))
         .accessibilityHint(String(localized: "Shows full-screen map"))
     }
@@ -119,23 +123,22 @@ private extension MapTrackFit {
 
 /// Full-screen interactive map (pan / zoom); system Back dismisses.
 struct SessionStartMapFullscreenView: View {
-    let coordinate: CLLocationCoordinate2D
-    let distanceMeters: CLLocationDistance
-    var headingDegrees: Double = 0
+    let destination: SessionMapDestination
 
     var body: some View {
         Map(initialPosition: .camera(MapCamera(
-            centerCoordinate: coordinate,
-            distance: distanceMeters,
-            heading: headingDegrees,
+            centerCoordinate: destination.coordinate,
+            distance: destination.distanceMeters,
+            heading: destination.headingDegrees,
             pitch: 0
-        ))) {
-            Marker("Start", coordinate: coordinate)
+        )), interactionModes: [.pan, .zoom]) {
+            Marker("Start", coordinate: destination.coordinate)
         }
         .mapStyle(.standard)
         .ignoresSafeArea(edges: .bottom)
+        .navigationTitle(String(localized: "Map"))
         .navigationBarTitleDisplayMode(.inline)
         .containerBackground(Color.rpplIdleBackground.gradient, for: .navigation)
-        .accessibilityLabel(String(localized: "Session start location map"))
+        .accessibilityLabel(String(localized: "Session location map"))
     }
 }

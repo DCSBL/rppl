@@ -243,6 +243,12 @@ final class PhoneICloudDriveController: NSObject {
         dismissedRemoteIDs.subtract(sessionIds)
         rebuildPendingImportsFromQuery()
         PhoneConnectivityService.shared.bumpSessionsRevision()
+        for sessionId in sessionIds {
+            PhoneWatchViewSync.pushViewUpdate(
+                store: PhoneConnectivityService.shared.store,
+                sessionId: sessionId
+            )
+        }
     }
 
     func dismissImportOffer() {

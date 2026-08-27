@@ -154,7 +154,6 @@ public enum WatchViewSyncDiff {
         for update in phoneUpdates {
             let sessionId = update.manifest.sessionId
             guard update.manifest.transferState == .acknowledged else { continue }
-            guard update.manifest.imported == nil else { continue }
             if let known = knownById[sessionId] {
                 if known.analyzerVersion == update.derived.analyzerVersion {
                     continue
