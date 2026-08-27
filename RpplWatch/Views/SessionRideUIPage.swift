@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 import RpplCore
 
 /// Product session UI: one-screen ride view; scrollable inactive overview.
@@ -184,52 +185,61 @@ struct SessionRideUIPage: View {
             VStack(alignment: .leading, spacing: 12) {
                 statusLine(primary: "Inactive", color: .gray)
 
-                Text("Session")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .alwaysOnSecondaryChrome(isLuminanceReduced)
+                HStack(alignment: .top, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Session")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-                SessionMetricRow(
-                    label: "Elapsed",
-                    value: SessionFormatters.elapsed(session.elapsed),
-                    valueColor: .yellow,
-                    isPrimaryMetric: true
-                )
-                SessionMetricRow(
-                    label: "Distance",
-                    value: SessionFormatters.distance(session.totalDistanceM)
-                )
-                SessionMetricRow(
-                    label: "Rides",
-                    value: "\(session.rideCount)"
-                )
-                SessionMetricRow(
-                    label: "Inactive for",
-                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
-                )
-                if session.waterTemperatureAvailable {
-                    SessionMetricRow(
-                        label: "Water",
-                        value: session.averageWaterTemperatureCelsius.map(SessionFormatters.waterTemp)
-                            ?? TemperatureFormat.placeholder
-                    )
-                }
+                        SessionMetricRow(
+                            label: "Elapsed",
+                            value: SessionFormatters.elapsed(session.elapsed),
+                            valueColor: .yellow,
+                            isPrimaryMetric: true
+                        )
+                        SessionMetricRow(
+                            label: "Distance",
+                            value: SessionFormatters.distance(session.totalDistanceM)
+                        )
+                        SessionMetricRow(
+                            label: "Rides",
+                            value: "\(session.rideCount)"
+                        )
+                        SessionMetricRow(
+                            label: "Inactive for",
+                            value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
+                        )
+                        if session.waterTemperatureAvailable {
+                            SessionMetricRow(
+                                label: "Water",
+                                value: session.averageWaterTemperatureCelsius.map(SessionFormatters.waterTemp)
+                                    ?? TemperatureFormat.placeholder
+                            )
+                        }
 
-                if let hr = session.lastHeartRate {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text(String(format: "%.0f", hr))
-                            .font(.system(.title3, design: .rounded).bold())
-                            .monospacedDigit()
-                        Image(systemName: "heart.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.red)
-                            .accessibilityHidden(true)
+                        if let hr = session.lastHeartRate {
+                            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                Text(String(format: "%.0f", hr))
+                                    .font(.system(.title3, design: .rounded).bold())
+                                    .monospacedDigit()
+                                Image(systemName: "heart.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red)
+                                    .accessibilityHidden(true)
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(
+                                String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
+                            )
+                            .alwaysOnSupportingMetric(isLuminanceReduced)
+                        }
                     }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(
-                        String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
-                    )
-                    .alwaysOnSupportingMetric(isLuminanceReduced)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if let coordinate = sessionStartCoordinate {
+                        SessionStartMapPinView(coordinate: coordinate)
+                    }
                 }
 
                 Divider()
@@ -241,6 +251,15 @@ struct SessionRideUIPage: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
         }
+    }
+
+    private var sessionStartCoordinate: CLLocationCoordinate2D? {
+        guard WatchDisplayLayout.showsSessionOverviewStartMap,
+              let latitude = session.sessionStartLatitude,
+              let longitude = session.sessionStartLongitude else {
+            return nil
+        }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
     @ViewBuilder

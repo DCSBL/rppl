@@ -2,6 +2,34 @@ import SwiftUI
 import MapKit
 import RpplCore
 
+/// Compact square start-location preview for Ultra session overview (no marker label).
+struct SessionStartMapPinView: View {
+    let coordinate: CLLocationCoordinate2D
+    var size: CGFloat = 64
+    var cameraDistanceMeters: CLLocationDistance = 450
+
+    var body: some View {
+        Map(initialPosition: .camera(MapCamera(
+            centerCoordinate: coordinate,
+            distance: cameraDistanceMeters,
+            heading: 0,
+            pitch: 0
+        )), interactionModes: []) {
+            Annotation("", coordinate: coordinate, anchor: .bottom) {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .accessibilityHidden(true)
+            }
+        }
+        .mapStyle(.standard)
+        .allowsHitTesting(false)
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .accessibilityLabel(String(localized: "Session start location"))
+    }
+}
+
 /// Non-interactive map preview strip. Full-screen map deferred on Watch.
 struct SessionMapStripView: View {
     var startCoordinate: CLLocationCoordinate2D?
