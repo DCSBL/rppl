@@ -12,6 +12,8 @@ struct SessionMapView: View {
     var showsStyleToggle: Bool = false
     /// Track-style toggle (averaged / heatmap); session overview only.
     var showsTrackStyleToggle: Bool = true
+    /// When set with session data, tapping the map body pushes full-screen map.
+    var fullscreenTitle: String? = nil
     var preferredFrame: MapTrackFrame? = nil
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -25,6 +27,7 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
+        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = locations.count >= 2 ? [locations] : []
@@ -32,6 +35,7 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
+        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -40,6 +44,7 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
+        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = tracks.filter { $0.count >= 2 }
@@ -47,6 +52,7 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
+        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -55,6 +61,7 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
+        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = []
@@ -62,6 +69,7 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
+        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -79,29 +87,48 @@ struct SessionMapView: View {
 
     var body: some View {
         GeometryReader { geo in
-            Map(position: $position, interactionModes: interactionModes) {
-                if let sessionMapData {
-                    sessionMapContent(sessionMapData)
-                } else {
-                    rideMapContent
+            ZStack(alignment: .topLeading) {
+                Map(position: $position, interactionModes: interactionModes) {
+                    if let sessionMapData {
+                        sessionMapContent(sessionMapData)
+                    } else {
+                        rideMapContent
+                    }
                 }
-            }
-            .mapStyle(mapStyle)
-            .onMapCameraChange(frequency: .onEnd) { context in
-                guard allowsInteraction else { return }
-                position = .camera(context.camera)
-                guard let fitted else { return }
-                showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
-            }
-            .overlay(alignment: .topLeading) {
+                .mapStyle(mapStyle)
+                .background {
+                    if let fullscreenTitle, let sessionMapData {
+                        NavigationLink {
+                            SessionMapFullscreenView(
+                                sessionMapData: sessionMapData,
+                                title: fullscreenTitle,
+                                preferredFrame: preferredFrame
+                            )
+                        } label: {
+                            Color.clear
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(String(localized: "Session map"))
+                        .accessibilityHint(String(localized: "Shows full-screen map"))
+                    }
+                }
+
                 if showsStyleToggle || (showsTrackStyleToggle && sessionMapData != nil) {
                     mapControlCluster
+                        .zIndex(1)
                 }
             }
             .overlay(alignment: .bottomTrailing) {
                 if allowsInteraction, showReset {
                     resetButton
                 }
+            }
+            .onMapCameraChange(frequency: .onEnd) { context in
+                guard allowsInteraction else { return }
+                position = .camera(context.camera)
+                guard let fitted else { return }
+                showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
             }
             .onAppear {
                 updateFit(for: geo.size, forceApply: true)

@@ -151,36 +151,17 @@ struct LogbookSessionDetailView: View {
                     : (sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
             )
         } else if let sessionMapTrackData {
-            ZStack {
-                SessionMapView(
-                    sessionMapData: sessionMapTrackData,
-                    allowsInteraction: true,
-                    showsStyleToggle: true,
-                    showsTrackStyleToggle: false,
-                    preferredFrame: mapFrame
-                )
-                .allowsHitTesting(false)
-
-                NavigationLink {
-                    SessionMapFullscreenView(
-                        sessionMapData: sessionMapTrackData,
-                        title: navigationTitle,
-                        preferredFrame: mapFrame
-                    )
-                } label: {
-                    Color.clear
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
+            SessionMapView(
+                sessionMapData: sessionMapTrackData,
+                allowsInteraction: false,
+                showsStyleToggle: true,
+                showsTrackStyleToggle: true,
+                fullscreenTitle: navigationTitle,
+                preferredFrame: mapFrame
+            )
                 .frame(height: 300)
                 .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
                 .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
-                .accessibilityElement(children: .ignore)
-                .accessibilityAddTraits(.isButton)
-                .accessibilityLabel(String(localized: "Session map"))
-                .accessibilityHint(String(localized: "Shows full-screen map"))
                 .overlay(alignment: .center) {
                     if tracksLoading, sessionMapTrackData.averagedTrack.isEmpty {
                         ProgressView()
