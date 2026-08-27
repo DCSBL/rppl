@@ -12,23 +12,35 @@ struct IdleSessionView: View {
     @State private var page = IdlePickerPage.activity(ActivityCodes.pickerLandingCode())
 
     var body: some View {
-        TabView(selection: $page) {
-            ForEach(ActivityCodes.pickerCodes, id: \.self) { code in
-                ActivityStartPage(
-                    code: code,
-                    isStarting: session.isStarting && session.startingActivityCode == code,
-                    enabled: canStart
-                ) {
-                    start(code)
+        NavigationStack {
+            TabView(selection: $page) {
+                ForEach(ActivityCodes.pickerCodes, id: \.self) { code in
+                    ActivityStartPage(
+                        code: code,
+                        isStarting: session.isStarting && session.startingActivityCode == code,
+                        enabled: canStart
+                    ) {
+                        start(code)
+                    }
+                    .tag(IdlePickerPage.activity(code))
+                    .allowsHitTesting(canStart)
                 }
-                .tag(IdlePickerPage.activity(code))
-                .allowsHitTesting(canStart)
-            }
 
-            IdleSyncPage(session: session, transfer: transfer)
-                .tag(IdlePickerPage.sync)
+                IdleSyncPage(session: session, transfer: transfer)
+                    .tag(IdlePickerPage.sync)
+            }
+            .tabViewStyle(.verticalPage)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        WatchLogbookListView()
+                    } label: {
+                        Image(systemName: "book.fill")
+                    }
+                    .accessibilityLabel(String(localized: "Logbook"))
+                }
+            }
         }
-        .tabViewStyle(.verticalPage)
         .preferredColorScheme(.dark)
     }
 

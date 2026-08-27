@@ -162,6 +162,7 @@ final class PhoneConnectivityService: NSObject {
         PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
+        PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
         // Mark first sync before any permission sheets — sync/ack already finished above.
         UserDefaults.standard.set(true, forKey: AppSettingsKey.didImportSessionFromWatch)
         Task {
@@ -211,6 +212,7 @@ final class PhoneConnectivityService: NSObject {
         }
         sessionsRevision += 1
         PhoneICloudDriveController.shared.acceptSession(sessionId)
+        PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
         return sessionId
     }
@@ -288,6 +290,7 @@ extension PhoneConnectivityService: WCSessionDelegate {
                 status = String(localized: "WC activated")
                 WakeLog.debug(.sync, "WC activated state=\(activationState.rawValue)")
                 rebroadcastAcksForImportedSessions()
+                PhoneWatchViewSync.rebroadcastViewUpdates(store: store)
                 flushPendingAcks()
             }
         }
@@ -352,5 +355,29 @@ extension PhoneConnectivityService: WCSessionDelegate {
         Task { @MainActor in
             refreshSyncState()
         }
+    }
+
+    nonisolated func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any],
+        replyHandler: @escaping ([String: Any]) -> Void
+    ) {
+        if let known = try? WatchViewSyncCodec.decodeSyncRequest(from: message) {
+            Task { @MainActor in
+                do {
+                    let reply = try PhoneWatchViewSync.handleSyncRequest(
+                        store: self.store,
+                        knownOnWatch: known
+                    )
+                    let payload = try WatchViewSyncCodec.encodeSyncReply(reply)
+                    replyHandler(payload)
+                } catch {
+                    WakeLog.error(.sync, "syncRequest failed: \(error.localizedDescription)")
+                    replyHandler([:])
+                }
+            }
+            return
+        }
+        replyHandler([:])
     }
 }

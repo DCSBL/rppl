@@ -23,7 +23,7 @@ repos:
         stages: [pre-commit]
       - id: check-added-large-files
         args: ["--maxkb=1000"]
-        exclude: ^Rppl/Resources/Exports/
+        exclude: ^Rppl(?:Watch)?/Resources/Exports/
         stages: [pre-commit]
 
   - repo: https://github.com/codespell-project/codespell
@@ -31,10 +31,10 @@ repos:
     hooks:
       - id: codespell
         additional_dependencies: ["tomli"]
-        exclude: ^Rppl/Resources/Exports/
+        exclude: ^Rppl(?:Watch)?/Resources/Exports/
         args:
-          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen"
+          - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplWatch/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin"
         stages: [pre-commit]
 
   - repo: local

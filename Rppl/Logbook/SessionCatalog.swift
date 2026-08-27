@@ -129,6 +129,7 @@ final class SessionCatalog {
                 try? await StoreIO.runOffMain {
                     try store.updateDerivedCityName(cityName, sessionId: manifest.sessionId)
                 }
+                PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: manifest.sessionId)
             }
         } else if let cityName {
             SessionCityResolver.shared.remember(sessionId: manifest.sessionId, cityName: cityName)

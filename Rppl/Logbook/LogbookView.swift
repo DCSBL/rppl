@@ -348,6 +348,7 @@ struct LogbookView: View {
             try connectivity.store.deleteSession(sessionId: sessionId)
             PhoneICloudDriveController.shared.unacceptSession(sessionId)
             SessionCityResolver.shared.invalidate(sessionId: sessionId)
+            PhoneWatchViewSync.pushViewDelete(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             reloadCatalog()
         } catch {

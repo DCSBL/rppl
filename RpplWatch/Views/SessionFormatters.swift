@@ -25,6 +25,23 @@ enum SessionFormatters {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    /// Watch ride rows — explicit minute/second units.
+    static func rideDuration(_ interval: TimeInterval) -> String {
+        let totalSeconds = max(0, Int(interval.rounded()))
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        if minutes >= 60 {
+            let hours = minutes / 60
+            let remainingMinutes = minutes % 60
+            return String(format: "%dh %dm %ds", hours, remainingMinutes, seconds)
+        }
+        return String(format: "%dm %ds", minutes, seconds)
+    }
+
+    static func averageSpeed(_ kmh: Double) -> String {
+        String(format: "%.1f km/h", kmh)
+    }
+
     static func distance(_ meters: Double) -> String {
         if meters >= 1000 {
             return DistanceFormat.kilometers(meters)

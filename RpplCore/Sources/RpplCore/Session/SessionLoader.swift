@@ -107,6 +107,15 @@ public enum SessionLoader {
         return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: byteSize)
     }
 
+    /// Read-only manifest + derived for distilled Watch logbook (never rebuilds from raw).
+    public static func loadStoredSummary(store: SessionFileStore, sessionId: String) throws -> SessionSummaryBundle {
+        let manifest = try store.readManifest(sessionId: sessionId)
+        guard let derived = try store.readDerivedView(sessionId: sessionId) else {
+            throw SessionStoreError.ioFailure("Missing derived view for \(sessionId)")
+        }
+        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: 0)
+    }
+
     /// In-memory load from a Share export / WC package (no disk write).
     public static func load(package: SessionTransferPackage) -> SessionLoadBundle {
         makeBundle(

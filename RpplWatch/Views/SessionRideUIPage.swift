@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 import RpplCore
 
 /// Product session UI: one-screen ride view; scrollable inactive overview.
@@ -50,7 +51,13 @@ struct SessionRideUIPage: View {
                     value: "\(session.rideCount)"
                 )
 
-                lastRideSection
+                WatchLastRideSection(
+                    duration: session.lastRideDuration,
+                    distanceMeters: session.lastRideMeters,
+                    lapCount: session.lastRideLapCount,
+                    didCompleteRide: session.didCompleteRide
+                )
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
 
                 Button("Resume") {
                     WakeLog.debug(.ui, "tap Resume from paused metrics")
@@ -184,6 +191,11 @@ struct SessionRideUIPage: View {
             VStack(alignment: .leading, spacing: 12) {
                 statusLine(primary: "Inactive", color: .gray)
 
+                if let coordinate = sessionStartCoordinate {
+                    SessionStartMapPinView(coordinate: coordinate)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+
                 Text("Session")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -236,39 +248,26 @@ struct SessionRideUIPage: View {
                     .padding(.vertical, 2)
                     .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-                lastRideSection
+                WatchLastRideSection(
+                    duration: session.lastRideDuration,
+                    distanceMeters: session.lastRideMeters,
+                    lapCount: session.lastRideLapCount,
+                    didCompleteRide: session.didCompleteRide
+                )
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
         }
     }
 
-    @ViewBuilder
-    private var lastRideSection: some View {
-        Text("Last ride")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .alwaysOnSecondaryChrome(isLuminanceReduced)
-
-        if session.didCompleteRide {
-            SessionMetricRow(
-                label: "Duration",
-                value: SessionFormatters.segmentDuration(session.lastRideDuration)
-            )
-            SessionMetricRow(
-                label: "Distance",
-                value: SessionFormatters.distance(session.lastRideMeters)
-            )
-            SessionMetricRow(
-                label: "Laps",
-                value: "\(session.lastRideLapCount)"
-            )
-        } else {
-            Text("No rides yet")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .alwaysOnSecondaryChrome(isLuminanceReduced)
+    private var sessionStartCoordinate: CLLocationCoordinate2D? {
+        guard WatchDisplayLayout.showsSessionOverviewStartMap,
+              let latitude = session.sessionStartLatitude,
+              let longitude = session.sessionStartLongitude else {
+            return nil
         }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
     @ViewBuilder

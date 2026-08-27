@@ -7,6 +7,15 @@ public enum AppConstants {
     public static let sessionsDirectoryName = "Sessions"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
+    /// Discriminator for iPhone ↔ Watch logbook view sync (`viewUpdate`, `viewDelete`, …).
+    public static let wcMessageTypeKey = "rpplMessageType"
+    public static let wcViewUpdateSessionIdKey = "sessionId"
+    public static let wcViewUpdateManifestKey = "manifestJSON"
+    public static let wcViewUpdateDerivedKey = "derivedJSON"
+    public static let wcViewDeleteSessionIdKey = "sessionId"
+    public static let wcSyncKnownSessionsKey = "knownSessions"
+    public static let wcSyncDeletesKey = "deletes"
+    public static let wcSyncUpdatesKey = "updates"
     /// Opaque last-started activity code (`wakeboard`, …). Never a localized title.
     public static let lastActivityCodeDefaultsKey = "nl.dcsbl.rppl.lastActivityCode"
     public static let hkMetadataActivityCode = "nl.dcsbl.rppl.activityCode"
