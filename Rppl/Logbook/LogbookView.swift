@@ -145,11 +145,12 @@ struct LogbookView: View {
                         flashHighlight(route.id)
                     }
             }
-            .alert(
+            .confirmationDialog(
                 "Delete Session?",
-                isPresented: $showDeleteConfirmation
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
             ) {
-                Button("Delete Permanently", role: .destructive) {
+                Button("Delete from Rppl", role: .destructive) {
                     if let sessionId = pendingDeleteSessionId {
                         deleteSession(sessionId)
                     }
@@ -159,9 +160,7 @@ struct LogbookView: View {
                     pendingDeleteSessionId = nil
                 }
             } message: {
-                Text(
-                    "This permanently removes the session from this iPhone and from iCloud Drive when sync is on. This cannot be undone."
-                )
+                Text(deleteConfirmationMessage)
             }
             .alert(
                 "Could Not Delete Session",
@@ -328,6 +327,19 @@ struct LogbookView: View {
         }
         .textCase(nil)
         .padding(.bottom, 4)
+    }
+
+    private var deleteConfirmationMessage: String {
+        if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
+            return String(
+                localized:
+                    "Permanently removes this session from Rppl on this iPhone and from iCloud Drive. This cannot be undone."
+            )
+        }
+        return String(
+            localized:
+                "Permanently removes this session from Rppl on this iPhone. This cannot be undone."
+        )
     }
 
     private func deleteSession(_ sessionId: String) {
