@@ -2196,6 +2196,22 @@
         }
       }
     },
+    "Shows full-screen map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows full-screen map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont kaart op volledig scherm"
+          }
+        }
+      }
+    },
     "Shows maps for your sessions. City and spot names already come from Watch GPS saved with each session.": {
       "localizations": {
         "en": {
