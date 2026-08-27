@@ -244,9 +244,7 @@ extension WatchSessionController {
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
-        #if RPPL_WEATHERKIT
         resetAirWeather()
-        #endif
         sensorSamplingDense = false
 
         startLocation()
@@ -388,9 +386,7 @@ extension WatchSessionController {
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
         resetWaterTemperatureTracking()
-        #if RPPL_WEATHERKIT
         resetAirWeather()
-        #endif
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         hkRides = []
