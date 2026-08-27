@@ -94,12 +94,13 @@ struct WatchSessionDetailView: View {
         }
 
         if let stats {
-            Text(WatchLogbookFormatting.sessionTimeRange(
+            Text(WatchLogbookFormatting.sessionDateTimeLine(
                 start: manifest?.startedAt ?? stats.startedAt,
                 end: manifest?.endedAt ?? stats.endedAt
             ))
             .font(.caption2)
             .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
 
             Text(SessionFormatters.elapsed(stats.totalDuration))
                 .font(.system(.largeTitle, design: .rounded).bold())
@@ -108,20 +109,14 @@ struct WatchSessionDetailView: View {
                 .lineLimit(1)
                 .foregroundStyle(Color.rpplIdlePrimary)
 
-            HStack(alignment: .top, spacing: 12) {
-                SessionMetricRow(
-                    label: "Distance",
-                    value: SessionFormatters.distance(stats.totalDistanceMeters)
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                SessionMetricRow(
-                    label: "Rides",
-                    value: "\(stats.rideCount)"
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
+            SessionMetricRow(
+                label: "Distance",
+                value: SessionFormatters.distance(stats.totalDistanceMeters)
+            )
+            SessionMetricRow(
+                label: "Rides",
+                value: "\(stats.rideCount)"
+            )
             SessionMetricRow(
                 label: "Laps",
                 value: "\(stats.totalLapCount)"
@@ -130,37 +125,14 @@ struct WatchSessionDetailView: View {
             if let maxSpeed = stats.maxSpeedKmh ?? stats.topSpeedKmh {
                 SessionMetricRow(
                     label: "Max speed",
-                    value: String(format: "%.1f km/h", maxSpeed)
+                    value: SessionFormatters.averageSpeed(maxSpeed)
                 )
             }
 
-            if let lastRide = stats.rides.last {
-                Divider()
-                    .padding(.vertical, 4)
+            Divider()
+                .padding(.vertical, 4)
 
-                Text("Last ride")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                SessionMetricRow(
-                    label: "Duration",
-                    value: SessionFormatters.segmentDuration(lastRide.duration)
-                )
-                SessionMetricRow(
-                    label: "Distance",
-                    value: SessionFormatters.distance(lastRide.distanceMeters)
-                )
-                SessionMetricRow(
-                    label: "Laps",
-                    value: "\(lastRide.lapCount)"
-                )
-            } else {
-                Divider()
-                    .padding(.vertical, 4)
-                Text("No rides yet")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            WatchRideListSection(rides: stats.rides, emptyMessage: "No rides detected.")
         }
     }
 

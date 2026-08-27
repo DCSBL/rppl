@@ -11,6 +11,12 @@ enum WatchLogbookFormatting {
         guard let end else { return startText }
         return "\(startText) – \(end.formatted(.dateTime.hour().minute()))"
     }
+
+    /// Locale date plus time span, e.g. `20-10-2026 · 14:14 – 15:15`.
+    static func sessionDateTimeLine(start: Date, end: Date?) -> String {
+        let dateText = start.formatted(.dateTime.day().month().year())
+        return "\(dateText) · \(sessionTimeRange(start: start, end: end))"
+    }
 }
 
 struct WatchLogbookListView: View {
