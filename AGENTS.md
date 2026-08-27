@@ -42,10 +42,24 @@ When generating, translating, or rewriting product copy about wakeboarding / cab
 
 ### Set vs lap (do not conflate)
 
-| Term | Meaning | Product / code |
-|------|---------|----------------|
-| **Set** | Rider’s allocated turn/block — dock until time or turn is up (falls don’t end the set; walk back and continue). Cable: often a timed block (e.g. 10 min) or a booked “N-lap set”. Boat: ~15–20 min (or N falls) before switching. Glossary shorthand: “a round of wakeboarding.” | Product language for turn allocation. **Not** what `LapRideTracker` counts. |
-| **Lap** | One complete circuit of a full-size cable — dock → every corner/tower in order → back to dock without falling/letting go. A set often contains multiple laps. Half circuit after a wipeout = half a lap; the set continues. | Crossing counter (`LapRideTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**. |
+#### 1. A set
+
+A **set** is the total overall session/turn allocated to a single rider from the time they step onto the dock until their assigned time or turn is up.
+
+- **Cable park:** A set usually means a specific block of time (e.g. a 10-minute set on a 2-tower system) or a set number of laps around a full-size cable (e.g. a “3-lap set”). During a set, if you fall, you walk back to the dock and use up the rest of your allocated time or remaining laps.
+- **Boat:** Historically one rider behind the boat for roughly 15–20 minutes (or until a predetermined number of falls, e.g. 2–3) before switching with another passenger.
+- **Glossary shorthand:** “a round of wakeboarding.”
+
+Product language for turn allocation. **Not** what `LapRideTracker` counts.
+
+#### 2. A lap
+
+A **lap** is a distance measurement: one complete circuit around a full-size cable-park layout — starting at the main dock, passing every turn/tower corner in order, and making it all the way back to the dock without falling or letting go.
+
+- **Usage:** “I'm going to do 3 laps and hit the kicker on the last one.”
+- **Key distinction:** A single set often consists of multiple laps. If you fall halfway around the circuit on your first go, you completed half a lap, but your overall set continues until your time/turn ends.
+
+Crossing counter (`LapRideTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**.
 
 Never call a circuit crossing a “set”. Never call an allocated turn a “lap”. Derived JSON key is `lapCount` (accept legacy `setCount` from the short-lived slang mis-rename; encode `lapCount` only).
 
