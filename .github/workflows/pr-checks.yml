@@ -127,12 +127,14 @@ jobs:
           # Resolve outside `if` so a failed `git diff` (missing SHAs) aborts
           # under `set -e` instead of looking like "no changes".
           changed_files="$(git diff --name-only "$base" "$head")"
-          if printf '%s\n' "$changed_files" | grep -E '^RpplCore/' >/dev/null; then
+          # Also run when this workflow changes so Setup Swift / test steps stay exercised.
+          if printf '%s\n' "$changed_files" \
+            | grep -E '^RpplCore/|^\.github/workflows/pr-checks\.yml$' >/dev/null; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "RpplCore paths changed — running tests"
+            echo "RpplCore or pr-checks workflow changed — running tests"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No RpplCore changes — skipping tests"
+            echo "No RpplCore / pr-checks workflow changes — skipping tests"
           fi
 
       # Pin v2: setup-swift@v3 fails GPG verify (swift-actions/setup-swift#798).
