@@ -60,8 +60,8 @@ struct SessionEndSummaryView: View {
                             value: SessionFormatters.distance(summary.lastRideMeters)
                         )
                         SessionMetricRow(
-                            label: "Sets",
-                            value: "\(summary.lastRideSetCount)"
+                            label: "Laps",
+                            value: "\(summary.lastRideLapCount)"
                         )
                     } else {
                         Text("No rides yet")
@@ -200,7 +200,7 @@ private struct SessionStartMapFullscreenView: View {
             distanceMeters: 2840,
             lastRideDuration: 312,
             lastRideMeters: 720,
-            lastRideSetCount: 2,
+            lastRideLapCount: 2,
             didCompleteRide: true,
             startLatitude: 51.9794,
             startLongitude: 4.5740

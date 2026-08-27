@@ -16,6 +16,8 @@ repos:
       - id: check-yaml
         stages: [pre-commit]
       - id: check-json
+        # Vite/TS configs often use JSONC (comments); strict JSON decode fails.
+        exclude: (^|/)tsconfig.*\.json$
         stages: [pre-commit]
       - id: check-merge-conflict
         stages: [pre-commit]
@@ -43,6 +45,13 @@ repos:
         language: system
         pass_filenames: false
         files: ^(LEGAL\.md|Rppl/Resources/LEGAL\.md)$
+        stages: [pre-commit]
+
+      - id: format-xcstrings
+        name: Format .xcstrings like Xcode
+        entry: python3 scripts/format-xcstrings.py
+        language: system
+        files: \.xcstrings$
         stages: [pre-commit]
 
       - id: swiftlint

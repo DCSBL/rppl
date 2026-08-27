@@ -97,7 +97,12 @@ public final class SessionFileStore: @unchecked Sendable {
         let url = derivedViewURL(sessionId: sessionId)
         guard fileManager.fileExists(atPath: url.path) else { return nil }
         let data = try Data(contentsOf: url)
-        return try decoder.decode(DerivedSessionView.self, from: data)
+        do {
+            return try decoder.decode(DerivedSessionView.self, from: data)
+        } catch {
+            // Stale / unreadable sidecar (e.g. schema drift) → missing so ensure rebuilds from raw.
+            return nil
+        }
     }
 
     public func writeDerivedView(_ view: DerivedSessionView, sessionId: String) throws {
@@ -698,7 +703,12 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
-        derived = try container.decodeIfPresent(DerivedSessionView.self, forKey: .derived)
+        // Soft-fail derived: stale keys / analyzer drift must not block raw import (rebuild on ensure).
+        if container.contains(.derived) {
+            derived = try? container.decode(DerivedSessionView.self, forKey: .derived)
+        } else {
+            derived = nil
+        }
     }
 
     public func encode(to encoder: Encoder) throws {

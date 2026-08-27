@@ -161,11 +161,9 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
         didUpdate measurement: CMWaterSubmersionMeasurement
     ) {
         Task { @MainActor in
-            var next = String(describing: measurement.submersionState)
-            if let depth = measurement.depth {
-                let meters = depth.converted(to: UnitLength.meters).value
-                if meters > 0 { next = "submerged" }
-            }
+            // Depth-zone enum ≠ event `.submerged`. Map all in-water zones to the opaque
+            // detection string `submerged` so water-temp persist + bout flags keep working.
+            let next = Self.normalizedWaterSubmersionState(measurement.submersionState)
             if latestWaterState != next {
                 applyWaterSubmersionState(next)
             }
@@ -177,6 +175,10 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
         didUpdate measurement: CMWaterTemperature
     ) {
         Task { @MainActor in
+            // Temperature only arrives while submerged; don't wait on measurement/event race.
+            if latestWaterState != "submerged" {
+                applyWaterSubmersionState("submerged")
+            }
             let temp = measurement.temperature.converted(to: UnitTemperature.celsius).value
             considerPersistingWaterTemperature(temp)
         }
@@ -184,7 +186,32 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
 
     nonisolated func manager(_ manager: CMWaterSubmersionManager, errorOccurred error: any Error) {
         Task { @MainActor in
-            WakeLog.error(.water, "submersion error: \(error.localizedDescription)")
+            let nsError = error as NSError
+            WakeLog.error(
+                .water,
+                "submersion error: \(error.localizedDescription) "
+                    + "domain=\(nsError.domain) code=\(nsError.code)"
+            )
+        }
+    }
+
+    /// Collapse `CMWaterSubmersionDepthState` into opaque session strings.
+    static func normalizedWaterSubmersionState(_ state: CMWaterSubmersionDepthState) -> String {
+        switch state {
+        case .unknown:
+            return "unknown"
+        case .notSubmerged:
+            return "notSubmerged"
+        case .submergedShallow, .submergedDeep, .approachingMaxDepth, .pastMaxDepth:
+            return "submerged"
+        case .sensorDepthError:
+            return "unknown"
+        @unknown default:
+            let raw = String(describing: state)
+            if raw.contains("submerged"), !raw.contains("notSubmerged") {
+                return "submerged"
+            }
+            return raw
         }
     }
 }

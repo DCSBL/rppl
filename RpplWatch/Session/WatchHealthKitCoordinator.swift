@@ -408,7 +408,7 @@ extension WatchSessionController {
         }
     }
 
-    /// Interval distance + speed on ride HKWorkoutActivity rows (not cable-park sets).
+    /// Interval distance + speed on ride HKWorkoutActivity rows (not cable-park laps).
     func attachRideMetricsToActivities(_ builder: HKLiveWorkoutBuilder) async throws {
         for activity in builder.workoutActivities {
             let code = activity.metadata?[WorkoutMetadataKeys.detectionCode] as? String

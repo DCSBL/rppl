@@ -3,15 +3,15 @@ import { toMs } from './analysisPrep'
 import { acceptsStep, meters } from './geoDistance'
 import { thresholds as gpsThresholds } from './signalFilter'
 
-/** Mirrors RpplCore SetThresholds (cable-loop defaults). */
-export interface SetThresholds {
+/** Mirrors RpplCore LapThresholds (cable-loop defaults). */
+export interface LapThresholds {
   startSafeRadiusM: number
   exitRadiusM: number
   minPathBeforeCrossingM: number
   maxHorizontalAccuracyM: number
 }
 
-export const defaultSetThresholds: SetThresholds = {
+export const defaultLapThresholds: LapThresholds = {
   startSafeRadiusM: 50,
   exitRadiusM: 70,
   minPathBeforeCrossingM: 200,
@@ -21,31 +21,31 @@ export const defaultSetThresholds: SetThresholds = {
 type ZoneState = 'idle' | 'awaitingAnchor' | 'atStart' | 'outside'
 
 /**
- * Crossing-based set counter — TS port of RpplCore SetRideTracker (WIP).
+ * Crossing-based lap counter — TS port of RpplCore LapRideTracker (WIP).
  * Exposes start anchor for viz.
  */
-export class SetRideTracker {
-  setCount = 0
+export class LapRideTracker {
+  lapCount = 0
   /** Timestamps (ms) of each completed crossing for this ride. */
-  setAtMs: number[] = []
+  lapAtMs: number[] = []
   isRideActive = false
   startLatitude: number | null = null
   startLongitude: number | null = null
 
-  private thresholds: SetThresholds
+  private thresholds: LapThresholds
   private zoneState: ZoneState = 'idle'
   private hasSeenInactive = false
   private scoringThisRide = false
   private pathSinceLeaveM = 0
   private previousLocation: LocationSample | null = null
 
-  constructor(thresholds: SetThresholds = defaultSetThresholds) {
+  constructor(thresholds: LapThresholds = defaultLapThresholds) {
     this.thresholds = { ...thresholds }
   }
 
   reset(): void {
-    this.setCount = 0
-    this.setAtMs = []
+    this.lapCount = 0
+    this.lapAtMs = []
     this.isRideActive = false
     this.zoneState = 'idle'
     this.hasSeenInactive = false
@@ -63,8 +63,8 @@ export class SetRideTracker {
 
   beginRide(): void {
     if (this.isRideActive) this.endRide()
-    this.setCount = 0
-    this.setAtMs = []
+    this.lapCount = 0
+    this.lapAtMs = []
     this.isRideActive = true
     this.scoringThisRide = this.hasSeenInactive
     this.zoneState = this.scoringThisRide ? 'awaitingAnchor' : 'idle'
@@ -140,8 +140,8 @@ export class SetRideTracker {
         distanceFromStart <= this.thresholds.startSafeRadiusM &&
         this.pathSinceLeaveM >= this.thresholds.minPathBeforeCrossingM
       ) {
-        this.setCount += 1
-        this.setAtMs.push(toMs(sample.timestamp))
+        this.lapCount += 1
+        this.lapAtMs.push(toMs(sample.timestamp))
         this.zoneState = 'atStart'
         this.pathSinceLeaveM = 0
       }

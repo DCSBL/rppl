@@ -1,7 +1,7 @@
 import Foundation
 
-/// Injectable set-crossing thresholds (fixed defaults now; dynamic resolver later).
-public struct SetThresholds: Equatable, Sendable {
+/// Injectable lap-crossing thresholds (fixed defaults now; dynamic resolver later).
+public struct LapThresholds: Equatable, Sendable {
     /// Re-enter within this radius of start to count a crossing.
     public var startSafeRadiusM: Double
     /// Must leave beyond this radius before a crossing can arm (hysteresis ≥ safe).
@@ -23,5 +23,5 @@ public struct SetThresholds: Equatable, Sendable {
     }
 
     /// Cable-loop defaults (safe 50 m / exit 70 m / min path 200 m).
-    public static let `default` = SetThresholds()
+    public static let `default` = LapThresholds()
 }

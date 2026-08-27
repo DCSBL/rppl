@@ -1,15 +1,24 @@
 import SwiftUI
 import RpplCore
 
+private struct SessionDetailRoute: Identifiable, Hashable {
+    let id: String
+}
+
 struct LogbookView: View {
+    @Binding var navigation: LogbookNavigationRequest
+
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var connectivity = PhoneConnectivityService.shared
+    @State private var iCloud = PhoneICloudDriveController.shared
     @State private var catalog = SessionCatalog()
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
     @State private var showActionError = false
     @State private var actionErrorText: String?
+    @State private var detailRoute: SessionDetailRoute?
+    @State private var highlightSessionId: String?
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -91,8 +100,14 @@ struct LogbookView: View {
                                     sessionId: entry.manifest.sessionId,
                                     store: connectivity.store
                                 )
+                                .onDisappear {
+                                    flashHighlight(entry.manifest.sessionId)
+                                }
                             } label: {
-                                SessionCard(entry: entry)
+                                SessionCard(
+                                    entry: entry,
+                                    isHighlighted: highlightSessionId == entry.manifest.sessionId
+                                )
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
@@ -124,6 +139,12 @@ struct LogbookView: View {
                 LogbookSessionDetailView(source: .bundledExample)
                     .toolbar(.visible, for: .navigationBar)
             }
+            .navigationDestination(item: $detailRoute) { route in
+                LogbookSessionDetailView(sessionId: route.id, store: connectivity.store)
+                    .onDisappear {
+                        flashHighlight(route.id)
+                    }
+            }
             .alert(
                 "Delete Session?",
                 isPresented: $showDeleteConfirmation
@@ -138,7 +159,9 @@ struct LogbookView: View {
                     pendingDeleteSessionId = nil
                 }
             } message: {
-                Text("This permanently removes the session from this iPhone. This cannot be undone.")
+                Text(
+                    "This permanently removes the session from this iPhone and from iCloud Drive when sync is on. This cannot be undone."
+                )
             }
             .alert(
                 "Could Not Delete Session",
@@ -151,12 +174,54 @@ struct LogbookView: View {
             }
             .onAppear {
                 connectivity.refreshSyncState()
-                catalog.reload(store: connectivity.store)
+                reloadCatalog()
+                consumeNavigationRequests()
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
-                catalog.reload(store: connectivity.store)
+                reloadCatalog()
+            }
+            .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
+                reloadCatalog()
+            }
+            .onChange(of: navigation.openSessionId) { _, _ in
+                consumeNavigationRequests()
+            }
+            .onChange(of: navigation.highlightSessionId) { _, sessionId in
+                if let sessionId {
+                    flashHighlight(sessionId)
+                    navigation.highlightSessionId = nil
+                }
             }
         }
+    }
+
+    private func consumeNavigationRequests() {
+        if let sessionId = navigation.openSessionId {
+            detailRoute = SessionDetailRoute(id: sessionId)
+            navigation.openSessionId = nil
+            flashHighlight(sessionId)
+        }
+        if let sessionId = navigation.highlightSessionId {
+            flashHighlight(sessionId)
+            navigation.highlightSessionId = nil
+        }
+    }
+
+    private func flashHighlight(_ sessionId: String) {
+        highlightSessionId = sessionId
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            if highlightSessionId == sessionId {
+                highlightSessionId = nil
+            }
+        }
+    }
+
+    private func reloadCatalog() {
+        catalog.reload(
+            store: connectivity.store,
+            acceptedSessionIDs: iCloud.logbookFilterIDs
+        )
     }
 
     private var header: some View {
@@ -220,7 +285,7 @@ struct LogbookView: View {
                     ? "—"
                     : LogbookFormatting.totalsFooter(
                         rides: totals.totalRuns,
-                        sets: totals.totalSets
+                        laps: totals.totalLaps
                     )
             )
                 .font(.caption)
@@ -269,15 +334,15 @@ struct LogbookView: View {
         WakeLog.debug(.ui, "confirm delete \(sessionId.prefix(8))…")
         do {
             try connectivity.store.deleteSession(sessionId: sessionId)
+            PhoneICloudDriveController.shared.unacceptSession(sessionId)
             SessionCityResolver.shared.invalidate(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
-            catalog.reload(store: connectivity.store)
+            reloadCatalog()
         } catch {
             let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
             actionErrorText = description.isEmpty
                 ? String(localized: "Something went wrong while deleting the session.")
                 : description
-            // Delete confirm alert still dismissing — defer so the error alert is not swallowed.
             Task { @MainActor in
                 showActionError = true
             }
@@ -289,6 +354,7 @@ struct LogbookView: View {
 private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
+    var isHighlighted = false
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -333,6 +399,11 @@ private struct SessionCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .logbookCardChrome()
+        .background(
+            RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
+                .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
+        )
+        .animation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 
     private var sessionMetaText: String {
@@ -359,39 +430,36 @@ private struct SessionCard: View {
         return LogbookFormatting.rideCount(stats.rideCount)
     }
 
-    private var setsText: String {
+    private var lapsText: String {
         guard let stats = entry.stats else { return "—" }
-        return LogbookFormatting.setCount(stats.totalSetCount)
+        return LogbookFormatting.lapCount(stats.totalLapCount)
     }
 
     @ViewBuilder
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                // Display order matches roomy row; keep priority still rides → distance → sets.
                 statLabel("water.waves", value: distanceText)
                 statLabel("flag.checkered", value: ridesText)
-                statLabel("arrow.triangle.2.circlepath", value: setsText)
+                statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
         } else {
-            // Drop lowest-priority stats first when width is tight (sets → distance → rides).
             ViewThatFits(in: .horizontal) {
-                statsRow(includeDistance: true, includeSets: true)
-                statsRow(includeDistance: true, includeSets: false)
-                statsRow(includeDistance: false, includeSets: false)
+                statsRow(includeDistance: true, includeLaps: true)
+                statsRow(includeDistance: true, includeLaps: false)
+                statsRow(includeDistance: false, includeLaps: false)
             }
         }
     }
 
-    private func statsRow(includeDistance: Bool, includeSets: Bool) -> some View {
+    private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
         HStack(spacing: 12) {
-            // Display: distance → rides → sets. Drop order (lowest first): sets → distance.
             if includeDistance {
                 statLabel("water.waves", value: distanceText)
             }
             statLabel("flag.checkered", value: ridesText)
-            if includeSets {
-                statLabel("arrow.triangle.2.circlepath", value: setsText)
+            if includeLaps {
+                statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
         }
     }
@@ -410,5 +478,5 @@ private struct SessionCard: View {
 }
 
 #Preview {
-    LogbookView()
+    LogbookView(navigation: .constant(LogbookNavigationRequest()))
 }

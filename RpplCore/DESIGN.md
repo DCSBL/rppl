@@ -62,7 +62,7 @@ classDiagram
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `DetectionThresholds`, `TemperatureFormat` | Thresholds authored in **km/h**; GPS compare in m/s |
-| Derived stats | `SessionStatsBuilder`, `DerivedSessionView`, `SessionAnalyzer`, `LiveRideTracker`, `SetRideTracker`, `SetThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Persist `derived/view.json`; rebuild when `SessionAnalyzer.version` stale ([SessionStorage.md](../Docs/SessionStorage.md)) |
+| Derived stats | `SessionStatsBuilder`, `DerivedSessionView`, `SessionAnalyzer`, `LiveRideTracker`, `LapRideTracker`, `LapThresholds`, `GeoDistance`, `DistanceFormat`, `LocationSpeedStats`, `HighlightAssigner` | Persist `derived/view.json`; rebuild when `SessionAnalyzer.version` stale ([SessionStorage.md](../Docs/SessionStorage.md)) |
 
 Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown codes must round-trip.
 
@@ -75,17 +75,17 @@ Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown
 | `Sync/` | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` |
 | `Geo/` | `GeoDistance`, downsample/centroid, map fit, location speed stats |
 | `Format/` | Distance, duration, energy, temperature, byte-size formatters |
-| *(root)* | `LiveRideTracker`, `SetRideTracker`, `HighlightAssigner`, `AppConstants`, `WakeLog` |
+| *(root)* | `LiveRideTracker`, `LapRideTracker`, `HighlightAssigner`, `AppConstants`, `WakeLog` |
 
 `SessionLoader.load(store:sessionId:)` bundles manifest, detections, locations, health, water, and derived stats for logbook detail (off-main reads via `StoreIO`). Geocoding stays in iPhone `Logbook/`.
 
 ## Session stats (derived)
 
-`SessionStatsBuilder.build(manifest:detections:locations:health:water:)` resolves superseded detection lines, treats `unsure` as inactive for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Water temperature is the mean of all persisted `WaterTemperatureSample`s; `SessionStats.waterTemperatureAvailable` copies `manifest.waterTemperatureAvailable` (missing/false → hide the tile; true with no samples → `- C`). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable), `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails), and `peakSpeedKmh` (max usable GPS sample). Session `maxSpeedKmh` is the max ride peak; `averageSpeedKmh` is ride meters / riding duration. `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostSets`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters / riding duration on Watch during recording (meters only while confidently `riding`).
+`SessionStatsBuilder.build(manifest:detections:locations:health:water:)` resolves superseded detection lines, treats `unsure` as inactive for ride windows (lookback supersede restores one ride), sums haversine meters on ride intervals only (accuracy + max-step + implied-speed gates), and reads cumulative active/basal calories as max HK mirror values (total = active + basal when both present). Water temperature is the mean of all persisted `WaterTemperatureSample`s; `SessionStats.waterTemperatureAvailable` copies `manifest.waterTemperatureAvailable` (missing/false → hide the tile; true with no samples → `- C`). Per ride it also fills `sustainedSpeedKmh` (best mean over ≥5 usable GPS samples spanning ≥5 s; fallback mean of ≥2 usable), `averageSpeedKmh` (path distance/duration after trimming ≤4 km/h start/end tails), and `peakSpeedKmh` (max usable GPS sample). Session `maxSpeedKmh` is the max ride peak; `averageSpeedKmh` is ride meters / riding duration. `HighlightAssigner` then stamps ride badges (`longest`, `longestTime` hidden when same as longest, `fastest`) and, across the logbook catalog, session badges (`longest` wall clock, `mostWaterTime` hidden when same session, `mostLaps`). Shortest ride badge deferred until failed-start detection improves. `LiveRideTracker` mirrors ride count / meters / riding duration on Watch during recording (meters only while confidently `riding`).
 
-### Sets (crossing-based)
+### Laps (crossing-based)
 
-`SetRideTracker` counts assumed start crossings per ride: leave beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter `startSafeRadiusM` → +1. Injectable `SetThresholds` (defaults: safe 50 m / exit 70 m / min path 200 m). Bad GPS ignored via `GeoDistance.acceptsStep`. Scoring only after a prior pause (mid-ride session start skipped). FSM runs only while attributed riding; pause freezes the count. `RideSegmentStats.setCount` is derived only (not persisted). Same tracker powers offline stats and live Watch UI.
+`LapRideTracker` counts assumed start crossings per ride: leave beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter `startSafeRadiusM` → +1. Injectable `LapThresholds` (defaults: safe 50 m / exit 70 m / min path 200 m). Bad GPS ignored via `GeoDistance.acceptsStep`. Scoring only after a prior pause (mid-ride session start skipped). FSM runs only while attributed riding; pause freezes the count. `RideSegmentStats.lapCount` lives in derived `view.json` only (raw GPS + detections regenerate it). Decode accepts intermediate slang mis-key `setCount`. Same tracker powers offline stats and live Watch UI. Do not call these crossings “sets” — see AGENTS Set vs lap.
 
 ## Detection pipeline
 

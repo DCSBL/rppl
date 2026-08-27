@@ -1,2466 +1,2472 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@, %2$@"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
           }
         }
       }
     },
-    "%lld": {},
-    "%lld park days are on your iPhone.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld park days are on your iPhone."
+    "%lld" : {
+
+    },
+    "%lld park days are on your iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld park days are on your iPhone."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld parkdagen staan op je iPhone."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld parkdagen staan op je iPhone."
           }
         }
       }
     },
-    "Ack failed: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ack failed: %@"
+    "Ack failed: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack failed: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ack mislukt: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack mislukt: %@"
           }
         }
       }
     },
-    "Acked %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acked %@"
+    "Acked %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acked %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ack %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack %@"
           }
         }
       }
     },
-    "Action Button: Workout › Rppl (start only)": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Action Button: Workout › Rppl (start only)"
+    "Action Button: Workout › Rppl (start only)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Action Button: Workout › Rppl (start only)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Action Button: Workout › Rppl (alleen start)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Action Button: Workout › Rppl (alleen start)"
           }
         }
       }
     },
-    "Allow %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow %@"
+    "Allow %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sta %@ toe"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sta %@ toe"
           }
         }
       }
     },
-    "Allow each permission so Rppl can record your park session on Apple Watch.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow each permission so Rppl can record your park session on Apple Watch."
+    "Allow each permission so Rppl can record your park session on Apple Watch." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow each permission so Rppl can record your park session on Apple Watch."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sta elke machtiging toe zodat Rppl je park session op Apple Watch kan opnemen."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sta elke machtiging toe zodat Rppl je park session op Apple Watch kan opnemen."
           }
         }
       }
     },
-    "allowed": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "allowed"
+    "allowed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "allowed"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "toegestaan"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "toegestaan"
           }
         }
       }
     },
-    "Allowed": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allowed"
+    "Allowed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toegestaan"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toegestaan"
           }
         }
       }
     },
-    "Cable Park": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cable Park"
+    "Cable Park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable Park"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kabelpark"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kabelpark"
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
+    "Cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annuleren"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuleren"
           }
         }
       }
     },
-    "Confident: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confident: %@"
+    "Confident: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confident: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confident: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confident: %@"
           }
         }
       }
     },
-    "Debug": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Debug"
+    "Debug" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Debug"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug"
           }
         }
       }
     },
-    "denied": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "denied"
+    "denied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "denied"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "geweigerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "geweigerd"
           }
         }
       }
     },
-    "Denied": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denied"
+    "Denied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denied"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geweigerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geweigerd"
           }
         }
       }
     },
-    "Detection: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detection: %@"
+    "Detection: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detection: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detectie: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detectie: %@"
           }
         }
       }
     },
-    "Discard": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard"
+    "Discard" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verwijderen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen"
           }
         }
       }
     },
-    "Discard Session?": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard Session?"
+    "Discard Session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard Session?"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session verwijderen?"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session verwijderen?"
           }
         }
       }
     },
-    "Discard: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard: %@"
+    "Discard: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verwijderen: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen: %@"
           }
         }
       }
     },
-    "Discarding…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discarding…"
+    "Discarding…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discarding…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verwijderen…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen…"
           }
         }
       }
     },
-    "DIST": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DIST"
+    "DIST" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIST"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AFST"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AFST"
           }
         }
       }
     },
-    "Distance": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Distance"
+    "Distance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afstand"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afstand"
           }
         }
       }
     },
-    "Done": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Done"
+    "Done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klaar"
           }
         }
       }
     },
-    "Duration": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration"
+    "Duration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duur"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duur"
           }
         }
       }
     },
-    "Elapsed": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elapsed"
+    "Elapsed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elapsed"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verstreken"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstreken"
           }
         }
       }
     },
-    "End Session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "End Session"
+    "End Session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session beëindigen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session beëindigen"
           }
         }
       }
     },
-    "End Session?": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "End Session?"
+    "End Session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Session?"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session beëindigen?"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session beëindigen?"
           }
         }
       }
     },
-    "Failed": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Failed"
+    "Failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mislukt"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mislukt"
           }
         }
       }
     },
-    "File delivered - awaiting phone ack": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "File delivered - awaiting phone ack"
+    "File delivered - awaiting phone ack" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File delivered - awaiting phone ack"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bestand afgeleverd - wachten op telefoon-ack"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestand afgeleverd - wachten op telefoon-ack"
           }
         }
       }
     },
-    "Filter: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter: %@"
+    "Filter: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter: %@"
           }
         }
       }
     },
-    "Flush: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Flush: %@"
+    "Flush: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flush: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Flush: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flush: %@"
           }
         }
       }
     },
-    "GPS %lld  MOT %lld  DET %lld": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GPS %lld  MOT %lld  DET %lld"
+    "GPS %lld  MOT %lld  DET %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS %lld  MOT %lld  DET %lld"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GPS %lld  MOT %lld  DET %lld"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS %lld  MOT %lld  DET %lld"
           }
         }
       }
     },
-    "GPS accuracy: %.0f m": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GPS accuracy: %.0f m"
+    "GPS accuracy: %.0f m" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS accuracy: %.0f m"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GPS-nauwkeurigheid: %.0f m"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS-nauwkeurigheid: %.0f m"
           }
         }
       }
     },
-    "Health": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Health"
+    "Health" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gezondheid"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gezondheid"
           }
         }
       }
     },
-    "Health auth: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Health auth: %@"
+    "Health auth: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health auth: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gezondheid-auth: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gezondheid-auth: %@"
           }
         }
       }
     },
-    "Health unavailable": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Health unavailable"
+    "Health unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health unavailable"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gezondheid niet beschikbaar"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gezondheid niet beschikbaar"
           }
         }
       }
     },
-    "Heart rate %@ beats per minute": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heart rate %@ beats per minute"
+    "Heart rate %@ beats per minute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate %@ beats per minute"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hartslag %@ slagen per minuut"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hartslag %@ slagen per minuut"
           }
         }
       }
     },
-    "Heart rate unavailable": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heart rate unavailable"
+    "Heart rate unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate unavailable"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hartslag niet beschikbaar"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hartslag niet beschikbaar"
           }
         }
       }
     },
-    "Helps tell when you are riding versus resting at the dock.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helps tell when you are riding versus resting at the dock."
+    "Helps tell when you are riding versus resting at the dock." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helps tell when you are riding versus resting at the dock."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helpt te bepalen of je aan het riden bent of rust bij de dock."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helpt te bepalen of je aan het riden bent of rust bij de dock."
           }
         }
       }
     },
-    "How to fix": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How to fix"
+    "How to fix" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to fix"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hoe te herstellen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoe te herstellen"
           }
         }
       }
     },
-    "Idle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Idle"
+    "Idle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idle"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactief"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactief"
           }
         }
       }
     },
-    "Inactive": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactive"
+    "Inactive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactive"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactief"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactief"
           }
         }
       }
     },
-    "Inactive for": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactive for"
+    "Inactive for" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactive for"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactief sinds"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactief sinds"
           }
         }
       }
     },
-    "iPhone not reachable - transfers will queue": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone not reachable - transfers will queue"
+    "iPhone not reachable - transfers will queue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone not reachable - transfers will queue"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone niet bereikbaar - transfers gaan in wachtrij"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone niet bereikbaar - transfers gaan in wachtrij"
           }
         }
       }
     },
-    "iPhone reachable": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone reachable"
+    "iPhone reachable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone reachable"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone bereikbaar"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone bereikbaar"
           }
         }
       }
     },
-    "Keep": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep"
+    "Keep" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bewaren"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewaren"
           }
         }
       }
     },
-    "KM/H": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "KM/H"
+    "KM/H" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KM/H"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "KM/U"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KM/U"
           }
         }
       }
     },
-    "Sets": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sets"
+    "Laps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sets"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps"
           }
         }
       }
     },
-    "SETS": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SETS"
+    "LAPS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAPS"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SETS"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAPS"
           }
         }
       }
     },
-    "Last": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last"
+    "Last" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laatste"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laatste"
           }
         }
       }
     },
-    "Last ride": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last ride"
+    "Last ride" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last ride"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laatste ride"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laatste ride"
           }
         }
       }
     },
-    "Last ride %@, %@, %lld sets": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last ride %1$@, %2$@, %3$lld sets"
+    "Last ride %@, %@, %lld laps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last ride %1$@, %2$@, %3$lld laps"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laatste ride %1$@, %2$@, %3$lld sets"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laatste ride %1$@, %2$@, %3$lld laps"
           }
         }
       }
     },
-    "Locks the screen to prevent accidental taps": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Locks the screen to prevent accidental taps"
+    "Locks the screen to prevent accidental taps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locks the screen to prevent accidental taps"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vergrendelt het scherm tegen per ongeluk tikken"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergrendelt het scherm tegen per ongeluk tikken"
           }
         }
       }
     },
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Location"
+    "Location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Locatie"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie"
           }
         }
       }
     },
-    "Location: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Location: %@"
+    "Location: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Locatie: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie: %@"
           }
         }
       }
     },
-    "Mark transfer: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mark transfer: %@"
+    "Mark transfer: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark transfer: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfer markeren: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer markeren: %@"
           }
         }
       }
     },
-    "Mode: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mode: %@"
+    "Mode: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modus: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modus: %@"
           }
         }
       }
     },
-    "Motion": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Motion"
+    "Motion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beweging"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beweging"
           }
         }
       }
     },
-    "Motion skipped": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Motion skipped"
+    "Motion skipped" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion skipped"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beweging overgeslagen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beweging overgeslagen"
           }
         }
       }
     },
-    "Motion: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Motion: %@"
+    "Motion: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beweging: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beweging: %@"
           }
         }
       }
     },
-    "No GPS": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No GPS"
+    "No GPS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No GPS"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen GPS"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen GPS"
           }
         }
       }
     },
-    "No GPS start location": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No GPS start location"
+    "No GPS start location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No GPS start location"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen GPS-startlocatie"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen GPS-startlocatie"
           }
         }
       }
     },
-    "No rides yet": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No rides yet"
+    "No rides yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rides yet"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog geen rides"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen rides"
           }
         }
       }
     },
-    "Not available on this Watch": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not available on this Watch"
+    "Not available on this Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available on this Watch"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet beschikbaar op deze Watch"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet beschikbaar op deze Watch"
           }
         }
       }
     },
-    "not decided": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "not decided"
+    "not decided" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not decided"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "niet besloten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "niet besloten"
           }
         }
       }
     },
-    "Not decided yet": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not decided yet"
+    "Not decided yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not decided yet"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog niet besloten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog niet besloten"
           }
         }
       }
     },
-    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App."
+    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl en sta Bij gebruik van de app toe."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl en sta Bij gebruik van de app toe."
           }
         }
       }
     },
-    "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl."
+    "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone Instellingen > Privacy en beveiliging > Beweging en fitness en schakel Rppl in."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Beweging en fitness en schakel Rppl in."
           }
         }
       }
     },
-    "Park day is on your iPhone.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park day is on your iPhone."
+    "Park day is on your iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park day is on your iPhone."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parkdag staat op je iPhone."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkdag staat op je iPhone."
           }
         }
       }
     },
-    "Pause": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause"
+    "Pause" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pauze"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauze"
           }
         }
       }
     },
-    "Paused": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paused"
+    "Paused" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paused"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gepauzeerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gepauzeerd"
           }
         }
       }
     },
-    "Pending transfers: %lld": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending transfers: %lld"
+    "Pending transfers: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending transfers: %lld"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Openstaande transfers: %lld"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openstaande transfers: %lld"
           }
         }
       }
     },
-    "Pending: %lld": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending: %lld"
+    "Pending: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending: %lld"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Openstaand: %lld"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openstaand: %lld"
           }
         }
       }
     },
-    "Permissions": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permissions"
+    "Permissions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Machtigingen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Machtigingen"
           }
         }
       }
     },
-    "Permissions updated": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permissions updated"
+    "Permissions updated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions updated"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Machtigingen bijgewerkt"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Machtigingen bijgewerkt"
           }
         }
       }
     },
-    "Phone connected": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Phone connected"
+    "Phone connected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone connected"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Telefoon verbonden"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telefoon verbonden"
           }
         }
       }
     },
-    "Queued %@…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Queued %@…"
+    "Queued %@…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Queued %@…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In wachtrij %@…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In wachtrij %@…"
           }
         }
       }
     },
-    "Raw code: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Raw code: %@"
+    "Raw code: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raw code: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Raw code: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raw code: %@"
           }
         }
       }
     },
-    "Ready to sync": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready to sync"
+    "Ready to sync" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to sync"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar om te synchroniseren"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klaar om te synchroniseren"
           }
         }
       }
     },
-    "Recording": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recording"
+    "Recording" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opnemen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnemen"
           }
         }
       }
     },
-    "Request permissions": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Request permissions"
+    "Request permissions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request permissions"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Machtigingen vragen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Machtigingen vragen"
           }
         }
       }
     },
-    "Required to record GPS during your park session so Rppl can track rides and distance.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Required to record GPS during your park session so Rppl can track rides and distance."
+    "Required to record GPS during your park session so Rppl can track rides and distance." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required to record GPS during your park session so Rppl can track rides and distance."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nodig om GPS tijdens je park session op te nemen zodat Rppl rides en afstand kan volgen."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nodig om GPS tijdens je park session op te nemen zodat Rppl rides en afstand kan volgen."
           }
         }
       }
     },
-    "Required to save the workout to Fitness and record heart rate while you ride.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Required to save the workout to Fitness and record heart rate while you ride."
+    "Required to save the workout to Fitness and record heart rate while you ride." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required to save the workout to Fitness and record heart rate while you ride."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nodig om de workout in Fitness op te slaan en hartslag tijdens het riden vast te leggen."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nodig om de workout in Fitness op te slaan en hartslag tijdens het riden vast te leggen."
           }
         }
       }
     },
-    "Resume": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resume"
+    "Resume" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hervatten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hervatten"
           }
         }
       }
     },
-    "Retry transfers": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retry transfers"
+    "Retry transfers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry transfers"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfers opnieuw"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfers opnieuw"
           }
         }
       }
     },
-    "RIDE": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RIDE"
+    "RIDE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RIDE"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RIDE"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RIDE"
           }
         }
       }
     },
-    "Rides": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rides"
+    "Rides" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rides"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rides"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rides"
           }
         }
       }
     },
-    "Riding": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riding"
+    "Riding" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riding"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
           }
         }
       }
+    },
+    "Rppl" : {
+
     },
-    "Rppl": {},
-    "Rppl session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl session"
+    "Rppl session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl session"
           }
         }
       }
     },
-    "Save workout: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save workout: %@"
+    "Save workout: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save workout: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout opslaan: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout opslaan: %@"
           }
         }
       }
     },
-    "Sensors-only (no HK workout)": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sensors-only (no HK workout)"
+    "Sensors-only (no HK workout)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensors-only (no HK workout)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alleen sensors (geen HK-workout)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen sensors (geen HK-workout)"
           }
         }
       }
     },
-    "Session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session"
+    "Session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session"
           }
         }
       }
     },
-    "Session complete": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session complete"
+    "Session complete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session complete"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session voltooid"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session voltooid"
           }
         }
       }
     },
-    "Session start location": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session start location"
+    "Session start location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session start location"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Startlocatie van session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startlocatie van session"
           }
         }
       }
     },
-    "Session start location map": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session start location map"
+    "Session start location map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session start location map"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaart van startlocatie van session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaart van startlocatie van session"
           }
         }
       }
     },
-    "Session synced": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session synced"
+    "Session synced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session synced"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session gesynchroniseerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session gesynchroniseerd"
           }
         }
       }
     },
-    "Sessions synced": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sessions synced"
+    "Sessions synced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions synced"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sessions gesynchroniseerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions gesynchroniseerd"
           }
         }
       }
     },
-    "Shows full-screen map": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shows full-screen map"
+    "Shows full-screen map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows full-screen map"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toont kaart op volledig scherm"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toont kaart op volledig scherm"
           }
         }
       }
     },
-    "Sim: Detected": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Detected"
+    "Sim: Detected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Detected"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Detectie"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Detectie"
           }
         }
       }
     },
-    "Sim: Inactive": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Inactive"
+    "Sim: Inactive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Inactive"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Inactief"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Inactief"
           }
         }
       }
     },
-    "Sim: Ride": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Ride"
+    "Sim: Ride" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Ride"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sim: Ride"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Ride"
           }
         }
       }
     },
-    "Start": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start"
+    "Start" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
           }
         }
       }
     },
-    "Start cable park in \\(.applicationName)": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start cable park in \\(.applicationName)"
+    "Start cable park in \\(.applicationName)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start cable park in \\(.applicationName)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start kabelpark in \\(.applicationName)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start kabelpark in \\(.applicationName)"
           }
         }
       }
     },
-    "Start Cable Park Session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Cable Park Session"
+    "Start Cable Park Session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Cable Park Session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start kabelpark session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start kabelpark session"
           }
         }
       }
     },
-    "Start session": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start session"
+    "Start session" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session starten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session starten"
           }
         }
       }
     },
-    "Start Session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Session"
+    "Start Session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session starten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session starten"
           }
         }
       }
     },
-    "Start session in \\(.applicationName)": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start session in \\(.applicationName)"
+    "Start session in \\(.applicationName)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start session in \\(.applicationName)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start session in \\(.applicationName)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start session in \\(.applicationName)"
           }
         }
       }
     },
-    "Starting…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starting…"
+    "Starting…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starten…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starten…"
           }
         }
       }
     },
-    "Starts a session": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starts a session"
+    "Starts a session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts a session"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start een session"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start een session"
           }
         }
       }
     },
-    "Starts an Rppl cable-park recording session.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starts an Rppl cable-park recording session."
+    "Starts an Rppl cable-park recording session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts an Rppl cable-park recording session."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start een Rppl recording session in het kabelpark."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start een Rppl recording session in het kabelpark."
           }
         }
       }
     },
-    "Stop": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+    "Stop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         }
       }
     },
-    "Stopped - waiting for phone ack": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stopped - waiting for phone ack"
+    "Stopped - waiting for phone ack" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped - waiting for phone ack"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gestopt - wachten op telefoon-ack"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestopt - wachten op telefoon-ack"
           }
         }
       }
     },
-    "Stopping…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stopping…"
+    "Stopping…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopping…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stoppen…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppen…"
           }
         }
       }
     },
-    "Stops recording and queues transfer to iPhone.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stops recording and queues transfer to iPhone."
+    "Stops recording and queues transfer to iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stops recording and queues transfer to iPhone."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stopt met opnemen en zet transfer naar iPhone in de wachtrij."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopt met opnemen en zet transfer naar iPhone in de wachtrij."
           }
         }
       }
     },
-    "Store: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store: %@"
+    "Store: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Store: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opslag: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opslag: %@"
           }
         }
       }
     },
-    "Stored %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stored %@"
+    "Stored %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stored %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opgeslagen %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen %@"
           }
         }
       }
     },
-    "Swipe for Resume": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Swipe for Resume"
+    "Swipe for Resume" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe for Resume"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Veeg voor Hervatten"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veeg voor Hervatten"
           }
         }
       }
     },
-    "Sync %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sync %@"
+    "Sync %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sync %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync %@"
           }
         }
       }
     },
-    "Synced": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synced"
+    "Synced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synced"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesynchroniseerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesynchroniseerd"
           }
         }
       }
     },
-    "Synced to iPhone": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synced to iPhone"
+    "Synced to iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synced to iPhone"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesynchroniseerd naar iPhone"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesynchroniseerd naar iPhone"
           }
         }
       }
     },
-    "Syncing to iPhone": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Syncing to iPhone"
+    "Syncing to iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing to iPhone"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchroniseren naar iPhone"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniseren naar iPhone"
           }
         }
       }
     },
-    "Syncing…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Syncing…"
+    "Syncing…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchroniseren…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniseren…"
           }
         }
       }
     },
-    "Transfer error: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfer error: %@"
+    "Transfer error: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer error: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transferfout: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferfout: %@"
           }
         }
       }
     },
-    "Transfer failed (kept on Watch): %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfer failed (kept on Watch): %@"
+    "Transfer failed (kept on Watch): %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer failed (kept on Watch): %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfer mislukt (blijft op Watch): %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer mislukt (blijft op Watch): %@"
           }
         }
       }
     },
-    "Transfer list error: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transfer list error: %@"
+    "Transfer list error: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer list error: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transferlijstfout: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferlijstfout: %@"
           }
         }
       }
     },
-    "Transferring…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transferring…"
+    "Transferring…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferring…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Overzetten…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overzetten…"
           }
         }
       }
     },
-    "Turn Digital Crown to unlock": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn Digital Crown to unlock"
+    "Turn Digital Crown to unlock" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Digital Crown to unlock"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draai Digital Crown om te ontgrendelen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draai Digital Crown om te ontgrendelen"
           }
         }
       }
     },
-    "Type of Workout": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Type of Workout"
+    "Type of Workout" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type of Workout"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Type workout"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type workout"
           }
         }
       }
     },
-    "unavailable, skipped": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "unavailable, skipped"
+    "unavailable, skipped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "unavailable, skipped"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "niet beschikbaar, overgeslagen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "niet beschikbaar, overgeslagen"
           }
         }
       }
     },
-    "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone."
+    "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Korter dan 30 seconden en geen rides. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korter dan 30 seconden en geen rides. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
           }
         }
       }
     },
-    "Unsure": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unsure"
+    "Unsure" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsure"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onzeker"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onzeker"
           }
         }
       }
     },
-    "Unsure (raw: %@)": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unsure (raw: %@)"
+    "Unsure (raw: %@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsure (raw: %@)"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onzeker (raw: %@)"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onzeker (raw: %@)"
           }
         }
       }
     },
-    "Water": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Water"
+    "Water" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Water"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water"
           }
         }
       }
     },
-    "Disable Water Lock": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disable Water Lock"
+    "Disable Water Lock" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disable Water Lock"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Water Lock uitschakelen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock uitschakelen"
           }
         }
       }
     },
-    "Enable Water Lock": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enable Water Lock"
+    "Enable Water Lock" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable Water Lock"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Water Lock inschakelen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock inschakelen"
           }
         }
       }
     },
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Water Lock"
+    "Water Lock" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Watervergrendeling"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watervergrendeling"
           }
         }
       }
     },
-    "WC activate error: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC activate error: %@"
+    "WC activate error: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC activate error: %@"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC-activatiefout: %@"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC-activatiefout: %@"
           }
         }
       }
     },
-    "WC activated": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC activated"
+    "WC activated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC activated"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC geactiveerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC geactiveerd"
           }
         }
       }
     },
-    "WC idle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC idle"
+    "WC idle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC idle"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC inactief"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC inactief"
           }
         }
       }
     },
-    "WC not activated - will retry": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC not activated - will retry"
+    "WC not activated - will retry" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC not activated - will retry"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC niet geactiveerd - opnieuw proberen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC niet geactiveerd - opnieuw proberen"
           }
         }
       }
     },
-    "WC unsupported": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC unsupported"
+    "WC unsupported" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC unsupported"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WC niet ondersteund"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC niet ondersteund"
           }
         }
       }
     },
-    "Workout": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout"
+    "Workout" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout"
           }
         }
       }
     },
-    "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout."
+    "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout niet toegestaan - tik op Machtigingen vragen of zet aan in Gezondheid. Doorgaan zonder workout."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout niet toegestaan - tik op Machtigingen vragen of zet aan in Gezondheid. Doorgaan zonder workout."
           }
         }
       }
     },
-    "Workout: %@. Continuing sensors-only.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout: %@. Continuing sensors-only."
+    "Workout: %@. Continuing sensors-only." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout: %@. Continuing sensors-only."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout: %@. Doorgaan met alleen sensors."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout: %@. Doorgaan met alleen sensors."
           }
         }
       }
     },
-    "workout: authorized": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: authorized"
+    "workout: authorized" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: authorized"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: toegestaan"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: toegestaan"
           }
         }
       }
     },
-    "workout: denied - enable in Settings › Health": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: denied - enable in Settings › Health"
+    "workout: denied - enable in Settings › Health" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: denied - enable in Settings › Health"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: geweigerd - zet aan in Instellingen › Gezondheid"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: geweigerd - zet aan in Instellingen › Gezondheid"
           }
         }
       }
     },
-    "workout: notDetermined": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: notDetermined"
+    "workout: notDetermined" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: notDetermined"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: niet bepaald"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: niet bepaald"
           }
         }
       }
     },
-    "workout: unknown": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: unknown"
+    "workout: unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: unknown"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "workout: onbekend"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: onbekend"
           }
         }
       }
     },
-    "Timers paused": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timers paused"
+    "Timers paused" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timers paused"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timers gepauzeerd"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timers gepauzeerd"
           }
         }
       }
     },
-    "Waiting for system permission popups. This can take a few seconds on first launch.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waiting for system permission popups. This can take a few seconds on first launch."
+    "Waiting for system permission popups. This can take a few seconds on first launch." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for system permission popups. This can take a few seconds on first launch."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wachten op systeemmachtigingen. Dit kan bij de eerste start een paar seconden duren."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wachten op systeemmachtigingen. Dit kan bij de eerste start een paar seconden duren."
           }
         }
       }
     },
-    "Waiting for the system popup…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waiting for the system popup…"
+    "Waiting for the system popup…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for the system popup…"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wachten op de systeempopup…"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wachten op de systeempopup…"
           }
         }
       }
     },
-    "Try Again": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try Again"
+    "Try Again" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opnieuw proberen"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnieuw proberen"
           }
         }
       }
     },
-    "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl."
+    "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open op iPhone de Gezondheid-app > Delen > Apps > Rppl en zet workouttoegang aan. Of: Instellingen > Gezondheid > Toegang tot gegevens en apparaten > Rppl."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open op iPhone de Gezondheid-app > Delen > Apps > Rppl en zet workouttoegang aan. Of: Instellingen > Gezondheid > Toegang tot gegevens en apparaten > Rppl."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
