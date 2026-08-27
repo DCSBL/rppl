@@ -834,7 +834,22 @@
         }
       }
     },
-    "Location": {
+    "Locks the screen to prevent accidental taps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locks the screen to prevent accidental taps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vergrendelt het scherm tegen per ongeluk tikken"
+          }
+        }
+      }
+    },
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2014,6 +2029,22 @@
         }
       }
     },
+    "Turn Digital Crown to unlock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Digital Crown to unlock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draai Digital Crown om te ontgrendelen"
+          }
+        }
+      }
+    },
     "Type of Workout": {
       "localizations": {
         "en": {
@@ -2111,7 +2142,38 @@
         }
       }
     },
-    "Water Lock": {
+    "Disable Water Lock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disable Water Lock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water Lock uitschakelen"
+          }
+        }
+      }
+    },
+    "Enable Water Lock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Water Lock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water Lock inschakelen"
+          }
+        }
+      }
+    },
       "localizations": {
         "en": {
           "stringUnit": {

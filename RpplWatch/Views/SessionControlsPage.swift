@@ -38,15 +38,17 @@ struct SessionControlsPage: View {
                 .disabled(session.isStopping)
             }
 
-            Button("Water Lock") {
-                WakeLog.debug(.ui, "tap Water Lock")
-                Task { await session.enableWaterLock() }
-            }
-            .buttonStyle(.bordered)
-            .disabled(session.isStopping)
+            waterLockButton
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.horizontal, 4)
+        .task {
+            session.refreshWaterLockState()
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                session.refreshWaterLockState()
+            }
+        }
         .confirmationDialog(
             "End Session?",
             isPresented: $showStopConfirmation,
@@ -77,6 +79,45 @@ struct SessionControlsPage: View {
         } message: {
             Text("Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone.")
         }
+    }
+
+    @ViewBuilder
+    private var waterLockButton: some View {
+        let label = Label {
+            Text(
+                session.isWaterLockEnabled
+                    ? String(localized: "Disable Water Lock")
+                    : String(localized: "Enable Water Lock")
+            )
+        } icon: {
+            Image(systemName: session.isWaterLockEnabled ? "drop.fill" : "drop")
+        }
+
+        Group {
+            if session.isWaterLockEnabled {
+                Button {
+                    WakeLog.debug(.ui, "tap Water Lock (locked)")
+                } label: {
+                    label
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.cyan)
+            } else {
+                Button {
+                    WakeLog.debug(.ui, "tap Enable Water Lock")
+                    Task { await session.enableWaterLock() }
+                } label: {
+                    label
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .disabled(session.isStopping || session.isWaterLockEnabled || !session.canEnableWaterLock)
+        .accessibilityHint(
+            session.isWaterLockEnabled
+                ? String(localized: "Turn Digital Crown to unlock")
+                : String(localized: "Locks the screen to prevent accidental taps")
+        )
     }
 
     private func presentStopFlow() {

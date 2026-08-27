@@ -70,6 +70,8 @@ final class WatchSessionController: NSObject {
 
     /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
     var recordingMode = "none"
+    /// Mirrors `WKInterfaceDevice.current().isWaterLockEnabled` (refreshed by controls UI).
+    var isWaterLockEnabled = false
     var motionRecordingEnabled = false
 
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
