@@ -82,6 +82,77 @@ It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
 
 To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`** (drop **`RpplCore tests`** if it was required).
 
+## Xcode Cloud
+
+**RpplCore `swift test`** and nightly TestFlight builds run in Xcode Cloud, not GitHub Actions. Local/push gate still runs Core tests through `xcode-gate` / `make test-core`.
+
+### Workflows
+
+Keep two workflows in App Store Connect / Xcode:
+
+| Workflow | Start condition | Actions |
+|----------|-----------------|---------|
+| **PR / Core tests** | Pull Request Changes | Test (`RpplCore` via `swift test`) |
+| **Nightly TestFlight** | On a Schedule for a Branch (`main`) | Test → Archive (scheme **Rppl**) → Deploy to TestFlight |
+
+Optional: add **Manual Start** on `main` to the nightly workflow for on-demand TestFlight builds.
+
+### Nightly schedule
+
+Configure **On a Schedule for a Branch**:
+
+- Branch: **`main`**
+- Frequency: daily
+- Time: **3:00 AM Europe/Amsterdam** (within the 1–5 AM window; adjust in App Store Connect if you prefer another slot or timezone)
+
+Do **not** add Branch Changes to the nightly workflow unless you also want push-triggered TestFlight (see optional push gate below).
+
+### Skip when no build changes
+
+[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone and cancels the workflow when there is nothing worth archiving:
+
+| `CI_START_CONDITION` | Behavior |
+|----------------------|----------|
+| `schedule` | Skip unless any commit in the last 24 hours touched build-related paths |
+| `push` | Skip unless `HEAD` vs `HEAD~1` includes build-related paths |
+| `manual`, `manual_rebuild`, `pr_open`, `pr_update` | Always continue |
+
+Build-related paths match the local pre-push **xcode-gate** hook (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, tooling, and most scripts do **not** count.
+
+The shared filter lives in [`scripts/ci/build-related-paths.sh`](../scripts/ci/build-related-paths.sh). Keep it aligned with the `xcode-gate` `files` block in [`.pre-commit-config.yaml`](../.pre-commit-config.yaml).
+
+When the script skips, it exits non-zero — Xcode Cloud stops the run and does not archive or deploy. That cancelled state is intentional (saves compute minutes); it is not a build failure to investigate.
+
+### Optional push gate
+
+If you add **Branch Changes on `main`** to the same TestFlight workflow, also set **Custom Conditions → Don’t Start a Build** in App Store Connect for:
+
+- `Docs/`
+- `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `LEGAL.md`
+- `.github/`
+- `tools/`
+
+The post-clone script is belt-and-braces for docs-only pushes that still start a run.
+
+### Setup (App Store Connect / Xcode)
+
+1. Open **Xcode → Product → Xcode Cloud → Manage Workflows** (or App Store Connect → Xcode Cloud).
+2. Create or edit **Nightly TestFlight** on `Rppl.xcodeproj`.
+3. Add start conditions: **On a Schedule for a Branch** (`main`, daily, 3:00 AM Europe/Amsterdam); optionally **Manual Start** on `main`.
+4. Actions: Test → Archive (scheme **Rppl**, iOS) → **Deploy to TestFlight** (internal testers).
+5. After merging `ci_scripts/` to `main`, run one **Manual Start** build to confirm the hook is picked up.
+
+### Local dry-run
+
+Approximate what Xcode Cloud will do:
+
+```bash
+CI_START_CONDITION=schedule CI_PRIMARY_REPOSITORY_PATH=$PWD bash ci_scripts/ci_post_clone.sh
+echo "exit=$?"
+```
+
+Exit `0` = continue; exit `1` = skip (no build-related changes in the last 24 hours on the current branch).
+
 ## Notes
 
 - Commit stays light (hygiene + spell + lint). First push after app/Core source changes still pays for `xcodebuild`; later pushes with the same inputs skip it. Core-test-only pushes skip the app build.
