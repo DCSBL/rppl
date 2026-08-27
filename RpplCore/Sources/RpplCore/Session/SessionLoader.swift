@@ -48,6 +48,7 @@ public struct SessionSummaryBundle: Sendable {
 
     public var stats: SessionStats { derived.stats }
     public var mapFrame: MapTrackFrame? { derived.mapFrame }
+    public var mapTracks: SessionMapTrackData? { derived.mapTracks }
     public var cityName: String? { derived.cityName }
 }
 
@@ -71,11 +72,13 @@ public enum SessionLoader {
         let existing = try store.readDerivedView(sessionId: sessionId)
         let cityName = existing?.cityName
         if existing == nil || existing?.isCurrentAnalyzer != true {
+            let mapTracks = SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
             try store.writeDerivedView(
                 DerivedSessionView(
                     analyzerVersion: SessionAnalyzer.version,
                     stats: stats,
                     mapFrame: mapFrame,
+                    mapTracks: mapTracks,
                     cityName: cityName
                 ),
                 sessionId: sessionId
