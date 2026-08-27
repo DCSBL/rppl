@@ -54,7 +54,6 @@ struct ContentView: View {
                 summaries: iCloud.pendingImportSummaries,
                 onImport: { ids in
                     showICloudImport = false
-                    iCloud.dismissImportReview()
                     Task {
                         await iCloud.importSelectedRemoteSessions(ids)
                     }
@@ -64,11 +63,6 @@ struct ContentView: View {
                     showICloudImport = false
                 }
             )
-        }
-        .onChange(of: iCloud.showImportReviewAfterEnable) { _, show in
-            if show {
-                showICloudImport = true
-            }
         }
         .onChange(of: iCloud.shouldOfferImport) { _, offer in
             if offer, !iCloud.suppressImportOffer {

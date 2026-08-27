@@ -18,10 +18,21 @@ struct ICloudLogbookPolicyTests {
         #expect(candidates.isEmpty)
     }
 
+    @Test func peerDeleteSkipsWhenLocalInventoryEmpty() {
+        // Empty local listing while accepts remain → unreliable (root switch / lag).
+        let candidates = ICloudLogbookPolicy.peerDeleteCandidates(
+            accepted: ["gone"],
+            remoteMetadata: ["other"],
+            localOnDisk: [],
+            metadataGatherComplete: true
+        )
+        #expect(candidates.isEmpty)
+    }
+
     @Test func peerDeleteRemovesAcceptedNotLocalNotRemote() {
-        let accepted: Set<String> = ["gone"]
-        let remote: Set<String> = ["other"]
-        let local: Set<String> = []
+        let accepted: Set<String> = ["gone", "keep"]
+        let remote: Set<String> = ["keep", "other"]
+        let local: Set<String> = ["keep"]
 
         let candidates = ICloudLogbookPolicy.peerDeleteCandidates(
             accepted: accepted,

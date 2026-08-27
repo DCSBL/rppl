@@ -2,8 +2,10 @@ import Foundation
 
 /// Pure iCloud logbook accept-set and peer-delete rules (testable without NSMetadataQuery).
 public enum ICloudLogbookPolicy {
-    /// Session ids safe to delete locally after a peer removed them from iCloud Drive.
+    /// Session ids safe to drop after a peer removed them from iCloud Drive.
     /// Never includes packages still present on disk — metadata can lag behind upload.
+    /// Empty `localOnDisk` while `accepted` is non-empty is treated as an unreliable
+    /// inventory (root switch / ubiquity lag) — never peer-delete in that state.
     public static func peerDeleteCandidates(
         accepted: Set<String>,
         remoteMetadata: Set<String>,
@@ -11,6 +13,8 @@ public enum ICloudLogbookPolicy {
         metadataGatherComplete: Bool
     ) -> Set<String> {
         guard metadataGatherComplete, !remoteMetadata.isEmpty else { return [] }
+        // Empty local listing with leftover accepts → do not unaccept (logbook would go blank).
+        if localOnDisk.isEmpty, !accepted.isEmpty { return [] }
         return accepted.subtracting(remoteMetadata).subtracting(localOnDisk)
     }
 

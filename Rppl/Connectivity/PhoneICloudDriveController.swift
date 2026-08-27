@@ -21,8 +21,6 @@ final class PhoneICloudDriveController: NSObject {
     private(set) var pendingImportSummaries: [RemoteSessionSummary] = []
     /// Present import picker when remote-only set appears (background discovery).
     private(set) var shouldOfferImport = false
-    /// After user toggles sync on — show import review even when nothing to import.
-    private(set) var showImportReviewAfterEnable = false
     /// True while enable/disable migration runs (Settings spinner).
     private(set) var isApplyingSyncChange = false
     /// Blocks auto-presenting import sheet during manual JSON import / root churn.
@@ -104,7 +102,6 @@ final class PhoneICloudDriveController: NSObject {
             stopMetadataQuery()
             pendingImportSummaries = []
             shouldOfferImport = false
-            showImportReviewAfterEnable = false
             let cloudRoot = iCloudSessionsRoot
             await migrateLiveRoot(
                 to: AppConstants.localPhoneSessionsRoot,
@@ -122,25 +119,12 @@ final class PhoneICloudDriveController: NSObject {
         }
     }
 
-    /// Wait for metadata gather (cap ~3s) then prompt import review (may be empty).
-    func prepareImportReview() async {
-        for _ in 0..<30 {
-            if metadataHasGathered { break }
-            try? await Task.sleep(nanoseconds: 100_000_000)
-        }
-        showImportReviewAfterEnable = true
-    }
-
     func beginImportOfferSuppression() {
         suppressImportOffer = true
     }
 
     func endImportOfferSuppression() {
         suppressImportOffer = false
-    }
-
-    func dismissImportReview() {
-        showImportReviewAfterEnable = false
     }
 
     func refreshAvailability() {
@@ -226,7 +210,6 @@ final class PhoneICloudDriveController: NSObject {
         dismissedRemoteIDs.formUnion(pendingImportSummaries.map(\.sessionId))
         shouldOfferImport = false
         pendingImportSummaries = []
-        showImportReviewAfterEnable = false
     }
 
     func acceptSession(_ sessionId: String) {
@@ -437,11 +420,15 @@ final class PhoneICloudDriveController: NSObject {
         }
 
         let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
+        // Anything already on the live root belongs in this phone’s logbook.
+        if !localOnDisk.isEmpty {
+            acceptSessions(localOnDisk)
+        }
         let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
             accepted: acceptedSessionIDs,
             remoteMetadata: remoteIDs,
             localOnDisk: localOnDisk,
-            metadataGatherComplete: metadataHasGathered
+            metadataGatherComplete: metadataHasGathered && !isSwitchingRoot
         )
         for sessionId in peerDeletes {
             try? store.deleteSession(sessionId: sessionId)

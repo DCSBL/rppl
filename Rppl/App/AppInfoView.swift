@@ -69,12 +69,11 @@ struct AppInfoView: View {
                             isOn: Binding(
                                 get: { iCloud.isSyncEnabled },
                                 set: { newValue in
-                                    if newValue {
-                                        Task {
-                                            await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
-                                            await iCloud.prepareImportReview()
-                                        }
-                                    } else {
+                                if newValue {
+                                    Task {
+                                        await iCloud.setSyncEnabled(true, deleteICloudCopies: false)
+                                    }
+                                } else {
                                         showDisableDeleteConfirm = true
                                     }
                                 }
@@ -189,7 +188,7 @@ struct AppInfoView: View {
                 handleImportResult(result)
             }
             .alert(
-                "Could Not Import Session",
+                "Could not import session",
                 isPresented: $showImportError,
                 presenting: importErrorText
             ) { _ in
@@ -227,18 +226,20 @@ struct AppInfoView: View {
             isImporting = true
             Task {
                 do {
-                    let sessionId = try await connectivity.peekExportedSessionId(from: url)
-                    if connectivity.hasSession(sessionId: sessionId) {
-                        isImporting = false
-                        pendingDuplicateSessionId = sessionId
-                        showAlreadyImportedAlert = true
-                        return
-                    }
                     let importedId = try await connectivity.importExportedSession(from: url)
                     isImporting = false
                     navigation.openSessionId = importedId
                     navigation.highlightSessionId = importedId
                     selectedTab = .logbook
+                } catch let error as SessionExportImportError {
+                    isImporting = false
+                    switch error {
+                    case .alreadyImported(let sessionId):
+                        pendingDuplicateSessionId = sessionId
+                        showAlreadyImportedAlert = true
+                    case .unreadable(let message):
+                        presentImportFailure(message)
+                    }
                 } catch {
                     isImporting = false
                     presentImportFailure(Self.userFacingMessage(for: error))
@@ -256,6 +257,9 @@ struct AppInfoView: View {
     }
 
     private static func userFacingMessage(for error: Error) -> String {
+        if let decoding = error as? DecodingError {
+            return SessionExportImportError.message(for: decoding)
+        }
         let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         if description.isEmpty {
             return String(localized: "Something went wrong while importing the session.")

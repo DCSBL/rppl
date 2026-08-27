@@ -173,24 +173,8 @@ final class PhoneConnectivityService: NSObject {
         (try? store.listSessionIDs().contains(sessionId)) ?? false
     }
 
-    /// Reads the session id from an export JSON without importing.
-    func peekExportedSessionId(from url: URL) async throws -> String {
-        let accessing = url.startAccessingSecurityScopedResource()
-        defer {
-            if accessing {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-        return try await StoreIO.runOffMain {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let package = try decoder.decode(SessionTransferPackage.self, from: data)
-            return package.manifest.sessionId
-        }
-    }
-
     /// Import a Share export JSON from Files. No Watch ack, no HealthKit, no post-sync permission trigger.
+    /// Throws `SessionExportImportError.alreadyImported` when the session id is already on disk.
     @discardableResult
     func importExportedSession(from url: URL) async throws -> String {
         WakeLog.debug(.transfer, "export-file import begin")
@@ -204,18 +188,80 @@ final class PhoneConnectivityService: NSObject {
             }
         }
         let store = self.store
-        let sessionId = try await StoreIO.runOffMain {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let package = try decoder.decode(SessionTransferPackage.self, from: data)
-            try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
-            return package.manifest.sessionId
+        let sessionId: String
+        do {
+            sessionId = try await StoreIO.runOffMain {
+                let data = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let package = try decoder.decode(SessionTransferPackage.self, from: data)
+                let id = package.manifest.sessionId
+                if FileManager.default.fileExists(
+                    atPath: store.sessionDirectory(for: id).path
+                ) {
+                    throw SessionExportImportError.alreadyImported(sessionId: id)
+                }
+                try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
+                return id
+            }
+        } catch let error as SessionExportImportError {
+            throw error
+        } catch let error as DecodingError {
+            throw SessionExportImportError.unreadable(SessionExportImportError.message(for: error))
+        } catch {
+            throw SessionExportImportError.unreadable(Self.userFacingImportMessage(for: error))
         }
         sessionsRevision += 1
         PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
         return sessionId
+    }
+
+    private static func userFacingImportMessage(for error: Error) -> String {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty {
+            return String(localized: "Something went wrong while importing the session.")
+        }
+        return description
+    }
+}
+
+enum SessionExportImportError: Error {
+    case alreadyImported(sessionId: String)
+    case unreadable(String)
+
+    static func message(for error: DecodingError) -> String {
+        switch error {
+        case .keyNotFound(let key, let context):
+            let path = codingPathString(context.codingPath + [key])
+            return String(
+                localized: "This export is missing \(path). Re-export from a current Rppl build, or pick a different file."
+            )
+        case .valueNotFound(_, let context):
+            let path = codingPathString(context.codingPath)
+            return String(
+                localized: "This export has an empty value at \(path). Re-export from Rppl and try again."
+            )
+        case .typeMismatch(_, let context):
+            let path = codingPathString(context.codingPath)
+            return String(
+                localized: "This export has an unexpected value at \(path). Re-export from Rppl and try again."
+            )
+        case .dataCorrupted(let context):
+            let path = codingPathString(context.codingPath)
+            if path.isEmpty {
+                return String(localized: "This file is not a Rppl session export JSON.")
+            }
+            return String(
+                localized: "This export looks corrupted at \(path). Re-export from Rppl and try again."
+            )
+        @unknown default:
+            return String(localized: "Could not read this session export. Re-export from Rppl and try again.")
+        }
+    }
+
+    private static func codingPathString(_ path: [CodingKey]) -> String {
+        path.map(\.stringValue).filter { !$0.isEmpty }.joined(separator: ".")
     }
 }
 
