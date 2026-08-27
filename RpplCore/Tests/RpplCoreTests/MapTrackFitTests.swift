@@ -84,6 +84,15 @@ struct MapTrackFitTests {
         #expect(phone.cameraDistanceMeters != tall.cameraDistanceMeters)
     }
 
+    @Test func startFrameFromSingleLocation() {
+        let frame = MapTrackFitter.frame(locations: [(latitude: 52.1, longitude: 5.1)])
+        #expect(frame != nil)
+        #expect(frame?.centerLatitude == 52.1)
+        #expect(frame?.centerLongitude == 5.1)
+        #expect(frame?.headingDegrees == 0)
+        #expect(frame?.spanWidthMeters == 800)
+    }
+
     private func verticalLoopPoints() -> [(latitude: Double, longitude: Double)] {
         // Ellipse: major axis N–S, minor E–W.
         (0..<36).map { i in

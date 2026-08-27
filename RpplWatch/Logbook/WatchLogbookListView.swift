@@ -76,45 +76,65 @@ private struct WatchSessionRow: View {
     let entry: WatchSessionEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                if !entry.isSynced {
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 6, height: 6)
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    if !entry.isSynced {
+                        Circle()
+                            .fill(Color.orange)
+                            .frame(width: 6, height: 6)
+                    }
+                    Text(WatchLogbookFormatting.sessionDate(entry.manifest.startedAt))
+                        .font(.headline)
+                        .foregroundStyle(Color.rpplIdlePrimary)
                 }
-                Text(WatchLogbookFormatting.sessionDate(entry.manifest.startedAt))
-                    .font(.headline)
-                    .foregroundStyle(Color.rpplIdlePrimary)
+
+                Text(WatchLogbookFormatting.sessionTimeRange(
+                    start: entry.manifest.startedAt,
+                    end: entry.manifest.endedAt ?? entry.stats.endedAt
+                ))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Text(SessionFormatters.elapsed(entry.stats.totalDuration))
+                    Text("·")
+                    Text(SessionFormatters.distance(entry.stats.totalDistanceMeters))
+                    Text("·")
+                    Text("\(entry.stats.rideCount) rides")
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+                if let cityName = entry.cityName, !cityName.isEmpty {
+                    Text(cityName)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(WatchLogbookFormatting.sessionTimeRange(
-                start: entry.manifest.startedAt,
-                end: entry.manifest.endedAt ?? entry.stats.endedAt
-            ))
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-
-            HStack(spacing: 8) {
-                Text(SessionFormatters.elapsed(entry.stats.totalDuration))
-                Text("·")
-                Text(SessionFormatters.distance(entry.stats.totalDistanceMeters))
-                Text("·")
-                Text("\(entry.stats.rideCount) rides")
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-
-            if let cityName = entry.cityName, !cityName.isEmpty {
-                Text(cityName)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            if let mapSource = rowMapSource {
+                SessionMapSnapshotView(
+                    source: mapSource,
+                    size: CGSize(width: 56, height: 56),
+                    cornerRadius: 10,
+                    showsPin: true
+                )
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private var rowMapSource: SessionMapSnapshotSource? {
+        guard WatchDisplayLayout.showsSessionOverviewStartMap else { return nil }
+        if let mapFrame = entry.mapFrame {
+            return .frame(mapFrame)
+        }
+        return nil
     }
 }
 

@@ -9,24 +9,12 @@ struct SessionStartMapPinView: View {
     var cameraDistanceMeters: CLLocationDistance = 450
 
     var body: some View {
-        Map(initialPosition: .camera(MapCamera(
-            centerCoordinate: coordinate,
-            distance: cameraDistanceMeters,
-            heading: 0,
-            pitch: 0
-        )), interactionModes: []) {
-            Annotation("", coordinate: coordinate, anchor: .bottom) {
-                Image(systemName: "mappin.circle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .accessibilityHidden(true)
-            }
-        }
-        .mapStyle(.standard)
-        .allowsHitTesting(false)
-        .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .accessibilityLabel(String(localized: "Session start location"))
+        SessionMapSnapshotView(
+            source: .coordinate(coordinate, distanceMeters: cameraDistanceMeters),
+            size: CGSize(width: size, height: size),
+            cornerRadius: 10,
+            showsPin: true
+        )
     }
 }
 
@@ -39,48 +27,30 @@ struct SessionMapStripView: View {
 
     var body: some View {
         Group {
-            if let startCoordinate {
-                startPinStrip(coordinate: startCoordinate, distanceMeters: startMapDistanceMeters)
-            } else if let mapFrame, let fit = mapFrameFit(mapFrame) {
-                framedStrip(fit: fit, markerCoordinate: fit.coordinate)
+            if let source = snapshotSource {
+                GeometryReader { geo in
+                    SessionMapSnapshotView(
+                        source: source,
+                        size: CGSize(width: max(geo.size.width, 1), height: mapHeight),
+                        cornerRadius: 12,
+                        showsPin: true
+                    )
+                }
+                .frame(height: mapHeight)
             } else {
                 noGPSPlaceholder
             }
         }
     }
 
-    @ViewBuilder
-    private func startPinStrip(coordinate: CLLocationCoordinate2D, distanceMeters: CLLocationDistance) -> some View {
-        Map(initialPosition: .camera(MapCamera(
-            centerCoordinate: coordinate,
-            distance: distanceMeters,
-            heading: 0,
-            pitch: 0
-        )), interactionModes: []) {
-            Marker("Start", coordinate: coordinate)
+    private var snapshotSource: SessionMapSnapshotSource? {
+        if let startCoordinate {
+            return .coordinate(startCoordinate, distanceMeters: startMapDistanceMeters)
         }
-        .mapStyle(.standard)
-        .allowsHitTesting(false)
-        .frame(height: mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityLabel(String(localized: "Session start location"))
-    }
-
-    @ViewBuilder
-    private func framedStrip(fit: MapTrackFit, markerCoordinate: CLLocationCoordinate2D) -> some View {
-        Map(initialPosition: .camera(MapCamera(
-            centerCoordinate: fit.coordinate,
-            distance: fit.cameraDistanceMeters,
-            heading: fit.headingDegrees,
-            pitch: 0
-        )), interactionModes: []) {
-            Marker("Track", coordinate: markerCoordinate)
+        if let mapFrame {
+            return .frame(mapFrame)
         }
-        .mapStyle(.standard)
-        .allowsHitTesting(false)
-        .frame(height: mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityLabel(String(localized: "Session map"))
+        return nil
     }
 
     private var noGPSPlaceholder: some View {
@@ -93,15 +63,5 @@ struct SessionMapStripView: View {
                     .foregroundStyle(.secondary)
             }
             .accessibilityLabel(String(localized: "No GPS start location"))
-    }
-
-    private func mapFrameFit(_ frame: MapTrackFrame) -> MapTrackFit? {
-        MapTrackFitter.fit(frame: frame, viewWidth: Double(mapHeight * 2), viewHeight: Double(mapHeight))
-    }
-}
-
-private extension MapTrackFit {
-    var coordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: centerLatitude, longitude: centerLongitude)
     }
 }

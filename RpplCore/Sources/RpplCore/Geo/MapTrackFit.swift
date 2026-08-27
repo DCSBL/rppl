@@ -62,11 +62,15 @@ public enum MapTrackFitter {
     private static let halfVerticalFOVRadians = 15.0 * .pi / 180.0
 
     /// Geo frame from coordinates (no view size). Persist this; fit per device later.
+    /// Uses a start pin frame when fewer than two samples exist.
     public static func frame(
         locations: [(latitude: Double, longitude: Double)],
         paddingFactor: Double = defaultPaddingFactor
     ) -> MapTrackFrame? {
-        guard locations.count >= 2 else { return nil }
+        guard let first = locations.first else { return nil }
+        guard locations.count >= 2 else {
+            return startFrame(latitude: first.latitude, longitude: first.longitude)
+        }
 
         var sumLat = 0.0
         var sumLon = 0.0
@@ -104,6 +108,21 @@ public enum MapTrackFitter {
             headingDegrees: heading,
             spanWidthMeters: paddedWidth,
             spanHeightMeters: paddedHeight
+        )
+    }
+
+    /// Single-point start map frame (~400 m radius).
+    public static func startFrame(
+        latitude: Double,
+        longitude: Double,
+        radiusMeters: Double = 400
+    ) -> MapTrackFrame {
+        MapTrackFrame(
+            centerLatitude: latitude,
+            centerLongitude: longitude,
+            headingDegrees: 0,
+            spanWidthMeters: radiusMeters * 2,
+            spanHeightMeters: radiusMeters * 2
         )
     }
 
