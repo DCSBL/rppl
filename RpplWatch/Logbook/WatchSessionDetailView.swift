@@ -20,7 +20,6 @@ struct WatchSessionDetailView: View {
     @State private var startCoordinate: CLLocationCoordinate2D?
     @State private var loadPhase: LoadPhase
     @State private var errorText: String?
-    @State private var mapDestination: SessionMapDestination?
 
     private enum LoadPhase: Equatable {
         case loading
@@ -52,35 +51,30 @@ struct WatchSessionDetailView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    switch loadPhase {
-                    case .loading:
-                        ProgressView("Loading session…")
-                            .frame(maxWidth: .infinity, minHeight: 120)
-                    case .failed:
-                        ContentUnavailableView(
-                            "Could not load session",
-                            systemImage: "exclamationmark.triangle",
-                            description: Text(errorText ?? String(localized: "Try again later."))
-                        )
-                        .frame(minHeight: 120)
-                    case .ready:
-                        detailContent
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                switch loadPhase {
+                case .loading:
+                    ProgressView("Loading session…")
+                        .frame(maxWidth: .infinity, minHeight: 120)
+                case .failed:
+                    ContentUnavailableView(
+                        "Could not load session",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text(errorText ?? String(localized: "Try again later."))
+                    )
+                    .frame(minHeight: 120)
+                case .ready:
+                    detailContent
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 10)
-                .padding(.top, 4)
-                .padding(.bottom, 12)
             }
-            .navigationTitle(navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(item: $mapDestination) { destination in
-                SessionStartMapFullscreenView(destination: destination)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.top, 4)
+            .padding(.bottom, 12)
         }
+        .navigationTitle(navigationTitle)
+        .navigationBarTitleDisplayMode(.inline)
         .containerBackground(Color.rpplIdleBackground.gradient, for: .navigation)
         .preferredColorScheme(.dark)
         .task { await loadIfNeeded() }
@@ -90,8 +84,7 @@ struct WatchSessionDetailView: View {
     private var detailContent: some View {
         SessionMapStripView(
             startCoordinate: startCoordinate,
-            mapFrame: mapFrame,
-            onMapTap: { mapDestination = $0 }
+            mapFrame: mapFrame
         )
 
         if let cityName, !cityName.isEmpty {
@@ -236,8 +229,4 @@ struct WatchSessionDetailView: View {
         }
         return try SessionLoader.loadExample(packageURL: url)
     }
-}
-
-extension SessionMapDestination: Identifiable {
-    var id: String { "\(latitude)-\(longitude)-\(distanceMeters)-\(headingDegrees)" }
 }

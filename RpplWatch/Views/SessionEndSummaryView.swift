@@ -8,87 +8,79 @@ struct SessionEndSummaryView: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
 
-    @State private var mapDestination: SessionMapDestination?
-
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    SessionMapStripView(
-                        startCoordinate: startCoordinate,
-                        mapFrame: nil,
-                        onMapTap: { mapDestination = $0 }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                SessionMapStripView(
+                    startCoordinate: startCoordinate,
+                    mapFrame: nil
+                )
+
+                Text("Session complete")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+
+                Text(SessionFormatters.elapsed(summary.duration))
+                    .font(.system(.largeTitle, design: .rounded).bold())
+                    .monospacedDigit()
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .foregroundStyle(Color.rpplIdlePrimary)
+
+                HStack(alignment: .top, spacing: 12) {
+                    SessionMetricRow(
+                        label: "Distance",
+                        value: SessionFormatters.distance(summary.distanceMeters)
                     )
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Text("Session complete")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    Text(SessionFormatters.elapsed(summary.duration))
-                        .font(.system(.largeTitle, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                        .foregroundStyle(Color.rpplIdlePrimary)
-
-                    HStack(alignment: .top, spacing: 12) {
-                        SessionMetricRow(
-                            label: "Distance",
-                            value: SessionFormatters.distance(summary.distanceMeters)
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                        SessionMetricRow(
-                            label: "Rides",
-                            value: "\(summary.rideCount)"
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-
-                    Divider()
-                        .padding(.vertical, 2)
-
-                    Text("Last ride")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-
-                    if summary.didCompleteRide {
-                        SessionMetricRow(
-                            label: "Duration",
-                            value: SessionFormatters.segmentDuration(summary.lastRideDuration)
-                        )
-                        SessionMetricRow(
-                            label: "Distance",
-                            value: SessionFormatters.distance(summary.lastRideMeters)
-                        )
-                        SessionMetricRow(
-                            label: "Laps",
-                            value: "\(summary.lastRideLapCount)"
-                        )
-                    } else {
-                        Text("No rides yet")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    syncLine
-                        .padding(.top, 4)
-
-                    Button("Done") {
-                        session.dismissSessionSummary()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.rpplIdleAccent)
-                    .padding(.top, 6)
+                    SessionMetricRow(
+                        label: "Rides",
+                        value: "\(summary.rideCount)"
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 4)
-                .padding(.bottom, 8)
+
+                Divider()
+                    .padding(.vertical, 2)
+
+                Text("Last ride")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                if summary.didCompleteRide {
+                    SessionMetricRow(
+                        label: "Duration",
+                        value: SessionFormatters.segmentDuration(summary.lastRideDuration)
+                    )
+                    SessionMetricRow(
+                        label: "Distance",
+                        value: SessionFormatters.distance(summary.lastRideMeters)
+                    )
+                    SessionMetricRow(
+                        label: "Laps",
+                        value: "\(summary.lastRideLapCount)"
+                    )
+                } else {
+                    Text("No rides yet")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                syncLine
+                    .padding(.top, 4)
+
+                Button("Done") {
+                    session.dismissSessionSummary()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.rpplIdleAccent)
+                .padding(.top, 6)
             }
-            .navigationDestination(item: $mapDestination) { destination in
-                SessionStartMapFullscreenView(destination: destination)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
         }
         .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
         .preferredColorScheme(.dark)
