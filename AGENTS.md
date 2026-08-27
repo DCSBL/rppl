@@ -38,11 +38,20 @@ Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer
 
 When generating, translating, or rewriting product copy about wakeboarding / cable parks **in any language**, keep authentic community slang and English jargon. Do not replace core terms with literal local equivalents — that reads amateurish in cable-park culture.
 
-**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `set` / `sets` (one cable loop / round — not “laps”), `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
+**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `set` / `sets`, `lap` / `laps`, `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
 
-**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* / *laps* for sets, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+### Set vs lap (do not conflate)
 
-Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webzine/wakeboarding-glossary.html) (**Set**: a round of wakeboard).
+| Term | Meaning | Product / code |
+|------|---------|----------------|
+| **Set** | Rider’s allocated turn/block — dock until time or turn is up (falls don’t end the set; walk back and continue). Cable: often a timed block (e.g. 10 min) or a booked “N-lap set”. Boat: ~15–20 min (or N falls) before switching. Glossary shorthand: “a round of wakeboarding.” | Product language for turn allocation. **Not** what `LapRideTracker` counts. |
+| **Lap** | One complete circuit of a full-size cable — dock → every corner/tower in order → back to dock without falling/letting go. A set often contains multiple laps. Half circuit after a wipeout = half a lap; the set continues. | Crossing counter (`LapRideTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**. |
+
+Never call a circuit crossing a “set”. Never call an allocated turn a “lap”. Derived JSON key is `lapCount` (accept legacy `setCount` from the short-lived slang mis-rename; encode `lapCount` only).
+
+**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* as stand-ins for ride/lap/set jargon, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"lap(s)"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+
+Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webzine/wakeboarding-glossary.html) (set ≈ round of wakeboarding; distinguish from lap = full circuit).
 
 Applies to UI strings (`.xcstrings`), Info.plist usage text, App Store / marketing copy, and agent-written prose — not to detection code identifiers in Core (those stay opaque English strings per hard constraint 4).
 
@@ -58,7 +67,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Hard constraints (do not “helpfully” break)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never `HKWorkoutEvent.lap` unless Fitness can show a lap count (Apple API name — product cable rounds are **sets**, not laps). See hard constraint 3.
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never emit `HKWorkoutEvent.lap` unless Fitness can show a lap count we fill (Apple API). In-app cable **laps** stay in `LapRideTracker` / derived stats — do not confuse with product **sets** (allocated turn). See hard constraint 3 + Set vs lap above.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
@@ -86,7 +95,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 | Task | Start here |
 |------|------------|
 | Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [Docs/RideDetection.md](Docs/RideDetection.md) · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `LapRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |

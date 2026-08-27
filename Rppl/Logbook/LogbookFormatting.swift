@@ -34,18 +34,18 @@ enum LogbookFormatting {
         String(localized: "\(count) rides")
     }
 
-    static func setCount(_ count: Int) -> String {
-        String(localized: "\(count) sets")
+    static func lapCount(_ count: Int) -> String {
+        String(localized: "\(count) laps")
     }
 
     static func sessionCount(_ count: Int) -> String {
         String(localized: "\(count) total")
     }
 
-    static func totalsFooter(rides: Int, sets: Int) -> String {
+    static func totalsFooter(rides: Int, laps: Int) -> String {
         let ridesText = String(localized: "\(rides) total rides")
-        let setsText = setCount(sets)
-        return String(localized: "\(ridesText) · \(setsText)")
+        let lapsText = lapCount(laps)
+        return String(localized: "\(ridesText) · \(lapsText)")
     }
 
     static func sessionDate(_ date: Date) -> String {
@@ -71,7 +71,7 @@ enum LogbookFormatting {
         switch highlight {
         case .longest: return String(localized: "Longest")
         case .mostWaterTime: return String(localized: "Most water time")
-        case .mostSets: return String(localized: "Most sets")
+        case .mostLaps: return String(localized: "Most laps")
         }
     }
 

@@ -211,7 +211,7 @@ struct LogbookSessionDetailView: View {
                         label: "Avg speed"
                     )
                     statTile("\(stats.rideCount)", label: "Rides")
-                    statTile("\(stats.totalSetCount)", label: "Sets")
+                    statTile("\(stats.totalLapCount)", label: "Laps")
                     statTile(
                         "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
                             + LogbookFormatting.duration(stats.ridingDuration),
@@ -593,7 +593,7 @@ private struct RideDetailCard: View {
                     LogbookFormatting.distanceKilometers(ride.distanceMeters),
                     label: "Distance"
                 )
-                rideStatTile("\(ride.setCount)", label: "Sets")
+                rideStatTile("\(ride.lapCount)", label: "Laps")
                 rideStatTile(
                     maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Max speed"

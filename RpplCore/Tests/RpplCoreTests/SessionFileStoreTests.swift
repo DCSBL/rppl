@@ -286,7 +286,7 @@ struct SessionFileStoreTests {
         #expect(package.water.isEmpty)
     }
 
-    @Test func transferPackageForwardMigratesDerivedLapCount() throws {
+    @Test func transferPackageForwardMigratesDerivedSetCount() throws {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let json = Data(
@@ -326,7 +326,7 @@ struct SessionFileStoreTests {
                       "endedAt": "2024-01-01T00:06:00Z",
                       "duration": 300,
                       "distanceMeters": 800,
-                      "lapCount": 4,
+                      "setCount": 4,
                       "highlights": []
                     }
                   ]
@@ -336,7 +336,7 @@ struct SessionFileStoreTests {
             """#.utf8
         )
         let package = try decoder.decode(SessionTransferPackage.self, from: json)
-        #expect(package.derived?.stats.rides.first?.setCount == 4)
+        #expect(package.derived?.stats.rides.first?.lapCount == 4)
         #expect(package.derived?.isCurrentAnalyzer == false)
     }
 

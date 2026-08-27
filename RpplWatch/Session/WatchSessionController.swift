@@ -75,8 +75,8 @@ final class WatchSessionController: NSObject {
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     var rideCount: Int { liveRideTracker.rideCount }
     var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
-    var currentRideSetCount: Int { liveRideTracker.currentRideSetCount }
-    var lastRideSetCount: Int { liveRideTracker.lastRideSetCount }
+    var currentRideLapCount: Int { liveRideTracker.currentRideLapCount }
+    var lastRideLapCount: Int { liveRideTracker.lastRideLapCount }
     /// Live meters while riding; frozen last-ride meters when inactive (`0 m` before first ride).
     var displayRideMeters: Double {
         liveRideTracker.isRideOngoing

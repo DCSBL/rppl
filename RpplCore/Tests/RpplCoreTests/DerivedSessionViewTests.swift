@@ -188,7 +188,7 @@ struct DerivedSessionViewTests {
         #expect(decoded == view)
     }
 
-    @Test func rideSegmentStatsForwardMigratesLapCount() throws {
+    @Test func rideSegmentStatsForwardMigratesSetCountToLapCount() throws {
         let json = """
         {
           "index": 0,
@@ -196,26 +196,26 @@ struct DerivedSessionViewTests {
           "endedAt": "2024-01-01T00:10:00Z",
           "duration": 600,
           "distanceMeters": 1200,
-          "lapCount": 3,
+          "setCount": 3,
           "highlights": []
         }
         """
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let ride = try decoder.decode(RideSegmentStats.self, from: Data(json.utf8))
-        #expect(ride.setCount == 3)
+        #expect(ride.lapCount == 3)
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let encoded = try encoder.encode(ride)
         let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
-        #expect(object?["setCount"] as? Int == 3)
-        #expect(object?["lapCount"] == nil)
+        #expect(object?["lapCount"] as? Int == 3)
+        #expect(object?["setCount"] == nil)
     }
 
-    @Test func ensureRebuildsLegacyLapCountSidecar() throws {
+    @Test func ensureRebuildsLegacySetCountSidecar() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("DerivedLapMigrate-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("DerivedSetMigrate-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let store = SessionFileStore(rootURL: root)
@@ -240,10 +240,10 @@ struct DerivedSessionViewTests {
             sessionId: manifest.sessionId
         )
 
-        // Analyzer v1 sidecar still keyed `lapCount` (pre-slang rename).
+        // Intermediate slang sidecar keyed `setCount` (mis-rename of circuit crossings).
         let legacyJSON = """
         {
-          "analyzerVersion": 1,
+          "analyzerVersion": 2,
           "stats": {
             "startedAt": "2023-11-14T22:16:40Z",
             "endedAt": "2023-11-14T22:18:40Z",
@@ -261,7 +261,7 @@ struct DerivedSessionViewTests {
                 "endedAt": "2023-11-14T22:17:50Z",
                 "duration": 60,
                 "distanceMeters": 400,
-                "lapCount": 2,
+                "setCount": 2,
                 "highlights": []
               }
             ]
@@ -275,7 +275,7 @@ struct DerivedSessionViewTests {
         try Data(legacyJSON.utf8).write(to: store.derivedViewURL(sessionId: manifest.sessionId))
 
         let read = try store.readDerivedView(sessionId: manifest.sessionId)
-        #expect(read?.stats.rides.first?.setCount == 2)
+        #expect(read?.stats.rides.first?.lapCount == 2)
         #expect(read?.cityName == "Almere")
         #expect(read?.isCurrentAnalyzer == false)
 
@@ -285,8 +285,8 @@ struct DerivedSessionViewTests {
         let rewritten = try store.readDerivedView(sessionId: manifest.sessionId)
         let data = try Data(contentsOf: store.derivedViewURL(sessionId: manifest.sessionId))
         let text = String(data: data, encoding: .utf8) ?? ""
-        #expect(text.contains("setCount"))
-        #expect(!text.contains("lapCount"))
+        #expect(text.contains("lapCount"))
+        #expect(!text.contains("setCount"))
         #expect(rewritten?.isCurrentAnalyzer == true)
     }
 

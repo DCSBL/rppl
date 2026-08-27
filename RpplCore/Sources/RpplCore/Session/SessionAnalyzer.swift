@@ -1,8 +1,9 @@
 import Foundation
 
-/// Bump when `SessionStatsBuilder` / set / speed / map-frame logic changes UI numbers.
+/// Bump when `SessionStatsBuilder` / lap / speed / map-frame logic changes UI numbers.
 /// Stale `derived/view.json` regenerates from raw on ensure.
-/// v2: cable-park crossing field renamed `lapCount` → `setCount` (decode still accepts `lapCount`).
+/// v2: brief slang mis-rename wrote `setCount` (circuit crossings).
+/// v3: canonical key is `lapCount` again; decode accepts `setCount` then rewrite.
 public enum SessionAnalyzer {
-    public static let version = 2
+    public static let version = 3
 }

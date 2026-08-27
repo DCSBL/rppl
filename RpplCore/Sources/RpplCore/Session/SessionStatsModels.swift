@@ -8,8 +8,8 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var endedAt: Date
     public var duration: TimeInterval
     public var distanceMeters: Double
-    /// Crossing-based sets for this ride (0 until assumed return to start).
-    public var setCount: Int
+    /// Crossing-based laps for this ride (0 until assumed return to start).
+    public var lapCount: Int
     /// Best sustained-window mean speed (km/h); see `LocationSpeedStats.sustainedSpeedKmh`.
     public var sustainedSpeedKmh: Double?
     /// Trimmed path average (km/h); see `LocationSpeedStats.trimmedAverageSpeedKmh`.
@@ -25,7 +25,7 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        setCount: Int = 0,
+        lapCount: Int = 0,
         sustainedSpeedKmh: Double? = nil,
         averageSpeedKmh: Double? = nil,
         peakSpeedKmh: Double? = nil,
@@ -36,7 +36,7 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.endedAt = endedAt
         self.duration = duration
         self.distanceMeters = distanceMeters
-        self.setCount = setCount
+        self.lapCount = lapCount
         self.sustainedSpeedKmh = sustainedSpeedKmh
         self.averageSpeedKmh = averageSpeedKmh
         self.peakSpeedKmh = peakSpeedKmh
@@ -50,11 +50,11 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         endedAt = try container.decode(Date.self, forKey: .endedAt)
         duration = try container.decode(TimeInterval.self, forKey: .duration)
         distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
-        // Forward migrate pre-slang `lapCount` → `setCount` (analyzer v1 sidecars / transfers).
-        if let sets = try container.decodeIfPresent(Int.self, forKey: .setCount) {
-            setCount = sets
+        // Canonical `lapCount`. Accept short-lived slang mis-rename `setCount` (forward only).
+        if let laps = try container.decodeIfPresent(Int.self, forKey: .lapCount) {
+            lapCount = laps
         } else {
-            setCount = try container.decodeIfPresent(Int.self, forKey: .lapCount) ?? 0
+            lapCount = try container.decodeIfPresent(Int.self, forKey: .setCount) ?? 0
         }
         sustainedSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .sustainedSpeedKmh)
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
@@ -69,7 +69,7 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
         try container.encode(endedAt, forKey: .endedAt)
         try container.encode(duration, forKey: .duration)
         try container.encode(distanceMeters, forKey: .distanceMeters)
-        try container.encode(setCount, forKey: .setCount)
+        try container.encode(lapCount, forKey: .lapCount)
         try container.encodeIfPresent(sustainedSpeedKmh, forKey: .sustainedSpeedKmh)
         try container.encodeIfPresent(averageSpeedKmh, forKey: .averageSpeedKmh)
         try container.encodeIfPresent(peakSpeedKmh, forKey: .peakSpeedKmh)
@@ -78,9 +78,9 @@ public struct RideSegmentStats: Codable, Equatable, Sendable, Identifiable {
 
     private enum CodingKeys: String, CodingKey {
         case index, startedAt, endedAt, duration, distanceMeters
-        case setCount
-        /// Legacy key from analyzer v1 / pre-slang rename.
         case lapCount
+        /// Intermediate slang mis-rename (circuit crossings briefly called sets).
+        case setCount
         case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, highlights
     }
 }
@@ -126,8 +126,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
     }
 
     /// Sum of per-ride crossing counts.
-    public var totalSetCount: Int {
-        rides.reduce(0) { $0 + $1.setCount }
+    public var totalLapCount: Int {
+        rides.reduce(0) { $0 + $1.lapCount }
     }
 
     public init(

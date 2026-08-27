@@ -58,7 +58,7 @@ Do **not** dual-write walking+running or swimming distance (pollutes those Healt
 
 **Product Pause** (Watch Pause button) is separate from detection `inactive`: it freezes the session clock, flushes then stops GPS/motion, **pauses the HK session**, and writes `inactive` detection lines with `detectorId` `product_pause` / `product_resume` (intentional sensor gap). Resume stays `inactive` until live detection re-proves `riding`.
 
-**Rides vs sets in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **sets** (`SetRideTracker`). Sets stay in-app / export only. Never emit `HKWorkoutEvent.lap` (Apple Fitness lap API) unless Fitness shows a lap count we can fill — product term is **set**, not lap.
+**Rides vs laps in Health:** Fitness intervals are detection **rides and dock waits**, not cable-park **laps** (`LapRideTracker` circuit crossings). Laps stay in-app / derived export. Never emit `HKWorkoutEvent.lap` unless Fitness can show a lap count we fill (Apple API). Product **set** = allocated turn — distinct from lap; see AGENTS Set vs lap.
 
 If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
 

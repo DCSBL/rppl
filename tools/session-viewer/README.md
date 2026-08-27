@@ -10,4 +10,4 @@ npm run dev
 
 Open folder with `manifest.json`, `detections.jsonl` (or legacy `assumptions.jsonl`), `location-*.jsonl`. Or open Share export `.json`.
 
-Top summary: distance, rides, sets, peak/avg speed, riding time (derived offline, mirrors Core). Timeline: green = riding, blue = inactive, grey = unsure; yellow verticals = set crossings. Track rings = set start anchors. Playhead scrubber + chart/track click show time, speed, and location.
+Top summary: distance, rides, laps, peak/avg speed, riding time (derived offline, mirrors Core). Timeline: green = riding, blue = inactive, grey = unsure; yellow verticals = lap crossings. Track rings = lap start anchors. Playhead scrubber + chart/track click show time, speed, and location.

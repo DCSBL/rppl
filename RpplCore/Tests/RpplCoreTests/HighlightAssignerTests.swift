@@ -9,7 +9,7 @@ private func ride(
     duration: TimeInterval,
     distance: Double,
     speed: Double? = nil,
-    sets: Int = 0
+    laps: Int = 0
 ) -> RideSegmentStats {
     RideSegmentStats(
         index: index,
@@ -17,7 +17,7 @@ private func ride(
         endedAt: t0.addingTimeInterval(duration),
         duration: duration,
         distanceMeters: distance,
-        setCount: sets,
+        lapCount: laps,
         sustainedSpeedKmh: speed
     )
 }
@@ -79,18 +79,18 @@ struct HighlightAssignerTests {
 
     @Test func sessionHidesMostWaterWhenSameAsLongest() {
         let map = HighlightAssigner.assignSessionHighlights([
-            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 2000, setCount: 5),
-            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1000, setCount: 12),
+            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 2000, lapCount: 5),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1000, lapCount: 12),
         ])
         #expect(map["a"] == [.longest])
-        #expect(map["b"] == [.mostSets])
+        #expect(map["b"] == [.mostLaps])
         #expect(map["a"]?.contains(.mostWaterTime) != true)
     }
 
     @Test func sessionMostWaterWhenDifferent() {
         let map = HighlightAssigner.assignSessionHighlights([
-            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 500, setCount: 2),
-            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1500, setCount: 2),
+            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 500, lapCount: 2),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1500, lapCount: 2),
         ])
         #expect(map["a"] == [.longest])
         #expect(map["b"] == [.mostWaterTime])
