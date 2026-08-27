@@ -70,6 +70,8 @@ final class WatchSessionController: NSObject {
 
     /// `workout` when HK session started; `sensorsOnly` when Health denied / simulator fallback.
     var recordingMode = "none"
+    /// Mirrors `WKInterfaceDevice.current().isWaterLockEnabled` (refreshed by controls UI).
+    var isWaterLockEnabled = false
     var motionRecordingEnabled = false
 
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
@@ -105,6 +107,7 @@ final class WatchSessionController: NSObject {
     /// True while an HK ride activity is open (ended on detection `inactive`).
     var hkRideActivityOpen = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
+    var workoutRunningContinuation: CheckedContinuation<Void, Never>?
     var hkRideDistanceMeters = 0.0
     var hkRideDistanceAnchorMeters = 0.0
     /// Ride windows for HealthKit distance samples and interval metadata.
