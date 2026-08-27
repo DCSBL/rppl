@@ -1,6 +1,11 @@
 import SwiftUI
 import RpplCore
 
+enum IdlePickerPage: Hashable {
+    case activity(String)
+    case sync
+}
+
 struct IdleSessionView: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService

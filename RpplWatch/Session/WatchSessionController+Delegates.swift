@@ -189,8 +189,8 @@ extension WatchSessionController: CMWaterSubmersionManagerDelegate {
         }
     }
 
-    /// Collapse `CMWaterSubmersionDepthState` into opaque session strings.
-    static func normalizedWaterSubmersionState(_ state: CMWaterSubmersionDepthState) -> String {
+    /// Collapse depth zones into opaque session strings.
+    static func normalizedWaterSubmersionState(_ state: CMWaterSubmersionMeasurement.DepthState) -> String {
         switch state {
         case .unknown:
             return "unknown"
