@@ -91,9 +91,9 @@ struct SessionEndSummaryView: View {
     }
 
     private func loadMapTracks() async {
-        if let derived = try? await StoreIO.runOffMain {
+        if let derived = try? await StoreIO.runOffMain({
             try Self.store.readDerivedView(sessionId: summary.sessionId)
-        } {
+        }) {
             mapFrame = derived.mapFrame
             if let tracks = derived.mapTracks {
                 mapTracks = tracks

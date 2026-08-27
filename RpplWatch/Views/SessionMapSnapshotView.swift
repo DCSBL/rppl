@@ -44,6 +44,9 @@ enum SessionMapSnapshotSource: Sendable {
 }
 
 enum SessionMapSnapshotRenderer {
+    private static let trackStrokeColor = UIColor(red: 0.18, green: 0.78, blue: 0.71, alpha: 1)
+    private static let startPinColor = UIColor(red: 1, green: 0.23, blue: 0.19, alpha: 1)
+
     static func render(
         source: SessionMapSnapshotSource,
         size: CGSize,
@@ -158,7 +161,7 @@ enum SessionMapSnapshotRenderer {
                     context: context,
                     snapshot: snapshot,
                     coordinates: data.averagedTrack,
-                    color: UIColor.systemTeal,
+                    color: trackStrokeColor,
                     lineWidth: max(2, image.size.width * 0.018)
                 )
             }
@@ -170,7 +173,7 @@ enum SessionMapSnapshotRenderer {
                     context: context,
                     snapshot: snapshot,
                     coordinates: track,
-                    color: UIColor.systemTeal.withAlphaComponent(opacity),
+                    color: trackStrokeColor.withAlphaComponent(opacity),
                     lineWidth: lineWidth
                 )
             }
@@ -219,7 +222,7 @@ enum SessionMapSnapshotRenderer {
             longitude: coordinate.longitude
         ))
         let radius = max(3, snapshot.image.size.width * 0.012)
-        context.setFillColor(UIColor.systemRed.cgColor)
+        context.setFillColor(startPinColor.cgColor)
         context.fillEllipse(in: CGRect(
             x: point.x - radius,
             y: point.y - radius,

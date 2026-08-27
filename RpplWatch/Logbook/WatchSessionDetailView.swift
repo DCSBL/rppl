@@ -154,11 +154,13 @@ struct WatchSessionDetailView: View {
 
     private func loadMapDataIfNeeded(sessionId: String, stats: SessionStats) async {
         if mapTracks == nil {
-            if let derived = try? await StoreIO.runOffMain {
+            if let derived = try? await StoreIO.runOffMain({
                 try Self.store.readDerivedView(sessionId: sessionId)
-            }, let tracks = derived.mapTracks {
-                mapTracks = tracks
+            }) {
                 mapFrame = derived.mapFrame
+                if let tracks = derived.mapTracks {
+                    mapTracks = tracks
+                }
             }
         }
 
