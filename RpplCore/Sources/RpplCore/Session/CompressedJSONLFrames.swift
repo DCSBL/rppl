@@ -1,4 +1,8 @@
+#if canImport(Compression)
 import Compression
+#else
+import CZlib
+#endif
 import Foundation
 
 public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
@@ -14,6 +18,9 @@ public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
 /// `[UInt32 BE compressedLength][zlib payload]`
 ///
 /// Concatenated frames decompress to UTF-8 JSONL (newline-delimited objects).
+///
+/// Apple platforms use Compression (`COMPRESSION_ZLIB`); Linux CI uses system zlib.
+/// Both speak RFC 1950 zlib so frames round-trip across hosts.
 public enum CompressedJSONLFrames {
     public static func makeFrame(jsonlUTF8: Data) throws -> Data {
         guard !jsonlUTF8.isEmpty else { throw CompressedJSONLFrameError.emptyPayload }
@@ -57,6 +64,7 @@ public enum CompressedJSONLFrames {
     }
 
     private static func compress(_ source: Data) throws -> Data {
+#if canImport(Compression)
         let dstCapacity = source.count + source.count / 16 + 64
         var dest = Data(count: dstCapacity)
         let written = dest.withUnsafeMutableBytes { destPtr -> Int in
@@ -77,9 +85,25 @@ public enum CompressedJSONLFrames {
         }
         guard written > 0 else { throw CompressedJSONLFrameError.compressionFailed }
         return dest.prefix(written)
+#else
+        var destLen = uLongf(compressBound(uLong(source.count)))
+        var dest = Data(count: Int(destLen))
+        let status = dest.withUnsafeMutableBytes { destPtr -> Int32 in
+            source.withUnsafeBytes { srcPtr -> Int32 in
+                guard let src = srcPtr.bindMemory(to: UInt8.self).baseAddress,
+                      let dst = destPtr.bindMemory(to: UInt8.self).baseAddress else {
+                    return Z_MEM_ERROR
+                }
+                return compress2(dst, &destLen, src, uLong(source.count), Z_DEFAULT_COMPRESSION)
+            }
+        }
+        guard status == Z_OK else { throw CompressedJSONLFrameError.compressionFailed }
+        return dest.prefix(Int(destLen))
+#endif
     }
 
     private static func decompress(_ source: Data) throws -> Data {
+#if canImport(Compression)
         var capacity = max(source.count * 8, 64 * 1024)
         for _ in 0..<8 {
             var dest = Data(count: capacity)
@@ -105,6 +129,31 @@ public enum CompressedJSONLFrames {
             capacity *= 2
         }
         throw CompressedJSONLFrameError.decompressionFailed
+#else
+        var capacity = max(source.count * 8, 64 * 1024)
+        for _ in 0..<8 {
+            var destLen = uLongf(capacity)
+            var dest = Data(count: capacity)
+            let status = dest.withUnsafeMutableBytes { destPtr -> Int32 in
+                source.withUnsafeBytes { srcPtr -> Int32 in
+                    guard let src = srcPtr.bindMemory(to: UInt8.self).baseAddress,
+                          let dst = destPtr.bindMemory(to: UInt8.self).baseAddress else {
+                        return Z_MEM_ERROR
+                    }
+                    return uncompress(dst, &destLen, src, uLong(source.count))
+                }
+            }
+            if status == Z_OK {
+                return dest.prefix(Int(destLen))
+            }
+            if status == Z_BUF_ERROR {
+                capacity *= 2
+                continue
+            }
+            throw CompressedJSONLFrameError.decompressionFailed
+        }
+        throw CompressedJSONLFrameError.decompressionFailed
+#endif
     }
 
     private static func lengthPrefixed(_ payload: Data) -> Data {
