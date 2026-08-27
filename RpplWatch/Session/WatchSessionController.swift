@@ -158,11 +158,9 @@ final class WatchSessionController: NSObject {
     var motionUpdatesStarted = false
     var activityUpdatesStarted = false
     var sessionWaterSamples: [WaterTemperatureSample] = []
-    #if RPPL_WEATHERKIT
     var airWeatherSnapshot: AirWeatherSnapshot?
     var airWeatherFetchTask: Task<Void, Never>?
     var airWeatherAttempted = false
-    #endif
 
     let workoutType = HKObjectType.workoutType()
     let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!

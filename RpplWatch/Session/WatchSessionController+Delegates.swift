@@ -34,9 +34,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             appendToLocationRing(sample)
             processLocationSample(sample)
             processDetectionTick(timestamp: loc.timestamp)
-            #if RPPL_WEATHERKIT
             requestAirWeatherIfNeeded(from: loc)
-            #endif
         }
     }
 

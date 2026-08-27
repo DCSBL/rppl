@@ -1,4 +1,3 @@
-#if RPPL_WEATHERKIT
 import CoreLocation
 import Foundation
 import HealthKit
@@ -124,4 +123,3 @@ extension WeatherCondition {
         }
     }
 }
-#endif
