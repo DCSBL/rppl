@@ -151,24 +151,48 @@ struct LogbookSessionDetailView: View {
                     : (sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
             )
         } else if let sessionMapTrackData {
-            SessionMapView(
-                sessionMapData: sessionMapTrackData,
-                allowsInteraction: false,
-                showsStyleToggle: true,
-                showsTrackStyleToggle: true,
-                fullscreenTitle: navigationTitle,
-                preferredFrame: mapFrame
-            )
-                .frame(height: 300)
-                .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
-                .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
-                .overlay(alignment: .center) {
-                    if tracksLoading, sessionMapTrackData.averagedTrack.isEmpty {
-                        ProgressView()
-                            .padding(12)
-                            .background(.ultraThinMaterial, in: Capsule())
-                    }
+            ZStack(alignment: .topLeading) {
+                SessionMapView(
+                    sessionMapData: sessionMapTrackData,
+                    allowsInteraction: false,
+                    preferredFrame: mapFrame
+                )
+                .allowsHitTesting(false)
+
+                NavigationLink {
+                    SessionMapFullscreenView(
+                        sessionMapData: sessionMapTrackData,
+                        title: navigationTitle,
+                        preferredFrame: mapFrame
+                    )
+                } label: {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+
+                SessionMapControlCluster(
+                    showsStyleToggle: true,
+                    showsTrackStyleToggle: true,
+                    hasSessionData: true
+                )
+                .padding(10)
+            }
+            .frame(height: 300)
+            .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+            .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(String(localized: "Session map"))
+            .accessibilityHint(String(localized: "Shows full-screen map"))
+            .overlay(alignment: .center) {
+                if tracksLoading, sessionMapTrackData.averagedTrack.isEmpty {
+                    ProgressView()
+                        .padding(12)
+                        .background(.ultraThinMaterial, in: Capsule())
+                }
+            }
         } else {
             mapPlaceholder("No GPS track")
         }

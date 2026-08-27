@@ -12,8 +12,6 @@ struct SessionMapView: View {
     var showsStyleToggle: Bool = false
     /// Track-style toggle (averaged / heatmap); session overview only.
     var showsTrackStyleToggle: Bool = true
-    /// When set with session data, tapping the map body pushes full-screen map.
-    var fullscreenTitle: String? = nil
     var preferredFrame: MapTrackFrame? = nil
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -27,7 +25,6 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
-        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = locations.count >= 2 ? [locations] : []
@@ -35,7 +32,6 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
-        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -44,7 +40,6 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
-        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = tracks.filter { $0.count >= 2 }
@@ -52,7 +47,6 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
-        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -61,7 +55,6 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         showsTrackStyleToggle: Bool = true,
-        fullscreenTitle: String? = nil,
         preferredFrame: MapTrackFrame? = nil
     ) {
         self.tracks = []
@@ -69,7 +62,6 @@ struct SessionMapView: View {
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
         self.showsTrackStyleToggle = showsTrackStyleToggle
-        self.fullscreenTitle = fullscreenTitle
         self.preferredFrame = preferredFrame
     }
 
@@ -86,66 +78,58 @@ struct SessionMapView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .topLeading) {
-                Map(position: $position, interactionModes: interactionModes) {
-                    if let sessionMapData {
-                        sessionMapContent(sessionMapData)
-                    } else {
-                        rideMapContent
-                    }
+        ZStack(alignment: .topLeading) {
+            Map(position: $position, interactionModes: interactionModes) {
+                if let sessionMapData {
+                    sessionMapContent(sessionMapData)
+                } else {
+                    rideMapContent
                 }
-                .mapStyle(mapStyle)
-                .background {
-                    if let fullscreenTitle, let sessionMapData {
-                        NavigationLink {
-                            SessionMapFullscreenView(
-                                sessionMapData: sessionMapData,
-                                title: fullscreenTitle,
-                                preferredFrame: preferredFrame
-                            )
-                        } label: {
-                            Color.clear
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(String(localized: "Session map"))
-                        .accessibilityHint(String(localized: "Shows full-screen map"))
-                    }
-                }
+            }
+            .mapStyle(mapStyle)
+            .allowsHitTesting(allowsInteraction)
 
-                if showsStyleToggle || (showsTrackStyleToggle && sessionMapData != nil) {
-                    mapControlCluster
-                        .zIndex(1)
-                }
+            if showsStyleToggle || (showsTrackStyleToggle && sessionMapData != nil) {
+                SessionMapControlCluster(
+                    showsStyleToggle: showsStyleToggle,
+                    showsTrackStyleToggle: showsTrackStyleToggle,
+                    hasSessionData: sessionMapData != nil
+                )
+                .padding(10)
+                .zIndex(1)
             }
-            .overlay(alignment: .bottomTrailing) {
-                if allowsInteraction, showReset {
-                    resetButton
-                }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if allowsInteraction, showReset {
+                resetButton
             }
-            .onMapCameraChange(frequency: .onEnd) { context in
-                guard allowsInteraction else { return }
-                position = .camera(context.camera)
-                guard let fitted else { return }
-                showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
+        }
+        .background {
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear {
+                        updateFit(for: geo.size, forceApply: true)
+                    }
+                    .onChange(of: geo.size) { _, newSize in
+                        updateFit(for: newSize, forceApply: !showReset)
+                    }
+                    .onChange(of: dataSignature) { _, _ in
+                        showReset = false
+                        updateFit(for: geo.size, forceApply: true)
+                    }
+                    .onChange(of: preferredFrameSignature) { _, _ in
+                        if fitCoordinates.count < 2, preferredFrame != nil {
+                            showReset = false
+                            updateFit(for: geo.size, forceApply: true)
+                        }
+                    }
             }
-            .onAppear {
-                updateFit(for: geo.size, forceApply: true)
-            }
-            .onChange(of: geo.size) { _, newSize in
-                updateFit(for: newSize, forceApply: !showReset)
-            }
-            .onChange(of: dataSignature) { _, _ in
-                showReset = false
-                updateFit(for: geo.size, forceApply: true)
-            }
-            .onChange(of: preferredFrameSignature) { _, _ in
-                if fitCoordinates.count < 2, preferredFrame != nil {
-                    showReset = false
-                    updateFit(for: geo.size, forceApply: true)
-                }
-            }
+        }
+        .onMapCameraChange(frequency: .onEnd) { context in
+            guard allowsInteraction else { return }
+            position = .camera(context.camera)
+            guard let fitted else { return }
+            showReset = !Self.isNearFittedCamera(context.camera, fit: fitted)
         }
     }
 
@@ -196,18 +180,6 @@ struct SessionMapView: View {
         }
     }
 
-    private var mapControlCluster: some View {
-        HStack(spacing: 8) {
-            if showsStyleToggle {
-                mapStyleToggle
-            }
-            if showsTrackStyleToggle, sessionMapData != nil {
-                trackStyleToggle
-            }
-        }
-        .padding(10)
-    }
-
     private var resetButton: some View {
         Button {
             applyFittedCamera(animated: true)
@@ -223,46 +195,6 @@ struct SessionMapView: View {
         .padding(.trailing, 16)
         .padding(.bottom, 16)
         .accessibilityLabel("Reset map")
-    }
-
-    private var mapStyleToggle: some View {
-        Button {
-            usesSatellite.toggle()
-        } label: {
-            Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(Color.rpplText)
-                .frame(width: 36, height: 36)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(
-            usesSatellite
-                ? String(localized: "Show standard map")
-                : String(localized: "Show satellite map")
-        )
-    }
-
-    private var trackStyleToggle: some View {
-        Button {
-            trackStyleRaw = trackStyle == .averaged
-                ? SessionMapTrackStyle.heatmap.rawValue
-                : SessionMapTrackStyle.averaged.rawValue
-        } label: {
-            Image(systemName: trackStyle == .averaged
-                ? "point.topleft.down.curvedto.point.bottomright.up"
-                : "square.3.layers.3d")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(Color.rpplText)
-                .frame(width: 36, height: 36)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(
-            trackStyle == .averaged
-                ? String(localized: "Show heatmap")
-                : String(localized: "Show averaged track")
-        )
     }
 
     private var preferredFrameSignature: String {
@@ -392,6 +324,63 @@ private struct ColoredSpeedSegment {
 private extension MapCoordinate {
     var clLocationCoordinate2D: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+}
+
+/// Satellite + session track-style toggles for inline maps (sibling layer above NavigationLink).
+struct SessionMapControlCluster: View {
+    var showsStyleToggle: Bool = false
+    var showsTrackStyleToggle: Bool = false
+    var hasSessionData: Bool = false
+
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @AppStorage(AppSettingsKey.sessionMapTrackStyle) private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
+
+    private var trackStyle: SessionMapTrackStyle {
+        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if showsStyleToggle {
+                Button {
+                    usesSatellite.toggle()
+                } label: {
+                    Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Color.rpplText)
+                        .frame(width: 36, height: 36)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    usesSatellite
+                        ? String(localized: "Show standard map")
+                        : String(localized: "Show satellite map")
+                )
+            }
+            if showsTrackStyleToggle, hasSessionData {
+                Button {
+                    trackStyleRaw = trackStyle == .averaged
+                        ? SessionMapTrackStyle.heatmap.rawValue
+                        : SessionMapTrackStyle.averaged.rawValue
+                } label: {
+                    Image(systemName: trackStyle == .averaged
+                        ? "point.topleft.down.curvedto.point.bottomright.up"
+                        : "square.3.layers.3d")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Color.rpplText)
+                        .frame(width: 36, height: 36)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    trackStyle == .averaged
+                        ? String(localized: "Show heatmap")
+                        : String(localized: "Show averaged track")
+                )
+            }
+        }
     }
 }
 
