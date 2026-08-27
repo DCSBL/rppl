@@ -206,23 +206,13 @@ final class PhoneConnectivityService: NSObject {
             }
         } catch let error as SessionExportImportError {
             throw error
-        } catch let error as DecodingError {
-            throw SessionExportImportError.unreadable(SessionExportImportError.message(for: error))
         } catch {
-            throw SessionExportImportError.unreadable(Self.userFacingImportMessage(for: error))
+            throw SessionExportImportError.unreadable(SessionExportImportError.detail(for: error))
         }
         sessionsRevision += 1
         PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "export-file import OK \(sessionId.prefix(8))…")
         return sessionId
-    }
-
-    private static func userFacingImportMessage(for error: Error) -> String {
-        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-        if description.isEmpty {
-            return String(localized: "Something went wrong while importing the session.")
-        }
-        return description
     }
 }
 
@@ -230,34 +220,52 @@ enum SessionExportImportError: Error {
     case alreadyImported(sessionId: String)
     case unreadable(String)
 
-    static func message(for error: DecodingError) -> String {
+    /// Diagnostic text for alerts — coding path + Foundation debugDescription, not vague localized strings.
+    static func detail(for error: Error) -> String {
+        if let decoding = error as? DecodingError {
+            return decodingDetail(for: decoding)
+        }
+        if let importError = error as? SessionExportImportError,
+           case .unreadable(let message) = importError {
+            return message
+        }
+        let ns = error as NSError
+        if let debug = ns.userInfo[NSDebugDescriptionErrorKey] as? String {
+            let trimmed = debug.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        let localized = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !localized.isEmpty { return localized }
+        return String(describing: error)
+    }
+
+    private static func decodingDetail(for error: DecodingError) -> String {
         switch error {
         case .keyNotFound(let key, let context):
-            let path = codingPathString(context.codingPath + [key])
-            return String(
-                localized: "This export is missing \(path). Re-export from a current Rppl build, or pick a different file."
-            )
+            return pathPrefixed(context, extraKey: key)
         case .valueNotFound(_, let context):
-            let path = codingPathString(context.codingPath)
-            return String(
-                localized: "This export has an empty value at \(path). Re-export from Rppl and try again."
-            )
+            return pathPrefixed(context)
         case .typeMismatch(_, let context):
-            let path = codingPathString(context.codingPath)
-            return String(
-                localized: "This export has an unexpected value at \(path). Re-export from Rppl and try again."
-            )
+            return pathPrefixed(context)
         case .dataCorrupted(let context):
-            let path = codingPathString(context.codingPath)
-            if path.isEmpty {
-                return String(localized: "This file is not a Rppl session export JSON.")
+            var text = pathPrefixed(context)
+            if let underlying = context.underlyingError {
+                text += " — \(underlying)"
             }
-            return String(
-                localized: "This export looks corrupted at \(path). Re-export from Rppl and try again."
-            )
+            return text
         @unknown default:
-            return String(localized: "Could not read this session export. Re-export from Rppl and try again.")
+            return String(describing: error)
         }
+    }
+
+    private static func pathPrefixed(_ context: DecodingError.Context, extraKey: CodingKey? = nil) -> String {
+        let path = codingPathString(
+            extraKey.map { context.codingPath + [$0] } ?? context.codingPath
+        )
+        let debug = context.debugDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if path.isEmpty { return debug }
+        if debug.isEmpty { return path }
+        return "\(path): \(debug)"
     }
 
     private static func codingPathString(_ path: [CodingKey]) -> String {

@@ -220,7 +220,7 @@ struct AppInfoView: View {
     private func handleImportResult(_ result: Result<[URL], Error>) {
         switch result {
         case .failure(let error):
-            presentImportFailure(error.localizedDescription)
+            presentImportFailure(SessionExportImportError.detail(for: error))
         case .success(let urls):
             guard let url = urls.first else { return }
             isImporting = true
@@ -242,7 +242,7 @@ struct AppInfoView: View {
                     }
                 } catch {
                     isImporting = false
-                    presentImportFailure(Self.userFacingMessage(for: error))
+                    presentImportFailure(SessionExportImportError.detail(for: error))
                     WakeLog.error(.transfer, "export-file import: \(error.localizedDescription)")
                 }
             }
@@ -254,17 +254,6 @@ struct AppInfoView: View {
         Task { @MainActor in
             showImportError = true
         }
-    }
-
-    private static func userFacingMessage(for error: Error) -> String {
-        if let decoding = error as? DecodingError {
-            return SessionExportImportError.message(for: decoding)
-        }
-        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-        if description.isEmpty {
-            return String(localized: "Something went wrong while importing the session.")
-        }
-        return description
     }
 }
 
