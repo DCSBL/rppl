@@ -98,6 +98,15 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests; `xcodebuild` build if app/Core sources changed) when the push includes build-related files. Skips steps whose inputs match the last successful run. Analyze is `make check` / `XCODE_GATE_ANALYZE=1` only.
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
 
+## Cloud Agents (Linux)
+
+Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](.github/workflows/pr-checks.yml), not a Mac with Xcode.
+
+- **Do run:** `pre-commit run` (commit-stage hooks) and `make lint` (SwiftLint via `tools/bin/swiftlint`).
+- **Do not expect:** `xcodebuild`, Simulator, HealthKit, Watch Connectivity, or a green `make check` / `make gate`.
+- **`cd RpplCore && swift test`:** source of truth on macOS / Xcode Cloud. On Linux it currently fails (`import Compression` — Apple framework). Do not treat that failure as a Cloud Agent environment bug; keep Core pure where possible, but do not invent Linux shims unless explicitly asked.
+- Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
+
 ## Git / commits
 
 - User often wants **frequent commits** after meaningful chunks. Ask if unclear; when asked, follow user git rules (no force-push, no `--no-verify` unless requested, HEREDOC messages).
