@@ -273,6 +273,61 @@ public final class SessionFileStore: @unchecked Sendable {
         try fileManager.removeItem(at: dir)
     }
 
+    // MARK: - Watch distilled view (manifest + derived only)
+
+    /// True when any raw stream file remains under the session package.
+    public func hasRawStreams(sessionId: String) -> Bool {
+        let dir = sessionDirectory(for: sessionId)
+        guard fileManager.fileExists(atPath: dir.path) else { return false }
+        guard let names = try? fileManager.contentsOfDirectory(atPath: dir.path) else { return false }
+        return names.contains { Self.isRawStreamFileName($0) }
+    }
+
+    /// Writes phone-authored manifest + derived. Prunes raw streams when session is acknowledged.
+    public func applyDistilledView(_ update: WatchViewUpdate) throws {
+        let sessionId = update.manifest.sessionId
+        if fileManager.fileExists(atPath: sessionDirectory(for: sessionId).path) {
+            try writeManifest(update.manifest)
+        } else {
+            _ = try createSession(manifest: update.manifest)
+            try writeManifest(update.manifest)
+        }
+        try writeDerivedView(update.derived, sessionId: sessionId)
+        if update.manifest.transferState == .acknowledged, hasRawStreams(sessionId: sessionId) {
+            try pruneRawStreams(sessionId: sessionId)
+        }
+    }
+
+    /// Removes raw streams after phone ack. Keeps `manifest.json` and `derived/view.json`.
+    public func pruneRawStreams(sessionId: String) throws {
+        let manifest = try readManifest(sessionId: sessionId)
+        guard manifest.transferState == .acknowledged else {
+            throw SessionStoreError.ioFailure("Cannot prune before phone ack: \(sessionId)")
+        }
+        guard try readDerivedView(sessionId: sessionId) != nil else {
+            throw SessionStoreError.ioFailure("Cannot prune without derived view: \(sessionId)")
+        }
+        guard hasRawStreams(sessionId: sessionId) else { return }
+
+        let dir = sessionDirectory(for: sessionId)
+        let names = try fileManager.contentsOfDirectory(atPath: dir.path)
+        for name in names where Self.isRawStreamFileName(name) {
+            try fileManager.removeItem(at: dir.appendingPathComponent(name))
+        }
+    }
+
+    private static func isRawStreamFileName(_ name: String) -> Bool {
+        if name == "detections.jsonl" { return true }
+        if name == "assumptions.jsonl" || name == "labels.jsonl" { return true }
+        if name.hasPrefix("location-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("health-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("water-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("motion-") && (name.hasSuffix(".jsonl") || name.hasSuffix(".jsonl.zlib")) {
+            return true
+        }
+        return false
+    }
+
     /// On-disk byte size of one session package (manifest + JSONL checkpoints).
     public func sessionByteSize(sessionId: String) throws -> Int64 {
         let dir = sessionDirectory(for: sessionId)
