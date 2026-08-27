@@ -5,7 +5,7 @@ import WatchKit
 import UIKit
 
 /// Static map thumbnail for Watch — SwiftUI `Map` often renders blank in small/scroll layouts.
-enum SessionMapSnapshotSource: Equatable, Sendable {
+enum SessionMapSnapshotSource: Sendable {
     case coordinate(CLLocationCoordinate2D, distanceMeters: CLLocationDistance)
     case frame(MapTrackFrame)
 
@@ -29,7 +29,6 @@ enum SessionMapSnapshotRenderer {
         let options = MKMapSnapshotter.Options()
         options.size = size
         options.scale = scale
-        options.mapType = .standard
 
         let pinCoordinate: CLLocationCoordinate2D
         switch source {
