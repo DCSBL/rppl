@@ -1,120 +1,120 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "CFBundleDisplayName": {
-      "comment": "Bundle display name",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl"
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
           }
         }
       }
     },
-    "CFBundleName": {
-      "comment": "Bundle name",
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "RpplWatch"
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "RpplWatch"
           }
         }
       }
     },
-    "NSHealthShareUsageDescription": {
-      "comment": "Privacy - Health Share Usage Description",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded."
+    "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven en hartslag kan worden vastgelegd."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven en hartslag kan worden vastgelegd."
           }
         }
       }
     },
-    "NSHealthUpdateUsageDescription": {
-      "comment": "Privacy - Health Update Usage Description",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl saves your cable-park workout to Health when the session ends."
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl saves your cable-park workout to Health when the session ends."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de session eindigt."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de session eindigt."
           }
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription": {
-      "comment": "Privacy - Location Always and When In Use Usage Description",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl records GPS for the full park session, including when the wrist is down."
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location Always and When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl records GPS for the full park session, including when the wrist is down."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl neemt GPS op voor de hele park session, ook als de pols omlaag is."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl neemt GPS op voor de hele park session, ook als de pols omlaag is."
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription": {
-      "comment": "Privacy - Location When In Use Usage Description",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl records GPS during cable-park wakeboarding sessions."
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl records GPS during cable-park wakeboarding sessions."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl neemt GPS op tijdens kabelpark-wakeboard sessions."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl neemt GPS op tijdens kabelpark-wakeboard sessions."
           }
         }
       }
     },
-    "NSMotionUsageDescription": {
-      "comment": "Privacy - Motion Usage Description",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl records device motion to help detect riding versus resting at the dock."
+    "NSMotionUsageDescription" : {
+      "comment" : "Privacy - Motion Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl records device motion to help detect riding versus resting at the dock."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rppl neemt apparaatbeweging op om riding versus rusten bij de dock te helpen detecteren."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl neemt apparaatbeweging op om riding versus rusten bij de dock te helpen detecteren."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
