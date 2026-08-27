@@ -102,17 +102,20 @@ private struct WatchSessionRow: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
-                HStack(spacing: 8) {
-                    Text(SessionFormatters.elapsed(entry.stats.totalDuration))
-                    Text("·")
-                    Text(SessionFormatters.distance(entry.stats.totalDistanceMeters))
-                    Text("·")
-                    Text("\(entry.stats.rideCount) rides")
+                VStack(alignment: .leading, spacing: 4) {
+                    WatchRideMetricLine(
+                        label: "Duration",
+                        value: SessionFormatters.elapsed(entry.stats.totalDuration)
+                    )
+                    WatchRideMetricLine(
+                        label: "Distance",
+                        value: SessionFormatters.distance(entry.stats.totalDistanceMeters)
+                    )
+                    WatchRideMetricLine(
+                        label: "Rides",
+                        value: "\(entry.stats.rideCount)"
+                    )
                 }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
 
                 if let cityName = entry.cityName, !cityName.isEmpty {
                     Text(cityName)

@@ -28,45 +28,24 @@ struct SessionEndSummaryView: View {
                     .lineLimit(1)
                     .foregroundStyle(Color.rpplIdlePrimary)
 
-                HStack(alignment: .top, spacing: 12) {
-                    SessionMetricRow(
-                        label: "Distance",
-                        value: SessionFormatters.distance(summary.distanceMeters)
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    SessionMetricRow(
-                        label: "Rides",
-                        value: "\(summary.rideCount)"
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                SessionMetricRow(
+                    label: "Distance",
+                    value: SessionFormatters.distance(summary.distanceMeters)
+                )
+                SessionMetricRow(
+                    label: "Rides",
+                    value: "\(summary.rideCount)"
+                )
 
                 Divider()
                     .padding(.vertical, 2)
 
-                Text("Last ride")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                if summary.didCompleteRide {
-                    SessionMetricRow(
-                        label: "Duration",
-                        value: SessionFormatters.segmentDuration(summary.lastRideDuration)
-                    )
-                    SessionMetricRow(
-                        label: "Distance",
-                        value: SessionFormatters.distance(summary.lastRideMeters)
-                    )
-                    SessionMetricRow(
-                        label: "Laps",
-                        value: "\(summary.lastRideLapCount)"
-                    )
-                } else {
-                    Text("No rides yet")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                WatchLastRideSection(
+                    duration: summary.lastRideDuration,
+                    distanceMeters: summary.lastRideMeters,
+                    lapCount: summary.lastRideLapCount,
+                    didCompleteRide: summary.didCompleteRide
+                )
 
                 syncLine
                     .padding(.top, 4)

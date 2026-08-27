@@ -101,16 +101,14 @@ struct WatchRideMetricLine: View {
     let value: String
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
+        VStack(alignment: .leading, spacing: 1) {
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .frame(width: 64, alignment: .leading)
             Text(value)
                 .font(.caption.weight(.semibold))
                 .monospacedDigit()
                 .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .combine)
     }
