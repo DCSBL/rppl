@@ -74,7 +74,7 @@ struct AppInfoView: View {
                     Text("Data")
                 } footer: {
                     Text(
-                        "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on."
+                        "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud."
                     )
                 }
 
