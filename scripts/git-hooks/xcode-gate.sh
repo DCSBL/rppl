@@ -82,7 +82,7 @@ run_core_tests() {
   echo "==> RpplCore swift test"
   (
     cd RpplCore
-    swift test
+    swift test --no-parallel
   )
   printf '%s\n' "$CORE_KEY" >"$CORE_STAMP"
 }

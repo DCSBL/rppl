@@ -4,11 +4,21 @@ import Testing
 
 @Suite("SessionImportLimits")
 struct SessionImportLimitsTests {
-    @Test func rejectsOversizedTransferJSON() {
-        let oversize = SessionImportLimits.maxTransferJSONBytes + 1
-        let json = Data(repeating: UInt8(ascii: " "), count: oversize)
+    @Test func rejectsOversizedTransferJSONOnDisk() throws {
+        let limit = 1024
+        let oversize = limit + 1
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("import-limit-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let url = root.appendingPathComponent("package.json")
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: url)
+        try handle.truncate(atOffset: UInt64(oversize))
+        try handle.close()
+
         #expect(throws: SessionStoreError.importTooLarge(oversize)) {
-            try SessionImportLimits.decodeTransferPackage(from: json)
+            _ = try SessionImportLimits.readBoundedFile(at: url, maxBytes: limit)
         }
     }
 

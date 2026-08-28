@@ -21,13 +21,12 @@ public enum SessionIdValidator {
     /// Session package directory guaranteed to stay under `rootURL`.
     public static func sessionDirectory(for sessionId: String, rootURL: URL) throws -> URL {
         try validate(sessionId)
-        let dir = rootURL.appendingPathComponent(sessionId, isDirectory: true)
-        let resolved = dir.standardizedFileURL
         let root = rootURL.standardizedFileURL
+        let resolved = root.appendingPathComponent(sessionId, isDirectory: true).standardizedFileURL
         let rootPrefix = root.path.hasSuffix("/") ? root.path : root.path + "/"
-        guard resolved.path.hasPrefix(rootPrefix) || resolved == root else {
+        guard resolved.path.hasPrefix(rootPrefix) else {
             throw SessionStoreError.invalidSessionId(sessionId)
         }
-        return dir
+        return resolved
     }
 }

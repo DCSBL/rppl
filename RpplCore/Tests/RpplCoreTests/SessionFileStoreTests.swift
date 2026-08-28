@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import RpplCore
 
-@Suite("SessionFileStore")
+@Suite("SessionFileStore", .serialized)
 struct SessionFileStoreTests {
     @Test func createsManifestAndRoundTripsDetections() throws {
         let root = FileManager.default.temporaryDirectory
@@ -626,6 +626,7 @@ struct SessionFileStoreTests {
 
         let store = SessionFileStore(rootURL: root)
         let manifest = SessionManifest(
+            sessionId: "cancel-read",
             testerId: "t",
             appVersion: "1.0",
             buildNumber: "1",
@@ -644,10 +645,16 @@ struct SessionFileStoreTests {
         }
         try store.appendLocationSamples(samples, sessionId: manifest.sessionId)
 
+        let locationURL = try store.sessionDirectory(for: manifest.sessionId)
+            .appendingPathComponent("location-000.jsonl")
+        #expect(FileManager.default.fileExists(atPath: locationURL.path))
+
         let reader = Task {
             try store.readLocationSamples(sessionId: manifest.sessionId)
         }
-        // Cancel before the cooperative checkpoints can finish the whole file.
+        for _ in 0..<8 {
+            await Task.yield()
+        }
         reader.cancel()
         do {
             _ = try await reader.value
