@@ -7,7 +7,7 @@ import WatchKit
 enum SessionMapSnapshotSource: Sendable {
     case coordinate(CLLocationCoordinate2D, distanceMeters: CLLocationDistance)
     case frame(MapTrackFrame)
-    case sessionTracks(SessionMapTrackData, style: SessionMapTrackStyle, frame: MapTrackFrame?)
+    case sessionTracks(SessionMapTrackData, frame: MapTrackFrame?)
 
     var cacheKey: String {
         switch self {
@@ -15,23 +15,22 @@ enum SessionMapSnapshotSource: Sendable {
             return "c:\(coordinate.latitude),\(coordinate.longitude):\(distanceMeters)"
         case let .frame(frame):
             return "f:\(frame.centerLatitude),\(frame.centerLongitude):\(frame.spanWidthMeters):\(frame.spanHeightMeters)"
-        case let .sessionTracks(data, style, frame):
+        case let .sessionTracks(data, frame):
             let frameKey = frame.map {
                 "\($0.centerLatitude),\($0.centerLongitude),\($0.spanWidthMeters)"
             } ?? "nil"
-            return "t:\(style.rawValue):\(data.averagedTrack.count):\(data.heatmapTracks.count):\(frameKey)"
+            return "t:\(data.heatmapTracks.count):\(frameKey)"
         }
     }
 
     static func sessionMap(
         mapTracks: SessionMapTrackData?,
-        trackStyle: SessionMapTrackStyle,
         startCoordinate: CLLocationCoordinate2D?,
         mapFrame: MapTrackFrame?,
         startDistanceMeters: CLLocationDistance = 500
     ) -> SessionMapSnapshotSource? {
         if let mapTracks, mapTracks.hasRenderableTrack {
-            return .sessionTracks(mapTracks, style: trackStyle, frame: mapFrame)
+            return .sessionTracks(mapTracks, frame: mapFrame)
         }
         if let startCoordinate {
             return .coordinate(startCoordinate, distanceMeters: startDistanceMeters)
@@ -65,7 +64,7 @@ enum SessionMapSnapshotRenderer {
             )
         case let .frame(frame):
             applyCamera(to: &options, frame: frame, size: size)
-        case let .sessionTracks(data, _, frame):
+        case let .sessionTracks(data, frame):
             if let frame {
                 applyCamera(to: &options, frame: frame, size: size)
             } else {
@@ -77,8 +76,8 @@ enum SessionMapSnapshotRenderer {
         switch source {
         case .coordinate, .frame:
             return snapshot.image
-        case let .sessionTracks(data, style, _):
-            return drawTracks(on: snapshot, data: data, style: style)
+        case let .sessionTracks(data, _):
+            return drawTracks(on: snapshot, data: data)
         }
     }
 
@@ -105,9 +104,7 @@ enum SessionMapSnapshotRenderer {
     }
 
     private static func region(for data: SessionMapTrackData, paddingFactor: Double) -> MKCoordinateRegion {
-        let coords = data.averagedTrack.count >= 2
-            ? data.averagedTrack
-            : data.heatmapTracks.flatMap { $0 }
+        let coords = data.heatmapTracks.flatMap { $0 }
         let lats = coords.map(\.latitude)
         let lons = coords.map(\.longitude)
         let minLat = lats.min() ?? data.start.latitude
@@ -129,8 +126,7 @@ enum SessionMapSnapshotRenderer {
 
     private static func drawTracks(
         on snapshot: MKMapSnapshotter.Snapshot,
-        data: SessionMapTrackData,
-        style: SessionMapTrackStyle
+        data: SessionMapTrackData
     ) -> UIImage {
         let image = snapshot.image
         UIGraphicsBeginImageContextWithOptions(image.size, true, image.scale)
@@ -143,46 +139,16 @@ enum SessionMapSnapshotRenderer {
         context.setLineCap(.round)
         context.setLineJoin(.round)
 
-        switch style {
-        case .averaged:
-            if let speeds = data.averagedSpeedKmh,
-               let segments = SessionMapSpeedColor.segments(track: data.averagedTrack, speedsKmh: speeds) {
-                for segment in segments where segment.coordinates.count >= 2 {
-                    let uiColor = UIColor(
-                        red: segment.color.red,
-                        green: segment.color.green,
-                        blue: segment.color.blue,
-                        alpha: 1
-                    )
-                    stroke(
-                        context: context,
-                        snapshot: snapshot,
-                        coordinates: segment.coordinates,
-                        color: uiColor,
-                        lineWidth: max(2, image.size.width * 0.018)
-                    )
-                }
-            } else {
-                stroke(
-                    context: context,
-                    snapshot: snapshot,
-                    coordinates: data.averagedTrack,
-                    color: trackStrokeColor,
-                    lineWidth: max(2, image.size.width * 0.018)
-                )
-            }
-        case .heatmap:
-            let opacity = min(0.35, 0.85 / Double(max(data.heatmapTracks.count, 1)))
-            let lineWidth = max(2.5, image.size.width * 0.022)
-            for track in data.heatmapTracks where track.count >= 2 {
-                stroke(
-                    context: context,
-                    snapshot: snapshot,
-                    coordinates: track,
-                    color: trackStrokeColor.withAlphaComponent(opacity),
-                    lineWidth: lineWidth
-                )
-            }
+        let opacity = min(0.35, 0.85 / Double(max(data.heatmapTracks.count, 1)))
+        let lineWidth = max(2.5, image.size.width * 0.022)
+        for track in data.heatmapTracks where track.count >= 2 {
+            stroke(
+                context: context,
+                snapshot: snapshot,
+                coordinates: track,
+                color: trackStrokeColor.withAlphaComponent(opacity),
+                lineWidth: lineWidth
+            )
         }
 
         drawStartPin(context: context, snapshot: snapshot, coordinate: data.start)

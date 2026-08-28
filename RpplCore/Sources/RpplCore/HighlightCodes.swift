@@ -13,3 +13,23 @@ public enum SessionHighlight: String, Sendable, Equatable, CaseIterable {
     case mostWaterTime
     case mostLaps
 }
+
+/// Per-session inputs for cross-logbook highlight assignment.
+public struct SessionHighlightInput: Sendable, Equatable {
+    public var id: String
+    public var totalDuration: TimeInterval
+    public var ridingDuration: TimeInterval
+    public var lapCount: Int
+
+    public init(
+        id: String,
+        totalDuration: TimeInterval,
+        ridingDuration: TimeInterval,
+        lapCount: Int
+    ) {
+        self.id = id
+        self.totalDuration = totalDuration
+        self.ridingDuration = ridingDuration
+        self.lapCount = lapCount
+    }
+}

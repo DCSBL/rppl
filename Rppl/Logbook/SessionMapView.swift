@@ -45,18 +45,15 @@ enum SessionMapLayout {
 struct SessionMapView: View {
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
-    /// Session overview distilled tracks (averaged / heatmap).
+    /// Session overview heatmap tracks.
     var sessionMapData: SessionMapTrackData? = nil
     var allowsInteraction: Bool = false
     /// Satellite toggle on interactive maps.
     var showsStyleToggle: Bool = false
-    /// Track-style toggle (averaged / heatmap); session overview only.
-    var showsTrackStyleToggle: Bool = true
     var preferredFrame: MapTrackFrame? = nil
     var layout: SessionMapLayout = .embedded
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
-    @AppStorage(AppSettingsKey.sessionMapTrackStyle) private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
     @State private var position: MapCameraPosition = .automatic
     @State private var fitted: MapTrackFit?
     @State private var showReset = false
@@ -65,7 +62,6 @@ struct SessionMapView: View {
         locations: [LocationSample],
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
-        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil,
         layout: SessionMapLayout = .embedded
     ) {
@@ -73,7 +69,6 @@ struct SessionMapView: View {
         self.sessionMapData = nil
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
-        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
         self.layout = layout
     }
@@ -82,7 +77,6 @@ struct SessionMapView: View {
         tracks: [[LocationSample]],
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
-        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil,
         layout: SessionMapLayout = .embedded
     ) {
@@ -90,7 +84,6 @@ struct SessionMapView: View {
         self.sessionMapData = nil
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
-        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
         self.layout = layout
     }
@@ -99,7 +92,6 @@ struct SessionMapView: View {
         sessionMapData: SessionMapTrackData,
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
-        showsTrackStyleToggle: Bool = true,
         preferredFrame: MapTrackFrame? = nil,
         layout: SessionMapLayout = .embedded
     ) {
@@ -107,13 +99,8 @@ struct SessionMapView: View {
         self.sessionMapData = sessionMapData
         self.allowsInteraction = allowsInteraction
         self.showsStyleToggle = showsStyleToggle
-        self.showsTrackStyleToggle = showsTrackStyleToggle
         self.preferredFrame = preferredFrame
         self.layout = layout
-    }
-
-    private var trackStyle: SessionMapTrackStyle {
-        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
     }
 
     private var interactionModes: MapInteractionModes {
@@ -128,11 +115,9 @@ struct SessionMapView: View {
         ZStack(alignment: .topLeading) {
             interactiveMap
 
-            if showsStyleToggle || (showsTrackStyleToggle && sessionMapData != nil) {
+            if showsStyleToggle {
                 SessionMapControlCluster(
-                    showsStyleToggle: showsStyleToggle,
-                    showsTrackStyleToggle: showsTrackStyleToggle,
-                    hasSessionData: sessionMapData != nil,
+                    showsStyleToggle: true,
                     layout: layout
                 )
                 .padding(layout.controlPadding)
@@ -177,24 +162,11 @@ struct SessionMapView: View {
 
     @MapContentBuilder
     private func sessionMapContent(_ data: SessionMapTrackData) -> some MapContent {
-        switch trackStyle {
-        case .averaged:
-            if let segments = speedSegments(for: data) {
-                ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
-                    MapPolyline(coordinates: segment.coordinates.map(\.clLocationCoordinate2D))
-                        .stroke(segment.color, lineWidth: 3)
-                }
-            } else if data.averagedTrack.count >= 2 {
-                MapPolyline(coordinates: data.averagedTrack.map(\.clLocationCoordinate2D))
-                    .stroke(Color.rpplHighlight, lineWidth: 3)
-            }
-        case .heatmap:
-            let opacity = heatmapLineOpacity(setCount: data.heatmapTracks.count)
-            ForEach(Array(data.heatmapTracks.enumerated()), id: \.offset) { _, track in
-                if track.count >= 2 {
-                    MapPolyline(coordinates: track.map(\.clLocationCoordinate2D))
-                        .stroke(Color.rpplHighlight.opacity(opacity), lineWidth: 4)
-                }
+        let opacity = heatmapLineOpacity(setCount: data.heatmapTracks.count)
+        ForEach(Array(data.heatmapTracks.enumerated()), id: \.offset) { _, track in
+            if track.count >= 2 {
+                MapPolyline(coordinates: track.map(\.clLocationCoordinate2D))
+                    .stroke(Color.rpplHighlight.opacity(opacity), lineWidth: 4)
             }
         }
         Marker("Start", coordinate: data.start.clLocationCoordinate2D)
@@ -265,10 +237,9 @@ struct SessionMapView: View {
         return "\(preferredFrame.centerLatitude)-\(preferredFrame.centerLongitude)-\(preferredFrame.headingDegrees)-\(preferredFrame.spanWidthMeters)"
     }
 
-    /// Excludes track style so toggling averaged / heatmap does not refit the camera.
     private var dataSignature: String {
         if let sessionMapData {
-            return "session-\(sessionMapData.averagedTrack.count)-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
+            return "session-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
         let count = tracks.reduce(0) { $0 + $1.count }
         return "sets-\(tracks.count)-\(count)"
@@ -281,26 +252,6 @@ struct SessionMapView: View {
             }
         }
         return MapTrackFitter.coordinates(fromTracks: tracks)
-    }
-
-    private func speedSegments(for data: SessionMapTrackData) -> [ColoredSpeedSegment]? {
-        guard let speeds = data.averagedSpeedKmh else { return nil }
-        guard let segments = SessionMapSpeedColor.segments(
-            track: data.averagedTrack,
-            speedsKmh: speeds
-        ) else {
-            return nil
-        }
-        return segments.map { segment in
-            ColoredSpeedSegment(
-                coordinates: segment.coordinates,
-                color: Color(
-                    red: segment.color.red,
-                    green: segment.color.green,
-                    blue: segment.color.blue
-                )
-            )
-        }
     }
 
     private func heatmapLineOpacity(setCount: Int) -> Double {
@@ -379,11 +330,6 @@ struct SessionMapView: View {
     }
 }
 
-private struct ColoredSpeedSegment {
-    let coordinates: [MapCoordinate]
-    let color: Color
-}
-
 private extension MapCoordinate {
     var clLocationCoordinate2D: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -403,19 +349,12 @@ private struct SessionMapCircleButtonLabel: View {
     }
 }
 
-/// Satellite + session track-style toggles for inline maps (sibling layer above NavigationLink).
+/// Satellite toggle for inline maps (sibling layer above NavigationLink).
 struct SessionMapControlCluster: View {
     var showsStyleToggle: Bool = false
-    var showsTrackStyleToggle: Bool = false
-    var hasSessionData: Bool = false
     var layout: SessionMapLayout = .embedded
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
-    @AppStorage(AppSettingsKey.sessionMapTrackStyle) private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
-
-    private var trackStyle: SessionMapTrackStyle {
-        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
-    }
 
     var body: some View {
         Group {
@@ -448,26 +387,6 @@ struct SessionMapControlCluster: View {
                 usesSatellite
                     ? String(localized: "Show standard map")
                     : String(localized: "Show satellite map")
-            )
-        }
-        if showsTrackStyleToggle, hasSessionData {
-            Button {
-                trackStyleRaw = trackStyle == .averaged
-                    ? SessionMapTrackStyle.heatmap.rawValue
-                    : SessionMapTrackStyle.averaged.rawValue
-            } label: {
-                SessionMapCircleButtonLabel(
-                    systemName: trackStyle == .averaged
-                        ? "point.topleft.down.curvedto.point.bottomright.up"
-                        : "square.3.layers.3d",
-                    size: layout.buttonSize
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(
-                trackStyle == .averaged
-                    ? String(localized: "Show heatmap")
-                    : String(localized: "Show averaged track")
             )
         }
     }

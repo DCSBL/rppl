@@ -81,7 +81,7 @@ derived/view.json
 
 ## Derived stats today
 
-`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Session map uses distilled `mapTracks` (averaged + heatmap polylines) and `MapTrackFrame` for camera; phone may rebuild from raw when derived is stale.
+`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Session map uses distilled `mapTracks` (heatmap set paths + start pin) and `MapTrackFrame` for camera; phone may rebuild from raw when derived is stale.
 
 ## Fast view files
 
@@ -94,7 +94,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 | Write | After Watch **Stop**; phone import keep if `analyzerVersion` matches else rebuild from raw (same `RpplCore`) |
 | Transfer | Include `derived` when present so Watch and iPhone stay aligned |
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
-| Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (averaged loop, heatmap set paths, start pin). Phone computes camera distance for its map view size |
+| Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (heatmap set paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
 | Crash | No new resume; do not regress today’s crash = dead |
 
