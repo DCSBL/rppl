@@ -19,19 +19,34 @@ public enum ICloudLogbookPolicy {
     }
 
     /// Union previous accepted ids with every package on disk after enable / migrate.
+    /// Skips ids the user hid from this phone’s logbook (still on disk / iCloud).
     public static func reconcileAccepted(
         previousAccepted: Set<String>,
-        localIDs: Set<String>
+        localIDs: Set<String>,
+        hiddenFromLogbook: Set<String> = []
     ) -> Set<String> {
-        previousAccepted.union(localIDs)
+        previousAccepted.union(localIDs.subtracting(hiddenFromLogbook))
     }
 
     /// Remote session ids that should appear in the import picker.
     public static func remoteImportCandidates(
         remoteMetadata: Set<String>,
         accepted: Set<String>,
-        dismissed: Set<String>
+        dismissed: Set<String>,
+        hiddenFromLogbook: Set<String> = []
     ) -> Set<String> {
-        remoteMetadata.subtracting(accepted).subtracting(dismissed)
+        remoteMetadata
+            .subtracting(accepted)
+            .subtracting(dismissed)
+            .subtracting(hiddenFromLogbook)
+    }
+
+    /// Local packages to auto-accept after metadata refresh (excludes hidden / declined).
+    public static func autoAcceptCandidates(
+        localOnDisk: Set<String>,
+        hiddenFromLogbook: Set<String>,
+        declinedImport: Set<String>
+    ) -> Set<String> {
+        localOnDisk.subtracting(hiddenFromLogbook).subtracting(declinedImport)
     }
 }
