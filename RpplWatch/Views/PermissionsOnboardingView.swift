@@ -237,9 +237,9 @@ extension WatchPermissionKind {
     var whyNeeded: String {
         switch self {
         case .location:
-            return String(localized: "Required to record GPS during your park session so Rppl can track rides and distance.")
+            return String(localized: "Required to record GPS during your park session so Rppl can track sets and distance.")
         case .health:
-            return String(localized: "Required to save the workout to Fitness and record heart rate while you ride.")
+            return String(localized: "Required to save the workout to Fitness and record heart rate while you set.")
         case .motion:
             return String(localized: "Helps tell when you are riding versus resting at the dock.")
         }

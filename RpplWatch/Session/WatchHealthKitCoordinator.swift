@@ -85,7 +85,7 @@ extension WatchSessionController {
         detectionCode = event.code
         lastConfidentCode = detectionEngine.lastConfidentCode
         filterRejectionReason = nil
-        liveRideTracker.update(
+        liveSetTracker.update(
             currentCode: detectionCode,
             lastConfident: lastConfidentCode,
             events: [event]
@@ -95,19 +95,19 @@ extension WatchSessionController {
 
     func refreshSegmentDurations() {
         guard let segmentStart = currentSegmentStartedAt else {
-            currentRideDuration = 0
+            currentSetDuration = 0
             currentInactiveDuration = 0
             return
         }
         let segmentElapsed = Date().timeIntervalSince(segmentStart)
         if lastConfidentCode == DetectionCodes.riding {
-            currentRideDuration = segmentElapsed
+            currentSetDuration = segmentElapsed
             currentInactiveDuration = 0
         } else if lastConfidentCode == DetectionCodes.inactive {
             currentInactiveDuration = segmentElapsed
-            currentRideDuration = 0
+            currentSetDuration = 0
         } else {
-            currentRideDuration = 0
+            currentSetDuration = 0
             currentInactiveDuration = 0
         }
     }
@@ -212,9 +212,9 @@ extension WatchSessionController {
 
         session.startActivity(with: Date())
         try await builder.beginCollection(at: Date())
-        // Session starts inactive: keep HR/basal streaming; ride-scoped metrics off until riding.
+        // Session starts inactive: keep HR/basal streaming; set-scoped metrics off until riding.
         setRideMetricsCollection(enabled: false)
-        WakeLog.debug(.workout, "HK collection began (inactive — ride metrics gated)")
+        WakeLog.debug(.workout, "HK collection began (inactive — set metrics gated)")
     }
 
     func finishAndSaveWorkout() async {
@@ -237,12 +237,12 @@ extension WatchSessionController {
 
         do {
             var closingMetadata: [String: Any] = [
-                WorkoutMetadataKeys.rideCount: liveRideTracker.rideCount,
+                WorkoutMetadataKeys.setCount: liveSetTracker.setCount,
                 WorkoutMetadataKeys.totalDistanceMeters: hkRideDistanceMeters
             ]
             if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
                 distanceMeters: hkRideDistanceMeters,
-                duration: liveRideTracker.sessionRidingDuration
+                duration: liveSetTracker.sessionRidingDuration
             ) {
                 closingMetadata[HKMetadataKeyAverageSpeed] = HKQuantity(
                     unit: .meter().unitDivided(by: .second()),
@@ -374,9 +374,9 @@ extension WatchSessionController {
 
     func recordFinishedHkRide(endedAt: Date) {
         guard let start = hkRideStartedAt else { return }
-        let meters = liveRideTracker.lastRideMeters
-        let duration = liveRideTracker.lastRideDuration > 0
-            ? liveRideTracker.lastRideDuration
+        let meters = liveSetTracker.lastSetMeters
+        let duration = liveSetTracker.lastSetDuration > 0
+            ? liveSetTracker.lastSetDuration
             : max(0, endedAt.timeIntervalSince(start))
         if meters > 0 {
             hkRides.append(
@@ -388,37 +388,37 @@ extension WatchSessionController {
 
     func addRideDistanceSamples(to builder: HKLiveWorkoutBuilder) async throws {
         var samples: [HKSample] = []
-        for ride in hkRides where ride.meters > 0 {
+        for set in hkRides where set.meters > 0 {
             samples.append(
                 HKQuantitySample(
                     type: distanceType,
-                    quantity: HKQuantity(unit: .meter(), doubleValue: ride.meters),
-                    start: ride.startedAt,
-                    end: ride.endedAt
+                    quantity: HKQuantity(unit: .meter(), doubleValue: set.meters),
+                    start: set.startedAt,
+                    end: set.endedAt
                 )
             )
         }
         try await addSamples(samples, to: builder)
         if !samples.isEmpty {
-            WakeLog.debug(.workout, "added \(samples.count) ride distance HK windows")
+            WakeLog.debug(.workout, "added \(samples.count) set distance HK windows")
         }
     }
 
-    /// Interval distance + speed on ride HKWorkoutActivity rows (not cable-park laps).
+    /// Interval distance + speed on set HKWorkoutActivity rows (not cable-park laps).
     func attachRideMetricsToActivities(_ builder: HKLiveWorkoutBuilder) async throws {
         for activity in builder.workoutActivities {
             let code = activity.metadata?[WorkoutMetadataKeys.detectionCode] as? String
             guard code == DetectionCodes.riding else { continue }
-            guard let ride = hkRides.first(where: {
+            guard let set = hkRides.first(where: {
                 abs($0.startedAt.timeIntervalSince(activity.startDate)) < 1
             }) else { continue }
 
             var metadata: [String: Any] = [
-                WorkoutMetadataKeys.rideDistanceMeters: ride.meters
+                WorkoutMetadataKeys.setDistanceMeters: set.meters
             ]
             if let speedMps = LocationSpeedStats.averageSpeedMetersPerSecond(
-                distanceMeters: ride.meters,
-                duration: ride.duration
+                distanceMeters: set.meters,
+                duration: set.duration
             ) {
                 metadata[HKMetadataKeyAverageSpeed] = HKQuantity(
                     unit: .meter().unitDivided(by: .second()),

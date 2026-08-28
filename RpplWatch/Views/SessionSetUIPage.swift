@@ -2,8 +2,8 @@ import SwiftUI
 import MapKit
 import RpplCore
 
-/// Product session UI: one-screen ride view; scrollable inactive overview.
-struct SessionRideUIPage: View {
+/// Product session UI: one-screen set view; scrollable inactive overview.
+struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
@@ -47,15 +47,15 @@ struct SessionRideUIPage: View {
                     value: SessionFormatters.distance(session.totalDistanceM)
                 )
                 SessionMetricRow(
-                    label: "Rides",
-                    value: "\(session.rideCount)"
+                    label: "Sets",
+                    value: "\(session.setCount)"
                 )
 
-                WatchLastRideSection(
-                    duration: session.lastRideDuration,
-                    distanceMeters: session.lastRideMeters,
-                    lapCount: session.lastRideLapCount,
-                    didCompleteRide: session.didCompleteRide
+                WatchLastSetSection(
+                    duration: session.lastSetDuration,
+                    distanceMeters: session.lastSetMeters,
+                    lapCount: session.lastSetLapCount,
+                    didCompleteSet: session.didCompleteSet
                 )
                 .alwaysOnSecondaryChrome(isLuminanceReduced)
 
@@ -77,7 +77,7 @@ struct SessionRideUIPage: View {
 
     private var ridingView: some View {
         VStack(spacing: 4) {
-            Text(SessionFormatters.segmentDuration(session.currentRideDuration))
+            Text(SessionFormatters.segmentDuration(session.currentSetDuration))
                 .font(.system(.largeTitle, design: .rounded).bold())
                 .monospacedDigit()
                 .minimumScaleFactor(0.6)
@@ -90,7 +90,7 @@ struct SessionRideUIPage: View {
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 VStack(spacing: 2) {
-                    Text(SessionFormatters.distance(session.displayRideMeters))
+                    Text(SessionFormatters.distance(session.displaySetMeters))
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
@@ -104,7 +104,7 @@ struct SessionRideUIPage: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text(session.currentRideSpeedKmh.map { String(format: "%.0f", $0) } ?? "--")
+                    Text(session.currentSetSpeedKmh.map { String(format: "%.0f", $0) } ?? "--")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
@@ -118,7 +118,7 @@ struct SessionRideUIPage: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text("\(session.currentRideLapCount)")
+                    Text("\(session.currentSetLapCount)")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
@@ -147,23 +147,23 @@ struct SessionRideUIPage: View {
 
             statusLine(primary: "Riding", color: .blue)
 
-            if session.didCompleteRide {
-                lastRideCompactLine
+            if session.didCompleteSet {
+                lastSetCompactLine
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 4)
     }
 
-    private var lastRideCompactLine: some View {
+    private var lastSetCompactLine: some View {
         HStack(spacing: 4) {
             Text("Last")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
             Text(
-                "\(SessionFormatters.segmentDuration(session.lastRideDuration)) · "
-                    + "\(SessionFormatters.distance(session.lastRideMeters)) · "
-                    + "\(session.lastRideLapCount)"
+                "\(SessionFormatters.segmentDuration(session.lastSetDuration)) · "
+                    + "\(SessionFormatters.distance(session.lastSetMeters)) · "
+                    + "\(session.lastSetLapCount)"
             )
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -174,13 +174,13 @@ struct SessionRideUIPage: View {
         .frame(maxWidth: .infinity)
         .padding(.top, 2)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(lastRideAccessibilityLabel)
+        .accessibilityLabel(lastSetAccessibilityLabel)
         .alwaysOnSecondaryChrome(isLuminanceReduced)
     }
 
-    private var lastRideAccessibilityLabel: String {
+    private var lastSetAccessibilityLabel: String {
         String(
-            localized: "Last ride \(SessionFormatters.segmentDuration(session.lastRideDuration)), \(SessionFormatters.distance(session.lastRideMeters)), \(session.lastRideLapCount) laps"
+            localized: "Last set \(SessionFormatters.segmentDuration(session.lastSetDuration)), \(SessionFormatters.distance(session.lastSetMeters)), \(session.lastSetLapCount) laps"
         )
     }
 
@@ -212,8 +212,8 @@ struct SessionRideUIPage: View {
                     value: SessionFormatters.distance(session.totalDistanceM)
                 )
                 SessionMetricRow(
-                    label: "Rides",
-                    value: "\(session.rideCount)"
+                    label: "Sets",
+                    value: "\(session.setCount)"
                 )
                 SessionMetricRow(
                     label: "Inactive for",
@@ -248,11 +248,11 @@ struct SessionRideUIPage: View {
                     .padding(.vertical, 2)
                     .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-                WatchLastRideSection(
-                    duration: session.lastRideDuration,
-                    distanceMeters: session.lastRideMeters,
-                    lapCount: session.lastRideLapCount,
-                    didCompleteRide: session.didCompleteRide
+                WatchLastSetSection(
+                    duration: session.lastSetDuration,
+                    distanceMeters: session.lastSetMeters,
+                    lapCount: session.lastSetLapCount,
+                    didCompleteSet: session.didCompleteSet
                 )
                 .alwaysOnSecondaryChrome(isLuminanceReduced)
             }

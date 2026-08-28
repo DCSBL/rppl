@@ -39,18 +39,18 @@ struct SessionEndSummaryView: View {
                     value: SessionFormatters.distance(summary.distanceMeters)
                 )
                 SessionMetricRow(
-                    label: "Rides",
-                    value: "\(summary.rideCount)"
+                    label: "Sets",
+                    value: "\(summary.setCount)"
                 )
 
                 Divider()
                     .padding(.vertical, 2)
 
-                WatchLastRideSection(
-                    duration: summary.lastRideDuration,
-                    distanceMeters: summary.lastRideMeters,
-                    lapCount: summary.lastRideLapCount,
-                    didCompleteRide: summary.didCompleteRide
+                WatchLastSetSection(
+                    duration: summary.lastSetDuration,
+                    distanceMeters: summary.lastSetMeters,
+                    lapCount: summary.lastSetLapCount,
+                    didCompleteSet: summary.didCompleteSet
                 )
 
                 syncLine
@@ -115,7 +115,7 @@ struct SessionEndSummaryView: View {
             )
             let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
             let frame = MapTrackFitter.frame(locations: coords)
-            let tracks = SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
+            let tracks = SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
             return (tracks, frame)
         }
         if let built {
@@ -149,12 +149,12 @@ struct SessionEndSummaryView: View {
         summary: EndedSessionSummary(
             sessionId: "preview",
             duration: 3725,
-            rideCount: 4,
+            setCount: 4,
             distanceMeters: 2840,
-            lastRideDuration: 312,
-            lastRideMeters: 720,
-            lastRideLapCount: 2,
-            didCompleteRide: true,
+            lastSetDuration: 312,
+            lastSetMeters: 720,
+            lastSetLapCount: 2,
+            didCompleteSet: true,
             startLatitude: 51.9794,
             startLongitude: 4.5740
         ),

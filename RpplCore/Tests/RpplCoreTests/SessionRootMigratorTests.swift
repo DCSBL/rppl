@@ -30,11 +30,11 @@ struct RemoteSessionSummaryTests {
                     totalDuration: 3600,
                     totalDistanceMeters: 1000,
                     activeEnergyKilocalories: nil,
-                    rideCount: 3,
+                    setCount: 3,
                     ridingDuration: 600,
                     inactiveDuration: 3000,
                     ridingInactiveRatio: 0.2,
-                    rides: []
+                    sets: []
                 ),
                 cityName: "Utrecht"
             ),
@@ -46,7 +46,7 @@ struct RemoteSessionSummaryTests {
         )
         #expect(summary.sessionId == "sess-1")
         #expect(summary.cityName == "Utrecht")
-        #expect(summary.rideCount == 3)
+        #expect(summary.setCount == 3)
         #expect(summary.totalDuration == 3600)
         #expect(summary.startedAt == started)
     }
@@ -74,7 +74,7 @@ struct RemoteSessionSummaryTests {
             sessionDirectory: store.sessionDirectory(for: "sess-2")
         )
         #expect(summary.cityName == nil)
-        #expect(summary.rideCount == 0)
+        #expect(summary.setCount == 0)
         #expect(summary.totalDuration == 90)
     }
 }

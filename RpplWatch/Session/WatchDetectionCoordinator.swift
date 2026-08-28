@@ -55,7 +55,7 @@ extension WatchSessionController {
         detectionCode = code
         lastConfidentCode = code
         filterRejectionReason = nil
-        liveRideTracker.update(
+        liveSetTracker.update(
             currentCode: code,
             lastConfident: code,
             events: [event]
@@ -106,7 +106,7 @@ extension WatchSessionController {
         filterRejectionReason = detectionEngine.lastFilterRejection
         detectionCode = detectionEngine.currentCode
         lastConfidentCode = detectionEngine.lastConfidentCode
-        liveRideTracker.update(
+        liveSetTracker.update(
             currentCode: detectionCode,
             lastConfident: lastConfidentCode,
             events: events
@@ -122,13 +122,13 @@ extension WatchSessionController {
     }
 
     func processLocationSample(_ sample: LocationSample) {
-        liveRideTracker.addLocation(sample)
+        liveSetTracker.addLocation(sample)
         accumulateRideDistanceForHealthKit()
         trackRidePeakSpeed(sample)
     }
 
     func trackRidePeakSpeed(_ sample: LocationSample) {
-        guard liveRideTracker.isRideOngoing else { return }
+        guard liveSetTracker.isSetOngoing else { return }
         let tick = DetectionTick(
             timestamp: sample.timestamp,
             speedMps: sample.speed,
@@ -141,8 +141,8 @@ extension WatchSessionController {
     }
 
     func accumulateRideDistanceForHealthKit() {
-        guard liveRideTracker.isRideOngoing else { return }
-        let current = liveRideTracker.currentRideMeters
+        guard liveSetTracker.isSetOngoing else { return }
+        let current = liveSetTracker.currentSetMeters
         if current > hkRideDistanceAnchorMeters {
             hkRideDistanceMeters += current - hkRideDistanceAnchorMeters
             hkRideDistanceAnchorMeters = current
@@ -192,5 +192,5 @@ extension WatchSessionController {
         }
     }
 
-    /// Keep HK session running. Fitness intervals = ride then dock-wait activities (no rest labels).
+    /// Keep HK session running. Fitness intervals = set then dock-wait activities (no rest labels).
 }

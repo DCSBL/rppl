@@ -77,7 +77,7 @@ struct SessionControlsPage: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone.")
+            Text("Under 30 seconds and no sets. Discard deletes it here. Keep transfers to iPhone.")
         }
     }
 
@@ -122,8 +122,8 @@ struct SessionControlsPage: View {
 
     private func presentStopFlow() {
         let duration = session.computeElapsed(at: Date())
-        if TinySessionPolicy.shouldOfferDiscard(duration: duration, rideCount: session.rideCount) {
-            WakeLog.debug(.ui, "tiny session — offer discard duration=\(Int(duration))s rides=\(session.rideCount)")
+        if TinySessionPolicy.shouldOfferDiscard(duration: duration, setCount: session.setCount) {
+            WakeLog.debug(.ui, "tiny session — offer discard duration=\(Int(duration))s sets=\(session.setCount)")
             showDiscardConfirmation = true
         } else {
             showStopConfirmation = true

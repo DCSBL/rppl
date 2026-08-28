@@ -16,7 +16,7 @@ This is the reverse of common Conventional Commits (`<type>(<scope>)`). Here the
 
 - `watch(feat): New feature`
 - `slang(fix): Make sure this and that`
-- `core(refactor): Extract ride hold logic`
+- `core(refactor): Extract set hold logic`
 - `phone(docs): Clarify export flow in PR body`
 
 ### Components

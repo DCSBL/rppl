@@ -113,8 +113,8 @@ struct WatchSessionDetailView: View {
                 value: SessionFormatters.distance(stats.totalDistanceMeters)
             )
             SessionMetricRow(
-                label: "Rides",
-                value: "\(stats.rideCount)"
+                label: "Sets",
+                value: "\(stats.setCount)"
             )
             SessionMetricRow(
                 label: "Laps",
@@ -131,7 +131,7 @@ struct WatchSessionDetailView: View {
             Divider()
                 .padding(.vertical, 4)
 
-            WatchRideListSection(rides: stats.rides, emptyMessage: "No rides detected.")
+            WatchSetListSection(sets: stats.sets, emptyMessage: "No sets detected.")
         }
     }
 
@@ -167,7 +167,7 @@ struct WatchSessionDetailView: View {
         if mapTracks == nil, Self.store.hasRawStreams(sessionId: sessionId) {
             let built = try? await StoreIO.runOffMain {
                 let locations = try Self.store.readLocationSamples(sessionId: sessionId)
-                return SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
+                return SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
             }
             if let built {
                 mapTracks = built
@@ -206,7 +206,7 @@ struct WatchSessionDetailView: View {
             mapFrame = bundle.mapFrame
             mapTracks = SessionMapTrackBuilder.build(
                 locations: bundle.locations,
-                rides: bundle.stats.rides
+                sets: bundle.stats.sets
             )
             if let mapTracks {
                 startCoordinate = CLLocationCoordinate2D(

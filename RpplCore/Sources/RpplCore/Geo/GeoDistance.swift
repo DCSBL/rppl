@@ -32,7 +32,7 @@ public enum GeoDistance {
         return min(hardCap, max(15, dynamic))
     }
 
-    /// Whether a GPS segment may contribute to ride distance.
+    /// Whether a GPS segment may contribute to set distance.
     public static func acceptsStep(
         from: LocationSample,
         to: LocationSample,

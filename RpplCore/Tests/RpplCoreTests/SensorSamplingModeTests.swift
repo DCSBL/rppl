@@ -11,8 +11,8 @@ struct SensorSamplingModeTests {
     }
 }
 
-@Suite("LiveRideTrackerBackfill")
-struct LiveRideTrackerBackfillTests {
+@Suite("LiveSetTrackerBackfill")
+struct LiveSetTrackerBackfillTests {
     private let t0 = Date(timeIntervalSince1970: 1_700_000_000)
 
     private func location(at offset: TimeInterval, lat: Double, lon: Double) -> LocationSample {
@@ -35,7 +35,7 @@ struct LiveRideTrackerBackfillTests {
     }
 
     @Test func replayLocationsAfterBackdatedEnter() {
-        var tracker = LiveRideTracker()
+        var tracker = LiveSetTracker()
         let holdStart = t0
         let enterEvent = detection(code: DetectionCodes.riding, at: 0)
         tracker.update(
@@ -48,7 +48,7 @@ struct LiveRideTrackerBackfillTests {
             location(at: 1, lat: 52.0001, lon: 5.0001),
             location(at: 2, lat: 52.0002, lon: 5.0002),
         ]
-        tracker.replayLocationsForRideEnter(buffered, from: holdStart)
-        #expect(tracker.currentRideMeters > 0)
+        tracker.replayLocationsForSetEnter(buffered, from: holdStart)
+        #expect(tracker.currentSetMeters > 0)
     }
 }

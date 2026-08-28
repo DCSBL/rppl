@@ -16,7 +16,7 @@ struct TotalsSummary: Sendable {
     var sessionCount = 0
     var totalDistanceMeters = 0.0
     var topSpeedKmh = 0.0
-    var totalRuns = 0
+    var totalSets = 0
     var totalLaps = 0
 }
 
@@ -32,7 +32,7 @@ final class SessionCatalog {
         for entry in entries {
             if let stats = entry.stats {
                 summary.totalDistanceMeters += stats.totalDistanceMeters
-                summary.totalRuns += stats.rideCount
+                summary.totalSets += stats.setCount
                 summary.totalLaps += stats.totalLapCount
             }
             if let speed = entry.topSpeedKmh {

@@ -1,32 +1,32 @@
 import Foundation
 
-/// Live ride counters for Watch UI during an active session.
-public struct LiveRideTracker: Sendable {
-    public private(set) var rideCount = 0
-    public private(set) var isRideOngoing = false
-    public private(set) var currentRideMeters = 0.0
-    public private(set) var lastRideMeters = 0.0
-    /// Duration of the most recently finished ride; `0` until the first ride ends.
-    public private(set) var lastRideDuration: TimeInterval = 0
-    /// Laps of the most recently finished ride; `0` until the first ride ends.
-    public private(set) var lastRideLapCount = 0
-    /// True after at least one ride has finished (including zero-meter rides).
-    public private(set) var didCompleteRide = false
-    /// Sum of finished ride meters plus current ride (ride-gated session distance).
-    public private(set) var sessionRideMeters = 0.0
-    /// Sum of finished ride durations (includes a ride closed at session stop).
+/// Live set counters for Watch UI during an active session.
+public struct LiveSetTracker: Sendable {
+    public private(set) var setCount = 0
+    public private(set) var isSetOngoing = false
+    public private(set) var currentSetMeters = 0.0
+    public private(set) var lastSetMeters = 0.0
+    /// Duration of the most recently finished set; `0` until the first set ends.
+    public private(set) var lastSetDuration: TimeInterval = 0
+    /// Laps of the most recently finished set; `0` until the first set ends.
+    public private(set) var lastSetLapCount = 0
+    /// True after at least one set has finished (including zero-meter sets).
+    public private(set) var didCompleteSet = false
+    /// Sum of finished set meters plus current set (set-gated session distance).
+    public private(set) var sessionSetMeters = 0.0
+    /// Sum of finished set durations (includes a set closed at session stop).
     public private(set) var sessionRidingDuration: TimeInterval = 0
     public private(set) var currentSpeedKmh: Double?
-    /// Crossing-based laps for the current ride (0 while inactive after finish until next enter).
-    public var currentRideLapCount: Int { lapTracker.lapCount }
+    /// Crossing-based laps for the current set (0 while inactive after finish until next enter).
+    public var currentSetLapCount: Int { lapTracker.lapCount }
 
     private var trackedCode = DetectionCodes.inactive
     private var trackedLastConfident = DetectionCodes.inactive
     private var previousLocation: LocationSample?
-    private var finishedRideMeters = 0.0
-    private var rideStartedAt: Date?
+    private var finishedSetMeters = 0.0
+    private var setStartedAt: Date?
     private let maxHorizontalAccuracyM: Double
-    private var lapTracker: LapRideTracker
+    private var lapTracker: LapSetTracker
 
     public init(
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
@@ -35,29 +35,29 @@ public struct LiveRideTracker: Sendable {
         self.maxHorizontalAccuracyM = maxHorizontalAccuracyM
         var thresholds = lapThresholds
         thresholds.maxHorizontalAccuracyM = maxHorizontalAccuracyM
-        var laps = LapRideTracker(thresholds: thresholds)
+        var laps = LapSetTracker(thresholds: thresholds)
         laps.noteInactive()
         self.lapTracker = laps
     }
 
     public mutating func reset() {
-        rideCount = 0
-        isRideOngoing = false
-        currentRideMeters = 0
-        lastRideMeters = 0
-        lastRideDuration = 0
-        lastRideLapCount = 0
-        didCompleteRide = false
-        sessionRideMeters = 0
+        setCount = 0
+        isSetOngoing = false
+        currentSetMeters = 0
+        lastSetMeters = 0
+        lastSetDuration = 0
+        lastSetLapCount = 0
+        didCompleteSet = false
+        sessionSetMeters = 0
         sessionRidingDuration = 0
-        finishedRideMeters = 0
+        finishedSetMeters = 0
         currentSpeedKmh = nil
         trackedCode = DetectionCodes.inactive
         trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
-        rideStartedAt = nil
+        setStartedAt = nil
         lapTracker.reset()
-        // Session starts inactive so the first dock→ride may score laps.
+        // Session starts inactive so the first dock→riding may score laps.
         lapTracker.noteInactive()
     }
 
@@ -75,12 +75,12 @@ public struct LiveRideTracker: Sendable {
             let code = DetectionCodes.normalize(event.code)
             let nowRiding = code == DetectionCodes.riding
             if nowRiding, !wasRiding {
-                rideCount += 1
-                currentRideMeters = 0
-                isRideOngoing = true
-                rideStartedAt = event.timestamp
+                setCount += 1
+                currentSetMeters = 0
+                isSetOngoing = true
+                setStartedAt = event.timestamp
             } else if !nowRiding, wasRiding {
-                finishCurrentRide(at: event.timestamp)
+                finishCurrentSet(at: event.timestamp)
             }
             trackedCode = code
             trackedLastConfident = code
@@ -94,17 +94,17 @@ public struct LiveRideTracker: Sendable {
             trackedCode = DetectionCodes.normalize(currentCode)
         }
         trackedLastConfident = DetectionCodes.normalize(lastConfident)
-        isRideOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
-        lapTracker.updateRiding(isRideOngoing)
+        isSetOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
+        lapTracker.updateRiding(isSetOngoing)
         if trackedCode != DetectionCodes.riding {
             currentSpeedKmh = nil
         }
         refreshSessionMeters()
     }
 
-    /// Replay buffered GPS fixes that fall inside a backdated ride-enter window.
-    public mutating func replayLocationsForRideEnter(_ samples: [LocationSample], from holdStart: Date) {
-        guard isRideOngoing else { return }
+    /// Replay buffered GPS fixes that fall inside a backdated set-enter window.
+    public mutating func replayLocationsForSetEnter(_ samples: [LocationSample], from holdStart: Date) {
+        guard isSetOngoing else { return }
         let ordered = samples
             .filter { $0.timestamp >= holdStart }
             .sorted { $0.timestamp < $1.timestamp }
@@ -138,7 +138,7 @@ public struct LiveRideTracker: Sendable {
 
         if let from = previousLocation,
            GeoDistance.acceptsStep(from: from, to: sample, maxHorizontalAccuracyM: maxHorizontalAccuracyM) {
-            currentRideMeters += GeoDistance.meters(
+            currentSetMeters += GeoDistance.meters(
                 fromLat: from.latitude,
                 fromLon: from.longitude,
                 toLat: sample.latitude,
@@ -149,36 +149,36 @@ public struct LiveRideTracker: Sendable {
         previousLocation = sample
     }
 
-    /// Close an open ride at session stop.
-    public mutating func closeOpenRide(at date: Date = Date()) {
-        if isRideOngoing {
-            finishCurrentRide(at: date)
+    /// Close an open set at session stop.
+    public mutating func closeOpenSet(at date: Date = Date()) {
+        if isSetOngoing {
+            finishCurrentSet(at: date)
         }
     }
 
-    private mutating func finishCurrentRide(at date: Date) {
-        lastRideMeters = currentRideMeters
-        if let started = rideStartedAt {
-            lastRideDuration = max(0, date.timeIntervalSince(started))
+    private mutating func finishCurrentSet(at date: Date) {
+        lastSetMeters = currentSetMeters
+        if let started = setStartedAt {
+            lastSetDuration = max(0, date.timeIntervalSince(started))
         } else {
-            lastRideDuration = 0
+            lastSetDuration = 0
         }
-        if lapTracker.isRideActive {
-            lapTracker.endRide()
+        if lapTracker.isSetActive {
+            lapTracker.endSet()
         }
-        lastRideLapCount = lapTracker.lapCount
-        didCompleteRide = true
-        sessionRidingDuration += lastRideDuration
-        finishedRideMeters += currentRideMeters
-        currentRideMeters = 0
-        isRideOngoing = false
+        lastSetLapCount = lapTracker.lapCount
+        didCompleteSet = true
+        sessionRidingDuration += lastSetDuration
+        finishedSetMeters += currentSetMeters
+        currentSetMeters = 0
+        isSetOngoing = false
         currentSpeedKmh = nil
-        rideStartedAt = nil
+        setStartedAt = nil
         refreshSessionMeters()
     }
 
     private mutating func refreshSessionMeters() {
-        sessionRideMeters = finishedRideMeters + currentRideMeters
+        sessionSetMeters = finishedSetMeters + currentSetMeters
     }
 
     private static func attributesAsRiding(code: String, lastConfident: String) -> Bool {

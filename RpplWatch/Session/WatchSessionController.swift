@@ -38,9 +38,9 @@ final class WatchSessionController: NSObject {
     var lastHorizontalAccuracy: Double?
     var lastHeartRate: Double?
     var lastSpeedMps: Double?
-    /// Ride-gated session distance (sum of ride meters). Not dock/pause walking.
-    var totalDistanceM: Double { liveRideTracker.sessionRideMeters }
-    var currentRideDuration: TimeInterval = 0
+    /// Set-gated session distance (sum of set meters). Not dock/pause walking.
+    var totalDistanceM: Double { liveSetTracker.sessionSetMeters }
+    var currentSetDuration: TimeInterval = 0
     var currentInactiveDuration: TimeInterval = 0
     var filterRejectionReason: String?
     var statusText = String(localized: "Idle")
@@ -75,20 +75,20 @@ final class WatchSessionController: NSObject {
     var motionRecordingEnabled = false
 
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
-    var rideCount: Int { liveRideTracker.rideCount }
-    var currentRideSpeedKmh: Double? { liveRideTracker.currentSpeedKmh }
-    var currentRideLapCount: Int { liveRideTracker.currentRideLapCount }
-    var lastRideLapCount: Int { liveRideTracker.lastRideLapCount }
-    /// Live meters while riding; frozen last-ride meters when inactive (`0 m` before first ride).
-    var displayRideMeters: Double {
-        liveRideTracker.isRideOngoing
-            ? liveRideTracker.currentRideMeters
-            : liveRideTracker.lastRideMeters
+    var setCount: Int { liveSetTracker.setCount }
+    var currentSetSpeedKmh: Double? { liveSetTracker.currentSpeedKmh }
+    var currentSetLapCount: Int { liveSetTracker.currentSetLapCount }
+    var lastSetLapCount: Int { liveSetTracker.lastSetLapCount }
+    /// Live meters while riding; frozen last-set meters when inactive (`0 m` before first set).
+    var displaySetMeters: Double {
+        liveSetTracker.isSetOngoing
+            ? liveSetTracker.currentSetMeters
+            : liveSetTracker.lastSetMeters
     }
-    var lastRideMeters: Double { liveRideTracker.lastRideMeters }
-    var lastRideDuration: TimeInterval { liveRideTracker.lastRideDuration }
-    var didCompleteRide: Bool { liveRideTracker.didCompleteRide }
-    var isRideOngoing: Bool { liveRideTracker.isRideOngoing }
+    var lastSetMeters: Double { liveSetTracker.lastSetMeters }
+    var lastSetDuration: TimeInterval { liveSetTracker.lastSetDuration }
+    var didCompleteSet: Bool { liveSetTracker.didCompleteSet }
+    var isSetOngoing: Bool { liveSetTracker.isSetOngoing }
     /// Ultra water-temp hardware present. Drives hide vs `- C` on inactive overview.
     var waterTemperatureAvailable = false
     /// Running mean of persisted submerged samples this session.
@@ -97,20 +97,20 @@ final class WatchSessionController: NSObject {
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     var detectionSimulationMode: DetectionSimulationMode = .detected
 
-    var liveRideTracker = LiveRideTracker()
+    var liveSetTracker = LiveSetTracker()
     let healthStore = HKHealthStore()
     var workoutSession: HKWorkoutSession?
     var workoutBuilder: HKLiveWorkoutBuilder?
     var workoutDataSource: HKLiveWorkoutDataSource?
     var workoutConfiguration: HKWorkoutConfiguration?
     var workoutRouteBuilder: HKWorkoutRouteBuilder?
-    /// True while an HK ride activity is open (ended on detection `inactive`).
+    /// True while an HK set activity is open (ended on detection `inactive`).
     var hkRideActivityOpen = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     var workoutRunningContinuation: CheckedContinuation<Void, Never>?
     var hkRideDistanceMeters = 0.0
     var hkRideDistanceAnchorMeters = 0.0
-    /// Ride windows for HealthKit distance samples and interval metadata.
+    /// Set windows for HealthKit distance samples and interval metadata.
     var hkRides: [HKRideMetric] = []
     var hkRideStartedAt: Date?
     var hkGpsFilter = GpsSignalFilter()
@@ -144,7 +144,7 @@ final class WatchSessionController: NSObject {
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []
     var healthBuffer: [HealthMetricSample] = []
-    /// Recent GPS fixes for backdating live ride meters on `ride_enter`.
+    /// Recent GPS fixes for backdating live set meters on `ride_enter`.
     var recentLocationRing: [LocationSample] = []
     var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?

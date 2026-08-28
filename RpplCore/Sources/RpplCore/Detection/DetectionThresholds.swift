@@ -12,7 +12,7 @@ public struct DetectionThresholds: Equatable, Sendable {
     public var rideExitHold: TimeInterval
     /// Riding + unusable GPS for this long → `unsure`.
     public var gapUnsureHold: TimeInterval
-    /// Unsure younger than this can lookback-merge into the same ride; at/after → new ride.
+    /// Unsure younger than this can lookback-merge into the same ride; at/after → new set.
     public var unsureSameRideWindow: TimeInterval
     public var maxHorizontalAccuracyM: Double
     public var maxPlausibleSpeedKmh: Double

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center"><strong>Cable-park wakeboarding, recorded on Apple Watch.</strong><br>
-Automatic ride and rest detection. Saved to Apple Health. No cloud. No subscription.</p>
+Automatic set and rest detection. Saved to Apple Health. No cloud. No subscription.</p>
 
 ## What Rppl does
 
@@ -39,7 +39,7 @@ I hope that, like me, you enjoy tracking your sessions!
 ## What to expect
 
 - **One session per park day.** Start and stop on the Watch. Use Pause when you truly step away; that freezes timers and stops sensors until you resume.
-- **Ride detection is automatic.** The Watch marks riding, rest, and unsure stretches from sensors. You do not label rides by hand.
+- **Set detection is automatic.** The Watch marks riding, rest, and unsure stretches from sensors. You do not label sets by hand.
 - **HealthKit is part of the product.** Workouts, heart rate, and energy land in Apple Health when you allow access.
 - **iPhone is for looking back.** After sync, browse sessions and maps on the phone. Recording stays on the Watch.
 - **Ultra Action Button (optional):** Settings → Action Button → Workout → Rppl starts a session.

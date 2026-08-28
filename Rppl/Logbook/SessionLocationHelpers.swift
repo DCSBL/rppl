@@ -2,35 +2,35 @@ import Foundation
 import RpplCore
 
 enum SessionLocationHelpers {
-    static func averageSpeedKmh(for ride: RideSegmentStats) -> Double? {
-        if let trimmed = ride.averageSpeedKmh { return trimmed }
+    static func averageSpeedKmh(for set: SetSegmentStats) -> Double? {
+        if let trimmed = set.averageSpeedKmh { return trimmed }
         return LocationSpeedStats.averageSpeedKmh(
-            distanceMeters: ride.distanceMeters,
-            duration: ride.duration
+            distanceMeters: set.distanceMeters,
+            duration: set.duration
         )
     }
 
-    static func peakSpeedKmh(for ride: RideSegmentStats, locations: [LocationSample] = []) -> Double? {
-        if let peak = ride.peakSpeedKmh { return peak }
+    static func peakSpeedKmh(for set: SetSegmentStats, locations: [LocationSample] = []) -> Double? {
+        if let peak = set.peakSpeedKmh { return peak }
         return LocationSpeedStats.peakSpeedKmh(from: locations)
     }
 
     static func peakSpeedKmh(
-        rides: [RideSegmentStats],
+        sets: [SetSegmentStats],
         locations: [LocationSample]
     ) -> Double? {
-        if let fromRides = rides.compactMap(\.peakSpeedKmh).max() {
+        if let fromRides = sets.compactMap(\.peakSpeedKmh).max() {
             return fromRides
         }
-        let windows = rides.map { (start: $0.startedAt, end: $0.endedAt) }
-        return LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: locations)
+        let windows = sets.map { (start: $0.startedAt, end: $0.endedAt) }
+        return LocationSpeedStats.peakSpeedKmh(setWindows: windows, locations: locations)
     }
 
     static func locations(
-        for ride: RideSegmentStats,
+        for set: SetSegmentStats,
         in all: [LocationSample]
     ) -> [LocationSample] {
-        RideLocationFilter.samples(in: all, from: ride.startedAt, to: ride.endedAt)
+        SetLocationFilter.samples(in: all, from: set.startedAt, to: set.endedAt)
     }
 
     static func downsample(_ locations: [LocationSample], maxCount: Int) -> [LocationSample] {

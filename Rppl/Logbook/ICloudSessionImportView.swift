@@ -123,8 +123,8 @@ struct ICloudSessionImportView: View {
     }
 
     private func statsLine(_ summary: RemoteSessionSummary) -> String {
-        let rides = LogbookFormatting.rideCount(summary.rideCount)
+        let setsText = LogbookFormatting.setCount(summary.setCount)
         let duration = LogbookFormatting.duration(summary.totalDuration)
-        return "\(rides) · \(duration)"
+        return "\(setsText) · \(duration)"
     }
 }

@@ -45,24 +45,21 @@ When generating, translating, or rewriting product copy about wakeboarding / cab
 
 #### 1. A set
 
-A **set** is the total overall session/turn allocated to a single rider from the time they step onto the dock until their assigned time or turn is up.
+A **set** is one detected riding segment within a park-day session: from confident `riding` enter until exit to `inactive` (or session end). Stats/UI label these **Sets** (`setCount`, `sets[]` in derived JSON).
 
-- **Cable park:** A set usually means a specific block of time (e.g. a 10-minute set on a 2-tower system) or a set number of laps around a full-size cable (e.g. a “3-lap set”). During a set, if you fall, you walk back to the dock and use up the rest of your allocated time or remaining laps.
-- **Boat:** Historically one rider behind the boat for roughly 15–20 minutes (or until a predetermined number of falls, e.g. 2–3) before switching with another passenger.
-- **Glossary shorthand:** “a round of wakeboarding.”
-
-Product language for turn allocation. **Not** what `LapRideTracker` counts.
+- **Cable-park slang:** riders also say “set” for an allocated dock turn; in Rppl that turn may include multiple detected sets and multiple laps. Do not conflate allocated turn with `setCount`.
+- **Legacy JSON:** decode `rideCount` / `rides` as aliases; encode `setCount` / `sets` only.
 
 #### 2. A lap
 
 A **lap** is a distance measurement: one complete circuit around a full-size cable-park layout — starting at the main dock, passing every turn/tower corner in order, and making it all the way back to the dock without falling or letting go.
 
 - **Usage:** “I'm going to do 3 laps and hit the kicker on the last one.”
-- **Key distinction:** A single set often consists of multiple laps. If you fall halfway around the circuit on your first go, you completed half a lap, but your overall set continues until your time/turn ends.
+- **Key distinction:** One park-day session often contains multiple sets; one set may contain multiple laps (or partial laps after a fall).
 
-Crossing counter (`LapRideTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**.
+Crossing counter (`LapSetTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**.
 
-Never call a circuit crossing a “set”. Never call an allocated turn a “lap”. Derived JSON key is `lapCount` (accept legacy `setCount` from the short-lived slang mis-rename; encode `lapCount` only).
+Never call a circuit crossing a “set”. Never call a detected riding segment a “lap”. Derived JSON key is `lapCount` (accept legacy segment mis-key `setCount` from a short-lived rename; encode `lapCount` only).
 
 **Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* as stand-ins for ride/lap/set jargon, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"lap(s)"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
 
@@ -82,7 +79,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Hard constraints (do not “helpfully” break)
 
-1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never emit `HKWorkoutEvent.lap` unless Fitness can show a lap count we fill (Apple API). In-app cable **laps** stay in `LapRideTracker` / derived stats — do not confuse with product **sets** (allocated turn). See hard constraint 3 + Set vs lap above.
+1. HealthKit save — `stopActivity` → wait `.stopped` → `endCollection` → **`finishWorkout()`** → `session.end()`. Still mirror HR / active (and basal) energy into JSONL. Keep the HK session **running** during detection `inactive`; `beginNewActivity` on each confident `riding` and `inactive` (Fitness numbered intervals). Disable active-energy + distance collection while docked. No `motionPaused` on detection rest. **`session.pause()` only for product Pause**. Never emit `HKWorkoutEvent.lap` unless Fitness can show a lap count we fill (Apple API). In-app cable **laps** stay in `LapSetTracker` / derived stats — do not confuse with product **sets** (detected riding segments). See hard constraint 3 + Set vs lap above.
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
@@ -125,7 +122,7 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 | Task | Start here |
 |------|------------|
 | Ride/pause detection | `DetectionEngine.swift`, `Detectors.swift`, `DetectionThresholds.swift` · [Docs/RideDetection.md](Docs/RideDetection.md) · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| Session stats (derived) | `SessionStatsBuilder.swift`, `LiveRideTracker.swift`, `LapRideTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Session stats (derived) | `SessionStatsBuilder.swift`, `LiveSetTracker.swift`, `LapSetTracker.swift`, `GeoDistance.swift` · [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |

@@ -4,14 +4,14 @@ import Testing
 
 private let t0 = Date(timeIntervalSince1970: 1_700_000_000)
 
-private func ride(
+private func set(
     index: Int,
     duration: TimeInterval,
     distance: Double,
     speed: Double? = nil,
     laps: Int = 0
-) -> RideSegmentStats {
-    RideSegmentStats(
+) -> SetSegmentStats {
+    SetSegmentStats(
         index: index,
         startedAt: t0,
         endedAt: t0.addingTimeInterval(duration),
@@ -41,16 +41,16 @@ private func location(
 @Suite("HighlightAssigner")
 struct HighlightAssignerTests {
     @Test func singleRideClearsHighlights() {
-        let result = HighlightAssigner.assignRideHighlights([
-            ride(index: 1, duration: 60, distance: 500, speed: 30)
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 60, distance: 500, speed: 30)
         ])
         #expect(result[0].highlights.isEmpty)
     }
 
     @Test func allEqualDistanceNoLongest() {
-        let result = HighlightAssigner.assignRideHighlights([
-            ride(index: 1, duration: 40, distance: 100, speed: 20),
-            ride(index: 2, duration: 50, distance: 100, speed: 25),
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 40, distance: 100, speed: 20),
+            set(index: 2, duration: 50, distance: 100, speed: 25),
         ])
         #expect(!result[0].highlights.contains(.longest))
         #expect(!result[1].highlights.contains(.longest))
@@ -59,18 +59,18 @@ struct HighlightAssignerTests {
     }
 
     @Test func hideLongestTimeWhenSameAsLongest() {
-        let result = HighlightAssigner.assignRideHighlights([
-            ride(index: 1, duration: 120, distance: 900, speed: 20),
-            ride(index: 2, duration: 60, distance: 400, speed: 35),
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 120, distance: 900, speed: 20),
+            set(index: 2, duration: 60, distance: 400, speed: 35),
         ])
         #expect(result[0].highlights == [.longest])
         #expect(result[1].highlights == [.fastest])
     }
 
     @Test func longestTimeWhenDifferentFromDistance() {
-        let result = HighlightAssigner.assignRideHighlights([
-            ride(index: 1, duration: 60, distance: 900, speed: 20),
-            ride(index: 2, duration: 120, distance: 400, speed: 25),
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 60, distance: 900, speed: 20),
+            set(index: 2, duration: 120, distance: 400, speed: 25),
         ])
         #expect(result[0].highlights.contains(.longest))
         #expect(result[1].highlights.contains(.longestTime))

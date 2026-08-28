@@ -3,28 +3,28 @@ import Foundation
 /// Build distilled session map polylines for `derived/view.json`.
 public enum SessionMapTrackBuilder {
     public static let averagedPointCount = 64
-    public static let heatmapPointsPerRide = 32
-    public static let maxHeatmapRides = 24
+    public static let heatmapPointsPerSet = 32
+    public static let maxHeatmapSets = 24
 
     public static func build(
         locations: [LocationSample],
-        rides: [RideSegmentStats]
+        sets: [SetSegmentStats]
     ) -> SessionMapTrackData? {
-        let rideTracks = RideLocationFilter.tracks(from: locations, rides: rides)
+        let setTracks = SetLocationFilter.tracks(from: locations, sets: sets)
             .filter { $0.count >= 2 }
-        guard !rideTracks.isEmpty else { return nil }
+        guard !setTracks.isEmpty else { return nil }
         guard let averaged = CableTrackRepresentative.average(
-            tracks: rideTracks,
+            tracks: setTracks,
             sampleCount: averagedPointCount
         ) else {
             return nil
         }
-        guard let start = CableTrackRepresentative.commonStart(from: rideTracks) else {
+        guard let start = CableTrackRepresentative.commonStart(from: setTracks) else {
             return nil
         }
 
-        let heatmapTracks = rideTracks.prefix(maxHeatmapRides).map { track in
-            LocationSampleDownsampler.downsample(track, maxCount: heatmapPointsPerRide)
+        let heatmapTracks = setTracks.prefix(maxHeatmapSets).map { track in
+            LocationSampleDownsampler.downsample(track, maxCount: heatmapPointsPerSet)
                 .map(MapCoordinate.init)
         }
 

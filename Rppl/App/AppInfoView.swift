@@ -29,7 +29,7 @@ struct AppInfoView: View {
             List {
                 Section {
                     Text(
-                        "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
+                        "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
                     )
                     .font(.subheadline)
                     .foregroundStyle(Color.rpplMuted)
@@ -83,7 +83,7 @@ struct AppInfoView: View {
                         Text("On your devices")
                             .font(.body.weight(.semibold))
                         Text(
-                            "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
+                            "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others."
                         )
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)

@@ -72,7 +72,7 @@ public enum SessionLoader {
         let existing = try store.readDerivedView(sessionId: sessionId)
         let cityName = existing?.cityName
         if existing == nil || existing?.isCurrentAnalyzer != true {
-            let mapTracks = SessionMapTrackBuilder.build(locations: locations, rides: stats.rides)
+            let mapTracks = SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
             try store.writeDerivedView(
                 DerivedSessionView(
                     analyzerVersion: SessionAnalyzer.version,

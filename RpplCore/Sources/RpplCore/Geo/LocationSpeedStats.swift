@@ -17,15 +17,15 @@ public enum LocationSpeedStats {
         return SpeedUnits.kilometersPerHour(fromMetersPerSecond: peakMps)
     }
 
-    /// Session top speed = max peak across ride windows (never whole-session GPS).
+    /// Session top speed = max peak across set windows (never whole-session GPS).
     public static func peakSpeedKmh(
-        rideWindows: [(start: Date, end: Date)],
+        setWindows: [(start: Date, end: Date)],
         locations: [LocationSample],
         thresholds: DetectionThresholds = .default
     ) -> Double? {
         var sessionPeak: Double?
-        for window in rideWindows {
-            let samples = RideLocationFilter.samples(in: locations, from: window.start, to: window.end)
+        for window in setWindows {
+            let samples = SetLocationFilter.samples(in: locations, from: window.start, to: window.end)
             guard let ridePeak = peakSpeedKmh(from: samples, thresholds: thresholds) else { continue }
             sessionPeak = max(sessionPeak ?? ridePeak, ridePeak)
         }
@@ -69,22 +69,22 @@ public enum LocationSpeedStats {
         return SpeedUnits.kilometersPerHour(fromMetersPerSecond: mean)
     }
 
-    /// Max sustained speed across ride windows.
+    /// Max sustained speed across set windows.
     public static func sustainedSpeedKmh(
-        rideWindows: [(start: Date, end: Date)],
+        setWindows: [(start: Date, end: Date)],
         locations: [LocationSample],
         thresholds: DetectionThresholds = .default
     ) -> Double? {
         var sessionBest: Double?
-        for window in rideWindows {
-            let samples = RideLocationFilter.samples(in: locations, from: window.start, to: window.end)
-            guard let ride = sustainedSpeedKmh(from: samples, thresholds: thresholds) else { continue }
-            sessionBest = max(sessionBest ?? ride, ride)
+        for window in setWindows {
+            let samples = SetLocationFilter.samples(in: locations, from: window.start, to: window.end)
+            guard let set = sustainedSpeedKmh(from: samples, thresholds: thresholds) else { continue }
+            sessionBest = max(sessionBest ?? set, set)
         }
         return sessionBest
     }
 
-    /// Ride meters / riding duration in m/s. HealthKit `HKMetadataKeyAverageSpeed` and speed samples.
+    /// Set meters / riding duration in m/s. HealthKit `HKMetadataKeyAverageSpeed` and speed samples.
     public static func averageSpeedMetersPerSecond(
         distanceMeters: Double,
         duration: TimeInterval

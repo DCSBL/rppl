@@ -1,13 +1,13 @@
 import Foundation
 
-/// Crossing-based lap counter for one ride (incremental; offline batch = same API).
+/// Crossing-based lap counter for one set (incremental; offline batch = same API).
 ///
 /// Leave start beyond `exitRadiusM`, travel ≥ `minPathBeforeCrossingM`, re-enter
 /// `startSafeRadiusM` → +1. Bad GPS ignored. Scoring only after a prior pause
-/// (mid-ride session start skipped until pause→riding).
-public struct LapRideTracker: Sendable {
+/// (mid-set session start skipped until pause→riding).
+public struct LapSetTracker: Sendable {
     public private(set) var lapCount = 0
-    public private(set) var isRideActive = false
+    public private(set) var isSetActive = false
 
     private enum ZoneState: Equatable {
         case idle
@@ -19,7 +19,7 @@ public struct LapRideTracker: Sendable {
     private var thresholds: LapThresholds
     private var zoneState: ZoneState = .idle
     private var hasSeenInactive = false
-    private var scoringThisRide = false
+    private var scoringThisSet = false
     private var startLatitude: Double?
     private var startLongitude: Double?
     private var pathSinceLeaveM = 0.0
@@ -31,61 +31,61 @@ public struct LapRideTracker: Sendable {
 
     public mutating func reset() {
         lapCount = 0
-        isRideActive = false
+        isSetActive = false
         zoneState = .idle
         hasSeenInactive = false
-        scoringThisRide = false
+        scoringThisSet = false
         startLatitude = nil
         startLongitude = nil
         pathSinceLeaveM = 0
         previousLocation = nil
     }
 
-    /// Mark dock/pause so the next ride may score laps.
+    /// Mark dock/pause so the next set may score laps.
     public mutating func noteInactive() {
-        if isRideActive {
-            endRide()
+        if isSetActive {
+            endSet()
         }
         hasSeenInactive = true
     }
 
-    /// Open a ride. Laps score only if `noteInactive()` was seen earlier.
-    public mutating func beginRide() {
-        if isRideActive {
-            endRide()
+    /// Open a set. Laps score only if `noteInactive()` was seen earlier.
+    public mutating func beginSet() {
+        if isSetActive {
+            endSet()
         }
         lapCount = 0
-        isRideActive = true
-        scoringThisRide = hasSeenInactive
-        zoneState = scoringThisRide ? .awaitingAnchor : .idle
+        isSetActive = true
+        scoringThisSet = hasSeenInactive
+        zoneState = scoringThisSet ? .awaitingAnchor : .idle
         startLatitude = nil
         startLongitude = nil
         pathSinceLeaveM = 0
         previousLocation = nil
     }
 
-    /// Freeze lap state for this ride (fall / pause / session end).
-    public mutating func endRide() {
-        isRideActive = false
-        scoringThisRide = false
+    /// Freeze lap state for this set (fall / pause / session end).
+    public mutating func endSet() {
+        isSetActive = false
+        scoringThisSet = false
         zoneState = .idle
         previousLocation = nil
-        // Completing a ride implies pause at/after exit — unlock scoring for later rides.
+        // Completing a set implies pause at/after exit — unlock scoring for later sets.
         hasSeenInactive = true
     }
 
     /// Drive enter/exit from attributed riding (incl. unsure→riding on live).
     public mutating func updateRiding(_ riding: Bool) {
-        if riding, !isRideActive {
-            beginRide()
-        } else if !riding, isRideActive {
-            endRide()
+        if riding, !isSetActive {
+            beginSet()
+        } else if !riding, isSetActive {
+            endSet()
         }
     }
 
     /// Feed a GPS sample. Unusable / rejected steps do not move zone or path.
     public mutating func addLocation(_ sample: LocationSample) {
-        guard isRideActive, scoringThisRide else { return }
+        guard isSetActive, scoringThisSet else { return }
 
         guard sample.horizontalAccuracy >= 0,
               sample.horizontalAccuracy <= thresholds.maxHorizontalAccuracyM

@@ -82,7 +82,7 @@ export interface AccuracyPoint {
   meters: number
 }
 
-export interface RideSegment {
+export interface SetSegment {
   index: number
   startMs: number
   endMs: number
@@ -97,7 +97,7 @@ export interface RideSegment {
 
 export interface DerivedSession {
   phases: { code: string; startMs: number; endMs: number }[]
-  rides: RideSegment[]
+  sets: SetSegment[]
   totalLapCount: number
   totalDistanceMeters: number
   ridingDurationMs: number

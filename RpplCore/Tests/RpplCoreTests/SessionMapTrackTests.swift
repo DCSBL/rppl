@@ -60,8 +60,8 @@ struct SessionMapTrackBuilderTests {
 
     @Test func builderProducesHeatmapAndAveraged() throws {
         let locations = straightTrack(latStart: 52.0, lon: 5.0, count: 30)
-        let rides = [
-            RideSegmentStats(
+        let sets = [
+            SetSegmentStats(
                 index: 1,
                 startedAt: base,
                 endedAt: base.addingTimeInterval(29),
@@ -70,7 +70,7 @@ struct SessionMapTrackBuilderTests {
                 lapCount: 1
             ),
         ]
-        let data = SessionMapTrackBuilder.build(locations: locations, rides: rides)
+        let data = SessionMapTrackBuilder.build(locations: locations, sets: sets)
         #expect(data != nil)
         #expect(data!.averagedTrack.count == SessionMapTrackBuilder.averagedPointCount)
         #expect(data!.heatmapTracks.count == 1)

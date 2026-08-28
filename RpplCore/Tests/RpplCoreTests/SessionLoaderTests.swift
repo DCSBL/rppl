@@ -31,7 +31,7 @@ struct SessionLoaderTests {
         let bundle = try SessionLoader.load(store: store, sessionId: manifest.sessionId)
         #expect(bundle.manifest.sessionId == manifest.sessionId)
         #expect(bundle.detections.count == 1)
-        #expect(bundle.stats.rideCount == 0)
+        #expect(bundle.stats.setCount == 0)
         #expect(bundle.byteSize >= 0)
     }
 
@@ -62,7 +62,7 @@ struct SessionLoaderTests {
         let bundle = SessionLoader.load(package: package)
         #expect(bundle.manifest.activityCode == "Example session")
         #expect(bundle.detections.count == 1)
-        #expect(bundle.stats.rideCount == 0)
+        #expect(bundle.stats.setCount == 0)
         #expect(bundle.byteSize == 0)
     }
 }

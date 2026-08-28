@@ -149,7 +149,7 @@ public struct DetectionEngine: Sendable {
     private mutating func applyLookback(tick: DetectionTick, usableSpeedMps: Double) -> DetectionEvent? {
         let age = unsureEnteredAt.map { tick.timestamp.timeIntervalSince($0) } ?? 0
         guard age < thresholds.unsureSameRideWindow else {
-            // Window expired — timeout detector (or next tick) commits pause; no same-ride merge.
+            // Window expired — timeout detector (or next tick) commits pause; no same-set merge.
             return nil
         }
 

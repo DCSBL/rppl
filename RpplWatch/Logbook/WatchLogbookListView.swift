@@ -103,17 +103,17 @@ private struct WatchSessionRow: View {
                 .foregroundStyle(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    WatchRideMetricLine(
+                    WatchSetMetricLine(
                         label: "Duration",
                         value: SessionFormatters.elapsed(entry.stats.totalDuration)
                     )
-                    WatchRideMetricLine(
+                    WatchSetMetricLine(
                         label: "Distance",
                         value: SessionFormatters.distance(entry.stats.totalDistanceMeters)
                     )
-                    WatchRideMetricLine(
-                        label: "Rides",
-                        value: "\(entry.stats.rideCount)"
+                    WatchSetMetricLine(
+                        label: "Sets",
+                        value: "\(entry.stats.setCount)"
                     )
                 }
             }

@@ -14,8 +14,8 @@ private func location(at offset: TimeInterval, lat: Double, lon: Double) -> Loca
     )
 }
 
-private func ride(index: Int, from start: TimeInterval, to end: TimeInterval) -> RideSegmentStats {
-    RideSegmentStats(
+private func set(index: Int, from start: TimeInterval, to end: TimeInterval) -> SetSegmentStats {
+    SetSegmentStats(
         index: index,
         startedAt: t0.addingTimeInterval(start),
         endedAt: t0.addingTimeInterval(end),
@@ -24,8 +24,8 @@ private func ride(index: Int, from start: TimeInterval, to end: TimeInterval) ->
     )
 }
 
-@Suite("RideLocationFilter")
-struct RideLocationFilterTests {
+@Suite("SetLocationFilter")
+struct SetLocationFilterTests {
     @Test func dropsWalkingBetweenRides() {
         let locations = [
             location(at: 5, lat: 52.0, lon: 5.0),
@@ -35,11 +35,11 @@ struct RideLocationFilterTests {
             location(at: 110, lat: 52.003, lon: 5.0),
             location(at: 120, lat: 52.004, lon: 5.0),
         ]
-        let rides = [
-            ride(index: 1, from: 10, to: 20),
-            ride(index: 2, from: 100, to: 130),
+        let sets = [
+            set(index: 1, from: 10, to: 20),
+            set(index: 2, from: 100, to: 130),
         ]
-        let tracks = RideLocationFilter.tracks(from: locations, rides: rides)
+        let tracks = SetLocationFilter.tracks(from: locations, sets: sets)
         #expect(tracks.count == 2)
         #expect(tracks[0].count == 2)
         #expect(tracks[1].count == 2)
@@ -52,8 +52,8 @@ struct RideLocationFilterTests {
             location(at: 5, lat: 52.0, lon: 5.0),
             location(at: 15, lat: 52.001, lon: 5.0),
         ]
-        let rides = [ride(index: 1, from: 10, to: 20)]
-        let tracks = RideLocationFilter.tracks(from: locations, rides: rides)
+        let sets = [set(index: 1, from: 10, to: 20)]
+        let tracks = SetLocationFilter.tracks(from: locations, sets: sets)
         #expect(tracks.isEmpty)
     }
 
@@ -62,8 +62,8 @@ struct RideLocationFilterTests {
             location(at: 10, lat: 52.0, lon: 5.0),
             location(at: 20, lat: 52.001, lon: 5.0),
         ]
-        let rides = [ride(index: 1, from: 10, to: 20)]
-        let tracks = RideLocationFilter.tracks(from: locations, rides: rides)
+        let sets = [set(index: 1, from: 10, to: 20)]
+        let tracks = SetLocationFilter.tracks(from: locations, sets: sets)
         #expect(tracks.count == 1)
         #expect(tracks[0].count == 2)
     }
