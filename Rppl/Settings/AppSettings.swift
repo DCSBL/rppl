@@ -15,4 +15,6 @@ enum AppSettingsKey {
     static let iCloudDriveSyncEnabled = "rppl.iCloudDriveSyncEnabled"
     /// Session ids accepted into this phone’s logbook (Ask-before-import; local only).
     static let iCloudAcceptedSessionIDs = "rppl.iCloudAcceptedSessionIds"
+    /// Session ids removed from this phone’s logbook but left in iCloud Drive.
+    static let iCloudHiddenSessionIDs = "rppl.iCloudHiddenSessionIds"
 }

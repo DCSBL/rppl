@@ -61,6 +61,15 @@ struct ICloudLogbookPolicyTests {
         #expect(result == ["a", "b", "imported", "old"])
     }
 
+    @Test func reconcileAcceptedSkipsHiddenFromLogbook() {
+        let result = ICloudLogbookPolicy.reconcileAccepted(
+            previousAccepted: ["a"],
+            localIDs: ["a", "b", "hidden"],
+            hiddenFromLogbook: ["hidden"]
+        )
+        #expect(result == ["a", "b"])
+    }
+
     @Test func remoteImportCandidatesFiltersAcceptedAndDismissed() {
         let result = ICloudLogbookPolicy.remoteImportCandidates(
             remoteMetadata: ["a", "b", "c"],
