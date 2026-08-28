@@ -16,45 +16,47 @@ public struct MapCoordinate: Codable, Equatable, Sendable {
     }
 }
 
-/// Session overview map display mode (averaged cable loop vs lap heatmap).
-public enum SessionMapTrackStyle: String, Codable, Sendable, CaseIterable {
-    case averaged
-    case heatmap
-}
-
-/// Distilled session polylines for phone + Watch logbook maps.
+/// Distilled session heatmap polylines for phone + Watch logbook maps.
 public struct SessionMapTrackData: Codable, Equatable, Sendable {
     public var start: MapCoordinate
-    public var averagedTrack: [MapCoordinate]
     public var heatmapTracks: [[MapCoordinate]]
-    /// Parallel to `averagedTrack`; km/h when speed was usable at resample index.
-    public var averagedSpeedKmh: [Double]?
 
-    public init(
-        start: MapCoordinate,
-        averagedTrack: [MapCoordinate],
-        heatmapTracks: [[MapCoordinate]],
-        averagedSpeedKmh: [Double]? = nil
-    ) {
+    public init(start: MapCoordinate, heatmapTracks: [[MapCoordinate]]) {
         self.start = start
-        self.averagedTrack = averagedTrack
         self.heatmapTracks = heatmapTracks
-        self.averagedSpeedKmh = averagedSpeedKmh
     }
 
     public var hasRenderableTrack: Bool {
-        averagedTrack.count >= 2 || heatmapTracks.contains { $0.count >= 2 }
+        heatmapTracks.contains { $0.count >= 2 }
     }
 
-    /// All polylines for camera framing — union keeps zoom stable when toggling display mode.
     public var allFitCoordinates: [MapCoordinate] {
-        var coords = averagedTrack
+        var coords: [MapCoordinate] = []
         for track in heatmapTracks where track.count >= 2 {
             coords.append(contentsOf: track)
         }
-        if coords.isEmpty, averagedTrack.count == 1 {
+        if coords.isEmpty {
             coords = [start]
         }
         return coords
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case start
+        case heatmapTracks
+        case averagedTrack
+        case averagedSpeedKmh
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        start = try container.decode(MapCoordinate.self, forKey: .start)
+        heatmapTracks = try container.decodeIfPresent([[MapCoordinate]].self, forKey: .heatmapTracks) ?? []
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(start, forKey: .start)
+        try container.encode(heatmapTracks, forKey: .heatmapTracks)
     }
 }

@@ -18,7 +18,6 @@ public enum AppConstants {
     public static let wcSyncUpdatesKey = "updates"
     /// Opaque last-started activity code (`wakeboard`, …). Never a localized title.
     public static let lastActivityCodeDefaultsKey = "nl.dcsbl.rppl.lastActivityCode"
-    public static let sessionMapTrackStyleDefaultsKey = "rppl.sessionMapTrackStyle"
     public static let hkMetadataActivityCode = "nl.dcsbl.rppl.activityCode"
 
     public static var documentsSessionsRoot: URL {
