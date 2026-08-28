@@ -6,6 +6,9 @@ public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
     case emptyPayload
     case compressionFailed
     case decompressionFailed
+    case frameTooLarge
+    case tooManyFrames
+    case totalSizeExceeded
 }
 
 /// Append-friendly JSONL storage: each flush is one length-prefixed zlib member.
@@ -15,6 +18,11 @@ public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
 ///
 /// Concatenated frames decompress to UTF-8 JSONL (newline-delimited objects).
 public enum CompressedJSONLFrames {
+    public static let maxFrameCount = 8_192
+    public static let maxCompressedBytesPerFrame = 1 * 1024 * 1024
+    public static let maxDecompressedBytesPerFrame = 8 * 1024 * 1024
+    public static let maxTotalDecodedBytes = 64 * 1024 * 1024
+
     public static func makeFrame(jsonlUTF8: Data) throws -> Data {
         guard !jsonlUTF8.isEmpty else { throw CompressedJSONLFrameError.emptyPayload }
         let compressed = try compress(jsonlUTF8)
@@ -40,18 +48,34 @@ public enum CompressedJSONLFrames {
     public static func decodeFrames(_ data: Data) throws -> Data {
         var offset = 0
         var result = Data()
+        var frameCount = 0
         while offset < data.count {
+            guard frameCount < maxFrameCount else {
+                throw CompressedJSONLFrameError.tooManyFrames
+            }
             guard offset + 4 <= data.count else {
                 throw CompressedJSONLFrameError.truncatedFrame
             }
             let length = Int(readUInt32BE(data, at: offset))
             offset += 4
-            guard length > 0, offset + length <= data.count else {
+            guard length > 0, length <= maxCompressedBytesPerFrame else {
+                throw CompressedJSONLFrameError.frameTooLarge
+            }
+            guard offset + length <= data.count else {
                 throw CompressedJSONLFrameError.truncatedFrame
             }
             let slice = data.subdata(in: offset..<(offset + length))
             offset += length
-            result.append(try decompress(slice))
+            let decompressed = try decompress(slice)
+            guard decompressed.count <= maxDecompressedBytesPerFrame else {
+                throw CompressedJSONLFrameError.frameTooLarge
+            }
+            let nextTotal = result.count + decompressed.count
+            guard nextTotal <= maxTotalDecodedBytes else {
+                throw CompressedJSONLFrameError.totalSizeExceeded
+            }
+            result.append(decompressed)
+            frameCount += 1
         }
         return result
     }
@@ -80,7 +104,7 @@ public enum CompressedJSONLFrames {
     }
 
     private static func decompress(_ source: Data) throws -> Data {
-        var capacity = max(source.count * 8, 64 * 1024)
+        var capacity = min(max(source.count * 8, 64 * 1024), maxDecompressedBytesPerFrame)
         for _ in 0..<8 {
             var dest = Data(count: capacity)
             let written = dest.withUnsafeMutableBytes { destPtr -> Int in
@@ -102,7 +126,11 @@ public enum CompressedJSONLFrames {
             if written > 0 {
                 return dest.prefix(written)
             }
-            capacity *= 2
+            let nextCapacity = capacity * 2
+            guard nextCapacity <= maxDecompressedBytesPerFrame else {
+                throw CompressedJSONLFrameError.decompressionFailed
+            }
+            capacity = nextCapacity
         }
         throw CompressedJSONLFrameError.decompressionFailed
     }
