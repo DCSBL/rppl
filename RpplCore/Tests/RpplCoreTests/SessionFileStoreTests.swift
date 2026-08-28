@@ -199,14 +199,14 @@ struct SessionFileStoreTests {
         )
         _ = try store.createSession(manifest: manifest)
 
-        let assumptionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let assumptionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("assumptions.jsonl")
         let legacy =
             #"{"code":"riding","id":"legacy-1","reason":"ride_start","timestamp":"2024-01-01T00:00:00Z"}"#
             + "\n"
         try Data(legacy.utf8).write(to: assumptionsURL)
         // Empty detections from createSession — migrate should fill from assumptions.
-        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let detectionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("detections.jsonl")
         try Data().write(to: detectionsURL)
 
@@ -233,7 +233,7 @@ struct SessionFileStoreTests {
         manifest.schemaVersion = 3
         _ = try store.createSession(manifest: manifest)
 
-        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let detectionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("detections.jsonl")
         let legacy =
             #"{"code":"paused","detectorId":"session_start","id":"d1","reason":"session_start","timestamp":"2024-01-01T00:00:00Z"}"#

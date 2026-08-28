@@ -288,7 +288,7 @@ final class PhoneICloudDriveController: NSObject {
     /// Permanently deletes a session package, using file coordination when on iCloud Drive.
     func deleteSessionPermanently(_ sessionId: String) async throws {
         let store = PhoneConnectivityService.shared.store
-        let dir = store.sessionDirectory(for: sessionId)
+        let dir = try store.sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
