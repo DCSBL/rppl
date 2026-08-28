@@ -42,13 +42,17 @@ struct MapTrackFitTests {
         #expect(MapTrackFitter.clampedHeadingDegrees(180) == 0)
     }
 
-    @Test func fitNeedsAtLeastTwoPoints() {
-        let one = MapTrackFitter.fit(
+    @Test func fitSinglePointUsesStartFrame() {
+        let fit = MapTrackFitter.fit(
             locations: [(52.0, 5.0)],
             viewWidth: 200,
             viewHeight: 200
         )
-        #expect(one == nil)
+        #expect(fit != nil)
+        guard let fit else { return }
+        #expect(fit.centerLatitude == 52.0)
+        #expect(fit.centerLongitude == 5.0)
+        #expect(fit.headingDegrees == 0)
     }
 
     @Test func paddingIncreasesCameraDistance() {

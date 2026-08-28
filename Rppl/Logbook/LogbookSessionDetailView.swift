@@ -174,8 +174,7 @@ struct LogbookSessionDetailView: View {
 
                 SessionMapControlCluster(
                     showsStyleToggle: true,
-                    showsTrackStyleToggle: true,
-                    hasSessionData: true
+                    layout: .embedded
                 )
                 .padding(10)
             }
@@ -187,7 +186,7 @@ struct LogbookSessionDetailView: View {
             .accessibilityLabel(String(localized: "Session map"))
             .accessibilityHint(String(localized: "Shows full-screen map"))
             .overlay(alignment: .center) {
-                if tracksLoading, sessionMapTrackData.averagedTrack.isEmpty {
+                if tracksLoading, !sessionMapTrackData.hasRenderableTrack {
                     ProgressView()
                         .padding(12)
                         .background(.ultraThinMaterial, in: Capsule())
