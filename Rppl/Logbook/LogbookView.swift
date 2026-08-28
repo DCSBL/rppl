@@ -109,6 +109,8 @@ struct LogbookView: View {
                                     isHighlighted: highlightSessionId == entry.manifest.sessionId
                                 )
                             }
+                            .buttonStyle(.plain)
+                            .navigationLinkIndicatorVisibility(.hidden)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     WakeLog.debug(.ui, "swipe delete \(entry.manifest.sessionId.prefix(8))…")
@@ -374,43 +376,52 @@ private struct SessionCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                (
-                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                        .foregroundStyle(Color.rpplText)
-                    + (entry.highlights.isEmpty
-                        ? Text("")
-                        : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
-                            .foregroundStyle(Color.rpplMuted))
-                )
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    (
+                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                            .foregroundStyle(Color.rpplText)
+                        + (entry.highlights.isEmpty
+                            ? Text("")
+                            : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
+                                .foregroundStyle(Color.rpplMuted))
+                    )
+                    .font(.headline)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(entry.cityName ?? "-")
+                    Text(entry.cityName ?? "-")
+                        .font(.caption)
+                        .foregroundStyle(Color.rpplMuted)
+                        .lineLimit(1)
+                }
+
+                Text(sessionMetaText)
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider()
+                    .overlay(Color.rpplFill)
+
+                sessionStatsSummary
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(sessionMetaText)
-                .font(.caption)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(Color.rpplMuted)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Divider()
-                .overlay(Color.rpplFill)
-
-            sessionStatsSummary
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityHidden(true)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
         .background(
             RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
