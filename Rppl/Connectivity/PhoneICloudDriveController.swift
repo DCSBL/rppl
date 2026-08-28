@@ -27,6 +27,8 @@ final class PhoneICloudDriveController: NSObject {
     private(set) var suppressImportOffer = false
     /// Logbook shows only these session ids while Drive sync is on (Ask-before-import).
     private(set) var acceptedSessionIDs: Set<String> = []
+    /// Hidden on this phone while the package may remain in iCloud Drive.
+    private(set) var hiddenSessionIDs: Set<String> = []
 
     private var ubiquityContainerURL: URL?
     private var metadataQuery: NSMetadataQuery?
@@ -48,6 +50,7 @@ final class PhoneICloudDriveController: NSObject {
         isSyncEnabled = defaults.bool(forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         super.init()
         acceptedSessionIDs = loadAcceptedIDs()
+        hiddenSessionIDs = loadHiddenIDs()
 
         NotificationCenter.default.addObserver(
             self,
@@ -268,6 +271,36 @@ final class PhoneICloudDriveController: NSObject {
         persistAcceptedIDs()
     }
 
+    /// Removes a session from this phone’s logbook while leaving the iCloud Drive copy.
+    func hideSessionFromLogbook(_ sessionId: String) {
+        unacceptSession(sessionId)
+        hiddenSessionIDs.insert(sessionId)
+        persistHiddenIDs()
+        PhoneConnectivityService.shared.bumpSessionsRevision()
+        WakeLog.debug(.store, "hide session from logbook \(sessionId.prefix(8))…")
+    }
+
+    /// Permanently deletes a session package, using file coordination when on iCloud Drive.
+    func deleteSessionPermanently(_ sessionId: String) async throws {
+        let store = PhoneConnectivityService.shared.store
+        let dir = store.sessionDirectory(for: sessionId)
+        guard fileManager.fileExists(atPath: dir.path) else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        try await coordinatedDeleteSession(at: dir)
+        hiddenSessionIDs.remove(sessionId)
+        persistHiddenIDs()
+        unacceptSession(sessionId)
+        PhoneConnectivityService.shared.bumpSessionsRevision()
+        WakeLog.debug(.store, "permanent delete session \(sessionId.prefix(8))…")
+    }
+
+    func clearHiddenSession(_ sessionId: String) {
+        guard hiddenSessionIDs.contains(sessionId) else { return }
+        hiddenSessionIDs.remove(sessionId)
+        persistHiddenIDs()
+    }
+
     var logbookFilterIDs: Set<String>? {
         isSyncEnabled && isICloudAvailable ? acceptedSessionIDs : nil
     }
@@ -279,6 +312,11 @@ final class PhoneICloudDriveController: NSObject {
         return Set(raw)
     }
 
+    private func loadHiddenIDs() -> Set<String> {
+        let raw = UserDefaults.standard.stringArray(forKey: AppSettingsKey.iCloudHiddenSessionIDs) ?? []
+        return Set(raw)
+    }
+
     private func persistAcceptedIDs() {
         UserDefaults.standard.set(
             Array(acceptedSessionIDs).sorted(),
@@ -286,11 +324,21 @@ final class PhoneICloudDriveController: NSObject {
         )
     }
 
+    private func persistHiddenIDs() {
+        UserDefaults.standard.set(
+            Array(hiddenSessionIDs).sorted(),
+            forKey: AppSettingsKey.iCloudHiddenSessionIDs
+        )
+    }
+
     private func acceptSessions(_ ids: Set<String>) {
         guard !ids.isEmpty else { return }
+        hiddenSessionIDs.subtract(ids)
+        persistHiddenIDs()
         acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
             previousAccepted: acceptedSessionIDs,
-            localIDs: ids
+            localIDs: ids,
+            hiddenFromLogbook: hiddenSessionIDs
         )
         persistAcceptedIDs()
     }
@@ -303,7 +351,8 @@ final class PhoneICloudDriveController: NSObject {
         guard !disk.isEmpty else { return }
         acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
             previousAccepted: acceptedSessionIDs,
-            localIDs: disk
+            localIDs: disk,
+            hiddenFromLogbook: hiddenSessionIDs
         )
         persistAcceptedIDs()
     }
@@ -465,9 +514,10 @@ final class PhoneICloudDriveController: NSObject {
         }
 
         let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
-        // Anything already on the live root belongs in this phone’s logbook.
-        if !localOnDisk.isEmpty {
-            acceptSessions(localOnDisk)
+        // Anything already on the live root belongs in this phone’s logbook unless hidden.
+        let autoAccept = localOnDisk.subtracting(hiddenSessionIDs)
+        if !autoAccept.isEmpty {
+            acceptSessions(autoAccept)
         }
         let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
             accepted: acceptedSessionIDs,
@@ -478,6 +528,7 @@ final class PhoneICloudDriveController: NSObject {
         for sessionId in peerDeletes {
             try? store.deleteSession(sessionId: sessionId)
             unacceptSession(sessionId)
+            clearHiddenSession(sessionId)
             WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
         }
         if !peerDeletes.isEmpty {
@@ -558,6 +609,33 @@ final class PhoneICloudDriveController: NSObject {
                     WakeLog.error(.store, "remove iCloud Sessions: \(error.localizedDescription)")
                 }
                 continuation.resume()
+            }
+        }
+    }
+
+    private func coordinatedDeleteSession(at sessionDir: URL) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let coordinator = NSFileCoordinator()
+                var coordinatorError: NSError?
+                var result: Result<Void, Error> = .success(())
+                coordinator.coordinate(
+                    writingItemAt: sessionDir,
+                    options: [.forDeleting],
+                    error: &coordinatorError
+                ) { url in
+                    do {
+                        try FileManager.default.removeItem(at: url)
+                        result = .success(())
+                    } catch {
+                        result = .failure(error)
+                    }
+                }
+                if let coordinatorError {
+                    continuation.resume(throwing: coordinatorError)
+                } else {
+                    continuation.resume(with: result)
+                }
             }
         }
     }
