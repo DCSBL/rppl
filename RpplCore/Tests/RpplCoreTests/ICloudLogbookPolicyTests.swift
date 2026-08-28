@@ -70,6 +70,25 @@ struct ICloudLogbookPolicyTests {
         #expect(result == ["a", "b"])
     }
 
+    @Test func remoteImportCandidatesFiltersHiddenFromLogbook() {
+        let result = ICloudLogbookPolicy.remoteImportCandidates(
+            remoteMetadata: ["a", "b", "hidden"],
+            accepted: ["a"],
+            dismissed: [],
+            hiddenFromLogbook: ["hidden"]
+        )
+        #expect(result == ["b"])
+    }
+
+    @Test func autoAcceptCandidatesSkipsHiddenAndDeclined() {
+        let result = ICloudLogbookPolicy.autoAcceptCandidates(
+            localOnDisk: ["keep", "hidden", "declined"],
+            hiddenFromLogbook: ["hidden"],
+            declinedImport: ["declined"]
+        )
+        #expect(result == ["keep"])
+    }
+
     @Test func remoteImportCandidatesFiltersAcceptedAndDismissed() {
         let result = ICloudLogbookPolicy.remoteImportCandidates(
             remoteMetadata: ["a", "b", "c"],

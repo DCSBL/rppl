@@ -32,8 +32,21 @@ public enum ICloudLogbookPolicy {
     public static func remoteImportCandidates(
         remoteMetadata: Set<String>,
         accepted: Set<String>,
-        dismissed: Set<String>
+        dismissed: Set<String>,
+        hiddenFromLogbook: Set<String> = []
     ) -> Set<String> {
-        remoteMetadata.subtracting(accepted).subtracting(dismissed)
+        remoteMetadata
+            .subtracting(accepted)
+            .subtracting(dismissed)
+            .subtracting(hiddenFromLogbook)
+    }
+
+    /// Local packages to auto-accept after metadata refresh (excludes hidden / declined).
+    public static func autoAcceptCandidates(
+        localOnDisk: Set<String>,
+        hiddenFromLogbook: Set<String>,
+        declinedImport: Set<String>
+    ) -> Set<String> {
+        localOnDisk.subtracting(hiddenFromLogbook).subtracting(declinedImport)
     }
 }
