@@ -30,6 +30,16 @@ enum SessionMapLayout {
             EdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 16)
         }
     }
+
+    /// Keeps MapKit attribution ("Maps Legal") out of home-indicator / corner radius.
+    var attributionSafeAreaPadding: EdgeInsets {
+        switch self {
+        case .embedded:
+            EdgeInsets()
+        case .fullscreen:
+            EdgeInsets(top: 0, leading: 8, bottom: 12, trailing: 0)
+        }
+    }
 }
 
 struct SessionMapView: View {
@@ -229,6 +239,7 @@ struct SessionMapView: View {
                     MapPitchToggle()
                     MapCompass()
                 }
+                .safeAreaPadding(layout.attributionSafeAreaPadding)
         } else {
             map
                 .allowsHitTesting(false)
