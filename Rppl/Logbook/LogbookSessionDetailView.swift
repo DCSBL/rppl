@@ -13,7 +13,7 @@ struct LogbookSessionDetailView: View {
     var store: SessionFileStore?
 
     private static let sessionMapPointBudget = 800
-    private static let rideMapPointBudget = 200
+    private static let setMapPointBudget = 200
     private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
 
     @State private var manifest: SessionManifest?
@@ -74,7 +74,7 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     sessionMap
                     sessionStatsCard
-                    ridesSection
+                    setsSection
                 }
             }
             .padding(.horizontal, 20)
@@ -139,7 +139,7 @@ struct LogbookSessionDetailView: View {
     private var displayedMaxSpeedKmh: Double? {
         guard let stats = sessionStats else { return nil }
         return stats.maxSpeedKmh
-            ?? SessionLocationHelpers.peakSpeedKmh(rides: stats.rides, locations: allLocations)
+            ?? SessionLocationHelpers.peakSpeedKmh(sets: stats.sets, locations: allLocations)
     }
 
     @ViewBuilder
@@ -148,7 +148,7 @@ struct LogbookSessionDetailView: View {
             mapPlaceholder(
                 tracksLoading
                     ? "Loading GPS…"
-                    : (sessionStats?.rides.isEmpty == false ? "No ride GPS" : "No GPS track")
+                    : (sessionStats?.sets.isEmpty == false ? "No set GPS" : "No GPS track")
             )
         } else if let sessionMapTrackData {
             ZStack(alignment: .topLeading) {
@@ -239,7 +239,7 @@ struct LogbookSessionDetailView: View {
                         stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                         label: "Avg speed"
                     )
-                    statTile("\(stats.rideCount)", label: "Rides")
+                    statTile("\(stats.setCount)", label: "Sets")
                     statTile("\(stats.totalLapCount)", label: "Laps")
                     statTile(
                         "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
@@ -277,24 +277,24 @@ struct LogbookSessionDetailView: View {
     }
 
     @ViewBuilder
-    private var ridesSection: some View {
+    private var setsSection: some View {
         if let stats = sessionStats {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Rides")
+                Text("Sets")
                     .font(.title3.bold())
                     .foregroundStyle(Color.rpplText)
 
-                if stats.rides.isEmpty {
-                    Text("No rides detected.")
+                if stats.sets.isEmpty {
+                    Text("No sets detected.")
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
                 } else {
-                    ForEach(stats.rides) { ride in
-                        RideDetailCard(
-                            ride: ride,
+                    ForEach(stats.sets) { set in
+                        SetDetailCard(
+                            set: set,
                             locations: SessionLocationHelpers.downsample(
-                                SessionLocationHelpers.locations(for: ride, in: allLocations),
-                                maxCount: Self.rideMapPointBudget
+                                SessionLocationHelpers.locations(for: set, in: allLocations),
+                                maxCount: Self.setMapPointBudget
                             )
                         )
                     }
@@ -393,7 +393,7 @@ struct LogbookSessionDetailView: View {
                 loadTask = nil
                 tracksLoading = true
                 tracksTask = Task(priority: .utility) {
-                    await loadTracks(store: store, sessionId: sessionId, rides: summary.stats.rides)
+                    await loadTracks(store: store, sessionId: sessionId, sets: summary.stats.sets)
                 }
 
             case .bundledExample:
@@ -418,7 +418,7 @@ struct LogbookSessionDetailView: View {
     private func loadTracks(
         store: SessionFileStore,
         sessionId: String,
-        rides: [RideSegmentStats]
+        sets: [SetSegmentStats]
     ) async {
         do {
             let locations = try await StoreIO.runOffMain {
@@ -426,9 +426,9 @@ struct LogbookSessionDetailView: View {
             }
             try Task.checkCancellation()
             let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: rides)
-            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
-            let mapPoints = rideTracks.map {
+            let setTracks = SetLocationFilter.tracks(from: sortedLocations, sets: sets)
+            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(setTracks.count, 1))
+            let mapPoints = setTracks.map {
                 SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
             }
             allLocations = sortedLocations
@@ -436,7 +436,7 @@ struct LogbookSessionDetailView: View {
             if sessionMapTrackData == nil {
                 sessionMapTrackData = SessionMapTrackBuilder.build(
                     locations: sortedLocations,
-                    rides: rides
+                    sets: sets
                 )
             }
             tracksLoading = false
@@ -453,9 +453,9 @@ struct LogbookSessionDetailView: View {
 
     private func applyFullBundle(_ bundle: SessionLoadBundle) {
         let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
-        let rideTracks = RideLocationFilter.tracks(from: sortedLocations, rides: bundle.stats.rides)
-        let perTrackBudget = max(32, Self.sessionMapPointBudget / max(rideTracks.count, 1))
-        let mapPoints = rideTracks.map {
+        let setTracks = SetLocationFilter.tracks(from: sortedLocations, sets: bundle.stats.sets)
+        let perTrackBudget = max(32, Self.sessionMapPointBudget / max(setTracks.count, 1))
+        let mapPoints = setTracks.map {
             SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
         }
         manifest = bundle.manifest
@@ -465,7 +465,7 @@ struct LogbookSessionDetailView: View {
         mapFrame = bundle.mapFrame
         sessionMapTrackData = SessionMapTrackBuilder.build(
             locations: sortedLocations,
-            rides: bundle.stats.rides
+            sets: bundle.stats.sets
         )
         cityName = bundle.cityName
     }
@@ -577,27 +577,27 @@ struct LogbookSessionDetailView: View {
     }
 }
 
-private struct RideDetailCard: View {
-    let ride: RideSegmentStats
+private struct SetDetailCard: View {
+    let set: SetSegmentStats
     let locations: [LocationSample]
 
     private var maxSpeedKmh: Double? {
-        SessionLocationHelpers.peakSpeedKmh(for: ride, locations: locations)
+        SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
     }
 
     private var averageSpeedKmh: Double? {
-        SessionLocationHelpers.averageSpeedKmh(for: ride)
+        SessionLocationHelpers.averageSpeedKmh(for: set)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 (
-                    Text("Ride \(ride.index)")
+                    Text("Set \(set.index)")
                         .foregroundStyle(Color.rpplText)
-                    + (ride.highlights.isEmpty
+                    + (set.highlights.isEmpty
                         ? Text("")
-                        : Text(" - \(LogbookFormatting.joinedRideHighlights(ride.highlights))")
+                        : Text(" - \(LogbookFormatting.joinedSetHighlights(set.highlights))")
                             .foregroundStyle(Color.rpplMuted))
                 )
                 .font(.headline)
@@ -614,7 +614,7 @@ private struct RideDetailCard: View {
                     NavigationLink {
                         SessionMapFullscreenView(
                             locations: locations,
-                            title: String(localized: "Ride \(ride.index)")
+                            title: String(localized: "Set \(set.index)")
                         )
                     } label: {
                         Color.clear
@@ -627,10 +627,10 @@ private struct RideDetailCard: View {
                 .logbookNestedClip()
                 .accessibilityElement(children: .ignore)
                 .accessibilityAddTraits(.isButton)
-                .accessibilityLabel(String(localized: "Ride \(ride.index)"))
+                .accessibilityLabel(String(localized: "Set \(set.index)"))
                 .accessibilityHint(String(localized: "Shows full-screen map"))
             } else {
-                Text("No GPS track for this ride")
+                Text("No GPS track for this set")
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
@@ -644,27 +644,27 @@ private struct RideDetailCard: View {
                 ],
                 spacing: 8
             ) {
-                rideStatTile(
-                    LogbookFormatting.duration(ride.duration),
+                setStatTile(
+                    LogbookFormatting.duration(set.duration),
                     label: "Duration"
                 )
-                rideStatTile(
-                    LogbookFormatting.distanceKilometers(ride.distanceMeters),
+                setStatTile(
+                    LogbookFormatting.distanceKilometers(set.distanceMeters),
                     label: "Distance"
                 )
-                rideStatTile("\(ride.lapCount)", label: "Laps")
-                rideStatTile(
+                setStatTile("\(set.lapCount)", label: "Laps")
+                setStatTile(
                     maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Max speed"
                 )
-                rideStatTile(
+                setStatTile(
                     averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                     label: "Avg speed"
                 )
             }
 
             Text(
-                LogbookFormatting.sessionTimeRange(start: ride.startedAt, end: ride.endedAt)
+                LogbookFormatting.sessionTimeRange(start: set.startedAt, end: set.endedAt)
             )
             .font(.caption)
             .foregroundStyle(Color.rpplMuted)
@@ -672,7 +672,7 @@ private struct RideDetailCard: View {
         .logbookCardChrome()
     }
 
-    private func rideStatTile(_ value: String, label: LocalizedStringKey) -> some View {
+    private func setStatTile(_ value: String, label: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
                 .font(.subheadline.bold())

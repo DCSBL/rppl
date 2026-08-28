@@ -30,8 +30,8 @@ enum LogbookFormatting {
         TemperatureFormat.celsius(celsius)
     }
 
-    static func rideCount(_ count: Int) -> String {
-        String(localized: "\(count) rides")
+    static func setCount(_ count: Int) -> String {
+        String(localized: "\(count) sets")
     }
 
     static func lapCount(_ count: Int) -> String {
@@ -42,10 +42,10 @@ enum LogbookFormatting {
         String(localized: "\(count) total")
     }
 
-    static func totalsFooter(rides: Int, laps: Int) -> String {
-        let ridesText = String(localized: "\(rides) total rides")
+    static func totalsFooter(sets: Int, laps: Int) -> String {
+        let setsText = String(localized: "\(sets) total sets")
         let lapsText = lapCount(laps)
-        return String(localized: "\(ridesText) · \(lapsText)")
+        return String(localized: "\(setsText) · \(lapsText)")
     }
 
     static func sessionDate(_ date: Date) -> String {
@@ -59,7 +59,7 @@ enum LogbookFormatting {
         return "\(startText) – \(endText)"
     }
 
-    static func rideHighlightLabel(_ highlight: RideHighlight) -> String {
+    static func setHighlightLabel(_ highlight: SetHighlight) -> String {
         switch highlight {
         case .longest: return String(localized: "Longest")
         case .longestTime: return String(localized: "Longest time")
@@ -75,8 +75,8 @@ enum LogbookFormatting {
         }
     }
 
-    static func joinedRideHighlights(_ highlights: [RideHighlight]) -> String {
-        highlights.map(rideHighlightLabel).joined(separator: " ")
+    static func joinedSetHighlights(_ highlights: [SetHighlight]) -> String {
+        highlights.map(setHighlightLabel).joined(separator: " ")
     }
 
     static func joinedSessionHighlights(_ highlights: [SessionHighlight]) -> String {

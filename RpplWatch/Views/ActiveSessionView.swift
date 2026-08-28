@@ -13,7 +13,7 @@ struct ActiveSessionView: View {
         TabView(selection: $tab) {
             SessionControlsPage(session: session)
                 .tag(SessionTab.controls)
-            SessionRideUIPage(session: session)
+            SessionSetUIPage(session: session)
                 .tag(SessionTab.activity)
         }
     }

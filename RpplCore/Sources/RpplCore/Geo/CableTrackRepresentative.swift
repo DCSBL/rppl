@@ -1,6 +1,6 @@
 import Foundation
 
-/// Pick the most common ride path across laps (medoid), not a mean that collapses loops.
+/// Pick the most common set path across laps (medoid), not a mean that collapses loops.
 public enum CableTrackRepresentative {
     public static let defaultSampleCount = 64
 

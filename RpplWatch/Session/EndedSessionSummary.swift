@@ -4,12 +4,12 @@ import Foundation
 struct EndedSessionSummary: Equatable, Sendable {
     let sessionId: String
     let duration: TimeInterval
-    let rideCount: Int
+    let setCount: Int
     let distanceMeters: Double
-    let lastRideDuration: TimeInterval
-    let lastRideMeters: Double
-    let lastRideLapCount: Int
-    let didCompleteRide: Bool
+    let lastSetDuration: TimeInterval
+    let lastSetMeters: Double
+    let lastSetLapCount: Int
+    let didCompleteSet: Bool
     let startLatitude: Double?
     let startLongitude: Double?
 }

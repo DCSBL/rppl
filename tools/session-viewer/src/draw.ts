@@ -1,7 +1,7 @@
 import type {
   AccuracyPoint,
   LocationSample,
-  RideSegment,
+  SetSegment,
   Segment,
   SpeedPoint,
   TimeRange,
@@ -443,7 +443,7 @@ export function drawEvents(
   segs: Segment[],
   range: TimeRange,
   selectedId: string | null,
-  rides: RideSegment[],
+  sets: SetSegment[],
   playheadMs: number | null,
 ): void {
   const { ctx, w, h } = setupCanvas(canvas)
@@ -471,8 +471,8 @@ export function drawEvents(
     }
   }
 
-  for (const ride of rides) {
-    for (const lapMs of ride.lapAtMs) {
+  for (const set of sets) {
+    for (const lapMs of set.lapAtMs) {
       if (lapMs < range.startMs || lapMs > range.endMs) continue
       const x = xAt(lapMs, range, frame.x0, frame.x1)
       ctx.strokeStyle = 'rgba(250, 204, 21, 0.9)'
@@ -564,7 +564,7 @@ export function hitTestTrack(
 
 export function buildTrackMarkers(
   locations: LocationSample[],
-  rides: RideSegment[],
+  sets: SetSegment[],
   playheadLoc: LocationSample | null,
 ): TrackMarker[] {
   const markers: TrackMarker[] = []
@@ -574,11 +574,11 @@ export function buildTrackMarkers(
   markers.push({ lat: first.latitude, lon: first.longitude, kind: 'start' })
   markers.push({ lat: last.latitude, lon: last.longitude, kind: 'end' })
 
-  for (const ride of rides) {
-    if (ride.startLatitude != null && ride.startLongitude != null) {
+  for (const set of sets) {
+    if (ride.startLatitude != null && set.startLongitude != null) {
       markers.push({
-        lat: ride.startLatitude,
-        lon: ride.startLongitude,
+        lat: set.startLatitude,
+        lon: set.startLongitude,
         kind: 'anchor',
       })
     }

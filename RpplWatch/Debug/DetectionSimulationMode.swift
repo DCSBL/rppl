@@ -1,6 +1,6 @@
 import Foundation
 
-/// Debug-page ride simulation cycle on Watch.
+/// Debug-page set simulation cycle on Watch.
 enum DetectionSimulationMode: String, Sendable {
     /// Live `DetectionEngine` output.
     case detected

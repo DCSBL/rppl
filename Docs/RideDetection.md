@@ -1,4 +1,4 @@
-# Ride start / stop detection (intern guide)
+# Set start / stop detection (intern guide)
 
 How Rppl decides “you’re on a ride” vs “you’re waiting at the dock” from Watch GPS (and Ultra water sensors).
 
@@ -12,11 +12,11 @@ Deeper UML: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md). On-disk streams: [Da
 
 A cable-park day is one long session (Start → Stop on Watch). Inside that day the rider loops:
 
-dock → grab handle → ride → fall or stop → swim / walk back → dock again.
+dock → grab handle → set → fall or stop → swim / walk back → dock again.
 
-We need automatic **ride segments** (start + end) so distance, avg speed, and ride count only cover real rides — not walking the dock while “inactive.”
+We need automatic **set segments** (start + end) so distance, avg speed, and set count only cover real sets — not walking the dock while “inactive.”
 
-There is **no** manual “I started / I stopped” button for rides. Detection is automatic.
+There is **no** manual “I started / I stopped” button for sets. Detection is automatic.
 
 ---
 
@@ -27,7 +27,7 @@ Written to `detections.jsonl` only when the code **changes** (plus session start
 | Code | Meaning for humans |
 |------|--------------------|
 | `inactive` | Not riding: dock, waiting, swimming after a committed end, walking back. Session **starts** here. |
-| `riding` | On the cable at ride speed. |
+| `riding` | On the cable at set speed. |
 | `unsure` | Soft mid-ride GPS (often a fall killed the fix). Soft state: Watch UI still shows last confident code as primary. |
 
 Unknown future codes must round-trip as strings — do not invent a closed Swift enum for the taxonomy yet (`DetectionCodes` helpers only).
@@ -61,10 +61,10 @@ session start ──► inactive
                       │
           later: speed ≥20 ×3s again
                       ▼
-                   riding   ← always a *new* ride after inactive
+                   riding   ← always a *new* set after inactive
 ```
 
-**Product bias:** detect **any** new start from `inactive` reliably. After a committed ride end, a long swim (5–10 min) then re-dock is a **new** ride — we do not try to glue that into the same ride.
+**Product bias:** detect **any** new start from `inactive` reliably. After a committed set end, a long swim (5–10 min) then re-dock is a **new** set — we do not try to glue that into the same set.
 
 ---
 
@@ -117,7 +117,7 @@ If GPS becomes usable again **before** 60 seconds of unsure:
 | ≤ 4 km/h | End ride: write `inactive` with supersede |
 | between | Stay `unsure` |
 
-After 60 s, lookback will not merge — timeout forces `inactive`; next enter is a new ride.
+After 60 s, lookback will not merge — timeout forces `inactive`; next enter is a new set.
 
 ### 4. Detectors (order matters — first match wins)
 
@@ -130,7 +130,7 @@ Default order in `DetectionEngine.defaultDetectors`:
 | 3 | `ride_exit` | `riding` + usable slow ≤4 km/h × **3 s** | `inactive` |
 | 4 | `ride_enter` | `inactive` + usable fast ≥20 km/h × **3 s** (× **4 s** if hold started from ≤8 km/h) | `riding` |
 
-Ultra `submerged` is **logged** on ticks/events for analysis; it does **not** end rides. All watches share the GPS gap / slow-exit path.
+Ultra `submerged` is **logged** on ticks/events for analysis; it does **not** end sets. All watches share the GPS gap / slow-exit path.
 
 Motion activity (`walking`, etc.) is **logged** on events when present; it does **not** drive decisions today.
 
@@ -142,9 +142,9 @@ Authoritative defaults: `DetectionThresholds` in RpplCore.
 
 | Constant | Default | Role |
 |----------|---------|------|
-| Ride enter | ≥ **20** km/h × **3.0** s | `inactive` → `riding` |
-| Ride enter from walk | ≥ **20** km/h × **4.0** s | Same, if highSpeed started at/below **8** km/h |
-| Ride exit | ≤ **4** km/h × **3.0** s | `riding` → `inactive` (usable GPS only) |
+| Set enter | ≥ **20** km/h × **3.0** s | `inactive` → `riding` |
+| Set enter from walk | ≥ **20** km/h × **4.0** s | Same, if highSpeed started at/below **8** km/h |
+| Set exit | ≤ **4** km/h × **3.0** s | `riding` → `inactive` (usable GPS only) |
 | GPS gap | unusable × **3.0** s | `riding` → `unsure` |
 | Same-ride / timeout window | **60** s | lookback merge vs force `inactive` |
 | Accuracy gate | **25** m | worse → unusable for speed rules |
@@ -168,15 +168,15 @@ GPS samples live in separate location JSONL. Detections do **not** store the who
 
 ## How stats use detections (don’t confuse the two)
 
-Detection decides **when** rides start/stop. Stats **derive** meters and speeds later:
+Detection decides **when** sets start/stop. Stats **derive** meters and speeds later:
 
 | Piece | Behavior (current) |
 |-------|--------------------|
-| `LiveRideTracker` (Watch live UI) | Accrue distance/speed only while code is confidently `riding`. Unsure freezes meters. Session distance = sum of ride meters. |
-| `SessionStatsBuilder` (phone / export) | Ride windows = attributed `riding` phases. **`unsure` counts as inactive for windows** (ride ends at gap). Lookback supersede restores one continuous ride when the unsure line is superseded. |
-| Peak speed | Filtered like detection (accuracy / 80 / jump). Session top = max over **ride windows**, not whole-day GPS. |
+| `LiveSetTracker` (Watch live UI) | Accrue distance/speed only while code is confidently `riding`. Unsure freezes meters. Session distance = sum of set meters. |
+| `SessionStatsBuilder` (phone / export) | Set windows = attributed `riding` phases. **`unsure` counts as inactive for windows** (ride ends at gap). Lookback supersede restores one continuous set when the unsure line is superseded. |
+| Peak speed | Filtered like detection (accuracy / 80 / jump). Session top = max over **set windows**, not whole-day GPS. |
 
-So: walking the dock while `inactive` must not grow distance. A GPS spike between rides must not become “session top speed.”
+So: walking the dock while `inactive` must not grow distance. A GPS spike between sets must not become “session top speed.”
 
 ---
 
@@ -186,7 +186,7 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
    Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥20×3s (×4s from walk) → new `riding`.
 
 2. **Fall (all watches)**
-   GPS dies or slows: unusable 3 s → `unsure`. If fix returns fast within 60 s → same ride (lookback). Slow usable ≤4 km/h → `inactive`. If not → `unsure_timeout` → `inactive`, later start is new ride. Ultra `submerged` is logged but does not force exit.
+   GPS dies or slows: unusable 3 s → `unsure`. If fix returns fast within 60 s → same set (lookback). Slow usable ≤4 km/h → `inactive`. If not → `unsure_timeout` → `inactive`, later start is new set. Ultra `submerged` is logged but does not force exit.
 
 3. **Fall, Non-Ultra / GPS dies**
    Same as (2) without water sensor.
@@ -195,7 +195,7 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
    One bad tick: ignored. Sustained bad: unsure, then lookback if speed returns quickly.
 
 5. **Cable stopped mid-run, long wait in water**
-   We prioritize ending/starting cleanly over “same ride after 10 minutes.” The 60 s unsure window intentionally **does not** keep that as one ride.
+   We prioritize ending/starting cleanly over “same set after 10 minutes.” The 60 s unsure window intentionally **does not** keep that as one set.
 
 6. **Late Start mid-run**
    Session starts `inactive` while already on cable. Usable fast GPS (≥20 km/h × hold) still enters `riding` within a few seconds. Pre-session time/meters are lost; `ride_enter` backdates to hold start when possible.
@@ -209,8 +209,8 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
 | Thresholds | `DetectionThresholds.swift` |
 | Filter rules | `GpsSignalFilter.swift` |
 | New start/stop rule | New `Detector` + register in `DetectionEngine.defaultDetectors` |
-| Live Watch meters | `LiveRideTracker.swift` |
-| Offline ride list / distance | `SessionStatsBuilder.swift` |
+| Live Watch meters | `LiveSetTracker.swift` |
+| Offline set list / distance | `SessionStatsBuilder.swift` |
 | Watch feeds ticks | `RpplWatch/WatchSessionController.swift` |
 
 Offline experiments: `DetectionEngine.replay(ticks:)` or `replay(locations:)`.
@@ -219,9 +219,9 @@ Offline experiments: `DetectionEngine.replay(ticks:)` or `replay(locations:)`.
 
 ## Quick myths
 
-- **“Session pause”** — product day-session is continuous. `inactive` means *not riding*, not “workout paused” in the Start/Stop sense. HealthKit keeps the session running; ride-scoped active energy/distance use motion events + collection gating, not `session.pause()`. Product Pause still pauses HK.
+- **“Session pause”** — product day-session is continuous. `inactive` means *not riding*, not “workout paused” in the Start/Stop sense. HealthKit keeps the session running; set-scoped active energy/distance use motion events + collection gating, not `session.pause()`. Product Pause still pauses HK.
 - **“Unsure means swimming”** — no. Unsure means GPS soft. Swimming after a fall is usually already `inactive` via slow exit or unsure timeout.
-- **“Average speed should equal cable speed”** — avg = ride distance / ride duration. Bad GPS distance or late ride-end still skews it; that is why end detection and step filters matter.
+- **“Average speed should equal cable speed”** — avg = set distance / set duration. Bad GPS distance or late ride-end still skews it; that is why end detection and step filters matter.
 
 ---
 

@@ -21,21 +21,21 @@ export const defaultLapThresholds: LapThresholds = {
 type ZoneState = 'idle' | 'awaitingAnchor' | 'atStart' | 'outside'
 
 /**
- * Crossing-based lap counter — TS port of RpplCore LapRideTracker (WIP).
+ * Crossing-based lap counter — TS port of RpplCore LapSetTracker (WIP).
  * Exposes start anchor for viz.
  */
-export class LapRideTracker {
+export class LapSetTracker {
   lapCount = 0
-  /** Timestamps (ms) of each completed crossing for this ride. */
+  /** Timestamps (ms) of each completed crossing for this set. */
   lapAtMs: number[] = []
-  isRideActive = false
+  isSetActive = false
   startLatitude: number | null = null
   startLongitude: number | null = null
 
   private thresholds: LapThresholds
   private zoneState: ZoneState = 'idle'
   private hasSeenInactive = false
-  private scoringThisRide = false
+  private scoringThisSet = false
   private pathSinceLeaveM = 0
   private previousLocation: LocationSample | null = null
 
@@ -46,10 +46,10 @@ export class LapRideTracker {
   reset(): void {
     this.lapCount = 0
     this.lapAtMs = []
-    this.isRideActive = false
+    this.isSetActive = false
     this.zoneState = 'idle'
     this.hasSeenInactive = false
-    this.scoringThisRide = false
+    this.scoringThisSet = false
     this.startLatitude = null
     this.startLongitude = null
     this.pathSinceLeaveM = 0
@@ -57,33 +57,33 @@ export class LapRideTracker {
   }
 
   noteInactive(): void {
-    if (this.isRideActive) this.endRide()
+    if (this.isSetActive) this.endSet()
     this.hasSeenInactive = true
   }
 
-  beginRide(): void {
-    if (this.isRideActive) this.endRide()
+  beginSet(): void {
+    if (this.isSetActive) this.endSet()
     this.lapCount = 0
     this.lapAtMs = []
-    this.isRideActive = true
-    this.scoringThisRide = this.hasSeenInactive
-    this.zoneState = this.scoringThisRide ? 'awaitingAnchor' : 'idle'
+    this.isSetActive = true
+    this.scoringThisSet = this.hasSeenInactive
+    this.zoneState = this.scoringThisSet ? 'awaitingAnchor' : 'idle'
     this.startLatitude = null
     this.startLongitude = null
     this.pathSinceLeaveM = 0
     this.previousLocation = null
   }
 
-  endRide(): void {
-    this.isRideActive = false
-    this.scoringThisRide = false
+  endSet(): void {
+    this.isSetActive = false
+    this.scoringThisSet = false
     this.zoneState = 'idle'
     this.previousLocation = null
     this.hasSeenInactive = true
   }
 
   addLocation(sample: LocationSample): void {
-    if (!this.isRideActive || !this.scoringThisRide) return
+    if (!this.isSetActive || !this.scoringThisSet) return
     if (
       sample.horizontalAccuracy < 0 ||
       sample.horizontalAccuracy > this.thresholds.maxHorizontalAccuracyM

@@ -168,7 +168,7 @@ struct SessionStatsBuilderTests {
             locations: [],
             health: []
         )
-        #expect(stats.rideCount == 0)
+        #expect(stats.setCount == 0)
         #expect(stats.totalDistanceMeters == 0)
         #expect(stats.ridingDuration == 0)
         #expect(stats.inactiveDuration == 600)
@@ -191,12 +191,12 @@ struct SessionStatsBuilderTests {
             locations: locations,
             health: []
         )
-        #expect(stats.rideCount == 1)
-        #expect(stats.rides.count == 1)
-        #expect(stats.rides[0].duration == 90)
-        #expect(stats.rides[0].distanceMeters > 10)
-        #expect(stats.rides[0].peakSpeedKmh != nil)
-        #expect(abs((stats.rides[0].peakSpeedKmh ?? 0) - SpeedUnits.kilometersPerHour(fromMetersPerSecond: 8)) < 0.5)
+        #expect(stats.setCount == 1)
+        #expect(stats.sets.count == 1)
+        #expect(stats.sets[0].duration == 90)
+        #expect(stats.sets[0].distanceMeters > 10)
+        #expect(stats.sets[0].peakSpeedKmh != nil)
+        #expect(abs((stats.sets[0].peakSpeedKmh ?? 0) - SpeedUnits.kilometersPerHour(fromMetersPerSecond: 8)) < 0.5)
         #expect(stats.maxSpeedKmh != nil)
         #expect(stats.averageSpeedKmh != nil)
         #expect(stats.ridingDuration == 90)
@@ -218,8 +218,8 @@ struct SessionStatsBuilderTests {
             locations: [],
             health: []
         )
-        #expect(stats.rideCount == 2)
-        #expect(stats.rides.count == 2)
+        #expect(stats.setCount == 2)
+        #expect(stats.sets.count == 2)
     }
 
     @Test func supersededUnsureMergesIntoOneRide() {
@@ -242,12 +242,12 @@ struct SessionStatsBuilderTests {
             locations: [],
             health: []
         )
-        #expect(stats.rideCount == 1)
-        #expect(stats.rides[0].duration == 90)
+        #expect(stats.setCount == 1)
+        #expect(stats.sets[0].duration == 90)
     }
 
     @Test func timedOutUnsureEndsRideAtGap() {
-        // Unsure without lookback supersede: ride ends at unsure (not attributed riding).
+        // Unsure without lookback supersede: set ends at unsure (not attributed riding).
         let detections = [
             detection(code: DetectionCodes.inactive, at: 0, id: "s"),
             detection(code: DetectionCodes.riding, at: 10, id: "r1"),
@@ -260,8 +260,8 @@ struct SessionStatsBuilderTests {
             locations: [],
             health: []
         )
-        #expect(stats.rideCount == 1)
-        #expect(stats.rides[0].duration == 30)
+        #expect(stats.setCount == 1)
+        #expect(stats.sets[0].duration == 30)
         #expect(stats.ridingDuration == 30)
     }
 
@@ -315,8 +315,8 @@ struct SessionStatsBuilderTests {
             locations: [],
             health: []
         )
-        #expect(stats.rideCount == 1)
-        #expect(stats.rides[0].endedAt == t0.addingTimeInterval(100))
+        #expect(stats.setCount == 1)
+        #expect(stats.sets[0].endedAt == t0.addingTimeInterval(100))
     }
 
     @Test func waterTemperatureAveragesAllSamples() {
@@ -366,21 +366,21 @@ struct SessionStatsBuilderTests {
     }
 }
 
-@Suite("LiveRideTracker")
-struct LiveRideTrackerTests {
-    @Test func rideCountOnEnter() {
-        var tracker = LiveRideTracker()
+@Suite("LiveSetTracker")
+struct LiveSetTrackerTests {
+    @Test func setCountOnEnter() {
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
             events: [detection(code: DetectionCodes.riding, at: 10)]
         )
-        #expect(tracker.rideCount == 1)
-        #expect(tracker.isRideOngoing)
+        #expect(tracker.setCount == 1)
+        #expect(tracker.isSetOngoing)
     }
 
     @Test func frozenLastRideMetersWhenInactive() {
-        var tracker = LiveRideTracker()
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
@@ -388,7 +388,7 @@ struct LiveRideTrackerTests {
         )
         tracker.addLocation(location(at: 1, lat: 52.0, lon: 5.0))
         tracker.addLocation(location(at: 2, lat: 52.0001, lon: 5.0))
-        let meters = tracker.currentRideMeters
+        let meters = tracker.currentSetMeters
         #expect(meters > 0)
 
         tracker.update(
@@ -396,21 +396,21 @@ struct LiveRideTrackerTests {
             lastConfident: DetectionCodes.inactive,
             events: [detection(code: DetectionCodes.inactive, at: 50)]
         )
-        #expect(!tracker.isRideOngoing)
-        #expect(tracker.lastRideMeters == meters)
-        #expect(tracker.currentRideMeters == 0)
+        #expect(!tracker.isSetOngoing)
+        #expect(tracker.lastSetMeters == meters)
+        #expect(tracker.currentSetMeters == 0)
         #expect(tracker.currentSpeedKmh == nil)
     }
 
     @Test func zeroMetersBeforeFirstRide() {
-        let tracker = LiveRideTracker()
-        #expect(tracker.lastRideMeters == 0)
-        #expect(tracker.rideCount == 0)
-        #expect(tracker.sessionRideMeters == 0)
+        let tracker = LiveSetTracker()
+        #expect(tracker.lastSetMeters == 0)
+        #expect(tracker.setCount == 0)
+        #expect(tracker.sessionSetMeters == 0)
     }
 
     @Test func unsureDoesNotAccrueDistance() {
-        var tracker = LiveRideTracker()
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
@@ -418,7 +418,7 @@ struct LiveRideTrackerTests {
         )
         tracker.addLocation(location(at: 1, lat: 52.0, lon: 5.0))
         tracker.addLocation(location(at: 2, lat: 52.0001, lon: 5.0))
-        let meters = tracker.currentRideMeters
+        let meters = tracker.currentSetMeters
         #expect(meters > 0)
 
         tracker.update(
@@ -426,15 +426,15 @@ struct LiveRideTrackerTests {
             lastConfident: DetectionCodes.riding,
             events: [detection(code: DetectionCodes.unsure, at: 3)]
         )
-        #expect(tracker.isRideOngoing)
+        #expect(tracker.isSetOngoing)
         tracker.addLocation(location(at: 4, lat: 52.0003, lon: 5.0))
-        #expect(tracker.currentRideMeters == meters)
+        #expect(tracker.currentSetMeters == meters)
         #expect(tracker.currentSpeedKmh == nil)
-        #expect(tracker.sessionRideMeters == meters)
+        #expect(tracker.sessionSetMeters == meters)
     }
 
-    @Test func sessionRideMetersSumsFinishedRides() {
-        var tracker = LiveRideTracker()
+    @Test func sessionSetMetersSumsFinishedRides() {
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
@@ -442,14 +442,14 @@ struct LiveRideTrackerTests {
         )
         tracker.addLocation(location(at: 1, lat: 52.0, lon: 5.0))
         tracker.addLocation(location(at: 2, lat: 52.0001, lon: 5.0))
-        let first = tracker.currentRideMeters
+        let first = tracker.currentSetMeters
 
         tracker.update(
             currentCode: DetectionCodes.inactive,
             lastConfident: DetectionCodes.inactive,
             events: [detection(code: DetectionCodes.inactive, at: 10)]
         )
-        #expect(tracker.sessionRideMeters == first)
+        #expect(tracker.sessionSetMeters == first)
 
         tracker.update(
             currentCode: DetectionCodes.riding,
@@ -458,14 +458,14 @@ struct LiveRideTrackerTests {
         )
         tracker.addLocation(location(at: 21, lat: 52.0, lon: 5.0))
         tracker.addLocation(location(at: 22, lat: 52.0001, lon: 5.0))
-        #expect(tracker.sessionRideMeters == first + tracker.currentRideMeters)
-        #expect(tracker.rideCount == 2)
+        #expect(tracker.sessionSetMeters == first + tracker.currentSetMeters)
+        #expect(tracker.setCount == 2)
     }
 
-    @Test func lastRideDurationOnFinish() {
-        var tracker = LiveRideTracker()
-        #expect(!tracker.didCompleteRide)
-        #expect(tracker.lastRideDuration == 0)
+    @Test func lastSetDurationOnFinish() {
+        var tracker = LiveSetTracker()
+        #expect(!tracker.didCompleteSet)
+        #expect(tracker.lastSetDuration == 0)
 
         tracker.update(
             currentCode: DetectionCodes.riding,
@@ -477,14 +477,14 @@ struct LiveRideTrackerTests {
             lastConfident: DetectionCodes.inactive,
             events: [detection(code: DetectionCodes.inactive, at: 55)]
         )
-        #expect(tracker.didCompleteRide)
-        #expect(tracker.lastRideDuration == 45)
-        #expect(!tracker.isRideOngoing)
+        #expect(tracker.didCompleteSet)
+        #expect(tracker.lastSetDuration == 45)
+        #expect(!tracker.isSetOngoing)
         #expect(tracker.sessionRidingDuration == 45)
     }
 
     @Test func sessionRidingDurationSumsFinishedRides() {
-        var tracker = LiveRideTracker()
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
@@ -500,26 +500,26 @@ struct LiveRideTrackerTests {
             lastConfident: DetectionCodes.riding,
             events: [detection(code: DetectionCodes.riding, at: 50)]
         )
-        tracker.closeOpenRide(at: t0.addingTimeInterval(80))
+        tracker.closeOpenSet(at: t0.addingTimeInterval(80))
         #expect(tracker.sessionRidingDuration == 70)
     }
 
-    @Test func closeOpenRideRecordsDuration() {
-        var tracker = LiveRideTracker()
+    @Test func closeOpenSetRecordsDuration() {
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
             events: [detection(code: DetectionCodes.riding, at: 0)]
         )
-        tracker.closeOpenRide(at: t0.addingTimeInterval(30))
-        #expect(tracker.didCompleteRide)
-        #expect(tracker.lastRideDuration == 30)
+        tracker.closeOpenSet(at: t0.addingTimeInterval(30))
+        #expect(tracker.didCompleteSet)
+        #expect(tracker.lastSetDuration == 30)
         #expect(tracker.sessionRidingDuration == 30)
-        #expect(!tracker.isRideOngoing)
+        #expect(!tracker.isSetOngoing)
     }
 
     @Test func resetClearsLastRideDuration() {
-        var tracker = LiveRideTracker()
+        var tracker = LiveSetTracker()
         tracker.update(
             currentCode: DetectionCodes.riding,
             lastConfident: DetectionCodes.riding,
@@ -531,9 +531,9 @@ struct LiveRideTrackerTests {
             events: [detection(code: DetectionCodes.inactive, at: 20)]
         )
         tracker.reset()
-        #expect(!tracker.didCompleteRide)
-        #expect(tracker.lastRideDuration == 0)
-        #expect(tracker.lastRideMeters == 0)
+        #expect(!tracker.didCompleteSet)
+        #expect(tracker.lastSetDuration == 0)
+        #expect(tracker.lastSetMeters == 0)
         #expect(tracker.sessionRidingDuration == 0)
     }
 }
@@ -552,7 +552,7 @@ struct LocationSpeedStatsTests {
     }
 
     @Test func sessionPeakUsesRideWindowsOnly() {
-        let rideLocations = [
+        let setLocations = [
             location(at: 10, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 32)),
             location(at: 11, lat: 52.0, lon: 5.0, speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 34)),
         ]
@@ -562,13 +562,13 @@ struct LocationSpeedStatsTests {
             lon: 5.0,
             speedMps: SpeedUnits.metersPerSecond(fromKilometersPerHour: 44)
         )
-        let all = rideLocations + [inactiveSpike]
+        let all = setLocations + [inactiveSpike]
         let windows = [(start: t0.addingTimeInterval(10), end: t0.addingTimeInterval(20))]
-        let sessionPeak = LocationSpeedStats.peakSpeedKmh(rideWindows: windows, locations: all)
+        let sessionPeak = LocationSpeedStats.peakSpeedKmh(setWindows: windows, locations: all)
         let rawAll = LocationSpeedStats.peakSpeedKmh(from: all)
         #expect(sessionPeak != nil)
         #expect(abs((sessionPeak ?? 0) - 34) < 0.5)
-        // Spike during pause is accepted by filter but outside ride window → not in session peak.
+        // Spike during pause is accepted by filter but outside set window → not in session peak.
         #expect(rawAll != nil)
         #expect((rawAll ?? 0) > (sessionPeak ?? 0))
     }

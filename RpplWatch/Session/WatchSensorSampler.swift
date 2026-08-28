@@ -96,7 +96,7 @@ extension WatchSessionController {
             .filter { $0.timestamp >= holdStart }
             .sorted { $0.timestamp < $1.timestamp }
         guard !samples.isEmpty else { return }
-        liveRideTracker.replayLocationsForRideEnter(samples, from: holdStart)
+        liveSetTracker.replayLocationsForSetEnter(samples, from: holdStart)
     }
 
     func startActivityUpdatesIfAvailable() {

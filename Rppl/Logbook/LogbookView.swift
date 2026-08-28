@@ -228,7 +228,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Park days and rides")
+            Text("Park days and sets")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -283,7 +283,7 @@ struct LogbookView: View {
                 catalog.isLoading
                     ? "—"
                     : LogbookFormatting.totalsFooter(
-                        rides: totals.totalRuns,
+                        sets: totals.totalSets,
                         laps: totals.totalLaps
                     )
             )
@@ -438,9 +438,9 @@ private struct SessionCard: View {
         return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
     }
 
-    private var ridesText: String {
+    private var setsText: String {
         guard let stats = entry.stats else { return "—" }
-        return LogbookFormatting.rideCount(stats.rideCount)
+        return LogbookFormatting.setCount(stats.setCount)
     }
 
     private var lapsText: String {
@@ -453,7 +453,7 @@ private struct SessionCard: View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
                 statLabel("water.waves", value: distanceText)
-                statLabel("flag.checkered", value: ridesText)
+                statLabel("flag.checkered", value: setsText)
                 statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }
         } else {
@@ -470,7 +470,7 @@ private struct SessionCard: View {
             if includeDistance {
                 statLabel("water.waves", value: distanceText)
             }
-            statLabel("flag.checkered", value: ridesText)
+            statLabel("flag.checkered", value: setsText)
             if includeLaps {
                 statLabel("arrow.triangle.2.circlepath", value: lapsText)
             }

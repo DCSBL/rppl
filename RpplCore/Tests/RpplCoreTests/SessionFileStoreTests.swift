@@ -336,7 +336,7 @@ struct SessionFileStoreTests {
             """#.utf8
         )
         let package = try decoder.decode(SessionTransferPackage.self, from: json)
-        #expect(package.derived?.stats.rides.first?.lapCount == 4)
+        #expect(package.derived?.stats.sets.first?.lapCount == 4)
         #expect(package.derived?.isCurrentAnalyzer == false)
     }
 

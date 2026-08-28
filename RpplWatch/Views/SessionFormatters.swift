@@ -25,7 +25,7 @@ enum SessionFormatters {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
-    /// Watch ride rows — explicit minute/second units.
+    /// Watch set rows — explicit minute/second units.
     static func rideDuration(_ interval: TimeInterval) -> String {
         let totalSeconds = max(0, Int(interval.rounded()))
         let minutes = totalSeconds / 60

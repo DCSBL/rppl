@@ -804,34 +804,34 @@
         }
       }
     },
-    "Last ride" : {
+    "Last set" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Last ride"
+            "value" : "Last set"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatste ride"
+            "value" : "Laatste set"
           }
         }
       }
     },
-    "Last ride %@, %@, %lld laps" : {
+    "Last set %@, %@, %lld laps" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Last ride %1$@, %2$@, %3$lld laps"
+            "value" : "Last set %1$@, %2$@, %3$lld laps"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatste ride %1$@, %2$@, %3$lld laps"
+            "value" : "Laatste set %1$@, %2$@, %3$lld laps"
           }
         }
       }
@@ -1000,18 +1000,18 @@
         }
       }
     },
-    "No rides yet" : {
+    "No sets yet" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No rides yet"
+            "value" : "No sets yet"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nog geen rides"
+            "value" : "Nog geen sets"
           }
         }
       }
@@ -1306,18 +1306,18 @@
         }
       }
     },
-    "Required to record GPS during your park session so Rppl can track rides and distance." : {
+    "Required to record GPS during your park session so Rppl can track sets and distance." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Required to record GPS during your park session so Rppl can track rides and distance."
+            "value" : "Required to record GPS during your park session so Rppl can track sets and distance."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig om GPS tijdens je park session op te nemen zodat Rppl rides en afstand kan volgen."
+            "value" : "Nodig om GPS tijdens je park session op te nemen zodat Rppl sets en afstand kan volgen."
           }
         }
       }
@@ -1386,18 +1386,18 @@
         }
       }
     },
-    "Rides" : {
+    "Sets" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides"
+            "value" : "Sets"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides"
+            "value" : "Sets"
           }
         }
       }
@@ -2162,18 +2162,18 @@
         }
       }
     },
-    "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone." : {
+    "Under 30 seconds and no sets. Discard deletes it here. Keep transfers to iPhone." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Under 30 seconds and no rides. Discard deletes it here. Keep transfers to iPhone."
+            "value" : "Under 30 seconds and no sets. Discard deletes it here. Keep transfers to iPhone."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korter dan 30 seconden en geen rides. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
+            "value" : "Korter dan 30 seconden en geen sets. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
           }
         }
       }

@@ -1,57 +1,57 @@
 import SwiftUI
 import RpplCore
 
-/// Compact per-ride stats for Watch logbook detail and session overview.
-struct WatchRideListSection: View {
-    let rides: [RideSegmentStats]
-    var emptyMessage: LocalizedStringKey = "No rides yet"
+/// Compact per-set stats for Watch logbook detail and session overview.
+struct WatchSetListSection: View {
+    let sets: [SetSegmentStats]
+    var emptyMessage: LocalizedStringKey = "No sets yet"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Rides")
+            Text("Sets")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
 
-            if rides.isEmpty {
+            if sets.isEmpty {
                 Text(emptyMessage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(Array(rides.enumerated()), id: \.element.id) { offset, ride in
+                ForEach(Array(sets.enumerated()), id: \.element.id) { offset, set in
                     if offset > 0 {
                         Divider()
                     }
-                    WatchRideRow(ride: ride)
+                    WatchSetRow(set: set)
                 }
             }
         }
     }
 }
 
-private struct WatchRideRow: View {
-    let ride: RideSegmentStats
+private struct WatchSetRow: View {
+    let set: SetSegmentStats
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Ride \(ride.index)")
+            Text("Set \(set.index)")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            WatchRideMetricLine(
+            WatchSetMetricLine(
                 label: "Duration",
-                value: SessionFormatters.rideDuration(ride.duration)
+                value: SessionFormatters.segmentDuration(set.duration)
             )
-            WatchRideMetricLine(
+            WatchSetMetricLine(
                 label: "Distance",
-                value: SessionFormatters.distance(ride.distanceMeters)
+                value: SessionFormatters.distance(set.distanceMeters)
             )
-            WatchRideMetricLine(
+            WatchSetMetricLine(
                 label: "Laps",
-                value: "\(ride.lapCount)"
+                value: "\(set.lapCount)"
             )
-            if let averageSpeed = ride.averageSpeedKmh {
-                WatchRideMetricLine(
+            if let averageSpeed = set.averageSpeedKmh {
+                WatchSetMetricLine(
                     label: "Avg speed",
                     value: SessionFormatters.averageSpeed(averageSpeed)
                 )
@@ -60,35 +60,35 @@ private struct WatchRideRow: View {
     }
 }
 
-/// Last finished ride on live session overview (Watch only tracks latest).
-struct WatchLastRideSection: View {
+/// Last finished set on live session overview (Watch only tracks latest).
+struct WatchLastSetSection: View {
     let duration: TimeInterval
     let distanceMeters: Double
     let lapCount: Int
-    var didCompleteRide: Bool
+    var didCompleteSet: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Last ride")
+            Text("Last set")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
 
-            if didCompleteRide {
-                WatchRideMetricLine(
+            if didCompleteSet {
+                WatchSetMetricLine(
                     label: "Duration",
-                    value: SessionFormatters.rideDuration(duration)
+                    value: SessionFormatters.segmentDuration(duration)
                 )
-                WatchRideMetricLine(
+                WatchSetMetricLine(
                     label: "Distance",
                     value: SessionFormatters.distance(distanceMeters)
                 )
-                WatchRideMetricLine(
+                WatchSetMetricLine(
                     label: "Laps",
                     value: "\(lapCount)"
                 )
             } else {
-                Text("No rides yet")
+                Text("No sets yet")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -96,7 +96,7 @@ struct WatchLastRideSection: View {
     }
 }
 
-struct WatchRideMetricLine: View {
+struct WatchSetMetricLine: View {
     let label: LocalizedStringKey
     let value: String
 

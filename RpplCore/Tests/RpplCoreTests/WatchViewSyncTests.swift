@@ -4,18 +4,18 @@ import Testing
 
 @Suite("WatchViewSyncCodec")
 struct WatchViewSyncCodecTests {
-    private func sampleStats(duration: TimeInterval = 120, rideCount: Int = 2) -> SessionStats {
+    private func sampleStats(duration: TimeInterval = 120, setCount: Int = 2) -> SessionStats {
         SessionStats(
             startedAt: Date(timeIntervalSince1970: 0),
             endedAt: Date(timeIntervalSince1970: duration),
             totalDuration: duration,
             totalDistanceMeters: 500,
             activeEnergyKilocalories: nil,
-            rideCount: rideCount,
+            setCount: setCount,
             ridingDuration: duration * 0.6,
             inactiveDuration: duration * 0.4,
             ridingInactiveRatio: 0.6,
-            rides: []
+            sets: []
         )
     }
 
@@ -74,11 +74,11 @@ struct WatchViewSyncDiffTests {
             totalDuration: duration,
             totalDistanceMeters: 0,
             activeEnergyKilocalories: nil,
-            rideCount: 0,
+            setCount: 0,
             ridingDuration: 0,
             inactiveDuration: duration,
             ridingInactiveRatio: 0,
-            rides: []
+            sets: []
         )
     }
 
@@ -133,11 +133,11 @@ struct SessionFileStoreDistilledTests {
             totalDuration: duration,
             totalDistanceMeters: 0,
             activeEnergyKilocalories: nil,
-            rideCount: 0,
+            setCount: 0,
             ridingDuration: 0,
             inactiveDuration: duration,
             ridingInactiveRatio: 0,
-            rides: []
+            sets: []
         )
     }
 

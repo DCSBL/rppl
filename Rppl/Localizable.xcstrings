@@ -73,7 +73,7 @@
         }
       }
     },
-    "%lld rides" : {
+    "%lld sets" : {
       "localizations" : {
         "en" : {
           "variations" : {
@@ -153,7 +153,7 @@
         }
       }
     },
-    "%lld total rides" : {
+    "%lld total sets" : {
       "localizations" : {
         "en" : {
           "variations" : {
@@ -1368,50 +1368,50 @@
         }
       }
     },
-    "No GPS track for this ride" : {
+    "No GPS track for this set" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No GPS track for this ride"
+            "value" : "No GPS track for this set"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen GPS-spoor voor deze ride"
+            "value" : "Geen GPS-spoor voor deze set"
           }
         }
       }
     },
-    "No ride GPS" : {
+    "No set GPS" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No ride GPS"
+            "value" : "No set GPS"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen GPS van rides"
+            "value" : "Geen GPS van sets"
           }
         }
       }
     },
-    "No rides detected." : {
+    "No sets detected." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No rides detected."
+            "value" : "No sets detected."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen rides gedetecteerd."
+            "value" : "Geen sets gedetecteerd."
           }
         }
       }
@@ -1609,18 +1609,18 @@
         }
       }
     },
-    "Park days and rides" : {
+    "Park days and sets" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Park days and rides"
+            "value" : "Park days and sets"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parkdagen en rides"
+            "value" : "Parkdagen en sets"
           }
         }
       }
@@ -1892,51 +1892,51 @@
         }
       }
     },
-    "Ride %lld" : {
+    "Set %lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ride %lld"
+            "value" : "Set %lld"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ride %lld"
+            "value" : "Set %lld"
           }
         }
       }
     },
-    "Rides" : {
+    "Sets" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides"
+            "value" : "Sets"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides"
+            "value" : "Sets"
           }
         }
       }
     },
-    "Rides (%lld)" : {
+    "Sets (%lld)" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides (%lld)"
+            "value" : "Sets (%lld)"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rides (%lld)"
+            "value" : "Sets (%lld)"
           }
         }
       }
@@ -1990,34 +1990,34 @@
         }
       }
     },
-    "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others." : {
+    "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl processes your session on your Watch and iPhone. We do not upload rides to a Rppl cloud or share your data with others."
+            "value" : "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl verwerkt je session op je Watch en iPhone. We uploaden geen rides naar een Rppl-cloud en delen je gegevens niet met anderen."
+            "value" : "Rppl verwerkt je session op je Watch en iPhone. We uploaden geen sets naar een Rppl-cloud en delen je gegevens niet met anderen."
           }
         }
       }
     },
-    "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports." : {
+    "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl records cable-park wakeboarding on Apple Watch. It tracks rides and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
+            "value" : "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt rides en pauzes van een hele parkdag in één session. Gebruik iPhone om sessions, kaarten en exports te bekijken."
+            "value" : "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt sets en pauzes van een hele parkdag in één session. Gebruik iPhone om sessions, kaarten en exports te bekijken."
           }
         }
       }

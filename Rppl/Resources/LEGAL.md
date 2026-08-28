@@ -34,7 +34,7 @@ In-app copy: **iPhone → Rppl → Legal → Terms & Privacy policy**. Keep that
 
 ## Privacy
 
-**Privacy first.** Session data is processed on your Apple Watch and iPhone to run the activity. We do not operate a Rppl cloud that receives your rides.
+**Privacy first.** Session data is processed on your Apple Watch and iPhone to run the activity. We do not operate a Rppl cloud that receives your sets.
 
 **Stays on your side.** Data is stored on your devices, in the Apple Health app when you allow Health access, in your iCloud Drive (Documents) when phone logbook sync is enabled (default on; you can turn it off in rppl → Data), and in your iCloud backup if you back up that device. Device backup and Documents in iCloud are different Apple features.
 
@@ -49,7 +49,7 @@ Export exists so you can share **raw, unfiltered** session data for analysis. Rp
 An export can include:
 
 - Session metadata, including a random install-scoped identifier
-- Ride / pause (inactive) detections
+- Set / pause (inactive) detections
 - GPS locations with **precise coordinates (not anonymized)**
 - Device motion
 - Heart rate and energy (when Health access was allowed)
@@ -64,10 +64,10 @@ If you share an export, **you** choose who receives it and remain responsible fo
 
 Collected only to process your cable-park activity on your devices:
 
-- GPS location (routes, speed, ride detection) — precise coordinates; not anonymized in storage or export
+- GPS location (routes, speed, set detection) — precise coordinates; not anonymized in storage or export
 - Accelerometer and gyroscope / device motion
 - Heart rate and energy estimates (via HealthKit when allowed)
-- Automatic ride / inactive detections derived from the sensors above
+- Automatic set / inactive detections derived from the sensors above
 - Water temperature when available (Apple Watch Ultra)
 - A random install-scoped identifier created on first launch (not a name or account; new ID after reinstall)
 

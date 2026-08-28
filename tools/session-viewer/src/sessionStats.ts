@@ -3,11 +3,11 @@ import type {
   DerivedSession,
   DetectionEvent,
   LocationSample,
-  RideSegment,
+  SetSegment,
 } from './types'
 import { toMs } from './analysisPrep'
 import { acceptsStep, meters } from './geoDistance'
-import { LapRideTracker, defaultLapThresholds } from './setRideTracker'
+import { LapSetTracker, defaultLapThresholds } from './lapSetTracker'
 import { filterSpeedMps, mpsToKmh, thresholds } from './signalFilter'
 
 const RIDING = 'riding'
@@ -29,7 +29,7 @@ export function effectiveEvents(events: DetectionEvent[]): DetectionEvent[] {
     .sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
 }
 
-/** Unsure → inactive for ride windows (mirrors SessionStatsBuilder.attributed). */
+/** Unsure → inactive for set windows (mirrors SessionStatsBuilder.attributed). */
 function normalizeCode(code: string): string {
   return code === 'paused' ? INACTIVE : code
 }
@@ -91,7 +91,7 @@ function mergeAdjacentPhases(phases: AttributedPhase[]): AttributedPhase[] {
   return merged
 }
 
-export function rideWindows(phases: AttributedPhase[]): { startMs: number; endMs: number }[] {
+export function setWindows(phases: AttributedPhase[]): { startMs: number; endMs: number }[] {
   return phases
     .filter((p) => p.attributedCode === RIDING)
     .map((p) => ({ startMs: p.startMs, endMs: p.endMs }))
@@ -132,8 +132,8 @@ function phaseDurationMs(phases: AttributedPhase[], code: string): number {
     .reduce((sum, p) => sum + Math.max(0, p.endMs - p.startMs), 0)
 }
 
-/** Peak usable km/h inside ride windows (mirrors LocationSpeedStats). */
-function peakSpeedKmhInRides(
+/** Peak usable km/h inside set windows (mirrors LocationSpeedStats). */
+function peakSpeedKmhInSets(
   locations: LocationSample[],
   windows: { startMs: number; endMs: number }[],
 ): number | null {
@@ -143,9 +143,9 @@ function peakSpeedKmhInRides(
   const sorted = [...locations].sort((a, b) => toMs(a.timestamp) - toMs(b.timestamp))
   for (const loc of sorted) {
     const tMs = toMs(loc.timestamp)
-    const inRide = windows.some((w) => tMs >= w.startMs && tMs <= w.endMs)
-    if (!inRide) {
-      // Reset jump baseline between rides so a pause gap doesn't poison next ride.
+    const inSet = windows.some((w) => tMs >= w.startMs && tMs <= w.endMs)
+    if (!inSet) {
+      // Reset jump baseline between sets so a pause gap doesn't poison next set.
       previousUsable = null
       continue
     }
@@ -163,7 +163,7 @@ function averageSpeedKmh(distanceMeters: number, durationMs: number): number | n
   return mpsToKmh(mps)
 }
 
-/** Derive rides + lap counts + start anchors (offline, mirrors SessionStatsBuilder). */
+/** Derive sets + lap counts + start anchors (offline, mirrors SessionStatsBuilder). */
 export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedSession {
   const sessionStartMs = toMs(pkg.manifest.startedAt)
   const sessionEndMs = Math.max(
@@ -172,17 +172,17 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
   )
   const effective = effectiveEvents(pkg.detections)
   const phases = buildAttributedPhases(effective, sessionStartMs, sessionEndMs)
-  const windows = rideWindows(phases)
+  const windows = setWindows(phases)
   const sortedLocations = [...pkg.locations].sort(
     (a, b) => toMs(a.timestamp) - toMs(b.timestamp),
   )
 
-  const lapTracker = new LapRideTracker(defaultLapThresholds)
+  const lapTracker = new LapSetTracker(defaultLapThresholds)
   if (hasInactivePhase(phases, windows[0]?.startMs ?? sessionEndMs)) {
     lapTracker.noteInactive()
   }
 
-  const rides: RideSegment[] = []
+  const sets: SetSegment[] = []
   let totalDistanceMeters = 0
   for (let i = 0; i < windows.length; i++) {
     const window = windows[i]!
@@ -192,7 +192,7 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       window.endMs,
       thresholds.maxHorizontalAccuracyM,
     )
-    lapTracker.beginRide()
+    lapTracker.beginSet()
     for (const sample of sortedLocations) {
       const t = toMs(sample.timestamp)
       if (t < window.startMs || t > window.endMs) continue
@@ -202,9 +202,9 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
     const lapAtMs = [...lapTracker.lapAtMs]
     const startLatitude = lapTracker.startLatitude
     const startLongitude = lapTracker.startLongitude
-    lapTracker.endRide()
+    lapTracker.endSet()
     totalDistanceMeters += distance
-    rides.push({
+    sets.push({
       index: i + 1,
       startMs: window.startMs,
       endMs: window.endMs,
@@ -226,12 +226,12 @@ export function deriveSession(pkg: AnalysisPackage, spanEndMs: number): DerivedS
       startMs: p.startMs,
       endMs: p.endMs,
     })),
-    rides,
-    totalLapCount: rides.reduce((sum, r) => sum + r.lapCount, 0),
+    sets,
+    totalLapCount: sets.reduce((sum, s) => sum + s.lapCount, 0),
     totalDistanceMeters,
     ridingDurationMs,
     inactiveDurationMs,
-    peakSpeedKmh: peakSpeedKmhInRides(sortedLocations, windows),
+    peakSpeedKmh: peakSpeedKmhInSets(sortedLocations, windows),
     averageSpeedKmh: averageSpeedKmh(totalDistanceMeters, ridingDurationMs),
   }
 }

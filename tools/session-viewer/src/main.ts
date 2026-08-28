@@ -50,7 +50,7 @@ app.innerHTML = `
   <div id="status">Open session folder (manifest + jsonl) or export JSON.</div>
   <div id="summary" class="summary" hidden>
     <div class="metric"><span class="metric-label">Distance</span><span class="metric-value" data-k="distance">—</span></div>
-    <div class="metric"><span class="metric-label">Rides</span><span class="metric-value" data-k="rides">—</span></div>
+    <div class="metric"><span class="metric-label">Sets</span><span class="metric-value" data-k="sets">—</span></div>
     <div class="metric"><span class="metric-label">Laps</span><span class="metric-value" data-k="laps">—</span></div>
     <div class="metric"><span class="metric-label">Peak</span><span class="metric-value" data-k="peak">—</span></div>
     <div class="metric"><span class="metric-label">Avg</span><span class="metric-value" data-k="avg">—</span></div>
@@ -146,7 +146,7 @@ function setMetric(key: string, value: string): void {
 function updateSummary(d: DerivedSession): void {
   summaryEl.hidden = false
   setMetric('distance', formatDistanceKm(d.totalDistanceMeters))
-  setMetric('rides', String(d.rides.length))
+  setMetric('sets', String(d.sets.length))
   setMetric('laps', String(d.totalLapCount))
   setMetric('peak', formatSpeed(d.peakSpeedKmh))
   setMetric('avg', formatSpeed(d.averageSpeedKmh))
@@ -323,9 +323,9 @@ function render(): void {
   const accuracy = accuracySeries(pkg.locations, windowRange)
   const extent = trackExtent(pkg.locations)
   const playLoc = nearestLocation(pkg.locations, playheadMs)
-  const markers = buildTrackMarkers(locs, derived.rides, playLoc)
+  const markers = buildTrackMarkers(locs, derived.sets, playLoc)
 
-  drawEvents(eventsCanvas, segs, windowRange, selectedId, derived.rides, playheadMs)
+  drawEvents(eventsCanvas, segs, windowRange, selectedId, derived.sets, playheadMs)
   drawSpeed(speedCanvas, speed, windowRange, selected, playheadMs)
   drawTrack(trackCanvas, locs, allSegments, markers, extent)
   drawAccuracy(accuracyCanvas, accuracy, windowRange, selected, playheadMs)

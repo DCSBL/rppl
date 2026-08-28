@@ -233,13 +233,13 @@ extension WatchSessionController {
         detectionCount = 0
         locationCount = 0
         motionCount = 0
-        currentRideDuration = 0
+        currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
         lastHorizontalAccuracy = nil
         filterRejectionReason = nil
         detectionEngine = DetectionEngine()
-        liveRideTracker.reset()
+        liveSetTracker.reset()
         sessionStartLatitude = nil
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
@@ -280,7 +280,7 @@ extension WatchSessionController {
         beginSessionTeardown(status: String(localized: "Stopping…"))
 
         stopSensors()
-        liveRideTracker.closeOpenRide()
+        liveSetTracker.closeOpenSet()
         await flushBuffers()
 
         do {
@@ -310,12 +310,12 @@ extension WatchSessionController {
         endedSessionSummary = EndedSessionSummary(
             sessionId: stoppedSessionId,
             duration: finalDuration,
-            rideCount: liveRideTracker.rideCount,
-            distanceMeters: liveRideTracker.sessionRideMeters,
-            lastRideDuration: liveRideTracker.lastRideDuration,
-            lastRideMeters: liveRideTracker.lastRideMeters,
-            lastRideLapCount: liveRideTracker.lastRideLapCount,
-            didCompleteRide: liveRideTracker.didCompleteRide,
+            setCount: liveSetTracker.setCount,
+            distanceMeters: liveSetTracker.sessionSetMeters,
+            lastSetDuration: liveSetTracker.lastSetDuration,
+            lastSetMeters: liveSetTracker.lastSetMeters,
+            lastSetLapCount: liveSetTracker.lastSetLapCount,
+            didCompleteSet: liveSetTracker.didCompleteSet,
             startLatitude: sessionStartLatitude,
             startLongitude: sessionStartLongitude
         )
@@ -337,7 +337,7 @@ extension WatchSessionController {
         beginSessionTeardown(status: String(localized: "Discarding…"))
 
         stopSensors()
-        liveRideTracker.closeOpenRide()
+        liveSetTracker.closeOpenSet()
         // No flush — package will be deleted; never queue transfer for discard.
 
         await discardWorkoutWithoutSaving()
@@ -374,9 +374,9 @@ extension WatchSessionController {
     }
 
     private func clearSessionRuntimeState() {
-        liveRideTracker.reset()
+        liveSetTracker.reset()
         storedByteSize = 0
-        currentRideDuration = 0
+        currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
         lastHorizontalAccuracy = nil
@@ -519,5 +519,5 @@ extension WatchSessionController {
         sessionStartLongitude = sample.longitude
     }
 
-    /// Cycle debug simulation: detected → inactive → ride → detected.
+    /// Cycle debug simulation: detected → inactive → set → detected.
 }

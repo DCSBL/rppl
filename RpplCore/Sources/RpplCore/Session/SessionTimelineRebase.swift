@@ -103,28 +103,28 @@ public enum SessionTimelineRebase {
             totalDistanceMeters: stats.totalDistanceMeters,
             activeEnergyKilocalories: stats.activeEnergyKilocalories,
             totalEnergyKilocalories: stats.totalEnergyKilocalories,
-            rideCount: stats.rideCount,
+            setCount: stats.setCount,
             ridingDuration: stats.ridingDuration,
             inactiveDuration: stats.inactiveDuration,
             ridingInactiveRatio: stats.ridingInactiveRatio,
-            rides: stats.rides.map { shift($0, by: delta) },
+            sets: stats.sets.map { shift($0, by: delta) },
             averageWaterTemperatureCelsius: stats.averageWaterTemperatureCelsius,
             waterTemperatureAvailable: stats.waterTemperatureAvailable
         )
     }
 
-    private static func shift(_ ride: RideSegmentStats, by delta: TimeInterval) -> RideSegmentStats {
-        RideSegmentStats(
-            index: ride.index,
-            startedAt: ride.startedAt.addingTimeInterval(delta),
-            endedAt: ride.endedAt.addingTimeInterval(delta),
-            duration: ride.duration,
-            distanceMeters: ride.distanceMeters,
-            lapCount: ride.lapCount,
-            sustainedSpeedKmh: ride.sustainedSpeedKmh,
-            averageSpeedKmh: ride.averageSpeedKmh,
-            peakSpeedKmh: ride.peakSpeedKmh,
-            highlights: ride.highlights
+    private static func shift(_ set: SetSegmentStats, by delta: TimeInterval) -> SetSegmentStats {
+        SetSegmentStats(
+            index: set.index,
+            startedAt: set.startedAt.addingTimeInterval(delta),
+            endedAt: set.endedAt.addingTimeInterval(delta),
+            duration: set.duration,
+            distanceMeters: set.distanceMeters,
+            lapCount: set.lapCount,
+            sustainedSpeedKmh: set.sustainedSpeedKmh,
+            averageSpeedKmh: set.averageSpeedKmh,
+            peakSpeedKmh: set.peakSpeedKmh,
+            highlights: set.highlights
         )
     }
 }

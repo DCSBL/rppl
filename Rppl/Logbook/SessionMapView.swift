@@ -147,7 +147,7 @@ struct SessionMapView: View {
                     .stroke(Color.rpplHighlight, lineWidth: 3)
             }
         case .heatmap:
-            let opacity = heatmapLineOpacity(rideCount: data.heatmapTracks.count)
+            let opacity = heatmapLineOpacity(setCount: data.heatmapTracks.count)
             ForEach(Array(data.heatmapTracks.enumerated()), id: \.offset) { _, track in
                 if track.count >= 2 {
                     MapPolyline(coordinates: track.map(\.clLocationCoordinate2D))
@@ -208,7 +208,7 @@ struct SessionMapView: View {
             return "session-\(sessionMapData.averagedTrack.count)-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
         let count = tracks.reduce(0) { $0 + $1.count }
-        return "rides-\(tracks.count)-\(count)"
+        return "sets-\(tracks.count)-\(count)"
     }
 
     private var fitCoordinates: [(latitude: Double, longitude: Double)] {
@@ -240,8 +240,8 @@ struct SessionMapView: View {
         }
     }
 
-    private func heatmapLineOpacity(rideCount: Int) -> Double {
-        min(0.35, 0.85 / Double(max(rideCount, 1)))
+    private func heatmapLineOpacity(setCount: Int) -> Double {
+        min(0.35, 0.85 / Double(max(setCount, 1)))
     }
 
     private func updateFit(for size: CGSize, forceApply: Bool) {

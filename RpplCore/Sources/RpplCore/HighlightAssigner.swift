@@ -1,59 +1,39 @@
 import Foundation
 
-/// Input row for cross-session record badges.
-public struct SessionHighlightInput: Equatable, Sendable {
-    public var id: String
-    public var totalDuration: TimeInterval
-    public var ridingDuration: TimeInterval
-    public var lapCount: Int
-
-    public init(
-        id: String,
-        totalDuration: TimeInterval,
-        ridingDuration: TimeInterval,
-        lapCount: Int
-    ) {
-        self.id = id
-        self.totalDuration = totalDuration
-        self.ridingDuration = ridingDuration
-        self.lapCount = lapCount
-    }
-}
-
-/// Assigns per-ride and per-session record badges from derived stats.
+/// Assigns per-set and per-session record badges from derived stats.
 public enum HighlightAssigner {
-    /// Fixed display order for ride badges.
-    public static let rideOrder: [RideHighlight] = [.longest, .longestTime, .fastest]
+    /// Fixed display order for set badges.
+    public static let setOrder: [SetHighlight] = [.longest, .longestTime, .fastest]
 
     /// Fixed display order for session badges.
     public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps]
 
-    public static func assignRideHighlights(_ rides: [RideSegmentStats]) -> [RideSegmentStats] {
-        guard rides.count >= 2 else {
-            return rides.map { clearedRide($0) }
+    public static func assignSetHighlights(_ sets: [SetSegmentStats]) -> [SetSegmentStats] {
+        guard sets.count >= 2 else {
+            return sets.map { clearedSet($0) }
         }
 
-        var byIndex: [Int: [RideHighlight]] = Dictionary(
-            uniqueKeysWithValues: rides.map { ($0.index, []) }
+        var byIndex: [Int: [SetHighlight]] = Dictionary(
+            uniqueKeysWithValues: sets.map { ($0.index, []) }
         )
 
-        if let winner = uniqueMaxRide(rides, value: { $0.distanceMeters }) {
+        if let winner = uniqueMaxSet(sets, value: { $0.distanceMeters }) {
             byIndex[winner.index, default: []].append(.longest)
         }
 
-        if let durationWinner = uniqueMaxRide(rides, value: { $0.duration }),
+        if let durationWinner = uniqueMaxSet(sets, value: { $0.duration }),
            !(byIndex[durationWinner.index]?.contains(.longest) ?? false) {
             byIndex[durationWinner.index, default: []].append(.longestTime)
         }
 
-        if let speedWinner = uniqueMaxRide(rides, value: { $0.sustainedSpeedKmh }) {
+        if let speedWinner = uniqueMaxSet(sets, value: { $0.sustainedSpeedKmh }) {
             byIndex[speedWinner.index, default: []].append(.fastest)
         }
 
-        return rides.map { ride in
-            var copy = ride
-            let raw = byIndex[ride.index] ?? []
-            copy.highlights = rideOrder.filter { raw.contains($0) }
+        return sets.map { set in
+            var copy = set
+            let raw = byIndex[set.index] ?? []
+            copy.highlights = setOrder.filter { raw.contains($0) }
             return copy
         }
     }
@@ -87,20 +67,20 @@ public enum HighlightAssigner {
 
     // MARK: - Helpers
 
-    private static func clearedRide(_ ride: RideSegmentStats) -> RideSegmentStats {
-        var copy = ride
+    private static func clearedSet(_ set: SetSegmentStats) -> SetSegmentStats {
+        var copy = set
         copy.highlights = []
         return copy
     }
 
-    /// Unique max among comparable values; ties → lowest ride index. Nil when all equal or empty.
-    private static func uniqueMaxRide(
-        _ rides: [RideSegmentStats],
-        value: (RideSegmentStats) -> Double?
-    ) -> RideSegmentStats? {
-        let scored = rides.compactMap { ride -> (RideSegmentStats, Double)? in
-            guard let scoredValue = value(ride) else { return nil }
-            return (ride, scoredValue)
+    /// Unique max among comparable values; ties → lowest set index. Nil when all equal or empty.
+    private static func uniqueMaxSet(
+        _ sets: [SetSegmentStats],
+        value: (SetSegmentStats) -> Double?
+    ) -> SetSegmentStats? {
+        let scored = sets.compactMap { set -> (SetSegmentStats, Double)? in
+            guard let scoredValue = value(set) else { return nil }
+            return (set, scoredValue)
         }
         guard scored.count >= 2 else { return nil }
         guard let best = scored.map(\.1).max() else { return nil }
@@ -111,11 +91,11 @@ public enum HighlightAssigner {
             .min(by: { $0.index < $1.index })
     }
 
-    private static func uniqueMaxRide(
-        _ rides: [RideSegmentStats],
-        value: (RideSegmentStats) -> Double
-    ) -> RideSegmentStats? {
-        uniqueMaxRide(rides, value: { Optional(value($0)) })
+    private static func uniqueMaxSet(
+        _ sets: [SetSegmentStats],
+        value: (SetSegmentStats) -> Double
+    ) -> SetSegmentStats? {
+        uniqueMaxSet(sets, value: { Optional(value($0)) })
     }
 
     private static func uniqueMaxSession<T: Comparable>(

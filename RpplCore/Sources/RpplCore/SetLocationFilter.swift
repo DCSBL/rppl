@@ -1,7 +1,7 @@
 import Foundation
 
-/// GPS samples that fall inside detected ride windows.
-public enum RideLocationFilter {
+/// GPS samples that fall inside detected set windows.
+public enum SetLocationFilter {
     public static func samples(
         in locations: [LocationSample],
         from start: Date,
@@ -10,14 +10,14 @@ public enum RideLocationFilter {
         locations.filter { $0.timestamp >= start && $0.timestamp <= end }
     }
 
-    /// One track per ride. Inactive/walking samples between rides are omitted,
-    /// so a map can stroke rides without connecting the gaps.
+    /// One track per set. Inactive/walking samples between sets are omitted,
+    /// so a map can stroke sets without connecting the gaps.
     public static func tracks(
         from locations: [LocationSample],
-        rides: [RideSegmentStats]
+        sets: [SetSegmentStats]
     ) -> [[LocationSample]] {
         let sorted = locations.sorted { $0.timestamp < $1.timestamp }
-        return rides
+        return sets
             .map { samples(in: sorted, from: $0.startedAt, to: $0.endedAt) }
             .filter { $0.count >= 2 }
     }

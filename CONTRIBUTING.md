@@ -12,7 +12,7 @@ Thanks for taking an interest. This file is for people changing the code or docs
 | DetectionEngine UML | [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | Streams, HealthKit, transfer, export | [Docs/DataCollection.md](Docs/DataCollection.md) |
 | On-disk session layout | [Docs/SessionStorage.md](Docs/SessionStorage.md) |
-| Ride / pause thresholds | [Docs/RideDetection.md](Docs/RideDetection.md) |
+| Set / pause thresholds | [Docs/RideDetection.md](Docs/RideDetection.md) |
 | Xcode, hooks, `make check` | [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | Terms & privacy | [LEGAL.md](LEGAL.md) |
 
@@ -34,9 +34,9 @@ Locked choices for product behavior. Prefer these over inventing UX. Full hard c
 | Reference gear | iPhone 16 Pro + Apple Watch Ultra 2 |
 | Audience | Riders · reliable capture over flashy UX |
 | Session | One `HKWorkoutSession` per park day · Start / Stop on Watch · product Pause allowed (≠ detection `inactive`) |
-| Detection | Live ride / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
+| Detection | Live set / inactive / unsure → `detections.jsonl` · no manual Action Button labels |
 | Phone | View-only list / map / Share-Export |
-| HealthKit | Save via `finishWorkout()` · `waterSports` · session stays running · ride + dock activities · ride-scoped energy · ride-gated distance + GPS route · HR/energy mirrored into files |
+| HealthKit | Save via `finishWorkout()` · `waterSports` · session stays running · set + dock activities · set-scoped energy · ride-gated distance + GPS route · HR/energy mirrored into files |
 | Transfer | Phone may be away · WC after Stop · never delete Watch data until phone ack |
 | Water Lock | On at session start |
 | Identity | Random install-scoped ID (`testerId`) in App Group / UserDefaults · reset on reinstall |

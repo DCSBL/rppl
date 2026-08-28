@@ -35,16 +35,16 @@ public enum SessionStatsBuilder {
         let activeDuration = ridingDuration + inactiveDuration
         let ratio = activeDuration > 0 ? ridingDuration / activeDuration : 0
 
-        let rideWindows = Self.rideWindows(from: phases)
+        let setWindows = Self.setWindows(from: phases)
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-        var rides: [RideSegmentStats] = []
+        var sets: [SetSegmentStats] = []
         var totalDistance = 0.0
-        var lapTracker = LapRideTracker(thresholds: lapThresholds)
-        if Self.hasInactivePhase(phases, before: rideWindows.first?.start ?? sessionEnd) {
+        var lapTracker = LapSetTracker(thresholds: lapThresholds)
+        if Self.hasInactivePhase(phases, before: setWindows.first?.start ?? sessionEnd) {
             lapTracker.noteInactive()
         }
 
-        for (index, window) in rideWindows.enumerated() {
+        for (index, window) in setWindows.enumerated() {
             let distance = Self.distanceMeters(
                 locations: sortedLocations,
                 from: window.start,
@@ -52,26 +52,26 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let duration = window.end.timeIntervalSince(window.start)
-            lapTracker.beginRide()
+            lapTracker.beginSet()
             for sample in sortedLocations where sample.timestamp >= window.start
                 && sample.timestamp <= window.end {
                 lapTracker.addLocation(sample)
             }
             let laps = lapTracker.lapCount
-            lapTracker.endRide()
-            let rideLocations = RideLocationFilter.samples(
+            lapTracker.endSet()
+            let setLocations = SetLocationFilter.samples(
                 in: sortedLocations,
                 from: window.start,
                 to: window.end
             )
-            let sustained = LocationSpeedStats.sustainedSpeedKmh(from: rideLocations)
+            let sustained = LocationSpeedStats.sustainedSpeedKmh(from: setLocations)
             let average = LocationSpeedStats.trimmedAverageSpeedKmh(
-                locations: rideLocations,
+                locations: setLocations,
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
-            let peak = LocationSpeedStats.peakSpeedKmh(from: rideLocations)
-            rides.append(
-                RideSegmentStats(
+            let peak = LocationSpeedStats.peakSpeedKmh(from: setLocations)
+            sets.append(
+                SetSegmentStats(
                     index: index + 1,
                     startedAt: window.start,
                     endedAt: window.end,
@@ -101,7 +101,7 @@ public enum SessionStatsBuilder {
             }
         }()
 
-        let highlightedRides = HighlightAssigner.assignRideHighlights(rides)
+        let highlightedSets = HighlightAssigner.assignSetHighlights(sets)
         let waterAverage: Double? = {
             guard !water.isEmpty else { return nil }
             return water.map(\.celsius).reduce(0, +) / Double(water.count)
@@ -114,11 +114,11 @@ public enum SessionStatsBuilder {
             totalDistanceMeters: totalDistance,
             activeEnergyKilocalories: activeCalories,
             totalEnergyKilocalories: totalCalories,
-            rideCount: highlightedRides.count,
+            setCount: highlightedSets.count,
             ridingDuration: ridingDuration,
             inactiveDuration: inactiveDuration,
             ridingInactiveRatio: ratio,
-            rides: highlightedRides,
+            sets: highlightedSets,
             averageWaterTemperatureCelsius: waterAverage,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false
         )
@@ -188,8 +188,8 @@ public enum SessionStatsBuilder {
     }
 
     static func attributed(_ code: String, lastConfident _: String) -> String {
-        // Unsure gaps do not extend ride windows — fall/GPS death ends ride duration/distance.
-        // Lookback supersedes restore continuous riding when speed returns inside the same-ride window.
+        // Unsure gaps do not extend set windows — fall/GPS death ends set duration/distance.
+        // Lookback supersedes restore continuous riding when speed returns inside the same-set window.
         let code = DetectionCodes.normalize(code)
         if code == DetectionCodes.unsure { return DetectionCodes.inactive }
         return code
@@ -214,7 +214,7 @@ public enum SessionStatsBuilder {
         return merged
     }
 
-    static func rideWindows(from phases: [AttributedPhase]) -> [TimeWindow] {
+    static func setWindows(from phases: [AttributedPhase]) -> [TimeWindow] {
         phases
             .filter { $0.attributedCode == DetectionCodes.riding }
             .map { TimeWindow(start: $0.start, end: $0.end) }

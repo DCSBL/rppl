@@ -150,8 +150,8 @@ struct DerivedSessionViewTests {
 
         let summary = try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
         let full = try SessionLoader.load(store: store, sessionId: manifest.sessionId)
-        #expect(summary.stats.rideCount == full.stats.rideCount)
-        #expect(summary.stats.rideCount == 1)
+        #expect(summary.stats.setCount == full.stats.setCount)
+        #expect(summary.stats.setCount == 1)
         #expect(summary.derived.isCurrentAnalyzer)
     }
 
@@ -162,11 +162,11 @@ struct DerivedSessionViewTests {
             totalDuration: 1,
             totalDistanceMeters: 0,
             activeEnergyKilocalories: nil,
-            rideCount: 0,
+            setCount: 0,
             ridingDuration: 0,
             inactiveDuration: 1,
             ridingInactiveRatio: 0,
-            rides: []
+            sets: []
         )
         let view = DerivedSessionView(
             stats: stats,
@@ -188,7 +188,7 @@ struct DerivedSessionViewTests {
         #expect(decoded == view)
     }
 
-    @Test func rideSegmentStatsForwardMigratesSetCountToLapCount() throws {
+    @Test func setSegmentStatsForwardMigratesSetCountToLapCount() throws {
         let json = """
         {
           "index": 0,
@@ -202,15 +202,57 @@ struct DerivedSessionViewTests {
         """
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let ride = try decoder.decode(RideSegmentStats.self, from: Data(json.utf8))
-        #expect(ride.lapCount == 3)
+        let set = try decoder.decode(SetSegmentStats.self, from: Data(json.utf8))
+        #expect(set.lapCount == 3)
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        let encoded = try encoder.encode(ride)
+        let encoded = try encoder.encode(set)
         let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
         #expect(object?["lapCount"] as? Int == 3)
         #expect(object?["setCount"] == nil)
+    }
+
+    @Test func sessionStatsForwardMigratesRideCountAndRides() throws {
+        let json = """
+        {
+          "startedAt": "2024-01-01T00:00:00Z",
+          "endedAt": "2024-01-01T00:30:00Z",
+          "totalDuration": 1800,
+          "totalDistanceMeters": 500,
+          "rideCount": 2,
+          "ridingDuration": 900,
+          "inactiveDuration": 900,
+          "ridingInactiveRatio": 0.5,
+          "waterTemperatureAvailable": false,
+          "rides": [
+            {
+              "index": 1,
+              "startedAt": "2024-01-01T00:05:00Z",
+              "endedAt": "2024-01-01T00:10:00Z",
+              "duration": 300,
+              "distanceMeters": 250,
+              "lapCount": 1,
+              "highlights": []
+            }
+          ]
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let stats = try decoder.decode(SessionStats.self, from: Data(json.utf8))
+        #expect(stats.setCount == 2)
+        #expect(stats.sets.count == 1)
+        #expect(stats.sets[0].lapCount == 1)
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let encoded = try encoder.encode(stats)
+        let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        #expect(object?["setCount"] as? Int == 2)
+        #expect(object?["rideCount"] == nil)
+        #expect(object?["rides"] == nil)
+        #expect((object?["sets"] as? [[String: Any]])?.first?["lapCount"] as? Int == 1)
     }
 
     @Test func ensureRebuildsLegacySetCountSidecar() throws {
@@ -275,7 +317,7 @@ struct DerivedSessionViewTests {
         try Data(legacyJSON.utf8).write(to: store.derivedViewURL(sessionId: manifest.sessionId))
 
         let read = try store.readDerivedView(sessionId: manifest.sessionId)
-        #expect(read?.stats.rides.first?.lapCount == 2)
+        #expect(read?.stats.sets.first?.lapCount == 2)
         #expect(read?.cityName == "Almere")
         #expect(read?.isCurrentAnalyzer == false)
 
@@ -285,11 +327,16 @@ struct DerivedSessionViewTests {
         let rewritten = try store.readDerivedView(sessionId: manifest.sessionId)
         let data = try Data(contentsOf: store.derivedViewURL(sessionId: manifest.sessionId))
         let text = String(data: data, encoding: .utf8) ?? ""
-        // Rebuild from raw (inactive-only) may drop rides; never re-emit slang `setCount`.
-        #expect(!text.contains("setCount"))
-        if let ride = rewritten?.stats.rides.first {
+        // Rebuild from raw (inactive-only) may drop sets; never re-emit segment mis-key `setCount` for laps.
+        #expect(!text.contains("\"setCount\": 2"))
+        #expect(!text.contains("rideCount"))
+        #expect(!text.contains("\"rides\""))
+        if let set = rewritten?.stats.sets.first {
             #expect(text.contains("lapCount"))
-            #expect(ride.lapCount >= 0)
+            #expect(set.lapCount >= 0)
+        }
+        if let rewritten {
+            #expect(rewritten.stats.setCount >= 0)
         }
         #expect(rewritten?.isCurrentAnalyzer == true)
     }

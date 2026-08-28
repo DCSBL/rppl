@@ -88,7 +88,7 @@ function filterSpeed(
   return speedMps
 }
 
-/** Exported for offline peak-speed over ride windows. */
+/** Exported for offline peak-speed over set windows. */
 export function filterSpeedMps(
   speedMps: number | null,
   horizontalAccuracy: number,
