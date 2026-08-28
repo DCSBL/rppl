@@ -8,7 +8,7 @@ public struct DerivedSessionView: Codable, Equatable, Sendable {
     public var stats: SessionStats
     /// Device-agnostic map framing; phone computes camera for its view size.
     public var mapFrame: MapTrackFrame?
-    /// Distilled polylines for session map (averaged + heatmap); synced to Watch.
+    /// Distilled heatmap polylines for session map; synced to Watch.
     public var mapTracks: SessionMapTrackData?
     /// Phone-only reverse-geocode; omitted on Watch.
     public var cityName: String?
