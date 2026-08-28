@@ -45,9 +45,10 @@ struct WatchViewSyncCodecTests {
         #expect(decoded == update)
     }
 
-    @Test func viewDeleteRoundTrip() {
+    @Test func viewDeleteRoundTrip() throws {
         let encoded = WatchViewSyncCodec.encodeViewDelete(sessionId: "gone")
-        #expect(WatchViewSyncCodec.decodeViewDelete(from: encoded) == "gone")
+        let decoded = try #require(try WatchViewSyncCodec.decodeViewDelete(from: encoded))
+        #expect(decoded == "gone")
     }
 
     @Test func syncRequestRoundTrip() throws {
@@ -212,7 +213,7 @@ struct SessionFileStoreDistilledTests {
         try store.pruneRawStreams(sessionId: manifest.sessionId)
     }
 
-    @Test func applyDistilledViewPrunesWhenAcknowledged() throws {
+    @Test func applyDistilledViewDoesNotPruneRawStreams() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("apply-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -244,7 +245,7 @@ struct SessionFileStoreDistilledTests {
             derived: DerivedSessionView(stats: sampleStats(duration: 99), cityName: "Phone")
         )
         try store.applyDistilledView(update)
-        #expect(store.hasRawStreams(sessionId: manifest.sessionId) == false)
+        #expect(store.hasRawStreams(sessionId: manifest.sessionId))
         #expect(try store.readDerivedView(sessionId: manifest.sessionId)?.cityName == "Phone")
     }
 

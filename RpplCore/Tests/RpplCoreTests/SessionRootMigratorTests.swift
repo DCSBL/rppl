@@ -42,7 +42,7 @@ struct RemoteSessionSummaryTests {
         )
 
         let summary = try RemoteSessionSummaryReader.read(
-            sessionDirectory: store.sessionDirectory(for: "sess-1")
+            sessionDirectory: try store.sessionDirectory(for: "sess-1")
         )
         #expect(summary.sessionId == "sess-1")
         #expect(summary.cityName == "Utrecht")
@@ -71,7 +71,7 @@ struct RemoteSessionSummaryTests {
         _ = try store.createSession(manifest: manifest)
 
         let summary = try RemoteSessionSummaryReader.read(
-            sessionDirectory: store.sessionDirectory(for: "sess-2")
+            sessionDirectory: try store.sessionDirectory(for: "sess-2")
         )
         #expect(summary.cityName == nil)
         #expect(summary.setCount == 0)

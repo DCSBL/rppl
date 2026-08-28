@@ -311,10 +311,10 @@ struct DerivedSessionViewTests {
           "cityName": "Almere"
         }
         """
-        let derivedDir = store.sessionDirectory(for: manifest.sessionId)
+        let derivedDir = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("derived", isDirectory: true)
         try FileManager.default.createDirectory(at: derivedDir, withIntermediateDirectories: true)
-        try Data(legacyJSON.utf8).write(to: store.derivedViewURL(sessionId: manifest.sessionId))
+        try Data(legacyJSON.utf8).write(to: try store.derivedViewURL(sessionId: manifest.sessionId))
 
         let read = try store.readDerivedView(sessionId: manifest.sessionId)
         #expect(read?.stats.sets.first?.lapCount == 2)
@@ -325,7 +325,7 @@ struct DerivedSessionViewTests {
         #expect(ensured.analyzerVersion == SessionAnalyzer.version)
         #expect(ensured.cityName == "Almere")
         let rewritten = try store.readDerivedView(sessionId: manifest.sessionId)
-        let data = try Data(contentsOf: store.derivedViewURL(sessionId: manifest.sessionId))
+        let data = try Data(contentsOf: try store.derivedViewURL(sessionId: manifest.sessionId))
         let text = String(data: data, encoding: .utf8) ?? ""
         // Rebuild from raw (inactive-only) may drop sets; never re-emit segment mis-key `setCount` for laps.
         #expect(!text.contains("\"setCount\": 2"))
@@ -363,10 +363,10 @@ struct DerivedSessionViewTests {
             ),
             sessionId: manifest.sessionId
         )
-        let derivedDir = store.sessionDirectory(for: manifest.sessionId)
+        let derivedDir = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("derived", isDirectory: true)
         try FileManager.default.createDirectory(at: derivedDir, withIntermediateDirectories: true)
-        try Data("not-json".utf8).write(to: store.derivedViewURL(sessionId: manifest.sessionId))
+        try Data("not-json".utf8).write(to: try store.derivedViewURL(sessionId: manifest.sessionId))
 
         #expect(try store.readDerivedView(sessionId: manifest.sessionId) == nil)
         let ensured = try store.ensureDerivedView(sessionId: manifest.sessionId)

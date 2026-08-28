@@ -288,7 +288,7 @@ final class PhoneICloudDriveController: NSObject {
     /// Permanently deletes a session package, using file coordination when on iCloud Drive.
     func deleteSessionPermanently(_ sessionId: String) async throws {
         let store = PhoneConnectivityService.shared.store
-        let dir = store.sessionDirectory(for: sessionId)
+        let dir = try store.sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
@@ -633,7 +633,7 @@ final class PhoneICloudDriveController: NSObject {
             DispatchQueue.global(qos: .userInitiated).async {
                 let coordinator = NSFileCoordinator()
                 var coordinatorError: NSError?
-                var result: Result<Void, Error> = .success(())
+                var deleteError: Error?
                 coordinator.coordinate(
                     writingItemAt: sessionDir,
                     options: [.forDeleting],
@@ -641,15 +641,16 @@ final class PhoneICloudDriveController: NSObject {
                 ) { url in
                     do {
                         try FileManager.default.removeItem(at: url)
-                        result = .success(())
                     } catch {
-                        result = .failure(error)
+                        deleteError = error
                     }
                 }
                 if let coordinatorError {
                     continuation.resume(throwing: coordinatorError)
+                } else if let deleteError {
+                    continuation.resume(throwing: deleteError)
                 } else {
-                    continuation.resume(with: result)
+                    continuation.resume()
                 }
             }
         }

@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import RpplCore
 
-@Suite("SessionFileStore")
+@Suite("SessionFileStore", .serialized)
 struct SessionFileStoreTests {
     @Test func createsManifestAndRoundTripsDetections() throws {
         let root = FileManager.default.temporaryDirectory
@@ -199,14 +199,14 @@ struct SessionFileStoreTests {
         )
         _ = try store.createSession(manifest: manifest)
 
-        let assumptionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let assumptionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("assumptions.jsonl")
         let legacy =
             #"{"code":"riding","id":"legacy-1","reason":"ride_start","timestamp":"2024-01-01T00:00:00Z"}"#
             + "\n"
         try Data(legacy.utf8).write(to: assumptionsURL)
         // Empty detections from createSession — migrate should fill from assumptions.
-        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let detectionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("detections.jsonl")
         try Data().write(to: detectionsURL)
 
@@ -233,7 +233,7 @@ struct SessionFileStoreTests {
         manifest.schemaVersion = 3
         _ = try store.createSession(manifest: manifest)
 
-        let detectionsURL = store.sessionDirectory(for: manifest.sessionId)
+        let detectionsURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("detections.jsonl")
         let legacy =
             #"{"code":"paused","detectorId":"session_start","id":"d1","reason":"session_start","timestamp":"2024-01-01T00:00:00Z"}"#
@@ -626,6 +626,7 @@ struct SessionFileStoreTests {
 
         let store = SessionFileStore(rootURL: root)
         let manifest = SessionManifest(
+            sessionId: "cancel-read",
             testerId: "t",
             appVersion: "1.0",
             buildNumber: "1",
@@ -644,10 +645,16 @@ struct SessionFileStoreTests {
         }
         try store.appendLocationSamples(samples, sessionId: manifest.sessionId)
 
+        let locationURL = try store.sessionDirectory(for: manifest.sessionId)
+            .appendingPathComponent("location-000.jsonl")
+        #expect(FileManager.default.fileExists(atPath: locationURL.path))
+
         let reader = Task {
             try store.readLocationSamples(sessionId: manifest.sessionId)
         }
-        // Cancel before the cooperative checkpoints can finish the whole file.
+        for _ in 0..<8 {
+            await Task.yield()
+        }
         reader.cancel()
         do {
             _ = try await reader.value

@@ -16,6 +16,7 @@ public enum SessionRootMigrator {
         return contents
             .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
             .map(\.lastPathComponent)
+            .filter { SessionIdValidator.isValid($0) }
             .sorted()
     }
 
@@ -41,6 +42,7 @@ public enum SessionRootMigrator {
         let destIDs = Set(try sessionIDs(in: destinationRoot, fileManager: fileManager))
         var copied: [String] = []
         for sessionId in sourceIDs where !destIDs.contains(sessionId) {
+            guard SessionIdValidator.isValid(sessionId) else { continue }
             let source = sourceRoot.appendingPathComponent(sessionId, isDirectory: true)
             let dest = destinationRoot.appendingPathComponent(sessionId, isDirectory: true)
             try fileManager.copyItem(at: source, to: dest)
@@ -61,6 +63,7 @@ public enum SessionRootMigrator {
         let sourceIDs = try sessionIDs(in: sourceRoot, fileManager: fileManager)
         var moved: [String] = []
         for sessionId in sourceIDs {
+            guard SessionIdValidator.isValid(sessionId) else { continue }
             let source = sourceRoot.appendingPathComponent(sessionId, isDirectory: true)
             let dest = destinationRoot.appendingPathComponent(sessionId, isDirectory: true)
             if fileManager.fileExists(atPath: dest.path) {

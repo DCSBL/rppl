@@ -103,13 +103,18 @@ public enum WatchViewSyncCodec {
             throw SessionStoreError.ioFailure("Invalid viewUpdate payload")
         }
         let manifest = try iso8601Decoder.decode(SessionManifest.self, from: manifestData)
+        try SessionIdValidator.validate(manifest.sessionId)
         let derived = try iso8601Decoder.decode(DerivedSessionView.self, from: derivedData)
         return WatchViewUpdate(manifest: manifest, derived: derived)
     }
 
-    public static func decodeViewDelete(from message: [String: Any]) -> String? {
+    public static func decodeViewDelete(from message: [String: Any]) throws -> String? {
         guard messageType(in: message) == .viewDelete else { return nil }
-        return message[AppConstants.wcViewDeleteSessionIdKey] as? String
+        guard let sessionId = message[AppConstants.wcViewDeleteSessionIdKey] as? String else {
+            throw SessionStoreError.ioFailure("Invalid viewDelete payload")
+        }
+        try SessionIdValidator.validate(sessionId)
+        return sessionId
     }
 
     public static func decodeSyncRequest(from message: [String: Any]) throws -> [WatchKnownSession]? {
@@ -125,7 +130,8 @@ public enum WatchViewSyncCodec {
 
     public static func decodeSyncReply(from message: [String: Any]) throws -> WatchViewSyncReply? {
         guard messageType(in: message) == .syncReply else { return nil }
-        let deleteIds = message[AppConstants.wcSyncDeletesKey] as? [String] ?? []
+        let deleteIds = (message[AppConstants.wcSyncDeletesKey] as? [String] ?? [])
+            .filter { SessionIdValidator.isValid($0) }
         let rawUpdates = message[AppConstants.wcSyncUpdatesKey] as? [[String: Any]] ?? []
         var updates: [WatchViewUpdate] = []
         updates.reserveCapacity(rawUpdates.count)

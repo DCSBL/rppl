@@ -52,6 +52,7 @@ public struct SessionMapTrackData: Codable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         start = try container.decode(MapCoordinate.self, forKey: .start)
         heatmapTracks = try container.decodeIfPresent([[MapCoordinate]].self, forKey: .heatmapTracks) ?? []
+        try SessionImportLimits.validateHeatmapTracks(heatmapTracks)
     }
 
     public func encode(to encoder: Encoder) throws {
