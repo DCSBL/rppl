@@ -257,6 +257,11 @@ final class PhoneICloudDriveController: NSObject {
         pendingImportSummaries = []
     }
 
+    /// Settings → Import session: iCloud picker even when auto-offer was dismissed.
+    func summariesForManualImport() -> [RemoteSessionSummary] {
+        collectRemoteImportSummaries(ignoreDismissed: true)
+    }
+
     func acceptSession(_ sessionId: String) {
         acceptSessions([sessionId])
     }
@@ -420,12 +425,22 @@ final class PhoneICloudDriveController: NSObject {
 
     private func rebuildPendingImportsFromQuery() {
         guard !suppressMetadataRebuild else { return }
-        guard isSyncEnabled, let root = iCloudSessionsRoot, let query = metadataQuery else {
+        guard isSyncEnabled, iCloudSessionsRoot != nil, metadataQuery != nil else {
             pendingImportSummaries = []
             shouldOfferImport = false
             return
         }
 
+        pendingImportSummaries = collectRemoteImportSummaries(ignoreDismissed: false)
+        shouldOfferImport = !suppressImportOffer && !pendingImportSummaries.isEmpty
+    }
+
+    private func collectRemoteImportSummaries(ignoreDismissed: Bool) -> [RemoteSessionSummary] {
+        guard isSyncEnabled, let root = iCloudSessionsRoot, let query = metadataQuery else {
+            return []
+        }
+
+        let dismissed = ignoreDismissed ? Set<String>() : dismissedRemoteIDs
         var remoteIDs = Set<String>()
         var candidates: [RemoteSessionSummary] = []
         let store = PhoneConnectivityService.shared.store
@@ -446,7 +461,7 @@ final class PhoneICloudDriveController: NSObject {
             guard ICloudLogbookPolicy.remoteImportCandidates(
                 remoteMetadata: [sessionId],
                 accepted: acceptedSessionIDs,
-                dismissed: dismissedRemoteIDs
+                dismissed: dismissed
             ).contains(sessionId)
             else {
                 continue
@@ -464,31 +479,31 @@ final class PhoneICloudDriveController: NSObject {
             }
         }
 
-        let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
-        // Anything already on the live root belongs in this phone’s logbook.
-        if !localOnDisk.isEmpty {
-            acceptSessions(localOnDisk)
-        }
-        let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
-            accepted: acceptedSessionIDs,
-            remoteMetadata: remoteIDs,
-            localOnDisk: localOnDisk,
-            metadataGatherComplete: metadataHasGathered && !isSwitchingRoot
-        )
-        for sessionId in peerDeletes {
-            try? store.deleteSession(sessionId: sessionId)
-            unacceptSession(sessionId)
-            WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
-        }
-        if !peerDeletes.isEmpty {
-            PhoneConnectivityService.shared.bumpSessionsRevision()
+        if !ignoreDismissed {
+            let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
+            // Anything already on the live root belongs in this phone’s logbook.
+            if !localOnDisk.isEmpty {
+                acceptSessions(localOnDisk)
+            }
+            let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
+                accepted: acceptedSessionIDs,
+                remoteMetadata: remoteIDs,
+                localOnDisk: localOnDisk,
+                metadataGatherComplete: metadataHasGathered && !isSwitchingRoot
+            )
+            for sessionId in peerDeletes {
+                try? store.deleteSession(sessionId: sessionId)
+                unacceptSession(sessionId)
+                WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
+            }
+            if !peerDeletes.isEmpty {
+                PhoneConnectivityService.shared.bumpSessionsRevision()
+            }
         }
 
-        pendingImportSummaries = Dictionary(grouping: candidates, by: \.sessionId)
+        return Dictionary(grouping: candidates, by: \.sessionId)
             .compactMap(\.value.first)
             .sorted { $0.startedAt > $1.startedAt }
-
-        shouldOfferImport = !suppressImportOffer && !pendingImportSummaries.isEmpty
     }
 
     private func readSummaryCoordinated(at sessionDir: URL) -> RemoteSessionSummary? {
