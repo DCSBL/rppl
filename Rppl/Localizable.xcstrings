@@ -860,6 +860,22 @@
         }
       }
     },
+    "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeer via iCloud Drive of een session-export-JSON. Geïmporteerde sessions verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
+          }
+        }
+      }
+    },
     "Import session" : {
       "localizations" : {
         "en" : {
@@ -3008,6 +3024,22 @@
     "iCloud Drive unavailable" : {
 
     },
+    "Import from file" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from file"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeren via bestand"
+          }
+        }
+      }
+    },
     "Import from iCloud" : {
 
     },
@@ -3055,6 +3087,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This session is already in your logbook."
+          }
+        }
+      }
+    },
+    "Turn on iCloud Drive to import park days from the cloud." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on iCloud Drive to import park days from the cloud."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schakel iCloud Drive in om park days uit de cloud te importeren."
           }
         }
       }
