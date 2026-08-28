@@ -21,64 +21,21 @@ struct SessionStartMapPinView: View {
 /// Full-screen map (pushed on NavigationStack).
 struct WatchSessionMapFullscreenView: View {
     let source: SessionMapSnapshotSource
-    var showsTrackStyleToggle: Bool = false
-
-    @AppStorage(AppConstants.sessionMapTrackStyleDefaultsKey)
-    private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
-
-    private var trackStyle: SessionMapTrackStyle {
-        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
-    }
 
     var body: some View {
         GeometryReader { geo in
             SessionMapSnapshotView(
-                source: resolvedSource,
+                source: source,
                 size: CGSize(width: geo.size.width, height: geo.size.height),
                 cornerRadius: 0,
                 showsPin: false
             )
-            .overlay(alignment: .topLeading) {
-                if showsTrackStyleToggle {
-                    trackStyleToggle
-                        .padding(8)
-                }
-            }
         }
         .navigationTitle(String(localized: "Map"))
         .navigationBarTitleDisplayMode(.inline)
         .containerBackground(Color.rpplIdleBackground.gradient, for: .navigation)
         .preferredColorScheme(.dark)
         .accessibilityLabel(String(localized: "Session map"))
-    }
-
-    private var resolvedSource: SessionMapSnapshotSource {
-        if case let .sessionTracks(data, _, frame) = source {
-            return .sessionTracks(data, style: trackStyle, frame: frame)
-        }
-        return source
-    }
-
-    private var trackStyleToggle: some View {
-        Button {
-            trackStyleRaw = trackStyle == .averaged
-                ? SessionMapTrackStyle.heatmap.rawValue
-                : SessionMapTrackStyle.averaged.rawValue
-        } label: {
-            Image(systemName: trackStyle == .averaged
-                ? "point.topleft.down.curvedto.point.bottomright.up"
-                : "square.3.layers.3d")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.rpplIdlePrimary)
-                .frame(width: 32, height: 32)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(
-            trackStyle == .averaged
-                ? String(localized: "Show heatmap")
-                : String(localized: "Show averaged track")
-        )
     }
 }
 
@@ -91,21 +48,11 @@ struct WatchSessionMapPreview: View {
     var mapHeight: CGFloat = 96
     var startMapDistanceMeters: CLLocationDistance = 500
 
-    @AppStorage(AppConstants.sessionMapTrackStyleDefaultsKey)
-    private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
-
-    private var trackStyle: SessionMapTrackStyle {
-        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if let source = snapshotSource {
                 NavigationLink {
-                    WatchSessionMapFullscreenView(
-                        source: source,
-                        showsTrackStyleToggle: mapTracks != nil
-                    )
+                    WatchSessionMapFullscreenView(source: source)
                 } label: {
                     GeometryReader { geo in
                         SessionMapSnapshotView(
@@ -140,7 +87,6 @@ struct WatchSessionMapPreview: View {
     private var snapshotSource: SessionMapSnapshotSource? {
         SessionMapSnapshotSource.sessionMap(
             mapTracks: mapTracks,
-            trackStyle: trackStyle,
             startCoordinate: startCoordinate,
             mapFrame: mapFrame,
             startDistanceMeters: startMapDistanceMeters
@@ -155,13 +101,6 @@ struct SessionMapStripView: View {
     var mapFrame: MapTrackFrame?
     var mapHeight: CGFloat = 96
     var startMapDistanceMeters: CLLocationDistance = 500
-
-    @AppStorage(AppConstants.sessionMapTrackStyleDefaultsKey)
-    private var trackStyleRaw = SessionMapTrackStyle.averaged.rawValue
-
-    private var trackStyle: SessionMapTrackStyle {
-        SessionMapTrackStyle(rawValue: trackStyleRaw) ?? .averaged
-    }
 
     var body: some View {
         Group {
@@ -184,7 +123,6 @@ struct SessionMapStripView: View {
     private var snapshotSource: SessionMapSnapshotSource? {
         SessionMapSnapshotSource.sessionMap(
             mapTracks: mapTracks,
-            trackStyle: trackStyle,
             startCoordinate: startCoordinate,
             mapFrame: mapFrame,
             startDistanceMeters: startMapDistanceMeters

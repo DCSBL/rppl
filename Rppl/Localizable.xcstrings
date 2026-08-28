@@ -536,6 +536,22 @@
         }
       }
     },
+    "Delete from iCloud Drive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete from iCloud Drive"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen uit iCloud Drive"
+          }
+        }
+      }
+    },
     "Delete from Rppl" : {
       "localizations" : {
         "en" : {
@@ -1842,6 +1858,22 @@
         }
       }
     },
+    "Remove from This iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from This iPhone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen van deze iPhone"
+          }
+        }
+      }
+    },
     "Reset" : {
       "localizations" : {
         "en" : {
@@ -2561,6 +2593,22 @@
         }
       }
     },
+    "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen van deze iPhone verbergt de session hier in Rppl. Verwijderen uit iCloud Drive verwijdert de session permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
     "Time" : {
       "localizations" : {
         "en" : {
@@ -2998,7 +3046,7 @@
     "Keep iCloud Copies" : {
 
     },
-    "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on." : {
+    "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud." : {
 
     },
     "No sessions to import" : {

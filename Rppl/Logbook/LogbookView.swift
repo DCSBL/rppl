@@ -147,16 +147,30 @@ struct LogbookView: View {
                         flashHighlight(route.id)
                     }
             }
-            .confirmationDialog(
+            .alert(
                 "Delete Session?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
+                isPresented: $showDeleteConfirmation
             ) {
-                Button("Delete from Rppl", role: .destructive) {
-                    if let sessionId = pendingDeleteSessionId {
-                        deleteSession(sessionId)
+                if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
+                    Button("Remove from This iPhone", role: .destructive) {
+                        if let sessionId = pendingDeleteSessionId {
+                            hideSessionFromLogbook(sessionId)
+                        }
+                        pendingDeleteSessionId = nil
                     }
-                    pendingDeleteSessionId = nil
+                    Button("Delete from iCloud Drive", role: .destructive) {
+                        if let sessionId = pendingDeleteSessionId {
+                            deleteSessionPermanently(sessionId)
+                        }
+                        pendingDeleteSessionId = nil
+                    }
+                } else {
+                    Button("Delete from Rppl", role: .destructive) {
+                        if let sessionId = pendingDeleteSessionId {
+                            deleteSessionLocally(sessionId)
+                        }
+                        pendingDeleteSessionId = nil
+                    }
                 }
                 Button("Cancel", role: .cancel) {
                     pendingDeleteSessionId = nil
@@ -335,7 +349,7 @@ struct LogbookView: View {
         if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
             return String(
                 localized:
-                    "Permanently removes this session from Rppl on this iPhone and from iCloud Drive. This cannot be undone."
+                    "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone."
             )
         }
         return String(
@@ -344,25 +358,51 @@ struct LogbookView: View {
         )
     }
 
-    private func deleteSession(_ sessionId: String) {
-        WakeLog.debug(.ui, "confirm delete \(sessionId.prefix(8))…")
+    private func hideSessionFromLogbook(_ sessionId: String) {
+        WakeLog.debug(.ui, "confirm hide \(sessionId.prefix(8))…")
+        iCloud.hideSessionFromLogbook(sessionId)
+        SessionCityResolver.shared.invalidate(sessionId: sessionId)
+        reloadCatalog()
+    }
+
+    private func deleteSessionPermanently(_ sessionId: String) {
+        WakeLog.debug(.ui, "confirm permanent delete \(sessionId.prefix(8))…")
+        Task {
+            do {
+                try await iCloud.deleteSessionPermanently(sessionId)
+                SessionCityResolver.shared.invalidate(sessionId: sessionId)
+                PhoneWatchViewSync.pushViewDelete(sessionId: sessionId)
+                WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
+                reloadCatalog()
+            } catch {
+                presentDeleteError(error)
+            }
+        }
+    }
+
+    private func deleteSessionLocally(_ sessionId: String) {
+        WakeLog.debug(.ui, "confirm local delete \(sessionId.prefix(8))…")
         do {
             try connectivity.store.deleteSession(sessionId: sessionId)
-            PhoneICloudDriveController.shared.unacceptSession(sessionId)
             SessionCityResolver.shared.invalidate(sessionId: sessionId)
             PhoneWatchViewSync.pushViewDelete(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             reloadCatalog()
         } catch {
-            let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-            actionErrorText = description.isEmpty
-                ? String(localized: "Something went wrong while deleting the session.")
-                : description
-            Task { @MainActor in
-                showActionError = true
-            }
-            WakeLog.error(.store, "delete session: \(error.localizedDescription)")
+            presentDeleteError(error)
         }
+    }
+
+    private func presentDeleteError(_ error: Error) {
+        let description = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        actionErrorText = description.isEmpty
+            ? String(localized: "Something went wrong while deleting the session.")
+            : description
+        // Delete confirm alert still dismissing — defer so the error alert is not swallowed.
+        Task { @MainActor in
+            showActionError = true
+        }
+        WakeLog.error(.store, "delete session: \(error.localizedDescription)")
     }
 }
 

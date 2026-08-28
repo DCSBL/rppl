@@ -4,6 +4,9 @@ import Testing
 
 @Suite("WatchViewSyncCodec")
 struct WatchViewSyncCodecTests {
+    /// ISO8601 JSON round-trip is second-precision; avoid `Date()` sub-second drift in equality checks.
+    private static let sampleStartedAt = Date(timeIntervalSince1970: 1_000_000)
+
     private func sampleStats(duration: TimeInterval = 120, setCount: Int = 2) -> SessionStats {
         SessionStats(
             startedAt: Date(timeIntervalSince1970: 0),
@@ -27,6 +30,7 @@ struct WatchViewSyncCodecTests {
             buildNumber: "1",
             watchModel: "Ultra2",
             systemVersion: "26.0",
+            startedAt: Self.sampleStartedAt,
             transferState: .acknowledged
         )
         let stats = sampleStats()
