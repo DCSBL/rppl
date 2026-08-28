@@ -152,10 +152,8 @@ final class PhoneConnectivityService: NSObject {
 
     func importPackage(from url: URL, sessionIdHint: String?) throws {
         WakeLog.debug(.transfer, "import begin hint=\(sessionIdHint.map { String($0.prefix(8)) } ?? "nil")…")
-        let data = try Data(contentsOf: url)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let package = try decoder.decode(SessionTransferPackage.self, from: data)
+        let data = try SessionImportLimits.readBoundedFile(at: url)
+        let package = try SessionImportLimits.decodeTransferPackage(from: data)
         try store.importTransferPackage(package, intoPhoneStore: store.rootURL)
         sessionsRevision += 1
         let sessionId = sessionIdHint ?? package.manifest.sessionId
@@ -192,13 +190,11 @@ final class PhoneConnectivityService: NSObject {
         let sessionId: String
         do {
             sessionId = try await StoreIO.runOffMain {
-                let data = try Data(contentsOf: url)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let package = try decoder.decode(SessionTransferPackage.self, from: data)
+                let data = try SessionImportLimits.readBoundedFile(at: url)
+                let package = try SessionImportLimits.decodeTransferPackage(from: data)
                 let id = package.manifest.sessionId
                 if FileManager.default.fileExists(
-                    atPath: store.sessionDirectory(for: id).path
+                    atPath: try store.sessionDirectory(for: id).path
                 ) {
                     throw SessionExportImportError.alreadyImported(sessionId: id)
                 }
