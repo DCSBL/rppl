@@ -134,19 +134,15 @@ public enum SessionLoader {
     }
 
     public static func load(packageURL: URL) throws -> SessionLoadBundle {
-        let data = try Data(contentsOf: packageURL)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let package = try decoder.decode(SessionTransferPackage.self, from: data)
+        let data = try SessionImportLimits.readBoundedFile(at: packageURL)
+        let package = try SessionImportLimits.decodeTransferPackage(from: data)
         return load(package: package)
     }
 
     /// Bundled empty-state example: shift timeline so `endedAt` is `now` (relative gaps kept).
     public static func loadExample(packageURL: URL, now: Date = Date()) throws -> SessionLoadBundle {
-        let data = try Data(contentsOf: packageURL)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let package = try decoder.decode(SessionTransferPackage.self, from: data)
+        let data = try SessionImportLimits.readBoundedFile(at: packageURL)
+        let package = try SessionImportLimits.decodeTransferPackage(from: data)
         return load(package: SessionTimelineRebase.package(package, soEndedAt: now))
     }
 
