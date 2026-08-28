@@ -629,11 +629,11 @@ final class PhoneICloudDriveController: NSObject {
     }
 
     private func coordinatedDeleteSession(at sessionDir: URL) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             DispatchQueue.global(qos: .userInitiated).async {
                 let coordinator = NSFileCoordinator()
                 var coordinatorError: NSError?
-                var result: Result<Void, Error> = .success(())
+                var deleteError: Error?
                 coordinator.coordinate(
                     writingItemAt: sessionDir,
                     options: [.forDeleting],
@@ -641,15 +641,16 @@ final class PhoneICloudDriveController: NSObject {
                 ) { url in
                     do {
                         try FileManager.default.removeItem(at: url)
-                        result = .success(())
                     } catch {
-                        result = .failure(error)
+                        deleteError = error
                     }
                 }
                 if let coordinatorError {
                     continuation.resume(throwing: coordinatorError)
+                } else if let deleteError {
+                    continuation.resume(throwing: deleteError)
                 } else {
-                    continuation.resume(with: result)
+                    continuation.resume()
                 }
             }
         }
