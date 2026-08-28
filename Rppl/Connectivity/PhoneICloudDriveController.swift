@@ -629,7 +629,7 @@ final class PhoneICloudDriveController: NSObject {
     }
 
     private func coordinatedDeleteSession(at sessionDir: URL) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             DispatchQueue.global(qos: .userInitiated).async {
                 let coordinator = NSFileCoordinator()
                 var coordinatorError: NSError?
