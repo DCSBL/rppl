@@ -2740,6 +2740,22 @@
         }
       }
     },
+    "this app" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this app"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deze app"
+          }
+        }
+      }
+    },
     "unavailable, skipped" : {
       "localizations" : {
         "en" : {

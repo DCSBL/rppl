@@ -20,6 +20,13 @@ struct AppInfoView: View {
         NavigationStack {
             List {
                 Section {
+                    header
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
+                Section {
                     Text(
                         "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
                     )
@@ -88,6 +95,7 @@ struct AppInfoView: View {
 
                     NavigationLink {
                         LegalTermsPrivacyView()
+                            .toolbar(.visible, for: .navigationBar)
                     } label: {
                         Text("Terms & Privacy policy")
                     }
@@ -119,9 +127,8 @@ struct AppInfoView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.rpplBackground)
-            .navigationTitle("Rppl")
-            .toolbarBackground(Color.rpplBackground, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
             .tint(Color.rpplAccent)
             .alert(
                 "Turn Off iCloud Drive?",
@@ -140,6 +147,14 @@ struct AppInfoView: View {
                 )
             }
         }
+    }
+
+    private var header: some View {
+        Text("this app")
+            .font(.largeTitle.bold())
+            .foregroundStyle(Color.rpplText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityAddTraits(.isHeader)
     }
 
     @ViewBuilder

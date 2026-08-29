@@ -11,6 +11,7 @@ struct PhonePermissionsListSection: View {
             ForEach(WatchPermissionKind.allCases, id: \.self) { kind in
                 NavigationLink {
                     PhonePermissionDetailView(kind: kind, permissions: permissions)
+                        .toolbar(.visible, for: .navigationBar)
                 } label: {
                     PhonePermissionRowView(
                         kind: kind,
