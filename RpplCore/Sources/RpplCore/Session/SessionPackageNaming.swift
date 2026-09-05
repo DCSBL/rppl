@@ -3,20 +3,20 @@ import Foundation
 /// Human-readable session package folder names for Files / iCloud Drive.
 ///
 /// Canonical identity stays `manifest.sessionId` (UUID). Folder name is display-only:
-/// `YYYY-MM-DD - City` with ` (2)`, ` (3)`, … on collision.
+/// `YYYY-MM-DD HH-mm - City` with ` (2)`, ` (3)`, … on rare same-minute collision.
 ///
 /// Manual renames are preserved: the store discovers packages via `manifest.json`.
 public enum SessionPackageNaming {
     public static let unknownCity = "Unknown"
 
-    /// Local calendar day of `startedAt` plus display city: `2026-06-01 - Rotterdam`.
+    /// Local start time plus display city: `2026-06-01 14-32 - Rotterdam`.
     public static func baseFolderName(
         startedAt: Date,
         cityName: String?,
         timeZone: TimeZone = .current,
         locale: Locale = .current
     ) -> String {
-        "\(dateString(startedAt: startedAt, timeZone: timeZone, locale: locale)) - \(displayCity(cityName))"
+        "\(dateTimeString(startedAt: startedAt, timeZone: timeZone, locale: locale)) - \(displayCity(cityName))"
     }
 
     /// Picks `base` or `base (2)` / `base (3)` / … not present in `existingNames`.
@@ -59,9 +59,11 @@ public enum SessionPackageNaming {
         return cleaned.isEmpty ? unknownCity : cleaned
     }
 
-    /// True when the folder looks app-owned (canonical pattern or legacy bare UUID).
+    /// True when the folder looks app-owned (canonical / date-only legacy / bare UUID).
     public static func isAppGenerated(_ folderName: String) -> Bool {
-        isLegacyUUIDFolder(folderName) || matchesCanonicalPattern(folderName)
+        isLegacyUUIDFolder(folderName)
+            || matchesCanonicalPattern(folderName)
+            || matchesDateOnlyPattern(folderName)
     }
 
     /// Legacy layout: folder name equals a UUID (historically == `sessionId`).
@@ -69,10 +71,18 @@ public enum SessionPackageNaming {
         UUID(uuidString: folderName) != nil
     }
 
-    /// `YYYY-MM-DD - City` or `YYYY-MM-DD - City (N)`.
+    /// `YYYY-MM-DD HH-mm - City` or `… (N)`.
     public static func matchesCanonicalPattern(_ folderName: String) -> Bool {
-        let pattern = #"^\d{4}-\d{2}-\d{2} - .+?(?: \(\d+\))?$"#
+        let pattern = #"^\d{4}-\d{2}-\d{2} \d{2}-\d{2} - .+?(?: \(\d+\))?$"#
         return folderName.range(of: pattern, options: .regularExpression) != nil
+    }
+
+    /// Short-lived date-only folders: `YYYY-MM-DD - City` (before time was added).
+    public static func matchesDateOnlyPattern(_ folderName: String) -> Bool {
+        let pattern = #"^\d{4}-\d{2}-\d{2} - .+?(?: \(\d+\))?$"#
+        // Exclude the time form (already matched by canonical).
+        return folderName.range(of: pattern, options: .regularExpression) != nil
+            && !matchesCanonicalPattern(folderName)
     }
 
     /// Rejects empty names and path traversal before building a package URL.
@@ -105,7 +115,7 @@ public enum SessionPackageNaming {
 
     // MARK: - Private
 
-    private static func dateString(
+    private static func dateTimeString(
         startedAt: Date,
         timeZone: TimeZone,
         locale: Locale
@@ -114,8 +124,9 @@ public enum SessionPackageNaming {
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = timeZone
-        formatter.dateFormat = "yyyy-MM-dd"
-        _ = locale // reserved for future localized titles; date stays ISO-like
+        // Colons are awkward in some file UIs; use HH-mm like Share export timestamps.
+        formatter.dateFormat = "yyyy-MM-dd HH-mm"
+        _ = locale // reserved for future localized titles; stamp stays POSIX
         return formatter.string(from: startedAt)
     }
 }

@@ -28,7 +28,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 
 /// File layout for one session package:
 /// ```
-/// <root>/<YYYY-MM-DD - City>/   # display name; identity is manifest.sessionId
+/// <root>/<YYYY-MM-DD HH-mm - City>/   # display name; identity is manifest.sessionId
 ///   manifest.json
 ///   detections.jsonl
 ///   location-000.jsonl
@@ -329,10 +329,10 @@ public final class SessionFileStore: @unchecked Sendable {
         forgetDirectory(for: sessionId)
     }
 
-    /// Renames legacy bare-UUID package folders to `YYYY-MM-DD - City`.
+    /// Renames legacy bare-UUID package folders to `YYYY-MM-DD HH-mm - City`.
     /// Skips user-renamed folders (not app-generated).
     @discardableResult
-    public func migratePackageFolderNamesIfNeeded() throws -> [String] {
+        public func migratePackageFolderNamesIfNeeded() throws -> [String] {
         try ensureRootExists()
         let entries = try SessionPackageLocator.index(
             in: rootURL,
@@ -342,20 +342,19 @@ public final class SessionFileStore: @unchecked Sendable {
         var migrated: [String] = []
         for entry in entries.values {
             let currentName = entry.directoryURL.lastPathComponent
-            guard SessionPackageNaming.isLegacyUUIDFolder(currentName),
-                  currentName == entry.sessionId
-            else {
-                continue
-            }
+            let isBareUUID = SessionPackageNaming.isLegacyUUIDFolder(currentName)
+                && currentName == entry.sessionId
+            let isDateOnly = SessionPackageNaming.matchesDateOnlyPattern(currentName)
+            guard isBareUUID || isDateOnly else { continue }
             try relocatePackageIfNeeded(
                 sessionId: entry.sessionId,
                 startedAt: entry.startedAt,
                 cityName: entry.cityName,
-                forceLegacyUUID: true
+                forceLegacyUUID: isBareUUID
             )
             migrated.append(entry.sessionId)
         }
-        if !migrated.isEmpty {
+if !migrated.isEmpty {
             invalidatePackageIndex()
         }
         return migrated.sorted()

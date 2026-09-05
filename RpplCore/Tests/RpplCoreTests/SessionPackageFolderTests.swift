@@ -4,16 +4,18 @@ import Testing
 
 @Suite("SessionPackageNaming")
 struct SessionPackageNamingTests {
-    @Test func baseFolderNameUsesLocalDateAndCity() {
+    @Test func baseFolderNameUsesLocalDateTimeAndCity() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-        let date = calendar.date(from: DateComponents(year: 2026, month: 6, day: 1, hour: 15))!
+        let date = calendar.date(
+            from: DateComponents(year: 2026, month: 6, day: 1, hour: 14, minute: 32)
+        )!
         let name = SessionPackageNaming.baseFolderName(
             startedAt: date,
             cityName: "Rotterdam",
             timeZone: TimeZone(secondsFromGMT: 0)!
         )
-        #expect(name == "2026-06-01 - Rotterdam")
+        #expect(name == "2026-06-01 14-32 - Rotterdam")
     }
 
     @Test func emptyCityBecomesUnknown() {
@@ -24,20 +26,21 @@ struct SessionPackageNamingTests {
 
     @Test func uniqueFolderNameAddsSuffixOnCollision() {
         let existing: Set<String> = [
-            "2026-06-01 - Rotterdam",
-            "2026-06-01 - Rotterdam (2)",
+            "2026-06-01 14-32 - Rotterdam",
+            "2026-06-01 14-32 - Rotterdam (2)",
         ]
         #expect(
             SessionPackageNaming.uniqueFolderName(
-                base: "2026-06-01 - Rotterdam",
+                base: "2026-06-01 14-32 - Rotterdam",
                 existingNames: existing
-            ) == "2026-06-01 - Rotterdam (3)"
+            ) == "2026-06-01 14-32 - Rotterdam (3)"
         )
     }
 
     @Test func appGeneratedPatterns() {
-        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 - Rotterdam"))
-        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 - Rotterdam (2)"))
+        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 14-32 - Rotterdam"))
+        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 14-32 - Rotterdam (2)"))
+        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 - Rotterdam")) // date-only legacy
         #expect(SessionPackageNaming.isAppGenerated(UUID().uuidString))
         #expect(!SessionPackageNaming.isAppGenerated("My park day"))
     }
@@ -94,7 +97,7 @@ struct SessionPackageFolderTests {
         #expect(try store.sessionDirectory(for: manifest.sessionId) == dir)
     }
 
-    @Test func sameDayCollisionGetsNumericSuffix() throws {
+    @Test func sameMinuteCollisionGetsNumericSuffix() throws {
         let root = tempRoot()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -127,6 +130,46 @@ struct SessionPackageFolderTests {
         #expect(dir1.lastPathComponent == base)
         #expect(dir2.lastPathComponent == "\(base) (2)")
     }
+
+    @Test func differentStartMinutesGetDistinctFolders() throws {
+        let root = tempRoot()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let morning = calendar.date(
+            from: DateComponents(year: 2026, month: 6, day: 1, hour: 10, minute: 0)
+        )!
+        let afternoon = calendar.date(
+            from: DateComponents(year: 2026, month: 6, day: 1, hour: 15, minute: 30)
+        )!
+        let store = SessionFileStore(rootURL: root)
+
+        let first = SessionManifest(
+            sessionId: "12121212-1212-1212-1212-121212121212",
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "W",
+            systemVersion: "26.0",
+            startedAt: morning
+        )
+        let second = SessionManifest(
+            sessionId: "34343434-3434-3434-3434-343434343434",
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "W",
+            systemVersion: "26.0",
+            startedAt: afternoon
+        )
+        let dir1 = try store.createSession(manifest: first)
+        let dir2 = try store.createSession(manifest: second)
+        #expect(dir1.lastPathComponent == SessionPackageNaming.baseFolderName(startedAt: morning, cityName: nil))
+        #expect(dir2.lastPathComponent == SessionPackageNaming.baseFolderName(startedAt: afternoon, cityName: nil))
+        #expect(!dir2.lastPathComponent.contains(" (2)"))
+    }
+
 
     @Test func cityUpdateRenamesAppGeneratedFolder() throws {
         let root = tempRoot()
