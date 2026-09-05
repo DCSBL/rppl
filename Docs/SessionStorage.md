@@ -2,11 +2,11 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v6)
+## Current layout (schema v7+)
 
 ```text
-<root>/<sessionId>/
-  manifest.json
+<root>/<YYYY-MM-DD - City>/   # display name; identity is manifest.sessionId
+  manifest.json               # canonical sessionId (UUID)
   detections.jsonl
   location-000.jsonl
   motion-000.jsonl.zlib   # or legacy motion-000.jsonl
@@ -15,6 +15,14 @@ On-disk layout for Watch and iPhone session packages. Streams and HealthKit poli
   derived/
     view.json             # analyzerVersion + SessionStats + MapTrackFrame?
 ```
+
+**Folder naming**
+
+- Format: `YYYY-MM-DD - City` (local calendar day of `startedAt`; city from phone geocode, else `Unknown`).
+- Same-day collisions: `… (2)`, `… (3)`, …
+- Identity is always `manifest.sessionId`. Discovery scans for `manifest.json`; folder name is display-only.
+- Manual renames in Files are preserved (store will not overwrite a user-renamed folder).
+- Legacy bare-UUID folders migrate to the human name on open / list.
 
 Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages without `derived/` rebuild on open.
 

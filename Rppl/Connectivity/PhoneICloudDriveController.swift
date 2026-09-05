@@ -240,7 +240,9 @@ final class PhoneICloudDriveController: NSObject {
     func importSelectedRemoteSessions(_ sessionIds: Set<String>) async {
         guard let root = iCloudSessionsRoot else { return }
         for sessionId in sessionIds {
-            let dir = root.appendingPathComponent(sessionId, isDirectory: true)
+            guard let dir = try? SessionPackageLocator.directory(for: sessionId, in: root) else {
+                continue
+            }
             await downloadUbiquitousItem(at: dir)
         }
         acceptSessions(sessionIds)
@@ -525,7 +527,8 @@ final class PhoneICloudDriveController: NSObject {
             else {
                 continue
             }
-            let sessionId = sessionDir.lastPathComponent
+            let summary = readSummaryCoordinated(at: sessionDir)
+            let sessionId = summary?.sessionId ?? sessionDir.lastPathComponent
             remoteIDs.insert(sessionId)
 
             guard ICloudLogbookPolicy.remoteImportCandidates(
@@ -538,7 +541,7 @@ final class PhoneICloudDriveController: NSObject {
                 continue
             }
 
-            if let summary = readSummaryCoordinated(at: sessionDir) {
+            if let summary {
                 candidates.append(summary)
             } else {
                 Task { @MainActor in
@@ -661,11 +664,10 @@ final class PhoneICloudDriveController: NSObject {
            localRoot.standardizedFileURL == cloudRoot.standardizedFileURL {
             return
         }
-        let dir = localRoot.appendingPathComponent(sessionId, isDirectory: true)
-        let exists = await Task.detached(priority: .userInitiated) {
-            FileManager.default.fileExists(atPath: dir.path)
-        }.value
-        guard exists else { return }
+        let store = SessionFileStore(rootURL: localRoot)
+        guard let dir = try? store.sessionDirectory(for: sessionId),
+              FileManager.default.fileExists(atPath: dir.path)
+        else { return }
         do {
             try await coordinatedDeleteSession(at: dir)
             WakeLog.debug(.store, "deleted local fallback copy \(sessionId.prefix(8))…")
