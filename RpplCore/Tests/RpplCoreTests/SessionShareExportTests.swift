@@ -66,4 +66,37 @@ struct SessionShareExportTests {
         let againText = try #require(String(data: again, encoding: .utf8))
         #expect(againText.hasPrefix("{\n  \"manifest\""))
     }
+
+    @Test func encodeIncludesBatteryWhenPresent() throws {
+        let package = SessionTransferPackage(
+            manifest: SessionManifest(
+                sessionId: "export-battery",
+                testerId: "tester",
+                appVersion: "1.0",
+                buildNumber: "1",
+                watchModel: "Watch",
+                systemVersion: "26.0",
+                startedAt: Date(timeIntervalSince1970: 100),
+                endedAt: Date(timeIntervalSince1970: 200),
+                transferState: .acknowledged
+            ),
+            detections: [],
+            locations: [],
+            health: [],
+            battery: [
+                BatterySample(
+                    timestamp: Date(timeIntervalSince1970: 150),
+                    level: 0.9123,
+                    state: BatteryStateCodes.unplugged
+                ),
+            ]
+        )
+        let text = try #require(String(data: try SessionShareExport.encode(package), encoding: .utf8))
+        #expect(text.contains("\"battery\""))
+        #expect(text.contains("0.9123"))
+        #expect(text.contains(BatteryStateCodes.unplugged))
+        let healthKey = try #require(text.range(of: "\"health\""))
+        let batteryKey = try #require(text.range(of: "\"battery\""))
+        #expect(healthKey.lowerBound < batteryKey.lowerBound)
+    }
 }

@@ -35,6 +35,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 ///   water-000.jsonl (optional; Ultra submerged water temperature)
+///   battery-000.jsonl (optional; Watch battery level + state)
 ///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
 /// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
@@ -240,6 +241,17 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
+    public func appendBatterySamples(
+        _ samples: [BatterySample],
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws {
+        let name = String(format: "battery-%03d.jsonl", chunkIndex)
+        for sample in samples {
+            try appendJSONLine(sample, to: name, sessionId: sessionId)
+        }
+    }
+
     public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
         guard data.count <= SessionImportLimits.maxMotionFramesZlibBytes else {
             throw SessionStoreError.importTooLarge(data.count)
@@ -336,6 +348,7 @@ public final class SessionFileStore: @unchecked Sendable {
         if name.hasPrefix("location-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("health-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("water-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("battery-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("motion-") && (name.hasSuffix(".jsonl") || name.hasSuffix(".jsonl.zlib")) {
             return true
         }
@@ -469,6 +482,14 @@ public final class SessionFileStore: @unchecked Sendable {
         return try readJSONL(WaterTemperatureSample.self, from: name, sessionId: sessionId)
     }
 
+    public func readBatterySamples(
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws -> [BatterySample] {
+        let name = String(format: "battery-%03d.jsonl", chunkIndex)
+        return try readJSONL(BatterySample.self, from: name, sessionId: sessionId)
+    }
+
     public func markReadyToTransfer(sessionId: String, endedAt: Date = Date()) throws {
         var manifest = try readManifest(sessionId: sessionId)
         manifest.endedAt = endedAt
@@ -538,6 +559,9 @@ public final class SessionFileStore: @unchecked Sendable {
         if !package.water.isEmpty {
             try phoneStore.appendWaterTemperatureSamples(package.water, sessionId: package.manifest.sessionId)
         }
+        if !package.battery.isEmpty {
+            try phoneStore.appendBatterySamples(package.battery, sessionId: package.manifest.sessionId)
+        }
         var imported = package.manifest
         imported.transferState = .acknowledged
         try phoneStore.writeManifest(imported)
@@ -580,6 +604,7 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let battery = (try? readBatterySamples(sessionId: sessionId)) ?? []
         let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
@@ -589,6 +614,7 @@ public final class SessionFileStore: @unchecked Sendable {
             motionFramesZlib: motionFrames,
             health: health,
             water: water,
+            battery: battery,
             derived: derived
         )
     }
@@ -733,6 +759,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var health: [HealthMetricSample]
     /// Sparse Ultra water-temperature samples (`water-000.jsonl`). Empty on older packages.
     public var water: [WaterTemperatureSample]
+    /// Sparse Watch battery samples (`battery-000.jsonl`). Empty on older packages.
+    public var battery: [BatterySample]
     /// Fast view sidecar when present (Watch Stop / current analyzer).
     public var derived: DerivedSessionView?
 
@@ -744,6 +772,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib: Data? = nil,
         health: [HealthMetricSample],
         water: [WaterTemperatureSample] = [],
+        battery: [BatterySample] = [],
         derived: DerivedSessionView? = nil
     ) {
         self.manifest = manifest
@@ -753,6 +782,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.motionFramesZlib = motionFramesZlib
         self.health = health
         self.water = water
+        self.battery = battery
         self.derived = derived
     }
 
@@ -773,6 +803,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
+        battery = try container.decodeIfPresent([BatterySample].self, forKey: .battery) ?? []
         // Soft-fail derived: stale keys / analyzer drift must not block raw import (rebuild on ensure).
         if container.contains(.derived) {
             derived = try? container.decode(DerivedSessionView.self, forKey: .derived)
@@ -785,6 +816,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         try SessionImportLimits.validateArrayCount(motion, limit: SessionImportLimits.maxMotionSamples, label: "motion")
         try SessionImportLimits.validateArrayCount(health, limit: SessionImportLimits.maxHealthSamples, label: "health")
         try SessionImportLimits.validateArrayCount(water, limit: SessionImportLimits.maxWaterSamples, label: "water")
+        try SessionImportLimits.validateArrayCount(battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
         if let motionFramesZlib, motionFramesZlib.count > SessionImportLimits.maxMotionFramesZlibBytes {
             throw SessionStoreError.importTooLarge(motionFramesZlib.count)
         }
@@ -804,13 +836,16 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         if !water.isEmpty {
             try container.encode(water, forKey: .water)
         }
+        if !battery.isEmpty {
+            try container.encode(battery, forKey: .battery)
+        }
         if let derived {
             try container.encode(derived, forKey: .derived)
         }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, derived
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, battery, derived
     }
 }
 

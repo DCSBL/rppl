@@ -16,17 +16,20 @@ export function toMs(iso: string): number {
 export function sessionSpan(pkg: AnalysisPackage): TimeRange {
   const locationTimes = pkg.locations.map((l) => toMs(l.timestamp))
   const detectionTimes = pkg.detections.map((a) => toMs(a.timestamp))
+  const batteryTimes = (pkg.battery ?? []).map((b) => toMs(b.timestamp))
   const started = toMs(pkg.manifest.startedAt)
   const lower = Math.min(
     started,
     ...locationTimes,
     ...detectionTimes.filter((n) => !Number.isNaN(n)),
+    ...batteryTimes.filter((n) => !Number.isNaN(n)),
   )
   const ended = pkg.manifest.endedAt ? toMs(pkg.manifest.endedAt) : NaN
   const upperCandidates = [
     ended,
     ...locationTimes,
     ...detectionTimes,
+    ...batteryTimes,
   ].filter((n) => !Number.isNaN(n))
   const upper = Math.max(
     upperCandidates.length ? Math.max(...upperCandidates) : lower + DEFAULT_WINDOW_MS,

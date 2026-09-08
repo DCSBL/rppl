@@ -28,6 +28,7 @@ public enum SessionTimelineRebase {
         result.motion = package.motion.map { shift($0, by: delta) }
         result.health = package.health.map { shift($0, by: delta) }
         result.water = package.water.map { shift($0, by: delta) }
+        result.battery = package.battery.map { shift($0, by: delta) }
         if let derived = package.derived {
             result.derived = DerivedSessionView(
                 analyzerVersion: derived.analyzerVersion,
@@ -57,6 +58,9 @@ public enum SessionTimelineRebase {
             latest = max(latest, sample.timestamp)
         }
         for sample in package.water {
+            latest = max(latest, sample.timestamp)
+        }
+        for sample in package.battery {
             latest = max(latest, sample.timestamp)
         }
         if let derived = package.derived {
@@ -90,6 +94,12 @@ public enum SessionTimelineRebase {
     }
 
     private static func shift(_ sample: WaterTemperatureSample, by delta: TimeInterval) -> WaterTemperatureSample {
+        var copy = sample
+        copy.timestamp = sample.timestamp.addingTimeInterval(delta)
+        return copy
+    }
+
+    private static func shift(_ sample: BatterySample, by delta: TimeInterval) -> BatterySample {
         var copy = sample
         copy.timestamp = sample.timestamp.addingTimeInterval(delta)
         return copy

@@ -24,6 +24,7 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 | deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
+| Battery | sparse; raw `WKInterfaceDevice.batteryLevel` (0…1 Float) + state; on change / 60 s / start·stop·pause·resume | `battery-000.jsonl` |
 | Detections | on transitions / revisions | `detections.jsonl` |
 | Manifest | once | `manifest.json` |
 
@@ -101,6 +102,7 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 | `motion` / `motionFramesZlib` | Device motion when present |
 | `health` | Mirrored heart rate and energy |
 | `water` | Ultra water temperature when present |
+| `battery` | Watch battery level (0…1) + state when present |
 | `derived` | Fast view stats / map frame when present |
 
 User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.

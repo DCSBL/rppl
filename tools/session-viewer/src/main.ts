@@ -15,7 +15,9 @@ import { loadExportJson, loadSessionFolder } from './loadSession'
 import { loadCachedSession, saveCachedSession } from './sessionCache'
 import {
   buildTrackMarkers,
+  batterySeries,
   drawAccuracy,
+  drawBattery,
   drawEvents,
   drawSpeed,
   drawTrack,
@@ -76,6 +78,7 @@ app.innerHTML = `
   <div class="panel"><canvas id="speed"></canvas></div>
   <div class="panel track"><canvas id="track"></canvas></div>
   <div class="panel"><canvas id="accuracy"></canvas></div>
+  <div class="panel"><canvas id="battery"></canvas></div>
   <div id="detail">Scrub playhead or click chart / track for point detail.</div>
 `
 
@@ -100,6 +103,7 @@ const exportJsonBtn = document.querySelector<HTMLButtonElement>('#exportJson')!
 const trackCanvas = document.querySelector<HTMLCanvasElement>('#track')!
 const speedCanvas = document.querySelector<HTMLCanvasElement>('#speed')!
 const accuracyCanvas = document.querySelector<HTMLCanvasElement>('#accuracy')!
+const batteryCanvas = document.querySelector<HTMLCanvasElement>('#battery')!
 const eventsCanvas = document.querySelector<HTMLCanvasElement>('#events')!
 
 let pkg: AnalysisPackage | null = null
@@ -321,6 +325,7 @@ function render(): void {
   const selected = allSegments.find((s) => s.id === selectedId) ?? null
   const speed = usableSpeedSeries(pkg.locations, windowRange)
   const accuracy = accuracySeries(pkg.locations, windowRange)
+  const battery = batterySeries(pkg.battery ?? [], windowRange)
   const extent = trackExtent(pkg.locations)
   const playLoc = nearestLocation(pkg.locations, playheadMs)
   const markers = buildTrackMarkers(locs, derived.sets, playLoc)
@@ -329,8 +334,28 @@ function render(): void {
   drawSpeed(speedCanvas, speed, windowRange, selected, playheadMs)
   drawTrack(trackCanvas, locs, allSegments, markers, extent)
   drawAccuracy(accuracyCanvas, accuracy, windowRange, selected, playheadMs)
+  drawBattery(batteryCanvas, battery, windowRange, selected, playheadMs)
 
   updateDetail(selected, playLoc)
+}
+
+function nearestBattery(
+  samples: AnalysisPackage['battery'],
+  tMs: number,
+): { level: number; state: string } | null {
+  const list = samples ?? []
+  if (!list.length) return null
+  let best = list[0]!
+  let bestDist = Math.abs(toMs(best.timestamp) - tMs)
+  for (const s of list) {
+    const d = Math.abs(toMs(s.timestamp) - tMs)
+    if (d < bestDist) {
+      best = s
+      bestDist = d
+    }
+  }
+  if (bestDist > 90_000) return null
+  return { level: best.level, state: best.state }
 }
 
 function updateDetail(selected: Segment | null, playLoc: ReturnType<typeof nearestLocation>): void {
@@ -348,9 +373,12 @@ function updateDetail(selected: Segment | null, playLoc: ReturnType<typeof neare
   const lat = playLoc ? playLoc.latitude.toFixed(6) : '—'
   const lon = playLoc ? playLoc.longitude.toFixed(6) : '—'
   const acc = playLoc ? `${playLoc.horizontalAccuracy.toFixed(1)} m` : '—'
+  const batt = nearestBattery(pkg.battery, playheadMs)
+  const battText =
+    batt != null ? `${(batt.level * 100).toFixed(2)}% (${batt.state})` : '—'
   const lines = [
     `Playhead ${offsetLabel(playheadMs)} · code=${code ?? '—'} · speed=${speedText}`,
-    `lat=${lat} lon=${lon} · accuracy=${acc}`,
+    `lat=${lat} lon=${lon} · accuracy=${acc} · battery=${battText}`,
   ]
   if (selected) {
     lines.push(
@@ -393,6 +421,7 @@ function onTimeChartClick(canvas: HTMLCanvasElement, clientX: number): void {
 
 speedCanvas.addEventListener('click', (ev) => onTimeChartClick(speedCanvas, ev.clientX))
 accuracyCanvas.addEventListener('click', (ev) => onTimeChartClick(accuracyCanvas, ev.clientX))
+batteryCanvas.addEventListener('click', (ev) => onTimeChartClick(batteryCanvas, ev.clientX))
 
 eventsCanvas.addEventListener('click', (ev) => {
   if (!windowRange) return

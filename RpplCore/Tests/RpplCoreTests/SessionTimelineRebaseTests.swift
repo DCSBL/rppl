@@ -54,6 +54,9 @@ struct SessionTimelineRebaseTests {
             ],
             water: [
                 WaterTemperatureSample(timestamp: mid, celsius: 18),
+            ],
+            battery: [
+                BatterySample(timestamp: mid, level: 0.87, state: BatteryStateCodes.unplugged),
             ]
         )
 
@@ -67,11 +70,14 @@ struct SessionTimelineRebaseTests {
         #expect(shifted.locations[1].timestamp == now)
         #expect(shifted.health[0].timestamp == now.addingTimeInterval(-3_600))
         #expect(shifted.water[0].timestamp == now.addingTimeInterval(-3_600))
+        #expect(shifted.battery[0].timestamp == now.addingTimeInterval(-3_600))
         // Non-time fields untouched.
         #expect(shifted.locations[0].latitude == 1)
         #expect(shifted.locations[0].longitude == 2)
         #expect(shifted.health[0].heartRateBPM == 120)
         #expect(shifted.water[0].celsius == 18)
+        #expect(shifted.battery[0].level == 0.87)
+        #expect(shifted.battery[0].state == BatteryStateCodes.unplugged)
         #expect(shifted.manifest.activityCode == "Example session")
     }
 

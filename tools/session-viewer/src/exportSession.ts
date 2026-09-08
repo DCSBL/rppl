@@ -109,7 +109,21 @@ async function loadRawFromFolder(files: File[], sessionId: string): Promise<RawT
     .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
   for (const file of healthFiles) health.push(...(await parseJsonl(file)))
 
+  const battery: unknown[] = []
+  const batteryFiles = sessionFiles
+    .filter((f) => /^battery-\d+\.jsonl$/i.test(basename(f.name)))
+    .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
+  for (const file of batteryFiles) battery.push(...(await parseJsonl(file)))
+
+  const water: unknown[] = []
+  const waterFiles = sessionFiles
+    .filter((f) => /^water-\d+\.jsonl$/i.test(basename(f.name)))
+    .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
+  for (const file of waterFiles) water.push(...(await parseJsonl(file)))
+
   const raw: RawTransferPackage = { manifest, detections, locations, health }
+  if (battery.length) raw.battery = battery as RawTransferPackage['battery']
+  if (water.length) raw.water = water
   const motionJsonl = await jsonlFromMotionFiles(sessionFiles)
   if (motionJsonl.trim()) raw.motionJsonl = motionJsonl
   else raw.motion = []
@@ -131,7 +145,8 @@ export async function buildWindowExport(
 }
 
 export function summarizeExport(sliced: SessionTransferPackage): string {
-  return `${sliced.locations.length} locs · ${sliced.detections.length} detections · ${sliced.health.length} health · ${sliced.motion?.length ?? 0} motion`
+  const batteryN = sliced.battery?.length ?? 0
+  return `${sliced.locations.length} locs · ${sliced.detections.length} detections · ${sliced.health.length} health · ${sliced.motion?.length ?? 0} motion · ${batteryN} battery`
 }
 
 export function downloadTransferPackage(sliced: SessionTransferPackage): void {
