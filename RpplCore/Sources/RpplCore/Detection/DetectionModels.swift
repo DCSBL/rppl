@@ -111,6 +111,8 @@ public struct DetectionSignal: Equatable, Sendable {
     public enum Kind: String, Equatable, Sendable {
         case enterRide
         case exitRide
+        /// Exit backdated to when the rider dropped below cable speed.
+        case exitRideOffCable
         case enterUnsure
         case unsureTimeout
     }

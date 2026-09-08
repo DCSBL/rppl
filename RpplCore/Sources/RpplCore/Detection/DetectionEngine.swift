@@ -22,6 +22,9 @@ public struct DetectionEngine: Sendable {
     private var pendingJumpSpeedMps: Double?
     private var unsureEnteredAt: Date?
     private var unsureEventId: String?
+    private var openSet: DetectionSetContext?
+    private var lastEvidenceAt: Date?
+    private let failedStartRule = FailedStartRule()
 
     public init(
         thresholds: DetectionThresholds = .default,
@@ -40,6 +43,7 @@ public struct DetectionEngine: Sendable {
             UnsureTimeoutDetector(),
             GpsGapDetector(),
             RideExitDetector(),
+            RideExitOffCableDetector(),
             RideEnterDetector(),
         ]
     }
@@ -63,6 +67,8 @@ public struct DetectionEngine: Sendable {
         lastFilterRejection = nil
         unsureEnteredAt = nil
         unsureEventId = nil
+        openSet = nil
+        lastEvidenceAt = nil
         holds.clear()
         return DetectionEvent(
             code: DetectionCodes.inactive,
@@ -92,6 +98,7 @@ public struct DetectionEngine: Sendable {
             hasFreshFix: tick.hasFreshFix
         )
         if let usable = outcome.usableSpeedMps {
+            accumulateCableEvidence(usableSpeedMps: usable, at: tick.timestamp)
             previousUsableSpeedMps = usable
             previousUsableAt = tick.timestamp
         }
@@ -186,6 +193,17 @@ public struct DetectionEngine: Sendable {
         return out
     }
 
+    /// Count seconds spent at cable speed inside the open set. Silence is not credited: a gap
+    /// longer than `gapUnsureHold` contributes only that much, because we cannot know the rest.
+    private mutating func accumulateCableEvidence(usableSpeedMps: Double, at timestamp: Date) {
+        defer { lastEvidenceAt = timestamp }
+        guard openSet != nil, usableSpeedMps >= thresholds.rideEnterSpeedMps else { return }
+        guard let last = lastEvidenceAt else { return }
+        let step = timestamp.timeIntervalSince(last)
+        guard step > 0 else { return }
+        openSet?.cableEvidence += min(step, thresholds.gapUnsureHold)
+    }
+
     private mutating func applyLookback(tick: DetectionTick, usableSpeedMps: Double) -> DetectionEvent? {
         let age = unsureEnteredAt.map { tick.timestamp.timeIntervalSince($0) } ?? 0
         guard age < thresholds.unsureSameRideWindow else {
@@ -239,19 +257,41 @@ public struct DetectionEngine: Sendable {
             if holdStart != tick.timestamp {
                 reason += " backfill_from=\(fmt(holdStart.timeIntervalSince1970))s"
             }
-            return transition(
+            let event = transition(
                 to: DetectionCodes.riding,
                 reason: reason,
                 detectorId: signal.detectorId,
                 tick: tick,
                 timestamp: holdStart
             )
+            openSet = DetectionSetContext(
+                enterEventId: event.id,
+                startedAt: holdStart,
+                // The hold that justified the enter is inside the backdated set window.
+                cableEvidence: tick.timestamp.timeIntervalSince(holdStart)
+            )
+            return event
         case .exitRide:
-            return transition(
-                to: DetectionCodes.inactive,
+            return endSet(
                 reason: signal.reason,
                 detectorId: signal.detectorId,
-                tick: tick
+                tick: tick,
+                endedAt: tick.timestamp
+            )
+        case .exitRideOffCable:
+            // Riding ended where the rider dropped below cable speed, not where they stopped.
+            let holdStart = holds.duration(.offCable, at: tick.timestamp).map {
+                tick.timestamp.addingTimeInterval(-$0)
+            } ?? tick.timestamp
+            var reason = signal.reason
+            if holdStart != tick.timestamp {
+                reason += " backfill_from=\(fmt(holdStart.timeIntervalSince1970))s"
+            }
+            return endSet(
+                reason: reason,
+                detectorId: signal.detectorId,
+                tick: tick,
+                endedAt: holdStart
             )
         case .enterUnsure:
             return transition(
@@ -261,13 +301,58 @@ public struct DetectionEngine: Sendable {
                 tick: tick
             )
         case .unsureTimeout:
-            return transition(
-                to: DetectionCodes.inactive,
+            return endSet(
                 reason: signal.reason,
                 detectorId: signal.detectorId,
-                tick: tick
+                tick: tick,
+                endedAt: tick.timestamp
             )
         }
+    }
+
+    /// Close the open set, or revoke it when it never became one. A revocation is an ordinary
+    /// `inactive` line that supersedes the `ride_enter` it replaces, so `effectiveEvents` drops
+    /// the enter and the set never reaches stats. No new detection code, no schema change.
+    private mutating func endSet(
+        reason: String,
+        detectorId: String,
+        tick: DetectionTick,
+        endedAt: Date
+    ) -> DetectionEvent {
+        let set = openSet
+        openSet = nil
+        guard
+            let set,
+            let verdict = failedStartRule.evaluate(
+                set: set,
+                endedAt: endedAt,
+                thresholds: thresholds
+            )
+        else {
+            return transition(
+                to: DetectionCodes.inactive,
+                reason: reason,
+                detectorId: detectorId,
+                tick: tick,
+                timestamp: endedAt
+            )
+        }
+        currentCode = DetectionCodes.inactive
+        lastConfidentCode = DetectionCodes.inactive
+        unsureEnteredAt = nil
+        unsureEventId = nil
+        holds.clear()
+        return DetectionEvent(
+            code: DetectionCodes.inactive,
+            timestamp: set.startedAt,
+            reason: "\(verdict) via=\(reason)",
+            detectorId: FailedStartRule.id,
+            speedMps: tick.speedMps,
+            horizontalAccuracy: tick.horizontalAccuracy,
+            waterSubmersionState: tick.waterSubmersionState,
+            motionActivity: tick.motionActivity,
+            supersedesId: set.enterEventId
+        )
     }
 
     private mutating func transition(
@@ -314,6 +399,9 @@ public struct DetectionEngine: Sendable {
         currentCode = code
         if DetectionCodes.isConfident(code) {
             lastConfidentCode = code
+        }
+        if code == DetectionCodes.inactive {
+            openSet = nil
         }
         unsureEnteredAt = nil
         unsureEventId = nil
