@@ -28,7 +28,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 
 /// File layout for one session package:
 /// ```
-/// <root>/<sessionId>/
+/// <root>/<YYYY-MM-DD HH-mm - City>/   # display name; identity is manifest.sessionId
 ///   manifest.json
 ///   detections.jsonl
 ///   location-000.jsonl
@@ -38,13 +38,16 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   battery-000.jsonl (optional; Watch battery level + state)
 ///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
-/// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
+/// Legacy packages may still live under a bare UUID folder (migrated on open) or have
+/// `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
     public let rootURL: URL
     private let fileManager: FileManager
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
     private let lock = NSLock()
+    /// `sessionId` → package directory. Rebuilt by scanning `manifest.json` files.
+    private var packageIndex: [String: URL]?
 
     public init(rootURL: URL, fileManager: FileManager = .default) {
         self.rootURL = rootURL
@@ -60,14 +63,50 @@ public final class SessionFileStore: @unchecked Sendable {
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
     }
 
+    /// Resolves the on-disk package directory for `sessionId` (folder name may differ).
     public func sessionDirectory(for sessionId: String) throws -> URL {
-        try SessionIdValidator.sessionDirectory(for: sessionId, rootURL: rootURL)
+        try SessionIdValidator.validate(sessionId)
+        if let cached = cachedDirectory(for: sessionId),
+           fileManager.fileExists(atPath: cached.path) {
+            return cached
+        }
+        try migratePackageFolderNamesIfNeeded()
+        let map = try rebuildPackageIndex()
+        guard let url = map[sessionId] else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        return url
     }
 
     public func createSession(manifest: SessionManifest) throws -> URL {
+        try SessionIdValidator.validate(manifest.sessionId)
         try ensureRootExists()
-        let dir = try sessionDirectory(for: manifest.sessionId)
+        try migratePackageFolderNamesIfNeeded()
+
+        if let existing = try? sessionDirectory(for: manifest.sessionId),
+           fileManager.fileExists(atPath: existing.path) {
+            try writeManifest(manifest)
+            return existing
+        }
+
+        let existingNames = try SessionPackageLocator.existingFolderNames(
+            in: rootURL,
+            fileManager: fileManager
+        )
+        let base = SessionPackageNaming.baseFolderName(
+            startedAt: manifest.startedAt,
+            cityName: nil
+        )
+        let folderName = SessionPackageNaming.uniqueFolderName(
+            base: base,
+            existingNames: existingNames
+        )
+        let dir = try SessionPackageNaming.packageDirectory(
+            folderName: folderName,
+            rootURL: rootURL
+        )
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        rememberDirectory(dir, for: manifest.sessionId)
         try writeManifest(manifest)
         let detectionsURL = dir.appendingPathComponent("detections.jsonl")
         if !fileManager.fileExists(atPath: detectionsURL.path) {
@@ -123,10 +162,17 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     /// Phone-only city write-back; does not change stats / mapFrame.
+    /// Phone-only city write-back; renames package folder when still app-generated.
     public func updateDerivedCityName(_ cityName: String, sessionId: String) throws {
         guard var view = try readDerivedView(sessionId: sessionId) else { return }
         view.cityName = cityName
         try writeDerivedView(view, sessionId: sessionId)
+        let manifest = try readManifest(sessionId: sessionId)
+        try relocatePackageIfNeeded(
+            sessionId: sessionId,
+            startedAt: manifest.startedAt,
+            cityName: cityName
+        )
     }
 
     /// First `limit` location samples for cheap geocode without full GPS parse.
@@ -280,16 +326,8 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func listSessionIDs() throws -> [String] {
         try ensureRootExists()
-        let contents = try fileManager.contentsOfDirectory(
-            at: rootURL,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        )
-        return contents
-            .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
-            .filter { SessionIdValidator.isValid($0.lastPathComponent) }
-            .map(\.lastPathComponent)
-            .sorted()
+        try migratePackageFolderNamesIfNeeded()
+        return try rebuildPackageIndex().keys.sorted()
     }
 
     /// Permanently removes one session package directory from this store.
@@ -299,6 +337,38 @@ public final class SessionFileStore: @unchecked Sendable {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
         try fileManager.removeItem(at: dir)
+        forgetDirectory(for: sessionId)
+    }
+
+    /// Renames legacy bare-UUID package folders to `YYYY-MM-DD HH-mm - City`.
+    /// Skips user-renamed folders (not app-generated).
+    @discardableResult
+        public func migratePackageFolderNamesIfNeeded() throws -> [String] {
+        try ensureRootExists()
+        let entries = try SessionPackageLocator.index(
+            in: rootURL,
+            fileManager: fileManager,
+            decoder: decoder
+        )
+        var migrated: [String] = []
+        for entry in entries.values {
+            let currentName = entry.directoryURL.lastPathComponent
+            let isBareUUID = SessionPackageNaming.isLegacyUUIDFolder(currentName)
+                && currentName == entry.sessionId
+            let isDateOnly = SessionPackageNaming.matchesDateOnlyPattern(currentName)
+            guard isBareUUID || isDateOnly else { continue }
+            try relocatePackageIfNeeded(
+                sessionId: entry.sessionId,
+                startedAt: entry.startedAt,
+                cityName: entry.cityName,
+                forceLegacyUUID: isBareUUID
+            )
+            migrated.append(entry.sessionId)
+        }
+if !migrated.isEmpty {
+            invalidatePackageIndex()
+        }
+        return migrated.sorted()
     }
 
     // MARK: - Watch distilled view (manifest + derived only)
@@ -315,7 +385,8 @@ public final class SessionFileStore: @unchecked Sendable {
     public func applyDistilledView(_ update: WatchViewUpdate) throws {
         try SessionIdValidator.validate(update.manifest.sessionId)
         let sessionId = update.manifest.sessionId
-        if fileManager.fileExists(atPath: try sessionDirectory(for: sessionId).path) {
+        if let dir = try? sessionDirectory(for: sessionId),
+           fileManager.fileExists(atPath: dir.path) {
             try writeManifest(update.manifest)
         } else {
             _ = try createSession(manifest: update.manifest)
@@ -746,6 +817,102 @@ private struct LegacyAssumptionLine: Decodable {
             motionActivity: motionActivity
         )
     }
+
+    // MARK: - Package path index
+
+    private func cachedDirectory(for sessionId: String) -> URL? {
+        lock.lock()
+        defer { lock.unlock() }
+        return packageIndex?[sessionId]
+    }
+
+    private func rememberDirectory(_ url: URL, for sessionId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        var index = packageIndex ?? [:]
+        index[sessionId] = url
+        packageIndex = index
+    }
+
+    private func forgetDirectory(for sessionId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        packageIndex?[sessionId] = nil
+    }
+
+    private func invalidatePackageIndex() {
+        lock.lock()
+        defer { lock.unlock() }
+        packageIndex = nil
+    }
+
+    @discardableResult
+    private func rebuildPackageIndex() throws -> [String: URL] {
+        let entries = try SessionPackageLocator.index(
+            in: rootURL,
+            fileManager: fileManager,
+            decoder: decoder
+        )
+        let map = Dictionary(uniqueKeysWithValues: entries.map { ($0.key, $0.value.directoryURL) })
+        lock.lock()
+        packageIndex = map
+        lock.unlock()
+        return map
+    }
+
+    /// Renames the package directory when the current name is still app-generated.
+    private func relocatePackageIfNeeded(
+        sessionId: String,
+        startedAt: Date,
+        cityName: String?,
+        forceLegacyUUID: Bool = false
+    ) throws {
+        try SessionIdValidator.validate(sessionId)
+        let current: URL
+        if forceLegacyUUID {
+            current = rootURL.appendingPathComponent(sessionId, isDirectory: true)
+            guard fileManager.fileExists(atPath: current.path) else { return }
+        } else if let cached = cachedDirectory(for: sessionId),
+                  fileManager.fileExists(atPath: cached.path) {
+            current = cached
+        } else {
+            let entries = try SessionPackageLocator.index(
+                in: rootURL,
+                fileManager: fileManager,
+                decoder: decoder
+            )
+            guard let entry = entries[sessionId] else { return }
+            current = entry.directoryURL
+        }
+
+        let currentName = current.lastPathComponent
+        guard SessionPackageNaming.isAppGenerated(currentName) else { return }
+
+        let existingNames = try SessionPackageLocator.existingFolderNames(
+            in: rootURL,
+            fileManager: fileManager
+        ).subtracting([currentName])
+        let base = SessionPackageNaming.baseFolderName(
+            startedAt: startedAt,
+            cityName: cityName
+        )
+        let desired = SessionPackageNaming.uniqueFolderName(
+            base: base,
+            existingNames: existingNames
+        )
+        guard desired != currentName else {
+            rememberDirectory(current, for: sessionId)
+            return
+        }
+
+        let destination = try SessionPackageNaming.packageDirectory(
+            folderName: desired,
+            rootURL: rootURL
+        )
+        try fileManager.moveItem(at: current, to: destination)
+        rememberDirectory(destination, for: sessionId)
+    }
+
 }
 
 public struct SessionTransferPackage: Codable, Equatable, Sendable {
