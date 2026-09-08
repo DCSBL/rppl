@@ -12,6 +12,7 @@ On-disk layout for Watch and iPhone session packages. Streams and HealthKit poli
   motion-000.jsonl.zlib   # or legacy motion-000.jsonl
   health-000.jsonl
   water-000.jsonl         # optional Ultra
+  battery-000.jsonl       # optional Watch battery level + state
   derived/
     view.json             # analyzerVersion + SessionStats + MapTrackFrame?
 ```
@@ -49,8 +50,9 @@ Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates 
 | `motion-*.jsonl.zlib` | Device motion | **1 Hz** inactive, **25 Hz** riding/unsure |
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
+| `battery-*.jsonl` | Watch battery fraction (0…1) + state | sparse |
 
-Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present).
+Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present). No public millivolt API on watchOS — battery `level` is the raw `Float` fraction from `WKInterfaceDevice`.
 
 ## What UI needs
 

@@ -114,6 +114,13 @@ struct SessionFileStoreTests {
         try watchStore.appendWaterTemperatureSamples([
             WaterTemperatureSample(timestamp: Date(timeIntervalSince1970: 12), celsius: 19.5)
         ], sessionId: manifest.sessionId)
+        try watchStore.appendBatterySamples([
+            BatterySample(
+                timestamp: Date(timeIntervalSince1970: 13),
+                level: 0.73,
+                state: BatteryStateCodes.unplugged
+            )
+        ], sessionId: manifest.sessionId)
         try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
@@ -130,6 +137,10 @@ struct SessionFileStoreTests {
         let water = try phoneStore.readWaterTemperatureSamples(sessionId: manifest.sessionId)
         #expect(water.count == 1)
         #expect(water[0].celsius == 19.5)
+        let battery = try phoneStore.readBatterySamples(sessionId: manifest.sessionId)
+        #expect(battery.count == 1)
+        #expect(battery[0].level == 0.73)
+        #expect(battery[0].state == BatteryStateCodes.unplugged)
         let phoneDerived = try phoneStore.readDerivedView(sessionId: manifest.sessionId)
         #expect(phoneDerived != nil)
         #expect(phoneDerived?.analyzerVersion == SessionAnalyzer.version)

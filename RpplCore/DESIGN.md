@@ -16,6 +16,7 @@ classDiagram
   class MotionSample
   class HealthMetricSample
   class WaterTemperatureSample
+  class BatterySample
   class SessionTransferPackage
   class SessionFileStore
   class DetectionCodes
@@ -34,6 +35,7 @@ classDiagram
   SessionFileStore --> MotionSample
   SessionFileStore --> HealthMetricSample
   SessionFileStore --> WaterTemperatureSample
+  SessionFileStore --> BatterySample
   SessionFileStore --> SessionTransferPackage : build/import
 
   SessionTransferPackage --> SessionManifest
@@ -42,6 +44,7 @@ classDiagram
   SessionTransferPackage --> MotionSample
   SessionTransferPackage --> HealthMetricSample
   SessionTransferPackage --> WaterTemperatureSample
+  SessionTransferPackage --> BatterySample
 
   DetectionEngine --> GpsSignalFilter : filter tick
   DetectionEngine --> DetectionHoldClock : sustained holds
@@ -58,7 +61,7 @@ classDiagram
 
 | Area | Types | Role |
 |------|--------|------|
-| Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package (`water-000.jsonl` optional) |
+| Session IO | `SessionFileStore`, `SessionManifest`, `SessionTransferPackage` | Checkpoint JSONL + WC/Share package (`water-000.jsonl` / `battery-000.jsonl` optional) |
 | Detection | `DetectionEvent`, `DetectionTick`, `DetectionEngine`, filter/holds/detectors | Auto ride/pause stream |
 | Sync copy | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` | Paired/reachable wording + pending transfer filter |
 | Units | `SpeedUnits`, `DetectionThresholds`, `TemperatureFormat` | Thresholds authored in **km/h**; GPS compare in m/s |

@@ -177,6 +177,12 @@ struct SessionFileStoreDistilledTests {
             ],
             sessionId: manifest.sessionId
         )
+        try store.appendBatterySamples(
+            [
+                BatterySample(timestamp: Date(), level: 0.5, state: BatteryStateCodes.unplugged),
+            ],
+            sessionId: manifest.sessionId
+        )
         try store.writeDerivedView(
             DerivedSessionView(stats: sampleStats(duration: 10)),
             sessionId: manifest.sessionId

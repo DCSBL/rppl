@@ -43,6 +43,8 @@ export interface AnalysisPackage {
   manifest: SessionManifest
   detections: DetectionEvent[]
   locations: LocationSample[]
+  /** Sparse Watch battery samples when present. */
+  battery?: BatterySample[]
 }
 
 /** Phone Share / WC transfer JSON. Extra keys on samples are kept as-is. */
@@ -53,6 +55,8 @@ export interface SessionTransferPackage {
   motion?: unknown[]
   motionFramesZlib?: string
   health: unknown[]
+  water?: unknown[]
+  battery?: BatterySample[]
 }
 
 export interface Segment {
@@ -80,6 +84,21 @@ export interface SpeedPoint {
 export interface AccuracyPoint {
   tMs: number
   meters: number
+}
+
+export interface BatterySample {
+  timestamp: string
+  /** Fraction 0…1 from WKInterfaceDevice.batteryLevel. */
+  level: number
+  /** Opaque: unplugged | charging | full | unknown. */
+  state: string
+}
+
+export interface BatteryPoint {
+  tMs: number
+  /** Display percent = level × 100. */
+  percent: number
+  state: string
 }
 
 export interface SetSegment {

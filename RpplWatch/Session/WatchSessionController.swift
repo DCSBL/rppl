@@ -135,6 +135,10 @@ final class WatchSessionController: NSObject {
     var latestActivity: String?
     var latestWaterState: String?
     var waterBuffer: [WaterTemperatureSample] = []
+    var batteryBuffer: [BatterySample] = []
+    var lastPersistedBatteryAt: Date?
+    var lastPersistedBatteryLevel: Double?
+    var lastPersistedBatteryState: String?
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false

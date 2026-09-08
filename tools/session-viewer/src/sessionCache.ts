@@ -37,6 +37,7 @@ function normalizePackage(raw: unknown): AnalysisPackage | null {
     manifest: pkg.manifest,
     detections,
     locations: pkg.locations ?? [],
+    battery: pkg.battery ?? [],
   }
 }
 
