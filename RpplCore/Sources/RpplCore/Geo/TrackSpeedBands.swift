@@ -1,6 +1,6 @@
 import Foundation
 
-/// Colour ramp scale for a speed-coloured track.
+/// Color ramp scale for a speed-colored track.
 ///
 /// Bands are relative to the session's own speed spread (robust percentiles), not to
 /// absolute km/h. A slow park day and a fast one both use the full ramp, and no display
@@ -13,7 +13,7 @@ public struct TrackSpeedScale: Equatable, Sendable {
     public init(lowKmh: Double, highKmh: Double, bandCount: Int) {
         self.bandCount = max(2, bandCount)
         self.lowKmh = lowKmh
-        // Keep a usable spread so a near-constant track still gets mid-ramp colour.
+        // Keep a usable spread so a near-constant track still gets mid-ramp color.
         self.highKmh = max(highKmh, lowKmh + TrackSpeedBands.minimumSpreadKmh)
     }
 
@@ -30,7 +30,7 @@ public struct TrackSpeedScale: Equatable, Sendable {
         return min(Int(scaled), bandCount - 1)
     }
 
-    /// Mid-band ramp position, for painting a whole band one colour.
+    /// Mid-band ramp position, for painting a whole band one color.
     public func bandFraction(_ index: Int) -> Double {
         let clamped = min(max(index, 0), bandCount - 1)
         return (Double(clamped) + 0.5) / Double(bandCount)
@@ -53,7 +53,7 @@ public struct TrackSpeedRun: Equatable, Sendable {
     }
 }
 
-/// Splits tracks into speed-banded runs so a map can stroke each run its own colour.
+/// Splits tracks into speed-banded runs so a map can stroke each run its own color.
 public enum TrackSpeedBands {
     public static let defaultBandCount = 6
     /// Smallest low→high spread (km/h) a scale may report.

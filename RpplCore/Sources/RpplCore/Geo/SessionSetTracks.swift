@@ -4,7 +4,7 @@ import Foundation
 ///
 /// `SetLocationFilter.tracks(from:sets:)` drops sets without a usable track, so its
 /// output can no longer be indexed against `stats.sets`. Map layers that label or
-/// colour per set need that pairing, so it travels with the samples here.
+/// color per set need that pairing, so it travels with the samples here.
 public struct SessionSetTrack: Equatable, Sendable {
     /// Position in the `sets` array the track was built from.
     public var setIndex: Int

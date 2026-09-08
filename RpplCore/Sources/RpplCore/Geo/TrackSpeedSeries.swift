@@ -1,10 +1,10 @@
 import Foundation
 
-/// Per-sample display speed (km/h) for map colouring.
+/// Per-sample display speed (km/h) for map coloring.
 ///
 /// Display only — never a detection input. Uses the same GPS accuracy and plausibility
 /// gates as detection so a bad fix cannot paint a fake sprint, then falls back to
-/// distance / Δt when Core Location gave no speed, and smooths so colour bands do not
+/// distance / Δt when Core Location gave no speed, and smooths so color bands do not
 /// flicker every sample.
 public enum TrackSpeedSeries {
     /// Samples on each side of a point averaged into its display speed.
@@ -23,7 +23,7 @@ public enum TrackSpeedSeries {
         return smoothed(raw, radius: max(0, smoothingRadius))
     }
 
-    /// Robust low / high speed pair (km/h) for scaling a colour ramp, ignoring outliers.
+    /// Robust low / high speed pair (km/h) for scaling a color ramp, ignoring outliers.
     /// Returns nil when the track has no usable speed at all.
     public static func percentileRangeKmh(
         _ speeds: [Double?],
