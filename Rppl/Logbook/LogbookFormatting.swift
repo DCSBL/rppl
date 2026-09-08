@@ -63,6 +63,7 @@ enum LogbookFormatting {
         switch highlight {
         case .longest: return String(localized: "Longest")
         case .longestTime: return String(localized: "Longest time")
+        case .shortest: return String(localized: "Shortest")
         case .fastest: return String(localized: "Fastest")
         }
     }

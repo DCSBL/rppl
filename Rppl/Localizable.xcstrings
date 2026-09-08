@@ -3540,6 +3540,22 @@
           }
         }
       }
+    },
+    "Shortest" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shortest"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kortste"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

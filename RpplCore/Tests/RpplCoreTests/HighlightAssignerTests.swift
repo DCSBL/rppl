@@ -77,6 +77,50 @@ struct HighlightAssignerTests {
         #expect(result[1].highlights.contains(.fastest))
     }
 
+    /// With two sets, "shortest" is just "the other one" — it needs a middle to mean anything.
+    @Test func shortestNeedsThreeSets() {
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 120, distance: 900, speed: 30),
+            set(index: 2, duration: 30, distance: 200, speed: 20),
+        ])
+        #expect(!result[1].highlights.contains(.shortest))
+    }
+
+    @Test func shortestGoesToTheShortestSet() {
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 120, distance: 900, speed: 30),
+            set(index: 2, duration: 90, distance: 600, speed: 25),
+            set(index: 3, duration: 30, distance: 200, speed: 20),
+        ])
+        #expect(result[2].highlights.contains(.shortest))
+        #expect(!result[0].highlights.contains(.shortest))
+        #expect(!result[1].highlights.contains(.shortest))
+    }
+
+    @Test func shortestSkippedWhenAllDurationsMatch() {
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 60, distance: 900, speed: 30),
+            set(index: 2, duration: 60, distance: 600, speed: 25),
+            set(index: 3, duration: 60, distance: 200, speed: 20),
+        ])
+        #expect(result.allSatisfy { !$0.highlights.contains(.shortest) })
+    }
+
+    /// Shortest in time can also be longest in distance; the distance badge wins, as with
+    /// `longestTime`, so one set never carries two contradictory-looking time badges.
+    @Test func shortestHiddenWhenSetAlsoWonDistance() {
+        let result = HighlightAssigner.assignSetHighlights([
+            set(index: 1, duration: 30, distance: 900, speed: 40),
+            set(index: 2, duration: 90, distance: 400, speed: 20),
+            set(index: 3, duration: 120, distance: 500, speed: 25),
+        ])
+        #expect(result[0].highlights == [.longest, .fastest])
+    }
+
+    @Test func shortestOrdersAfterLongestTime() {
+        #expect(HighlightAssigner.setOrder == [.longest, .longestTime, .shortest, .fastest])
+    }
+
     @Test func sessionHidesMostWaterWhenSameAsLongest() {
         let map = HighlightAssigner.assignSessionHighlights([
             SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 2000, lapCount: 5),

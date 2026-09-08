@@ -3,7 +3,11 @@ import Foundation
 /// Assigns per-set and per-session record badges from derived stats.
 public enum HighlightAssigner {
     /// Fixed display order for set badges.
-    public static let setOrder: [SetHighlight] = [.longest, .longestTime, .fastest]
+    public static let setOrder: [SetHighlight] = [.longest, .longestTime, .shortest, .fastest]
+
+    /// A shortest badge only says something when there is a middle to be shorter than, and it is
+    /// only honest once the engine can revoke a failed start that never was a set.
+    static let minimumSetsForShortest = 3
 
     /// Fixed display order for session badges.
     public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps]
@@ -24,6 +28,12 @@ public enum HighlightAssigner {
         if let durationWinner = uniqueMaxSet(sets, value: { $0.duration }),
            !(byIndex[durationWinner.index]?.contains(.longest) ?? false) {
             byIndex[durationWinner.index, default: []].append(.longestTime)
+        }
+
+        if sets.count >= minimumSetsForShortest,
+           let shortest = uniqueMinSet(sets, value: { $0.duration }),
+           !(byIndex[shortest.index]?.contains(.longest) ?? false) {
+            byIndex[shortest.index, default: []].append(.shortest)
         }
 
         if let speedWinner = uniqueMaxSet(sets, value: { $0.sustainedSpeedKmh }) {
@@ -96,6 +106,21 @@ public enum HighlightAssigner {
         value: (SetSegmentStats) -> Double
     ) -> SetSegmentStats? {
         uniqueMaxSet(sets, value: { Optional(value($0)) })
+    }
+
+    /// Unique min among comparable values; ties → lowest set index. Nil when all equal or empty.
+    private static func uniqueMinSet(
+        _ sets: [SetSegmentStats],
+        value: (SetSegmentStats) -> Double
+    ) -> SetSegmentStats? {
+        guard sets.count >= 2 else { return nil }
+        let scored = sets.map { ($0, value($0)) }
+        guard let best = scored.map(\.1).min() else { return nil }
+        if scored.allSatisfy({ $0.1 == best }) { return nil }
+        return scored
+            .filter { $0.1 == best }
+            .map(\.0)
+            .min(by: { $0.index < $1.index })
     }
 
     private static func uniqueMaxSession<T: Comparable>(
