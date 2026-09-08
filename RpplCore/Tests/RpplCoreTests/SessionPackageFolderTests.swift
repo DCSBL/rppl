@@ -170,7 +170,6 @@ struct SessionPackageFolderTests {
         #expect(!dir2.lastPathComponent.contains(" (2)"))
     }
 
-
     @Test func cityUpdateRenamesAppGeneratedFolder() throws {
         let root = tempRoot()
         defer { try? FileManager.default.removeItem(at: root) }

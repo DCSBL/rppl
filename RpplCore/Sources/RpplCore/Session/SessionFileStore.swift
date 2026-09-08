@@ -114,7 +114,6 @@ public final class SessionFileStore: @unchecked Sendable {
         return dir
     }
 
-
     public func writeManifest(_ manifest: SessionManifest) throws {
         let url = try sessionDirectory(for: manifest.sessionId).appendingPathComponent("manifest.json")
         let data = try encoder.encode(manifest)
@@ -360,7 +359,6 @@ if !migrated.isEmpty {
         return migrated.sorted()
     }
 
-
     // MARK: - Watch distilled view (manifest + derived only)
 
     /// True when any raw stream file remains under the session package.
@@ -384,7 +382,6 @@ if !migrated.isEmpty {
         }
         try writeDerivedView(update.derived, sessionId: sessionId)
     }
-
 
     /// Removes raw streams after phone ack. Keeps `manifest.json` and `derived/view.json`.
     public func pruneRawStreams(sessionId: String) throws {
@@ -889,7 +886,6 @@ private struct LegacyAssumptionLine: Decodable {
         try fileManager.moveItem(at: current, to: destination)
         rememberDirectory(destination, for: sessionId)
     }
-
 
 }
 
