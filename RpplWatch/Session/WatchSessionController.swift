@@ -115,6 +115,8 @@ final class WatchSessionController: NSObject {
     var hkRideStartedAt: Date?
     var hkGpsFilter = GpsSignalFilter()
     var hkPreviousUsableSpeedMps: Double?
+    var hkPreviousUsableAt: Date?
+    var hkPendingJumpSpeedMps: Double?
     var hkPeakSpeedMps: Double = 0
 
     struct HKRideMetric {

@@ -393,6 +393,8 @@ extension WatchSessionController {
         hkRideActivityOpen = false
         hkGpsFilter = GpsSignalFilter()
         hkPreviousUsableSpeedMps = nil
+        hkPreviousUsableAt = nil
+        hkPendingJumpSpeedMps = nil
         hkPeakSpeedMps = 0
         pausedAccumulated = 0
         productPausedAt = nil
