@@ -7,19 +7,39 @@ public struct DetectionTick: Equatable, Sendable {
     public var horizontalAccuracy: Double?
     public var waterSubmersionState: String?
     public var motionActivity: String?
+    /// `false` for a heartbeat tick that carries no new GPS fix (Watch 1 Hz timer, water-state
+    /// change). Heartbeats advance the gap / timeout clocks but never present speed evidence.
+    public var hasFreshFix: Bool
 
     public init(
         timestamp: Date,
         speedMps: Double? = nil,
         horizontalAccuracy: Double? = nil,
         waterSubmersionState: String? = nil,
-        motionActivity: String? = nil
+        motionActivity: String? = nil,
+        hasFreshFix: Bool = true
     ) {
         self.timestamp = timestamp
         self.speedMps = speedMps
         self.horizontalAccuracy = horizontalAccuracy
         self.waterSubmersionState = waterSubmersionState
         self.motionActivity = motionActivity
+        self.hasFreshFix = hasFreshFix
+    }
+
+    /// Time-only tick for when no new fix arrived. Keeps gap / timeout clocks running so
+    /// detection does not stall while GPS is silent.
+    public static func heartbeat(
+        at timestamp: Date,
+        waterSubmersionState: String? = nil,
+        motionActivity: String? = nil
+    ) -> DetectionTick {
+        DetectionTick(
+            timestamp: timestamp,
+            waterSubmersionState: waterSubmersionState,
+            motionActivity: motionActivity,
+            hasFreshFix: false
+        )
     }
 }
 

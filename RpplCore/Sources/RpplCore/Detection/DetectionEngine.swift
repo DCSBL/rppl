@@ -18,6 +18,8 @@ public struct DetectionEngine: Sendable {
     private var detectors: [any Detector]
     private var holds = DetectionHoldClock()
     private var previousUsableSpeedMps: Double?
+    private var previousUsableAt: Date?
+    private var pendingJumpSpeedMps: Double?
     private var unsureEnteredAt: Date?
     private var unsureEventId: String?
 
@@ -56,6 +58,8 @@ public struct DetectionEngine: Sendable {
         currentCode = DetectionCodes.inactive
         lastConfidentCode = DetectionCodes.inactive
         previousUsableSpeedMps = nil
+        previousUsableAt = nil
+        pendingJumpSpeedMps = nil
         lastFilterRejection = nil
         unsureEnteredAt = nil
         unsureEventId = nil
@@ -70,16 +74,26 @@ public struct DetectionEngine: Sendable {
 
     /// Process one sensor tick. Returns zero or more events (transition and/or lookback revision).
     public mutating func process(_ tick: DetectionTick) -> [DetectionEvent] {
-        let outcome = filter.evaluate(tick, previousUsableSpeedMps: previousUsableSpeedMps)
-        lastFilterRejection = outcome.rejectionReason
+        let outcome = filter.evaluate(
+            tick,
+            previousUsableSpeedMps: previousUsableSpeedMps,
+            previousUsableAt: previousUsableAt,
+            pendingJumpSpeedMps: pendingJumpSpeedMps
+        )
+        if tick.hasFreshFix {
+            lastFilterRejection = outcome.rejectionReason
+            pendingJumpSpeedMps = outcome.jumpCandidateSpeedMps
+        }
         holds.update(
             timestamp: tick.timestamp,
             usableSpeedMps: outcome.usableSpeedMps,
             previousUsableSpeedMps: previousUsableSpeedMps,
-            thresholds: thresholds
+            thresholds: thresholds,
+            hasFreshFix: tick.hasFreshFix
         )
         if let usable = outcome.usableSpeedMps {
             previousUsableSpeedMps = usable
+            previousUsableAt = tick.timestamp
         }
 
         var events: [DetectionEvent] = []
@@ -132,18 +146,44 @@ public struct DetectionEngine: Sendable {
     }
 
     /// Map location samples into ticks (speed/accuracy only) and replay.
+    ///
+    /// Heartbeats are injected between fixes at `heartbeatInterval` so an offline replay sees the
+    /// same clock the Watch does; without them a GPS blackout produces no `gps_gap` /
+    /// `unsure_timeout` at all. Pass `nil` for fix-only replay.
     public static func replay(
         locations: [LocationSample],
-        thresholds: DetectionThresholds = .default
+        thresholds: DetectionThresholds = .default,
+        heartbeatInterval: TimeInterval? = 1.0
     ) -> [DetectionEvent] {
-        let ticks = locations.map { sample in
-            DetectionTick(
-                timestamp: sample.timestamp,
-                speedMps: sample.speed,
-                horizontalAccuracy: sample.horizontalAccuracy
-            )
+        let fixes = locations
+            .sorted { $0.timestamp < $1.timestamp }
+            .map { sample in
+                DetectionTick(
+                    timestamp: sample.timestamp,
+                    speedMps: sample.speed,
+                    horizontalAccuracy: sample.horizontalAccuracy
+                )
+            }
+        return replay(ticks: withHeartbeats(fixes, every: heartbeatInterval), thresholds: thresholds)
+    }
+
+    /// Interleave heartbeat ticks so silence between fixes advances the gap / timeout clocks.
+    static func withHeartbeats(
+        _ fixes: [DetectionTick],
+        every interval: TimeInterval?
+    ) -> [DetectionTick] {
+        guard let interval, interval > 0, let first = fixes.first else { return fixes }
+        var out: [DetectionTick] = [first]
+        out.reserveCapacity(fixes.count)
+        for fix in fixes.dropFirst() {
+            var next = out[out.count - 1].timestamp.addingTimeInterval(interval)
+            while next < fix.timestamp {
+                out.append(.heartbeat(at: next))
+                next = next.addingTimeInterval(interval)
+            }
+            out.append(fix)
         }
-        return replay(ticks: ticks, thresholds: thresholds)
+        return out
     }
 
     private mutating func applyLookback(tick: DetectionTick, usableSpeedMps: Double) -> DetectionEvent? {
@@ -168,14 +208,21 @@ public struct DetectionEngine: Sendable {
         }
 
         if usableSpeedMps <= thresholds.stoppedSpeedMps {
-            let reason =
+            // Riding ended when the evidence did, not when GPS came back: backdate to the unsure
+            // start so the set window does not swallow the gap it replaces.
+            let endedAt = unsureEnteredAt ?? tick.timestamp
+            var reason =
                 "lookback_inactive age=\(fmt(age))s<\(fmt(thresholds.unsureSameRideWindow))s"
                 + " speed=\(SpeedUnits.reasonKilometersPerHour(fromMetersPerSecond: usableSpeedMps))"
+            if endedAt != tick.timestamp {
+                reason += " backfill_from=\(fmt(endedAt.timeIntervalSince1970))s"
+            }
             return revise(
                 code: DetectionCodes.inactive,
                 reason: reason,
                 detectorId: "lookback",
                 tick: tick,
+                timestamp: endedAt,
                 supersedesId: supersedes
             )
         }
@@ -261,6 +308,7 @@ public struct DetectionEngine: Sendable {
         reason: String,
         detectorId: String,
         tick: DetectionTick,
+        timestamp: Date? = nil,
         supersedesId: String?
     ) -> DetectionEvent {
         currentCode = code
@@ -272,7 +320,7 @@ public struct DetectionEngine: Sendable {
         holds.clear()
         return DetectionEvent(
             code: code,
-            timestamp: tick.timestamp,
+            timestamp: timestamp ?? tick.timestamp,
             reason: reason,
             detectorId: detectorId,
             speedMps: tick.speedMps,

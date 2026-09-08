@@ -32,12 +32,26 @@ public struct DetectionHoldClock: Sendable, Equatable {
         highSpeedFromWalk ? thresholds.rideEnterHoldFromWalk : thresholds.rideEnterHold
     }
 
+    /// - Parameter hasFreshFix: `false` for a heartbeat tick. Silence accrues `.unusable` but
+    ///   leaves the speed holds alone until it outlasts `gapUnsureHold` — a fix that is merely
+    ///   late is no evidence that the rider slowed down or sped up.
     public mutating func update(
         timestamp: Date,
         usableSpeedMps: Double?,
         previousUsableSpeedMps: Double?,
-        thresholds: DetectionThresholds
+        thresholds: DetectionThresholds,
+        hasFreshFix: Bool = true
     ) {
+        guard hasFreshFix else {
+            set(.unusable, active: true, at: timestamp)
+            if let silence = duration(.unusable, at: timestamp), silence > thresholds.gapUnsureHold {
+                startedAt[.highSpeed] = nil
+                startedAt[.stopped] = nil
+                highSpeedFromWalk = false
+            }
+            return
+        }
+
         let high = usableSpeedMps.map { $0 >= thresholds.rideEnterSpeedMps } ?? false
         if high {
             if startedAt[.highSpeed] == nil {

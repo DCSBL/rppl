@@ -24,7 +24,7 @@ extension WatchSessionController {
         case .detected:
             WakeLog.debug(.ui, "sim detection=detected (live engine)")
             WKInterfaceDevice.current().play(.click)
-            processDetectionTick()
+            processDetectionHeartbeat()
         case .inactive:
             forceSimulatedDetection(code: DetectionCodes.inactive)
             playRideHaptic(for: DetectionCodes.inactive)
@@ -86,22 +86,34 @@ extension WatchSessionController {
         persistDetection(event)
     }
 
-    func processDetectionTick(timestamp: Date = Date()) {
+    /// No new fix: 1 Hz timer or a water-state change. Keeps the gap / timeout clocks running so
+    /// detection does not stall while GPS is silent, without passing an old speed off as current.
+    func processDetectionHeartbeat(at timestamp: Date = Date()) {
+        processDetection(
+            tick: .heartbeat(
+                at: timestamp,
+                waterSubmersionState: latestWaterState,
+                motionActivity: latestActivity
+            )
+        )
+    }
+
+    /// New GPS fix — the only tick that carries speed evidence.
+    func processDetectionFix(_ location: CLLocation) {
+        processDetection(
+            tick: DetectionTick(
+                timestamp: location.timestamp,
+                speedMps: location.speed >= 0 ? location.speed : nil,
+                horizontalAccuracy: location.horizontalAccuracy,
+                waterSubmersionState: latestWaterState,
+                motionActivity: latestActivity
+            )
+        )
+    }
+
+    private func processDetection(tick: DetectionTick) {
         guard isRunning, !isProductPaused else { return }
         guard detectionSimulationMode == .detected else { return }
-        let speed: Double?
-        if let loc = latestLocation, loc.speed >= 0 {
-            speed = loc.speed
-        } else {
-            speed = nil
-        }
-        let tick = DetectionTick(
-            timestamp: timestamp,
-            speedMps: speed,
-            horizontalAccuracy: latestLocation?.horizontalAccuracy,
-            waterSubmersionState: latestWaterState,
-            motionActivity: latestActivity
-        )
         let events = detectionEngine.process(tick)
         filterRejectionReason = detectionEngine.lastFilterRejection
         detectionCode = detectionEngine.currentCode
@@ -134,9 +146,16 @@ extension WatchSessionController {
             speedMps: sample.speed,
             horizontalAccuracy: sample.horizontalAccuracy
         )
-        let outcome = hkGpsFilter.evaluate(tick, previousUsableSpeedMps: hkPreviousUsableSpeedMps)
+        let outcome = hkGpsFilter.evaluate(
+            tick,
+            previousUsableSpeedMps: hkPreviousUsableSpeedMps,
+            previousUsableAt: hkPreviousUsableAt,
+            pendingJumpSpeedMps: hkPendingJumpSpeedMps
+        )
+        hkPendingJumpSpeedMps = outcome.jumpCandidateSpeedMps
         guard let usable = outcome.usableSpeedMps else { return }
         hkPreviousUsableSpeedMps = usable
+        hkPreviousUsableAt = sample.timestamp
         hkPeakSpeedMps = max(hkPeakSpeedMps, usable)
     }
 
@@ -180,6 +199,8 @@ extension WatchSessionController {
             if event.code == DetectionCodes.riding {
                 hkRideStartedAt = event.timestamp
                 hkPreviousUsableSpeedMps = nil
+                hkPreviousUsableAt = nil
+                hkPendingJumpSpeedMps = nil
             }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
