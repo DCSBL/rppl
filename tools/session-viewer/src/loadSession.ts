@@ -1,4 +1,10 @@
-import type { AnalysisPackage, DetectionEvent, LocationSample, SessionManifest } from './types'
+import type {
+  AnalysisPackage,
+  BatterySample,
+  DetectionEvent,
+  LocationSample,
+  SessionManifest,
+} from './types'
 import { stripHeavyKeys } from './stripHeavyKeys'
 
 export async function loadExportJson(file: File): Promise<AnalysisPackage> {
@@ -9,15 +15,18 @@ export async function loadExportJson(file: File): Promise<AnalysisPackage> {
     detections?: DetectionEvent[]
     assumptions?: DetectionEvent[]
     locations?: LocationSample[]
+    battery?: BatterySample[]
   }
   if (!parsed.manifest) throw new Error('export missing manifest')
   const detections = normalizeDetections(parsed.detections ?? parsed.assumptions ?? [])
+  const battery = normalizeBattery(parsed.battery ?? [])
   return {
     manifest: parsed.manifest,
     detections,
     locations: [...(parsed.locations ?? [])].sort(
       (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
     ),
+    battery,
   }
 }
 
@@ -51,7 +60,14 @@ async function loadFromFlatList(list: File[]): Promise<AnalysisPackage> {
     locations.push(...((await parseJsonl(file)) as LocationSample[]))
   }
   locations.sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
-  return { manifest, detections, locations }
+  const batteryFiles = list
+    .filter((f) => /^battery-\d+\.jsonl$/i.test(basename(f.name)))
+    .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
+  const battery: BatterySample[] = []
+  for (const file of batteryFiles) {
+    battery.push(...((await parseJsonl(file)) as BatterySample[]))
+  }
+  return { manifest, detections, locations, battery: normalizeBattery(battery) }
 }
 
 async function loadFromFileMap(
@@ -80,6 +96,12 @@ export function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
       ...event,
       detectorId: event.detectorId ?? 'legacy_assumption',
     }))
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+}
+
+export function normalizeBattery(raw: BatterySample[]): BatterySample[] {
+  return [...raw]
+    .filter((s) => typeof s.level === 'number' && Number.isFinite(s.level) && s.level >= 0)
     .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
 }
 

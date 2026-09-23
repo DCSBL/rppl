@@ -106,15 +106,26 @@ struct SecurityRegressionTests {
             at: root.appendingPathComponent("bad..id", isDirectory: true),
             withIntermediateDirectories: true
         )
-        let validId = UUID().uuidString
+        // UUID folder without manifest is ignored (discovery requires manifest.json).
+        let orphanId = UUID().uuidString
         try FileManager.default.createDirectory(
-            at: root.appendingPathComponent(validId, isDirectory: true),
+            at: root.appendingPathComponent(orphanId, isDirectory: true),
             withIntermediateDirectories: true
         )
 
         let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Watch7,1",
+            systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+
         let ids = try store.listSessionIDs()
-        #expect(ids == [validId])
+        #expect(ids == [manifest.sessionId])
+        #expect(!ids.contains(orphanId))
     }
 
     // MARK: - Oversize JSON import (DCSBL-76)

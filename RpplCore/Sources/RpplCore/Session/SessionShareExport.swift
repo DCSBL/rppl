@@ -42,6 +42,9 @@ public enum SessionShareExport {
         if !package.water.isEmpty {
             fields.append(("water", try encodeFragment(package.water, encoder: encoder)))
         }
+        if !package.battery.isEmpty {
+            fields.append(("battery", try encodeFragment(package.battery, encoder: encoder)))
+        }
         if let derived = package.derived {
             fields.append(("derived", try encodeFragment(derived, encoder: encoder)))
         }

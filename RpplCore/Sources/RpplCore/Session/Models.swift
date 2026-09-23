@@ -217,3 +217,19 @@ public struct WaterTemperatureSample: Codable, Equatable, Sendable {
         self.celsius = celsius
     }
 }
+
+/// Sparse Watch battery reading (`WKInterfaceDevice.batteryLevel` / `batteryState`).
+/// No public mV API — `level` is the raw 0…1 fraction (full Float precision as Double).
+public struct BatterySample: Codable, Equatable, Sendable {
+    public var timestamp: Date
+    /// Fraction 0…1 from `WKInterfaceDevice.batteryLevel`.
+    public var level: Double
+    /// Opaque: `unplugged` | `charging` | `full` | `unknown`.
+    public var state: String
+
+    public init(timestamp: Date, level: Double, state: String) {
+        self.timestamp = timestamp
+        self.level = level
+        self.state = state
+    }
+}
