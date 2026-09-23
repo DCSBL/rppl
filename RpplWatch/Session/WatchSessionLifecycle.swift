@@ -257,6 +257,7 @@ extension WatchSessionController {
         productPausedAt = nil
         isProductPaused = false
         currentSegmentStartedAt = Date()
+        lastHeartRate = nil
         isRunning = true
         isStarting = false
         startingActivityCode = nil
@@ -409,6 +410,7 @@ extension WatchSessionController {
         sessionStartLatitude = nil
         sessionStartLongitude = nil
         self.manifest = nil
+        lastHeartRate = nil
         isRunning = false
         isStopping = false
     }

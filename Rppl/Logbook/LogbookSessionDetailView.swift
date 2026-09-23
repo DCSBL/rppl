@@ -19,6 +19,7 @@ struct LogbookSessionDetailView: View {
     private static let replayFrameSeconds: Double = 0.05
 
     @State private var manifest: SessionManifest?
+    @State private var showsMissingCaloriesInfo = false
     @State private var sessionStats: SessionStats?
     @State private var setTracks: [SessionSetTrack] = []
     @State private var playbackTimeline: TrackPlaybackTimeline = .empty
@@ -327,17 +328,19 @@ struct LogbookSessionDetailView: View {
                             label: "Water temperature"
                         )
                     }
-                    if let calories = stats.activeEnergyKilocalories {
-                        statTile(
-                            LogbookFormatting.kilocalories(calories),
-                            label: "Active calories"
-                        )
-                    }
                     if let total = stats.totalEnergyKilocalories {
+                        if let calories = stats.activeEnergyKilocalories {
+                            statTile(
+                                LogbookFormatting.kilocalories(calories),
+                                label: "Active calories"
+                            )
+                        }
                         statTile(
                             LogbookFormatting.kilocalories(total),
                             label: "Total calories"
                         )
+                    } else {
+                        missingCaloriesTile
                     }
                 }
             }
@@ -387,6 +390,37 @@ struct LogbookSessionDetailView: View {
         ) {
             content()
         }
+    }
+
+    private var missingCaloriesTile: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text("-")
+                    .font(.title3.bold())
+                Button {
+                    showsMissingCaloriesInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.footnote)
+                        .foregroundStyle(Color.rpplMuted)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("About missing calories")
+                .popover(isPresented: $showsMissingCaloriesInfo) {
+                    Text("No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit.")
+                        .font(.footnote)
+                        .padding()
+                        .frame(maxWidth: 260)
+                        .presentationCompactAdaptation(.popover)
+                }
+            }
+            Text("Calories")
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .logbookNestedBackground(Color.rpplFill)
     }
 
     private func statTile(_ value: String, label: LocalizedStringKey) -> some View {
