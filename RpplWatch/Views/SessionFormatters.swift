@@ -39,7 +39,7 @@ enum SessionFormatters {
     }
 
     static func averageSpeed(_ kmh: Double) -> String {
-        String(format: "%.1f km/h", kmh)
+        DistanceFormat.kilometersPerHour(kmh)
     }
 
     static func distance(_ meters: Double) -> String {
@@ -47,11 +47,6 @@ enum SessionFormatters {
             return DistanceFormat.kilometers(meters)
         }
         return DistanceFormat.meters(meters)
-    }
-
-    static func speedKmh(_ metersPerSecond: Double?) -> String {
-        guard let metersPerSecond, metersPerSecond >= 0 else { return "--" }
-        return String(format: "%.1f", metersPerSecond * 3.6)
     }
 
     static func waterTemp(_ celsius: Double) -> String {
