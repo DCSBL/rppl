@@ -63,6 +63,9 @@ extension WatchSessionController {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 self.elapsed = self.computeElapsed(at: Date())
                 self.refreshSegmentDurations()
+                // Detection ticks otherwise only arrive with GPS fixes, so a blackout froze the
+                // engine: no `gps_gap`, no `unsure_timeout`, set left open.
+                self.processDetectionHeartbeat()
             }
         }
     }
@@ -208,6 +211,8 @@ extension WatchSessionController {
         hkRideActivityOpen = false
         hkGpsFilter = GpsSignalFilter()
         hkPreviousUsableSpeedMps = nil
+        hkPreviousUsableAt = nil
+        hkPendingJumpSpeedMps = nil
         hkPeakSpeedMps = 0
 
         session.startActivity(with: Date())

@@ -25,6 +25,8 @@ public struct LiveSetTracker: Sendable {
     private var previousLocation: LocationSample?
     private var finishedSetMeters = 0.0
     private var setStartedAt: Date?
+    private var unsureStartedAt: Date?
+    private var unsureEventId: String?
     private let maxHorizontalAccuracyM: Double
     private var lapTracker: LapSetTracker
 
@@ -56,6 +58,8 @@ public struct LiveSetTracker: Sendable {
         trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
         setStartedAt = nil
+        unsureStartedAt = nil
+        unsureEventId = nil
         lapTracker.reset()
         // Session starts inactive so the first dock→riding may score laps.
         lapTracker.noteInactive()
@@ -67,12 +71,21 @@ public struct LiveSetTracker: Sendable {
         lastConfident: String,
         events: [DetectionEvent]
     ) {
-        for event in events where DetectionCodes.isConfident(event.code) {
+        for event in events {
+            let code = DetectionCodes.normalize(event.code)
+            if code == DetectionCodes.unsure {
+                if unsureStartedAt == nil {
+                    unsureStartedAt = event.timestamp
+                    unsureEventId = event.id
+                }
+                trackedCode = DetectionCodes.unsure
+                continue
+            }
+            guard DetectionCodes.isConfident(code) else { continue }
             let wasRiding = Self.attributesAsRiding(
                 code: trackedCode,
                 lastConfident: trackedLastConfident
             )
-            let code = DetectionCodes.normalize(event.code)
             let nowRiding = code == DetectionCodes.riding
             if nowRiding, !wasRiding {
                 setCount += 1
@@ -80,14 +93,12 @@ public struct LiveSetTracker: Sendable {
                 isSetOngoing = true
                 setStartedAt = event.timestamp
             } else if !nowRiding, wasRiding {
-                finishCurrentSet(at: event.timestamp)
+                finishCurrentSet(at: setEnd(for: event))
             }
+            unsureStartedAt = nil
+            unsureEventId = nil
             trackedCode = code
             trackedLastConfident = code
-        }
-
-        for event in events where DetectionCodes.normalize(event.code) == DetectionCodes.unsure {
-            trackedCode = DetectionCodes.unsure
         }
 
         if events.isEmpty || events.allSatisfy({ DetectionCodes.normalize($0.code) == DetectionCodes.unsure }) {
@@ -152,8 +163,17 @@ public struct LiveSetTracker: Sendable {
     /// Close an open set at session stop.
     public mutating func closeOpenSet(at date: Date = Date()) {
         if isSetOngoing {
-            finishCurrentSet(at: date)
+            finishCurrentSet(at: unsureStartedAt ?? date)
         }
+    }
+
+    /// `SessionStatsBuilder` drops an `unsure` gap from the set window unless a lookback
+    /// superseded that line. Mirror it so the stop screen and the logbook agree.
+    private func setEnd(for event: DetectionEvent) -> Date {
+        guard let unsureStartedAt, event.supersedesId != unsureEventId else {
+            return event.timestamp
+        }
+        return unsureStartedAt
     }
 
     private mutating func finishCurrentSet(at date: Date) {

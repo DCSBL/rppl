@@ -259,7 +259,7 @@ extension WatchSessionController {
             }
             latestWaterState = next
             WakeLog.debug(.water, "submersion → \(next)")
-            processDetectionTick()
+            processDetectionHeartbeat()
         }
     }
 

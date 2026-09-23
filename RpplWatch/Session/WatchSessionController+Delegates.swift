@@ -33,7 +33,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             captureSessionStartCoordinate(from: sample)
             appendToLocationRing(sample)
             processLocationSample(sample)
-            processDetectionTick(timestamp: loc.timestamp)
+            processDetectionFix(loc)
             requestAirWeatherIfNeeded(from: loc)
         }
     }

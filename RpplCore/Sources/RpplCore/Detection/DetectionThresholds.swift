@@ -17,6 +17,12 @@ public struct DetectionThresholds: Equatable, Sendable {
     public var maxHorizontalAccuracyM: Double
     public var maxPlausibleSpeedKmh: Double
     public var maxSpeedJumpKmh: Double
+    /// Jump filter only compares against a usable sample younger than this — a speed step
+    /// measured across a long GPS silence says nothing about a spike.
+    public var maxSpeedJumpWindow: TimeInterval
+    /// Two consecutive samples agreeing within this (km/h) make a jump a real step, not a
+    /// spike: accept the second one instead of latching on a stale comparison.
+    public var speedJumpCorroborationKmh: Double
 
     public init(
         rideEnterSpeedKmh: Double = 20,
@@ -29,7 +35,9 @@ public struct DetectionThresholds: Equatable, Sendable {
         unsureSameRideWindow: TimeInterval = 60.0,
         maxHorizontalAccuracyM: Double = 25,
         maxPlausibleSpeedKmh: Double = 80,
-        maxSpeedJumpKmh: Double = 30
+        maxSpeedJumpKmh: Double = 30,
+        maxSpeedJumpWindow: TimeInterval = 10.0,
+        speedJumpCorroborationKmh: Double = 10
     ) {
         self.rideEnterSpeedKmh = rideEnterSpeedKmh
         self.rideEnterHold = rideEnterHold
@@ -42,6 +50,8 @@ public struct DetectionThresholds: Equatable, Sendable {
         self.maxHorizontalAccuracyM = maxHorizontalAccuracyM
         self.maxPlausibleSpeedKmh = maxPlausibleSpeedKmh
         self.maxSpeedJumpKmh = maxSpeedJumpKmh
+        self.maxSpeedJumpWindow = maxSpeedJumpWindow
+        self.speedJumpCorroborationKmh = speedJumpCorroborationKmh
     }
 
     public static let `default` = DetectionThresholds()

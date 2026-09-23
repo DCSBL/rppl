@@ -162,6 +162,8 @@ public enum LocationSpeedStats {
         let sorted = locations.sorted { $0.timestamp < $1.timestamp }
         let filter = GpsSignalFilter(thresholds: thresholds)
         var previousUsableMps: Double?
+        var previousUsableAt: Date?
+        var pendingJumpMps: Double?
         var result: [UsableSpeed] = []
 
         for sample in sorted {
@@ -170,9 +172,18 @@ public enum LocationSpeedStats {
                 speedMps: sample.speed,
                 horizontalAccuracy: sample.horizontalAccuracy
             )
-            let outcome = filter.evaluate(tick, previousUsableSpeedMps: previousUsableMps)
+            // Same jump gates as detection, including the stale / corroboration relief, so a real
+            // acceleration step is not filtered out of peak and average speeds.
+            let outcome = filter.evaluate(
+                tick,
+                previousUsableSpeedMps: previousUsableMps,
+                previousUsableAt: previousUsableAt,
+                pendingJumpSpeedMps: pendingJumpMps
+            )
+            pendingJumpMps = outcome.jumpCandidateSpeedMps
             guard let usable = outcome.usableSpeedMps, usable > 0 else { continue }
             previousUsableMps = usable
+            previousUsableAt = sample.timestamp
             result.append(UsableSpeed(timestamp: sample.timestamp, speedMps: usable))
         }
         return result
