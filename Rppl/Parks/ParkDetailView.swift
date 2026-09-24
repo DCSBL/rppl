@@ -10,6 +10,7 @@ struct ParkDetailView: View {
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @State private var weatherProvider = ParksWeatherProvider()
     @State private var weather: ParkWeather?
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
@@ -84,7 +85,13 @@ struct ParkDetailView: View {
             Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
             if let origin = entry?.origin, origin != .bundled {
                 Button("Send to Rppl", systemImage: "envelope") {
-                    if MailAvailability.canSend { showMail = true } else { ParkShare.share(park) }
+                    if MailAvailability.canSend {
+                        showMail = true
+                    } else if let url = ParkShare.mailtoURL(for: park) {
+                        openURL(url)
+                    } else {
+                        ParkShare.share(park)
+                    }
                 }
                 Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
             }

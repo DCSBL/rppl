@@ -34,6 +34,21 @@ enum ParkShare {
     static func subject(for park: Park) -> String {
         String(localized: "Park: \(park.name)")
     }
+
+    /// `mailto:` link for devices without a configured Mail account (`MFMailComposeViewController.canSendMail() == false`).
+    /// A `mailto:` URL can't carry an attachment, so the YAML is inlined as a fenced code block instead.
+    static func mailtoURL(for park: Park) -> URL? {
+        guard let yaml = try? ParkCatalog.encode(park) else { return nil }
+        let body = mailBody + "\n```yaml\n" + yaml + "```\n"
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = feedbackAddress
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: subject(for: park)),
+            URLQueryItem(name: "body", value: body),
+        ]
+        return components.url
+    }
 }
 
 struct ParkMailComposer: UIViewControllerRepresentable {
