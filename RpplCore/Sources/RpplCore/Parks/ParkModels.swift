@@ -260,3 +260,9 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
         ParkSchedule.day(for: opening, on: date, timeZone: resolvedTimeZone)
     }
 }
+
+/// Opaque-string values for `SessionManifest.parkIdSource`.
+public enum SessionParkSource {
+    public static let auto = "auto"
+    public static let manual = "manual"
+}

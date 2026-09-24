@@ -5,6 +5,8 @@ updated_at: 2026-09-24
 history:
   - date: 2026-09-24
     description: initial
+  - date: 2026-09-24
+    description: add prices, facilities and description from wetnwild.nl
 
 author: Rppl
 name: Wet 'n Wild
@@ -23,6 +25,7 @@ links:
 cables:
   - name: Cable
     direction: ccw
+    length_m: 780
     # First point is the start.
     points:
       - { lat: 52.13616893686612, lon: 4.67831871475394 }
@@ -60,3 +63,21 @@ opening:
     - { id: "17:00", start: "17:00", end: "18:00" }
     - { id: "18:00", start: "18:00", end: "19:00" }
     - { id: "19:00", start: "19:00", end: "20:00" }
+
+# Source: wetnwild.nl/abonnementen-en-tarieven (September 2026). Only 1-hour rates were
+# confirmed; verify 2-hour/day rates and rental prices on-site before relying on them.
+prices:
+  - { name: 1 hour, price: "€ 25", note: "From 15 years. Skis/board, life vest, helmet and instruction included" }
+  - { name: 1 hour, price: "€ 20", note: Up to 14 years }
+  - { name: Kids Wake Club, price: "€ 175", note: 8 lessons }
+  - { name: Kids Wake Club trial lesson, price: "€ 21,50", note: per person }
+  - { name: Online booking discount, price: "− € 2", note: "per person, when booked online" }
+
+facilities:
+  - Changing rooms (male/female)
+  - Showers
+  - Restaurant / Social Club beach club
+
+description: >-
+  Cable ski/wakeboard run on the Alphense Zegerplas, running counter-clockwise since 1998.
+  Normal cable speed is 30 km/h (27 km/h during the Saturday beginner hour, see opening rules).

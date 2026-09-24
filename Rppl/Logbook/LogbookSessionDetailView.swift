@@ -209,8 +209,39 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    /// Manual park pick: stored as `manual`, so auto-matching never overrides it.
+    private var parkSelection: Binding<String?> {
+        Binding(
+            get: { manifest?.parkId },
+            set: { newId in
+                guard let store, let sessionId = manifest?.sessionId else { return }
+                let park = parks.first { $0.id == newId }
+                Task {
+                    try? await StoreIO.runOffMain {
+                        try store.setManualPark(park, sessionId: sessionId)
+                    }
+                    manifest = try? store.readManifest(sessionId: sessionId)
+                    cityName = park?.name
+                    PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
+                    if park == nil {
+                        let peek = try? store.peekLocationSamples(sessionId: sessionId)
+                        cityName = await SessionCityResolver.shared.cityName(
+                            sessionId: sessionId,
+                            locations: peek ?? []
+                        )
+                        if let cityName {
+                            try? store.updateDerivedCityName(cityName, sessionId: sessionId)
+                        }
+                    }
+                }
+            }
+        )
+    }
+
     /// Park this session's track sits in, matched on the derived map frame center.
     private var matchedPark: Park? {
+        if let parkId = manifest?.parkId { return parks.first { $0.id == parkId } }
+        if manifest?.parkIdSource == SessionParkSource.manual { return nil }
         guard let mapFrame else { return nil }
         let center = ParkCoordinate(lat: mapFrame.centerLatitude, lon: mapFrame.centerLongitude)
         return ParkListing.nearest(to: center, in: parks)
@@ -316,7 +347,16 @@ struct LogbookSessionDetailView: View {
                     }
 
                     LabeledContent("Location") {
-                        Text(cityName ?? "-")
+                        Menu {
+                            Picker("Park", selection: parkSelection) {
+                                Text("No park").tag(String?.none)
+                                ForEach(parks) { park in
+                                    Text(park.name).tag(String?.some(park.id))
+                                }
+                            }
+                        } label: {
+                            Text(cityName ?? "-")
+                        }
                     }
                 }
 
@@ -513,7 +553,22 @@ struct LogbookSessionDetailView: View {
                 sessionStats = summary.stats
                 mapFrame = summary.mapFrame
                 sessionMapTrackData = summary.mapTracks
-                cityName = summary.cityName
+                let linkedPark = try? await StoreIO.runOffMain {
+                    try store.linkPark(
+                        sessionId: sessionId,
+                        center: summary.mapFrame.map {
+                            ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude)
+                        },
+                        parks: ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
+                    )
+                }
+                if let linkedPark {
+                    manifest = (try? store.readManifest(sessionId: sessionId)) ?? summary.manifest
+                    cityName = linkedPark.name
+                    PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
+                } else {
+                    cityName = summary.cityName
+                }
                 if cityName == nil {
                     let peek = try await StoreIO.runOffMain {
                         try store.peekLocationSamples(sessionId: sessionId)

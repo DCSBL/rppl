@@ -100,9 +100,9 @@ struct ParkEditorView: View {
             coordinateField("Latitude", value: $draft.location.lat)
             coordinateField("Longitude", value: $draft.location.lon)
             Button("Use current location", systemImage: "location") {
-                if let here = location.coordinate { draft.location = here } else { location.start() }
+                if let here = location.coordinate { draft.location = here } else { location.refresh() }
             }
-            .task { location.start() }
+            .task { location.refresh() }
             Button("Pick on map", systemImage: "mappin.and.ellipse") { pickingLocation = true }
         }
     }

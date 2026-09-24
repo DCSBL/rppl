@@ -11,6 +11,8 @@ struct ParksView: View {
     @State private var catalog = SessionCatalog()
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     private var parks: [Park] { store.entries.map(\.park) }
 
@@ -61,7 +63,18 @@ struct ParksView: View {
                     .listRowSeparator(.hidden)
                 }
 
-                if parks.isEmpty {
+                if sort == .distance, location.availability != .available {
+                    ParksLocationNeededCard(
+                        availability: location.availability,
+                        onRequestAccess: { location.refresh() },
+                        onOpenSettings: {
+                            if let url = ParkNavigation.appSettingsURL { openURL(url) }
+                        }
+                    )
+                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else if parks.isEmpty {
                     Text("No parks yet")
                         .foregroundStyle(Color.rpplMuted)
                         .listRowBackground(Color.clear)
@@ -97,8 +110,14 @@ struct ParksView: View {
         }
         .task {
             store.reload()
-            location.start()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
+        }
+        // Refresh only on appear / foreground return — a live-updating fix would reorder the
+        // Nearby list out from under the user while they're scrolling or tapping a park.
+        .onAppear { location.refresh() }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            location.refresh()
         }
     }
 }

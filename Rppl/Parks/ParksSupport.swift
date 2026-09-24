@@ -3,23 +3,51 @@ import MapKit
 import Observation
 import RpplCore
 import SwiftUI
+import UIKit
 import WeatherKit
 
+/// Whether the Nearby sort can use a location fix right now.
+enum ParksLocationAvailability: Equatable {
+    case available
+    case notDetermined
+    case denied
+    case servicesDisabled
+}
+
 /// One-shot iPhone location fix for "nearby" sorting. Denied or unavailable simply means no distances.
+///
+/// `refresh()` is the only entry point that requests a fix — callers trigger it on view appear and on
+/// return from background, never continuously, so the Nearby sort doesn't reorder mid-use.
 @Observable
 @MainActor
 final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
     private(set) var coordinate: ParkCoordinate?
+    private(set) var authorizationStatus: CLAuthorizationStatus
+    private(set) var servicesEnabled = true
     private let manager = CLLocationManager()
 
+    var availability: ParksLocationAvailability {
+        guard servicesEnabled else { return .servicesDisabled }
+        switch authorizationStatus {
+        case .notDetermined: return .notDetermined
+        case .restricted, .denied: return .denied
+        case .authorizedWhenInUse, .authorizedAlways: return .available
+        @unknown default: return .notDetermined
+        }
+    }
+
     override init() {
+        authorizationStatus = .notDetermined
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        authorizationStatus = manager.authorizationStatus
     }
 
-    func start() {
-        switch manager.authorizationStatus {
+    func refresh() {
+        authorizationStatus = manager.authorizationStatus
+        servicesEnabled = CLLocationManager.locationServicesEnabled()
+        switch authorizationStatus {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
         case .authorizedWhenInUse, .authorizedAlways:
@@ -30,7 +58,7 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        Task { @MainActor in self.start() }
+        Task { @MainActor in self.refresh() }
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -73,6 +101,71 @@ enum ParkNavigation {
         )
         item.name = park.name
         item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+    }
+
+    static var appSettingsURL: URL? { URL(string: UIApplication.openSettingsURLString) }
+}
+
+/// Shown in place of the Nearby-sorted list when there's no location fix to sort by.
+struct ParksLocationNeededCard: View {
+    let availability: ParksLocationAvailability
+    let onRequestAccess: () -> Void
+    let onOpenSettings: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(Color.rpplText)
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(Color.rpplMuted)
+            if let buttonTitle {
+                Button(buttonTitle, action: buttonAction)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.rpplAccent)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
+
+    private var title: String {
+        switch availability {
+        case .servicesDisabled: String(localized: "Location Services is off")
+        case .notDetermined, .denied, .available: String(localized: "Location needed")
+        }
+    }
+
+    private var message: String {
+        switch availability {
+        case .notDetermined:
+            String(localized: "Allow location access to sort parks by distance.")
+        case .denied:
+            String(localized: "Location access was denied. Turn it on in Settings to sort parks by distance.")
+        case .servicesDisabled:
+            String(
+                localized: "Turn on Location Services in Settings > Privacy & Security to sort parks by distance."
+            )
+        case .available:
+            ""
+        }
+    }
+
+    private var buttonTitle: String? {
+        switch availability {
+        case .notDetermined: String(localized: "Grant Access")
+        case .denied: String(localized: "Open Settings")
+        case .servicesDisabled, .available: nil
+        }
+    }
+
+    private var buttonAction: () -> Void {
+        switch availability {
+        case .notDetermined: onRequestAccess
+        case .denied: onOpenSettings
+        case .servicesDisabled, .available: {}
+        }
     }
 }
 

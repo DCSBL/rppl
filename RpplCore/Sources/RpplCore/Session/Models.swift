@@ -23,6 +23,11 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var imported: Date?
     /// WeatherKit current conditions near the start of the session. Nil when unavailable.
     public var weather: SessionWeather?
+    /// `Park.id` this session belongs to. Written by the phone after import; nil when unlinked.
+    public var parkId: String?
+    /// How `parkId` was set (`auto` / `manual`). `manual` is never overwritten by auto-matching,
+    /// including a manual "no park" (`parkId` nil).
+    public var parkIdSource: String?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -47,7 +52,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         wristLocation: String? = nil,
         crownOrientation: String? = nil,
         imported: Date? = nil,
-        weather: SessionWeather? = nil
+        weather: SessionWeather? = nil,
+        parkId: String? = nil,
+        parkIdSource: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -65,6 +72,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.crownOrientation = crownOrientation
         self.imported = imported
         self.weather = weather
+        self.parkId = parkId
+        self.parkIdSource = parkIdSource
     }
 }
 

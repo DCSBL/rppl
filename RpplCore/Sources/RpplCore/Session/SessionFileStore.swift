@@ -199,6 +199,57 @@ public final class SessionFileStore: @unchecked Sendable {
         )
     }
 
+    /// Links the session to a park and syncs the derived location label (`cityName`) to the park name.
+    ///
+    /// Manual links are kept as-is (including manual "no park"). Otherwise a stored `parkId` wins;
+    /// unlinked sessions are matched on `center` and stored as `auto`.
+    /// - Returns: The linked park, or nil when unlinked (label left to city geocoding).
+    @discardableResult
+    public func linkPark(sessionId: String, center: ParkCoordinate?, parks: [Park]) throws -> Park? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        let park: Park?
+        if manifest.parkIdSource == SessionParkSource.manual || manifest.parkId != nil {
+            park = parks.first { $0.id == manifest.parkId }
+        } else if let center, let match = ParkListing.nearest(to: center, in: parks) {
+            manifest.parkId = match.id
+            manifest.parkIdSource = SessionParkSource.auto
+            try writeManifest(manifest)
+            park = match
+        } else {
+            park = nil
+        }
+        if let park { try syncParkLabel(park.name, sessionId: sessionId, startedAt: manifest.startedAt) }
+        return park
+    }
+
+    /// Manual park pick from session detail. Nil = explicitly no park; clears the park label
+    /// so city geocoding refills it.
+    public func setManualPark(_ park: Park?, sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        manifest.parkId = park?.id
+        manifest.parkIdSource = SessionParkSource.manual
+        try writeManifest(manifest)
+        if let park {
+            try syncParkLabel(park.name, sessionId: sessionId, startedAt: manifest.startedAt)
+        } else if var view = try readDerivedView(sessionId: sessionId), view.cityName != nil {
+            view.cityName = nil
+            try writeDerivedView(view, sessionId: sessionId)
+        }
+    }
+
+    private func syncParkLabel(_ name: String, sessionId: String, startedAt: Date) throws {
+        guard var view = try readDerivedView(sessionId: sessionId), view.cityName != name else { return }
+        view.cityName = name
+        try writeDerivedView(view, sessionId: sessionId)
+        try relocatePackageIfNeeded(sessionId: sessionId, startedAt: startedAt, cityName: name)
+    }
+
     /// First `limit` location samples for cheap geocode without full GPS parse.
     public func peekLocationSamples(sessionId: String, limit: Int = 48, chunkIndex: Int = 0) throws -> [LocationSample] {
         let name = String(format: "location-%03d.jsonl", chunkIndex)
