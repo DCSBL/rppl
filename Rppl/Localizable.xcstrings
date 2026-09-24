@@ -806,7 +806,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exporteert het volledige session-bestand: ruwe sensorgegevens, niets gefilterd of geanonimiseerd."
+            "value" : "Het volledige session-bestand met ruwe sensorgegevens. Deze gegevens zijn niet gefilterd of geanonimiseerd en kunnen persoonlijke gegevens bevatten."
           }
         }
       }

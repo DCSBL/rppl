@@ -183,7 +183,8 @@ struct SessionMapView: View {
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             guard allowsInteraction else { return }
-            position = .camera(context.camera)
+            // Do not write `position` back here: it interrupts pan inertia and
+            // swallows the next swipe. The Map binding already tracks the camera.
             guard let fitted else { return }
             showReset = !isNearFittedCamera(context.camera, fit: fitted)
         }
@@ -572,11 +573,37 @@ struct SessionMapFullscreenView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .background(DisableNavigationSwipeBack())
         .toolbar(.hidden, for: .tabBar)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .background(Color.rpplBackground)
         .tint(Color.rpplAccent)
         .accessibilityLabel(title)
+    }
+}
+
+/// Turns off the interactive swipe-back gestures while visible so repeated map
+/// swipes never pop the screen. The back button still works.
+private struct DisableNavigationSwipeBack: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> Controller { Controller() }
+    func updateUIViewController(_ controller: Controller, context: Context) {}
+
+    final class Controller: UIViewController {
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            setSwipeBack(enabled: false)
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            setSwipeBack(enabled: true)
+        }
+
+        private func setSwipeBack(enabled: Bool) {
+            guard let nav = navigationController else { return }
+            nav.interactivePopGestureRecognizer?.isEnabled = enabled
+            nav.interactiveContentPopGestureRecognizer?.isEnabled = enabled
+        }
     }
 }
