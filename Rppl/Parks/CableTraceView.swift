@@ -2,7 +2,8 @@ import MapKit
 import RpplCore
 import SwiftUI
 
-/// Full-screen map to trace a cable: tap to add points, tap a point to select it, then tap the map to move it.
+/// Full-screen map to trace a cable: pan/zoom so the center marker sits on the spot, then press Add point.
+/// Tap an existing point to select it, pan to the new spot and press Move here.
 struct CableTraceView: View {
     @Binding var cable: ParkCable
     let center: ParkCoordinate
@@ -11,13 +12,17 @@ struct CableTraceView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selected: Int?
     @State private var position: MapCameraPosition
+    @State private var viewCenter: CLLocationCoordinate2D
+    @State private var askShape = false
 
     init(cable: Binding<ParkCable>, center: ParkCoordinate) {
         _cable = cable
         self.center = center
         let anchor = cable.wrappedValue.points?.first?.coordinate ?? center
+        let start = CLLocationCoordinate2D(latitude: anchor.lat, longitude: anchor.lon)
+        _viewCenter = State(initialValue: start)
         _position = State(initialValue: .region(MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: anchor.lat, longitude: anchor.lon),
+            center: start,
             latitudinalMeters: 600,
             longitudinalMeters: 600
         )))
@@ -29,39 +34,35 @@ struct CableTraceView: View {
         CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
     }
 
+    private var centerCoordinate: ParkCoordinate {
+        ParkCoordinate(lat: viewCenter.latitude, lon: viewCenter.longitude)
+    }
+
     var body: some View {
         NavigationStack {
-            MapReader { proxy in
-                Map(position: $position) {
-                    if points.count >= 2 {
-                        let line = points.map(coordinate)
-                        MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
-                            .stroke(Color.rpplAccent, lineWidth: 3)
-                    }
-                    ForEach(Array(points.enumerated()), id: \.offset) { index, point in
-                        Annotation("", coordinate: coordinate(point), anchor: .center) {
-                            pointMarker(index: index, point: point)
-                        }
-                    }
+            Map(position: $position) {
+                if points.count >= 2 {
+                    let line = points.map(coordinate)
+                    MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
+                        .stroke(Color.rpplAccent, lineWidth: 3)
                 }
-                .mapStyle(usesSatellite ? .hybrid(elevation: .flat) : .standard)
-                .onTapGesture { screen in
-                    guard let tapped = proxy.convert(screen, from: .local) else { return }
-                    let coordinate = ParkCoordinate(lat: tapped.latitude, lon: tapped.longitude)
-                    if let index = selected {
-                        ParkDraft.move(&cable, index: index, to: coordinate)
-                        selected = nil
-                    } else {
-                        ParkDraft.append(coordinate, to: &cable)
+                ForEach(Array(points.enumerated()), id: \.offset) { index, point in
+                    Annotation("", coordinate: coordinate(point), anchor: .center) {
+                        pointMarker(index: index, point: point)
                     }
                 }
             }
+            .mapStyle(usesSatellite ? .hybrid(elevation: .flat) : .standard)
+            .onMapCameraChange(frequency: .continuous) { context in
+                viewCenter = context.camera.centerCoordinate
+            }
+            .overlay { crosshair.allowsHitTesting(false) }
             .safeAreaInset(edge: .bottom) { controls }
             .navigationTitle("Trace cable")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done") { points.count >= 2 ? (askShape = true) : dismiss() }
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -72,7 +73,26 @@ struct CableTraceView: View {
                     .accessibilityLabel(Text("Map style"))
                 }
             }
+            .confirmationDialog("Is this cable a full-size loop or 2D?", isPresented: $askShape, titleVisibility: .visible) {
+                Button("Full size (loop)") {
+                    if cable.direction?.isLoop != true { cable.direction = .clockwise }
+                    dismiss()
+                }
+                Button("2D (back and forth)") {
+                    cable.direction = .twoD
+                    dismiss()
+                }
+                Button("Keep tracing", role: .cancel) {}
+            }
         }
+    }
+
+    private var crosshair: some View {
+        ZStack {
+            Circle().strokeBorder(.white, lineWidth: 2).frame(width: 26, height: 26)
+            Circle().fill(Color.rpplAccent).frame(width: 8, height: 8)
+        }
+        .shadow(color: .black.opacity(0.5), radius: 2)
     }
 
     private func pointMarker(index: Int, point: ParkCablePoint) -> some View {
@@ -81,9 +101,11 @@ struct CableTraceView: View {
             selected = isSelected ? nil : index
         } label: {
             Circle()
-                .fill(point.start == true ? Color.green : Color.rpplAccent)
+                .fill(point.start == true ? Color.green : (isSelected ? Color.orange : Color.rpplAccent))
                 .frame(width: isSelected ? 22 : 14, height: isSelected ? 22 : 14)
                 .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text("Point \(index + 1)"))
@@ -94,51 +116,45 @@ struct CableTraceView: View {
             HStack {
                 Text(lengthText).font(.subheadline.weight(.semibold))
                 Spacer()
-                Picker("Direction", selection: directionBinding) {
-                    Text("Clockwise").tag("cw")
-                    Text("Counter-clockwise").tag("ccw")
-                    Text("2D").tag("2d")
-                }
-                .pickerStyle(.menu)
-            }
-            Text(selected == nil ? "Tap the map to add points along the cable." : "Tap the map to move the selected point.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            HStack {
                 Button("Undo", systemImage: "arrow.uturn.backward") {
                     ParkDraft.undo(&cable)
                     selected = nil
                 }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.bordered)
                 .disabled(points.isEmpty)
-                Button("Clear", systemImage: "trash", role: .destructive) {
-                    cable.points = nil
-                    selected = nil
-                }
-                .disabled(points.isEmpty)
-                Spacer()
-                if let index = selected {
-                    Button("Start", systemImage: "flag") {
-                        ParkDraft.toggleStart(&cable, index: index)
+            }
+            if let index = selected {
+                HStack {
+                    Button("Move here", systemImage: "arrow.up.and.down.and.arrow.left.and.right") {
+                        ParkDraft.move(&cable, index: index, to: centerCoordinate)
+                        selected = nil
                     }
-                    Button("Delete point", systemImage: "minus.circle", role: .destructive) {
+                    .buttonStyle(.borderedProminent)
+                    Button("Start", systemImage: "flag") { ParkDraft.toggleStart(&cable, index: index) }
+                        .buttonStyle(.bordered)
+                    Button("Delete point", systemImage: "trash", role: .destructive) {
                         ParkDraft.remove(&cable, index: index)
                         selected = nil
                     }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.bordered)
                 }
+            } else {
+                Button {
+                    ParkDraft.append(centerCoordinate, to: &cable)
+                } label: {
+                    Label("Add point", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                Text("Pan and zoom until the marker is on the cable, then add the point.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .labelStyle(.iconOnly)
-            .buttonStyle(.bordered)
         }
         .padding(12)
         .background(.regularMaterial)
-    }
-
-    private var directionBinding: Binding<String> {
-        Binding(
-            get: { cable.direction?.rawValue ?? "cw" },
-            set: { cable.direction = ParkCableDirection(rawValue: $0) }
-        )
     }
 
     private var lengthText: String {

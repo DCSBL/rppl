@@ -10,6 +10,7 @@ struct ParkEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var draft: Park
+    private let initial: Park
     @State private var location = ParksLocationProvider()
     @State private var tracing: Int?
     @State private var pickingLocation = false
@@ -19,16 +20,18 @@ struct ParkEditorView: View {
     init(original: Park?, onSaved: @escaping () -> Void) {
         self.original = original
         self.onSaved = onSaved
-        _draft = State(initialValue: original ?? Park(
+        let start = original ?? Park(
             id: "",
             name: "",
             location: ParkCoordinate(lat: 0, lon: 0),
             timezone: TimeZone.current.identifier
-        ))
+        )
+        initial = start
+        _draft = State(initialValue: start)
     }
 
     private var issues: [ParkDraft.Issue] { ParkDraft.validate(draft) }
-    private var isDirty: Bool { draft != (original ?? draft) || original == nil }
+    private var isDirty: Bool { draft != initial }
 
     var body: some View {
         NavigationStack {

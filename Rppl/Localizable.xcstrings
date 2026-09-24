@@ -5506,6 +5506,118 @@
           }
         }
       }
+    },
+    "Add point" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add point"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Punt toevoegen"
+          }
+        }
+      }
+    },
+    "Move here" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move here"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verplaats hierheen"
+          }
+        }
+      }
+    },
+    "Pan and zoom until the marker is on the cable, then add the point." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pan and zoom until the marker is on the cable, then add the point."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pan en zoom tot de markering op de cable staat en voeg dan het punt toe."
+          }
+        }
+      }
+    },
+    "Is this cable a full-size loop or 2D?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is this cable a full-size loop or 2D?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is deze cable een full-size loop of 2D?"
+          }
+        }
+      }
+    },
+    "Full size (loop)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size (loop)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size (loop)"
+          }
+        }
+      }
+    },
+    "2D (back and forth)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2D (back and forth)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2D (heen en weer)"
+          }
+        }
+      }
+    },
+    "Keep tracing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep tracing"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doorgaan met traceren"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
