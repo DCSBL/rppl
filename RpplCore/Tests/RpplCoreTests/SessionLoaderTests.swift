@@ -35,7 +35,7 @@ struct SessionLoaderTests {
         #expect(bundle.byteSize >= 0)
     }
 
-    @Test func loadPackageBuildsStatsWithoutStore() {
+    @Test func loadPackageBuildsStatsWithoutStore() throws {
         let manifest = SessionManifest(
             testerId: "tester-1",
             appVersion: "1.0",
@@ -59,7 +59,7 @@ struct SessionLoaderTests {
             health: [],
             water: []
         )
-        let bundle = SessionLoader.load(package: package)
+        let bundle = try SessionLoader.load(package: package)
         #expect(bundle.manifest.activityCode == "Example session")
         #expect(bundle.detections.count == 1)
         #expect(bundle.stats.setCount == 0)
