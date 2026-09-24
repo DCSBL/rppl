@@ -11,6 +11,7 @@ struct ParksView: View {
     @State private var catalog = SessionCatalog()
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var showMap = false
     @State private var searchText = ""
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -29,6 +30,24 @@ struct ParksView: View {
             visits: visits,
             userLocation: location.coordinate,
             sort: sort
+        )
+    }
+
+    private enum SortChoice: Hashable {
+        case sort(ParkListSort)
+        case map
+    }
+
+    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort selected.
+    private var sortChoice: Binding<SortChoice> {
+        Binding(
+            get: { .sort(sort) },
+            set: {
+                switch $0 {
+                case .sort(let value): sort = value
+                case .map: showMap = true
+                }
+            }
         )
     }
 
@@ -54,9 +73,10 @@ struct ParksView: View {
                                 .accessibilityLabel(Text("Add park"))
                             }
                         }
-                        Picker("Sort", selection: $sort) {
-                            Text("Nearby").tag(ParkListSort.distance)
-                            Text("Most visited").tag(ParkListSort.visits)
+                        Picker("Sort", selection: sortChoice) {
+                            Text("Nearby").tag(SortChoice.sort(.distance))
+                            Text("Most visited").tag(SortChoice.sort(.visits))
+                            Text("View on map").tag(SortChoice.map)
                         }
                         .pickerStyle(.segmented)
                     }
@@ -114,6 +134,9 @@ struct ParksView: View {
         .tint(Color.rpplAccent)
         .sheet(isPresented: $showEditor) {
             ParkEditorView(original: nil, onSaved: {})
+        }
+        .fullScreenCover(isPresented: $showMap) {
+            ParksMapView(parks: parks)
         }
         .task {
             store.reload()
