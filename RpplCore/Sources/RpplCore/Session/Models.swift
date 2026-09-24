@@ -21,6 +21,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var crownOrientation: String?
     /// When set, session was imported from an export JSON on phone (not Watch WC transfer). No HealthKit.
     public var imported: Date?
+    /// WeatherKit current conditions near the start of the session. Nil when unavailable.
+    public var weather: SessionWeather?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -44,7 +46,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         activityCode: String? = nil,
         wristLocation: String? = nil,
         crownOrientation: String? = nil,
-        imported: Date? = nil
+        imported: Date? = nil,
+        weather: SessionWeather? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -61,6 +64,19 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.wristLocation = wristLocation
         self.crownOrientation = crownOrientation
         self.imported = imported
+        self.weather = weather
+    }
+}
+
+/// Current weather captured once per session (Watch, via WeatherKit).
+public struct SessionWeather: Codable, Equatable, Sendable {
+    public var temperatureCelsius: Double
+    /// Relative humidity, 0–100.
+    public var humidityPercent: Double
+
+    public init(temperatureCelsius: Double, humidityPercent: Double) {
+        self.temperatureCelsius = temperatureCelsius
+        self.humidityPercent = humidityPercent
     }
 }
 

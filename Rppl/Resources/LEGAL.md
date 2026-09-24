@@ -98,7 +98,7 @@ Park information in the Parks tab (opening times, blocks, prices, contact detail
 
 We may change, pause, or remove features, or stop offering the app, at any time.
 
-We do not plan to monetize heavily, but we may add paid features, make existing features paid, or ask for donations, only to cover possible costs of running and distributing the app (for example Apple fees, tooling, or infrastructure).
+We do not plan to monetize heavily, but we may add paid features or ask for donations to cover possible costs of running and distributing the app (for example Apple fees, tooling, or infrastructure). We currently do not plan to make existing features paid; however, these terms allow us to do so if needed in the future. Any such decision would be communicated via App Store release notes before taking effect.
 
 Material changes to these terms or privacy practices will be communicated to you via App Store release notes or an in-app notice. Continued use after changes means you accept the updated terms.
 

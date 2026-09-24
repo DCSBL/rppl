@@ -38,16 +38,7 @@ final class PhonePermissionsController: NSObject {
         locationPermission = Self.locationState(locationManager.authorizationStatus)
 
         if HKHealthStore.isHealthDataAvailable() {
-            switch healthStore.authorizationStatus(for: workoutType) {
-            case .notDetermined:
-                healthPermission = .notDetermined
-            case .sharingDenied:
-                healthPermission = .denied
-            case .sharingAuthorized:
-                healthPermission = .authorized
-            @unknown default:
-                healthPermission = .notDetermined
-            }
+            refreshHealth()
         } else {
             healthPermission = .unavailable
         }
@@ -65,6 +56,21 @@ final class PhonePermissionsController: NSObject {
             }
         } else {
             motionPermission = .unavailable
+        }
+    }
+
+    /// Read-only access: `authorizationStatus(for:)` reports *sharing* only and reads as denied
+    /// (red x) even when the user allowed reads, worse on iOS 27. Read grants are private, so
+    /// "sheet already shown" (`.unnecessary`) is the best signal available.
+    private func refreshHealth() {
+        healthStore.getRequestStatusForAuthorization(
+            toShare: [], read: [workoutType, heartRateType]
+        ) { [weak self] status, _ in
+            let state: WatchPermissionState = switch status {
+            case .unnecessary: .authorized
+            default: .notDetermined
+            }
+            Task { @MainActor in self?.healthPermission = state }
         }
     }
 

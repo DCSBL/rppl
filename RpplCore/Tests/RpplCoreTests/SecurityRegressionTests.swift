@@ -66,7 +66,8 @@ struct SecurityRegressionTests {
         let watchRoot = tempRoot(label: "traversal-import-watch")
         let phoneRoot = tempRoot(label: "traversal-import-phone")
         defer {
-            try? FileManager.default.removeItem(at: watchRoot.deletingLastPathComponent())
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
         }
 
         let store = SessionFileStore(rootURL: watchRoot)
@@ -189,7 +190,8 @@ struct SecurityRegressionTests {
         let watchRoot = tempRoot(label: "zlib-import-watch")
         let phoneRoot = tempRoot(label: "zlib-import-phone")
         defer {
-            try? FileManager.default.removeItem(at: watchRoot.deletingLastPathComponent())
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
         }
 
         let store = SessionFileStore(rootURL: watchRoot)

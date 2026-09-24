@@ -7,5 +7,6 @@ public enum SessionSchema {
     /// v5: optional `derived/view.json` (stats + map frame); raw streams unchanged.
     /// v6: optional manifest `wristLocation` + `crownOrientation` (Watch wear settings at start).
     /// v7: optional manifest `imported` (phone file-import timestamp; nil for Watch/WC sessions).
-    public static let currentVersion = 7
+    /// v8: optional manifest `weather` (WeatherKit temperature + humidity at start).
+    public static let currentVersion = 8
 }

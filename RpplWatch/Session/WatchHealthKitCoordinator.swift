@@ -333,7 +333,6 @@ extension WatchSessionController {
     }
 
     func requestAirWeatherIfNeeded(from location: CLLocation) {
-        guard recordingMode == "workout" else { return }
         guard !airWeatherAttempted else { return }
         guard AirWeatherKit.isUsable(location) else { return }
         airWeatherAttempted = true
@@ -343,9 +342,22 @@ extension WatchSessionController {
             guard let self, !Task.isCancelled else { return }
             self.airWeatherSnapshot = snapshot
             self.airWeatherFetchTask = nil
-            if snapshot != nil {
+            if let snapshot {
+                self.persistAirWeather(snapshot)
                 WakeLog.debug(.workout, "air weather cached")
             }
+        }
+    }
+
+    func persistAirWeather(_ snapshot: AirWeatherSnapshot) {
+        guard let store, var current = manifest else { return }
+        let weather = snapshot.sessionWeather
+        current.weather = weather
+        manifest = current
+        do {
+            try store.updateWeather(weather, sessionId: current.sessionId)
+        } catch {
+            WakeLog.error(.store, "weather manifest: \(error.localizedDescription)")
         }
     }
 
@@ -364,6 +376,7 @@ extension WatchSessionController {
             airWeatherFetchTask?.cancel()
             airWeatherFetchTask = nil
             airWeatherSnapshot = await AirWeatherKit.fetch(location: loc)
+            if let late = airWeatherSnapshot { persistAirWeather(late) }
         }
         guard let snapshot = airWeatherSnapshot else {
             WakeLog.debug(.workout, "air weather skipped — none cached")

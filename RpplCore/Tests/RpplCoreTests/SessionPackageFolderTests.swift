@@ -94,7 +94,10 @@ struct SessionPackageFolderTests {
         #expect(dir.lastPathComponent == expected)
         #expect(dir.lastPathComponent != manifest.sessionId)
         #expect(try store.listSessionIDs() == [manifest.sessionId])
-        #expect(try store.sessionDirectory(for: manifest.sessionId) == dir)
+        #expect(
+            try store.sessionDirectory(for: manifest.sessionId).resolvingSymlinksInPath()
+                == dir.resolvingSymlinksInPath()
+        )
     }
 
     @Test func sameMinuteCollisionGetsNumericSuffix() throws {

@@ -622,6 +622,15 @@ if !migrated.isEmpty {
         try writeManifest(manifest)
     }
 
+    public func updateWeather(_ weather: SessionWeather, sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        manifest.weather = weather
+        try writeManifest(manifest)
+    }
+
     public func markTransferring(sessionId: String) throws {
         lock.lock()
         defer { lock.unlock() }
