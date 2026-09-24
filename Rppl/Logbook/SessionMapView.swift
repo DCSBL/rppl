@@ -2,6 +2,16 @@ import SwiftUI
 import MapKit
 import RpplCore
 
+/// Which set the map isolates. Nothing selected draws every set flat, as before.
+struct SessionMapRendering {
+    /// Per-set GPS paired with set numbers.
+    var setTracks: [SessionSetTrack] = []
+    /// `SessionSetTrack.setIndex` to isolate; nil shows every set.
+    var soloSetIndex: Int?
+
+    static let flat = SessionMapRendering()
+}
+
 enum SessionMapLayout {
     case embedded
     case fullscreen
@@ -58,16 +68,6 @@ struct SessionMapView: View {
     @State private var position: MapCameraPosition = .automatic
     @State private var fitted: MapTrackFit?
     @State private var showReset = false
-    @State private var orbitDegrees: Double = 0
-    @State private var orbitTask: Task<Void, Never>?
-
-    /// Camera degrees per orbit step in `flyover`.
-    private static let orbitStepDegrees: Double = 8
-    private static let orbitStepSeconds: Double = 1
-    /// Direction chevrons drawn along a soloed set.
-    private static let directionMarkerCount = 5
-    /// Seconds of riding kept bright behind the replay head.
-    private static let replayTrailSeconds: TimeInterval = 6
 
     init(
         locations: [LocationSample],
@@ -124,7 +124,7 @@ struct SessionMapView: View {
         allowsInteraction ? [.pan, .zoom, .pitch, .rotate] : []
     }
 
-    /// Per-set tracks for the appearance layers. Set cards pass plain tracks instead.
+    /// Per-set tracks for solo. Set cards pass plain tracks instead.
     private var renderTracks: [SessionSetTrack] {
         if !rendering.setTracks.isEmpty { return rendering.setTracks }
         return tracks.enumerated().map { offset, samples in
@@ -132,51 +132,8 @@ struct SessionMapView: View {
         }
     }
 
-    /// Requested appearance, downgraded when its data has not loaded yet.
-    private var effectiveAppearance: SessionMapAppearance {
-        let requested = rendering.appearance
-        guard requested.needsSetTracks else { return requested }
-        guard !renderTracks.isEmpty else { return .flat }
-        if requested == .replay, rendering.timeline.isEmpty { return .sets }
-        return requested
-    }
-
-    private var resolvedSpeedScale: TrackSpeedScale? {
-        if let scale = rendering.speedScale { return scale }
-        return TrackSpeedBands.scale(forTracks: renderTracks.map(\.samples))
-    }
-
     private var mapStyle: MapStyle {
-        if effectiveAppearance == .flyover {
-            return .imagery(elevation: .realistic)
-        }
-        // `flat` stays the untouched baseline to compare the other looks against.
-        if effectiveAppearance == .flat {
-            return usesSatellite ? .hybrid : .standard
-        }
-        if usesSatellite {
-            return .hybrid(elevation: .flat, pointsOfInterest: .excludingAll)
-        }
-        // Muted basemap with no POI pins: the track is the only saturated thing on screen.
-        return .standard(
-            elevation: .flat,
-            emphasis: .muted,
-            pointsOfInterest: .excludingAll,
-            showsTraffic: false
-        )
-    }
-
-    private var cameraPitch: Double {
-        effectiveAppearance == .flyover ? 58 : 0
-    }
-
-    /// A pitched camera needs to sit further back to keep the whole track in frame.
-    private var cameraDistanceMultiplier: Double {
-        effectiveAppearance == .flyover ? 1.5 : 1
-    }
-
-    private var orbitsNow: Bool {
-        rendering.orbits && effectiveAppearance == .flyover && !allowsInteraction
+        usesSatellite ? .hybrid : .standard
     }
 
     var body: some View {
@@ -226,31 +183,16 @@ struct SessionMapView: View {
             guard let fitted else { return }
             showReset = !isNearFittedCamera(context.camera, fit: fitted)
         }
-        .onAppear { syncOrbit() }
-        .onChange(of: orbitSignature) { _, _ in syncOrbit() }
-        .onDisappear {
-            orbitTask?.cancel()
-            orbitTask = nil
-        }
     }
 
     // MARK: - Map content
 
     @MapContentBuilder
     private var mapContent: some MapContent {
-        switch effectiveAppearance {
-        case .flat:
-            flatContent
-        case .sets:
-            setsContent(lineWidth: SessionTrackPalette.coreLineWidth)
-        case .speed:
-            speedContent
-        case .solo:
+        if focusedTrack != nil {
             soloContent
-        case .replay:
-            replayContent
-        case .flyover:
-            setsContent(lineWidth: SessionTrackPalette.flyoverLineWidth)
+        } else {
+            flatContent
         }
     }
 
@@ -280,204 +222,39 @@ struct SessionMapView: View {
     }
 
     @MapContentBuilder
-    private func setsContent(lineWidth: CGFloat) -> some MapContent {
-        let visible = renderTracks
-        // Casings first, cores second: a later set must not paint over an earlier core.
-        ForEach(Array(visible.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element.samples))
-                .stroke(
-                    SessionTrackPalette.casing,
-                    style: SessionTrackPalette.strokeStyle(width: lineWidth + 3)
-                )
-        }
-        ForEach(Array(visible.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element.samples))
-                .stroke(
-                    SessionTrackPalette.setColor(position: item.offset, of: visible.count),
-                    style: SessionTrackPalette.strokeStyle(width: lineWidth)
-                )
-        }
-        startAnnotation
-    }
-
-    @MapContentBuilder
-    private var speedContent: some MapContent {
-        let scale = resolvedSpeedScale
-        let runs = speedRuns(scale: scale)
-        ForEach(Array(runs.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element.coordinates))
-                .stroke(
-                    SessionTrackPalette.casing,
-                    style: SessionTrackPalette.strokeStyle(width: SessionTrackPalette.casingLineWidth)
-                )
-        }
-        ForEach(Array(runs.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element.coordinates))
-                .stroke(
-                    SessionTrackPalette.speedColor(
-                        fraction: scale?.bandFraction(item.element.bandIndex) ?? 0.5
-                    ),
-                    style: SessionTrackPalette.strokeStyle(width: 4)
-                )
-        }
-        startAnnotation
-    }
-
-    @MapContentBuilder
     private var soloContent: some MapContent {
         if let focused = focusedTrack {
-            let visible = renderTracks
-            let color = SessionTrackPalette.setColor(
-                position: focusedPosition ?? 0,
-                of: visible.count
-            )
-            ForEach(Array(visible.enumerated()), id: \.offset) { item in
-                if item.element.setIndex != focused.setIndex {
-                    MapPolyline(coordinates: coordinates(item.element.samples))
-                        .stroke(
-                            SessionTrackPalette.ghost,
-                            style: SessionTrackPalette.strokeStyle(
-                                width: SessionTrackPalette.ghostLineWidth
-                            )
-                        )
-                }
+            ForEach(renderTracks.filter { $0.setIndex != focused.setIndex }, id: \.setIndex) { track in
+                MapPolyline(coordinates: coordinates(track.samples))
+                    .stroke(Color.secondary.opacity(0.45), lineWidth: 2)
             }
             MapPolyline(coordinates: coordinates(focused.samples))
-                .stroke(
-                    SessionTrackPalette.casing,
-                    style: SessionTrackPalette.strokeStyle(
-                        width: SessionTrackPalette.casingLineWidth
-                    )
-                )
-            MapPolyline(coordinates: coordinates(focused.samples))
-                .stroke(color, style: SessionTrackPalette.strokeStyle(width: 4))
-            ForEach(directionMarkers(for: focused.samples)) { marker in
-                Annotation("", coordinate: marker.coordinate) {
-                    Image(systemName: "location.north.fill")
-                        .font(.system(size: 8, weight: .black))
-                        .foregroundStyle(.white)
-                        .rotationEffect(.degrees(marker.bearing))
-                        .padding(3)
-                        .background(SessionTrackPalette.casing, in: Circle())
-                }
-                .annotationTitles(.hidden)
-            }
+                .stroke(Color.rpplHighlight, lineWidth: 4)
             if let first = focused.samples.first {
-                endpointAnnotation("Start", at: coordinate(first), symbol: "flag.fill", fill: color)
+                endpointAnnotation("Start", at: coordinate(first), symbol: "play.fill")
             }
             if let last = focused.samples.last {
-                endpointAnnotation(
-                    "Finish",
-                    at: coordinate(last),
-                    symbol: "flag.checkered",
-                    fill: SessionTrackPalette.casing
-                )
+                endpointAnnotation("End", at: coordinate(last), symbol: "stop.fill")
             }
-        } else {
-            setsContent(lineWidth: SessionTrackPalette.coreLineWidth)
-        }
-    }
-
-    @MapContentBuilder
-    private var replayContent: some MapContent {
-        let timeline = rendering.timeline
-        let progress = rendering.replayProgress
-        let drawn = timeline.polylines(upToProgress: progress)
-        let visible = renderTracks
-
-        ForEach(Array(visible.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element.samples))
-                .stroke(
-                    SessionTrackPalette.ghost.opacity(0.5),
-                    style: SessionTrackPalette.strokeStyle(
-                        width: SessionTrackPalette.ghostLineWidth
-                    )
-                )
-        }
-        ForEach(Array(drawn.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element))
-                .stroke(
-                    SessionTrackPalette.casing,
-                    style: SessionTrackPalette.strokeStyle(
-                        width: SessionTrackPalette.casingLineWidth
-                    )
-                )
-        }
-        ForEach(Array(drawn.enumerated()), id: \.offset) { item in
-            MapPolyline(coordinates: coordinates(item.element))
-                .stroke(
-                    SessionTrackPalette.setColor(position: item.offset, of: max(visible.count, 1)),
-                    style: SessionTrackPalette.strokeStyle(width: 4)
-                )
-        }
-        let trail = timeline.headTrail(
-            upToProgress: progress,
-            seconds: Self.replayTrailSeconds
-        )
-        if trail.count >= 2 {
-            MapPolyline(coordinates: coordinates(trail))
-                .stroke(
-                    SessionTrackPalette.head,
-                    style: SessionTrackPalette.strokeStyle(width: 5)
-                )
-        }
-        if let head = timeline.point(atProgress: progress) {
-            Annotation("", coordinate: coordinate(head.coordinate)) {
-                replayHeadBadge(speedKmh: head.speedKmh)
-            }
-            .annotationTitles(.hidden)
-        }
-    }
-
-    @MapContentBuilder
-    private var startAnnotation: some MapContent {
-        if let start = startCoordinate {
-            endpointAnnotation(
-                "Start",
-                at: start,
-                symbol: "flag.fill",
-                fill: SessionTrackPalette.setColor(position: 0, of: max(renderTracks.count, 1))
-            )
         }
     }
 
     private func endpointAnnotation(
         _ title: LocalizedStringKey,
         at coordinate: CLLocationCoordinate2D,
-        symbol: String,
-        fill: Color
+        symbol: String
     ) -> some MapContent {
         Annotation(title, coordinate: coordinate) {
             Image(systemName: symbol)
                 .font(.system(size: 9, weight: .heavy))
                 .foregroundStyle(.white)
                 .frame(width: 20, height: 20)
-                .background(fill, in: Circle())
+                .background(Color.rpplHighlight, in: Circle())
                 .overlay {
                     Circle().strokeBorder(.white.opacity(0.85), lineWidth: 1.5)
                 }
         }
         .annotationTitles(.hidden)
-    }
-
-    private func replayHeadBadge(speedKmh: Double?) -> some View {
-        HStack(spacing: 4) {
-            Circle()
-                .fill(SessionTrackPalette.head)
-                .frame(width: 9, height: 9)
-                .overlay {
-                    Circle().strokeBorder(SessionTrackPalette.casing, lineWidth: 1)
-                }
-            if let speedKmh {
-                Text(LogbookFormatting.speedKilometersPerHour(speedKmh))
-                    .font(.caption2.bold())
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-            }
-        }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(SessionTrackPalette.casing, in: Capsule())
     }
 
     @ViewBuilder
@@ -516,52 +293,9 @@ struct SessionMapView: View {
 
     // MARK: - Track helpers
 
-    /// Only `solo` isolates a set; other looks must keep the whole-session framing.
     private var focusedTrack: SessionSetTrack? {
-        guard effectiveAppearance == .solo, let soloSetIndex = rendering.soloSetIndex else {
-            return nil
-        }
+        guard let soloSetIndex = rendering.soloSetIndex else { return nil }
         return renderTracks.first { $0.setIndex == soloSetIndex }
-    }
-
-    private var focusedPosition: Int? {
-        guard let focused = focusedTrack else { return nil }
-        return renderTracks.firstIndex { $0.setIndex == focused.setIndex }
-    }
-
-    private var startCoordinate: CLLocationCoordinate2D? {
-        if let sessionMapData { return coordinate(sessionMapData.start) }
-        guard let first = renderTracks.first?.samples.first else { return nil }
-        return coordinate(first)
-    }
-
-    private func speedRuns(scale: TrackSpeedScale?) -> [TrackSpeedRun] {
-        guard let scale else { return [] }
-        return renderTracks.flatMap { TrackSpeedBands.runs(from: $0.samples, scale: scale) }
-    }
-
-    private func directionMarkers(for samples: [LocationSample]) -> [SessionMapDirectionMarker] {
-        guard samples.count >= 4 else { return [] }
-        let slots = min(Self.directionMarkerCount, samples.count / 3)
-        guard slots >= 1 else { return [] }
-        var markers: [SessionMapDirectionMarker] = []
-        for slot in 0..<slots {
-            let position = Double(slot) + 0.5
-            let index = Int(position / Double(slots) * Double(samples.count - 2))
-            guard index + 1 < samples.count,
-                  let bearing = GeoBearing.degrees(from: samples[index], to: samples[index + 1])
-            else {
-                continue
-            }
-            markers.append(
-                SessionMapDirectionMarker(
-                    id: index,
-                    coordinate: coordinate(samples[index]),
-                    bearing: bearing
-                )
-            )
-        }
-        return markers
     }
 
     private func coordinates(_ samples: [LocationSample]) -> [CLLocationCoordinate2D] {
@@ -587,19 +321,14 @@ struct SessionMapView: View {
         return "\(preferredFrame.centerLatitude)-\(preferredFrame.centerLongitude)-\(preferredFrame.headingDegrees)-\(preferredFrame.spanWidthMeters)"
     }
 
-    /// Camera-relevant inputs only — replay progress must not refit mid-playback.
     private var dataSignature: String {
-        var signature = "\(effectiveAppearance.rawValue)-\(focusedTrack?.setIndex ?? -1)"
+        var signature = "solo-\(focusedTrack?.setIndex ?? -1)"
         if let sessionMapData {
             signature += "-session-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
         let trackPoints = renderTracks.reduce(0) { $0 + $1.samples.count }
         signature += "-sets-\(renderTracks.count)-\(trackPoints)"
         return signature
-    }
-
-    private var orbitSignature: String {
-        "\(orbitsNow)-\(fitted == nil)"
     }
 
     private var fitCoordinates: [(latitude: Double, longitude: Double)] {
@@ -667,9 +396,9 @@ struct SessionMapView: View {
                 latitude: fit.centerLatitude,
                 longitude: fit.centerLongitude
             ),
-            distance: fit.cameraDistanceMeters * cameraDistanceMultiplier,
-            heading: fit.headingDegrees + orbitDegrees,
-            pitch: cameraPitch
+            distance: fit.cameraDistanceMeters,
+            heading: fit.headingDegrees,
+            pitch: 0
         )
     }
 
@@ -688,14 +417,14 @@ struct SessionMapView: View {
     private func isNearFittedCamera(_ camera: MapCamera, fit: MapTrackFit) -> Bool {
         let headingDelta = abs(
             MapTrackFitter.clampedHeadingDegrees(
-                camera.heading - (fit.headingDegrees + orbitDegrees)
+                camera.heading - fit.headingDegrees
             )
         )
         let latDelta = abs(camera.centerCoordinate.latitude - fit.centerLatitude)
         let lonDelta = abs(camera.centerCoordinate.longitude - fit.centerLongitude)
-        let expectedDistance = fit.cameraDistanceMeters * cameraDistanceMultiplier
+        let expectedDistance = fit.cameraDistanceMeters
         let distanceRatio = abs(camera.distance - expectedDistance) / max(expectedDistance, 1)
-        let pitchDelta = abs(camera.pitch - cameraPitch)
+        let pitchDelta = abs(camera.pitch)
         return headingDelta < 3
             && latDelta < 0.00012
             && lonDelta < 0.00012
@@ -703,36 +432,6 @@ struct SessionMapView: View {
             && pitchDelta < 6
     }
 
-    // MARK: - Orbit
-
-    private func syncOrbit() {
-        orbitTask?.cancel()
-        orbitTask = nil
-        guard orbitsNow else {
-            if orbitDegrees != 0 {
-                orbitDegrees = 0
-                applyFittedCamera(animated: true)
-            }
-            return
-        }
-        orbitTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(Self.orbitStepSeconds))
-                if Task.isCancelled { return }
-                guard let fitted else { continue }
-                orbitDegrees += Self.orbitStepDegrees
-                withAnimation(.linear(duration: Self.orbitStepSeconds * 1.05)) {
-                    position = .camera(camera(for: fitted))
-                }
-            }
-        }
-    }
-}
-
-private struct SessionMapDirectionMarker: Identifiable {
-    let id: Int
-    let coordinate: CLLocationCoordinate2D
-    let bearing: Double
 }
 
 private struct SessionMapCircleButtonLabel: View {
