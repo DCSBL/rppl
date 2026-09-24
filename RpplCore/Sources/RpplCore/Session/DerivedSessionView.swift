@@ -10,7 +10,8 @@ public struct DerivedSessionView: Codable, Equatable, Sendable {
     public var mapFrame: MapTrackFrame?
     /// Distilled heatmap polylines for session map; synced to Watch.
     public var mapTracks: SessionMapTrackData?
-    /// Phone-only reverse-geocode; omitted on Watch.
+    /// Location label shown in lists/detail: the linked park's name, else the phone-only
+    /// reverse-geocoded city. Written by the phone; pushed to Watch.
     public var cityName: String?
 
     public init(

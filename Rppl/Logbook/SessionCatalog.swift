@@ -68,12 +68,13 @@ final class SessionCatalog {
                     .sorted { $0.startedAt > $1.startedAt }
             }
 
+            let parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
             var loaded: [SessionEntry] = []
             loaded.reserveCapacity(manifests.count)
 
             for manifest in manifests {
                 try Task.checkCancellation()
-                let entry = try await buildEntry(store: store, manifest: manifest)
+                let entry = try await buildEntry(store: store, manifest: manifest, parks: parks)
                 loaded.append(entry)
             }
 
@@ -112,9 +113,25 @@ final class SessionCatalog {
         }
     }
 
-    private func buildEntry(store: SessionFileStore, manifest: SessionManifest) async throws -> SessionEntry {
-        let summary = try await StoreIO.runOffMain {
+    private func buildEntry(
+        store: SessionFileStore,
+        manifest: SessionManifest,
+        parks: [Park]
+    ) async throws -> SessionEntry {
+        var summary = try await StoreIO.runOffMain {
             try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
+        }
+
+        // Park link: the label becomes the park name; unlinked sessions fall through to city geocoding.
+        let center = summary.mapFrame.map { ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude) }
+        let park = try? await StoreIO.runOffMain {
+            try store.linkPark(sessionId: manifest.sessionId, center: center, parks: parks)
+        }
+        if let park, park.name != summary.cityName {
+            summary = try await StoreIO.runOffMain {
+                try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
+            }
+            PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: manifest.sessionId)
         }
 
         let topSpeedKmh = summary.stats.maxSpeedKmh ?? summary.stats.topSpeedKmh

@@ -1202,6 +1202,22 @@
         }
       }
     },
+    "Park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park"
+          }
+        }
+      }
+    },
     "Location" : {
       "localizations" : {
         "en" : {
@@ -1214,6 +1230,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Locatie"
+          }
+        }
+      }
+    },
+    "No park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No park"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen park"
           }
         }
       }
