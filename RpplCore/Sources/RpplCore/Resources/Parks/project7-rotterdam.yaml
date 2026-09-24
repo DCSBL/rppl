@@ -1,0 +1,56 @@
+version: 1
+id: project7-rotterdam
+created_at: 2026-09-24
+updated_at: 2026-09-24
+history:
+  - date: 2026-09-24
+    description: initial
+
+name: Project 7 Cablepark Rotterdam
+address: Kosboulevard 35, 3059 XZ Rotterdam
+timezone: Europe/Amsterdam
+location:
+  lat: 51.979207
+  lon: 4.573426
+
+phone: 010 - 2600 110
+email: info@project7cablepark.nl
+website: https://www.project7cablepark.nl
+
+cables:
+  - name: Cable
+    direction: cw
+    # First point is the start.
+    points:
+      - { lat: 51.9793329062201, lon: 4.574032424368503 }
+      - { lat: 51.98027154180474, lon: 4.577629454117891 }
+      - { lat: 51.98005965351376, lon: 4.578447235195577 }
+      - { lat: 51.97955932699905, lon: 4.578422725733926 }
+      - { lat: 51.97854472025907, lon: 4.574643325299373 }
+
+# Drop-in windows (rules) and fixed-start blocks (slots). A block is available
+# when it fits inside an open window. Source: project7cablepark.nl/openingstijden
+opening:
+  booking: required
+  note: >-
+    Book a block online in advance and check in at the desk 30 minutes before start.
+    Easter, Ascension and Pentecost use weekend hours in April and May.
+  rules:
+    - { label: April, months: [4], days: [weekend], open: "12:30", close: "17:00" }
+    - { label: May, months: [5], days: [weekdays], open: "14:00", close: "20:00" }
+    - { label: May, months: [5], days: [weekend], open: "12:30", close: "20:00" }
+    - { label: June, months: [6], days: [weekdays], open: "14:00", close: "21:30" }
+    - { label: June, months: [6], days: [weekend], open: "12:30", close: "21:30" }
+    - { label: July, months: [7], days: [daily], open: "11:00", close: "21:30" }
+    - { label: August, months: [8], days: [daily], open: "11:00", close: "20:00" }
+    - { label: September, months: [9], days: [weekdays], open: "14:00", close: "20:00" }
+    - { label: September, months: [9], days: [weekend], open: "12:30", close: "20:00" }
+    - { label: October, months: [10], days: [weekend], open: "12:30", close: "17:00" }
+  slots:
+    - { id: "1", start: "11:00", end: "12:30" }
+    - { id: "2", start: "12:30", end: "14:00" }
+    - { id: "3", start: "14:00", end: "15:30" }
+    - { id: "4", start: "15:30", end: "17:00" }
+    - { id: "5", start: "17:00", end: "18:30" }
+    - { id: "6", start: "18:30", end: "20:00" }
+    - { id: "7", start: "20:00", end: "21:30" }

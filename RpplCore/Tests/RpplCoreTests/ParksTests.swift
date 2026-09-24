@@ -1,0 +1,186 @@
+import Foundation
+import Testing
+@testable import RpplCore
+
+struct ParksTests {
+    private let amsterdam = TimeZone(identifier: "Europe/Amsterdam")!
+
+    private func date(_ iso: String) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = amsterdam
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))!
+    }
+
+    private func project7() throws -> Park {
+        let park = ParkCatalog.loadBundled().first { $0.id == "project7-rotterdam" }
+        return try #require(park)
+    }
+
+    @Test func bundledProject7Decodes() throws {
+        let park = try project7()
+        #expect(park.name == "Project 7 Cablepark Rotterdam")
+        #expect(park.location.lat == 51.979207)
+        #expect(park.cables?.count == 1)
+        #expect(park.cables?.first?.direction == .clockwise)
+        #expect(park.cables?.first?.points?.count == 5)
+        #expect(park.opening?.slots?.count == 7)
+    }
+
+    @Test func project7SeptemberWeekdayOffersBlocks3To6() throws {
+        // 2026-09-24 is a Thursday.
+        let day = try project7().schedule(on: date("2026-09-24"))
+        #expect(day.windows.map { ParkSchedule.timeText(minutes: $0.startMinute) } == ["14:00"])
+        #expect(day.windows.map { ParkSchedule.timeText(minutes: $0.endMinute) } == ["20:00"])
+        #expect(day.availableSlots.map(\.id) == ["3", "4", "5", "6"])
+    }
+
+    @Test func project7SeptemberWeekendAddsBlock2() throws {
+        // 2026-09-26 is a Saturday.
+        let day = try project7().schedule(on: date("2026-09-26"))
+        #expect(day.availableSlots.map(\.id) == ["2", "3", "4", "5", "6"])
+    }
+
+    @Test func project7ClosedInWinterAndAprilWeekdays() throws {
+        let park = try project7()
+        #expect(park.schedule(on: date("2026-01-14")).isOpen == false)
+        #expect(park.schedule(on: date("2026-04-15")).isOpen == false)
+        #expect(park.schedule(on: date("2026-10-07")).isOpen == false)
+    }
+
+    @Test func project7JulyOpensAllBlocks() throws {
+        let day = try project7().schedule(on: date("2026-07-15"))
+        #expect(day.availableSlots.count == 7)
+    }
+
+    @Test func dropInOnlyParkWithDatedRuleChange() throws {
+        let yaml = """
+        version: 1
+        id: drop-in
+        name: Drop In
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          booking: none
+          rules:
+            - { label: Summer, until: "2026-10-04", days: [wed], open: "16:00", close: "20:00" }
+            - { label: Beginner hour, days: [sat], open: "12:00", close: "13:00", note: "27 km/h" }
+            - { days: [sat], open: "12:00", close: "18:00" }
+            - { label: Autumn, from: "2026-10-05", days: [wed], open: "17:00", close: "19:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        let summerWed = park.schedule(on: date("2026-09-30"))
+        #expect(summerWed.windows.count == 1)
+        #expect(summerWed.windows.first?.startMinute == 16 * 60)
+        #expect(summerWed.availableSlots.isEmpty)
+        let autumnWed = park.schedule(on: date("2026-10-07"))
+        #expect(autumnWed.windows.first?.startMinute == 17 * 60)
+        let saturday = park.schedule(on: date("2026-09-26"))
+        #expect(saturday.windows.count == 2)
+        #expect(saturday.windows.first?.note == "27 km/h")
+    }
+
+    @Test func blocksOnlyParkWithoutRules() throws {
+        let yaml = """
+        version: 1
+        id: blocks
+        name: Blocks
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          slots:
+            - { id: a, days: [sat, sun], start: "10:00", end: "11:00" }
+            - { id: b, start: "11:00", end: "12:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(park.schedule(on: date("2026-09-26")).availableSlots.map(\.id) == ["a", "b"])
+        #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.id) == ["b"])
+    }
+
+    @Test func minimalParkAndOptionalCablePoints() throws {
+        let yaml = """
+        version: 1
+        id: bare
+        name: Bare
+        location: { lat: 1, lon: 2 }
+        cables:
+          - { name: Beginner, direction: 2d, length_m: 320, description: Short }
+          - { direction: custom-loop }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(park.opening == nil)
+        #expect(park.cables?.first?.effectiveLengthM == 320)
+        #expect(park.cables?.first?.direction == .twoD)
+        #expect(park.cables?.last?.direction?.rawValue == "custom-loop")
+        #expect(park.cables?.last?.effectiveLengthM == nil)
+        #expect(park.schedule().isOpen == false)
+    }
+
+    @Test func startPointsDefaultToFirstAndHonourFlags() {
+        let a = ParkCablePoint(lat: 1, lon: 1)
+        let b = ParkCablePoint(lat: 2, lon: 2, start: true)
+        #expect(ParkCable(points: [a, b]).startPoints == [b])
+        #expect(ParkCable(points: [a, ParkCablePoint(lat: 2, lon: 2)]).startPoints == [a])
+        #expect(ParkCable().startPoints.isEmpty)
+    }
+
+    @Test func loopCableLengthIncludesClosingSegment() throws {
+        let cable = try #require(try project7().cables?.first)
+        let open = try #require(cable.points).adjacentMeters
+        let length = try #require(cable.computedLengthM)
+        #expect(length > open)
+        #expect(abs(open - 666.3) < 1)
+        #expect(abs(length - 763.5) < 1)
+        var twoD = cable
+        twoD.direction = .twoD
+        #expect(twoD.computedLengthM == open)
+    }
+
+    @Test func yamlRoundTrip() throws {
+        let park = try project7()
+        var decoded = try ParkCatalog.parse(yaml: try ParkCatalog.encode(park), fallbackId: "x")
+        let original = try #require(park.cables?.first?.points)
+        let roundTripped = try #require(decoded.cables?.first?.points)
+        for (a, b) in zip(original, roundTripped) {
+            #expect(abs(a.lat - b.lat) < 1e-9 && abs(a.lon - b.lon) < 1e-9)
+        }
+        // The encoder trims coordinate digits past double precision; compare the rest exactly.
+        decoded.cables = park.cables
+        #expect(decoded == park)
+    }
+
+    @Test func userFileOverridesBundledById() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("parks-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let yaml = "version: 1\nid: project7-rotterdam\nname: Edited\nlocation: { lat: 1, lon: 2 }\n"
+        try yaml.write(to: dir.appendingPathComponent("edited.yaml"), atomically: true, encoding: .utf8)
+        try "not: [valid".write(to: dir.appendingPathComponent("broken.yaml"), atomically: true, encoding: .utf8)
+        let parks = ParkCatalog.load(userRoot: dir)
+        #expect(parks.filter { $0.id == "project7-rotterdam" }.map(\.name) == ["Edited"])
+    }
+
+    @Test func sortingAndVisitCounts() {
+        let near = Park(id: "near", name: "Near", location: ParkCoordinate(lat: 52.0, lon: 4.0))
+        let far = Park(id: "far", name: "Far", location: ParkCoordinate(lat: 53.0, lon: 5.0))
+        let fav = Park(id: "fav", name: "Zed", location: ParkCoordinate(lat: 54.0, lon: 6.0))
+        let me = ParkCoordinate(lat: 52.001, lon: 4.001)
+        let parks = [far, fav, near]
+        let byDistance = ParkListing.sorted(parks, favorites: ["fav"], visits: [:], userLocation: me, sort: .distance)
+        #expect(byDistance.map(\.id) == ["fav", "near", "far"])
+        let byVisits = ParkListing.sorted(parks, favorites: [], visits: ["far": 3, "near": 1], userLocation: me, sort: .visits)
+        #expect(byVisits.map(\.id) == ["far", "near", "fav"])
+        let noFix = ParkListing.sorted(parks, favorites: [], visits: [:], userLocation: nil, sort: .distance)
+        #expect(noFix.map(\.id) == ["far", "near", "fav"])
+
+        let counts = ParkListing.visitCounts(
+            parks: parks,
+            sessionCenters: [me, ParkCoordinate(lat: 52.002, lon: 4.0), ParkCoordinate(lat: 10, lon: 10)]
+        )
+        #expect(counts == ["near": 2])
+    }
+}
+
+private extension Array where Element == ParkCablePoint {
+    var adjacentMeters: Double {
+        zip(self, dropFirst()).reduce(0) { $0 + $1.0.coordinate.meters(to: $1.1.coordinate) }
+    }
+}

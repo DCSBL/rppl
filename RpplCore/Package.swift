@@ -12,9 +12,13 @@ let package = Package(
     products: [
         .library(name: "RpplCore", targets: ["RpplCore"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0"),
+    ],
     targets: [
         .target(
             name: "RpplCore",
+            dependencies: [.product(name: "Yams", package: "Yams")],
             resources: [.process("Resources")]
         ),
         .testTarget(
