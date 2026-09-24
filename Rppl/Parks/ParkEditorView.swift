@@ -30,8 +30,18 @@ struct ParkEditorView: View {
         _draft = State(initialValue: start)
     }
 
+    /// Where the trace map opens: the park pin, else the user's position, never 0,0.
+    private var traceCenter: ParkCoordinate {
+        ParkDraft.isValid(draft.location) ? draft.location : (location.coordinate ?? draft.location)
+    }
+
     private var issues: [ParkDraft.Issue] { ParkDraft.validate(draft) }
-    private var isDirty: Bool { draft != initial }
+    private var isDirty: Bool { draft != initial && !(original == nil && onlyAutoLocationChanged) }
+    private var onlyAutoLocationChanged: Bool {
+        var probe = draft
+        probe.location = initial.location
+        return probe == initial
+    }
 
     var body: some View {
         NavigationStack {
@@ -64,12 +74,17 @@ struct ParkEditorView: View {
                 Text(saveError ?? "")
             }
             .fullScreenCover(item: Binding(get: { tracing.map(TraceTarget.init) }, set: { tracing = $0?.index })) { target in
-                CableTraceView(cable: cableBinding(target.index), center: draft.location)
+                CableTraceView(cable: cableBinding(target.index), center: traceCenter)
             }
             .sheet(isPresented: $pickingLocation) {
                 LocationPickerView(coordinate: $draft.location)
             }
+            .task { location.refresh() }
             .interactiveDismissDisabled(isDirty)
+            .onChange(of: location.coordinate) { _, fix in
+                // A new park has no location yet: default it to where the user is.
+                if let fix, original == nil, !ParkDraft.isValid(draft.location) { draft.location = fix }
+            }
         }
         .tint(Color.rpplAccent)
     }
