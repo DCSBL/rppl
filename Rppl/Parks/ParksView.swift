@@ -10,6 +10,9 @@ struct ParksView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var showMap = false
+    @State private var searchText = ""
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     private var visits: [String: Int] {
         let centers = catalog.entries.compactMap(\.center)
@@ -18,7 +21,7 @@ struct ParksView: View {
 
     private var sortedParks: [Park] {
         ParkListing.sorted(
-            parks,
+            ParkSearch.filter(parks, query: searchText),
             favorites: favorites.ids,
             visits: visits,
             userLocation: location.coordinate,
@@ -64,8 +67,23 @@ struct ParksView: View {
                     .listRowSeparator(.hidden)
                 }
 
-                if parks.isEmpty {
+                if sort == .distance, location.availability != .available {
+                    ParksLocationNeededCard(
+                        availability: location.availability,
+                        onRequestAccess: { location.refresh() },
+                        onOpenSettings: {
+                            if let url = ParkNavigation.appSettingsURL { openURL(url) }
+                        }
+                    )
+                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else if parks.isEmpty {
                     Text("No parks yet")
+                        .foregroundStyle(Color.rpplMuted)
+                        .listRowBackground(Color.clear)
+                } else if sortedParks.isEmpty {
+                    Text("No parks found")
                         .foregroundStyle(Color.rpplMuted)
                         .listRowBackground(Color.clear)
                 } else {
@@ -89,6 +107,7 @@ struct ParksView: View {
             .contentMargins(.top, 8, for: .scrollContent)
             .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search parks"))
             .navigationDestination(for: Park.self) { park in
                 ParkDetailContainer(park: park)
             }
@@ -99,8 +118,14 @@ struct ParksView: View {
         }
         .task {
             parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
-            location.start()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
+        }
+        // Refresh only on appear / foreground return — a live-updating fix would reorder the
+        // Nearby list out from under the user while they're scrolling or tapping a park.
+        .onAppear { location.refresh() }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            location.refresh()
         }
     }
 }

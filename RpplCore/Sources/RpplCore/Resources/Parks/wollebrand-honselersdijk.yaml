@@ -1,0 +1,70 @@
+version: 1
+id: wollebrand-honselersdijk
+created_at: 2026-09-24
+updated_at: 2026-09-24
+history:
+  - date: 2026-09-24
+    description: initial
+  - date: 2026-09-24
+    description: add cable trace and refine dock location
+  - date: 2026-09-24
+    description: add block schedule and prices
+
+name: Cablepark de Wollebrand
+address: Broekpolderlaan 10, 2675 LJ Honselersdijk
+timezone: Europe/Amsterdam
+# Dock.
+location:
+  lat: 51.99278189793896
+  lon: 4.239882979511977
+
+phone: 0174 - 64 11 44
+email: info@kabelskibaan.nl
+website: https://www.kabelskibaan.nl
+
+links:
+  - { kind: booking, url: "https://reserveren.kabelskibaan.nl/checkOut/954e89a6-1cf5-46ef-b48e-0d0cb642128d/dateSelect" }
+  - { kind: facebook, url: "https://www.facebook.com/people/Cablepark-Wollebrand/100063621169078/" }
+
+cables:
+  - name: Cable
+    direction: cw
+    description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
+    # Points are listed in travel order, first point is the start.
+    points:
+      - { lat: 51.99260583846942, lon: 4.239754339256239 }
+      - { lat: 51.9916676524598, lon: 4.242258597378462 }
+      - { lat: 51.99110265802685, lon: 4.242111288077519 }
+      - { lat: 51.99171948645172, lon: 4.238748427146507 }
+      - { lat: 51.99231557307252, lon: 4.238651623891362 }
+
+# Fixed-start 80-minute blocks. Source: kabelskibaan.nl/openingstijden.
+opening:
+  booking: required
+  note: >-
+    Book a block online in advance. Arrive 30 minutes before your start time. Outside
+    regular hours the park can be booked exclusively.
+  slots:
+    - { id: "1", start: "12:30", end: "13:50" }
+    - { id: "2", start: "14:00", end: "15:20" }
+    - { id: "3", start: "15:30", end: "16:50" }
+    - { id: "4", start: "17:00", end: "18:20" }
+    - { id: "5", start: "18:30", end: "19:50" }
+    - { id: "6", start: "20:00", end: "21:20" }
+
+prices:
+  - { name: Block (80 min), price: "€ 25,00", note: p.p. }
+  - { name: Wetsuit rental, price: "€ 5,00", note: per 80 min }
+  - { name: Wakeboard rental, price: "€ 10,00", note: per 80 min }
+  - { name: Obstacle board rental, price: "€ 20,00", note: per 80 min }
+  - { name: 10x block (80 min), price: "€ 220,00", note: "€ 30,00 discount" }
+
+facilities:
+  - Rental (skis, wakeboard, wetsuit)
+  - Restaurant (Wollebrand Lakehouse)
+  - Groups / corporate outings
+
+description: >-
+  Open since 2002. Rates include water skis, life vest and instruction. Wakeboard rental
+  requires ID. Youth up to 15 need supervisor permission. Onsite Wollebrand Lakehouse
+  restaurant for food and drinks.
