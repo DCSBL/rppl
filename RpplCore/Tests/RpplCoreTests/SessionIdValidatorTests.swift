@@ -47,7 +47,8 @@ struct SessionIdValidatorTests {
         let watchRoot = tempRoot().appendingPathComponent("watch", isDirectory: true)
         let phoneRoot = tempRoot().appendingPathComponent("phone", isDirectory: true)
         defer {
-            try? FileManager.default.removeItem(at: watchRoot.deletingLastPathComponent())
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
         }
 
         let watchStore = SessionFileStore(rootURL: watchRoot)
