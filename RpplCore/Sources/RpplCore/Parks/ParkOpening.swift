@@ -158,6 +158,16 @@ public struct ParkMonthSchedule: Equatable, Sendable, Identifiable {
     public var id: Int { month ?? 0 }
 }
 
+/// Whether a park is open right now, accounting for the current time — not just whether today
+/// has any opening windows at all.
+public enum ParkOpenStatus: Equatable, Sendable {
+    /// Open now, or opens later today.
+    case openToday
+    case opensTomorrow
+    /// Not open today, and the next opening isn't tomorrow either (or there's no schedule at all).
+    case closed
+}
+
 public enum ParkSchedule {
     /// Collapses opening rules into one entry per month, ordered January to December.
     public static func months(for opening: ParkOpening?) -> [ParkMonthSchedule] {
@@ -230,6 +240,26 @@ public enum ParkSchedule {
             }
         }
         return ParkDaySchedule(windows: windows, availableSlots: available)
+    }
+
+    /// Today's `isOpen` alone doesn't account for the current time of day — a park that closed
+    /// at 18:00 still has windows "today" at 20:00. This checks whether now still falls inside
+    /// (or before) one of today's windows before falling back to tomorrow's schedule.
+    public static func status(for opening: ParkOpening?, at date: Date, timeZone: TimeZone) -> ParkOpenStatus {
+        guard let opening else { return .closed }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        let nowMinute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+
+        let today = day(for: opening, on: date, timeZone: timeZone)
+        if today.windows.contains(where: { nowMinute < $0.endMinute }) {
+            return .openToday
+        }
+
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else { return .closed }
+        return day(for: opening, on: tomorrow, timeZone: timeZone).isOpen ? .opensTomorrow : .closed
     }
 
     public static func minutes(_ time: String) -> Int? {

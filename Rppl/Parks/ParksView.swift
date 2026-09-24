@@ -170,8 +170,8 @@ private struct ParkCard: View {
     let isFavorite: Bool
     let entry: ParkEntry?
 
-    private var openToday: Bool? {
-        park.opening == nil ? nil : park.schedule().isOpen
+    private var openStatus: ParkOpenStatus? {
+        park.opening == nil ? nil : park.openStatus()
     }
 
     var body: some View {
@@ -204,11 +204,11 @@ private struct ParkCard: View {
                             .multilineTextAlignment(.leading)
                     }
                     FlowLayout(spacing: 6) {
-                        if let openToday {
+                        if let openStatus {
                             ParkChip(
-                                text: openToday ? String(localized: "Open today") : String(localized: "Closed today"),
-                                tint: openToday ? .green : .red,
-                                fill: (openToday ? Color.green : Color.red).opacity(0.14)
+                                text: openStatus.badgeText,
+                                tint: openStatus.badgeColor,
+                                fill: openStatus.badgeColor.opacity(0.14)
                             )
                         }
                         if let distanceMeters {

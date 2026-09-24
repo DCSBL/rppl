@@ -12,6 +12,15 @@ struct ParksTests {
         return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))!
     }
 
+    private func date(_ iso: String, hour: Int, minute: Int = 0) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = amsterdam
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        return calendar.date(
+            from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: hour, minute: minute)
+        )!
+    }
+
     private func project7() throws -> Park {
         let park = ParkCatalog.loadBundled().first { $0.id == "project7-rotterdam" }
         return try #require(park)
@@ -46,6 +55,20 @@ struct ParksTests {
         #expect(park.schedule(on: date("2026-01-14")).isOpen == false)
         #expect(park.schedule(on: date("2026-04-15")).isOpen == false)
         #expect(park.schedule(on: date("2026-10-07")).isOpen == false)
+    }
+
+    @Test func openStatusReflectsTimeOfDayNotJustTheDate() throws {
+        let park = try project7()
+        // 2026-09-24 is a Thursday, open 14:00-20:00; Friday 09-25 is also a weekday (open).
+        #expect(park.openStatus(at: date("2026-09-24", hour: 10)) == .openToday)
+        #expect(park.openStatus(at: date("2026-09-24", hour: 15)) == .openToday)
+        // Past today's close, but tomorrow is open too: must not still read as "open".
+        #expect(park.openStatus(at: date("2026-09-24", hour: 21)) == .opensTomorrow)
+        // 2026-10-02 is a Friday: October only opens weekends, so today's closed but Saturday isn't.
+        #expect(park.openStatus(at: date("2026-10-02", hour: 12)) == .opensTomorrow)
+        // 2026-10-05 is a Monday, 10-06 a Tuesday: both closed (October is weekend-only).
+        #expect(park.openStatus(at: date("2026-10-05", hour: 12)) == .closed)
+        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .closed)
     }
 
     @Test func monthsCollapseToOneEntryPerMonth() throws {

@@ -360,6 +360,24 @@ struct ParkChip: View {
     }
 }
 
+extension ParkOpenStatus {
+    var badgeText: String {
+        switch self {
+        case .openToday: String(localized: "Open today")
+        case .opensTomorrow: String(localized: "Opens tomorrow")
+        case .closed: String(localized: "Closed")
+        }
+    }
+
+    var badgeColor: Color {
+        switch self {
+        case .openToday: .green
+        case .opensTomorrow: .yellow
+        case .closed: .red
+        }
+    }
+}
+
 enum ParkOriginBadge {
     static func text(for entry: ParkEntry?) -> String? {
         guard let entry else { return nil }

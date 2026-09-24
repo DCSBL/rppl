@@ -259,6 +259,12 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
     public func schedule(on date: Date = Date()) -> ParkDaySchedule {
         ParkSchedule.day(for: opening, on: date, timeZone: resolvedTimeZone)
     }
+
+    /// Whether the park is open right now (or opens later today), opens tomorrow, or is closed
+    /// beyond that — accounting for the current time, not just today's date.
+    public func openStatus(at date: Date = Date()) -> ParkOpenStatus {
+        ParkSchedule.status(for: opening, at: date, timeZone: resolvedTimeZone)
+    }
 }
 
 /// Opaque-string values for `SessionManifest.parkIdSource`.
