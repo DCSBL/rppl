@@ -869,30 +869,6 @@ if !migrated.isEmpty {
         }
         return result
     }
-}
-
-/// Bridge for pre-v3 `assumptions.jsonl` lines (no `detectorId`).
-private struct LegacyAssumptionLine: Decodable {
-    var id: String?
-    var code: String
-    var timestamp: Date
-    var reason: String
-    var speedMps: Double?
-    var waterSubmersionState: String?
-    var motionActivity: String?
-
-    func asDetectionEvent() -> DetectionEvent {
-        DetectionEvent(
-            id: id ?? UUID().uuidString,
-            code: code,
-            timestamp: timestamp,
-            reason: reason,
-            detectorId: "legacy_assumption",
-            speedMps: speedMps,
-            waterSubmersionState: waterSubmersionState,
-            motionActivity: motionActivity
-        )
-    }
 
     // MARK: - Package path index
 
@@ -988,7 +964,30 @@ private struct LegacyAssumptionLine: Decodable {
         try fileManager.moveItem(at: current, to: destination)
         rememberDirectory(destination, for: sessionId)
     }
+}
 
+/// Bridge for pre-v3 `assumptions.jsonl` lines (no `detectorId`).
+private struct LegacyAssumptionLine: Decodable {
+    var id: String?
+    var code: String
+    var timestamp: Date
+    var reason: String
+    var speedMps: Double?
+    var waterSubmersionState: String?
+    var motionActivity: String?
+
+    func asDetectionEvent() -> DetectionEvent {
+        DetectionEvent(
+            id: id ?? UUID().uuidString,
+            code: code,
+            timestamp: timestamp,
+            reason: reason,
+            detectorId: "legacy_assumption",
+            speedMps: speedMps,
+            waterSubmersionState: waterSubmersionState,
+            motionActivity: motionActivity
+        )
+    }
 }
 
 public struct SessionTransferPackage: Codable, Equatable, Sendable {
