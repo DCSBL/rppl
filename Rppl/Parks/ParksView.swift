@@ -190,6 +190,11 @@ private struct ParkCard: View {
                                 .foregroundStyle(Color.rpplAccent)
                                 .accessibilityLabel(Text("Favorite"))
                         }
+                        if let badge = ParkOriginBadge.text(for: entry) {
+                            Text(badge)
+                                .font(.caption)
+                                .foregroundStyle(Color.rpplMuted)
+                        }
                     }
                     if let address = park.address {
                         Text(address)
@@ -198,16 +203,13 @@ private struct ParkCard: View {
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }
-                    HStack(spacing: 6) {
+                    FlowLayout(spacing: 6) {
                         if let openToday {
                             ParkChip(
                                 text: openToday ? String(localized: "Open today") : String(localized: "Closed today"),
                                 tint: openToday ? .green : .red,
                                 fill: (openToday ? Color.green : Color.red).opacity(0.14)
                             )
-                        }
-                        if let badge = ParkOriginBadge.text(for: entry) {
-                            ParkChip(text: badge, tint: Color.rpplAccent, fill: Color.rpplAccent.opacity(0.14))
                         }
                         if let distanceMeters {
                             ParkChip(text: DistanceFormat.kilometers(distanceMeters))
