@@ -8,6 +8,8 @@ struct SessionEntry: Identifiable, Sendable {
     let topSpeedKmh: Double?
     let cityName: String?
     let highlights: [SessionHighlight]
+    /// Track center from the derived map frame; used to match sessions to parks.
+    var center: ParkCoordinate?
 
     var id: String { manifest.sessionId }
 }
@@ -93,7 +95,8 @@ final class SessionCatalog {
                     stats: entry.stats,
                     topSpeedKmh: entry.topSpeedKmh,
                     cityName: entry.cityName,
-                    highlights: highlightMap[entry.manifest.sessionId] ?? []
+                    highlights: highlightMap[entry.manifest.sessionId] ?? [],
+                    center: entry.center
                 )
             }
             isLoading = false
@@ -140,7 +143,10 @@ final class SessionCatalog {
             stats: summary.stats,
             topSpeedKmh: topSpeedKmh,
             cityName: cityName,
-            highlights: []
+            highlights: [],
+            center: summary.mapFrame.map {
+                ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude)
+            }
         )
     }
 }

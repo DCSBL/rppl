@@ -5,6 +5,7 @@ import RpplCore
 
 enum AppTab: Hashable {
     case logbook
+    case parks
     case app
 }
 
@@ -43,6 +44,10 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             Tab("Logbook", systemImage: "book.fill", value: AppTab.logbook) {
                 LogbookView(navigation: $logbookNavigation)
+            }
+
+            Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
+                ParksView()
             }
 
             Tab(value: AppTab.app) {
