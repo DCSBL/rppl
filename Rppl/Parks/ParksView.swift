@@ -9,6 +9,7 @@ struct ParksView: View {
     @State private var catalog = SessionCatalog()
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var searchText = ""
 
     private var visits: [String: Int] {
         let centers = catalog.entries.compactMap(\.center)
@@ -17,7 +18,7 @@ struct ParksView: View {
 
     private var sortedParks: [Park] {
         ParkListing.sorted(
-            parks,
+            ParkSearch.filter(parks, query: searchText),
             favorites: favorites.ids,
             visits: visits,
             userLocation: location.coordinate,
@@ -48,6 +49,10 @@ struct ParksView: View {
                     Text("No parks yet")
                         .foregroundStyle(Color.rpplMuted)
                         .listRowBackground(Color.clear)
+                } else if sortedParks.isEmpty {
+                    Text("No parks found")
+                        .foregroundStyle(Color.rpplMuted)
+                        .listRowBackground(Color.clear)
                 } else {
                     let counts = visits
                     ForEach(sortedParks) { park in
@@ -69,6 +74,7 @@ struct ParksView: View {
             .contentMargins(.top, 8, for: .scrollContent)
             .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search parks"))
             .navigationDestination(for: Park.self) { park in
                 ParkDetailContainer(park: park)
             }
