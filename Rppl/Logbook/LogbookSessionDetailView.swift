@@ -14,21 +14,12 @@ struct LogbookSessionDetailView: View {
 
     private static let setMapPointBudget = 200
     private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
-    /// Wall-clock seconds a full-session replay takes at 1× playback.
-    private static let replayDuration: TimeInterval = 24
-    private static let replayFrameSeconds: Double = 0.05
 
     @State private var manifest: SessionManifest?
     @State private var showsMissingCaloriesInfo = false
     @State private var sessionStats: SessionStats?
     @State private var setTracks: [SessionSetTrack] = []
-    @State private var playbackTimeline: TrackPlaybackTimeline = .empty
-    @State private var speedScale: TrackSpeedScale?
     @State private var soloSetIndex: Int?
-    @State private var replayProgress: Double = 0
-    @State private var isReplaying = false
-    @State private var replayTask: Task<Void, Never>?
-    @State private var flyoverOrbits = true
     @State private var sessionMapTrackData: SessionMapTrackData?
     @State private var allLocations: [LocationSample] = []
     @State private var mapFrame: MapTrackFrame?
@@ -45,8 +36,6 @@ struct LogbookSessionDetailView: View {
     @State private var exportTask: Task<Void, Never>?
     @State private var showExportExplainer = false
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
-    @AppStorage(AppSettingsKey.sessionMapAppearance)
-    private var mapAppearanceRaw = SessionMapAppearance.sets.rawValue
 
     private enum LoadPhase: Equatable {
         case loading
@@ -85,7 +74,6 @@ struct LogbookSessionDetailView: View {
                     .frame(minHeight: 240)
                 case .ready:
                     sessionMap
-                    mapAppearanceControls
                     sessionStatsCard
                     setsSection
                 }
@@ -101,13 +89,6 @@ struct LogbookSessionDetailView: View {
         .onDisappear {
             cancelLoad()
             cancelExport()
-            stopReplay()
-        }
-        .onChange(of: mapAppearanceRaw) { _, _ in
-            applyAppearanceSideEffects()
-        }
-        .onChange(of: isReplaying) { _, running in
-            if running { startReplay() } else { stopReplay() }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -183,7 +164,7 @@ struct LogbookSessionDetailView: View {
                 NavigationLink {
                     SessionMapFullscreenView(
                         sessionMapData: sessionMapTrackData,
-                        rendering: fullscreenRendering,
+                        rendering: sessionRendering,
                         title: navigationTitle,
                         preferredFrame: mapFrame
                     )
@@ -199,6 +180,10 @@ struct LogbookSessionDetailView: View {
                     layout: .embedded
                 )
                 .padding(10)
+
+                setSelectionMenu
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(10)
             }
             .frame(height: 300)
             .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
@@ -219,54 +204,44 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private var mapAppearance: SessionMapAppearance {
-        SessionMapAppearance(rawValue: mapAppearanceRaw) ?? .sets
-    }
-
-    private var mapAppearanceBinding: Binding<SessionMapAppearance> {
-        Binding(
-            get: { mapAppearance },
-            set: { mapAppearanceRaw = $0.rawValue }
-        )
-    }
-
     private var sessionRendering: SessionMapRendering {
-        SessionMapRendering(
-            appearance: mapAppearance,
-            setTracks: setTracks,
-            timeline: playbackTimeline,
-            speedScale: speedScale,
-            soloSetIndex: soloSetIndex,
-            replayProgress: replayProgress,
-            orbits: flyoverOrbits
-        )
+        SessionMapRendering(setTracks: setTracks, soloSetIndex: soloSetIndex)
     }
 
-    /// Full-screen map is interactive, so playback stays put and shows the whole track.
-    private var fullscreenRendering: SessionMapRendering {
-        var rendering = sessionRendering
-        if rendering.appearance == .replay {
-            rendering.replayProgress = 1
-        }
-        rendering.orbits = false
-        return rendering
-    }
-
+    /// Native menu over the map: the session's own sets are the only options.
     @ViewBuilder
-    private var mapAppearanceControls: some View {
-        if sessionMapTrackData != nil || !setTracks.isEmpty {
-            SessionMapAppearanceControls(
-                appearance: mapAppearanceBinding,
-                soloSetIndex: $soloSetIndex,
-                replayProgress: $replayProgress,
-                isReplaying: $isReplaying,
-                orbits: $flyoverOrbits,
-                setTracks: setTracks,
-                timeline: playbackTimeline,
-                speedScale: speedScale,
-                isLoading: tracksLoading
-            )
+    private var setSelectionMenu: some View {
+        if setTracks.count > 1 {
+            Menu {
+                Picker("Set", selection: $soloSetIndex) {
+                    Text("All sets").tag(Int?.none)
+                    ForEach(setTracks, id: \.setIndex) { track in
+                        Text("Set \(track.setNumber)").tag(Int?.some(track.setIndex))
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(selectedSetTitle)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2.weight(.semibold))
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.rpplText)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
+            }
+            .accessibilityLabel("Set")
         }
+    }
+
+    private var selectedSetTitle: String {
+        guard let index = soloSetIndex,
+              let track = setTracks.first(where: { $0.setIndex == index })
+        else {
+            return String(localized: "All sets")
+        }
+        return String(localized: "Set \(track.setNumber)")
     }
 
     @ViewBuilder
@@ -368,10 +343,6 @@ struct LogbookSessionDetailView: View {
                             locations: SessionLocationHelpers.downsample(
                                 SessionLocationHelpers.locations(for: set, in: allLocations),
                                 maxCount: Self.setMapPointBudget
-                            ),
-                            rendering: .singleSet(
-                                appearance: mapAppearance,
-                                speedScale: speedScale
                             )
                         )
                     }
@@ -568,62 +539,13 @@ struct LogbookSessionDetailView: View {
         applyTrackLayers(locations: sortedLocations, sets: bundle.stats.sets)
     }
 
-    /// Builds the per-set track, playback timeline and speed scale the map appearances need.
+    /// Per-set GPS for the set menu; drops a selection whose set no longer exists.
     private func applyTrackLayers(locations: [LocationSample], sets: [SetSegmentStats]) {
         let tracks = SessionSetTrackBuilder.tracks(locations: locations, sets: sets)
         setTracks = tracks
-        playbackTimeline = TrackPlaybackBuilder.build(setTracks: tracks)
-        speedScale = TrackSpeedBands.scale(forTracks: tracks.map(\.samples))
-        if soloSetIndex == nil || !tracks.contains(where: { $0.setIndex == soloSetIndex }) {
-            soloSetIndex = tracks.first?.setIndex
+        if let index = soloSetIndex, !tracks.contains(where: { $0.setIndex == index }) {
+            soloSetIndex = nil
         }
-        applyAppearanceSideEffects()
-    }
-
-    /// Keeps solo / replay state consistent with the picked appearance.
-    private func applyAppearanceSideEffects() {
-        switch mapAppearance {
-        case .replay:
-            guard !playbackTimeline.isEmpty else { return }
-            replayProgress = 0
-            isReplaying = true
-        case .solo:
-            stopReplay()
-            if soloSetIndex == nil {
-                soloSetIndex = setTracks.first?.setIndex
-            }
-        default:
-            stopReplay()
-        }
-    }
-
-    private func startReplay() {
-        guard !playbackTimeline.isEmpty else {
-            isReplaying = false
-            return
-        }
-        replayTask?.cancel()
-        if replayProgress >= 0.999 { replayProgress = 0 }
-        let increment = Self.replayFrameSeconds / Self.replayDuration
-        replayTask = Task { @MainActor in
-            while !Task.isCancelled, isReplaying {
-                try? await Task.sleep(for: .seconds(Self.replayFrameSeconds))
-                if Task.isCancelled { return }
-                let next = replayProgress + increment
-                if next >= 1 {
-                    replayProgress = 1
-                    isReplaying = false
-                    return
-                }
-                replayProgress = next
-            }
-        }
-    }
-
-    private func stopReplay() {
-        replayTask?.cancel()
-        replayTask = nil
-        if isReplaying { isReplaying = false }
     }
 
     private static func loadBundledExample() throws -> SessionLoadBundle {
