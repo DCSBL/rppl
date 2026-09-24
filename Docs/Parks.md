@@ -7,7 +7,15 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 - Park data is collected **by hand** by the developer or community from the park's own site or by visiting. Do not import or bulk-copy data from other cable-park apps or directories.
 - Bundled parks live in `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`.
 - User files in `<App Group>/Parks/*.yaml` (fallback `Documents/Parks/`) override bundled parks with the same `id`. Invalid files are skipped and logged.
-- YAML stays the source of truth. Later, in-app editing and remote updates write the same format.
+- YAML stays the source of truth. The in-app editor writes the same format.
+
+### In-app editor
+
+- Parks tab `+` creates a park; park detail `…` menu → Edit changes one. Cables are traced by tapping a satellite or standard map. `AppSettingsKey.parkEditorEnabled` (default on) hides the editor entry points.
+- Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
+- An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from. When the app later ships a newer `updated_at`, the park shows **Update available** and asks: keep my version (bumps `based_on_updated_at`) or use the app version (deletes the override).
+- `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer).
+- Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl with the YAML attached (falls back to the share sheet when Mail is not set up).
 
 ## Schema (version 1)
 
@@ -16,6 +24,8 @@ Only `version`, `id`, `name` and `location` are required. Everything else may be
 ```yaml
 version: 1
 id: project7-rotterdam            # stable slug, unique
+author: Rppl                      # optional credit
+based_on_updated_at: 2026-09-24   # optional, set on user overrides of bundled parks
 created_at: 2026-09-24
 updated_at: 2026-09-24
 history:

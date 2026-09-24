@@ -2,6 +2,8 @@ import Foundation
 
 /// Stable `UserDefaults` keys for `@AppStorage` and direct access.
 enum AppSettingsKey {
+    /// Park editor (+ / Edit / share). Flip the default to hide the editor from users.
+    static let parkEditorEnabled = "rppl.parkEditorEnabled"
     static let mapUsesSatellite = "rppl.mapUsesSatellite"
     /// At least one Watch session package imported on this iPhone.
     static let didImportSessionFromWatch = "rppl.didImportSessionFromWatch"

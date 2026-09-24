@@ -39,6 +39,12 @@ public enum ParkDraft {
         cable.points = points.isEmpty ? nil : points
     }
 
+    public static func remove(_ cable: inout ParkCable, index: Int) {
+        guard var points = cable.points, points.indices.contains(index) else { return }
+        points.remove(at: index)
+        cable.points = points.isEmpty ? nil : points
+    }
+
     public static func move(_ cable: inout ParkCable, index: Int, to coordinate: ParkCoordinate) {
         guard var points = cable.points, points.indices.contains(index) else { return }
         points[index].lat = coordinate.lat
