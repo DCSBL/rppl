@@ -62,6 +62,10 @@ struct AirWeatherSnapshot: Sendable {
         condition = current.condition.healthKitWeatherCondition
     }
 
+    var sessionWeather: SessionWeather {
+        SessionWeather(temperatureCelsius: celsius, humidityPercent: humidityPercent)
+    }
+
     var healthKitMetadata: [String: Any] {
         [
             HKMetadataKeyWeatherTemperature: HKQuantity(unit: .degreeCelsius(), doubleValue: celsius),
