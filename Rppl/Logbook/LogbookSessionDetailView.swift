@@ -32,6 +32,7 @@ struct LogbookSessionDetailView: View {
     @State private var sessionMapTrackData: SessionMapTrackData?
     @State private var allLocations: [LocationSample] = []
     @State private var mapFrame: MapTrackFrame?
+    @State private var parks: [Park] = []
     @State private var tracksLoading = false
     @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
@@ -85,6 +86,7 @@ struct LogbookSessionDetailView: View {
                     .frame(minHeight: 240)
                 case .ready:
                     sessionMap
+                    parkLink
                     mapAppearanceControls
                     sessionStatsCard
                     setsSection
@@ -98,6 +100,7 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
+        .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
         .onDisappear {
             cancelLoad()
             cancelExport()
@@ -176,7 +179,8 @@ struct LogbookSessionDetailView: View {
                     sessionMapData: sessionMapTrackData,
                     rendering: sessionRendering,
                     allowsInteraction: false,
-                    preferredFrame: mapFrame
+                    preferredFrame: mapFrame,
+                    cableOverlays: cableOverlays
                 )
                 .allowsHitTesting(false)
 
@@ -185,7 +189,8 @@ struct LogbookSessionDetailView: View {
                         sessionMapData: sessionMapTrackData,
                         rendering: fullscreenRendering,
                         title: navigationTitle,
-                        preferredFrame: mapFrame
+                        preferredFrame: mapFrame,
+                        cableOverlays: cableOverlays
                     )
                 } label: {
                     Color.clear
@@ -216,6 +221,53 @@ struct LogbookSessionDetailView: View {
             }
         } else {
             mapPlaceholder("No GPS track")
+        }
+    }
+
+    /// Park this session's track sits in, matched on the derived map frame center.
+    private var matchedPark: Park? {
+        guard let mapFrame else { return nil }
+        let center = ParkCoordinate(lat: mapFrame.centerLatitude, lon: mapFrame.centerLongitude)
+        return ParkListing.nearest(to: center, in: parks)
+    }
+
+    private var cableOverlays: [[CLLocationCoordinate2D]] {
+        (matchedPark?.cables ?? []).compactMap { cable in
+            var coordinates = (cable.points ?? []).map {
+                CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+            }
+            guard coordinates.count >= 2 else { return nil }
+            if cable.direction?.isLoop == true, let first = coordinates.first { coordinates.append(first) }
+            return coordinates
+        }
+    }
+
+    @ViewBuilder
+    private var parkLink: some View {
+        if let park = matchedPark {
+            NavigationLink {
+                ParkDetailContainer(park: park)
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundStyle(Color.rpplAccent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(park.name)
+                            .font(.headline)
+                            .foregroundStyle(Color.rpplText)
+                        Text("View park")
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.rpplMuted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .logbookCardChrome()
+            }
+            .buttonStyle(.plain)
         }
     }
 

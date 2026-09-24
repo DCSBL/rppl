@@ -121,6 +121,17 @@ struct ParksTests {
         #expect(months.first?.lines.first?.dates == ["2026-04-05", "2026-04-06"])
     }
 
+    @Test func bundledDownUnderDecodesWithoutOpeningBlock() throws {
+        let park = try #require(ParkCatalog.loadBundled().first { $0.id == "downunder-nieuwegein" })
+        #expect(park.opening == nil)
+        #expect(park.cables?.count == 2)
+        #expect(park.cables?.first?.direction == .counterClockwise)
+        #expect(park.cables?.first?.effectiveLengthM == 720)
+        #expect(park.cables?.first?.points?.count == 5)
+        #expect(park.prices?.count == 8)
+        #expect(park.links?.contains { $0.kind == "booking" } == true)
+    }
+
     @Test func project7JulyOpensAllBlocks() throws {
         let day = try project7().schedule(on: date("2026-07-15"))
         #expect(day.availableSlots.count == 7)
@@ -237,6 +248,14 @@ struct ParksTests {
         try "not: [valid".write(to: dir.appendingPathComponent("broken.yaml"), atomically: true, encoding: .utf8)
         let parks = ParkCatalog.load(userRoot: dir)
         #expect(parks.filter { $0.id == "project7-rotterdam" }.map(\.name) == ["Edited"])
+    }
+
+    @Test func nearestParkWithinRadius() {
+        let a = Park(id: "a", name: "A", location: ParkCoordinate(lat: 52.0, lon: 4.0))
+        let b = Park(id: "b", name: "B", location: ParkCoordinate(lat: 52.003, lon: 4.0))
+        let near = ParkCoordinate(lat: 52.0025, lon: 4.0)
+        #expect(ParkListing.nearest(to: near, in: [a, b])?.id == "b")
+        #expect(ParkListing.nearest(to: ParkCoordinate(lat: 10, lon: 10), in: [a, b]) == nil)
     }
 
     @Test func sortingAndVisitCounts() {

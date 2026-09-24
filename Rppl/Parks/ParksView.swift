@@ -4,7 +4,7 @@ import SwiftUI
 struct ParksView: View {
     @State private var parks: [Park] = []
     @State private var sort: ParkListSort = .distance
-    @State private var favorites = ParkFavorites()
+    @State private var favorites = ParkFavorites.shared
     @State private var location = ParksLocationProvider()
     @State private var catalog = SessionCatalog()
     @State private var connectivity = PhoneConnectivityService.shared
@@ -70,11 +70,7 @@ struct ParksView: View {
             .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
-                ParkDetailView(
-                    park: park,
-                    isFavorite: favorites.contains(park.id),
-                    onToggleFavorite: { favorites.toggle(park.id) }
-                )
+                ParkDetailContainer(park: park)
             }
         }
         .tint(Color.rpplAccent)

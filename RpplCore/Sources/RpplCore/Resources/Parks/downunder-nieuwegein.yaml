@@ -1,0 +1,60 @@
+version: 1
+id: downunder-nieuwegein
+created_at: 2026-09-24
+updated_at: 2026-09-24
+history:
+  - date: 2026-09-24
+    description: initial
+
+name: Cable Park Down Under
+address: Ravensewetering 1, 3439 ZZ Nieuwegein
+timezone: Europe/Amsterdam
+# Dock.
+location:
+  lat: 52.048428101966046
+  lon: 5.124218887481674
+
+phone: 030 287 7777
+email: info@downunder.nl
+website: https://downunder.nl/sports/sport/waterskien/
+
+links:
+  - { kind: booking, url: "https://bhg.smarteventmanager.com/book/?StandardReservationGroupCode=CABLE&CompanyCode=DU" }
+  # Opening hours are only published as a PDF, so there is no opening block yet.
+  - { kind: opening hours, url: "https://downunder.nl/sports/wp-content/uploads/2025/03/Cable-Park-Openingstijden-2025.pdf" }
+  - { kind: instagram, url: "https://www.instagram.com/downundernieuwegein/" }
+  - { kind: facebook, url: "https://www.facebook.com/downundernieuwegein" }
+
+cables:
+  - name: Cable
+    # Points are listed in travel order (first point is the start): down the west side, along the south, back up the east side.
+    direction: ccw
+    length_m: 720
+    points:
+      - { lat: 52.04847716280033, lon: 5.12449809781112 }
+      - { lat: 52.04696922828588, lon: 5.123267622750089 }
+      - { lat: 52.04639696591422, lon: 5.123594214660459 }
+      - { lat: 52.046601617325294, lon: 5.126200783281035 }
+      - { lat: 52.04770251144333, lon: 5.127018302993614 }
+  - name: Short cable
+    description: Short cable for improving your skills with guidance.
+
+prices:
+  - { name: 1 hour, price: "€ 25", note: "From 15 years. Life vest, helmet and instruction included" }
+  - { name: 1 hour, price: "€ 20", note: "Up to 14 years. Life vest, helmet and instruction included" }
+  - { name: 2 hours, price: "€ 35", note: From 15 years }
+  - { name: 2 hours, price: "€ 30", note: Up to 14 years }
+  - { name: Day, price: "€ 55", note: From 15 years }
+  - { name: Day, price: "€ 47,50", note: Up to 14 years }
+  - { name: Wetsuit rental, price: "€ 5 / € 7,50 / € 10", note: 1 hour / 2 hours / day }
+  - { name: Water ski rental, price: "€ 5 / € 7,50 / € 10", note: 1 hour / 2 hours / day }
+
+facilities:
+  - Changing rooms
+  - Showers
+  - Equipment rental
+  - Restaurant
+
+description: >-
+  Water skiing is suitable from 12 years. Always wear a helmet.
+  Kneeboards can be rented separately.

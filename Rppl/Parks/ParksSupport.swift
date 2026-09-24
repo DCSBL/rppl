@@ -47,6 +47,8 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
 @Observable
 @MainActor
 final class ParkFavorites {
+    static let shared = ParkFavorites()
+
     private static let key = "rppl.favoriteParkIDs"
     private(set) var ids: Set<String>
 
@@ -262,5 +264,19 @@ struct ParkChip: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(fill, in: Capsule())
+    }
+}
+
+/// Park detail wired to the shared favorites; used from the Parks tab and the session page.
+struct ParkDetailContainer: View {
+    let park: Park
+    @State private var favorites = ParkFavorites.shared
+
+    var body: some View {
+        ParkDetailView(
+            park: park,
+            isFavorite: favorites.contains(park.id),
+            onToggleFavorite: { favorites.toggle(park.id) }
+        )
     }
 }

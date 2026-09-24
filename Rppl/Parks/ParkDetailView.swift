@@ -267,13 +267,7 @@ struct ParkDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .logbookNestedBackground(highlighted ? Color.rpplAccent.opacity(0.16) : Color.rpplFill)
-        .overlay {
-            if highlighted {
-                RoundedRectangle(cornerRadius: LogbookLayout.nestedMinimumCornerRadius + 4, style: .continuous)
-                    .strokeBorder(Color.rpplAccent.opacity(0.7), lineWidth: 1.5)
-            }
-        }
+        .logbookNestedBackground(highlighted ? Color.rpplAccent.opacity(0.24) : Color.rpplFill)
     }
 
     private func cableCard(_ cable: ParkCable) -> some View {
@@ -316,13 +310,13 @@ struct ParkDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle("Contact")
                 if let phone = park.phone, let phoneURL {
-                    Link(destination: phoneURL) { Label(phone, systemImage: "phone") }
+                    Link(destination: phoneURL) { contactRow(phone, systemImage: "phone") }
                 }
                 if let email = park.email, let mailURL {
-                    Link(destination: mailURL) { Label(email, systemImage: "envelope") }
+                    Link(destination: mailURL) { contactRow(email, systemImage: "envelope") }
                 }
                 if let website = park.website, let webURL {
-                    Link(destination: webURL) { Label(website, systemImage: "safari") }
+                    Link(destination: webURL) { contactRow(website, systemImage: "safari") }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -402,7 +396,7 @@ struct ParkDetailView: View {
                 Text("Opening times may change and can be outdated. Verify with the park before booking.")
             }
             if let updated = park.lastUpdated {
-                Text("Last updated \(updated.formatted(date: .long, time: .omitted))")
+                Text("Last updated: \(updated.formatted(date: .long, time: .omitted))")
             }
         }
         .font(.caption)
@@ -414,6 +408,16 @@ struct ParkDetailView: View {
     }
 
     // MARK: Helpers
+
+    private func contactRow(_ text: String, systemImage: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .frame(width: 24, alignment: .center)
+            Text(text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
 
     private func sectionTitle(_ key: LocalizedStringKey) -> some View {
         Text(key).font(.headline).foregroundStyle(Color.rpplText)
@@ -453,11 +457,11 @@ private struct ParkMap: View {
             ForEach(startMarkers, id: \.id) { marker in
                 Annotation("", coordinate: marker.coordinate, anchor: .center) {
                     Image(systemName: "location.north.fill")
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
+                        .frame(width: 18, height: 18)
                         .background(Color.rpplAccent, in: Circle())
-                        .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 1.5))
                         .rotationEffect(.degrees((marker.bearing ?? 0) - mapHeading))
                         .accessibilityLabel(Text("Start"))
                 }

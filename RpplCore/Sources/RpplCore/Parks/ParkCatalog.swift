@@ -68,6 +68,22 @@ public enum ParkListing {
     /// A session counts as a visit when its center is this close to the park pin or a traced cable point.
     public static let visitRadiusMeters = 750.0
 
+    /// Closest park whose pin or traced cable is within `radiusMeters` of `coordinate`.
+    public static func nearest(
+        to coordinate: ParkCoordinate,
+        in parks: [Park],
+        radiusMeters: Double = visitRadiusMeters
+    ) -> Park? {
+        parks
+            .map { park -> (park: Park, distance: Double) in
+                let anchors = [park.location] + (park.cables ?? []).flatMap { ($0.points ?? []).map(\.coordinate) }
+                return (park, anchors.map { $0.meters(to: coordinate) }.min() ?? .infinity)
+            }
+            .filter { $0.distance <= radiusMeters }
+            .min { $0.distance < $1.distance }?
+            .park
+    }
+
     public static func visitCounts(
         parks: [Park],
         sessionCenters: [ParkCoordinate],
