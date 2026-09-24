@@ -132,18 +132,7 @@ struct SessionSetUIPage: View {
                 .frame(maxWidth: .infinity)
             }
 
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(session.lastHeartRate.map { String(format: "%.0f", $0) } ?? "--")
-                    .font(.system(.title3, design: .rounded).bold())
-                    .monospacedDigit()
-                Image(systemName: "heart.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.red)
-                    .accessibilityHidden(true)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(heartRateAccessibilityLabel)
-            .alwaysOnSupportingMetric(isLuminanceReduced)
+            heartRateRow
 
             statusLine(primary: "Riding", color: .blue)
 
@@ -227,22 +216,7 @@ struct SessionSetUIPage: View {
                     )
                 }
 
-                if let hr = session.lastHeartRate {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text(String(format: "%.0f", hr))
-                            .font(.system(.title3, design: .rounded).bold())
-                            .monospacedDigit()
-                        Image(systemName: "heart.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.red)
-                            .accessibilityHidden(true)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(
-                        String(format: String(localized: "Heart rate %@ beats per minute"), String(format: "%.0f", hr))
-                    )
-                    .alwaysOnSupportingMetric(isLuminanceReduced)
-                }
+                heartRateRow
 
                 Divider()
                     .padding(.vertical, 2)
@@ -284,6 +258,27 @@ struct SessionSetUIPage: View {
         }
         .frame(maxWidth: .infinity)
         .alwaysOnSecondaryChrome(isLuminanceReduced)
+    }
+
+    private var heartRateRow: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if let hr = session.lastHeartRate {
+                Text(String(format: "%.0f", hr))
+                    .font(.system(.title3, design: .rounded).bold())
+                    .monospacedDigit()
+            } else {
+                Text("- BPM")
+                    .font(.system(.title3, design: .rounded).bold())
+                    .foregroundStyle(.secondary)
+            }
+            Image(systemName: "heart.fill")
+                .font(.caption2)
+                .foregroundStyle(.red)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(heartRateAccessibilityLabel)
+        .alwaysOnSupportingMetric(isLuminanceReduced)
     }
 
     private var heartRateAccessibilityLabel: String {

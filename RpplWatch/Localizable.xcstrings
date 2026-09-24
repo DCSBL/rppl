@@ -2546,6 +2546,22 @@
           }
         }
       }
+    },
+    "- BPM" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- BPM"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- BPM"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

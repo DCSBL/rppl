@@ -3556,6 +3556,54 @@
           }
         }
       }
+    },
+    "About missing calories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About missing calories"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over ontbrekende calorieën"
+          }
+        }
+      }
+    },
+    "Calories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calorieën"
+          }
+        }
+      }
+    },
+    "No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen hartslag of calorieën opgeslagen. De watch zat waarschijnlijk over kleding of een wetsuit."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
