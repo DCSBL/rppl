@@ -152,13 +152,13 @@ struct LogbookView: View {
                 isPresented: $showDeleteConfirmation
             ) {
                 if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
-                    Button("Remove from This iPhone", role: .destructive) {
+                    Button("Delete from This iPhone", role: .destructive) {
                         if let sessionId = pendingDeleteSessionId {
                             hideSessionFromLogbook(sessionId)
                         }
                         pendingDeleteSessionId = nil
                     }
-                    Button("Delete from iCloud Drive", role: .destructive) {
+                    Button("Delete from iPhone and iCloud", role: .destructive) {
                         if let sessionId = pendingDeleteSessionId {
                             deleteSessionPermanently(sessionId)
                         }
@@ -349,7 +349,7 @@ struct LogbookView: View {
         if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
             return String(
                 localized:
-                    "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone."
+                    "Delete from This iPhone hides the session in Rppl here. Delete from iPhone and iCloud permanently removes it from all devices. This cannot be undone."
             )
         }
         return String(

@@ -584,18 +584,18 @@
         }
       }
     },
-    "Delete from iCloud Drive" : {
+    "Delete from iPhone and iCloud" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete from iCloud Drive"
+            "value" : "Delete from iPhone and iCloud"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verwijderen uit iCloud Drive"
+            "value" : "Verwijderen van iPhone en iCloud"
           }
         }
       }
@@ -1906,12 +1906,12 @@
         }
       }
     },
-    "Remove from This iPhone" : {
+    "Delete from This iPhone" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remove from This iPhone"
+            "value" : "Delete from This iPhone"
           }
         },
         "nl" : {
@@ -1922,18 +1922,18 @@
         }
       }
     },
-    "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone." : {
+    "Delete from This iPhone hides the session in Rppl here. Delete from iPhone and iCloud permanently removes it from all devices. This cannot be undone." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone."
+            "value" : "Delete from This iPhone hides the session in Rppl here. Delete from iPhone and iCloud permanently removes it from all devices. This cannot be undone."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verwijderen van deze iPhone verbergt de session hier in Rppl. Verwijderen uit iCloud Drive verwijdert de session permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
+            "value" : "Verwijderen van deze iPhone verbergt de session hier in Rppl. Verwijderen van iPhone en iCloud verwijdert de session permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
