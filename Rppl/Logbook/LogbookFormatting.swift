@@ -30,6 +30,14 @@ enum LogbookFormatting {
         TemperatureFormat.celsius(celsius)
     }
 
+    static func airTemperature(_ celsius: Double) -> String {
+        TemperatureFormat.celsius(celsius)
+    }
+
+    static func humidityPercent(_ percent: Double) -> String {
+        (percent / 100).formatted(.percent.precision(.fractionLength(0)))
+    }
+
     static func setCount(_ count: Int) -> String {
         String(localized: "\(count) sets")
     }
