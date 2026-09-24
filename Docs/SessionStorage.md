@@ -106,7 +106,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
 | Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (heatmap set paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
-| Crash | No new resume; do not regress today’s crash = dead |
+| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = last event time, `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
@@ -118,4 +118,4 @@ Raw remains required to regenerate `derived/` after analyzer bumps or storage mi
 - Raw stream sync phone → Watch (view sync carries derived only)
 - CloudKit
 - Watch logbook edit / delete (view-only mirror of phone)
-- New crash / HK workout recovery features
+- Resuming an interrupted session, and HK workout recovery (merge of split sessions may come later)

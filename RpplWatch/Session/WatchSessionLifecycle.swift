@@ -534,3 +534,17 @@ extension WatchSessionController {
 
     /// Cycle debug simulation: detected → inactive → set → detected.
 }
+
+// MARK: - Crash recovery
+extension WatchSessionController {
+    /// Finalizes sessions left in `recording` by a crash/kill so they show up and transfer.
+    /// Never resumes or prompts; failures are logged and skipped (never blocks launch).
+    func recoverOrphanedSessions() {
+        guard !isStarting else { return }
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        let activeId = isRunning ? manifest?.sessionId : nil
+        let recovered = fileStore.recoverOrphanedRecordings(activeSessionId: activeId)
+        guard !recovered.isEmpty else { return }
+        WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s)")
+    }
+}
