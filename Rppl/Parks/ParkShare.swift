@@ -27,8 +27,15 @@ enum ParkShare {
         ActivitySharePresenter.present(items: [url])
     }
 
-    static var mailBody: String {
-        String(localized: "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n\nNotes:\n")
+    /// `changedSections` is a "these sections are changed" summary, not a field-by-field diff.
+    static func mailBody(changedSections: [ParkSection] = []) -> String {
+        var body = String(localized: "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n")
+        if !changedSections.isEmpty {
+            let list = changedSections.map { "- \($0.label)" }.joined(separator: "\n")
+            body += "\n" + String(localized: "Changed sections:") + "\n" + list + "\n"
+        }
+        body += "\n" + String(localized: "Notes:") + "\n"
+        return body
     }
 
     static func subject(for park: Park) -> String {
@@ -37,9 +44,9 @@ enum ParkShare {
 
     /// `mailto:` link for devices without a configured Mail account (`MFMailComposeViewController.canSendMail() == false`).
     /// A `mailto:` URL can't carry an attachment, so the YAML is inlined as a fenced code block instead.
-    static func mailtoURL(for park: Park) -> URL? {
+    static func mailtoURL(for park: Park, changedSections: [ParkSection] = []) -> URL? {
         guard let yaml = try? ParkCatalog.encode(park) else { return nil }
-        let body = mailBody + "\n```yaml\n" + yaml + "```\n"
+        let body = mailBody(changedSections: changedSections) + "\n```yaml\n" + yaml + "```\n"
         var components = URLComponents()
         components.scheme = "mailto"
         components.path = feedbackAddress
@@ -51,8 +58,24 @@ enum ParkShare {
     }
 }
 
+extension ParkSection {
+    var label: String {
+        switch self {
+        case .basics: String(localized: "Basics")
+        case .location: String(localized: "Location")
+        case .contact: String(localized: "Contact")
+        case .about: String(localized: "About")
+        case .cables: String(localized: "Cables")
+        case .opening: String(localized: "Opening")
+        case .prices: String(localized: "Prices")
+        case .links: String(localized: "Links")
+        }
+    }
+}
+
 struct ParkMailComposer: UIViewControllerRepresentable {
     let park: Park
+    let changedSections: [ParkSection]
     let onFinish: () -> Void
 
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
@@ -60,7 +83,7 @@ struct ParkMailComposer: UIViewControllerRepresentable {
         controller.mailComposeDelegate = context.coordinator
         controller.setToRecipients([ParkShare.feedbackAddress])
         controller.setSubject(ParkShare.subject(for: park))
-        controller.setMessageBody(ParkShare.mailBody, isHTML: false)
+        controller.setMessageBody(ParkShare.mailBody(changedSections: changedSections), isHTML: false)
         if let url = ParkShare.yamlFile(for: park), let data = try? Data(contentsOf: url) {
             controller.addAttachmentData(data, mimeType: "application/x-yaml", fileName: url.lastPathComponent)
         }

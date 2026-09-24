@@ -22,6 +22,12 @@ struct ParkDetailView: View {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
     }
 
+    /// Section-level "these sections are changed" summary against the bundled version; empty for a brand-new custom park.
+    private var changedSections: [ParkSection] {
+        guard let base = entry?.bundledPark else { return [] }
+        return ParkDiff.changedSections(from: base, to: park)
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
@@ -62,7 +68,7 @@ struct ParkDetailView: View {
             ParkEditorView(original: park, onSaved: {})
         }
         .sheet(isPresented: $showMail) {
-            ParkMailComposer(park: park) { showMail = false }
+            ParkMailComposer(park: park, changedSections: changedSections) { showMail = false }
                 .ignoresSafeArea()
         }
         .confirmationDialog(removeTitle, isPresented: $confirmRemove, titleVisibility: .visible) {
@@ -87,7 +93,7 @@ struct ParkDetailView: View {
                 Button("Send to Rppl", systemImage: "envelope") {
                     if MailAvailability.canSend {
                         showMail = true
-                    } else if let url = ParkShare.mailtoURL(for: park) {
+                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
                         openURL(url)
                     } else {
                         ParkShare.share(park)
