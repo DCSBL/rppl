@@ -80,17 +80,30 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     public var booking: String?
     public var rules: [ParkOpeningRule]?
     public var slots: [ParkSlot]?
+    /// `false` when blocks are plain start times (hourly) rather than numbered ("Block 3"). Default numbered.
+    public var numbered: Bool?
+    /// Durations a booking can span, in minutes (`[60, 120]` = per 1 or 2 hours).
+    public var bookingMinutes: [Int]?
     public var note: String?
+
+    enum CodingKeys: String, CodingKey {
+        case booking, rules, slots, numbered, note
+        case bookingMinutes = "booking_minutes"
+    }
 
     public init(
         booking: String? = nil,
         rules: [ParkOpeningRule]? = nil,
         slots: [ParkSlot]? = nil,
+        numbered: Bool? = nil,
+        bookingMinutes: [Int]? = nil,
         note: String? = nil
     ) {
         self.booking = booking
         self.rules = rules
         self.slots = slots
+        self.numbered = numbered
+        self.bookingMinutes = bookingMinutes
         self.note = note
     }
 }
@@ -117,7 +130,49 @@ public struct ParkDaySchedule: Equatable, Sendable {
     public var isOpen: Bool { !windows.isEmpty || !availableSlots.isEmpty }
 }
 
+public struct ParkScheduleLine: Equatable, Sendable {
+    public var label: String?
+    public var days: [String]?
+    public var from: String?
+    public var until: String?
+    public var open: String
+    public var close: String
+    public var note: String?
+}
+
+/// One display entry per month; `lines` holds the specialities (weekend hours, beginner hour, …).
+/// `month == nil` collects rules without a `months` selector.
+public struct ParkMonthSchedule: Equatable, Sendable, Identifiable {
+    public var month: Int?
+    public var lines: [ParkScheduleLine]
+
+    public var id: Int { month ?? 0 }
+}
+
 public enum ParkSchedule {
+    /// Collapses opening rules into one entry per month, ordered January to December.
+    public static func months(for opening: ParkOpening?) -> [ParkMonthSchedule] {
+        var byMonth: [Int?: [ParkScheduleLine]] = [:]
+        for rule in opening?.rules ?? [] {
+            let line = ParkScheduleLine(
+                label: rule.label,
+                days: rule.days,
+                from: rule.from,
+                until: rule.until,
+                open: rule.open,
+                close: rule.close,
+                note: rule.note
+            )
+            let keys: [Int?] = rule.months.map { $0.map { Optional($0) } } ?? [nil]
+            for month in keys {
+                byMonth[month, default: []].append(line)
+            }
+        }
+        return byMonth
+            .map { ParkMonthSchedule(month: $0.key, lines: $0.value) }
+            .sorted { ($0.month ?? 13) < ($1.month ?? 13) }
+    }
+
     public static func day(
         for opening: ParkOpening?,
         on date: Date,

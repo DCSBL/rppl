@@ -48,6 +48,61 @@ struct ParksTests {
         #expect(park.schedule(on: date("2026-10-07")).isOpen == false)
     }
 
+    @Test func monthsCollapseToOneEntryPerMonth() throws {
+        let months = ParkSchedule.months(for: try project7().opening)
+        #expect(months.map(\.month) == [4, 5, 6, 7, 8, 9, 10])
+        let september = try #require(months.first { $0.month == 9 })
+        #expect(september.lines.map(\.days) == [["weekdays"], ["weekend"]])
+        #expect(september.lines.map(\.open) == ["14:00", "12:30"])
+        let july = try #require(months.first { $0.month == 7 })
+        #expect(july.lines.count == 1)
+    }
+
+    @Test func rulesWithoutMonthsGoInTrailingEntry() {
+        let opening = ParkOpening(rules: [
+            ParkOpeningRule(months: [2], open: "10:00", close: "11:00"),
+            ParkOpeningRule(open: "12:00", close: "13:00"),
+            ParkOpeningRule(months: [1, 2], open: "14:00", close: "15:00"),
+        ])
+        let months = ParkSchedule.months(for: opening)
+        #expect(months.map(\.month) == [1, 2, nil])
+        #expect(months[1].lines.map(\.open) == ["10:00", "14:00"])
+    }
+
+    @Test func bundledProject7HasBookingLink() throws {
+        let link = try #require(try project7().links?.first { $0.kind == "booking" })
+        #expect(link.url == "https://www.project7cablepark.nl/online-ticket/")
+    }
+
+    @Test func bundledWetNWildHasBeginnerHourAndCcwCable() throws {
+        let park = try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+        #expect(park.cables?.first?.direction == .counterClockwise)
+        #expect(park.cables?.first?.points?.count == 5)
+        // 2026-09-26 is a Saturday: full window plus the beginner hour.
+        let saturday = park.schedule(on: date("2026-09-26"))
+        #expect(saturday.windows.count == 2)
+        #expect(saturday.windows.contains { $0.note == "Cable runs at 27 km/h" })
+        // 2026-09-27 is a Sunday.
+        #expect(park.schedule(on: date("2026-09-27")).windows.map(\.startMinute) == [13 * 60])
+        #expect(park.schedule(on: date("2026-09-28")).isOpen == false)
+        // Hourly, unnumbered blocks that fit the day's window; Wed 2026-09-23, Thu 09-24, Sat 09-26.
+        #expect(park.opening?.numbered == false)
+        #expect(park.opening?.bookingMinutes == [60, 120])
+        #expect(park.schedule(on: date("2026-09-23")).availableSlots.map(\.start) == ["16:00", "17:00", "18:00", "19:00"])
+        #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
+        #expect(saturday.availableSlots.map(\.start) == ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00"])
+        #expect(park.links?.first { $0.kind == "booking" } != nil)
+    }
+
+    @Test func lastUpdatedParsesDateOnlyString() throws {
+        let updated = try #require(try project7().lastUpdated)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = amsterdam
+        let parts = calendar.dateComponents([.year, .month, .day], from: updated)
+        #expect(parts.year == 2026 && parts.month == 9 && parts.day == 24)
+        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).lastUpdated == nil)
+    }
+
     @Test func project7JulyOpensAllBlocks() throws {
         let day = try project7().schedule(on: date("2026-07-15"))
         #expect(day.availableSlots.count == 7)
@@ -120,6 +175,14 @@ struct ParksTests {
         #expect(ParkCable(points: [a, b]).startPoints == [b])
         #expect(ParkCable(points: [a, ParkCablePoint(lat: 2, lon: 2)]).startPoints == [a])
         #expect(ParkCable().startPoints.isEmpty)
+    }
+
+    @Test func startBearingPointsTowardSecondPoint() throws {
+        let cable = try #require(try project7().cables?.first)
+        let start = try #require(cable.starts.first)
+        let bearing = try #require(start.bearingDegrees)
+        #expect(bearing > 60 && bearing < 75)
+        #expect(ParkCable(points: [ParkCablePoint(lat: 1, lon: 1)]).starts.first?.bearingDegrees == nil)
     }
 
     @Test func loopCableLengthIncludesClosingSegment() throws {

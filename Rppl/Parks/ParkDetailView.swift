@@ -8,74 +8,36 @@ struct ParkDetailView: View {
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var weatherProvider = ParksWeatherProvider()
+    @State private var weather: ParkWeather?
+
+    private var bookingURL: URL? {
+        park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
+    }
 
     var body: some View {
-        List {
-            Section {
-                ParkMap(park: park, usesSatellite: usesSatellite)
-                    .frame(height: 260)
-                    .listRowInsets(EdgeInsets())
-                if let address = park.address {
-                    Text(address)
-                        .foregroundStyle(Color.rpplMuted)
+        ScrollView {
+            VStack(spacing: 12) {
+                mapCard
+                if park.opening != nil {
+                    todayCard
+                    openingTimesCard
+                    blocksCard
                 }
-                Button {
-                    ParkNavigation.openDirections(to: park)
-                } label: {
-                    Label("Navigate", systemImage: "location.fill")
+                ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
+                    cableCard(cable)
                 }
+                contactCard
+                pricesCard
+                aboutCard
+                linksCard
+                footer
             }
-
-            if let opening = park.opening {
-                todaySection(opening)
-                scheduleSection(opening)
-            }
-
-            ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
-                cableSection(cable)
-            }
-
-            contactSection
-
-            if let prices = park.prices, !prices.isEmpty {
-                Section("Prices") {
-                    ForEach(Array(prices.enumerated()), id: \.offset) { _, price in
-                        LabeledContent {
-                            Text(price.price)
-                        } label: {
-                            VStack(alignment: .leading) {
-                                Text(price.name)
-                                if let note = price.note {
-                                    Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if let facilities = park.facilities, !facilities.isEmpty {
-                Section("Facilities") {
-                    Text(facilities.joined(separator: " · "))
-                }
-            }
-
-            if let description = park.description, !description.isEmpty {
-                Section("About") {
-                    Text(description)
-                }
-            }
-
-            if let links = park.links, !links.isEmpty {
-                Section("Links") {
-                    ForEach(Array(links.enumerated()), id: \.offset) { _, link in
-                        if let url = URL(string: link.url) {
-                            Link(link.kind.capitalized, destination: url)
-                        }
-                    }
-                }
-            }
+            .padding(.horizontal, LogbookLayout.horizontalInset)
+            .padding(.vertical, 8)
         }
+        .background(Color.rpplBackground)
         .navigationTitle(park.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -86,103 +48,394 @@ struct ParkDetailView: View {
                 .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
             }
         }
-    }
-
-    private func todaySection(_ opening: ParkOpening) -> some View {
-        let day = park.schedule()
-        return Section("Today") {
-            if day.isOpen {
-                ForEach(Array(day.windows.enumerated()), id: \.offset) { _, window in
-                    LabeledContent {
-                        Text(ParkFormatting.window(window))
-                    } label: {
-                        Text(window.label ?? String(localized: "Open"))
-                    }
-                    if let note = window.note {
-                        Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
-                    }
-                }
-                if !day.availableSlots.isEmpty {
-                    LabeledContent {
-                        Text(day.availableSlots.map(\.id).joined(separator: ", "))
-                    } label: {
-                        Text("Blocks")
-                    }
-                }
-                if opening.booking == "required" {
-                    Text("Booking required")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                }
-            } else {
-                Text("Closed today")
-                    .foregroundStyle(Color.rpplMuted)
-            }
+        .task {
+            weather = await weatherProvider.weather(for: park)
         }
     }
 
-    @ViewBuilder
-    private func scheduleSection(_ opening: ParkOpening) -> some View {
-        if let rules = opening.rules, !rules.isEmpty {
-            Section("Opening times") {
-                ForEach(Array(rules.enumerated()), id: \.offset) { _, rule in
-                    LabeledContent {
-                        Text("\(rule.open) – \(rule.close)")
-                    } label: {
-                        VStack(alignment: .leading) {
-                            if let label = rule.label { Text(label) }
-                            if let days = ParkFormatting.days(rule.days) {
-                                Text(days).font(.caption).foregroundStyle(Color.rpplMuted)
+    // MARK: Cards
+
+    private var mapCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ParkMap(park: park, usesSatellite: usesSatellite)
+                .frame(height: 220)
+                .logbookNestedClip()
+
+            if let address = park.address {
+                Text(address)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+
+            Button {
+                ParkNavigation.openDirections(to: park)
+            } label: {
+                Label("Navigate", systemImage: "location.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+
+            if let bookingURL {
+                Link(destination: bookingURL) {
+                    Label("Book online", systemImage: "ticket")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
+
+    private var todayCard: some View {
+        let day = park.schedule()
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Today")
+
+            if day.isOpen {
+                ForEach(Array(day.windows.enumerated()), id: \.offset) { _, window in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(ParkFormatting.openFromTo(window))
+                            .font(.title3.bold())
+                            .foregroundStyle(Color.rpplText)
+                        if let detail = windowDetail(window) {
+                            Text(detail)
+                                .font(.caption)
+                                .foregroundStyle(Color.rpplMuted)
+                        }
+                    }
+                }
+                if !day.availableSlots.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Blocks")
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                        FlowLayout {
+                            ForEach(day.availableSlots, id: \.id) { slot in
+                                ParkChip(
+                                    text: ParkFormatting.slot(slot),
+                                    tint: Color.rpplAccent,
+                                    fill: Color.rpplAccent.opacity(0.14)
+                                )
                             }
                         }
                     }
                 }
-                if let note = opening.note {
-                    Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
+            } else {
+                Text("Closed today")
+                    .font(.title3.bold())
+                    .foregroundStyle(.red)
+            }
+
+            if let weather {
+                Divider().overlay(Color.rpplFill)
+                weatherRow(weather)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
+
+    private func weatherRow(_ weather: ParkWeather) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 16) {
+                Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
+                Label(
+                    String(localized: "Wind \(DistanceFormat.kilometersPerHour(weather.windKmh))"),
+                    systemImage: "wind"
+                )
+            }
+            .font(.subheadline)
+            .foregroundStyle(Color.rpplText)
+
+            if let legal = weather.legalURL {
+                Link(destination: legal) {
+                    HStack(spacing: 4) {
+                        if let mark = colorScheme == .dark ? weather.markDarkURL : weather.markLightURL {
+                            AsyncImage(url: mark) { image in
+                                image.resizable().scaledToFit()
+                            } placeholder: {
+                                Text("Apple Weather")
+                            }
+                            .frame(height: 12)
+                        } else {
+                            Text("Apple Weather")
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(Color.rpplMuted)
                 }
             }
         }
-        if let slots = opening.slots, !slots.isEmpty {
-            Section("Blocks") {
-                ForEach(Array(slots.enumerated()), id: \.offset) { _, slot in
-                    LabeledContent {
-                        Text(ParkFormatting.slot(slot))
-                    } label: {
-                        Text(slot.label ?? slot.id)
+    }
+
+    private var openingTimesCard: some View {
+        let months = ParkSchedule.months(for: park.opening)
+        let current = ParkFormatting.currentMonth(in: park)
+        return Group {
+            if !months.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionTitle("Opening times")
+                    ForEach(months) { entry in
+                        monthTile(entry, isCurrent: entry.month == current)
+                    }
+                    if let note = park.opening?.note {
+                        Text(note)
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .logbookCardChrome()
+            }
+        }
+    }
+
+    private func monthTile(_ entry: ParkMonthSchedule, isCurrent: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(ParkFormatting.monthName(entry.month))
+                .font(.subheadline.bold())
+                .foregroundStyle(isCurrent ? Color.rpplAccent : Color.rpplText)
+            ForEach(Array(entry.lines.enumerated()), id: \.offset) { _, line in
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(lineTitle(line))
+                            .foregroundStyle(Color.rpplText)
+                        Spacer(minLength: 8)
+                        Text("\(line.open) – \(line.close)")
+                            .monospacedDigit()
+                            .foregroundStyle(Color.rpplText)
+                    }
+                    .font(.subheadline)
+                    if let note = line.note {
+                        Text(note)
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
                     }
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .logbookNestedBackground(isCurrent ? Color.rpplAccent.opacity(0.14) : Color.rpplFill)
     }
 
-    private func cableSection(_ cable: ParkCable) -> some View {
-        Section(cable.name ?? String(localized: "Cable")) {
-            if let direction = ParkFormatting.direction(cable.direction) {
-                LabeledContent("Direction", value: direction)
+    private var blocksCard: some View {
+        let slots = park.opening?.slots ?? []
+        let todayIds = Set(park.schedule().availableSlots.map(\.id))
+        return Group {
+            if !slots.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionTitle("Blocks")
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                        ForEach(slots, id: \.id) { slot in
+                            blockTile(slot, highlighted: todayIds.contains(slot.id))
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let durations = ParkFormatting.bookingDurations(park.opening?.bookingMinutes) {
+                            Text("Bookable for \(durations)")
+                        }
+                        if !todayIds.isEmpty {
+                            Text("Highlighted blocks are available today")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .logbookCardChrome()
             }
-            if let length = cable.effectiveLengthM {
-                LabeledContent("Length", value: DistanceFormat.meters(length))
+        }
+    }
+
+    private func blockTile(_ slot: ParkSlot, highlighted: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(ParkFormatting.slot(slot))
+                .font(.subheadline.bold())
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .foregroundStyle(highlighted ? Color.rpplAccent : Color.rpplText)
+            if let label = slotLabel(slot) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(8)
+        .logbookNestedBackground(highlighted ? Color.rpplAccent.opacity(0.16) : Color.rpplFill)
+        .overlay {
+            if highlighted {
+                RoundedRectangle(cornerRadius: LogbookLayout.nestedMinimumCornerRadius + 4, style: .continuous)
+                    .strokeBorder(Color.rpplAccent.opacity(0.7), lineWidth: 1.5)
+            }
+        }
+    }
+
+    private func cableCard(_ cable: ParkCable) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(cable.name ?? String(localized: "Cable")).font(.headline).foregroundStyle(Color.rpplText)
+            FlowLayout {
+                if let type = ParkFormatting.cableType(cable.direction) {
+                    ParkChip(
+                        text: type,
+                        systemImage: cable.direction?.isLoop == true
+                            ? "arrow.triangle.2.circlepath" : "arrow.left.and.right"
+                    )
+                }
+                if let direction = ParkFormatting.loopDirection(cable.direction) {
+                    ParkChip(
+                        text: direction,
+                        systemImage: cable.direction == .clockwise ? "arrow.clockwise" : "arrow.counterclockwise"
+                    )
+                }
+                if let length = cable.effectiveLengthM {
+                    ParkChip(text: DistanceFormat.meters(length), systemImage: "ruler")
+                }
             }
             if let description = cable.description {
                 Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.rpplText)
             }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
+
+    @ViewBuilder
+    private var contactCard: some View {
+        let phoneURL = park.phone.flatMap { URL(string: "tel:" + $0.filter { $0.isNumber || $0 == "+" }) }
+        let mailURL = park.email.flatMap { URL(string: "mailto:\($0)") }
+        let webURL = park.website.flatMap { URL(string: $0) }
+        if phoneURL != nil || mailURL != nil || webURL != nil {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle("Contact")
+                if let phone = park.phone, let phoneURL {
+                    Link(destination: phoneURL) { Label(phone, systemImage: "phone") }
+                }
+                if let email = park.email, let mailURL {
+                    Link(destination: mailURL) { Label(email, systemImage: "envelope") }
+                }
+                if let website = park.website, let webURL {
+                    Link(destination: webURL) { Label(website, systemImage: "safari") }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .logbookCardChrome()
         }
     }
 
     @ViewBuilder
-    private var contactSection: some View {
-        let phoneURL = park.phone.flatMap { phone in
-            URL(string: "tel:" + phone.filter { $0.isNumber || $0 == "+" })
+    private var pricesCard: some View {
+        if let prices = park.prices, !prices.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle("Prices")
+                ForEach(Array(prices.enumerated()), id: \.offset) { _, price in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(price.name).foregroundStyle(Color.rpplText)
+                            if let note = price.note {
+                                Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        Text(price.price).bold().foregroundStyle(Color.rpplText)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .logbookCardChrome()
         }
-        let mailURL = park.email.flatMap { URL(string: "mailto:\($0)") }
-        let webURL = park.website.flatMap { URL(string: $0) }
-        if phoneURL != nil || mailURL != nil || webURL != nil {
-            Section("Contact") {
-                if let phone = park.phone, let phoneURL { Link(phone, destination: phoneURL) }
-                if let email = park.email, let mailURL { Link(email, destination: mailURL) }
-                if let website = park.website, let webURL { Link(website, destination: webURL) }
+    }
+
+    @ViewBuilder
+    private var aboutCard: some View {
+        let facilities = park.facilities ?? []
+        let description = park.description ?? ""
+        if !facilities.isEmpty || !description.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                if !description.isEmpty {
+                    sectionTitle("About")
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.rpplText)
+                }
+                if !facilities.isEmpty {
+                    sectionTitle("Facilities")
+                    FlowLayout {
+                        ForEach(facilities, id: \.self) { ParkChip(text: $0) }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .logbookCardChrome()
+        }
+    }
+
+    @ViewBuilder
+    private var linksCard: some View {
+        let links = (park.links ?? []).filter { $0.kind.lowercased() != "booking" }
+        if !links.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle("Links")
+                ForEach(Array(links.enumerated()), id: \.offset) { _, link in
+                    if let url = URL(string: link.url) {
+                        Link(destination: url) {
+                            Label(link.kind.capitalized, systemImage: "link")
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .logbookCardChrome()
+        }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 6) {
+            if park.opening != nil {
+                Text("Opening times may change and can be outdated. Verify with the park before booking.")
+            }
+            if let updated = park.lastUpdated {
+                Text("Last updated \(updated.formatted(date: .long, time: .omitted))")
             }
         }
+        .font(.caption)
+        .foregroundStyle(Color.rpplMuted)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 8)
+        .padding(.top, 4)
+    }
+
+    // MARK: Helpers
+
+    private func sectionTitle(_ key: LocalizedStringKey) -> some View {
+        Text(key).font(.headline).foregroundStyle(Color.rpplText)
+    }
+
+    private func slotLabel(_ slot: ParkSlot) -> String? {
+        if let label = slot.label { return label }
+        return park.opening?.numbered == false ? nil : String(localized: "Block \(slot.id)")
+    }
+
+    private func windowDetail(_ window: ParkTimeWindow) -> String? {
+        let parts = [window.label.flatMap { ParkFormatting.isMonthLabel($0) ? nil : $0 }, window.note]
+        let text = parts.compactMap { $0 }.joined(separator: " · ")
+        return text.isEmpty ? nil : text
+    }
+
+    private func lineTitle(_ line: ParkScheduleLine) -> String {
+        var parts = [ParkFormatting.days(line.days) ?? String(localized: "Daily")]
+        if let label = line.label, !ParkFormatting.isMonthLabel(label) { parts.append(label) }
+        if let from = line.from { parts.append(String(localized: "from \(from)")) }
+        if let until = line.until { parts.append(String(localized: "until \(until)")) }
+        return parts.joined(separator: " · ")
     }
 }
 
@@ -190,10 +443,24 @@ private struct ParkMap: View {
     let park: Park
     let usesSatellite: Bool
 
+    @State private var mapHeading: Double = 0
+
     var body: some View {
         Map(initialPosition: .region(region)) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
+            ForEach(startMarkers, id: \.id) { marker in
+                Annotation("", coordinate: marker.coordinate, anchor: .center) {
+                    Image(systemName: "location.north.fill")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                        .background(Color.rpplAccent, in: Circle())
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                        .rotationEffect(.degrees((marker.bearing ?? 0) - mapHeading))
+                        .accessibilityLabel(Text("Start"))
+                }
+            }
             ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
                 let points = (cable.points ?? []).map { coordinate($0.lat, $0.lon) }
                 if points.count >= 2 {
@@ -203,6 +470,27 @@ private struct ParkMap: View {
             }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
+        .onMapCameraChange(frequency: .continuous) { context in
+            mapHeading = context.camera.heading
+        }
+    }
+
+    private struct StartMarker {
+        let id: String
+        let coordinate: CLLocationCoordinate2D
+        let bearing: Double?
+    }
+
+    private var startMarkers: [StartMarker] {
+        (park.cables ?? []).enumerated().flatMap { cableIndex, cable in
+            cable.starts.enumerated().map { startIndex, start in
+                StartMarker(
+                    id: "\(cableIndex)-\(startIndex)",
+                    coordinate: coordinate(start.point.lat, start.point.lon),
+                    bearing: start.bearingDegrees
+                )
+            }
+        }
     }
 
     private var region: MKCoordinateRegion {

@@ -1,6 +1,6 @@
 # Terms & Privacy Policy
 
-**Last updated:** 25 August 2026
+**Last updated:** 24 September 2026
 
 ## A note from Duco
 
@@ -75,8 +75,8 @@ Apple HealthKit data is used only to support health and fitness features (workou
 
 **Apple Services:** To provide a complete experience, Rppl requests data from native Apple services:
 
-- **Apple WeatherKit:** Your current location is sent to Apple WeatherKit to retrieve air weather (temperature, humidity, condition) and water temperature (Apple Watch Ultra, when available) for your session.
-- **Apple Maps:** Used to display your route maps.
+- **Apple WeatherKit:** Your current location is sent to Apple WeatherKit to retrieve air weather (temperature, humidity, condition) and water temperature (Apple Watch Ultra, when available) for your session. In the Parks tab, the location of a park (not yours) is sent to Apple WeatherKit to show its current temperature and wind.
+- **Apple Maps:** Used to display your route maps and park maps, and to open directions to a park.
 
 If future updates require integrating new third-party APIs that process your data, we will ask for your explicit permission first.
 
@@ -91,6 +91,8 @@ Rppl can be used at any age. However, if you are under the legal age of digital 
 Wakeboarding and water sports can be dangerous. Rppl must not be used to make unsafe or unwise decisions. **Do not attempt dangerous maneuvers, ignore safety rules, or act recklessly based on data from this app.** You remain solely responsible for your safety, judgment, and equipment.
 
 By using this app you take your (expensive) Apple Watch on the water. That risk is yours alone. We are not liable for loss, damage, data loss, or any injuries arising from your use of the app, taking a Watch into a wet environment, or your own unsafe choices. To the extent strictly required by EU law, liability for our own gross negligence or intentional misconduct is not excluded, but the app is otherwise provided strictly as-is, without warranties.
+
+Park information in the Parks tab (opening times, blocks, prices, contact details, cable layouts, locations and directions) is collected by hand from public sources and may be incomplete, outdated or wrong. Parks change their hours and rules without notice. We give no guarantee that it is correct and are not liable for any loss, cost or inconvenience arising from relying on it, such as a trip to a closed park or a missed booking. Always verify with the park itself before you travel or book.
 
 ## Service changes & costs
 

@@ -29,34 +29,46 @@ struct ParksView: View {
         NavigationStack {
             List {
                 Section {
-                    Picker("Sort", selection: $sort) {
-                        Text("Nearby").tag(ParkListSort.distance)
-                        Text("Most visited").tag(ParkListSort.visits)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Parks")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.rpplText)
+                        Picker("Sort", selection: $sort) {
+                            Text("Nearby").tag(ParkListSort.distance)
+                            Text("Most visited").tag(ParkListSort.visits)
+                        }
+                        .pickerStyle(.segmented)
                     }
-                    .pickerStyle(.segmented)
+                    .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
                 }
 
                 if parks.isEmpty {
                     Text("No parks yet")
                         .foregroundStyle(Color.rpplMuted)
+                        .listRowBackground(Color.clear)
                 } else {
                     let counts = visits
                     ForEach(sortedParks) { park in
-                        NavigationLink(value: park) {
-                            ParkRow(
-                                park: park,
-                                visitCount: counts[park.id] ?? 0,
-                                distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
-                                isFavorite: favorites.contains(park.id),
-                                onToggleFavorite: { favorites.toggle(park.id) }
-                            )
-                        }
+                        ParkCard(
+                            park: park,
+                            visitCount: counts[park.id] ?? 0,
+                            distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
+                            isFavorite: favorites.contains(park.id)
+                        )
+                        .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
                 }
             }
-            .navigationTitle("Parks")
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+            .contentMargins(.top, 8, for: .scrollContent)
+            .background(Color.rpplBackground)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
                 ParkDetailView(
                     park: park,
@@ -65,6 +77,7 @@ struct ParksView: View {
                 )
             }
         }
+        .tint(Color.rpplAccent)
         .task {
             parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
             location.start()
@@ -77,53 +90,73 @@ extension Park: Hashable {
     public func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-private struct ParkRow: View {
+private struct ParkCard: View {
     let park: Park
     let visitCount: Int
     let distanceMeters: Double?
     let isFavorite: Bool
-    let onToggleFavorite: () -> Void
+
+    private var openToday: Bool? {
+        park.opening == nil ? nil : park.schedule().isOpen
+    }
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onToggleFavorite) {
-                Image(systemName: isFavorite ? "star.fill" : "star")
-                    .foregroundStyle(isFavorite ? Color.rpplAccent : Color.rpplMuted)
-            }
-            .buttonStyle(.borderless)
-            .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(park.name)
-                    .font(.headline)
-                    .foregroundStyle(Color.rpplText)
-                if let address = park.address {
-                    Text(address)
-                        .font(.subheadline)
-                        .foregroundStyle(Color.rpplMuted)
-                }
-                HStack(spacing: 8) {
-                    if let distanceMeters {
-                        Text(DistanceFormat.kilometers(distanceMeters))
+        HStack(alignment: .center, spacing: 12) {
+            NavigationLink(value: park) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(park.name)
+                            .font(.headline)
+                            .foregroundStyle(Color.rpplText)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if isFavorite {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.rpplAccent)
+                                .accessibilityLabel(Text("Favorite"))
+                        }
                     }
-                    if visitCount > 0 {
-                        Text(ParkFormatting.visits(visitCount))
+                    if let address = park.address {
+                        Text(address)
+                            .font(.caption)
+                            .foregroundStyle(Color.rpplMuted)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    HStack(spacing: 6) {
+                        if let openToday {
+                            ParkChip(
+                                text: openToday ? String(localized: "Open today") : String(localized: "Closed today"),
+                                tint: openToday ? .green : .red,
+                                fill: (openToday ? Color.green : Color.red).opacity(0.14)
+                            )
+                        }
+                        if let distanceMeters {
+                            ParkChip(text: DistanceFormat.kilometers(distanceMeters))
+                        }
+                        if visitCount > 0 {
+                            ParkChip(text: ParkFormatting.visits(visitCount))
+                        }
                     }
                 }
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-
-            Spacer(minLength: 0)
+            .buttonStyle(.plain)
 
             Button {
                 ParkNavigation.openDirections(to: park)
             } label: {
                 Image(systemName: "location.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 52, height: 52)
+                    .background(Color.rpplAccent, in: Circle())
             }
-            .buttonStyle(.borderless)
-            .tint(Color.rpplAccent)
+            .buttonStyle(.plain)
             .accessibilityLabel(Text("Navigate"))
         }
+        .logbookCardChrome()
     }
 }

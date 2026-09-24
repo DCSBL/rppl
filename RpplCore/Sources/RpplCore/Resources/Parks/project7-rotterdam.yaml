@@ -16,10 +16,22 @@ location:
 phone: 010 - 2600 110
 email: info@project7cablepark.nl
 website: https://www.project7cablepark.nl
+links:
+  - { kind: booking, url: "https://www.project7cablepark.nl/online-ticket/" }
+  - { kind: instagram, url: "https://www.instagram.com/project7cablepark/" }
+  - { kind: facebook, url: "https://www.facebook.com/project7cableparkrotterdam/" }
+
+facilities:
+  - Free parking
+  - Skis included
+  - Board rental
+  - Restaurant
+  - Changing facility
+  - Toilet
 
 cables:
   - name: Cable
-    direction: cw
+    direction: cw               # full size (loop); 2d is a 2-point "2.0" cable
     # First point is the start.
     points:
       - { lat: 51.9793329062201, lon: 4.574032424368503 }

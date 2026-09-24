@@ -53,6 +53,12 @@ public struct ParkCablePoint: Codable, Equatable, Sendable {
     public var coordinate: ParkCoordinate { ParkCoordinate(lat: lat, lon: lon) }
 }
 
+public struct ParkCableStart: Equatable, Sendable {
+    public var point: ParkCablePoint
+    /// Degrees clockwise from true north; nil when the cable has no second point.
+    public var bearingDegrees: Double?
+}
+
 public struct ParkCable: Codable, Equatable, Sendable {
     public var name: String?
     public var direction: ParkCableDirection?
@@ -82,10 +88,27 @@ public struct ParkCable: Codable, Equatable, Sendable {
     }
 
     /// Points flagged `start: true`; the first point when none is flagged.
-    public var startPoints: [ParkCablePoint] {
-        guard let points, let first = points.first else { return [] }
-        let flagged = points.filter { $0.start == true }
-        return flagged.isEmpty ? [first] : flagged
+    public var startPoints: [ParkCablePoint] { starts.map(\.point) }
+
+    /// Start points with the travel bearing towards the next traced point (points are listed in travel order).
+    public var starts: [ParkCableStart] {
+        guard let points, !points.isEmpty else { return [] }
+        var indices = points.indices.filter { points[$0].start == true }
+        if indices.isEmpty { indices = [0] }
+        return indices.map { index in
+            let point = points[index]
+            var bearing: Double?
+            if points.count >= 2 {
+                let next = points[(index + 1) % points.count]
+                let distance = point.coordinate.meters(to: next.coordinate)
+                if distance > 0.5 {
+                    bearing = GeoBearing.degrees(
+                        fromLat: point.lat, fromLon: point.lon, toLat: next.lat, toLon: next.lon
+                    )
+                }
+            }
+            return ParkCableStart(point: point, bearingDegrees: bearing)
+        }
     }
 
     /// Sum of segments; loop cables (`cw` / `ccw`) include the closing segment.
@@ -211,6 +234,16 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
 
     public var resolvedTimeZone: TimeZone {
         timezone.flatMap(TimeZone.init(identifier:)) ?? TimeZone(identifier: "Europe/Amsterdam") ?? .current
+    }
+
+    /// `updated_at` (`yyyy-MM-dd`) as a date at noon in the park's time zone.
+    public var lastUpdated: Date? {
+        guard let updatedAt else { return nil }
+        let parts = updatedAt.prefix(10).split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = resolvedTimeZone
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))
     }
 
     /// Today's opening windows and available slots in the park's own time zone.

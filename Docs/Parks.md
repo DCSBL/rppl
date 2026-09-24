@@ -31,15 +31,17 @@ website: https://www.project7cablepark.nl
 
 cables:
   - name: Cable                   # optional ("Beginner", "Advanced", …)
-    direction: cw                 # cw | ccw | 2d (unknown values round-trip)
+    direction: cw                 # cw | ccw = "full size" (goes round), 2d = 2-point "2.0" cable
     description: optional text
     length_m: 760                 # optional; wins over the length computed from points
-    points:                       # optional; first point is the start
+    points:                       # optional; listed in travel order, first point is the start
       - { lat: 51.97933, lon: 4.57403 }
       - { lat: 51.98027, lon: 4.57763, start: true }   # explicit start(s) when needed
 
 opening:
   booking: required               # required | optional | none
+  numbered: true                  # false = blocks are plain start times (hourly), not "Block 3"
+  booking_minutes: [60, 120]      # optional: bookable per 1 or 2 hours
   note: free text
   rules:                          # drop-in / open windows
     - { label: September, months: [9], days: [weekdays], open: "14:00", close: "20:00" }
@@ -47,7 +49,7 @@ opening:
     - { id: "3", start: "14:00", end: "15:30" }
 
 prices:  [{ name: Day pass, price: "€25", note: optional }]
-links:   [{ kind: instagram, url: "https://…" }]
+links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
 ```
@@ -67,6 +69,13 @@ Rules and slots share optional selectors, all of which must match a date:
 - A park with **both** offers a slot only when it fits completely inside an open window. Example: Project 7 in September on a weekday is open 14:00–20:00, so blocks 3–6 are available; on weekends 12:30–20:00 adds block 2.
 - Several rules may match one day (for example a beginner hour inside the opening window); all are shown.
 - No matching rule means closed.
+
+### Display
+
+- The opening-times card collapses rules into one entry per month, listing the specialities (weekend hours, beginner hour, …) as lines under it. The current month is highlighted.
+- Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
+- Special days (holidays) are not modelled yet. They will become a further selector on rules (for example explicit dates) and appear as extra lines in the month entries.
+- Cables are called "full size" (`cw`/`ccw`) or "2.0" (`2d`). The map shows an arrow on each start point, pointing towards the next traced point.
 
 ### Cable length
 
