@@ -34,6 +34,10 @@ final class PhoneICloudDriveController: NSObject {
     private var metadataQuery: NSMetadataQuery?
     /// Session ids the user dismissed or deleted (skip import picker across launches).
     private var dismissedRemoteIDs = Set<String>()
+    /// Package folder paths just deleted on this device — bridges the gap before
+    /// `NSMetadataQuery` drops the stale result, so the import picker doesn't
+    /// briefly re-offer a session we just removed.
+    private var recentlyDeletedFolderPaths = Set<String>()
     private var rootSwitchTask: Task<Void, Never>?
     private var isSwitchingRoot = false
     private var metadataHasGathered = false
@@ -297,6 +301,7 @@ final class PhoneICloudDriveController: NSObject {
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
+        recentlyDeletedFolderPaths.insert(dir.standardizedFileURL.path)
         try await coordinatedDeleteSession(at: dir)
         await deleteFromLocalFallbackRoot(sessionId: sessionId)
         hiddenSessionIDs.remove(sessionId)
@@ -515,6 +520,7 @@ final class PhoneICloudDriveController: NSObject {
         let dismissed = ignoreDismissed ? Set<String>() : dismissedRemoteIDs
         var remoteIDs = Set<String>()
         var candidates: [RemoteSessionSummary] = []
+        var seenFolderPaths = Set<String>()
         let store = PhoneConnectivityService.shared.store
 
         for case let item as NSMetadataItem in query.results {
@@ -525,6 +531,12 @@ final class PhoneICloudDriveController: NSObject {
             guard sessionDir.deletingLastPathComponent().standardizedFileURL
                 == root.standardizedFileURL
             else {
+                continue
+            }
+            let sessionDirPath = sessionDir.standardizedFileURL.path
+            seenFolderPaths.insert(sessionDirPath)
+            guard !recentlyDeletedFolderPaths.contains(sessionDirPath) else {
+                // Stale query result — NSMetadataQuery hasn't dropped it yet.
                 continue
             }
             let summary = readSummaryCoordinated(at: sessionDir)
@@ -552,6 +564,9 @@ final class PhoneICloudDriveController: NSObject {
                 )
             }
         }
+
+        // Query caught up with a deletion — stop guarding that path.
+        recentlyDeletedFolderPaths.formIntersection(seenFolderPaths)
 
         if !ignoreDismissed {
             let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
