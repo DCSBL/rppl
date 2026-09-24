@@ -360,14 +360,29 @@ struct ParkChip: View {
     }
 }
 
-/// Park detail wired to the shared favorites; used from the Parks tab and the session page.
+enum ParkOriginBadge {
+    static func text(for entry: ParkEntry?) -> String? {
+        guard let entry else { return nil }
+        if entry.hasNewerBundled { return String(localized: "Update available") }
+        switch entry.origin {
+        case .bundled: return nil
+        case .custom: return String(localized: "Custom")
+        case .edited: return String(localized: "Edited")
+        }
+    }
+}
+
+/// Park detail wired to the shared favorites and park store; used from the Parks tab and the session page.
 struct ParkDetailContainer: View {
     let park: Park
     @State private var favorites = ParkFavorites.shared
+    @State private var store = ParkStore.shared
 
     var body: some View {
+        let entry = store.entry(id: park.id)
         ParkDetailView(
-            park: park,
+            park: entry?.park ?? park,
+            entry: entry,
             isFavorite: favorites.contains(park.id),
             onToggleFavorite: { favorites.toggle(park.id) }
         )

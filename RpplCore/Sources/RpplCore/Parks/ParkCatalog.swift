@@ -44,6 +44,102 @@ public enum ParkCatalog {
         return byId.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
+    // MARK: - User parks (custom + edited overrides)
+
+    /// Every park with where it came from. A user file wins over a bundled park with the same `id`.
+    public static func loadWithOrigin(userRoot: URL?) -> [ParkEntry] {
+        let bundled = Dictionary(loadBundled().map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var entries: [String: ParkEntry] = bundled.mapValues { ParkEntry(park: $0, origin: .bundled) }
+        if let userRoot {
+            for park in loadDirectory(userRoot) {
+                guard let base = bundled[park.id] else {
+                    entries[park.id] = ParkEntry(park: park, origin: .custom)
+                    continue
+                }
+                let newer = (base.updatedAt ?? "") > (park.basedOnUpdatedAt ?? "")
+                entries[park.id] = ParkEntry(park: park, origin: .edited, bundledPark: base, hasNewerBundled: newer)
+            }
+        }
+        return entries.values.sorted { $0.park.name.localizedCaseInsensitiveCompare($1.park.name) == .orderedAscending }
+    }
+
+    /// Writes `<id>.yaml` into `userRoot`, stamping `updated_at`, a history line and (for overrides) `based_on_updated_at`.
+    @discardableResult
+    public static func save(
+        _ park: Park,
+        to userRoot: URL,
+        bundledBase: Park? = nil,
+        now: Date = Date()
+    ) throws -> Park {
+        var park = park
+        let day = dayString(now)
+        park.updatedAt = day
+        if park.createdAt == nil { park.createdAt = day }
+        park.basedOnUpdatedAt = bundledBase.map { $0.updatedAt ?? "" }
+        var history = park.history ?? []
+        history.append(ParkHistoryEntry(date: day, description: bundledBase == nil ? "Edited in app" : "Edited in app (override)"))
+        park.history = history
+        try FileManager.default.createDirectory(at: userRoot, withIntermediateDirectories: true)
+        try removeUserFiles(id: park.id, in: userRoot)
+        try encode(park).write(to: userRoot.appendingPathComponent("\(park.id).yaml"), atomically: true, encoding: .utf8)
+        return park
+    }
+
+    /// Deletes a custom park, or removes an override so the bundled park shows again.
+    public static func deleteUserPark(id: String, userRoot: URL) throws {
+        try removeUserFiles(id: id, in: userRoot)
+    }
+
+    /// Keeps the user's override but marks the current bundled version as seen.
+    public static func keepMine(_ entry: ParkEntry, userRoot: URL) throws {
+        guard let base = entry.bundledPark else { return }
+        var park = entry.park
+        park.basedOnUpdatedAt = base.updatedAt
+        try removeUserFiles(id: park.id, in: userRoot)
+        try encode(park).write(to: userRoot.appendingPathComponent("\(park.id).yaml"), atomically: true, encoding: .utf8)
+    }
+
+    /// Lowercase ASCII slug from a park name, made unique against `existing`.
+    public static func slug(from name: String, existing: Set<String> = []) -> String {
+        let folded = name.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current).lowercased()
+        var out = ""
+        var lastDash = true
+        for scalar in folded.unicodeScalars {
+            if scalar.isASCII, CharacterSet.alphanumerics.contains(scalar) {
+                out.unicodeScalars.append(scalar)
+                lastDash = false
+            } else if !lastDash {
+                out.append("-")
+                lastDash = true
+            }
+        }
+        while out.hasSuffix("-") { out.removeLast() }
+        if out.isEmpty { out = "park" }
+        var candidate = out
+        var n = 2
+        while existing.contains(candidate) {
+            candidate = "\(out)-\(n)"
+            n += 1
+        }
+        return candidate
+    }
+
+    private static func removeUserFiles(id: String, in directory: URL) throws {
+        let urls = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+        for url in urls where ["yaml", "yml"].contains(url.pathExtension.lowercased()) {
+            let text = try? String(contentsOf: url, encoding: .utf8)
+            let fileId = text.flatMap { try? parse(yaml: $0, fallbackId: url.deletingPathExtension().lastPathComponent).id }
+            if fileId == id { try FileManager.default.removeItem(at: url) }
+        }
+    }
+
+    private static func dayString(_ date: Date) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let c = calendar.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", c.year ?? 1970, c.month ?? 1, c.day ?? 1)
+    }
+
     private static func loadFiles(_ urls: [URL]) -> [Park] {
         var seen = Set<String>()
         var parks: [Park] = []
@@ -56,6 +152,32 @@ public enum ParkCatalog {
             }
         }
         return parks
+    }
+}
+
+public enum ParkOrigin: String, Sendable {
+    case bundled
+    /// Only exists as a user file.
+    case custom
+    /// A user file overriding a bundled park.
+    case edited
+}
+
+public struct ParkEntry: Equatable, Sendable, Identifiable {
+    public var park: Park
+    public var origin: ParkOrigin
+    /// The bundled version when `origin == .edited`.
+    public var bundledPark: Park?
+    /// The app ships a newer version than the one the override was based on.
+    public var hasNewerBundled: Bool
+
+    public var id: String { park.id }
+
+    public init(park: Park, origin: ParkOrigin, bundledPark: Park? = nil, hasNewerBundled: Bool = false) {
+        self.park = park
+        self.origin = origin
+        self.bundledPark = bundledPark
+        self.hasNewerBundled = hasNewerBundled
     }
 }
 

@@ -169,6 +169,10 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
     public var createdAt: String?
     public var updatedAt: String?
     public var history: [ParkHistoryEntry]?
+    /// Credit for whoever wrote or last maintained this park file.
+    public var author: String?
+    /// On a user override of a bundled park: the bundled `updated_at` this edit was based on.
+    public var basedOnUpdatedAt: String?
 
     public var name: String
     public var location: ParkCoordinate
@@ -186,10 +190,11 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
     public var facilities: [String]?
 
     enum CodingKeys: String, CodingKey {
-        case version, id, history, name, location, address, timezone, cables, opening
+        case version, id, history, author, name, location, address, timezone, cables, opening
         case phone, email, website, prices, links, description, facilities
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+        case basedOnUpdatedAt = "based_on_updated_at"
     }
 
     public init(
@@ -210,7 +215,9 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
         facilities: [String]? = nil,
         createdAt: String? = nil,
         updatedAt: String? = nil,
-        history: [ParkHistoryEntry]? = nil
+        history: [ParkHistoryEntry]? = nil,
+        author: String? = nil,
+        basedOnUpdatedAt: String? = nil
     ) {
         self.version = version
         self.id = id
@@ -230,6 +237,8 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.history = history
+        self.author = author
+        self.basedOnUpdatedAt = basedOnUpdatedAt
     }
 
     public var resolvedTimeZone: TimeZone {

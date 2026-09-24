@@ -2,7 +2,9 @@ import RpplCore
 import SwiftUI
 
 struct ParksView: View {
-    @State private var parks: [Park] = []
+    @State private var store = ParkStore.shared
+    @State private var showEditor = false
+    @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var sort: ParkListSort = .distance
     @State private var favorites = ParkFavorites.shared
     @State private var location = ParksLocationProvider()
@@ -13,6 +15,8 @@ struct ParksView: View {
     @State private var searchText = ""
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+
+    private var parks: [Park] { store.entries.map(\.park) }
 
     private var visits: [String: Int] {
         let centers = catalog.entries.compactMap(\.center)
@@ -52,9 +56,23 @@ struct ParksView: View {
             List {
                 Section {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Parks")
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(Color.rpplText)
+                        HStack {
+                            Text("Parks")
+                                .font(.largeTitle.bold())
+                                .foregroundStyle(Color.rpplText)
+                            Spacer()
+                            if editorEnabled {
+                                Button {
+                                    showEditor = true
+                                } label: {
+                                    Image(systemName: "plus")
+                                        .font(.title3.weight(.semibold))
+                                        .frame(width: 44, height: 44)
+                                }
+                                .buttonStyle(.borderless)
+                                .accessibilityLabel(Text("Add park"))
+                            }
+                        }
                         Picker("Sort", selection: sortChoice) {
                             Text("Nearby").tag(SortChoice.sort(.distance))
                             Text("Most visited").tag(SortChoice.sort(.visits))
@@ -93,7 +111,8 @@ struct ParksView: View {
                             park: park,
                             visitCount: counts[park.id] ?? 0,
                             distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
-                            isFavorite: favorites.contains(park.id)
+                            isFavorite: favorites.contains(park.id),
+                            entry: store.entry(id: park.id)
                         )
                         .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                         .listRowBackground(Color.clear)
@@ -113,11 +132,14 @@ struct ParksView: View {
             }
         }
         .tint(Color.rpplAccent)
+        .sheet(isPresented: $showEditor) {
+            ParkEditorView(original: nil, onSaved: {})
+        }
         .fullScreenCover(isPresented: $showMap) {
             ParksMapView(parks: parks)
         }
         .task {
-            parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
+            store.reload()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
@@ -139,6 +161,7 @@ private struct ParkCard: View {
     let visitCount: Int
     let distanceMeters: Double?
     let isFavorite: Bool
+    let entry: ParkEntry?
 
     private var openToday: Bool? {
         park.opening == nil ? nil : park.schedule().isOpen
@@ -175,6 +198,9 @@ private struct ParkCard: View {
                                 tint: openToday ? .green : .red,
                                 fill: (openToday ? Color.green : Color.red).opacity(0.14)
                             )
+                        }
+                        if let badge = ParkOriginBadge.text(for: entry) {
+                            ParkChip(text: badge, tint: Color.rpplAccent, fill: Color.rpplAccent.opacity(0.14))
                         }
                         if let distanceMeters {
                             ParkChip(text: DistanceFormat.kilometers(distanceMeters))

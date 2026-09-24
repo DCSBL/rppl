@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ParkDetailView: View {
     let park: Park
+    let entry: ParkEntry?
     let isFavorite: Bool
     let onToggleFavorite: () -> Void
 
@@ -11,6 +12,10 @@ struct ParkDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var weatherProvider = ParksWeatherProvider()
     @State private var weather: ParkWeather?
+    @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
+    @State private var showEditor = false
+    @State private var showMail = false
+    @State private var confirmRemove = false
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -19,6 +24,7 @@ struct ParkDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                updateCard
                 mapCard
                 if park.opening != nil {
                     todayCard
@@ -47,9 +53,64 @@ struct ParkDetailView: View {
                 }
                 .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
             }
+            if editorEnabled {
+                ToolbarItem(placement: .primaryAction) { editMenu }
+            }
+        }
+        .sheet(isPresented: $showEditor) {
+            ParkEditorView(original: park, onSaved: {})
+        }
+        .sheet(isPresented: $showMail) {
+            ParkMailComposer(park: park) { showMail = false }
+                .ignoresSafeArea()
+        }
+        .confirmationDialog(removeTitle, isPresented: $confirmRemove, titleVisibility: .visible) {
+            Button(removeTitle, role: .destructive) { ParkStore.shared.removeUserVersion(id: park.id) }
         }
         .task {
             weather = await weatherProvider.weather(for: park)
+        }
+    }
+
+    // MARK: Editing
+
+    private var removeTitle: String {
+        entry?.origin == .custom ? String(localized: "Delete park") : String(localized: "Revert to app version")
+    }
+
+    private var editMenu: some View {
+        Menu {
+            Button("Edit", systemImage: "pencil") { showEditor = true }
+            Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
+            if let origin = entry?.origin, origin != .bundled {
+                Button("Send to Rppl", systemImage: "envelope") {
+                    if MailAvailability.canSend { showMail = true } else { ParkShare.share(park) }
+                }
+                Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityLabel(Text("Edit park"))
+    }
+
+    @ViewBuilder
+    private var updateCard: some View {
+        if let entry, entry.hasNewerBundled {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle("Update available")
+                Text("This park was updated in the app since you edited it. Keep your version or switch to the app version?")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.rpplMuted)
+                HStack {
+                    Button("Keep my version") { ParkStore.shared.keepMine(entry) }
+                        .buttonStyle(.bordered)
+                    Button("Use app version") { ParkStore.shared.removeUserVersion(id: entry.id) }
+                        .buttonStyle(.borderedProminent)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .logbookCardChrome()
         }
     }
 
@@ -219,7 +280,7 @@ struct ParkDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
-        .logbookNestedBackground(isCurrent ? Color.rpplAccent.opacity(0.14) : Color.rpplFill)
+        .parkHighlightBackground(isCurrent, opacity: 0.14)
     }
 
     private var blocksCard: some View {
@@ -267,7 +328,7 @@ struct ParkDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .logbookNestedBackground(highlighted ? Color.rpplAccent.opacity(0.24) : Color.rpplFill)
+        .parkHighlightBackground(highlighted, opacity: 0.24)
     }
 
     private func cableCard(_ cable: ParkCable) -> some View {
@@ -395,6 +456,12 @@ struct ParkDetailView: View {
             if park.opening != nil {
                 Text("Opening times may change and can be outdated. Verify with the park before booking.")
             }
+            if let author = park.author, author.caseInsensitiveCompare("rppl") != .orderedSame {
+                Text("Credits: \(author)")
+            }
+            if let badge = ParkOriginBadge.text(for: entry) {
+                Text(badge)
+            }
             if let updated = park.lastUpdated {
                 Text("Last updated: \(updated.formatted(date: .long, time: .omitted))")
             }
@@ -516,5 +583,13 @@ private struct ParkMap: View {
 
     private func coordinate(_ lat: Double, _ lon: Double) -> CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+}
+
+private extension View {
+    /// Accent tint layered over the normal nested fill, so highlights stay lighter than the card in dark mode.
+    func parkHighlightBackground(_ highlighted: Bool, opacity: Double) -> some View {
+        logbookNestedBackground(highlighted ? Color.rpplAccent.opacity(opacity) : Color.clear)
+            .logbookNestedBackground(Color.rpplFill)
     }
 }
