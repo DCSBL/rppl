@@ -22,5 +22,8 @@ struct RpplWatchApp: App {
         WakeLog.debug(.lifecycle, "RpplWatchApp init")
         _ = TesterIdentity.resolve()
         WatchTransferService.shared.activate()
+        Task.detached(priority: .utility) {
+            await WatchSessionController.shared.recoverDanglingWorkoutSession()
+        }
     }
 }

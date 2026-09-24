@@ -144,6 +144,38 @@ extension WatchSessionController {
         }
     }
 
+    /// Ends a workout session left dangling by a crash so watchOS stops handing it back
+    /// on every relaunch. Runs off the launch path; each step is time-bounded.
+    func recoverDanglingWorkoutSession() async {
+        let store = healthStore
+        let recovered: HKWorkoutSession? = await withTaskGroup(of: HKWorkoutSession?.self) { group in
+            group.addTask { try? await store.recoverActiveWorkoutSession() }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        guard let session = recovered, workoutSession == nil else { return }
+        WakeLog.debug(.workout, "recovered dangling HKWorkoutSession state=\(session.state.rawValue)")
+        let builder = session.associatedWorkoutBuilder()
+        if session.state == .running || session.state == .paused {
+            session.stopActivity(with: Date())
+            for _ in 0..<20 where session.state != .stopped {
+                try? await Task.sleep(nanoseconds: 250_000_000)
+            }
+        }
+        do {
+            try await builder.endCollection(at: Date())
+            _ = try await builder.finishWorkout()
+        } catch {
+            WakeLog.error(.workout, "dangling finishWorkout: \(error.localizedDescription)")
+        }
+        session.end()
+    }
+
     /// Returns true if an HK workout session is running.
     func startWorkoutIfAuthorized() async -> Bool {
         refreshPermissionStatus()
