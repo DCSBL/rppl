@@ -4,6 +4,23 @@ import Testing
 
 @Suite("SessionFileStore", .serialized)
 struct SessionFileStoreTests {
+    @Test func updateWeatherPersistsInManifest() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "Watch7,1", systemVersion: "26.0"
+        )
+        _ = try store.createSession(manifest: manifest)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).weather == nil)
+
+        let weather = SessionWeather(temperatureCelsius: 18.5, humidityPercent: 62)
+        try store.updateWeather(weather, sessionId: manifest.sessionId)
+        #expect(try store.readManifest(sessionId: manifest.sessionId).weather == weather)
+    }
+
     @Test func createsManifestAndRoundTripsDetections() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)
