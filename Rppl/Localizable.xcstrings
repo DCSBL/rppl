@@ -3707,6 +3707,22 @@
         }
       }
     },
+    "Closed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesloten"
+          }
+        }
+      }
+    },
     "Closed today" : {
       "localizations" : {
         "en" : {
@@ -3935,6 +3951,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vandaag open"
+          }
+        }
+      }
+    },
+    "Opens tomorrow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens tomorrow"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen open"
           }
         }
       }
