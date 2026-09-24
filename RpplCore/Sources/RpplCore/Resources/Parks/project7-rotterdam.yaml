@@ -9,6 +9,8 @@ history:
     description: add prices from project7cablepark.nl/tarieven
   - date: 2026-09-24
     description: correct prices per user-supplied tarieven data
+  - date: 2026-09-24
+    description: add gift voucher/group price, beachclub link, age rule from FAQ
 
 name: Project 7 Cablepark Rotterdam
 address: Kosboulevard 35, 3059 XZ Rotterdam
@@ -24,16 +26,18 @@ links:
   - { kind: booking, url: "https://www.project7cablepark.nl/online-ticket/" }
   - { kind: instagram, url: "https://www.instagram.com/project7cablepark/" }
   - { kind: facebook, url: "https://www.facebook.com/project7cableparkrotterdam/" }
+  - { kind: restaurant, url: "https://storm-nesselande.nl" }
 
 facilities:
   - Free parking
   - Skis included
   - Board rental
-  - Restaurant
-  - Changing facility
+  - Storm Beachclub & Bistro (next door)
+  - Changing rooms
+  - Coin shower (€0,50)
   - Toilet
 
-# Source: project7cablepark.nl/tarieven
+# Source: project7cablepark.nl/tarieven + FAQ
 prices:
   - { name: Online ticket, price: "€29", note: "1.5h block" }
   - { name: Counter ticket, price: "€31", note: "1.5h block" }
@@ -44,6 +48,8 @@ prices:
   - { name: Monthly pass, price: "€345", note: "May, June or September" }
   - { name: Monthly pass, price: "€395", note: "July or August" }
   - { name: Season pass, price: "€995" }
+  - { name: Gift voucher, price: "€29", note: "belevenisbon, redeem for one online ticket" }
+  - { name: Group discount, price: "-€3 pp", note: "11+ people, paid as one group" }
 
 cables:
   - name: Cable
@@ -61,8 +67,8 @@ cables:
 opening:
   booking: required
   note: >-
-    Book a block online in advance and check in at the desk 30 minutes before start.
-    Easter, Ascension and Pentecost use weekend hours in April and May.
+    Book a block online at least 3 hours in advance and check in at the desk 30 minutes
+    before start. Easter, Ascension and Pentecost use weekend hours in April and May.
   rules:
     - { label: April, months: [4], days: [weekend], open: "12:30", close: "17:00" }
     - { label: May, months: [5], days: [weekdays], open: "14:00", close: "20:00" }
@@ -82,3 +88,8 @@ opening:
     - { id: "5", start: "17:00", end: "18:30" }
     - { id: "6", start: "18:30", end: "20:00" }
     - { id: "7", start: "20:00", end: "21:30" }
+
+description: >-
+  Swim diploma B required; riders should be able to swim to shore unassisted with
+  their skis. Recommended from about age 10; under 16 needs an adult's permission
+  at the desk. Standard water skis are included in the ticket price.
