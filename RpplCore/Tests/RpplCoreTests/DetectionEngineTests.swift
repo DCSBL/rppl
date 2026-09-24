@@ -20,6 +20,18 @@ private func tick(
     )
 }
 
+/// Sustained cable speed, one tick per second, so a set is old and proven enough to keep.
+private func cruise(
+    _ engine: inout DetectionEngine,
+    from start: Int,
+    through end: Int,
+    speedKmh: Double = 22
+) {
+    for second in start...end {
+        _ = engine.process(tick(at: Double(second), speedKmh: speedKmh))
+    }
+}
+
 /// Enter riding from session start with default thresholds.
 private func enterRiding(_ engine: inout DetectionEngine, at start: TimeInterval = 0) {
     _ = engine.makeSessionStartEvent(at: t0)
@@ -198,8 +210,9 @@ struct DetectionEngineTests {
         #expect(engine.currentCode == DetectionCodes.riding)
         #expect(engine.lastConfidentCode == DetectionCodes.riding)
 
-        _ = engine.process(tick(at: 8, speedKmh: 2))
-        let exited = engine.process(tick(at: 11.1, speedKmh: 1))
+        cruise(&engine, from: 6, through: 15)
+        _ = engine.process(tick(at: 16, speedKmh: 2))
+        let exited = engine.process(tick(at: 19.1, speedKmh: 1))
         #expect(exited.first?.code == DetectionCodes.inactive)
         #expect(exited.first?.detectorId == "ride_exit")
     }
@@ -225,8 +238,9 @@ struct DetectionEngineTests {
     @Test func rideExitAfterStoppedHold() {
         var engine = DetectionEngine()
         enterRiding(&engine)
-        #expect(engine.process(tick(at: 3, speedKmh: 2)).isEmpty)
-        let events = engine.process(tick(at: 6.1, speedKmh: 1))
+        cruise(&engine, from: 4, through: 15)
+        #expect(engine.process(tick(at: 16, speedKmh: 2)).isEmpty)
+        let events = engine.process(tick(at: 19.1, speedKmh: 1))
         #expect(events.first?.code == DetectionCodes.inactive)
         #expect(events.first?.detectorId == "ride_exit")
     }
@@ -377,8 +391,9 @@ struct DetectionEngineTests {
         let ticks = [
             tick(at: 0, speedKmh: 22),
             tick(at: 3.1, speedKmh: 22),
-            tick(at: 5, speedKmh: 2),
-            tick(at: 8.1, speedKmh: 1),
+        ] + (4...15).map { tick(at: Double($0), speedKmh: 22) } + [
+            tick(at: 16, speedKmh: 2),
+            tick(at: 19.1, speedKmh: 1),
         ]
         let events = DetectionEngine.replay(ticks: ticks)
         #expect(events.first?.reason == "session_start")
@@ -544,7 +559,11 @@ struct DetectionExtensibilityTests {
     }
 
     @Test func customDetectorCanPrepend() {
+        // The forced exit lands 4 s into the set; keep the failed-start rule out of this test.
+        var thresholds = DetectionThresholds.default
+        thresholds.failedStartMaxAge = 0
         var engine = DetectionEngine(
+            thresholds: thresholds,
             detectors: [AlwaysInactiveDetector()] + DetectionEngine.defaultDetectors
         )
         _ = engine.makeSessionStartEvent(at: t0)
