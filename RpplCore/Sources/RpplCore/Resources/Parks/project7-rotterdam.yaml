@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-09-24
     description: add prices from project7cablepark.nl/tarieven
+  - date: 2026-09-24
+    description: correct prices per user-supplied tarieven data
 
 name: Project 7 Cablepark Rotterdam
 address: Kosboulevard 35, 3059 XZ Rotterdam
@@ -33,13 +35,15 @@ facilities:
 
 # Source: project7cablepark.nl/tarieven
 prices:
-  - { name: Block (1.5h), price: "€31", note: "online €29" }
-  - { name: Evening block, price: "€19,50", note: "20:00/21:00 start, phone booking before 18:30" }
-  - { name: Waterski Experience, price: "€36,50", note: "skis, life vest and wetsuit included" }
-  - { name: Beginner lesson, price: "€35", note: "50% off from age 10 with swim diploma B" }
-  - { name: 10x block card, price: "€245", note: "voordeelkaart" }
-  - { name: Monthly pass, price: "€345 – €395", note: "lower in May/June/September, higher in July/August" }
-  - { name: Season pass, price: "€995", note: "early-bird discount before April 3" }
+  - { name: Online ticket, price: "€29", note: "1.5h block" }
+  - { name: Counter ticket, price: "€31", note: "1.5h block" }
+  - { name: 10x block card, price: "€260", note: "voordeelkaart, 1.5h blocks" }
+  - { name: Wetsuit rental, price: "€7,50", note: "per 1.5h" }
+  - { name: Wakeboard rental, price: "€12,50", note: "per 1.5h" }
+  - { name: Obstacle board rental, price: "€20", note: "per 1.5h" }
+  - { name: Monthly pass, price: "€345", note: "May, June or September" }
+  - { name: Monthly pass, price: "€395", note: "July or August" }
+  - { name: Season pass, price: "€995" }
 
 cables:
   - name: Cable
