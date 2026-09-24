@@ -5,6 +5,7 @@ excluded:
   - RpplCore/.build
   - .swiftpm
   - .worktrees
+  - .claude
   - DerivedData
   - Exports
   - tools

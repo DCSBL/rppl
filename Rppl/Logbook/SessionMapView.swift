@@ -63,6 +63,8 @@ struct SessionMapView: View {
     var showsStyleToggle: Bool = false
     var preferredFrame: MapTrackFrame? = nil
     var layout: SessionMapLayout = .embedded
+    /// Park cable outlines drawn as a thin line beneath the tracks.
+    var cableOverlays: [[CLLocationCoordinate2D]] = []
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
@@ -109,8 +111,10 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         preferredFrame: MapTrackFrame? = nil,
-        layout: SessionMapLayout = .embedded
+        layout: SessionMapLayout = .embedded,
+        cableOverlays: [[CLLocationCoordinate2D]] = []
     ) {
+        self.cableOverlays = cableOverlays
         self.tracks = []
         self.sessionMapData = sessionMapData
         self.rendering = rendering
@@ -189,6 +193,10 @@ struct SessionMapView: View {
 
     @MapContentBuilder
     private var mapContent: some MapContent {
+        ForEach(Array(cableOverlays.enumerated()), id: \.offset) { item in
+            MapPolyline(coordinates: item.element)
+                .stroke(Color.rpplAccent, lineWidth: 1.5)
+        }
         if focusedTrack != nil {
             soloContent
         } else {
@@ -497,6 +505,7 @@ struct SessionMapFullscreenView: View {
     let rendering: SessionMapRendering
     let title: String
     var preferredFrame: MapTrackFrame? = nil
+    var cableOverlays: [[CLLocationCoordinate2D]] = []
 
     init(
         locations: [LocationSample],
@@ -528,8 +537,10 @@ struct SessionMapFullscreenView: View {
         sessionMapData: SessionMapTrackData,
         rendering: SessionMapRendering = .flat,
         title: String,
-        preferredFrame: MapTrackFrame? = nil
+        preferredFrame: MapTrackFrame? = nil,
+        cableOverlays: [[CLLocationCoordinate2D]] = []
     ) {
+        self.cableOverlays = cableOverlays
         self.tracks = []
         self.sessionMapData = sessionMapData
         self.rendering = rendering
@@ -546,7 +557,8 @@ struct SessionMapFullscreenView: View {
                     allowsInteraction: true,
                     showsStyleToggle: true,
                     preferredFrame: preferredFrame,
-                    layout: .fullscreen
+                    layout: .fullscreen,
+                    cableOverlays: cableOverlays
                 )
             } else {
                 SessionMapView(

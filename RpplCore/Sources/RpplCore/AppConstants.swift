@@ -5,6 +5,8 @@ public enum AppConstants {
     /// iCloud Documents container (iPhone logbook when Drive sync is enabled).
     public static let iCloudContainerIdentifier = "iCloud.nl.dcsbl.rppl"
     public static let sessionsDirectoryName = "Sessions"
+    /// User-added or edited park YAML files (override bundled parks with the same `id`).
+    public static let parksDirectoryName = "Parks"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
     /// Discriminator for iPhone ↔ Watch logbook view sync (`viewUpdate`, `viewDelete`, …).
@@ -40,6 +42,12 @@ public enum AppConstants {
     /// `…/Documents/Sessions` inside an iCloud ubiquity container URL.
     public static func iCloudDocumentsSessionsRoot(containerURL: URL) -> URL {
         sessionsRoot(in: containerURL.appendingPathComponent("Documents", isDirectory: true))
+    }
+
+    public static var localPhoneParksRoot: URL {
+        let base = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+            ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return base.appendingPathComponent(parksDirectoryName, isDirectory: true)
     }
 
     public static func sessionsRoot(in baseURL: URL) -> URL {

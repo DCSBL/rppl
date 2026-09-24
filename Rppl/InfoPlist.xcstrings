@@ -87,13 +87,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map."
+            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map and sorts cable parks by distance from you."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart."
+            "value" : "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart en sorteert cable parks op afstand tot jou."
           }
         }
       }
