@@ -282,6 +282,82 @@ struct ParksTests {
         )
         #expect(counts == ["near": 2])
     }
+
+    // MARK: - Editing
+
+    private func tempDir() throws -> URL {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("parks-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    @Test func authorAndLegacyDecode() throws {
+        let legacy = try ParkCatalog.parse(yaml: "version: 1\nid: a\nname: A\nlocation: { lat: 1, lon: 2 }\n", fallbackId: "a")
+        #expect(legacy.author == nil && legacy.basedOnUpdatedAt == nil)
+        let park = Park(id: "a", name: "A", location: ParkCoordinate(lat: 1, lon: 2), author: "Duco")
+        let decoded = try ParkCatalog.parse(yaml: try ParkCatalog.encode(park), fallbackId: "a")
+        #expect(decoded.author == "Duco")
+    }
+
+    @Test func customParkSaveLoadDelete() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let park = Park(id: "my-park", name: "Mine", location: ParkCoordinate(lat: 52, lon: 4))
+        let saved = try ParkCatalog.save(park, to: dir)
+        #expect(saved.updatedAt != nil && saved.history?.count == 1)
+        let entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == "my-park" })
+        #expect(entry.origin == .custom)
+        try ParkCatalog.deleteUserPark(id: "my-park", userRoot: dir)
+        #expect(ParkCatalog.loadWithOrigin(userRoot: dir).allSatisfy { $0.id != "my-park" })
+    }
+
+    @Test func editedOverrideConflictFlow() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var base = try project7()
+        base.updatedAt = "2026-01-01"
+        var edit = base
+        edit.name = "My Project 7"
+        // Override was based on an older bundled version than the one the app ships.
+        var stale = try ParkCatalog.save(edit, to: dir, bundledBase: base)
+        stale.basedOnUpdatedAt = "2025-01-01"
+        try ParkCatalog.encode(stale).write(to: dir.appendingPathComponent("\(stale.id).yaml"), atomically: true, encoding: .utf8)
+        let bundledUpdated = try #require(ParkCatalog.loadBundled().first { $0.id == stale.id }?.updatedAt)
+        #expect(bundledUpdated > "2025-01-01")
+        var entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == stale.id })
+        #expect(entry.origin == .edited && entry.park.name == "My Project 7" && entry.hasNewerBundled)
+        try ParkCatalog.keepMine(entry, userRoot: dir)
+        entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == stale.id })
+        #expect(entry.park.name == "My Project 7" && !entry.hasNewerBundled)
+        try ParkCatalog.deleteUserPark(id: stale.id, userRoot: dir)
+        entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == stale.id })
+        #expect(entry.origin == .bundled && entry.park.name != "My Project 7")
+    }
+
+    @Test func slugIsAsciiAndUnique() {
+        #expect(ParkCatalog.slug(from: "Wet 'n Wild Alphen!") == "wet-n-wild-alphen")
+        #expect(ParkCatalog.slug(from: "Café Ünï", existing: ["cafe-uni"]) == "cafe-uni-2")
+        #expect(ParkCatalog.slug(from: "***") == "park")
+    }
+
+    @Test func draftValidationAndTrace() {
+        var park = Park(id: "a", name: " ", location: ParkCoordinate(lat: 0, lon: 0))
+        #expect(ParkDraft.validate(park) == [.missingName, .invalidLocation])
+        park.name = "A"
+        park.location = ParkCoordinate(lat: 52, lon: 4)
+        var cable = ParkCable()
+        ParkDraft.append(ParkCoordinate(lat: 52, lon: 4), to: &cable)
+        park.cables = [cable]
+        #expect(ParkDraft.validate(park) == [.cableTooShort(index: 0)])
+        ParkDraft.append(ParkCoordinate(lat: 52.001, lon: 4), to: &cable)
+        ParkDraft.toggleStart(&cable, index: 1)
+        #expect(cable.points?[1].start == true)
+        park.cables = [cable]
+        #expect(ParkDraft.validate(park).isEmpty)
+        ParkDraft.undo(&cable)
+        ParkDraft.undo(&cable)
+        #expect(cable.points == nil)
+    }
 }
 
 private extension Array where Element == ParkCablePoint {
