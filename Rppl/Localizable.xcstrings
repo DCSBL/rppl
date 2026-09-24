@@ -193,6 +193,374 @@
         }
       }
     },
+    "3D" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3D"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3D"
+          }
+        }
+      }
+    },
+    "All sets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All sets"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle sets"
+          }
+        }
+      }
+    },
+    "Auto-orbit camera" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-orbit camera"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera automatisch laten draaien"
+          }
+        }
+      }
+    },
+    "Colored by GPS speed across this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colored by GPS speed across this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekleurd op GPS-snelheid binnen deze session."
+          }
+        }
+      }
+    },
+    "Cool colors early in the day, warm late." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cool colors early in the day, warm late."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koele kleuren vroeg op de dag, warme laat."
+          }
+        }
+      }
+    },
+    "Finish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        }
+      }
+    },
+    "First set" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First set"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eerste set"
+          }
+        }
+      }
+    },
+    "Flat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flat"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plat"
+          }
+        }
+      }
+    },
+    "Last set" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last set"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laatste set"
+          }
+        }
+      }
+    },
+    "Next set" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next set"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgende set"
+          }
+        }
+      }
+    },
+    "One color, every set stacked." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One color, every set stacked."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén kleur, alle sets over elkaar."
+          }
+        }
+      }
+    },
+    "One set at a time, the rest ghosted." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One set at a time, the rest ghosted."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén set tegelijk, de rest als ghost."
+          }
+        }
+      }
+    },
+    "Pause replay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause replay"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay pauzeren"
+          }
+        }
+      }
+    },
+    "Pitched satellite with terrain." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pitched satellite with terrain."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekantelde satelliet met terrein."
+          }
+        }
+      }
+    },
+    "Play replay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play replay"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay starten"
+          }
+        }
+      }
+    },
+    "Previous set" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous set"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorige set"
+          }
+        }
+      }
+    },
+    "Replay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay"
+          }
+        }
+      }
+    },
+    "Replay position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay position"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay-positie"
+          }
+        }
+      }
+    },
+    "Scrub or play the ride back, dock time skipped." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrub or play the ride back, dock time skipped."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrub of speel de ride terug, dock-tijd overgeslagen."
+          }
+        }
+      }
+    },
+    "Set %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %lld of %lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %lld van %lld"
+          }
+        }
+      }
+    },
+    "Set %lld · %@ / %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %lld · %@ / %@ · %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %lld · %@ / %@ · %@"
+          }
+        }
+      }
+    },
+    "Solo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo"
+          }
+        }
+      }
+    },
+    "Speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snelheid"
+          }
+        }
+      }
+    },
     "•" : {
 
     },
@@ -536,6 +904,22 @@
         }
       }
     },
+    "Delete from iCloud Drive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete from iCloud Drive"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen uit iCloud Drive"
+          }
+        }
+      }
+    },
     "Delete from Rppl" : {
       "localizations" : {
         "en" : {
@@ -840,6 +1224,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import mislukt: %@"
+          }
+        }
+      }
+    },
+    "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeer via iCloud Drive of een session-export-JSON. Geïmporteerde sessions verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
           }
         }
       }
@@ -1822,6 +2222,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Machtigingen vragen"
+          }
+        }
+      }
+    },
+    "Remove from This iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from This iPhone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen van deze iPhone"
+          }
+        }
+      }
+    },
+    "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from This iPhone hides the session in Rppl here. Delete from iCloud Drive permanently removes it from all devices. This cannot be undone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen van deze iPhone verbergt de session hier in Rppl. Verwijderen uit iCloud Drive verwijdert de session permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
@@ -2960,13 +3392,29 @@
     "iCloud Drive unavailable" : {
 
     },
+    "Import from file" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from file"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeren via bestand"
+          }
+        }
+      }
+    },
     "Import from iCloud" : {
 
     },
     "Keep iCloud Copies" : {
 
     },
-    "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on." : {
+    "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud." : {
 
     },
     "No sessions to import" : {
@@ -3007,6 +3455,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This session is already in your logbook."
+          }
+        }
+      }
+    },
+    "Turn on iCloud Drive to import park days from the cloud." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on iCloud Drive to import park days from the cloud."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schakel iCloud Drive in om park days uit de cloud te importeren."
           }
         }
       }

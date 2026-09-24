@@ -26,21 +26,49 @@ public enum WakeLog {
         case water
     }
 
+    public enum Privacy {
+        case `private`
+        case sensitive
+        case `public`
+    }
+
     private static func logger(_ category: Category) -> Logger {
         Logger(subsystem: subsystem, category: category.rawValue)
     }
 
-    public static func debug(_ category: Category, _ message: @autoclosure () -> String) {
+    public static func debug(
+        _ category: Category,
+        _ message: @autoclosure () -> String,
+        privacy: Privacy = .private
+    ) {
         let text = message()
-        logger(category).debug("\(text, privacy: .public)")
+        switch privacy {
+        case .private:
+            logger(category).debug("\(text, privacy: .private)")
+        case .sensitive:
+            logger(category).debug("\(text, privacy: .sensitive)")
+        case .public:
+            logger(category).debug("\(text, privacy: .public)")
+        }
         #if DEBUG
         print("[Wake/\(category.rawValue)] \(text)")
         #endif
     }
 
-    public static func error(_ category: Category, _ message: @autoclosure () -> String) {
+    public static func error(
+        _ category: Category,
+        _ message: @autoclosure () -> String,
+        privacy: Privacy = .private
+    ) {
         let text = message()
-        logger(category).error("\(text, privacy: .public)")
+        switch privacy {
+        case .private:
+            logger(category).error("\(text, privacy: .private)")
+        case .sensitive:
+            logger(category).error("\(text, privacy: .sensitive)")
+        case .public:
+            logger(category).error("\(text, privacy: .public)")
+        }
         #if DEBUG
         print("[Wake/\(category.rawValue)] ERROR \(text)")
         #endif

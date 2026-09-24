@@ -3,6 +3,9 @@ import Foundation
 public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
     case sessionNotFound(String)
     case invalidManifest
+    case invalidSessionId(String)
+    case importTooLarge(Int)
+    case importLimitExceeded(String)
     case ioFailure(String)
 
     public var errorDescription: String? {
@@ -11,6 +14,12 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
             return "Session not found: \(sessionId)"
         case .invalidManifest:
             return "Invalid session manifest"
+        case .invalidSessionId(let sessionId):
+            return "Invalid session id: \(sessionId)"
+        case .importTooLarge(let bytes):
+            return "Import exceeds size limit: \(bytes) bytes"
+        case .importLimitExceeded(let detail):
+            return "Import exceeds element limit: \(detail)"
         case .ioFailure(let message):
             return message
         }
@@ -19,22 +28,26 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 
 /// File layout for one session package:
 /// ```
-/// <root>/<sessionId>/
+/// <root>/<YYYY-MM-DD HH-mm - City>/   # display name; identity is manifest.sessionId
 ///   manifest.json
 ///   detections.jsonl
 ///   location-000.jsonl
 ///   motion-000.jsonl.zlib (framed zlib JSONL; legacy plain motion-000.jsonl still readable)
 ///   health-000.jsonl
 ///   water-000.jsonl (optional; Ultra submerged water temperature)
+///   battery-000.jsonl (optional; Watch battery level + state)
 ///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
-/// Legacy sessions may still have `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
+/// Legacy packages may still live under a bare UUID folder (migrated on open) or have
+/// `assumptions.jsonl` / `labels.jsonl` (migrated or ignored).
 public final class SessionFileStore: @unchecked Sendable {
     public let rootURL: URL
     private let fileManager: FileManager
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    private let lock = NSLock()
+    private let lock = NSRecursiveLock()
+    /// `sessionId` → package directory. Rebuilt by scanning `manifest.json` files.
+    private var packageIndex: [String: URL]?
 
     public init(rootURL: URL, fileManager: FileManager = .default) {
         self.rootURL = rootURL
@@ -47,17 +60,62 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func ensureRootExists() throws {
+        lock.lock()
+        defer { lock.unlock() }
+
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
     }
 
-    public func sessionDirectory(for sessionId: String) -> URL {
-        rootURL.appendingPathComponent(sessionId, isDirectory: true)
+    /// Resolves the on-disk package directory for `sessionId` (folder name may differ).
+    public func sessionDirectory(for sessionId: String) throws -> URL {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try SessionIdValidator.validate(sessionId)
+        if let cached = cachedDirectory(for: sessionId),
+           fileManager.fileExists(atPath: cached.path) {
+            return cached
+        }
+        try migratePackageFolderNamesIfNeeded()
+        let map = try rebuildPackageIndex()
+        guard let url = map[sessionId] else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        return url
     }
 
     public func createSession(manifest: SessionManifest) throws -> URL {
-        try ensureRootExists()
-        let dir = sessionDirectory(for: manifest.sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        try SessionIdValidator.validate(manifest.sessionId)
+        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        try migratePackageFolderNamesIfNeeded()
+
+        if let existing = try? sessionDirectory(for: manifest.sessionId),
+           fileManager.fileExists(atPath: existing.path) {
+            try writeManifest(manifest)
+            return existing
+        }
+
+        let existingNames = try SessionPackageLocator.existingFolderNames(
+            in: rootURL,
+            fileManager: fileManager
+        )
+        let base = SessionPackageNaming.baseFolderName(
+            startedAt: manifest.startedAt,
+            cityName: nil
+        )
+        let folderName = SessionPackageNaming.uniqueFolderName(
+            base: base,
+            existingNames: existingNames
+        )
+        let dir = try SessionPackageNaming.packageDirectory(
+            folderName: folderName,
+            rootURL: rootURL
+        )
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        rememberDirectory(dir, for: manifest.sessionId)
         try writeManifest(manifest)
         let detectionsURL = dir.appendingPathComponent("detections.jsonl")
         if !fileManager.fileExists(atPath: detectionsURL.path) {
@@ -67,13 +125,19 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func writeManifest(_ manifest: SessionManifest) throws {
-        let url = sessionDirectory(for: manifest.sessionId).appendingPathComponent("manifest.json")
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try sessionDirectory(for: manifest.sessionId).appendingPathComponent("manifest.json")
         let data = try encoder.encode(manifest)
         try data.write(to: url, options: [.atomic])
     }
 
     public func readManifest(sessionId: String) throws -> SessionManifest {
-        let url = sessionDirectory(for: sessionId).appendingPathComponent("manifest.json")
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try sessionDirectory(for: sessionId).appendingPathComponent("manifest.json")
         guard fileManager.fileExists(atPath: url.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
@@ -87,14 +151,17 @@ public final class SessionFileStore: @unchecked Sendable {
 
     // MARK: - Derived view (`derived/view.json`)
 
-    public func derivedViewURL(sessionId: String) -> URL {
-        sessionDirectory(for: sessionId)
+    public func derivedViewURL(sessionId: String) throws -> URL {
+        try sessionDirectory(for: sessionId)
             .appendingPathComponent("derived", isDirectory: true)
             .appendingPathComponent("view.json")
     }
 
     public func readDerivedView(sessionId: String) throws -> DerivedSessionView? {
-        let url = derivedViewURL(sessionId: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try derivedViewURL(sessionId: sessionId)
         guard fileManager.fileExists(atPath: url.path) else { return nil }
         let data = try Data(contentsOf: url)
         do {
@@ -106,17 +173,30 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func writeDerivedView(_ view: DerivedSessionView, sessionId: String) throws {
-        let dir = sessionDirectory(for: sessionId).appendingPathComponent("derived", isDirectory: true)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = try sessionDirectory(for: sessionId).appendingPathComponent("derived", isDirectory: true)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let data = try encoder.encode(view)
-        try data.write(to: derivedViewURL(sessionId: sessionId), options: [.atomic])
+        try data.write(to: try derivedViewURL(sessionId: sessionId), options: [.atomic])
     }
 
     /// Phone-only city write-back; does not change stats / mapFrame.
+    /// Phone-only city write-back; renames package folder when still app-generated.
     public func updateDerivedCityName(_ cityName: String, sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
         guard var view = try readDerivedView(sessionId: sessionId) else { return }
         view.cityName = cityName
         try writeDerivedView(view, sessionId: sessionId)
+        let manifest = try readManifest(sessionId: sessionId)
+        try relocatePackageIfNeeded(
+            sessionId: sessionId,
+            startedAt: manifest.startedAt,
+            cityName: cityName
+        )
     }
 
     /// First `limit` location samples for cheap geocode without full GPS parse.
@@ -129,6 +209,9 @@ public final class SessionFileStore: @unchecked Sendable {
     /// Preserves phone-only `cityName` across rebuilds when present.
     @discardableResult
     public func ensureDerivedView(sessionId: String) throws -> DerivedSessionView {
+        lock.lock()
+        defer { lock.unlock() }
+
         if let existing = try readDerivedView(sessionId: sessionId), existing.isCurrentAnalyzer {
             return existing
         }
@@ -141,6 +224,9 @@ public final class SessionFileStore: @unchecked Sendable {
     /// Force rebuild from raw (tests / future tooling). Does not touch HealthKit.
     @discardableResult
     public func reanalyzeSession(sessionId: String) throws -> DerivedSessionView {
+        lock.lock()
+        defer { lock.unlock() }
+
         let previousCity = try readDerivedView(sessionId: sessionId)?.cityName
         let rebuilt = try buildDerivedView(sessionId: sessionId, cityName: previousCity)
         try writeDerivedView(rebuilt, sessionId: sessionId)
@@ -200,7 +286,7 @@ public final class SessionFileStore: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
 
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
 
@@ -231,15 +317,36 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
+    public func appendBatterySamples(
+        _ samples: [BatterySample],
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws {
+        let name = String(format: "battery-%03d.jsonl", chunkIndex)
+        for sample in samples {
+            try appendJSONLine(sample, to: name, sessionId: sessionId)
+        }
+    }
+
     public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
-        let dir = sessionDirectory(for: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard data.count <= SessionImportLimits.maxMotionFramesZlibBytes else {
+            throw SessionStoreError.importTooLarge(data.count)
+        }
+        _ = try CompressedJSONLFrames.decodeFrames(data)
+        let dir = try sessionDirectory(for: sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
         try data.write(to: url, options: [.atomic])
     }
 
     public func readMotionFrameData(sessionId: String, chunkIndex: Int = 0) throws -> Data? {
-        let url = sessionDirectory(for: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try sessionDirectory(for: sessionId)
             .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
         guard fileManager.fileExists(atPath: url.path) else { return nil }
         return try Data(contentsOf: url)
@@ -255,53 +362,92 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func listSessionIDs() throws -> [String] {
         try ensureRootExists()
-        let contents = try fileManager.contentsOfDirectory(
-            at: rootURL,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        )
-        return contents
-            .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
-            .map(\.lastPathComponent)
-            .sorted()
+        try migratePackageFolderNamesIfNeeded()
+        return try rebuildPackageIndex().keys.sorted()
     }
 
     /// Permanently removes one session package directory from this store.
     public func deleteSession(sessionId: String) throws {
-        let dir = sessionDirectory(for: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = try sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
         try fileManager.removeItem(at: dir)
+        forgetDirectory(for: sessionId)
+    }
+
+    /// Renames legacy bare-UUID package folders to `YYYY-MM-DD HH-mm - City`.
+    /// Skips user-renamed folders (not app-generated).
+    @discardableResult
+        public func migratePackageFolderNamesIfNeeded() throws -> [String] {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try ensureRootExists()
+        let entries = try SessionPackageLocator.index(
+            in: rootURL,
+            fileManager: fileManager,
+            decoder: decoder
+        )
+        var migrated: [String] = []
+        for entry in entries.values {
+            let currentName = entry.directoryURL.lastPathComponent
+            let isBareUUID = SessionPackageNaming.isLegacyUUIDFolder(currentName)
+                && currentName == entry.sessionId
+            let isDateOnly = SessionPackageNaming.matchesDateOnlyPattern(currentName)
+            guard isBareUUID || isDateOnly else { continue }
+            try relocatePackageIfNeeded(
+                sessionId: entry.sessionId,
+                startedAt: entry.startedAt,
+                cityName: entry.cityName,
+                forceLegacyUUID: isBareUUID
+            )
+            migrated.append(entry.sessionId)
+        }
+if !migrated.isEmpty {
+            invalidatePackageIndex()
+        }
+        return migrated.sorted()
     }
 
     // MARK: - Watch distilled view (manifest + derived only)
 
     /// True when any raw stream file remains under the session package.
     public func hasRawStreams(sessionId: String) -> Bool {
-        let dir = sessionDirectory(for: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let dir = try? sessionDirectory(for: sessionId) else { return false }
         guard fileManager.fileExists(atPath: dir.path) else { return false }
         guard let names = try? fileManager.contentsOfDirectory(atPath: dir.path) else { return false }
         return names.contains { Self.isRawStreamFileName($0) }
     }
 
-    /// Writes phone-authored manifest + derived. Prunes raw streams when session is acknowledged.
+    /// Writes phone-authored manifest + derived view. Does not prune raw streams (local ack only).
     public func applyDistilledView(_ update: WatchViewUpdate) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try SessionIdValidator.validate(update.manifest.sessionId)
         let sessionId = update.manifest.sessionId
-        if fileManager.fileExists(atPath: sessionDirectory(for: sessionId).path) {
+        if let dir = try? sessionDirectory(for: sessionId),
+           fileManager.fileExists(atPath: dir.path) {
             try writeManifest(update.manifest)
         } else {
             _ = try createSession(manifest: update.manifest)
             try writeManifest(update.manifest)
         }
         try writeDerivedView(update.derived, sessionId: sessionId)
-        if update.manifest.transferState == .acknowledged, hasRawStreams(sessionId: sessionId) {
-            try pruneRawStreams(sessionId: sessionId)
-        }
     }
 
     /// Removes raw streams after phone ack. Keeps `manifest.json` and `derived/view.json`.
     public func pruneRawStreams(sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
         let manifest = try readManifest(sessionId: sessionId)
         guard manifest.transferState == .acknowledged else {
             throw SessionStoreError.ioFailure("Cannot prune before phone ack: \(sessionId)")
@@ -311,7 +457,7 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         guard hasRawStreams(sessionId: sessionId) else { return }
 
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         let names = try fileManager.contentsOfDirectory(atPath: dir.path)
         for name in names where Self.isRawStreamFileName(name) {
             try fileManager.removeItem(at: dir.appendingPathComponent(name))
@@ -324,6 +470,7 @@ public final class SessionFileStore: @unchecked Sendable {
         if name.hasPrefix("location-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("health-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("water-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("battery-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("motion-") && (name.hasSuffix(".jsonl") || name.hasSuffix(".jsonl.zlib")) {
             return true
         }
@@ -332,7 +479,7 @@ public final class SessionFileStore: @unchecked Sendable {
 
     /// On-disk byte size of one session package (manifest + JSONL checkpoints).
     public func sessionByteSize(sessionId: String) throws -> Int64 {
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
@@ -373,7 +520,7 @@ public final class SessionFileStore: @unchecked Sendable {
     /// and assumptions exist.
     @discardableResult
     public func migrateAssumptionsIfNeeded(sessionId: String) throws -> Bool {
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         let detectionsURL = dir.appendingPathComponent("detections.jsonl")
         let assumptionsURL = dir.appendingPathComponent("assumptions.jsonl")
 
@@ -416,7 +563,7 @@ public final class SessionFileStore: @unchecked Sendable {
     /// Rewrite legacy detection code `paused` → `inactive` once (schema v4).
     @discardableResult
     public func migratePausedToInactiveIfNeeded(sessionId: String) throws -> Bool {
-        let detectionsURL = sessionDirectory(for: sessionId).appendingPathComponent("detections.jsonl")
+        let detectionsURL = try sessionDirectory(for: sessionId).appendingPathComponent("detections.jsonl")
         guard fileManager.fileExists(atPath: detectionsURL.path) else { return false }
 
         let events = try readJSONL(DetectionEvent.self, from: "detections.jsonl", sessionId: sessionId)
@@ -457,7 +604,18 @@ public final class SessionFileStore: @unchecked Sendable {
         return try readJSONL(WaterTemperatureSample.self, from: name, sessionId: sessionId)
     }
 
+    public func readBatterySamples(
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws -> [BatterySample] {
+        let name = String(format: "battery-%03d.jsonl", chunkIndex)
+        return try readJSONL(BatterySample.self, from: name, sessionId: sessionId)
+    }
+
     public func markReadyToTransfer(sessionId: String, endedAt: Date = Date()) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
         var manifest = try readManifest(sessionId: sessionId)
         manifest.endedAt = endedAt
         manifest.transferState = .readyToTransfer
@@ -465,6 +623,9 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func markTransferring(sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
         var manifest = try readManifest(sessionId: sessionId)
         manifest.transferState = .transferring
         try writeManifest(manifest)
@@ -475,6 +636,9 @@ public final class SessionFileStore: @unchecked Sendable {
     ///   `false` when it was already acknowledged (idempotent re-ack / heal).
     @discardableResult
     public func markAcknowledged(sessionId: String) throws -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
         var manifest = try readManifest(sessionId: sessionId)
         if manifest.transferState == .acknowledged {
             return false
@@ -497,7 +661,10 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func zipSessionForTransfer(sessionId: String, to destinationURL: URL) throws -> URL {
-        let dir = sessionDirectory(for: sessionId)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = try sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
@@ -510,6 +677,14 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func importTransferPackage(_ package: SessionTransferPackage, intoPhoneStore phoneRoot: URL) throws {
+        try SessionIdValidator.validate(package.manifest.sessionId)
+        try SessionImportLimits.validateArrayCount(package.detections, limit: SessionImportLimits.maxDetections, label: "detections")
+        try SessionImportLimits.validateArrayCount(package.locations, limit: SessionImportLimits.maxLocations, label: "locations")
+        try SessionImportLimits.validateArrayCount(package.motion, limit: SessionImportLimits.maxMotionSamples, label: "motion")
+        try SessionImportLimits.validateArrayCount(package.health, limit: SessionImportLimits.maxHealthSamples, label: "health")
+        try SessionImportLimits.validateArrayCount(package.water, limit: SessionImportLimits.maxWaterSamples, label: "water")
+        try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
         _ = try phoneStore.createSession(manifest: package.manifest)
         for detection in package.detections {
@@ -524,6 +699,9 @@ public final class SessionFileStore: @unchecked Sendable {
         try phoneStore.appendHealthSamples(package.health, sessionId: package.manifest.sessionId)
         if !package.water.isEmpty {
             try phoneStore.appendWaterTemperatureSamples(package.water, sessionId: package.manifest.sessionId)
+        }
+        if !package.battery.isEmpty {
+            try phoneStore.appendBatterySamples(package.battery, sessionId: package.manifest.sessionId)
         }
         var imported = package.manifest
         imported.transferState = .acknowledged
@@ -546,7 +724,7 @@ public final class SessionFileStore: @unchecked Sendable {
     ) throws {
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
         let sessionId = package.manifest.sessionId
-        if fileManager.fileExists(atPath: phoneStore.sessionDirectory(for: sessionId).path) {
+        if fileManager.fileExists(atPath: try phoneStore.sessionDirectory(for: sessionId).path) {
             try phoneStore.deleteSession(sessionId: sessionId)
         }
         var stamped = package
@@ -555,6 +733,9 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func buildTransferPackage(sessionId: String) throws -> SessionTransferPackage {
+        lock.lock()
+        defer { lock.unlock() }
+
         let manifest = try readManifest(sessionId: sessionId)
         let detections = try readDetections(sessionId: sessionId)
         let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
@@ -567,6 +748,7 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
         let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let battery = (try? readBatterySamples(sessionId: sessionId)) ?? []
         let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
@@ -576,12 +758,13 @@ public final class SessionFileStore: @unchecked Sendable {
             motionFramesZlib: motionFrames,
             health: health,
             water: water,
+            battery: battery,
             derived: derived
         )
     }
 
     public func readMotionSamples(sessionId: String, chunkIndex: Int = 0) throws -> [MotionSample] {
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         let zlibURL = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
         if fileManager.fileExists(atPath: zlibURL.path) {
             let framed = try Data(contentsOf: zlibURL)
@@ -621,7 +804,7 @@ public final class SessionFileStore: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
 
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("detections.jsonl")
         var data = Data()
@@ -637,7 +820,7 @@ public final class SessionFileStore: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
 
-        let dir = sessionDirectory(for: sessionId)
+        let dir = try sessionDirectory(for: sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(fileName)
         if !fileManager.fileExists(atPath: url.path) {
@@ -657,7 +840,10 @@ public final class SessionFileStore: @unchecked Sendable {
         sessionId: String,
         limit: Int? = nil
     ) throws -> [T] {
-        let url = sessionDirectory(for: sessionId).appendingPathComponent(fileName)
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try sessionDirectory(for: sessionId).appendingPathComponent(fileName)
         guard fileManager.fileExists(atPath: url.path) else { return [] }
         let data = try Data(contentsOf: url)
         return try decodeJSONL(type, from: data, limit: limit)
@@ -682,6 +868,101 @@ public final class SessionFileStore: @unchecked Sendable {
             result.append(try decoder.decode(T.self, from: lineData))
         }
         return result
+    }
+
+    // MARK: - Package path index
+
+    private func cachedDirectory(for sessionId: String) -> URL? {
+        lock.lock()
+        defer { lock.unlock() }
+        return packageIndex?[sessionId]
+    }
+
+    private func rememberDirectory(_ url: URL, for sessionId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        var index = packageIndex ?? [:]
+        index[sessionId] = url
+        packageIndex = index
+    }
+
+    private func forgetDirectory(for sessionId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        packageIndex?[sessionId] = nil
+    }
+
+    private func invalidatePackageIndex() {
+        lock.lock()
+        defer { lock.unlock() }
+        packageIndex = nil
+    }
+
+    @discardableResult
+    private func rebuildPackageIndex() throws -> [String: URL] {
+        let entries = try SessionPackageLocator.index(
+            in: rootURL,
+            fileManager: fileManager,
+            decoder: decoder
+        )
+        let map = Dictionary(uniqueKeysWithValues: entries.map { ($0.key, $0.value.directoryURL) })
+        lock.lock()
+        packageIndex = map
+        lock.unlock()
+        return map
+    }
+
+    /// Renames the package directory when the current name is still app-generated.
+    private func relocatePackageIfNeeded(
+        sessionId: String,
+        startedAt: Date,
+        cityName: String?,
+        forceLegacyUUID: Bool = false
+    ) throws {
+        try SessionIdValidator.validate(sessionId)
+        let current: URL
+        if forceLegacyUUID {
+            current = rootURL.appendingPathComponent(sessionId, isDirectory: true)
+            guard fileManager.fileExists(atPath: current.path) else { return }
+        } else if let cached = cachedDirectory(for: sessionId),
+                  fileManager.fileExists(atPath: cached.path) {
+            current = cached
+        } else {
+            let entries = try SessionPackageLocator.index(
+                in: rootURL,
+                fileManager: fileManager,
+                decoder: decoder
+            )
+            guard let entry = entries[sessionId] else { return }
+            current = entry.directoryURL
+        }
+
+        let currentName = current.lastPathComponent
+        guard SessionPackageNaming.isAppGenerated(currentName) else { return }
+
+        let existingNames = try SessionPackageLocator.existingFolderNames(
+            in: rootURL,
+            fileManager: fileManager
+        ).subtracting([currentName])
+        let base = SessionPackageNaming.baseFolderName(
+            startedAt: startedAt,
+            cityName: cityName
+        )
+        let desired = SessionPackageNaming.uniqueFolderName(
+            base: base,
+            existingNames: existingNames
+        )
+        guard desired != currentName else {
+            rememberDirectory(current, for: sessionId)
+            return
+        }
+
+        let destination = try SessionPackageNaming.packageDirectory(
+            folderName: desired,
+            rootURL: rootURL
+        )
+        try fileManager.moveItem(at: current, to: destination)
+        rememberDirectory(destination, for: sessionId)
     }
 }
 
@@ -720,6 +1001,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var health: [HealthMetricSample]
     /// Sparse Ultra water-temperature samples (`water-000.jsonl`). Empty on older packages.
     public var water: [WaterTemperatureSample]
+    /// Sparse Watch battery samples (`battery-000.jsonl`). Empty on older packages.
+    public var battery: [BatterySample]
     /// Fast view sidecar when present (Watch Stop / current analyzer).
     public var derived: DerivedSessionView?
 
@@ -731,6 +1014,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib: Data? = nil,
         health: [HealthMetricSample],
         water: [WaterTemperatureSample] = [],
+        battery: [BatterySample] = [],
         derived: DerivedSessionView? = nil
     ) {
         self.manifest = manifest
@@ -740,6 +1024,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.motionFramesZlib = motionFramesZlib
         self.health = health
         self.water = water
+        self.battery = battery
         self.derived = derived
     }
 
@@ -760,11 +1045,22 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         motionFramesZlib = try container.decodeIfPresent(Data.self, forKey: .motionFramesZlib)
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
+        battery = try container.decodeIfPresent([BatterySample].self, forKey: .battery) ?? []
         // Soft-fail derived: stale keys / analyzer drift must not block raw import (rebuild on ensure).
         if container.contains(.derived) {
             derived = try? container.decode(DerivedSessionView.self, forKey: .derived)
         } else {
             derived = nil
+        }
+        try SessionIdValidator.validate(manifest.sessionId)
+        try SessionImportLimits.validateArrayCount(detections, limit: SessionImportLimits.maxDetections, label: "detections")
+        try SessionImportLimits.validateArrayCount(locations, limit: SessionImportLimits.maxLocations, label: "locations")
+        try SessionImportLimits.validateArrayCount(motion, limit: SessionImportLimits.maxMotionSamples, label: "motion")
+        try SessionImportLimits.validateArrayCount(health, limit: SessionImportLimits.maxHealthSamples, label: "health")
+        try SessionImportLimits.validateArrayCount(water, limit: SessionImportLimits.maxWaterSamples, label: "water")
+        try SessionImportLimits.validateArrayCount(battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+        if let motionFramesZlib, motionFramesZlib.count > SessionImportLimits.maxMotionFramesZlibBytes {
+            throw SessionStoreError.importTooLarge(motionFramesZlib.count)
         }
     }
 
@@ -782,13 +1078,16 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         if !water.isEmpty {
             try container.encode(water, forKey: .water)
         }
+        if !battery.isEmpty {
+            try container.encode(battery, forKey: .battery)
+        }
         if let derived {
             try container.encode(derived, forKey: .derived)
         }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, derived
+        case manifest, detections, assumptions, labels, locations, motion, motionFramesZlib, health, water, battery, derived
     }
 }
 

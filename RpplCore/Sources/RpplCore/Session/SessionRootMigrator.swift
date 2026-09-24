@@ -7,16 +7,7 @@ public enum SessionRootMigrator {
         in rootURL: URL,
         fileManager: FileManager = .default
     ) throws -> [String] {
-        guard fileManager.fileExists(atPath: rootURL.path) else { return [] }
-        let contents = try fileManager.contentsOfDirectory(
-            at: rootURL,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        )
-        return contents
-            .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
-            .map(\.lastPathComponent)
-            .sorted()
+        try SessionPackageLocator.sessionIDs(in: rootURL, fileManager: fileManager)
     }
 
     public static func remoteOnlyIDs(local: Set<String>, remote: Set<String>) -> Set<String> {
@@ -29,6 +20,7 @@ public enum SessionRootMigrator {
 
     /// Copies each session package directory from `sourceRoot` into `destinationRoot`
     /// when the destination does not already contain that session id.
+    /// Preserves human-readable folder names when possible.
     /// - Returns: session ids newly copied.
     @discardableResult
     public static func copyMissingPackages(
@@ -37,13 +29,32 @@ public enum SessionRootMigrator {
         fileManager: FileManager = .default
     ) throws -> [String] {
         try fileManager.createDirectory(at: destinationRoot, withIntermediateDirectories: true)
-        let sourceIDs = try sessionIDs(in: sourceRoot, fileManager: fileManager)
+        let sourceIndex = try SessionPackageLocator.index(in: sourceRoot, fileManager: fileManager)
         let destIDs = Set(try sessionIDs(in: destinationRoot, fileManager: fileManager))
+        var destNames = try SessionPackageLocator.existingFolderNames(
+            in: destinationRoot,
+            fileManager: fileManager
+        )
         var copied: [String] = []
-        for sessionId in sourceIDs where !destIDs.contains(sessionId) {
-            let source = sourceRoot.appendingPathComponent(sessionId, isDirectory: true)
-            let dest = destinationRoot.appendingPathComponent(sessionId, isDirectory: true)
-            try fileManager.copyItem(at: source, to: dest)
+        for sessionId in sourceIndex.keys.sorted() where !destIDs.contains(sessionId) {
+            guard SessionIdValidator.isValid(sessionId) else { continue }
+            guard let entry = sourceIndex[sessionId] else { continue }
+            let preferredName = entry.directoryURL.lastPathComponent
+            let folderName: String
+            if destNames.contains(preferredName) {
+                folderName = SessionPackageNaming.uniqueFolderName(
+                    base: preferredName,
+                    existingNames: destNames
+                )
+            } else {
+                folderName = preferredName
+            }
+            let dest = try SessionPackageNaming.packageDirectory(
+                folderName: folderName,
+                rootURL: destinationRoot
+            )
+            try fileManager.copyItem(at: entry.directoryURL, to: dest)
+            destNames.insert(folderName)
             copied.append(sessionId)
         }
         return copied.sorted()
@@ -58,15 +69,36 @@ public enum SessionRootMigrator {
         fileManager: FileManager = .default
     ) throws -> [String] {
         try fileManager.createDirectory(at: destinationRoot, withIntermediateDirectories: true)
-        let sourceIDs = try sessionIDs(in: sourceRoot, fileManager: fileManager)
+        let sourceIndex = try SessionPackageLocator.index(in: sourceRoot, fileManager: fileManager)
+        let destIndex = try SessionPackageLocator.index(in: destinationRoot, fileManager: fileManager)
+        var destNames = try SessionPackageLocator.existingFolderNames(
+            in: destinationRoot,
+            fileManager: fileManager
+        )
         var moved: [String] = []
-        for sessionId in sourceIDs {
-            let source = sourceRoot.appendingPathComponent(sessionId, isDirectory: true)
-            let dest = destinationRoot.appendingPathComponent(sessionId, isDirectory: true)
-            if fileManager.fileExists(atPath: dest.path) {
-                try fileManager.removeItem(at: dest)
+        for sessionId in sourceIndex.keys.sorted() {
+            guard SessionIdValidator.isValid(sessionId) else { continue }
+            guard let entry = sourceIndex[sessionId] else { continue }
+            if let existing = destIndex[sessionId] {
+                try fileManager.removeItem(at: existing.directoryURL)
+                destNames.remove(existing.directoryURL.lastPathComponent)
             }
-            try fileManager.moveItem(at: source, to: dest)
+            let preferredName = entry.directoryURL.lastPathComponent
+            let folderName: String
+            if destNames.contains(preferredName) {
+                folderName = SessionPackageNaming.uniqueFolderName(
+                    base: preferredName,
+                    existingNames: destNames
+                )
+            } else {
+                folderName = preferredName
+            }
+            let dest = try SessionPackageNaming.packageDirectory(
+                folderName: folderName,
+                rootURL: destinationRoot
+            )
+            try fileManager.moveItem(at: entry.directoryURL, to: dest)
+            destNames.insert(folderName)
             moved.append(sessionId)
         }
         return moved.sorted()

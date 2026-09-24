@@ -6,3 +6,6 @@ RpplCore/.build/
 .swiftpm/
 /Exports/
 .worktrees/
+
+# Cursor debug logs
+.cursor/*.log

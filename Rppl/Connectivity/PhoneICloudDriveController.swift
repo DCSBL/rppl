@@ -27,10 +27,12 @@ final class PhoneICloudDriveController: NSObject {
     private(set) var suppressImportOffer = false
     /// Logbook shows only these session ids while Drive sync is on (Ask-before-import).
     private(set) var acceptedSessionIDs: Set<String> = []
+    /// Hidden on this phone while the package may remain in iCloud Drive.
+    private(set) var hiddenSessionIDs: Set<String> = []
 
     private var ubiquityContainerURL: URL?
     private var metadataQuery: NSMetadataQuery?
-    /// Session ids the user dismissed this run (avoid re-prompt spam until set changes).
+    /// Session ids the user dismissed or deleted (skip import picker across launches).
     private var dismissedRemoteIDs = Set<String>()
     private var rootSwitchTask: Task<Void, Never>?
     private var isSwitchingRoot = false
@@ -48,6 +50,8 @@ final class PhoneICloudDriveController: NSObject {
         isSyncEnabled = defaults.bool(forKey: AppSettingsKey.iCloudDriveSyncEnabled)
         super.init()
         acceptedSessionIDs = loadAcceptedIDs()
+        hiddenSessionIDs = loadHiddenIDs()
+        dismissedRemoteIDs = loadDismissedIDs()
 
         NotificationCenter.default.addObserver(
             self,
@@ -236,7 +240,9 @@ final class PhoneICloudDriveController: NSObject {
     func importSelectedRemoteSessions(_ sessionIds: Set<String>) async {
         guard let root = iCloudSessionsRoot else { return }
         for sessionId in sessionIds {
-            let dir = root.appendingPathComponent(sessionId, isDirectory: true)
+            guard let dir = try? SessionPackageLocator.directory(for: sessionId, in: root) else {
+                continue
+            }
             await downloadUbiquitousItem(at: dir)
         }
         acceptSessions(sessionIds)
@@ -253,8 +259,14 @@ final class PhoneICloudDriveController: NSObject {
 
     func dismissImportOffer() {
         dismissedRemoteIDs.formUnion(pendingImportSummaries.map(\.sessionId))
+        persistDismissedIDs()
         shouldOfferImport = false
         pendingImportSummaries = []
+    }
+
+    /// Settings → Import session: iCloud picker even when auto-offer was dismissed.
+    func summariesForManualImport() -> [RemoteSessionSummary] {
+        collectRemoteImportSummaries(ignoreDismissed: true)
     }
 
     func acceptSession(_ sessionId: String) {
@@ -268,6 +280,41 @@ final class PhoneICloudDriveController: NSObject {
         persistAcceptedIDs()
     }
 
+    /// Removes a session from this phone’s logbook while leaving the iCloud Drive copy.
+    func hideSessionFromLogbook(_ sessionId: String) {
+        unacceptSession(sessionId)
+        hiddenSessionIDs.insert(sessionId)
+        persistHiddenIDs()
+        rebuildPendingImportsFromQuery()
+        PhoneConnectivityService.shared.bumpSessionsRevision()
+        WakeLog.debug(.store, "hide session from logbook \(sessionId.prefix(8))…")
+    }
+
+    /// Permanently deletes a session package, using file coordination when on iCloud Drive.
+    func deleteSessionPermanently(_ sessionId: String) async throws {
+        let store = PhoneConnectivityService.shared.store
+        let dir = try store.sessionDirectory(for: sessionId)
+        guard fileManager.fileExists(atPath: dir.path) else {
+            throw SessionStoreError.sessionNotFound(sessionId)
+        }
+        try await coordinatedDeleteSession(at: dir)
+        await deleteFromLocalFallbackRoot(sessionId: sessionId)
+        hiddenSessionIDs.remove(sessionId)
+        persistHiddenIDs()
+        unacceptSession(sessionId)
+        dismissedRemoteIDs.insert(sessionId)
+        persistDismissedIDs()
+        rebuildPendingImportsFromQuery()
+        PhoneConnectivityService.shared.bumpSessionsRevision()
+        WakeLog.debug(.store, "permanent delete session \(sessionId.prefix(8))…")
+    }
+
+    func clearHiddenSession(_ sessionId: String) {
+        guard hiddenSessionIDs.contains(sessionId) else { return }
+        hiddenSessionIDs.remove(sessionId)
+        persistHiddenIDs()
+    }
+
     var logbookFilterIDs: Set<String>? {
         isSyncEnabled && isICloudAvailable ? acceptedSessionIDs : nil
     }
@@ -279,6 +326,16 @@ final class PhoneICloudDriveController: NSObject {
         return Set(raw)
     }
 
+    private func loadHiddenIDs() -> Set<String> {
+        let raw = UserDefaults.standard.stringArray(forKey: AppSettingsKey.iCloudHiddenSessionIDs) ?? []
+        return Set(raw)
+    }
+
+    private func loadDismissedIDs() -> Set<String> {
+        let raw = UserDefaults.standard.stringArray(forKey: AppSettingsKey.iCloudDismissedImportSessionIDs) ?? []
+        return Set(raw)
+    }
+
     private func persistAcceptedIDs() {
         UserDefaults.standard.set(
             Array(acceptedSessionIDs).sorted(),
@@ -286,11 +343,30 @@ final class PhoneICloudDriveController: NSObject {
         )
     }
 
+    private func persistHiddenIDs() {
+        UserDefaults.standard.set(
+            Array(hiddenSessionIDs).sorted(),
+            forKey: AppSettingsKey.iCloudHiddenSessionIDs
+        )
+    }
+
+    private func persistDismissedIDs() {
+        UserDefaults.standard.set(
+            Array(dismissedRemoteIDs).sorted(),
+            forKey: AppSettingsKey.iCloudDismissedImportSessionIDs
+        )
+    }
+
     private func acceptSessions(_ ids: Set<String>) {
         guard !ids.isEmpty else { return }
+        hiddenSessionIDs.subtract(ids)
+        persistHiddenIDs()
+        dismissedRemoteIDs.subtract(ids)
+        persistDismissedIDs()
         acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
             previousAccepted: acceptedSessionIDs,
-            localIDs: ids
+            localIDs: ids,
+            hiddenFromLogbook: hiddenSessionIDs
         )
         persistAcceptedIDs()
     }
@@ -303,7 +379,8 @@ final class PhoneICloudDriveController: NSObject {
         guard !disk.isEmpty else { return }
         acceptedSessionIDs = ICloudLogbookPolicy.reconcileAccepted(
             previousAccepted: acceptedSessionIDs,
-            localIDs: disk
+            localIDs: disk,
+            hiddenFromLogbook: hiddenSessionIDs
         )
         persistAcceptedIDs()
     }
@@ -420,12 +497,22 @@ final class PhoneICloudDriveController: NSObject {
 
     private func rebuildPendingImportsFromQuery() {
         guard !suppressMetadataRebuild else { return }
-        guard isSyncEnabled, let root = iCloudSessionsRoot, let query = metadataQuery else {
+        guard isSyncEnabled, iCloudSessionsRoot != nil, metadataQuery != nil else {
             pendingImportSummaries = []
             shouldOfferImport = false
             return
         }
 
+        pendingImportSummaries = collectRemoteImportSummaries(ignoreDismissed: false)
+        shouldOfferImport = !suppressImportOffer && !pendingImportSummaries.isEmpty
+    }
+
+    private func collectRemoteImportSummaries(ignoreDismissed: Bool) -> [RemoteSessionSummary] {
+        guard isSyncEnabled, let root = iCloudSessionsRoot, let query = metadataQuery else {
+            return []
+        }
+
+        let dismissed = ignoreDismissed ? Set<String>() : dismissedRemoteIDs
         var remoteIDs = Set<String>()
         var candidates: [RemoteSessionSummary] = []
         let store = PhoneConnectivityService.shared.store
@@ -440,19 +527,21 @@ final class PhoneICloudDriveController: NSObject {
             else {
                 continue
             }
-            let sessionId = sessionDir.lastPathComponent
+            let summary = readSummaryCoordinated(at: sessionDir)
+            let sessionId = summary?.sessionId ?? sessionDir.lastPathComponent
             remoteIDs.insert(sessionId)
 
             guard ICloudLogbookPolicy.remoteImportCandidates(
                 remoteMetadata: [sessionId],
                 accepted: acceptedSessionIDs,
-                dismissed: dismissedRemoteIDs
+                dismissed: dismissed,
+                hiddenFromLogbook: hiddenSessionIDs
             ).contains(sessionId)
             else {
                 continue
             }
 
-            if let summary = readSummaryCoordinated(at: sessionDir) {
+            if let summary {
                 candidates.append(summary)
             } else {
                 Task { @MainActor in
@@ -464,31 +553,38 @@ final class PhoneICloudDriveController: NSObject {
             }
         }
 
-        let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
-        // Anything already on the live root belongs in this phone’s logbook.
-        if !localOnDisk.isEmpty {
-            acceptSessions(localOnDisk)
-        }
-        let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
-            accepted: acceptedSessionIDs,
-            remoteMetadata: remoteIDs,
-            localOnDisk: localOnDisk,
-            metadataGatherComplete: metadataHasGathered && !isSwitchingRoot
-        )
-        for sessionId in peerDeletes {
-            try? store.deleteSession(sessionId: sessionId)
-            unacceptSession(sessionId)
-            WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
-        }
-        if !peerDeletes.isEmpty {
-            PhoneConnectivityService.shared.bumpSessionsRevision()
+        if !ignoreDismissed {
+            let localOnDisk = Set((try? store.listSessionIDs()) ?? [])
+            let autoAccept = ICloudLogbookPolicy.autoAcceptCandidates(
+                localOnDisk: localOnDisk,
+                hiddenFromLogbook: hiddenSessionIDs,
+                declinedImport: dismissedRemoteIDs
+            )
+            if !autoAccept.isEmpty {
+                acceptSessions(autoAccept)
+            }
+            let peerDeletes = ICloudLogbookPolicy.peerDeleteCandidates(
+                accepted: acceptedSessionIDs,
+                remoteMetadata: remoteIDs,
+                localOnDisk: localOnDisk,
+                metadataGatherComplete: metadataHasGathered && !isSwitchingRoot
+            )
+            for sessionId in peerDeletes {
+                try? store.deleteSession(sessionId: sessionId)
+                unacceptSession(sessionId)
+                clearHiddenSession(sessionId)
+                dismissedRemoteIDs.remove(sessionId)
+                persistDismissedIDs()
+                WakeLog.debug(.store, "peer-delete drop \(sessionId.prefix(8))…")
+            }
+            if !peerDeletes.isEmpty {
+                PhoneConnectivityService.shared.bumpSessionsRevision()
+            }
         }
 
-        pendingImportSummaries = Dictionary(grouping: candidates, by: \.sessionId)
+        return Dictionary(grouping: candidates, by: \.sessionId)
             .compactMap(\.value.first)
             .sorted { $0.startedAt > $1.startedAt }
-
-        shouldOfferImport = !suppressImportOffer && !pendingImportSummaries.isEmpty
     }
 
     private func readSummaryCoordinated(at sessionDir: URL) -> RemoteSessionSummary? {
@@ -558,6 +654,55 @@ final class PhoneICloudDriveController: NSObject {
                     WakeLog.error(.store, "remove iCloud Sessions: \(error.localizedDescription)")
                 }
                 continuation.resume()
+            }
+        }
+    }
+
+    private func deleteFromLocalFallbackRoot(sessionId: String) async {
+        let localRoot = AppConstants.localPhoneSessionsRoot
+        if let cloudRoot = iCloudSessionsRoot,
+           localRoot.standardizedFileURL == cloudRoot.standardizedFileURL {
+            return
+        }
+        let store = SessionFileStore(rootURL: localRoot)
+        guard let dir = try? store.sessionDirectory(for: sessionId),
+              FileManager.default.fileExists(atPath: dir.path)
+        else { return }
+        do {
+            try await coordinatedDeleteSession(at: dir)
+            WakeLog.debug(.store, "deleted local fallback copy \(sessionId.prefix(8))…")
+        } catch {
+            WakeLog.error(
+                .store,
+                "delete local fallback copy failed: \(error.localizedDescription)"
+            )
+        }
+    }
+
+    private func coordinatedDeleteSession(at sessionDir: URL) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let coordinator = NSFileCoordinator()
+                var coordinatorError: NSError?
+                var deleteError: Error?
+                coordinator.coordinate(
+                    writingItemAt: sessionDir,
+                    options: [.forDeleting],
+                    error: &coordinatorError
+                ) { url in
+                    do {
+                        try FileManager.default.removeItem(at: url)
+                    } catch {
+                        deleteError = error
+                    }
+                }
+                if let coordinatorError {
+                    continuation.resume(throwing: coordinatorError)
+                } else if let deleteError {
+                    continuation.resume(throwing: deleteError)
+                } else {
+                    continuation.resume()
+                }
             }
         }
     }

@@ -120,8 +120,15 @@ public enum SessionLoader {
     }
 
     /// In-memory load from a Share export / WC package (no disk write).
-    public static func load(package: SessionTransferPackage) -> SessionLoadBundle {
-        makeBundle(
+    public static func load(package: SessionTransferPackage) throws -> SessionLoadBundle {
+        try SessionImportLimits.validateArrayCount(package.detections, limit: SessionImportLimits.maxDetections, label: "detections")
+        try SessionImportLimits.validateArrayCount(package.locations, limit: SessionImportLimits.maxLocations, label: "locations")
+        try SessionImportLimits.validateArrayCount(package.motion, limit: SessionImportLimits.maxMotionSamples, label: "motion")
+        try SessionImportLimits.validateArrayCount(package.health, limit: SessionImportLimits.maxHealthSamples, label: "health")
+        try SessionImportLimits.validateArrayCount(package.water, limit: SessionImportLimits.maxWaterSamples, label: "water")
+        try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+
+        return makeBundle(
             manifest: package.manifest,
             detections: package.detections,
             locations: package.locations,
@@ -134,20 +141,16 @@ public enum SessionLoader {
     }
 
     public static func load(packageURL: URL) throws -> SessionLoadBundle {
-        let data = try Data(contentsOf: packageURL)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let package = try decoder.decode(SessionTransferPackage.self, from: data)
-        return load(package: package)
+        let data = try SessionImportLimits.readBoundedFile(at: packageURL)
+        let package = try SessionImportLimits.decodeTransferPackage(from: data)
+        return try load(package: package)
     }
 
     /// Bundled empty-state example: shift timeline so `endedAt` is `now` (relative gaps kept).
     public static func loadExample(packageURL: URL, now: Date = Date()) throws -> SessionLoadBundle {
-        let data = try Data(contentsOf: packageURL)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let package = try decoder.decode(SessionTransferPackage.self, from: data)
-        return load(package: SessionTimelineRebase.package(package, soEndedAt: now))
+        let data = try SessionImportLimits.readBoundedFile(at: packageURL)
+        let package = try SessionImportLimits.decodeTransferPackage(from: data)
+        return try load(package: SessionTimelineRebase.package(package, soEndedAt: now))
     }
 
     private static func makeBundle(

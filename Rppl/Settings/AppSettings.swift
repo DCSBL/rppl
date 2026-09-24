@@ -3,6 +3,8 @@ import Foundation
 /// Stable `UserDefaults` keys for `@AppStorage` and direct access.
 enum AppSettingsKey {
     static let mapUsesSatellite = "rppl.mapUsesSatellite"
+    /// Selected `SessionMapAppearance` for the session detail map.
+    static let sessionMapAppearance = "rppl.sessionMapAppearance"
     /// At least one Watch session package imported on this iPhone.
     static let didImportSessionFromWatch = "rppl.didImportSessionFromWatch"
     /// Post-first-sync Location/Health/Motion asks already attempted (once).
@@ -13,4 +15,8 @@ enum AppSettingsKey {
     static let iCloudDriveSyncEnabled = "rppl.iCloudDriveSyncEnabled"
     /// Session ids accepted into this phone’s logbook (Ask-before-import; local only).
     static let iCloudAcceptedSessionIDs = "rppl.iCloudAcceptedSessionIds"
+    /// Session ids removed from this phone’s logbook but left in iCloud Drive.
+    static let iCloudHiddenSessionIDs = "rppl.iCloudHiddenSessionIds"
+    /// Session ids the user declined to import or deleted (skip import picker across launches).
+    static let iCloudDismissedImportSessionIDs = "rppl.iCloudDismissedImportSessionIds"
 }

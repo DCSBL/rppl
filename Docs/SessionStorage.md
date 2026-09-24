@@ -2,19 +2,28 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v6)
+## Current layout (schema v7+)
 
 ```text
-<root>/<sessionId>/
-  manifest.json
+<root>/<YYYY-MM-DD HH-mm - City>/   # display name; identity is manifest.sessionId
+  manifest.json               # canonical sessionId (UUID)
   detections.jsonl
   location-000.jsonl
   motion-000.jsonl.zlib   # or legacy motion-000.jsonl
   health-000.jsonl
   water-000.jsonl         # optional Ultra
+  battery-000.jsonl       # optional Watch battery level + state
   derived/
     view.json             # analyzerVersion + SessionStats + MapTrackFrame?
 ```
+
+**Folder naming**
+
+- Format: `YYYY-MM-DD HH-mm - City` (local start of `startedAt`; city from phone geocode, else `Unknown`).
+- Same-minute collisions (rare): `… (2)`, `… (3)`, …
+- Identity is always `manifest.sessionId`. Discovery scans for `manifest.json`; folder name is display-only.
+- Manual renames in Files are preserved (store will not overwrite a user-renamed folder).
+- Legacy bare-UUID folders (and short-lived date-only names) migrate to the timed human name on open / list.
 
 Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages without `derived/` rebuild on open.
 
@@ -49,8 +58,9 @@ Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates 
 | `motion-*.jsonl.zlib` | Device motion | **1 Hz** inactive, **25 Hz** riding/unsure |
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
+| `battery-*.jsonl` | Watch battery fraction (0…1) + state | sparse |
 
-Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present).
+Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present). No public millivolt API on watchOS — battery `level` is the raw `Float` fraction from `WKInterfaceDevice`.
 
 ## What UI needs
 

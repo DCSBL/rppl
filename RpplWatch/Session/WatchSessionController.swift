@@ -115,6 +115,8 @@ final class WatchSessionController: NSObject {
     var hkRideStartedAt: Date?
     var hkGpsFilter = GpsSignalFilter()
     var hkPreviousUsableSpeedMps: Double?
+    var hkPreviousUsableAt: Date?
+    var hkPendingJumpSpeedMps: Double?
     var hkPeakSpeedMps: Double = 0
 
     struct HKRideMetric {
@@ -135,6 +137,10 @@ final class WatchSessionController: NSObject {
     var latestActivity: String?
     var latestWaterState: String?
     var waterBuffer: [WaterTemperatureSample] = []
+    var batteryBuffer: [BatterySample] = []
+    var lastPersistedBatteryAt: Date?
+    var lastPersistedBatteryLevel: Double?
+    var lastPersistedBatteryState: String?
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false

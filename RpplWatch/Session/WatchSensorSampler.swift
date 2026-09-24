@@ -138,16 +138,20 @@ extension WatchSessionController {
 
     func flushBuffers() async {
         guard let store, let manifest else { return }
+        considerPersistingBattery()
         let locations = locationBuffer
         let motions = motionBuffer
         let health = healthBuffer
         let water = waterBuffer
+        let battery = batteryBuffer
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
         waterBuffer.removeAll(keepingCapacity: true)
+        batteryBuffer.removeAll(keepingCapacity: true)
 
-        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty else { return }
+        guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty || !battery.isEmpty
+        else { return }
 
         do {
             if !locations.isEmpty {
@@ -162,6 +166,9 @@ extension WatchSessionController {
             if !water.isEmpty {
                 try store.appendWaterTemperatureSamples(water, sessionId: manifest.sessionId)
             }
+            if !battery.isEmpty {
+                try store.appendBatterySamples(battery, sessionId: manifest.sessionId)
+            }
             refreshStoredByteSize()
             // Success path silent — every ~2s while recording would drown action logs.
         } catch {
@@ -169,7 +176,7 @@ extension WatchSessionController {
             WakeLog.error(
                 .store,
                 "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
-                    + "water=\(water.count): \(error.localizedDescription)"
+                    + "water=\(water.count) battery=\(battery.count): \(error.localizedDescription)"
             )
         }
     }
@@ -185,6 +192,66 @@ extension WatchSessionController {
         averageWaterTemperatureCelsius = nil
     }
 
+    func resetBatteryTracking() {
+        batteryBuffer.removeAll(keepingCapacity: true)
+        lastPersistedBatteryAt = nil
+        lastPersistedBatteryLevel = nil
+        lastPersistedBatteryState = nil
+    }
+
+    func enableBatteryMonitoring() {
+        WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
+    }
+
+    func disableBatteryMonitoring() {
+        WKInterfaceDevice.current().isBatteryMonitoringEnabled = false
+    }
+
+    /// Persist when level/state changes, every 60s heartbeat, or when `force` (lifecycle anchors).
+    func considerPersistingBattery(force: Bool = false) {
+        guard isRunning else { return }
+        if !force, isProductPaused { return }
+
+        let device = WKInterfaceDevice.current()
+        device.isBatteryMonitoringEnabled = true
+        let rawLevel = Double(device.batteryLevel)
+        guard rawLevel >= 0 else { return }
+
+        let state = Self.batteryStateCode(device.batteryState)
+        let now = Date()
+        let intervalElapsed = lastPersistedBatteryAt.map {
+            now.timeIntervalSince($0) >= Self.batteryPersistInterval
+        } ?? true
+        let levelChanged = lastPersistedBatteryLevel.map { abs($0 - rawLevel) > 0 } ?? true
+        let stateChanged = lastPersistedBatteryState.map { $0 != state } ?? true
+        guard force || intervalElapsed || levelChanged || stateChanged else { return }
+
+        let sample = BatterySample(timestamp: now, level: rawLevel, state: state)
+        batteryBuffer.append(sample)
+        lastPersistedBatteryAt = now
+        lastPersistedBatteryLevel = rawLevel
+        lastPersistedBatteryState = state
+        WakeLog.debug(
+            .session,
+            String(format: "battery level=%.4f state=%@", rawLevel, state)
+        )
+    }
+
+    static func batteryStateCode(_ state: WKInterfaceDeviceBatteryState) -> String {
+        switch state {
+        case .unplugged:
+            return BatteryStateCodes.unplugged
+        case .charging:
+            return BatteryStateCodes.charging
+        case .full:
+            return BatteryStateCodes.full
+        case .unknown:
+            return BatteryStateCodes.unknown
+        @unknown default:
+            return BatteryStateCodes.unknown
+        }
+    }
+
     func applyWaterSubmersionState(_ next: String) {
         if latestWaterState != next {
             if next == "submerged" {
@@ -192,7 +259,7 @@ extension WatchSessionController {
             }
             latestWaterState = next
             WakeLog.debug(.water, "submersion → \(next)")
-            processDetectionTick()
+            processDetectionHeartbeat()
         }
     }
 
@@ -271,5 +338,6 @@ extension WatchSessionController {
 
     static let waterTempPersistInterval: TimeInterval = 15
     static let waterTempLogDeltaC = 2.0
+    static let batteryPersistInterval: TimeInterval = 60
     static let locationRingMaxAge: TimeInterval = 5
 }

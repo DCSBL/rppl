@@ -244,6 +244,7 @@ extension WatchSessionController {
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
         resetWaterTemperatureTracking()
+        resetBatteryTracking()
         resetAirWeather()
         sensorSamplingDense = false
 
@@ -263,6 +264,8 @@ extension WatchSessionController {
             statusText = String(localized: "Recording")
         }
 
+        enableBatteryMonitoring()
+        considerPersistingBattery(force: true)
         logSessionStartDetection()
         await enableWaterLockWhenWorkoutActive()
         WKInterfaceDevice.current().play(.start)
@@ -279,9 +282,11 @@ extension WatchSessionController {
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
         beginSessionTeardown(status: String(localized: "Stopping…"))
 
+        considerPersistingBattery(force: true)
         stopSensors()
         liveSetTracker.closeOpenSet()
         await flushBuffers()
+        disableBatteryMonitoring()
 
         do {
             try store.markReadyToTransfer(sessionId: manifest.sessionId)
@@ -339,6 +344,7 @@ extension WatchSessionController {
         stopSensors()
         liveSetTracker.closeOpenSet()
         // No flush — package will be deleted; never queue transfer for discard.
+        disableBatteryMonitoring()
 
         await discardWorkoutWithoutSaving()
         recordingMode = "none"
@@ -385,6 +391,7 @@ extension WatchSessionController {
         currentSegmentStartedAt = nil
         lastPersistedConfidentCode = DetectionCodes.inactive
         resetWaterTemperatureTracking()
+        resetBatteryTracking()
         resetAirWeather()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
@@ -393,6 +400,8 @@ extension WatchSessionController {
         hkRideActivityOpen = false
         hkGpsFilter = GpsSignalFilter()
         hkPreviousUsableSpeedMps = nil
+        hkPreviousUsableAt = nil
+        hkPendingJumpSpeedMps = nil
         hkPeakSpeedMps = 0
         pausedAccumulated = 0
         productPausedAt = nil
@@ -411,6 +420,7 @@ extension WatchSessionController {
         }
         WakeLog.debug(.session, "pauseSession begin")
         applyForcedInactive(reason: "product_pause", detectorId: "product_pause")
+        considerPersistingBattery(force: true)
         await flushBuffers()
         flushTask?.cancel()
         timerTask?.cancel()
@@ -444,6 +454,7 @@ extension WatchSessionController {
         startLocation()
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
+        considerPersistingBattery(force: true)
         startBackgroundLoops()
         if let session = workoutSession, session.state == .paused {
             session.resume()

@@ -28,6 +28,25 @@ struct CompressedJSONLFramesTests {
             try CompressedJSONLFrames.decodeFrames(Data([0x00, 0x00, 0x00, 0x10, 0x01]))
         }
     }
+
+    @Test func rejectsOversizedLengthHeader() {
+        var frame = Data([0x00, 0x10, 0x00, 0x01]) // claims 1 MiB + 1 compressed
+        frame.append(Data(repeating: 0x00, count: 16))
+        #expect(throws: CompressedJSONLFrameError.frameTooLarge) {
+            try CompressedJSONLFrames.decodeFrames(frame)
+        }
+    }
+
+    @Test func rejectsTooManyFrames() throws {
+        let single = try CompressedJSONLFrames.makeFrame(jsonlUTF8: Data("x\n".utf8))
+        var many = Data()
+        for _ in 0..<(CompressedJSONLFrames.maxFrameCount + 1) {
+            many.append(single)
+        }
+        #expect(throws: CompressedJSONLFrameError.tooManyFrames) {
+            try CompressedJSONLFrames.decodeFrames(many)
+        }
+    }
 }
 
 @Suite("MotionCompression")
@@ -73,7 +92,7 @@ struct MotionCompressionTests {
         #expect(framed != nil)
         #expect(framed!.count > 0)
 
-        let zlibURL = store.sessionDirectory(for: manifest.sessionId)
+        let zlibURL = try store.sessionDirectory(for: manifest.sessionId)
             .appendingPathComponent("motion-000.jsonl.zlib")
         #expect(FileManager.default.fileExists(atPath: zlibURL.path))
     }

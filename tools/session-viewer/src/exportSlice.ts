@@ -1,5 +1,6 @@
 import type {
   AnalysisPackage,
+  BatterySample,
   DetectionEvent,
   LocationSample,
   SessionManifest,
@@ -77,6 +78,7 @@ export function sliceAnalysisPackage(
     locations: recordsInWindow(pkg.locations, range) as LocationSample[],
     motion: [],
     health: [],
+    battery: recordsInWindow(pkg.battery ?? [], range),
   }
 }
 
@@ -90,6 +92,8 @@ export interface RawTransferPackage {
   /** Uncompressed motion JSONL (folder load). Sliced into `motion` on export. */
   motionJsonl?: string
   health?: unknown[]
+  water?: unknown[]
+  battery?: BatterySample[]
 }
 
 function detectionsOf(raw: RawTransferPackage): DetectionEvent[] {
@@ -128,5 +132,7 @@ export async function sliceTransferPackage(
     locations: recordsInWindow(raw.locations ?? [], range) as LocationSample[],
     motion: await sliceMotion(raw, range),
     health: recordsInWindow(raw.health ?? [], range),
+    water: recordsInWindow(raw.water ?? [], range),
+    battery: recordsInWindow(raw.battery ?? [], range) as BatterySample[],
   }
 }

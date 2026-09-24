@@ -4,8 +4,10 @@ import RpplCore
 /// Multi-select picker for iCloud Drive session packages not yet on this phone.
 struct ICloudSessionImportView: View {
     let summaries: [RemoteSessionSummary]
+    var iCloudImportEnabled: Bool = true
     var onImport: (Set<String>) -> Void
     var onCancel: () -> Void
+    var onImportFromFile: () -> Void
 
     @State private var selected: Set<String> = []
 
@@ -15,74 +17,86 @@ struct ICloudSessionImportView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            List {
                 if summaries.isEmpty {
-                    ContentUnavailableView {
-                        Label("No sessions to import", systemImage: "icloud")
-                    } description: {
-                        Text("Every park day in iCloud Drive is already in this iPhone logbook.")
+                    Section {
+                        ContentUnavailableView {
+                            Label("No sessions to import", systemImage: "icloud")
+                        } description: {
+                            Text(emptyStateDescription)
+                        }
+                        .foregroundStyle(Color.rpplText)
+                        .listRowBackground(Color.clear)
                     }
-                    .foregroundStyle(Color.rpplText)
                 } else {
-                    List {
-                        Section {
-                            Button {
-                                if allSelected {
-                                    selected.removeAll()
-                                } else {
-                                    selected = Set(summaries.map(\.sessionId))
-                                }
-                            } label: {
-                                Text(allSelected ? "Deselect All" : "Select All")
-                                    .font(.body.weight(.semibold))
+                    Section {
+                        Button {
+                            if allSelected {
+                                selected.removeAll()
+                            } else {
+                                selected = Set(summaries.map(\.sessionId))
                             }
-                            .tint(Color.rpplAccent)
+                        } label: {
+                            Text(allSelected ? "Deselect All" : "Select All")
+                                .font(.body.weight(.semibold))
                         }
-
-                        Section {
-                            ForEach(summaries) { summary in
-                                Button {
-                                    toggle(summary.sessionId)
-                                } label: {
-                                    HStack(alignment: .top, spacing: 12) {
-                                        Image(
-                                            systemName: selected.contains(summary.sessionId)
-                                                ? "checkmark.circle.fill"
-                                                : "circle"
-                                        )
-                                        .foregroundStyle(
-                                            selected.contains(summary.sessionId)
-                                                ? Color.rpplAccent
-                                                : Color.rpplMuted
-                                        )
-                                        .font(.title3)
-
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(summary.cityName ?? "-")
-                                                .font(.headline)
-                                                .foregroundStyle(Color.rpplText)
-                                            Text(dateLine(summary))
-                                                .font(.subheadline)
-                                                .foregroundStyle(Color.rpplMuted)
-                                            Text(statsLine(summary))
-                                                .font(.caption)
-                                                .foregroundStyle(Color.rpplMuted)
-                                        }
-                                        Spacer(minLength: 0)
-                                    }
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        } footer: {
-                            Text(
-                                "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook."
-                            )
-                        }
+                        .tint(Color.rpplAccent)
                     }
-                    .scrollContentBackground(.hidden)
+
+                    Section {
+                        ForEach(summaries) { summary in
+                            Button {
+                                toggle(summary.sessionId)
+                            } label: {
+                                HStack(alignment: .top, spacing: 12) {
+                                    Image(
+                                        systemName: selected.contains(summary.sessionId)
+                                            ? "checkmark.circle.fill"
+                                            : "circle"
+                                    )
+                                    .foregroundStyle(
+                                        selected.contains(summary.sessionId)
+                                            ? Color.rpplAccent
+                                            : Color.rpplMuted
+                                    )
+                                    .font(.title3)
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(summary.cityName ?? "-")
+                                            .font(.headline)
+                                            .foregroundStyle(Color.rpplText)
+                                        Text(dateLine(summary))
+                                            .font(.subheadline)
+                                            .foregroundStyle(Color.rpplMuted)
+                                        Text(statsLine(summary))
+                                            .font(.caption)
+                                            .foregroundStyle(Color.rpplMuted)
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } footer: {
+                        Text(
+                            "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook."
+                        )
+                    }
+                }
+
+                Section {
+                    Button(action: onImportFromFile) {
+                        Label("Import from file", systemImage: "square.and.arrow.down")
+                    }
+                    .tint(Color.rpplAccent)
+                } footer: {
+                    Text(
+                        "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
+                    )
                 }
             }
+            .scrollContentBackground(.hidden)
             .background(Color.rpplBackground)
             .navigationTitle("Import from iCloud")
             .navigationBarTitleDisplayMode(.inline)
@@ -105,6 +119,17 @@ struct ICloudSessionImportView: View {
                 selected = Set(summaries.map(\.sessionId))
             }
         }
+    }
+
+    private var emptyStateDescription: String {
+        if iCloudImportEnabled {
+            return String(
+                localized: "Every park day in iCloud Drive is already in this iPhone logbook."
+            )
+        }
+        return String(
+            localized: "Turn on iCloud Drive to import park days from the cloud."
+        )
     }
 
     private func toggle(_ id: String) {

@@ -17,7 +17,7 @@ This project uses **caveman** mode for agent ↔ human chat.
 - Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
 - A worktree will be squashed and merged via a GitHub PR by human.
 - **PR title** (not necessarily each commit): `<component>(<type>): <short description>` — e.g. `watch(feat): …`, `slang(fix): …`. See [contributions/agent.md](contributions/agent.md).
-- Each commit triggers light `pre-commit` hooks; each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
+- Each commit triggers light `pre-commit` hooks (hygiene, codespell, legal sync, `.xcstrings` format, SwiftLint); each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
 
 ## Linear issues
 _Only use linear issues when one is given by the user_
@@ -92,7 +92,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 - Source of truth: `cd RpplCore && swift test` (Swift Testing).
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
-- Pre-commit (commit): hygiene → codespell → SwiftLint.
+- Pre-commit (commit): hygiene → codespell → legal sync → `.xcstrings` format → SwiftLint.
 - Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests; `xcodebuild` build if app/Core sources changed) when the push includes build-related files. Skips steps whose inputs match the last successful run. Analyze is `make check` / `XCODE_GATE_ANALYZE=1` only.
 - Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
 

@@ -54,7 +54,7 @@ final class WatchViewSyncService {
             applyViewUpdate(update)
             return
         }
-        if let sessionId = WatchViewSyncCodec.decodeViewDelete(from: message) {
+        if let sessionId = try? WatchViewSyncCodec.decodeViewDelete(from: message) {
             applyViewDelete(sessionId: sessionId)
             return
         }

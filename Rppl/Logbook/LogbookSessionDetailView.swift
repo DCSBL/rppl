@@ -12,13 +12,22 @@ struct LogbookSessionDetailView: View {
     let source: LogbookSessionDetailSource
     var store: SessionFileStore?
 
-    private static let sessionMapPointBudget = 800
     private static let setMapPointBudget = 200
     private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
+    /// Wall-clock seconds a full-session replay takes at 1× playback.
+    private static let replayDuration: TimeInterval = 24
+    private static let replayFrameSeconds: Double = 0.05
 
     @State private var manifest: SessionManifest?
     @State private var sessionStats: SessionStats?
-    @State private var mapTracks: [[LocationSample]] = []
+    @State private var setTracks: [SessionSetTrack] = []
+    @State private var playbackTimeline: TrackPlaybackTimeline = .empty
+    @State private var speedScale: TrackSpeedScale?
+    @State private var soloSetIndex: Int?
+    @State private var replayProgress: Double = 0
+    @State private var isReplaying = false
+    @State private var replayTask: Task<Void, Never>?
+    @State private var flyoverOrbits = true
     @State private var sessionMapTrackData: SessionMapTrackData?
     @State private var allLocations: [LocationSample] = []
     @State private var mapFrame: MapTrackFrame?
@@ -35,6 +44,8 @@ struct LogbookSessionDetailView: View {
     @State private var exportTask: Task<Void, Never>?
     @State private var showExportExplainer = false
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
+    @AppStorage(AppSettingsKey.sessionMapAppearance)
+    private var mapAppearanceRaw = SessionMapAppearance.sets.rawValue
 
     private enum LoadPhase: Equatable {
         case loading
@@ -73,6 +84,7 @@ struct LogbookSessionDetailView: View {
                     .frame(minHeight: 240)
                 case .ready:
                     sessionMap
+                    mapAppearanceControls
                     sessionStatsCard
                     setsSection
                 }
@@ -88,6 +100,13 @@ struct LogbookSessionDetailView: View {
         .onDisappear {
             cancelLoad()
             cancelExport()
+            stopReplay()
+        }
+        .onChange(of: mapAppearanceRaw) { _, _ in
+            applyAppearanceSideEffects()
+        }
+        .onChange(of: isReplaying) { _, running in
+            if running { startReplay() } else { stopReplay() }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -154,6 +173,7 @@ struct LogbookSessionDetailView: View {
             ZStack(alignment: .topLeading) {
                 SessionMapView(
                     sessionMapData: sessionMapTrackData,
+                    rendering: sessionRendering,
                     allowsInteraction: false,
                     preferredFrame: mapFrame
                 )
@@ -162,6 +182,7 @@ struct LogbookSessionDetailView: View {
                 NavigationLink {
                     SessionMapFullscreenView(
                         sessionMapData: sessionMapTrackData,
+                        rendering: fullscreenRendering,
                         title: navigationTitle,
                         preferredFrame: mapFrame
                     )
@@ -194,6 +215,56 @@ struct LogbookSessionDetailView: View {
             }
         } else {
             mapPlaceholder("No GPS track")
+        }
+    }
+
+    private var mapAppearance: SessionMapAppearance {
+        SessionMapAppearance(rawValue: mapAppearanceRaw) ?? .sets
+    }
+
+    private var mapAppearanceBinding: Binding<SessionMapAppearance> {
+        Binding(
+            get: { mapAppearance },
+            set: { mapAppearanceRaw = $0.rawValue }
+        )
+    }
+
+    private var sessionRendering: SessionMapRendering {
+        SessionMapRendering(
+            appearance: mapAppearance,
+            setTracks: setTracks,
+            timeline: playbackTimeline,
+            speedScale: speedScale,
+            soloSetIndex: soloSetIndex,
+            replayProgress: replayProgress,
+            orbits: flyoverOrbits
+        )
+    }
+
+    /// Full-screen map is interactive, so playback stays put and shows the whole track.
+    private var fullscreenRendering: SessionMapRendering {
+        var rendering = sessionRendering
+        if rendering.appearance == .replay {
+            rendering.replayProgress = 1
+        }
+        rendering.orbits = false
+        return rendering
+    }
+
+    @ViewBuilder
+    private var mapAppearanceControls: some View {
+        if sessionMapTrackData != nil || !setTracks.isEmpty {
+            SessionMapAppearanceControls(
+                appearance: mapAppearanceBinding,
+                soloSetIndex: $soloSetIndex,
+                replayProgress: $replayProgress,
+                isReplaying: $isReplaying,
+                orbits: $flyoverOrbits,
+                setTracks: setTracks,
+                timeline: playbackTimeline,
+                speedScale: speedScale,
+                isLoading: tracksLoading
+            )
         }
     }
 
@@ -294,6 +365,10 @@ struct LogbookSessionDetailView: View {
                             locations: SessionLocationHelpers.downsample(
                                 SessionLocationHelpers.locations(for: set, in: allLocations),
                                 maxCount: Self.setMapPointBudget
+                            ),
+                            rendering: .singleSet(
+                                appearance: mapAppearance,
+                                speedScale: speedScale
                             )
                         )
                     }
@@ -425,13 +500,8 @@ struct LogbookSessionDetailView: View {
             }
             try Task.checkCancellation()
             let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            let setTracks = SetLocationFilter.tracks(from: sortedLocations, sets: sets)
-            let perTrackBudget = max(32, Self.sessionMapPointBudget / max(setTracks.count, 1))
-            let mapPoints = setTracks.map {
-                SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
-            }
             allLocations = sortedLocations
-            mapTracks = mapPoints
+            applyTrackLayers(locations: sortedLocations, sets: sets)
             if sessionMapTrackData == nil {
                 sessionMapTrackData = SessionMapTrackBuilder.build(
                     locations: sortedLocations,
@@ -452,21 +522,74 @@ struct LogbookSessionDetailView: View {
 
     private func applyFullBundle(_ bundle: SessionLoadBundle) {
         let sortedLocations = bundle.locations.sorted { $0.timestamp < $1.timestamp }
-        let setTracks = SetLocationFilter.tracks(from: sortedLocations, sets: bundle.stats.sets)
-        let perTrackBudget = max(32, Self.sessionMapPointBudget / max(setTracks.count, 1))
-        let mapPoints = setTracks.map {
-            SessionLocationHelpers.downsample($0, maxCount: perTrackBudget)
-        }
         manifest = bundle.manifest
         sessionStats = bundle.stats
         allLocations = sortedLocations
-        mapTracks = mapPoints
         mapFrame = bundle.mapFrame
         sessionMapTrackData = SessionMapTrackBuilder.build(
             locations: sortedLocations,
             sets: bundle.stats.sets
         )
         cityName = bundle.cityName
+        applyTrackLayers(locations: sortedLocations, sets: bundle.stats.sets)
+    }
+
+    /// Builds the per-set track, playback timeline and speed scale the map appearances need.
+    private func applyTrackLayers(locations: [LocationSample], sets: [SetSegmentStats]) {
+        let tracks = SessionSetTrackBuilder.tracks(locations: locations, sets: sets)
+        setTracks = tracks
+        playbackTimeline = TrackPlaybackBuilder.build(setTracks: tracks)
+        speedScale = TrackSpeedBands.scale(forTracks: tracks.map(\.samples))
+        if soloSetIndex == nil || !tracks.contains(where: { $0.setIndex == soloSetIndex }) {
+            soloSetIndex = tracks.first?.setIndex
+        }
+        applyAppearanceSideEffects()
+    }
+
+    /// Keeps solo / replay state consistent with the picked appearance.
+    private func applyAppearanceSideEffects() {
+        switch mapAppearance {
+        case .replay:
+            guard !playbackTimeline.isEmpty else { return }
+            replayProgress = 0
+            isReplaying = true
+        case .solo:
+            stopReplay()
+            if soloSetIndex == nil {
+                soloSetIndex = setTracks.first?.setIndex
+            }
+        default:
+            stopReplay()
+        }
+    }
+
+    private func startReplay() {
+        guard !playbackTimeline.isEmpty else {
+            isReplaying = false
+            return
+        }
+        replayTask?.cancel()
+        if replayProgress >= 0.999 { replayProgress = 0 }
+        let increment = Self.replayFrameSeconds / Self.replayDuration
+        replayTask = Task { @MainActor in
+            while !Task.isCancelled, isReplaying {
+                try? await Task.sleep(for: .seconds(Self.replayFrameSeconds))
+                if Task.isCancelled { return }
+                let next = replayProgress + increment
+                if next >= 1 {
+                    replayProgress = 1
+                    isReplaying = false
+                    return
+                }
+                replayProgress = next
+            }
+        }
+    }
+
+    private func stopReplay() {
+        replayTask?.cancel()
+        replayTask = nil
+        if isReplaying { isReplaying = false }
     }
 
     private static func loadBundledExample() throws -> SessionLoadBundle {
@@ -579,6 +702,7 @@ struct LogbookSessionDetailView: View {
 private struct SetDetailCard: View {
     let set: SetSegmentStats
     let locations: [LocationSample]
+    var rendering: SessionMapRendering = .flat
 
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
@@ -607,12 +731,13 @@ private struct SetDetailCard: View {
 
             if locations.count >= 2 {
                 ZStack {
-                    SessionMapView(locations: locations)
+                    SessionMapView(locations: locations, rendering: rendering)
                         .allowsHitTesting(false)
 
                     NavigationLink {
                         SessionMapFullscreenView(
                             locations: locations,
+                            rendering: rendering,
                             title: String(localized: "Set \(set.index)")
                         )
                     } label: {

@@ -1,5 +1,7 @@
 import type {
   AccuracyPoint,
+  BatteryPoint,
+  BatterySample,
   LocationSample,
   SetSegment,
   Segment,
@@ -438,6 +440,70 @@ export function drawAccuracy(
   drawPlayheadCursor(ctx, frame, range, playheadMs)
 }
 
+export function batterySeries(samples: BatterySample[], range: TimeRange): BatteryPoint[] {
+  return samples
+    .map((s) => ({
+      tMs: toMs(s.timestamp),
+      percent: s.level * 100,
+      state: s.state,
+    }))
+    .filter((p) => !Number.isNaN(p.tMs) && p.tMs >= range.startMs && p.tMs <= range.endMs)
+    .sort((a, b) => a.tMs - b.tMs)
+}
+
+export function drawBattery(
+  canvas: HTMLCanvasElement,
+  points: BatteryPoint[],
+  range: TimeRange,
+  highlight: Segment | null,
+  playheadMs: number | null,
+): void {
+  const { ctx, w, h } = setupCanvas(canvas)
+  const frame = plotFrame(ctx, w, h, 'Battery (%)')
+  const minV = 0
+  const maxV = 100
+
+  if (highlight) {
+    const band = clippedBand(highlight.startMs, highlight.endMs, range)
+    if (band) {
+      const xA = xAt(band.startMs, range, frame.x0, frame.x1)
+      const xB = xAt(band.endMs, range, frame.x0, frame.x1)
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.18)'
+      ctx.fillRect(xA, frame.y0, Math.max(1, xB - xA), frame.y1 - frame.y0)
+    }
+  }
+
+  if (!points.length) {
+    drawCentered(ctx, w, h, 'No battery samples in window')
+    drawPlayheadCursor(ctx, frame, range, playheadMs)
+    return
+  }
+
+  const pts = points.map((p) => ({
+    x: xAt(p.tMs, range, frame.x0, frame.x1),
+    y: yAt(p.percent, minV, maxV, frame.y0, frame.y1),
+    tMs: p.tMs,
+    state: p.state,
+  }))
+  ctx.strokeStyle = '#34d399'
+  ctx.lineWidth = 1.25
+  strokeOpenPath(ctx, pts, (i) => {
+    const prev = pts[i - 1]!
+    const cur = pts[i]!
+    return cur.tMs < prev.tMs || cur.tMs - prev.tMs > SERIES_GAP_MS
+  })
+
+  for (const p of pts) {
+    if (p.state !== 'charging' && p.state !== 'full') continue
+    ctx.fillStyle = p.state === 'charging' ? '#fbbf24' : '#60a5fa'
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  drawPlayheadCursor(ctx, frame, range, playheadMs)
+}
+
 export function drawEvents(
   canvas: HTMLCanvasElement,
   segs: Segment[],
@@ -575,7 +641,7 @@ export function buildTrackMarkers(
   markers.push({ lat: last.latitude, lon: last.longitude, kind: 'end' })
 
   for (const set of sets) {
-    if (ride.startLatitude != null && set.startLongitude != null) {
+    if (set.startLatitude != null && set.startLongitude != null) {
       markers.push({
         lat: set.startLatitude,
         lon: set.startLongitude,

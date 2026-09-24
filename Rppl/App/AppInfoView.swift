@@ -1,21 +1,13 @@
 import SwiftUI
-import UniformTypeIdentifiers
 import RpplCore
 
 struct AppInfoView: View {
-    @Binding var navigation: LogbookNavigationRequest
-    @Binding var selectedTab: AppTab
+    var isImporting: Bool
+    var onImportSessionTapped: () -> Void
 
     @State private var permissions = PhonePermissionsController.shared
-    @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var showDisableDeleteConfirm = false
-    @State private var showImporter = false
-    @State private var isImporting = false
-    @State private var showImportError = false
-    @State private var importErrorText: String?
-    @State private var showAlreadyImportedAlert = false
-    @State private var pendingDuplicateSessionId: String?
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -43,9 +35,7 @@ struct AppInfoView: View {
 
                 if AppReleaseChannel.allowsDebugTools {
                     Section {
-                        Button {
-                            showImporter = true
-                        } label: {
+                        Button(action: onImportSessionTapped) {
                             if isImporting {
                                 ProgressView()
                             } else {
@@ -57,7 +47,7 @@ struct AppInfoView: View {
                         Text("Import")
                     } footer: {
                         Text(
-                            "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
+                            "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated."
                         )
                     }
                 }
@@ -74,7 +64,7 @@ struct AppInfoView: View {
                     Text("Data")
                 } footer: {
                     Text(
-                        "Keeps your phone logbook in your iCloud Drive so sessions can survive deleting the app. Uses your Apple account — not a Rppl cloud. Default on."
+                        "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud."
                     )
                 }
 
@@ -149,40 +139,6 @@ struct AppInfoView: View {
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
             }
-            .fileImporter(
-                isPresented: $showImporter,
-                allowedContentTypes: [.json],
-                allowsMultipleSelection: false
-            ) { result in
-                handleImportResult(result)
-            }
-            .alert(
-                "Could not import session",
-                isPresented: $showImportError,
-                presenting: importErrorText
-            ) { _ in
-                Button("OK", role: .cancel) {}
-            } message: { message in
-                Text(message)
-            }
-            .alert(
-                "Already in logbook",
-                isPresented: $showAlreadyImportedAlert
-            ) {
-                Button("Cancel", role: .cancel) {
-                    pendingDuplicateSessionId = nil
-                }
-                Button("Show") {
-                    if let sessionId = pendingDuplicateSessionId {
-                        navigation.openSessionId = sessionId
-                        navigation.highlightSessionId = sessionId
-                        selectedTab = .logbook
-                    }
-                    pendingDuplicateSessionId = nil
-                }
-            } message: {
-                Text("This session is already in your logbook.")
-            }
         }
     }
 
@@ -228,50 +184,11 @@ struct AppInfoView: View {
             await iCloud.setSyncEnabled(false, deleteICloudCopies: deleteCopies)
         }
     }
-
-    private func handleImportResult(_ result: Result<[URL], Error>) {
-        switch result {
-        case .failure(let error):
-            presentImportFailure(SessionExportImportError.detail(for: error))
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            isImporting = true
-            Task {
-                do {
-                    let importedId = try await connectivity.importExportedSession(from: url)
-                    isImporting = false
-                    navigation.openSessionId = importedId
-                    navigation.highlightSessionId = importedId
-                    selectedTab = .logbook
-                } catch let error as SessionExportImportError {
-                    isImporting = false
-                    switch error {
-                    case .alreadyImported(let sessionId):
-                        pendingDuplicateSessionId = sessionId
-                        showAlreadyImportedAlert = true
-                    case .unreadable(let message):
-                        presentImportFailure(message)
-                    }
-                } catch {
-                    isImporting = false
-                    presentImportFailure(SessionExportImportError.detail(for: error))
-                    WakeLog.error(.transfer, "export-file import: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func presentImportFailure(_ message: String) {
-        importErrorText = message
-        Task { @MainActor in
-            showImportError = true
-        }
-    }
 }
 
 #Preview {
     AppInfoView(
-        navigation: .constant(LogbookNavigationRequest()),
-        selectedTab: .constant(.app)
+        isImporting: false,
+        onImportSessionTapped: {}
     )
 }
