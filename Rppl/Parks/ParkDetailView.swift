@@ -10,6 +10,7 @@ struct ParkDetailView: View {
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @State private var weatherProvider = ParksWeatherProvider()
     @State private var weather: ParkWeather?
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
@@ -19,6 +20,12 @@ struct ParkDetailView: View {
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
+    }
+
+    /// Section-level "these sections are changed" summary against the bundled version; empty for a brand-new custom park.
+    private var changedSections: [ParkSection] {
+        guard let base = entry?.bundledPark else { return [] }
+        return ParkDiff.changedSections(from: base, to: park)
     }
 
     var body: some View {
@@ -61,7 +68,7 @@ struct ParkDetailView: View {
             ParkEditorView(original: park, onSaved: {})
         }
         .sheet(isPresented: $showMail) {
-            ParkMailComposer(park: park) { showMail = false }
+            ParkMailComposer(park: park, changedSections: changedSections) { showMail = false }
                 .ignoresSafeArea()
         }
         .confirmationDialog(removeTitle, isPresented: $confirmRemove, titleVisibility: .visible) {
@@ -84,7 +91,13 @@ struct ParkDetailView: View {
             Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
             if let origin = entry?.origin, origin != .bundled {
                 Button("Send to Rppl", systemImage: "envelope") {
-                    if MailAvailability.canSend { showMail = true } else { ParkShare.share(park) }
+                    if MailAvailability.canSend {
+                        showMail = true
+                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
+                        openURL(url)
+                    } else {
+                        ParkShare.share(park)
+                    }
                 }
                 Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
             }
