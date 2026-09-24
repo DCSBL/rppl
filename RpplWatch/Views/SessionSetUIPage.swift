@@ -104,13 +104,13 @@ struct SessionSetUIPage: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 2) {
-                    Text(session.currentSetSpeedKmh.map { String(format: "%.0f", $0) } ?? "--")
+                    Text(session.currentSetSpeedKmh.map { DistanceFormat.speedValue($0) } ?? "--")
                         .font(.system(.title2, design: .rounded).bold())
                         .monospacedDigit()
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                         .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("KM/H")
+                    Text(DistanceFormat.speedUnitSymbol().uppercased())
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)

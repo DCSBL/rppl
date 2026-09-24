@@ -112,9 +112,19 @@ struct DistanceFormatTests {
 
     @Test func kilometersUsesLocaleUnit() {
         let en = DistanceFormat.kilometers(2500, locale: Locale(identifier: "en_US"))
-        #expect(en.lowercased().contains("km"))
+        #expect(en.lowercased().contains("mi"))
         let nl = DistanceFormat.kilometers(2500, locale: Locale(identifier: "nl_NL"))
         #expect(nl.lowercased().contains("km"))
+    }
+
+    @Test func usLocaleUsesImperialUnits() {
+        let us = Locale(identifier: "en_US")
+        #expect(DistanceFormat.meters(100, locale: us).contains("ft"))
+        #expect(DistanceFormat.kilometers(1609.344, locale: us).contains("mi"))
+        let mph = DistanceFormat.kilometersPerHour(16.09344, locale: us)
+        #expect(mph.contains("10.0") && mph.lowercased().contains("mph"))
+        #expect(DistanceFormat.speedUnitSymbol(locale: us).lowercased() == "mph")
+        #expect(DistanceFormat.speedUnitSymbol(locale: Locale(identifier: "nl_NL")).lowercased().hasPrefix("km/"))
     }
 
     @Test func speedUsesLocaleUnit() {
@@ -148,14 +158,14 @@ struct EnergyFormatTests {
 
 @Suite("TemperatureFormat")
 struct TemperatureFormatTests {
-    @Test func placeholderIsDashC() {
-        #expect(TemperatureFormat.placeholder == "- C")
+    @Test func metricLocaleKeepsCelsius() {
+        let formatted = TemperatureFormat.celsius(21.4, locale: Locale(identifier: "nl_NL"))
+        #expect(formatted.contains("21") && formatted.contains("C"))
     }
 
-    @Test func celsiusIncludesValueAndUnit() {
-        let formatted = TemperatureFormat.celsius(21.4, locale: Locale(identifier: "en_US"))
-        #expect(formatted.contains("21.4"))
-        #expect(formatted.hasSuffix(" C"))
+    @Test func usLocaleConvertsToFahrenheit() {
+        let formatted = TemperatureFormat.celsius(20, locale: Locale(identifier: "en_US"))
+        #expect(formatted.contains("68") && formatted.contains("F"))
     }
 }
 

@@ -1,13 +1,18 @@
 import Foundation
 
-/// Session water-temperature display (`22 C`; placeholder `- C` until first sample).
+/// Session water-temperature display. Input is always °C; output follows the device
+/// temperature unit (°C / °F). Placeholder until first sample.
 public enum TemperatureFormat {
-    public static let placeholder = "- C"
+    public static let placeholder = "--°"
 
-    public static func celsius(_ value: Double, locale: Locale = .current) -> String {
-        let number = value.formatted(
-            .number.precision(.fractionLength(0...1)).locale(locale)
+    public static func celsius(_ value: Double, locale: Locale = .autoupdatingCurrent) -> String {
+        Measurement(value: value, unit: UnitTemperature.celsius).formatted(
+            .measurement(
+                width: .abbreviated,
+                usage: .weather,
+                numberFormatStyle: .number.precision(.fractionLength(0...0))
+            )
+            .locale(locale)
         )
-        return "\(number) C"
     }
 }
