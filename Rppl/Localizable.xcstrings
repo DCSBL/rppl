@@ -4140,6 +4140,38 @@
           }
         }
       }
+    },
+    "Air temperature" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Air temperature"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luchttemperatuur"
+          }
+        }
+      }
+    },
+    "Humidity" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humidity"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luchtvochtigheid"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -355,6 +355,16 @@ struct LogbookSessionDetailView: View {
                             label: "Water temperature"
                         )
                     }
+                    if let weather = manifest?.weather {
+                        statTile(
+                            LogbookFormatting.airTemperature(weather.temperatureCelsius),
+                            label: "Air temperature"
+                        )
+                        statTile(
+                            LogbookFormatting.humidityPercent(weather.humidityPercent),
+                            label: "Humidity"
+                        )
+                    }
                     if let total = stats.totalEnergyKilocalories {
                         if let calories = stats.activeEnergyKilocalories {
                             statTile(
