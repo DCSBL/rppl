@@ -1,0 +1,43 @@
+version: 1
+id: wollebrand-honselersdijk
+created_at: 2026-09-24
+updated_at: 2026-09-24
+history:
+  - date: 2026-09-24
+    description: initial
+
+name: Cablepark de Wollebrand
+address: Broekpolderlaan 10, 2675 LJ Honselersdijk
+timezone: Europe/Amsterdam
+location:
+  lat: 51.995419
+  lon: 4.24197
+
+phone: 0174 - 64 11 44
+email: info@kabelskibaan.nl
+website: https://www.kabelskibaan.nl
+
+links:
+  - { kind: facebook, url: "https://www.facebook.com/people/Cablepark-Wollebrand/100063621169078/" }
+
+cables:
+  - name: Cable
+    description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
+
+# No structured schedule captured (source blocked from this environment); verify
+# current hours, blocks and reservation rules on the website before relying on this.
+opening:
+  booking: optional
+  note: >-
+    Reservations are not mandatory but guarantee a spot. Arrive 30 minutes before your
+    start time. Outside regular hours the park can be booked exclusively.
+
+facilities:
+  - Rental (skis, wakeboard, wetsuit)
+  - Restaurant (Wollebrand Lakehouse)
+  - Groups / corporate outings
+
+description: >-
+  Open since 2002. Rates include water skis, life vest and instruction. Wakeboard rental
+  requires ID. Youth up to 15 need supervisor permission. Onsite Wollebrand Lakehouse
+  restaurant for food and drinks.
