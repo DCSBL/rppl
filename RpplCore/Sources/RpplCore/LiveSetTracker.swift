@@ -25,6 +25,7 @@ public struct LiveSetTracker: Sendable {
     private var previousLocation: LocationSample?
     private var finishedSetMeters = 0.0
     private var setStartedAt: Date?
+    private var setEnterEventId: String?
     private var unsureStartedAt: Date?
     private var unsureEventId: String?
     private let maxHorizontalAccuracyM: Double
@@ -58,6 +59,7 @@ public struct LiveSetTracker: Sendable {
         trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
         setStartedAt = nil
+        setEnterEventId = nil
         unsureStartedAt = nil
         unsureEventId = nil
         lapTracker.reset()
@@ -92,6 +94,10 @@ public struct LiveSetTracker: Sendable {
                 currentSetMeters = 0
                 isSetOngoing = true
                 setStartedAt = event.timestamp
+                setEnterEventId = event.id
+            } else if event.supersedesId != nil, event.supersedesId == setEnterEventId {
+                // Engine revoked its own enter (failed start): the set never happened.
+                revokeCurrentSet()
             } else if !nowRiding, wasRiding {
                 finishCurrentSet(at: setEnd(for: event))
             }
@@ -176,7 +182,23 @@ public struct LiveSetTracker: Sendable {
         return unsureStartedAt
     }
 
+    /// Undo a set the engine took back. Leaves the previous set's frozen values alone: the Watch
+    /// keeps showing the last real set rather than a set that turned out not to exist.
+    private mutating func revokeCurrentSet() {
+        setCount = max(0, setCount - 1)
+        currentSetMeters = 0
+        isSetOngoing = false
+        currentSpeedKmh = nil
+        setStartedAt = nil
+        setEnterEventId = nil
+        if lapTracker.isSetActive {
+            lapTracker.endSet()
+        }
+        refreshSessionMeters()
+    }
+
     private mutating func finishCurrentSet(at date: Date) {
+        setEnterEventId = nil
         lastSetMeters = currentSetMeters
         if let started = setStartedAt {
             lastSetDuration = max(0, date.timeIntervalSince(started))

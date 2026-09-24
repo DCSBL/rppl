@@ -10,6 +10,16 @@ public struct DetectionThresholds: Equatable, Sendable {
     public var rideEnterHoldFromWalk: TimeInterval
     public var stoppedSpeedKmh: Double
     public var rideExitHold: TimeInterval
+    /// Off the cable but still moving (km/h): swimming or coasting back sits in this band while
+    /// the cable itself runs ~31 km/h. Above `walkBandSpeedKmh`, well below `rideEnterSpeedKmh`.
+    public var offCableSpeedKmh: Double
+    /// Longer than `rideExitHold` because the band is wider.
+    public var offCableExitHold: TimeInterval
+    /// A set younger than this can be revoked as a failed start.
+    public var failedStartMaxAge: TimeInterval
+    /// Cable-speed seconds a set must show to be real. Above the enter hold that opened it, so
+    /// revocation needs more evidence than a single dock spike can produce.
+    public var failedStartCableEvidence: TimeInterval
     /// Riding + unusable GPS for this long → `unsure`.
     public var gapUnsureHold: TimeInterval
     /// Unsure younger than this can lookback-merge into the same ride; at/after → new set.
@@ -31,6 +41,10 @@ public struct DetectionThresholds: Equatable, Sendable {
         rideEnterHoldFromWalk: TimeInterval = 4.0,
         stoppedSpeedKmh: Double = 4,
         rideExitHold: TimeInterval = 3.0,
+        offCableSpeedKmh: Double = 13,
+        offCableExitHold: TimeInterval = 4.0,
+        failedStartMaxAge: TimeInterval = 12.0,
+        failedStartCableEvidence: TimeInterval = 6.0,
         gapUnsureHold: TimeInterval = 3.0,
         unsureSameRideWindow: TimeInterval = 60.0,
         maxHorizontalAccuracyM: Double = 25,
@@ -45,6 +59,10 @@ public struct DetectionThresholds: Equatable, Sendable {
         self.rideEnterHoldFromWalk = rideEnterHoldFromWalk
         self.stoppedSpeedKmh = stoppedSpeedKmh
         self.rideExitHold = rideExitHold
+        self.offCableSpeedKmh = offCableSpeedKmh
+        self.offCableExitHold = offCableExitHold
+        self.failedStartMaxAge = failedStartMaxAge
+        self.failedStartCableEvidence = failedStartCableEvidence
         self.gapUnsureHold = gapUnsureHold
         self.unsureSameRideWindow = unsureSameRideWindow
         self.maxHorizontalAccuracyM = maxHorizontalAccuracyM
@@ -66,5 +84,9 @@ public struct DetectionThresholds: Equatable, Sendable {
 
     public var walkBandSpeedMps: Double {
         SpeedUnits.metersPerSecond(fromKilometersPerHour: walkBandSpeedKmh)
+    }
+
+    public var offCableSpeedMps: Double {
+        SpeedUnits.metersPerSecond(fromKilometersPerHour: offCableSpeedKmh)
     }
 }

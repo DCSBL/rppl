@@ -3,6 +3,8 @@ import Foundation
 public enum DetectionHoldKind: String, CaseIterable, Sendable, Equatable {
     case highSpeed
     case stopped
+    /// Below cable speed but not yet stopped — the swim / coast back after letting go.
+    case offCable
     case unusable
 }
 
@@ -47,6 +49,7 @@ public struct DetectionHoldClock: Sendable, Equatable {
             if let silence = duration(.unusable, at: timestamp), silence > thresholds.gapUnsureHold {
                 startedAt[.highSpeed] = nil
                 startedAt[.stopped] = nil
+                startedAt[.offCable] = nil
                 highSpeedFromWalk = false
             }
             return
@@ -69,6 +72,11 @@ public struct DetectionHoldClock: Sendable, Equatable {
         set(
             .stopped,
             active: usableSpeedMps.map { $0 <= thresholds.stoppedSpeedMps } ?? false,
+            at: timestamp
+        )
+        set(
+            .offCable,
+            active: usableSpeedMps.map { $0 <= thresholds.offCableSpeedMps } ?? false,
             at: timestamp
         )
         set(.unusable, active: usableSpeedMps == nil, at: timestamp)

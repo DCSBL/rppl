@@ -4,6 +4,7 @@ import Foundation
 public enum SetHighlight: String, Sendable, Equatable, Codable, CaseIterable {
     case longest
     case longestTime
+    case shortest
     case fastest
 }
 

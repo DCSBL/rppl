@@ -250,9 +250,13 @@ struct GpsSignalFilterJumpTests {
         _ = engine.process(fix(at: 1, speedKmh: 38))
         _ = engine.process(fix(at: 3.1, speedKmh: 38))
         #expect(engine.currentCode == DetectionCodes.riding)
+        // A real set, not a failed start, before the fall.
+        for offset in stride(from: 4.0, through: 15.0, by: 1.0) {
+            _ = engine.process(fix(at: offset, speedKmh: 38))
+        }
 
         var exited: DetectionEvent?
-        for offset in stride(from: 4.0, through: 12.0, by: 1.0) {
+        for offset in stride(from: 16.0, through: 24.0, by: 1.0) {
             let events = engine.process(fix(at: offset, speedKmh: 1))
             if let event = events.first, event.code == DetectionCodes.inactive {
                 exited = event

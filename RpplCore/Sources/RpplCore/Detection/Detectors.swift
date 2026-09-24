@@ -65,6 +65,68 @@ public struct RideExitDetector: Detector {
     }
 }
 
+/// The fast `ride_exit` rule waits for <=4 km/h, but letting go of the cable leaves the rider
+/// swimming or coasting in the 4-8 km/h band for tens of seconds while the cable runs ~31 km/h.
+/// This ends the set where the rider left the cable, so the decay tail is not counted as riding.
+public struct RideExitOffCableDetector: Detector {
+    public let id = "ride_exit_offcable"
+
+    public init() {}
+
+    public func evaluate(_ ctx: DetectionEvalContext) -> DetectionSignal? {
+        guard ctx.currentCode == DetectionCodes.riding else { return nil }
+        guard ctx.speedUsable else { return nil }
+        guard let held = ctx.held(.offCable), held >= ctx.thresholds.offCableExitHold else {
+            return nil
+        }
+        let reason =
+            "ride_exit_offcable speed=\(ctx.speedKmhText())<=\(ctx.fmt(ctx.thresholds.offCableSpeedKmh))"
+            + " for \(ctx.fmt(held))s from=riding"
+        return DetectionSignal(kind: .exitRideOffCable, detectorId: id, reason: reason)
+    }
+}
+
+/// What the engine knows about the set that is currently open.
+public struct DetectionSetContext: Sendable, Equatable {
+    /// Id of the `ride_enter` event that opened the set — what a revocation supersedes.
+    public var enterEventId: String
+    public var startedAt: Date
+    /// Seconds at or above `rideEnterSpeedKmh` inside the set, seeded with the enter hold.
+    public var cableEvidence: TimeInterval
+
+    public init(enterEventId: String, startedAt: Date, cableEvidence: TimeInterval) {
+        self.enterEventId = enterEventId
+        self.startedAt = startedAt
+        self.cableEvidence = cableEvidence
+    }
+}
+
+/// Decides whether a set that just ended was never a set: a dock GPS spike, or a yank that never
+/// became riding. Not a `Detector` — it judges a set at the moment it closes rather than
+/// proposing a transition, and the engine turns its verdict into a revocation of the enter.
+public struct FailedStartRule: Sendable {
+    public static let id = "failed_start"
+
+    public init() {}
+
+    /// Returns a reason when the set should be revoked, `nil` when it stands.
+    public func evaluate(
+        set: DetectionSetContext,
+        endedAt: Date,
+        thresholds: DetectionThresholds
+    ) -> String? {
+        let age = endedAt.timeIntervalSince(set.startedAt)
+        guard age < thresholds.failedStartMaxAge else { return nil }
+        guard set.cableEvidence < thresholds.failedStartCableEvidence else { return nil }
+        return "failed_start age=\(fmt(age))s<\(fmt(thresholds.failedStartMaxAge))s"
+            + " cable=\(fmt(set.cableEvidence))s<\(fmt(thresholds.failedStartCableEvidence))s"
+    }
+
+    private func fmt(_ value: Double) -> String {
+        String(format: "%.1f", value)
+    }
+}
+
 public struct GpsGapDetector: Detector {
     public let id = "gps_gap"
 
