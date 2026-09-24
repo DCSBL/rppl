@@ -9,6 +9,7 @@ struct ParksView: View {
     @State private var catalog = SessionCatalog()
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var showMap = false
 
     private var visits: [String: Int] {
         let centers = catalog.entries.compactMap(\.center)
@@ -25,6 +26,24 @@ struct ParksView: View {
         )
     }
 
+    private enum SortChoice: Hashable {
+        case sort(ParkListSort)
+        case map
+    }
+
+    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort selected.
+    private var sortChoice: Binding<SortChoice> {
+        Binding(
+            get: { .sort(sort) },
+            set: {
+                switch $0 {
+                case .sort(let value): sort = value
+                case .map: showMap = true
+                }
+            }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -33,9 +52,10 @@ struct ParksView: View {
                         Text("Parks")
                             .font(.largeTitle.bold())
                             .foregroundStyle(Color.rpplText)
-                        Picker("Sort", selection: $sort) {
-                            Text("Nearby").tag(ParkListSort.distance)
-                            Text("Most visited").tag(ParkListSort.visits)
+                        Picker("Sort", selection: sortChoice) {
+                            Text("Nearby").tag(SortChoice.sort(.distance))
+                            Text("Most visited").tag(SortChoice.sort(.visits))
+                            Text("View on map").tag(SortChoice.map)
                         }
                         .pickerStyle(.segmented)
                     }
@@ -74,6 +94,9 @@ struct ParksView: View {
             }
         }
         .tint(Color.rpplAccent)
+        .fullScreenCover(isPresented: $showMap) {
+            ParksMapView(parks: parks)
+        }
         .task {
             parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
             location.start()
