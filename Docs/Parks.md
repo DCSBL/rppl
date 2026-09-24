@@ -63,6 +63,7 @@ Rules and slots share optional selectors, all of which must match a date:
 | `months` | Month numbers 1–12 |
 | `days` | `mon`…`sun`, `weekdays`, `weekend`, `daily` |
 | `from` / `until` | Inclusive `yyyy-MM-dd`, for a change of hours from or until a date |
+| `dates` | Explicit `yyyy-MM-dd` dates (holidays, special days); listed under their month |
 
 - A park with **rules only** is drop-in: the Today section shows the open windows.
 - A park with **slots only** offers each slot on the days it matches.
@@ -74,7 +75,7 @@ Rules and slots share optional selectors, all of which must match a date:
 
 - The opening-times card collapses rules into one entry per month, listing the specialities (weekend hours, beginner hour, …) as lines under it. The current month is highlighted.
 - Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
-- Special days (holidays) are not modelled yet. They will become a further selector on rules (for example explicit dates) and appear as extra lines in the month entries.
+- Special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. There is no closed-day rule or UI for them yet.
 - Cables are called "full size" (`cw`/`ccw`) or "2.0" (`2d`). The map shows an arrow on each start point, pointing towards the next traced point.
 
 ### Cable length

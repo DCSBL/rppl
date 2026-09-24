@@ -9,6 +9,8 @@ public protocol ParkDateSelector {
     /// Inclusive `yyyy-MM-dd` bounds, e.g. for a seasonal change of hours.
     var from: String? { get }
     var until: String? { get }
+    /// Explicit `yyyy-MM-dd` dates (holidays, special days).
+    var dates: [String]? { get }
 }
 
 public struct ParkOpeningRule: Codable, Equatable, Sendable, ParkDateSelector {
@@ -17,6 +19,7 @@ public struct ParkOpeningRule: Codable, Equatable, Sendable, ParkDateSelector {
     public var days: [String]?
     public var from: String?
     public var until: String?
+    public var dates: [String]?
     /// `HH:mm`
     public var open: String
     public var close: String
@@ -28,6 +31,7 @@ public struct ParkOpeningRule: Codable, Equatable, Sendable, ParkDateSelector {
         days: [String]? = nil,
         from: String? = nil,
         until: String? = nil,
+        dates: [String]? = nil,
         open: String,
         close: String,
         note: String? = nil
@@ -37,6 +41,7 @@ public struct ParkOpeningRule: Codable, Equatable, Sendable, ParkDateSelector {
         self.days = days
         self.from = from
         self.until = until
+        self.dates = dates
         self.open = open
         self.close = close
         self.note = note
@@ -51,6 +56,7 @@ public struct ParkSlot: Codable, Equatable, Sendable, ParkDateSelector {
     public var days: [String]?
     public var from: String?
     public var until: String?
+    public var dates: [String]?
     public var start: String
     public var end: String
 
@@ -61,6 +67,7 @@ public struct ParkSlot: Codable, Equatable, Sendable, ParkDateSelector {
         days: [String]? = nil,
         from: String? = nil,
         until: String? = nil,
+        dates: [String]? = nil,
         start: String,
         end: String
     ) {
@@ -70,6 +77,7 @@ public struct ParkSlot: Codable, Equatable, Sendable, ParkDateSelector {
         self.days = days
         self.from = from
         self.until = until
+        self.dates = dates
         self.start = start
         self.end = end
     }
@@ -135,6 +143,7 @@ public struct ParkScheduleLine: Equatable, Sendable {
     public var days: [String]?
     public var from: String?
     public var until: String?
+    public var dates: [String]?
     public var open: String
     public var close: String
     public var note: String?
@@ -159,11 +168,14 @@ public enum ParkSchedule {
                 days: rule.days,
                 from: rule.from,
                 until: rule.until,
+                dates: rule.dates,
                 open: rule.open,
                 close: rule.close,
                 note: rule.note
             )
-            let keys: [Int?] = rule.months.map { $0.map { Optional($0) } } ?? [nil]
+            let dateMonths = Set((rule.dates ?? []).compactMap { Int($0.split(separator: "-").dropFirst().first ?? "") })
+            let keys: [Int?] = rule.months.map { $0.map { Optional($0) } }
+                ?? (dateMonths.isEmpty ? [nil] : dateMonths.sorted().map { Optional($0) })
             for month in keys {
                 byMonth[month, default: []].append(line)
             }
@@ -194,6 +206,7 @@ public enum ParkSchedule {
             if let days = selector.days, !days.contains(where: { dayToken($0, matches: weekday) }) { return false }
             if let from = selector.from, isoDate < from { return false }
             if let until = selector.until, isoDate > until { return false }
+            if let dates = selector.dates, !dates.contains(isoDate) { return false }
             return true
         }
 

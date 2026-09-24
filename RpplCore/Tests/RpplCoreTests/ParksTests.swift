@@ -103,6 +103,24 @@ struct ParksTests {
         #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).lastUpdated == nil)
     }
 
+    @Test func specialDatesOverrideAndGroupUnderTheirMonth() throws {
+        let yaml = """
+        version: 1
+        id: holiday
+        name: Holiday
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          rules:
+            - { label: Easter, dates: ["2026-04-05", "2026-04-06"], open: "12:30", close: "17:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(park.schedule(on: date("2026-04-05")).isOpen)
+        #expect(park.schedule(on: date("2026-04-07")).isOpen == false)
+        let months = ParkSchedule.months(for: park.opening)
+        #expect(months.map(\.month) == [4])
+        #expect(months.first?.lines.first?.dates == ["2026-04-05", "2026-04-06"])
+    }
+
     @Test func project7JulyOpensAllBlocks() throws {
         let day = try project7().schedule(on: date("2026-07-15"))
         #expect(day.availableSlots.count == 7)

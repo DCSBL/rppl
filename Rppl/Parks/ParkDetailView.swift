@@ -435,6 +435,7 @@ struct ParkDetailView: View {
         if let label = line.label, !ParkFormatting.isMonthLabel(label) { parts.append(label) }
         if let from = line.from { parts.append(String(localized: "from \(from)")) }
         if let until = line.until { parts.append(String(localized: "until \(until)")) }
+        if let dates = line.dates { parts.append(dates.joined(separator: ", ")) }
         return parts.joined(separator: " · ")
     }
 }
