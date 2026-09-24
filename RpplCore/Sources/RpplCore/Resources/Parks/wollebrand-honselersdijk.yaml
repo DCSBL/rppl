@@ -5,13 +5,16 @@ updated_at: 2026-09-24
 history:
   - date: 2026-09-24
     description: initial
+  - date: 2026-09-24
+    description: add cable trace and refine dock location
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
 timezone: Europe/Amsterdam
+# Dock.
 location:
-  lat: 51.995419
-  lon: 4.24197
+  lat: 51.99278189793896
+  lon: 4.239882979511977
 
 phone: 0174 - 64 11 44
 email: info@kabelskibaan.nl
@@ -22,7 +25,15 @@ links:
 
 cables:
   - name: Cable
+    direction: cw
     description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
+    # Points are listed in travel order, first point is the start.
+    points:
+      - { lat: 51.99260583846942, lon: 4.239754339256239 }
+      - { lat: 51.9916676524598, lon: 4.242258597378462 }
+      - { lat: 51.99110265802685, lon: 4.242111288077519 }
+      - { lat: 51.99171948645172, lon: 4.238748427146507 }
+      - { lat: 51.99231557307252, lon: 4.238651623891362 }
 
 # No structured schedule captured (source blocked from this environment); verify
 # current hours, blocks and reservation rules on the website before relying on this.
