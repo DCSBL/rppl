@@ -200,7 +200,7 @@ final class ParksWeatherProvider {
             cache[park.id] = (Date(), result)
             return result
         } catch {
-            WakeLog.debug(.ui, "park weather: \(error.localizedDescription)")
+            WakeLog.error(.ui, "park weather: \(error)")
             return nil
         }
     }

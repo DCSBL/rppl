@@ -123,13 +123,18 @@ struct ParksTests {
 
     @Test func bundledDownUnderDecodesWithoutOpeningBlock() throws {
         let park = try #require(ParkCatalog.loadBundled().first { $0.id == "downunder-nieuwegein" })
-        #expect(park.opening == nil)
         #expect(park.cables?.count == 2)
         #expect(park.cables?.first?.direction == .counterClockwise)
         #expect(park.cables?.first?.effectiveLengthM == 720)
         #expect(park.cables?.first?.points?.count == 5)
         #expect(park.prices?.count == 8)
         #expect(park.links?.contains { $0.kind == "booking" } == true)
+        // 2026-09-24 Thursday 17-20, 09-23 Wednesday 15-20, 09-28 Monday closed, 09-26 Saturday 12-19.
+        #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
+        #expect(park.schedule(on: date("2026-09-23")).availableSlots.count == 5)
+        #expect(park.schedule(on: date("2026-09-28")).isOpen == false)
+        #expect(park.schedule(on: date("2026-09-26")).availableSlots.count == 7)
+        #expect(park.schedule(on: date("2026-07-14")).availableSlots.count == 8)
     }
 
     @Test func project7JulyOpensAllBlocks() throws {
