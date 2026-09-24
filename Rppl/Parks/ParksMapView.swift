@@ -2,16 +2,20 @@ import MapKit
 import RpplCore
 import SwiftUI
 
-/// Full-screen map of all parks: red pins with names, place search, tap a pin for the park detail.
+/// Map of all parks, shown in place of the parks list: red pins with names, place search,
+/// tap a pin for the park detail.
 struct ParksMapView: View {
     let parks: [Park]
+    let location: ParksLocationProvider
+    let onClose: () -> Void
 
-    @Environment(\.dismiss) private var dismiss
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedID: String?
     @State private var detailPark: Park?
     @State private var query = ""
     @State private var searchFailed = false
+    @State private var mapStyleChoice: ParksMapStyleChoice = .standard
+    @State private var searchPin: ParksSearchPin?
 
     private var parkMatches: [Park] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -20,54 +24,110 @@ struct ParksMapView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Map(position: $position, selection: $selectedID) {
-                ForEach(parks) { park in
-                    Marker(
-                        park.name,
-                        coordinate: CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
-                    )
-                    .tint(.red)
-                    .tag(park.id)
+        Map(position: $position, selection: $selectedID) {
+            ForEach(parks) { park in
+                Marker(
+                    park.name,
+                    coordinate: CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
+                )
+                .tint(.red)
+                .tag(park.id)
+            }
+            if let searchPin {
+                Marker(searchPin.name, systemImage: "magnifyingglass", coordinate: searchPin.coordinate)
+                    .tint(.blue)
+            }
+            UserAnnotation()
+        }
+        .mapStyle(mapStyleChoice.mapStyle)
+        .mapControls {
+            MapCompass()
+            MapPitchToggle()
+            MapScaleView()
+        }
+        .overlay(alignment: .topTrailing) {
+            VStack(spacing: 10) {
+                Button {
+                    onClose()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 40, height: 40)
+                        .background(.thinMaterial, in: Circle())
                 }
-            }
-            .mapStyle(.standard)
-            .mapControls {
-                MapCompass()
-                MapScaleView()
-            }
-            .ignoresSafeArea(edges: .bottom)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(String(localized: "Close"), systemImage: "xmark") { dismiss() }
-                }
-            }
-            .searchable(text: $query, prompt: Text("Search places"))
-            .searchSuggestions {
-                ForEach(parkMatches) { park in
-                    Button {
-                        query = ""
-                        detailPark = park
-                    } label: {
-                        Label(park.name, systemImage: "mappin")
+                .accessibilityLabel(Text("Close map"))
+
+                Menu {
+                    ForEach(ParksMapStyleChoice.allCases) { choice in
+                        Button {
+                            mapStyleChoice = choice
+                        } label: {
+                            Label(choice.title, systemImage: choice.symbol)
+                            if choice == mapStyleChoice {
+                                Image(systemName: "checkmark")
+                            }
+                        }
                     }
+                } label: {
+                    Image(systemName: mapStyleChoice.symbol)
+                        .font(.body.weight(.semibold))
+                        .frame(width: 40, height: 40)
+                        .background(.thinMaterial, in: Circle())
                 }
+                .accessibilityLabel(Text("Map style"))
+
+                Button {
+                    focusOnUserLocation()
+                } label: {
+                    Image(systemName: "location.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 40, height: 40)
+                        .background(.thinMaterial, in: Circle())
+                }
+                .accessibilityLabel(Text("Here"))
             }
-            .onSubmit(of: .search) { Task { await search() } }
-            .onChange(of: selectedID) { _, id in
-                guard let id, let park = parks.first(where: { $0.id == id }) else { return }
-                selectedID = nil
-                detailPark = park
-            }
-            .navigationDestination(item: $detailPark) { park in
-                ParkDetailContainer(park: park)
-            }
-            .alert(Text("No place found"), isPresented: $searchFailed) {
-                Button("OK", role: .cancel) {}
+            .foregroundStyle(Color.rpplText)
+            .padding(.top, 8)
+            .padding(.trailing, 12)
+        }
+        .ignoresSafeArea(edges: .bottom)
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
+        .searchSuggestions {
+            ForEach(parkMatches) { park in
+                Button {
+                    query = ""
+                    detailPark = park
+                } label: {
+                    Label(park.name, systemImage: "mappin")
+                }
             }
         }
-        .tint(Color.rpplAccent)
+        .onSubmit(of: .search) { Task { await search() } }
+        .onChange(of: selectedID) { _, id in
+            guard let id, let park = parks.first(where: { $0.id == id }) else { return }
+            selectedID = nil
+            detailPark = park
+        }
+        .navigationDestination(item: $detailPark) { park in
+            ParkDetailContainer(park: park)
+        }
+        .alert(Text("No place found"), isPresented: $searchFailed) {
+            Button("OK", role: .cancel) {}
+        }
+        .onAppear { location.refresh() }
+    }
+
+    private func focusOnUserLocation() {
+        location.refresh()
+        guard let coordinate = location.coordinate else { return }
+        withAnimation {
+            position = .camera(
+                MapCamera(
+                    centerCoordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon),
+                    distance: 5_000
+                )
+            )
+        }
     }
 
     /// Countries and towns only: address results without a street.
@@ -85,8 +145,46 @@ struct ParksMapView: View {
         }
         let center = place.placemark.coordinate
         let region = (place.placemark.region as? CLCircularRegion)?.radius ?? 20_000
+        searchPin = ParksSearchPin(name: place.name ?? text, coordinate: center)
         withAnimation {
             position = .camera(MapCamera(centerCoordinate: center, distance: max(region * 3, 5_000)))
+        }
+    }
+}
+
+private struct ParksSearchPin {
+    let name: String
+    let coordinate: CLLocationCoordinate2D
+}
+
+private enum ParksMapStyleChoice: String, CaseIterable, Identifiable {
+    case standard
+    case satellite
+    case hybrid
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .standard: String(localized: "Standard")
+        case .satellite: String(localized: "Satellite")
+        case .hybrid: String(localized: "Hybrid")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .standard: "map"
+        case .satellite: "globe.americas.fill"
+        case .hybrid: "square.stack.3d.up.fill"
+        }
+    }
+
+    var mapStyle: MapStyle {
+        switch self {
+        case .standard: .standard
+        case .satellite: .imagery
+        case .hybrid: .hybrid
         }
     }
 }

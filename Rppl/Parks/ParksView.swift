@@ -53,80 +53,90 @@ struct ParksView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Parks")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(Color.rpplText)
-                            Spacer()
-                            if editorEnabled {
-                                Button {
-                                    showEditor = true
-                                } label: {
-                                    Image(systemName: "plus")
-                                        .font(.title3.weight(.semibold))
-                                        .frame(width: 44, height: 44)
+            Group {
+                if showMap {
+                    ParksMapView(parks: parks, location: location, onClose: { showMap = false })
+                } else {
+                    List {
+                        Section {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text("Parks")
+                                        .font(.largeTitle.bold())
+                                        .foregroundStyle(Color.rpplText)
+                                    Spacer()
+                                    if editorEnabled {
+                                        Button {
+                                            showEditor = true
+                                        } label: {
+                                            Image(systemName: "plus")
+                                                .font(.title3.weight(.semibold))
+                                                .frame(width: 44, height: 44)
+                                        }
+                                        .buttonStyle(.borderless)
+                                        .accessibilityLabel(Text("Add park"))
+                                    }
                                 }
-                                .buttonStyle(.borderless)
-                                .accessibilityLabel(Text("Add park"))
+                                Picker("Sort", selection: sortChoice) {
+                                    Text("Nearby").tag(SortChoice.sort(.distance))
+                                    Text("Most visited").tag(SortChoice.sort(.visits))
+                                    Text("View on map").tag(SortChoice.map)
+                                }
+                                .pickerStyle(.segmented)
+                            }
+                            .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+
+                        if sort == .distance, location.availability != .available {
+                            ParksLocationNeededCard(
+                                availability: location.availability,
+                                onRequestAccess: { location.refresh() },
+                                onOpenSettings: {
+                                    if let url = ParkNavigation.appSettingsURL { openURL(url) }
+                                }
+                            )
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        } else if parks.isEmpty {
+                            Text("No parks yet")
+                                .foregroundStyle(Color.rpplMuted)
+                                .listRowBackground(Color.clear)
+                        } else if sortedParks.isEmpty {
+                            Text("No parks found")
+                                .foregroundStyle(Color.rpplMuted)
+                                .listRowBackground(Color.clear)
+                        } else {
+                            let counts = visits
+                            ForEach(sortedParks) { park in
+                                ParkCard(
+                                    park: park,
+                                    visitCount: counts[park.id] ?? 0,
+                                    distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
+                                    isFavorite: favorites.contains(park.id),
+                                    entry: store.entry(id: park.id)
+                                )
+                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                             }
                         }
-                        Picker("Sort", selection: sortChoice) {
-                            Text("Nearby").tag(SortChoice.sort(.distance))
-                            Text("Most visited").tag(SortChoice.sort(.visits))
-                            Text("View on map").tag(SortChoice.map)
-                        }
-                        .pickerStyle(.segmented)
                     }
-                    .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                }
-
-                if sort == .distance, location.availability != .available {
-                    ParksLocationNeededCard(
-                        availability: location.availability,
-                        onRequestAccess: { location.refresh() },
-                        onOpenSettings: {
-                            if let url = ParkNavigation.appSettingsURL { openURL(url) }
-                        }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+                    .contentMargins(.top, 8, for: .scrollContent)
+                    .searchable(
+                        text: $searchText,
+                        placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: Text("Search parks")
                     )
-                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                } else if parks.isEmpty {
-                    Text("No parks yet")
-                        .foregroundStyle(Color.rpplMuted)
-                        .listRowBackground(Color.clear)
-                } else if sortedParks.isEmpty {
-                    Text("No parks found")
-                        .foregroundStyle(Color.rpplMuted)
-                        .listRowBackground(Color.clear)
-                } else {
-                    let counts = visits
-                    ForEach(sortedParks) { park in
-                        ParkCard(
-                            park: park,
-                            visitCount: counts[park.id] ?? 0,
-                            distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
-                            isFavorite: favorites.contains(park.id),
-                            entry: store.entry(id: park.id)
-                        )
-                        .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    }
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
-            .contentMargins(.top, 8, for: .scrollContent)
             .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search parks"))
             .navigationDestination(for: Park.self) { park in
                 ParkDetailContainer(park: park)
             }
@@ -134,9 +144,6 @@ struct ParksView: View {
         .tint(Color.rpplAccent)
         .sheet(isPresented: $showEditor) {
             ParkEditorView(original: nil, onSaved: {})
-        }
-        .fullScreenCover(isPresented: $showMap) {
-            ParksMapView(parks: parks)
         }
         .task {
             store.reload()
