@@ -802,9 +802,13 @@ private struct SetDetailCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
                 if set.fallDetected {
-                    Label(LogbookFormatting.fallDetectedLabel(), systemImage: "figure.fall")
-                        .font(.caption)
-                        .foregroundStyle(.red)
+                    ParkChip(
+                        text: LogbookFormatting.fallDetectedLabel(),
+                        systemImage: "figure.fall",
+                        tint: .red,
+                        fill: Color.red.opacity(0.14)
+                    )
+                    .padding(.top, 2)
                 }
             }
 
