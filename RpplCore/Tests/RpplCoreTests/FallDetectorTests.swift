@@ -102,4 +102,143 @@ struct FallDetectorTests {
         ]
         #expect(!FallDetector.detectsFall(in: samples))
     }
+
+    // MARK: - Boundaries (default thresholds: minBase=15, minDrop=15, maxWindow=2.5,
+    // gpsBlackoutGap=3.0, gpsBlackoutResumeSpeedKmh=8)
+
+    @Test func defaultThresholdsMatchCalibratedValues() {
+        let thresholds = FallDetectionThresholds.default
+        #expect(thresholds.minBaseSpeedKmh == 15)
+        #expect(thresholds.minDropKmh == 15)
+        #expect(thresholds.maxWindow == 2.5)
+        #expect(thresholds.gpsBlackoutGap == 3.0)
+        #expect(thresholds.gpsBlackoutResumeSpeedKmh == 8)
+    }
+
+    @Test func dropExactlyAtThresholdFlags() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 1, speedKmh: 15)]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func dropJustBelowThresholdDoesNotFlag() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 1, speedKmh: 15.1)]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func baseExactlyAtMinSpeedFlags() {
+        let samples = [location(at: 0, speedKmh: 15), location(at: 1, speedKmh: 0)]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func baseJustBelowMinSpeedNeverFlagsRegardlessOfDropSize() {
+        let samples = [location(at: 0, speedKmh: 14.9), location(at: 1, speedKmh: 0)]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func windowExactlyAtMaxWindowFlags() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 2.5, speedKmh: 10)]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func blackoutGapExactlyAtThresholdFlags() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 3.0, speedKmh: 5)]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func blackoutGapJustBelowThresholdDoesNotFlag() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 2.9, speedKmh: 5)]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func resumeSpeedExactlyAtBlackoutThresholdFlags() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 4, speedKmh: 8)]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func resumeSpeedJustAboveBlackoutThresholdDoesNotFlag() {
+        let samples = [location(at: 0, speedKmh: 30), location(at: 4, speedKmh: 8.1)]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    // MARK: - Custom thresholds
+
+    @Test func customThresholdsCanTightenCliffRule() {
+        // A cliff that qualifies under defaults should not qualify once minDropKmh is raised
+        // past it.
+        let samples = [location(at: 0, speedKmh: 30), location(at: 1, speedKmh: 10)]
+        #expect(FallDetector.detectsFall(in: samples))
+        let strict = FallDetectionThresholds(minDropKmh: 25)
+        #expect(!FallDetector.detectsFall(in: samples, thresholds: strict))
+    }
+
+    @Test func customThresholdsCanLoosenBlackoutRule() {
+        // 2.7 s: past the default cliff window (2.5 s) and under the default blackout bar
+        // (3.0 s), so neither rule fires by default. Lowering gpsBlackoutGap alone (leaving
+        // maxWindow untouched) should flag it.
+        let samples = [location(at: 0, speedKmh: 30), location(at: 2.7, speedKmh: 5)]
+        #expect(!FallDetector.detectsFall(in: samples))
+        let sensitive = FallDetectionThresholds(gpsBlackoutGap: 2.0)
+        #expect(FallDetector.detectsFall(in: samples, thresholds: sensitive))
+    }
+
+    // MARK: - GPS noise interaction (same filter as LocationSpeedStats)
+
+    @Test func ignoresImplausibleSpeedSpike() {
+        // A single 150 km/h reading (> maxPlausibleSpeedKmh) is filtered out entirely, so it
+        // cannot manufacture a cliff against the real cable-speed readings around it.
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: 29),
+            location(at: 2, speedKmh: 150),
+            location(at: 3, speedKmh: 27),
+        ]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func ignoresSpeedJumpGlitch() {
+        // A single uncorroborated jump (>= maxSpeedJumpKmh from the last usable sample) is
+        // rejected by GpsSignalFilter. Without that filter, the glitch itself (60) would become
+        // a "base" and the next real reading (28) would read as a 32 km/h cliff.
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: 29),
+            location(at: 2, speedKmh: 60),
+            location(at: 3, speedKmh: 28),
+        ]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    // MARK: - Input shape
+
+    @Test func unsortedInputIsSortedBeforeAnalysis() {
+        let samples = [
+            location(at: 1, speedKmh: 30),
+            location(at: 0, speedKmh: 29),
+            location(at: 2, speedKmh: 5),
+        ]
+        #expect(FallDetector.detectsFall(in: samples.shuffled()))
+    }
+
+    @Test func nilSpeedSamplesAreIgnoredNotTreatedAsAStop() {
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: nil),
+            location(at: 2, speedKmh: 29),
+        ]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    /// A dip that doesn't qualify on its own, a recovery back to cable speed, then a real fall —
+    /// the scan must not give up after the first non-qualifying base and must still find the
+    /// later cliff.
+    @Test func detectsALaterCliffAfterANonQualifyingDip() {
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: 20), // dip of 8 — under threshold, not a cliff
+            location(at: 2, speedKmh: 27), // recovers to cable speed
+            location(at: 3, speedKmh: 26),
+            location(at: 4, speedKmh: 4), // the real fall
+        ]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
 }

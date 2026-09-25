@@ -130,6 +130,55 @@ struct SessionTimelineRebaseTests {
         #expect(shifted.locations[0].timestamp == now)
     }
 
+    /// Regression: the rebased copy of a derived set must keep `fallDetected` — an earlier version
+    /// of `shift(_ set:by:)` rebuilt `SetSegmentStats` without threading it through, silently
+    /// resetting every set to `false` on rebase.
+    @Test func rebasePreservesFallDetectedOnDerivedSets() {
+        let start = Date(timeIntervalSince1970: 1_000_000)
+        let end = start.addingTimeInterval(600)
+        let now = Date(timeIntervalSince1970: 2_000_000)
+
+        let flaggedSet = SetSegmentStats(
+            index: 1,
+            startedAt: start,
+            endedAt: end,
+            duration: 600,
+            distanceMeters: 400,
+            fallDetected: true
+        )
+        let stats = SessionStats(
+            startedAt: start,
+            endedAt: end,
+            totalDuration: 600,
+            totalDistanceMeters: 400,
+            activeEnergyKilocalories: nil,
+            setCount: 1,
+            ridingDuration: 600,
+            inactiveDuration: 0,
+            ridingInactiveRatio: 1,
+            sets: [flaggedSet]
+        )
+        let package = SessionTransferPackage(
+            manifest: SessionManifest(
+                testerId: "t",
+                appVersion: "1",
+                buildNumber: "1",
+                watchModel: "Watch7,1",
+                systemVersion: "26.0",
+                startedAt: start,
+                endedAt: end
+            ),
+            locations: [],
+            health: [],
+            derived: DerivedSessionView(stats: stats)
+        )
+
+        let shifted = SessionTimelineRebase.package(package, soEndedAt: now)
+
+        #expect(shifted.derived?.stats.sets.first?.fallDetected == true)
+        #expect(shifted.derived?.stats.sets.first?.startedAt == now.addingTimeInterval(-600))
+    }
+
     @Test func loadExampleRebasesBeforeBuildingStats() throws {
         let start = Date(timeIntervalSince1970: 1_000)
         let end = start.addingTimeInterval(3_600)

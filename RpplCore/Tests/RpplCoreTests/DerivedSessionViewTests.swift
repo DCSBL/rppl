@@ -213,6 +213,50 @@ struct DerivedSessionViewTests {
         #expect(object?["setCount"] == nil)
     }
 
+    @Test func setSegmentStatsDefaultsFallDetectedFalseWhenMissing() throws {
+        // Pre-FallDetector derived JSON never wrote this key — must decode as false, not crash.
+        let json = """
+        {
+          "index": 0,
+          "startedAt": "2024-01-01T00:00:00Z",
+          "endedAt": "2024-01-01T00:10:00Z",
+          "duration": 600,
+          "distanceMeters": 1200,
+          "lapCount": 0,
+          "highlights": []
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let set = try decoder.decode(SetSegmentStats.self, from: Data(json.utf8))
+        #expect(!set.fallDetected)
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let encoded = try encoder.encode(set)
+        let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        #expect(object?["fallDetected"] as? Bool == false)
+    }
+
+    @Test func setSegmentStatsRoundTripsFallDetectedTrue() throws {
+        let set = SetSegmentStats(
+            index: 1,
+            startedAt: Date(timeIntervalSince1970: 0),
+            endedAt: Date(timeIntervalSince1970: 60),
+            duration: 60,
+            distanceMeters: 300,
+            fallDetected: true
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let data = try encoder.encode(set)
+        let decoded = try decoder.decode(SetSegmentStats.self, from: data)
+        #expect(decoded == set)
+        #expect(decoded.fallDetected)
+    }
+
     @Test func sessionStatsForwardMigratesRideCountAndRides() throws {
         let json = """
         {

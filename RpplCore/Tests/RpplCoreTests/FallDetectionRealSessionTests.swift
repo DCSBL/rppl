@@ -55,6 +55,16 @@ struct FallDetectionRealSessionTests {
         let set1 = try #require(fixture.sets.first { $0.index == 1 })
         #expect(FallDetector.detectsFall(in: set1.locations))
     }
+
+    /// Whole-session sanity check: 7 of the 10 labeled sets are real falls (one via the blackout
+    /// rule, six via plain cliffs), 2 are controlled stops. Catches an accidental threshold
+    /// change that flips the overall balance even if individual per-set tests still pass.
+    @Test func sevenOfTenSetsAreFlaggedAsFalls() throws {
+        let fixture = try Self.loadFixture()
+        let flaggedCount = fixture.sets.filter { FallDetector.detectsFall(in: $0.locations) }.count
+        #expect(flaggedCount == 7)
+        #expect(fixture.sets.count == 10)
+    }
 }
 
 private enum FixtureError: Error {

@@ -157,6 +157,41 @@ struct HighlightAssignerTests {
         #expect(map["a"]?.contains(.mostFalls) != true)
         #expect(map["b"]?.contains(.mostFalls) != true)
     }
+
+    @Test func sessionNoMostFallsWhenAllZero() {
+        // Zero falls everywhere is not a record — same "all equal" rule as the other badges.
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 900, lapCount: 3),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 900, lapCount: 3),
+        ])
+        #expect(map["a"]?.contains(.mostFalls) != true)
+        #expect(map["b"]?.contains(.mostFalls) != true)
+    }
+
+    /// mostFalls is independent of the other badges — a session can win both at once, unlike
+    /// longest/longestTime which hide one another.
+    @Test func sessionCanWinLongestAndMostFallsTogether() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 2000, lapCount: 5, fallCount: 3),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1000, lapCount: 12, fallCount: 1),
+        ])
+        #expect(map["a"] == [.longest, .mostFalls])
+        #expect(map["b"] == [.mostLaps])
+    }
+
+    @Test func mostFallsOrdersLastInSessionBadges() {
+        #expect(HighlightAssigner.sessionOrder == [.longest, .mostWaterTime, .mostLaps, .mostFalls])
+    }
+
+    @Test func assignSetHighlightsPreservesFallDetectedFlag() {
+        var flagged = set(index: 1, duration: 60, distance: 500, speed: 30)
+        flagged.fallDetected = true
+        let clean = set(index: 2, duration: 90, distance: 900, speed: 25)
+
+        let result = HighlightAssigner.assignSetHighlights([flagged, clean])
+        #expect(result[0].fallDetected)
+        #expect(!result[1].fallDetected)
+    }
 }
 
 @Suite("LocationSpeedStats.sustained")
