@@ -186,6 +186,28 @@ public enum ParkListSort: String, Sendable, CaseIterable {
     case visits
 }
 
+/// Parks list/map filters. Every field cleared (`nil` / empty / `false`) means "show everything",
+/// including parks that are closed — the "Open" filter only narrows the list once a date is picked.
+public struct ParkFilters: Equatable, Sendable {
+    public var openOnDate: Date?
+    public var cableDirections: Set<ParkCableDirection>
+    public var favoritesOnly: Bool
+
+    public init(
+        openOnDate: Date? = nil,
+        cableDirections: Set<ParkCableDirection> = [],
+        favoritesOnly: Bool = false
+    ) {
+        self.openOnDate = openOnDate
+        self.cableDirections = cableDirections
+        self.favoritesOnly = favoritesOnly
+    }
+
+    public var isActive: Bool {
+        openOnDate != nil || !cableDirections.isEmpty || favoritesOnly
+    }
+}
+
 public enum ParkListing {
     /// A session counts as a visit when its center is this close to the park pin or a traced cable point.
     public static let visitRadiusMeters = 750.0
@@ -220,6 +242,28 @@ public enum ParkListing {
             if visits > 0 { counts[park.id] = visits }
         }
         return counts
+    }
+
+    /// Applies the Open/Cable/Favourites filters. "Open" checks the picked date's own schedule
+    /// (not the current time of day), so a future date works the same as today.
+    public static func filtered(
+        _ parks: [Park],
+        favorites: Set<String>,
+        filters: ParkFilters
+    ) -> [Park] {
+        guard filters.isActive else { return parks }
+        return parks.filter { park in
+            if filters.favoritesOnly, !favorites.contains(park.id) { return false }
+            if !filters.cableDirections.isEmpty {
+                let directions = Set((park.cables ?? []).compactMap(\.direction))
+                if directions.isDisjoint(with: filters.cableDirections) { return false }
+            }
+            if let openOnDate = filters.openOnDate {
+                let schedule = ParkSchedule.day(for: park.opening, on: openOnDate, timeZone: park.resolvedTimeZone)
+                if !schedule.isOpen { return false }
+            }
+            return true
+        }
     }
 
     /// Favorites first, then by the chosen sort. Distance sort without a fix falls back to name.

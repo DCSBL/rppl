@@ -228,14 +228,15 @@ struct ParksTests {
         #expect(park.openStatus(at: date("2026-09-24", hour: 10)) == .unknown)
     }
 
-    @Test func bundledWollebrandHasUnknownHours() throws {
+    @Test func bundledWollebrandHasSeasonalHours() throws {
         let park = ParkCatalog.loadBundled().first { $0.id == "wollebrand-honselersdijk" }
         let park2 = try #require(park)
         #expect(park2.opening?.slots?.count == 6)
+        // Friday 25 September 2026: rule is wed/fri 15:30-20:00.
         let day = park2.schedule(on: date("2026-09-25"))
-        #expect(day.isScheduleKnown == false)
-        #expect(day.isOpen == false)
-        #expect(park2.openStatus(at: date("2026-09-25", hour: 15)) == .unknown)
+        #expect(day.isScheduleKnown == true)
+        #expect(day.isOpen == true)
+        #expect(park2.openStatus(at: date("2026-09-25", hour: 15)) == .openToday)
     }
 
     @Test func minimalParkAndOptionalCablePoints() throws {
@@ -335,6 +336,38 @@ struct ParksTests {
             sessionCenters: [me, ParkCoordinate(lat: 52.002, lon: 4.0), ParkCoordinate(lat: 10, lon: 10)]
         )
         #expect(counts == ["near": 2])
+    }
+
+    @Test func filteringByFavoritesCableAndOpenDate() throws {
+        let project7 = try project7()
+        let wetNWild = try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+        let parks = [project7, wetNWild]
+
+        #expect(ParkFilters().isActive == false)
+
+        let favoritesOnly = ParkFilters(favoritesOnly: true)
+        #expect(favoritesOnly.isActive)
+        #expect(ParkListing.filtered(parks, favorites: [], filters: favoritesOnly).isEmpty)
+        #expect(
+            ParkListing.filtered(parks, favorites: [wetNWild.id], filters: favoritesOnly).map(\.id)
+                == [wetNWild.id]
+        )
+
+        let ccwOnly = ParkFilters(cableDirections: [.counterClockwise])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: ccwOnly).map(\.id) == [wetNWild.id])
+        let cwOnly = ParkFilters(cableDirections: [.clockwise])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: cwOnly).map(\.id) == [project7.id])
+        let twoDOnly = ParkFilters(cableDirections: [.twoD])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: twoDOnly).isEmpty)
+
+        // 2026-09-24 (Thursday) project7 is open; 2026-10-07 both are closed.
+        let openThursday = ParkFilters(openOnDate: date("2026-09-24"))
+        #expect(ParkListing.filtered(parks, favorites: [], filters: openThursday).map(\.id).contains(project7.id))
+        let closedDay = ParkFilters(openOnDate: date("2026-10-07"))
+        #expect(ParkListing.filtered(parks, favorites: [], filters: closedDay).isEmpty)
+
+        // Cleared filters show everything, including closed parks.
+        #expect(ParkListing.filtered(parks, favorites: [], filters: ParkFilters()).map(\.id) == parks.map(\.id))
     }
 
     // MARK: - Editing

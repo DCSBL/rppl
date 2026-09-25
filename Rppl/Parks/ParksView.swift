@@ -14,6 +14,9 @@ struct ParksView: View {
     @State private var showMap = false
     @State private var showSearch = false
     @State private var searchText = ""
+    @State private var openFilterDate: Date?
+    @State private var cableFilter: Set<ParkCableDirection> = []
+    @State private var favoritesOnly = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -29,18 +32,34 @@ struct ParksView: View {
         return ParkListing.visitCounts(parks: parks, sessionCenters: centers)
     }
 
+    private var filters: ParkFilters {
+        ParkFilters(openOnDate: openFilterDate, cableDirections: cableFilter, favoritesOnly: favoritesOnly)
+    }
+
+    private var filteredParks: [Park] {
+        ParkListing.filtered(parks, favorites: favorites.ids, filters: filters)
+    }
+
     /// While searching, order is relevance (best hit first); otherwise the chosen sort.
     private var sortedParks: [Park] {
         if isSearching {
-            return ParkSearch.rank(parks, query: searchText)
+            return ParkSearch.rank(filteredParks, query: searchText)
         }
         return ParkListing.sorted(
-            parks,
+            filteredParks,
             favorites: favorites.ids,
             visits: visits,
             userLocation: location.coordinate,
             sort: sort
         )
+    }
+
+    private func clearFilters() {
+        withAnimation(.snappy(duration: 0.2)) {
+            openFilterDate = nil
+            cableFilter = []
+            favoritesOnly = false
+        }
     }
 
     private func toggleSearch() {
@@ -84,7 +103,8 @@ struct ParksView: View {
                                     .font(.title3.weight(.semibold))
                                     .frame(width: 44, height: 44)
                             }
-                            .buttonStyle(.borderless)
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.circle)
                             .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
                         }
                         if editorEnabled {
@@ -95,7 +115,8 @@ struct ParksView: View {
                                     .font(.title3.weight(.semibold))
                                     .frame(width: 44, height: 44)
                             }
-                            .buttonStyle(.borderless)
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.circle)
                             .accessibilityLabel(Text("Add park"))
                         }
                     }
@@ -110,13 +131,20 @@ struct ParksView: View {
                         }
                         .pickerStyle(.segmented)
                     }
+                    if !parks.isEmpty {
+                        ParksFilterBar(
+                            openDate: $openFilterDate,
+                            cableDirections: $cableFilter,
+                            favoritesOnly: $favoritesOnly
+                        )
+                    }
                 }
                 .padding(.horizontal, LogbookLayout.horizontalInset)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
 
                 if showMap {
-                    ParksMapView(parks: parks, location: location, onClose: { showMap = false })
+                    ParksMapView(parks: filteredParks, location: location, onClose: { showMap = false })
                 } else {
                     List {
                         if !isSearching, sort == .distance, location.availability != .available {
@@ -134,6 +162,11 @@ struct ParksView: View {
                             Text("No parks yet")
                                 .foregroundStyle(Color.rpplMuted)
                                 .listRowBackground(Color.clear)
+                        } else if filters.isActive, filteredParks.isEmpty {
+                            ParksNoMatchCard(onClear: clearFilters)
+                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                         } else if sortedParks.isEmpty {
                             Text("No parks found")
                                 .foregroundStyle(Color.rpplMuted)
@@ -186,6 +219,151 @@ struct ParksView: View {
 
 extension Park: Hashable {
     public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
+/// Filter pills row: Open (datepicker), Cable (multi-pick), Favourites only (toggle).
+private struct ParksFilterBar: View {
+    @Binding var openDate: Date?
+    @Binding var cableDirections: Set<ParkCableDirection>
+    @Binding var favoritesOnly: Bool
+    @State private var showOpenPicker = false
+
+    private static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoD]
+
+    private var openLabel: String {
+        guard let openDate else { return String(localized: "Open") }
+        if Calendar.current.isDateInToday(openDate) { return String(localized: "Open today") }
+        return openDate.formatted(.dateTime.month(.abbreviated).day())
+    }
+
+    private var cableLabel: String {
+        guard !cableDirections.isEmpty else { return String(localized: "Cable") }
+        return Self.cableChoices
+            .filter { cableDirections.contains($0) }
+            .map(Self.label(for:))
+            .joined(separator: ", ")
+    }
+
+    static func label(for direction: ParkCableDirection) -> String {
+        switch direction {
+        case .clockwise: String(localized: "CW")
+        case .counterClockwise: String(localized: "CCW")
+        case .twoD: String(localized: "2.0")
+        default: direction.rawValue.uppercased()
+        }
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                Button { showOpenPicker = true } label: {
+                    ParksFilterPillLabel(title: openLabel, isActive: openDate != nil, showsChevron: true)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showOpenPicker) {
+                    ParksOpenDatePicker(date: $openDate)
+                }
+
+                Menu {
+                    ForEach(Self.cableChoices, id: \.self) { direction in
+                        Button {
+                            if cableDirections.contains(direction) {
+                                cableDirections.remove(direction)
+                            } else {
+                                cableDirections.insert(direction)
+                            }
+                        } label: {
+                            Text(Self.label(for: direction))
+                            if cableDirections.contains(direction) {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                } label: {
+                    ParksFilterPillLabel(title: cableLabel, isActive: !cableDirections.isEmpty, showsChevron: true)
+                }
+
+                Button { favoritesOnly.toggle() } label: {
+                    ParksFilterPillLabel(
+                        title: String(localized: "Favourites"),
+                        isActive: favoritesOnly,
+                        systemImage: "star.fill"
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .scrollClipDisabled()
+    }
+}
+
+private struct ParksFilterPillLabel: View {
+    let title: String
+    let isActive: Bool
+    var systemImage: String?
+    var showsChevron = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if let systemImage {
+                Image(systemName: systemImage)
+            }
+            Text(title)
+            if showsChevron {
+                Image(systemName: "chevron.down")
+                    .font(.caption2)
+                    .opacity(0.6)
+            }
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(isActive ? .white : Color.rpplText)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(isActive ? Color.rpplAccent : Color.rpplFill, in: Capsule())
+    }
+}
+
+private struct ParksOpenDatePicker: View {
+    @Binding var date: Date?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            DatePicker(
+                "Date",
+                selection: Binding(get: { date ?? Date() }, set: { date = $0 }),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .labelsHidden()
+
+            HStack {
+                Button(String(localized: "Today")) { date = Date() }
+                Spacer()
+                Button(String(localized: "Clear"), role: .destructive) { date = nil }
+            }
+        }
+        .padding()
+        .frame(width: 320)
+        .presentationCompactAdaptation(.popover)
+    }
+}
+
+/// Shown in place of the parks list when active filters leave nothing to show.
+private struct ParksNoMatchCard: View {
+    let onClear: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("No parks with these filters")
+                .font(.headline)
+                .foregroundStyle(Color.rpplText)
+            Button(String(localized: "Clear filters"), action: onClear)
+                .buttonStyle(.borderedProminent)
+                .tint(Color.rpplAccent)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
 }
 
 private struct ParkSearchField: View {
