@@ -7,7 +7,9 @@ import SwiftUI
 struct ParksMapView: View {
     let parks: [Park]
     let location: ParksLocationProvider
-    let onClose: () -> Void
+    /// Height of the floating header above this view, so its own controls sit below it
+    /// instead of hiding underneath.
+    var topInset: CGFloat = 0
 
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedID: String?
@@ -41,51 +43,20 @@ struct ParksMapView: View {
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .mapControls {
+            MapUserLocationButton()
             MapCompass()
             MapPitchToggle()
             MapScaleView()
         }
-        .overlay(alignment: .topTrailing) {
-            VStack(spacing: 10) {
-                Button {
-                    onClose()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
-                }
-                .accessibilityLabel(Text("Close map"))
-
-                Button {
-                    usesSatellite.toggle()
-                } label: {
-                    Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
-                }
-                .accessibilityLabel(
-                    usesSatellite
-                        ? Text("Show standard map")
-                        : Text("Show satellite map")
-                )
-
-                Button {
-                    focusOnUserLocation()
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
-                }
-                .accessibilityLabel(Text("Here"))
-            }
-            .foregroundStyle(Color.rpplText)
-            .padding(.top, 8)
-            .padding(.trailing, 12)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            Color.clear.frame(height: topInset)
         }
-        .ignoresSafeArea(edges: .bottom)
+        .overlay(alignment: .topTrailing) {
+            MapStyleToggleButton(usesSatellite: $usesSatellite)
+                .padding(.top, topInset + 8)
+                .padding(.trailing, 12)
+        }
+        .ignoresSafeArea()
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
         .searchSuggestions {
             ForEach(parkMatches) { park in
@@ -110,19 +81,6 @@ struct ParksMapView: View {
             Button("OK", role: .cancel) {}
         }
         .onAppear { location.refresh() }
-    }
-
-    private func focusOnUserLocation() {
-        location.refresh()
-        guard let coordinate = location.coordinate else { return }
-        withAnimation {
-            position = .camera(
-                MapCamera(
-                    centerCoordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon),
-                    distance: 5_000
-                )
-            )
-        }
     }
 
     /// Countries and towns only: address results without a street.
@@ -150,4 +108,31 @@ struct ParksMapView: View {
 private struct ParksSearchPin {
     let name: String
     let coordinate: CLLocationCoordinate2D
+}
+
+/// Standard/satellite toggle, styled to match MapKit's own controls (MapCompass, MapPitchToggle)
+/// rather than the app's own button chrome.
+private struct MapStyleToggleButton: View {
+    @Binding var usesSatellite: Bool
+
+    var body: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
+        } label: {
+            Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.borderless)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(.separator, lineWidth: 0.5)
+        }
+        .accessibilityLabel(
+            usesSatellite
+                ? Text("Show standard map")
+                : Text("Show satellite map")
+        )
+    }
 }

@@ -17,6 +17,7 @@ struct ParksView: View {
     @State private var openFilterDate: Date?
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
+    @State private var headerHeight: CGFloat = 0
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -75,14 +76,18 @@ struct ParksView: View {
         case map
     }
 
-    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort selected.
+    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort
+    /// selected. Picking "Nearby"/"Most visited" while the map is open closes it back to the list.
     private var sortChoice: Binding<SortChoice> {
         Binding(
-            get: { .sort(sort) },
+            get: { showMap ? .map : .sort(sort) },
             set: {
                 switch $0 {
-                case .sort(let value): sort = value
-                case .map: showMap = true
+                case .sort(let value):
+                    sort = value
+                    showMap = false
+                case .map:
+                    showMap = true
                 }
             }
         )
@@ -90,7 +95,63 @@ struct ParksView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                Color.rpplBackground.ignoresSafeArea()
+
+                // The map is full height, bleeding under the translucent header below.
+                if showMap {
+                    ParksMapView(parks: filteredParks, location: location, topInset: headerHeight)
+                        .ignoresSafeArea()
+                } else {
+                    List {
+                        if !isSearching, sort == .distance, location.availability != .available {
+                            ParksLocationNeededCard(
+                                availability: location.availability,
+                                onRequestAccess: { location.refresh() },
+                                onOpenSettings: {
+                                    if let url = ParkNavigation.appSettingsURL { openURL(url) }
+                                }
+                            )
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        } else if parks.isEmpty {
+                            Text("No parks yet")
+                                .foregroundStyle(Color.rpplMuted)
+                                .listRowBackground(Color.clear)
+                        } else if filters.isActive, filteredParks.isEmpty {
+                            ParksNoMatchCard(onClear: clearFilters)
+                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        } else if sortedParks.isEmpty {
+                            Text("No parks found")
+                                .foregroundStyle(Color.rpplMuted)
+                                .listRowBackground(Color.clear)
+                        } else {
+                            let counts = visits
+                            ForEach(sortedParks) { park in
+                                ParkCard(
+                                    park: park,
+                                    visitCount: counts[park.id] ?? 0,
+                                    distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
+                                    isFavorite: favorites.contains(park.id),
+                                    entry: store.entry(id: park.id)
+                                )
+                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+                    .contentMargins(.top, headerHeight + 8, for: .scrollContent)
+                }
+
+                // Floats on top always: title, search/add, sort picker, filter bar. Translucent
+                // over the map so it reads as an overlay rather than a second opaque bar.
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Parks")
@@ -142,58 +203,13 @@ struct ParksView: View {
                 .padding(.horizontal, LogbookLayout.horizontalInset)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
-
-                if showMap {
-                    ParksMapView(parks: filteredParks, location: location, onClose: { showMap = false })
-                } else {
-                    List {
-                        if !isSearching, sort == .distance, location.availability != .available {
-                            ParksLocationNeededCard(
-                                availability: location.availability,
-                                onRequestAccess: { location.refresh() },
-                                onOpenSettings: {
-                                    if let url = ParkNavigation.appSettingsURL { openURL(url) }
-                                }
-                            )
-                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                        } else if parks.isEmpty {
-                            Text("No parks yet")
-                                .foregroundStyle(Color.rpplMuted)
-                                .listRowBackground(Color.clear)
-                        } else if filters.isActive, filteredParks.isEmpty {
-                            ParksNoMatchCard(onClear: clearFilters)
-                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        } else if sortedParks.isEmpty {
-                            Text("No parks found")
-                                .foregroundStyle(Color.rpplMuted)
-                                .listRowBackground(Color.clear)
-                        } else {
-                            let counts = visits
-                            ForEach(sortedParks) { park in
-                                ParkCard(
-                                    park: park,
-                                    visitCount: counts[park.id] ?? 0,
-                                    distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
-                                    isFavorite: favorites.contains(park.id),
-                                    entry: store.entry(id: park.id)
-                                )
-                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                            }
-                        }
-                    }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
-                    .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
-                    .contentMargins(.top, 8, for: .scrollContent)
-                }
+                .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackground))
+                .onGeometryChange(
+                    for: CGFloat.self,
+                    of: { $0.size.height },
+                    action: { headerHeight = $0 }
+                )
             }
-            .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
                 ParkDetailContainer(park: park)
