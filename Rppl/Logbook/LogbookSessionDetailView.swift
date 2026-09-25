@@ -787,19 +787,27 @@ private struct SetDetailCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                (
-                    Text("Set \(set.index)")
-                        .foregroundStyle(Color.rpplText)
-                    + (set.highlights.isEmpty
-                        ? Text("")
-                        : Text(" - \(LogbookFormatting.joinedSetHighlights(set.highlights))")
-                            .foregroundStyle(Color.rpplMuted))
-                )
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Set \(set.index)")
+                    .foregroundStyle(Color.rpplText)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if !set.highlights.isEmpty {
+                    FlowLayout(spacing: 6) {
+                        ForEach(set.highlights, id: \.rawValue) { highlight in
+                            ParkChip(
+                                text: LogbookFormatting.setHighlightLabel(highlight),
+                                systemImage: highlight.badgeIcon,
+                                tint: highlight.badgeTint,
+                                fill: highlight.badgeTint.opacity(0.14)
+                            )
+                        }
+                    }
+                    .accessibilityLabel(LogbookFormatting.joinedSetHighlights(set.highlights))
+                }
             }
 
             if locations.count >= 2 {
