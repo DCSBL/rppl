@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-09-24
+updated_at: 2026-09-25
 history:
   - date: 2026-09-24
     description: initial
@@ -9,6 +9,8 @@ history:
     description: add cable trace and refine dock location
   - date: 2026-09-24
     description: add block schedule and prices
+  - date: 2026-09-25
+    description: mark opening days as unknown (no published weekly schedule)
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
@@ -38,9 +40,12 @@ cables:
       - { lat: 51.99171948645172, lon: 4.238748427146507 }
       - { lat: 51.99231557307252, lon: 4.238651623891362 }
 
-# Fixed-start 80-minute blocks. Source: kabelskibaan.nl/openingstijden.
+# Fixed-start 80-minute blocks, but the site doesn't publish which days/weeks they run —
+# booking is done through the online calendar instead. Do not assume these blocks are
+# available every day.
 opening:
   booking: required
+  hours_unknown: true
   note: >-
     Book a block online in advance. Arrive 30 minutes before your start time. Outside
     regular hours the park can be booked exclusively.
