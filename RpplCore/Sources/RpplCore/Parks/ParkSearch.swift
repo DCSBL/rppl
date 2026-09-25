@@ -13,15 +13,21 @@ public enum ParkSearch {
         return parks.filter { matches($0, queryWords: queryWords) }
     }
 
+    private struct RankedHit {
+        let offset: Int
+        let park: Park
+        let score: Int
+    }
+
     /// Matching parks, most-likely-hit first. Ties keep `parks`' incoming order.
     public static func rank(_ parks: [Park], query: String) -> [Park] {
         let queryWords = words(in: query)
         guard !queryWords.isEmpty else { return parks }
         return parks
             .enumerated()
-            .compactMap { offset, park -> (offset: Int, park: Park, score: Int)? in
+            .compactMap { offset, park -> RankedHit? in
                 guard matches(park, queryWords: queryWords) else { return nil }
-                return (offset, park, score(park, queryWords: queryWords, query: query))
+                return RankedHit(offset: offset, park: park, score: score(park, queryWords: queryWords, query: query))
             }
             .sorted { a, b in
                 a.score != b.score ? a.score > b.score : a.offset < b.offset
