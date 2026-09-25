@@ -87,8 +87,4 @@ enum LogbookFormatting {
     static func joinedSetHighlights(_ highlights: [SetHighlight]) -> String {
         highlights.map(setHighlightLabel).joined(separator: " ")
     }
-
-    static func joinedSessionHighlights(_ highlights: [SessionHighlight]) -> String {
-        highlights.map(sessionHighlightLabel).joined(separator: " ")
-    }
 }
