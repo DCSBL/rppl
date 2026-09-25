@@ -7,7 +7,9 @@ import SwiftUI
 struct ParksMapView: View {
     let parks: [Park]
     let location: ParksLocationProvider
-    let onClose: () -> Void
+    /// Height of the floating header above this view, so its own controls sit below it
+    /// instead of hiding underneath.
+    var topInset: CGFloat = 0
 
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedID: String?
@@ -46,38 +48,15 @@ struct ParksMapView: View {
             MapPitchToggle()
             MapScaleView()
         }
-        .overlay(alignment: .topTrailing) {
-            VStack(spacing: 10) {
-                Button {
-                    onClose()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.title3.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel(Text("Close map"))
-
-                Button {
-                    usesSatellite.toggle()
-                } label: {
-                    Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
-                        .font(.title3.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel(
-                    usesSatellite
-                        ? Text("Show standard map")
-                        : Text("Show satellite map")
-                )
-            }
-            .padding(.top, 8)
-            .padding(.trailing, 12)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            Color.clear.frame(height: topInset)
         }
-        .ignoresSafeArea(edges: .bottom)
+        .overlay(alignment: .topTrailing) {
+            MapStyleToggleButton(usesSatellite: $usesSatellite)
+                .padding(.top, topInset + 8)
+                .padding(.trailing, 12)
+        }
+        .ignoresSafeArea()
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
         .searchSuggestions {
             ForEach(parkMatches) { park in
@@ -129,4 +108,31 @@ struct ParksMapView: View {
 private struct ParksSearchPin {
     let name: String
     let coordinate: CLLocationCoordinate2D
+}
+
+/// Standard/satellite toggle, styled to match MapKit's own controls (MapCompass, MapPitchToggle)
+/// rather than the app's own button chrome.
+private struct MapStyleToggleButton: View {
+    @Binding var usesSatellite: Bool
+
+    var body: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
+        } label: {
+            Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.borderless)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(.separator, lineWidth: 0.5)
+        }
+        .accessibilityLabel(
+            usesSatellite
+                ? Text("Show standard map")
+                : Text("Show satellite map")
+        )
+    }
 }

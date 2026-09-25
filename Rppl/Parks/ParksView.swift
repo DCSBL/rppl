@@ -17,6 +17,7 @@ struct ParksView: View {
     @State private var openFilterDate: Date?
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
+    @State private var headerHeight: CGFloat = 0
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -75,14 +76,18 @@ struct ParksView: View {
         case map
     }
 
-    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort selected.
+    /// The map is a destination, not a sort: picking it opens the cover and keeps the previous sort
+    /// selected. Picking "Nearby"/"Most visited" while the map is open closes it back to the list.
     private var sortChoice: Binding<SortChoice> {
         Binding(
-            get: { .sort(sort) },
+            get: { showMap ? .map : .sort(sort) },
             set: {
                 switch $0 {
-                case .sort(let value): sort = value
-                case .map: showMap = true
+                case .sort(let value):
+                    sort = value
+                    showMap = false
+                case .map:
+                    showMap = true
                 }
             }
         )
@@ -90,66 +95,13 @@ struct ParksView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // The map is a full-screen destination with its own controls (see ParksMapView);
-                // showing this header on top of it duplicates buttons and fights the sort Picker
-                // for the "View on map" selection.
-                if !showMap {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Parks")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(Color.rpplText)
-                            Spacer()
-                            if !parks.isEmpty {
-                                Button(action: toggleSearch) {
-                                    Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
-                                        .font(.title3.weight(.semibold))
-                                        .frame(width: 44, height: 44)
-                                }
-                                .buttonStyle(.glass)
-                                .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
-                            }
-                            if editorEnabled {
-                                Button {
-                                    showEditor = true
-                                } label: {
-                                    Image(systemName: "plus")
-                                        .font(.title3.weight(.semibold))
-                                        .frame(width: 44, height: 44)
-                                }
-                                .buttonStyle(.glass)
-                                .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text("Add park"))
-                            }
-                        }
-                        if showSearch {
-                            ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
-                                .transition(.move(edge: .top).combined(with: .opacity))
-                        } else {
-                            Picker("Sort", selection: sortChoice) {
-                                Text("Nearby").tag(SortChoice.sort(.distance))
-                                Text("Most visited").tag(SortChoice.sort(.visits))
-                                Text("View on map").tag(SortChoice.map)
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                        if !parks.isEmpty {
-                            ParksFilterBar(
-                                openDate: $openFilterDate,
-                                cableDirections: $cableFilter,
-                                favoritesOnly: $favoritesOnly
-                            )
-                        }
-                    }
-                    .padding(.horizontal, LogbookLayout.horizontalInset)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
-                }
+            ZStack(alignment: .top) {
+                Color.rpplBackground.ignoresSafeArea()
 
+                // The map is full height, bleeding under the translucent header below.
                 if showMap {
-                    ParksMapView(parks: filteredParks, location: location, onClose: { showMap = false })
+                    ParksMapView(parks: filteredParks, location: location, topInset: headerHeight)
+                        .ignoresSafeArea()
                 } else {
                     List {
                         if !isSearching, sort == .distance, location.availability != .available {
@@ -195,10 +147,65 @@ struct ParksView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
-                    .contentMargins(.top, 8, for: .scrollContent)
+                    .contentMargins(.top, headerHeight + 8, for: .scrollContent)
                 }
+
+                // Floats on top always: title, search/add, sort picker, filter bar. Translucent
+                // over the map so it reads as an overlay rather than a second opaque bar.
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Parks")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.rpplText)
+                        Spacer()
+                        if !parks.isEmpty {
+                            Button(action: toggleSearch) {
+                                Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
+                                    .font(.title3.weight(.semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.circle)
+                            .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
+                        }
+                        if editorEnabled {
+                            Button {
+                                showEditor = true
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.title3.weight(.semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.circle)
+                            .accessibilityLabel(Text("Add park"))
+                        }
+                    }
+                    if showSearch {
+                        ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    } else {
+                        Picker("Sort", selection: sortChoice) {
+                            Text("Nearby").tag(SortChoice.sort(.distance))
+                            Text("Most visited").tag(SortChoice.sort(.visits))
+                            Text("View on map").tag(SortChoice.map)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    if !parks.isEmpty {
+                        ParksFilterBar(
+                            openDate: $openFilterDate,
+                            cableDirections: $cableFilter,
+                            favoritesOnly: $favoritesOnly
+                        )
+                    }
+                }
+                .padding(.horizontal, LogbookLayout.horizontalInset)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+                .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackground))
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { headerHeight = $0 }
             }
-            .background(Color.rpplBackground)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
                 ParkDetailContainer(park: park)
