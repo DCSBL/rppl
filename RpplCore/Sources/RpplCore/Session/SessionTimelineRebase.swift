@@ -134,7 +134,6 @@ public enum SessionTimelineRebase {
             sustainedSpeedKmh: set.sustainedSpeedKmh,
             averageSpeedKmh: set.averageSpeedKmh,
             peakSpeedKmh: set.peakSpeedKmh,
-            fallDetected: set.fallDetected,
             highlights: set.highlights
         )
     }

@@ -85,8 +85,7 @@ final class SessionCatalog {
                         id: entry.manifest.sessionId,
                         totalDuration: stats.totalDuration,
                         ridingDuration: stats.ridingDuration,
-                        lapCount: stats.totalLapCount,
-                        fallCount: stats.fallCount
+                        lapCount: stats.totalLapCount
                     )
                 }
             )

@@ -70,7 +70,6 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let peak = LocationSpeedStats.peakSpeedKmh(from: setLocations)
-            let fallDetected = FallDetector.detectsFall(duration: max(0, duration))
             sets.append(
                 SetSegmentStats(
                     index: index + 1,
@@ -81,8 +80,7 @@ public enum SessionStatsBuilder {
                     lapCount: laps,
                     sustainedSpeedKmh: sustained,
                     averageSpeedKmh: average,
-                    peakSpeedKmh: peak,
-                    fallDetected: fallDetected
+                    peakSpeedKmh: peak
                 )
             )
             totalDistance += distance
