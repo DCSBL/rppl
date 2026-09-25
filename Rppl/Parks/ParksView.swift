@@ -204,7 +204,11 @@ struct ParksView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 8)
                 .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackground))
-                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { headerHeight = $0 }
+                .onGeometryChange(
+                    for: CGFloat.self,
+                    of: { $0.size.height },
+                    action: { headerHeight = $0 }
+                )
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
