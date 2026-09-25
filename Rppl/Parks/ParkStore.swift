@@ -50,10 +50,3 @@ final class ParkStore {
         ParkCatalog.slug(from: name, existing: Set(entries.map(\.id)))
     }
 }
-
-/// Central switch for the editor UI; one flag so it can be hidden again later.
-enum ParkEditor {
-    static var isEnabled: Bool {
-        UserDefaults.standard.object(forKey: AppSettingsKey.parkEditorEnabled) as? Bool ?? true
-    }
-}

@@ -191,6 +191,29 @@ struct ParksTests {
         #expect(saturday.windows.first?.note == "27 km/h")
     }
 
+    @Test func overnightRuleWrapsPastMidnightOnTheSameDay() throws {
+        let yaml = """
+        version: 1
+        id: overnight
+        name: Overnight
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          rules:
+            - { days: [fri], open: "22:00", close: "02:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        // 2026-09-25 is a Friday: the window is stored as 22:00-26:00 (past-midnight close).
+        let friday = park.schedule(on: date("2026-09-25"))
+        #expect(friday.windows.map(\.startMinute) == [22 * 60])
+        #expect(friday.windows.map(\.endMinute) == [26 * 60])
+        // Before 22:00, the window hasn't started yet today but still counts as "open today".
+        #expect(park.openStatus(at: date("2026-09-25", hour: 10)) == .openToday)
+        #expect(park.openStatus(at: date("2026-09-25", hour: 23)) == .openToday)
+        // Saturday has no matching rule of its own — a session started Friday night that runs
+        // past midnight isn't tracked as "still open" once the calendar day rolls over.
+        #expect(park.schedule(on: date("2026-09-26")).isOpen == false)
+    }
+
     @Test func blocksOnlyParkWithoutRules() throws {
         let yaml = """
         version: 1
@@ -338,6 +361,20 @@ struct ParksTests {
         #expect(counts == ["near": 2])
     }
 
+    @Test func nearestAndVisitCountsMatchViaTracedCablePointsNotJustThePin() {
+        // Pin is far away; a traced cable point is the close anchor instead.
+        let cablePoint = ParkCoordinate(lat: 52.01, lon: 4.0)
+        let park = Park(
+            id: "a",
+            name: "A",
+            location: ParkCoordinate(lat: 53.0, lon: 5.0),
+            cables: [ParkCable(points: [ParkCablePoint(lat: cablePoint.lat, lon: cablePoint.lon)])]
+        )
+        let near = ParkCoordinate(lat: 52.0105, lon: 4.0)
+        #expect(ParkListing.nearest(to: near, in: [park])?.id == "a")
+        #expect(ParkListing.visitCounts(parks: [park], sessionCenters: [near]) == ["a": 1])
+    }
+
     @Test func filteringByFavoritesCableAndOpenDate() throws {
         let project7 = try project7()
         let wetNWild = try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
@@ -386,6 +423,21 @@ struct ParksTests {
         #expect(decoded.author == "Duco")
     }
 
+    @Test func emptyIdFallsBackToFilename() throws {
+        let yaml = "version: 1\nid: \"\"\nname: A\nlocation: { lat: 1, lon: 2 }\n"
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "from-filename")
+        #expect(park.id == "from-filename")
+    }
+
+    @Test func loadDirectorySupportsYmlExtension() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let yaml = "version: 1\nid: yml-park\nname: Yml\nlocation: { lat: 1, lon: 2 }\n"
+        try yaml.write(to: dir.appendingPathComponent("yml-park.yml"), atomically: true, encoding: .utf8)
+        let parks = ParkCatalog.loadDirectory(dir)
+        #expect(parks.map(\.id) == ["yml-park"])
+    }
+
     @Test func customParkSaveLoadDelete() throws {
         let dir = try tempDir()
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -396,6 +448,20 @@ struct ParksTests {
         #expect(entry.origin == .custom)
         try ParkCatalog.deleteUserPark(id: "my-park", userRoot: dir)
         #expect(ParkCatalog.loadWithOrigin(userRoot: dir).allSatisfy { $0.id != "my-park" })
+    }
+
+    @Test func resavingAppendsHistoryInsteadOfReplacingIt() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let park = Park(id: "my-park", name: "Mine", location: ParkCoordinate(lat: 52, lon: 4))
+        let firstSave = try ParkCatalog.save(park, to: dir)
+        #expect(firstSave.history?.count == 1)
+        var edited = firstSave
+        edited.name = "Mine, renamed"
+        let secondSave = try ParkCatalog.save(edited, to: dir)
+        #expect(secondSave.history?.count == 2)
+        let reloaded = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == "my-park" })
+        #expect(reloaded.park.name == "Mine, renamed" && reloaded.park.history?.count == 2)
     }
 
     @Test func editedOverrideConflictFlow() throws {
@@ -444,6 +510,26 @@ struct ParksTests {
         ParkDraft.undo(&cable)
         ParkDraft.undo(&cable)
         #expect(cable.points == nil)
+    }
+
+    @Test func invalidCablePointIsFlaggedSeparatelyFromTooShort() {
+        let cable = ParkCable(points: [ParkCablePoint(lat: 52, lon: 4), ParkCablePoint(lat: 95, lon: 4)])
+        var park = Park(id: "a", name: "A", location: ParkCoordinate(lat: 52, lon: 4))
+        park.cables = [cable]
+        #expect(ParkDraft.validate(park) == [.invalidCablePoint(cable: 0)])
+    }
+
+    @Test func centroidOfTracedPointsAcrossCables() throws {
+        #expect(ParkDraft.centroid(of: []) == nil)
+        #expect(ParkDraft.centroid(of: [ParkCable()]) == nil)
+        var cableA = ParkCable()
+        ParkDraft.append(ParkCoordinate(lat: 52.0, lon: 4.0), to: &cableA)
+        ParkDraft.append(ParkCoordinate(lat: 52.0, lon: 5.0), to: &cableA)
+        var cableB = ParkCable()
+        ParkDraft.append(ParkCoordinate(lat: 54.0, lon: 4.0), to: &cableB)
+        let centroid = try #require(ParkDraft.centroid(of: [cableA, cableB]))
+        #expect(abs(centroid.lat - (52.0 + 52.0 + 54.0) / 3) < 1e-9)
+        #expect(abs(centroid.lon - (4.0 + 5.0 + 4.0) / 3) < 1e-9)
     }
 }
 

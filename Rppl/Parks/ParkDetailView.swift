@@ -29,14 +29,15 @@ struct ParkDetailView: View {
     }
 
     var body: some View {
+        let daySchedule = park.opening != nil ? park.schedule() : nil
         ScrollView {
             VStack(spacing: 12) {
                 updateCard
                 mapCard
-                if park.opening != nil {
-                    todayCard
+                if let daySchedule {
+                    todayCard(daySchedule)
                     openingTimesCard
-                    blocksCard
+                    blocksCard(daySchedule)
                 }
                 ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
                     cableCard(cable)
@@ -163,9 +164,8 @@ struct ParkDetailView: View {
         .logbookCardChrome()
     }
 
-    private var todayCard: some View {
-        let day = park.schedule()
-        return VStack(alignment: .leading, spacing: 12) {
+    private func todayCard(_ day: ParkDaySchedule) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Today")
 
             if !day.isScheduleKnown {
@@ -300,9 +300,9 @@ struct ParkDetailView: View {
         .parkHighlightBackground(isCurrent, opacity: 0.14)
     }
 
-    private var blocksCard: some View {
+    private func blocksCard(_ day: ParkDaySchedule) -> some View {
         let slots = park.opening?.slots ?? []
-        let todayIds = Set(park.schedule().availableSlots.map(\.id))
+        let todayIds = Set(day.availableSlots.map(\.id))
         return Group {
             if !slots.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
