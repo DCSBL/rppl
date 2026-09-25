@@ -785,31 +785,45 @@ private struct SetDetailCard: View {
         SessionLocationHelpers.averageSpeedKmh(for: set)
     }
 
+    private var highlightsAccessibilityLabel: String {
+        var parts = set.highlights.map(LogbookFormatting.setHighlightLabel)
+        if set.fallDetected {
+            parts.append(LogbookFormatting.fallDetectedLabel())
+        }
+        return parts.joined(separator: " ")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                (
-                    Text("Set \(set.index)")
-                        .foregroundStyle(Color.rpplText)
-                    + (set.highlights.isEmpty
-                        ? Text("")
-                        : Text(" - \(LogbookFormatting.joinedSetHighlights(set.highlights))")
-                            .foregroundStyle(Color.rpplMuted))
-                )
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Set \(set.index)")
+                    .foregroundStyle(Color.rpplText)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                if set.fallDetected {
-                    // A fall is a shame, not a bad thing — playful pink, not alarm red.
-                    ParkChip(
-                        text: LogbookFormatting.fallDetectedLabel(),
-                        systemImage: "figure.fall",
-                        tint: .pink,
-                        fill: Color.pink.opacity(0.14)
-                    )
-                    .padding(.top, 2)
+                if !set.highlights.isEmpty || set.fallDetected {
+                    FlowLayout(spacing: 6) {
+                        ForEach(set.highlights, id: \.rawValue) { highlight in
+                            ParkChip(
+                                text: LogbookFormatting.setHighlightLabel(highlight),
+                                systemImage: highlight.badgeIcon,
+                                tint: highlight.badgeTint,
+                                fill: highlight.badgeTint.opacity(0.14)
+                            )
+                        }
+                        if set.fallDetected {
+                            // A fall is a shame, not a bad thing — playful pink, not alarm red.
+                            ParkChip(
+                                text: LogbookFormatting.fallDetectedLabel(),
+                                systemImage: "figure.fall",
+                                tint: .pink,
+                                fill: Color.pink.opacity(0.14)
+                            )
+                        }
+                    }
+                    .accessibilityLabel(highlightsAccessibilityLabel)
                 }
             }
 

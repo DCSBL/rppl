@@ -427,6 +427,26 @@ extension SessionHighlight {
     }
 }
 
+extension SetHighlight {
+    var badgeIcon: String {
+        switch self {
+        case .longest: "ruler"
+        case .longestTime: "clock.fill"
+        case .shortest: "arrow.down.to.line"
+        case .fastest: "bolt.fill"
+        }
+    }
+
+    var badgeTint: Color {
+        switch self {
+        case .longest: .orange
+        case .longestTime: .blue
+        case .shortest: .gray
+        case .fastest: .purple
+        }
+    }
+}
+
 private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
