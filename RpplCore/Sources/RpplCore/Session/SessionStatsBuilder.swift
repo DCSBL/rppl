@@ -70,10 +70,7 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let peak = LocationSpeedStats.peakSpeedKmh(from: setLocations)
-            let fallDetected = FallDetector.detectsFall(
-                in: setLocations,
-                gpsThresholds: DetectionThresholds(maxHorizontalAccuracyM: maxHorizontalAccuracyM)
-            )
+            let fallDetected = FallDetector.detectsFall(duration: max(0, duration))
             sets.append(
                 SetSegmentStats(
                     index: index + 1,

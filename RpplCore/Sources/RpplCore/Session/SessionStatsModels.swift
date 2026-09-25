@@ -16,8 +16,8 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var averageSpeedKmh: Double?
     /// Peak usable GPS sample speed (km/h); see `LocationSpeedStats.peakSpeedKmh`.
     public var peakSpeedKmh: Double?
-    /// GPS speed collapsed to near-zero within a couple seconds inside this set — a fall or hard
-    /// letting-go rather than a controlled stop; see `FallDetector`.
+    /// This set ran conspicuously shorter than a normal full lap — a fall, a failed trick, or a
+    /// failed start cut it short; see `FallDetector`.
     public var fallDetected: Bool
     /// Record badges for this set within the session (empty if none).
     public var highlights: [SetHighlight]
