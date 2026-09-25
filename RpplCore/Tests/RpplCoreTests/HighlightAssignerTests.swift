@@ -139,6 +139,24 @@ struct HighlightAssignerTests {
         #expect(map["a"] == [.longest])
         #expect(map["b"] == [.mostWaterTime])
     }
+
+    @Test func sessionMostFallsWinner() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(id: "a", totalDuration: 1800, ridingDuration: 900, lapCount: 3, fallCount: 1),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 900, lapCount: 3, fallCount: 4),
+        ])
+        #expect(map["b"]?.contains(.mostFalls) == true)
+        #expect(map["a"]?.contains(.mostFalls) != true)
+    }
+
+    @Test func sessionNoMostFallsWhenTied() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(id: "a", totalDuration: 1800, ridingDuration: 900, lapCount: 3, fallCount: 2),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 900, lapCount: 3, fallCount: 2),
+        ])
+        #expect(map["a"]?.contains(.mostFalls) != true)
+        #expect(map["b"]?.contains(.mostFalls) != true)
+    }
 }
 
 @Suite("LocationSpeedStats.sustained")

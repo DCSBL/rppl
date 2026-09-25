@@ -186,7 +186,7 @@ So: walking the dock while `inactive` must not grow distance. A GPS spike betwee
    Speed drops ≤4 km/h for 3 s with good GPS → `ride_exit` → `inactive`. Next pull-away ≥20×3s (×4s from walk) → new `riding`.
 
 2. **Fall (all watches)**
-   GPS dies or slows: unusable 3 s → `unsure`. If fix returns fast within 60 s → same set (lookback). Slow usable ≤4 km/h → `inactive`. If not → `unsure_timeout` → `inactive`, later start is new set. Ultra `submerged` is logged but does not force exit.
+   GPS dies or slows: unusable 3 s → `unsure`. If fix returns fast within 60 s → same set (lookback). Slow usable ≤4 km/h → `inactive`. If not → `unsure_timeout` → `inactive`, later start is new set. Ultra `submerged` is logged but does not force exit. Separately, `FallDetector` (derived stats, not detection) flags the set `fallDetected` when GPS speed visibly collapses ≥15 km/h within 2.5 s rather than gliding down — see `RpplCore/DESIGN.md` § Fall detection.
 
 3. **Fall, Non-Ultra / GPS dies**
    Same as (2) without water sensor.

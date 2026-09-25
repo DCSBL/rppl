@@ -800,6 +800,12 @@ private struct SetDetailCard: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.75)
                 .fixedSize(horizontal: false, vertical: true)
+
+                if set.fallDetected {
+                    Label(LogbookFormatting.fallDetectedLabel(), systemImage: "figure.fall")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
             }
 
             if locations.count >= 2 {

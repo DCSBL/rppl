@@ -412,6 +412,7 @@ extension SessionHighlight {
         case .longest: "clock.fill"
         case .mostWaterTime: "water.waves"
         case .mostLaps: "arrow.triangle.2.circlepath"
+        case .mostFalls: "figure.fall"
         }
     }
 
@@ -420,6 +421,7 @@ extension SessionHighlight {
         case .longest: .orange
         case .mostWaterTime: .blue
         case .mostLaps: .purple
+        case .mostFalls: .red
         }
     }
 }
