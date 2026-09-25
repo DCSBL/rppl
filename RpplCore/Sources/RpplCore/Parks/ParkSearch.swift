@@ -13,6 +13,46 @@ public enum ParkSearch {
         return parks.filter { matches($0, queryWords: queryWords) }
     }
 
+    /// Matching parks, most-likely-hit first. Ties keep `parks`' incoming order.
+    public static func rank(_ parks: [Park], query: String) -> [Park] {
+        let queryWords = words(in: query)
+        guard !queryWords.isEmpty else { return parks }
+        return parks
+            .enumerated()
+            .compactMap { offset, park -> (offset: Int, park: Park, score: Int)? in
+                guard matches(park, queryWords: queryWords) else { return nil }
+                return (offset, park, score(park, queryWords: queryWords, query: query))
+            }
+            .sorted { a, b in
+                a.score != b.score ? a.score > b.score : a.offset < b.offset
+            }
+            .map(\.park)
+    }
+
+    /// Higher is a better hit: exact/prefix whole-name matches beat per-word matches;
+    /// name matches beat address matches; exact word matches beat prefix/fuzzy ones.
+    private static func score(_ park: Park, queryWords: [String], query: String) -> Int {
+        let foldedName = fold(park.name)
+        let foldedQuery = fold(query)
+        if foldedName == foldedQuery { return 1000 }
+        if foldedName.hasPrefix(foldedQuery) { return 900 }
+        if foldedName.contains(foldedQuery) { return 800 }
+
+        let nameWords = words(in: park.name)
+        let addressWords = words(in: park.address ?? "")
+        return queryWords.reduce(0) { total, queryWord in
+            if nameWords.contains(queryWord) { return total + 30 }
+            if nameWords.contains(where: { $0.hasPrefix(queryWord) }) { return total + 20 }
+            if addressWords.contains(queryWord) { return total + 8 }
+            if addressWords.contains(where: { $0.hasPrefix(queryWord) }) { return total + 5 }
+            return total + 1
+        }
+    }
+
+    private static func fold(_ text: String) -> String {
+        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: nil)
+    }
+
     private static func matches(_ park: Park, queryWords: [String]) -> Bool {
         let parkWords = words(in: park.name) + words(in: park.address ?? "")
         guard !parkWords.isEmpty else { return false }

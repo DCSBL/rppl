@@ -53,4 +53,23 @@ struct ParkSearchTests {
     @Test func noMatchReturnsEmpty() {
         #expect(ParkSearch.filter(parks, query: "xyzxyz").isEmpty)
     }
+
+    @Test func rankPutsNamePrefixMatchBeforeAddressOnlyMatch() {
+        // "cable" prefixes downUnder's name word "Cable"; project7 only has "Cablepark" in its name too,
+        // but "nieuw" matches project7's address word "Nieuw" while also being a downUnder name substring.
+        #expect(ParkSearch.rank(parks, query: "cable").map(\.id) == ["downunder-nieuwegein", "project7-rotterdam"])
+    }
+
+    @Test func rankPutsExactNameMatchFirst() {
+        #expect(
+            ParkSearch.rank(parks, query: "project 7 cablepark rotterdam").map(\.id) == ["project7-rotterdam"]
+        )
+    }
+
+    @Test func rankKeepsOriginalOrderOnTie() {
+        let a = Park(id: "a", name: "Cable Park Alpha", location: ParkCoordinate(lat: 0, lon: 0))
+        let b = Park(id: "b", name: "Cable Park Bravo", location: ParkCoordinate(lat: 0, lon: 0))
+        #expect(ParkSearch.rank([a, b], query: "cable").map(\.id) == ["a", "b"])
+        #expect(ParkSearch.rank([b, a], query: "cable").map(\.id) == ["b", "a"])
+    }
 }
