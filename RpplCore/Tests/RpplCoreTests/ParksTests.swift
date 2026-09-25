@@ -228,14 +228,15 @@ struct ParksTests {
         #expect(park.openStatus(at: date("2026-09-24", hour: 10)) == .unknown)
     }
 
-    @Test func bundledWollebrandHasUnknownHours() throws {
+    @Test func bundledWollebrandHasSeasonalHours() throws {
         let park = ParkCatalog.loadBundled().first { $0.id == "wollebrand-honselersdijk" }
         let park2 = try #require(park)
         #expect(park2.opening?.slots?.count == 6)
+        // Friday 25 September 2026: rule is wed/fri 15:30-20:00.
         let day = park2.schedule(on: date("2026-09-25"))
-        #expect(day.isScheduleKnown == false)
-        #expect(day.isOpen == false)
-        #expect(park2.openStatus(at: date("2026-09-25", hour: 15)) == .unknown)
+        #expect(day.isScheduleKnown == true)
+        #expect(day.isOpen == true)
+        #expect(park2.openStatus(at: date("2026-09-25", hour: 15)) == .openToday)
     }
 
     @Test func minimalParkAndOptionalCablePoints() throws {
