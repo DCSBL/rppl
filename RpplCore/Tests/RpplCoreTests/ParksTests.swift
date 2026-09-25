@@ -207,6 +207,37 @@ struct ParksTests {
         #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.id) == ["b"])
     }
 
+    @Test func hoursUnknownOverridesRulesAndSlots() throws {
+        let yaml = """
+        version: 1
+        id: unknown-hours
+        name: Unknown
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          hours_unknown: true
+          slots:
+            - { id: a, start: "10:00", end: "11:00" }
+          rules:
+            - { days: [mon], open: "10:00", close: "11:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        let day = park.schedule(on: date("2026-09-24"))
+        #expect(day.isScheduleKnown == false)
+        #expect(day.isOpen == false)
+        #expect(day.availableSlots.isEmpty)
+        #expect(park.openStatus(at: date("2026-09-24", hour: 10)) == .unknown)
+    }
+
+    @Test func bundledWollebrandHasUnknownHours() throws {
+        let park = ParkCatalog.loadBundled().first { $0.id == "wollebrand-honselersdijk" }
+        let park2 = try #require(park)
+        #expect(park2.opening?.slots?.count == 6)
+        let day = park2.schedule(on: date("2026-09-25"))
+        #expect(day.isScheduleKnown == false)
+        #expect(day.isOpen == false)
+        #expect(park2.openStatus(at: date("2026-09-25", hour: 15)) == .unknown)
+    }
+
     @Test func minimalParkAndOptionalCablePoints() throws {
         let yaml = """
         version: 1

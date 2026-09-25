@@ -12,25 +12,43 @@ struct ParksView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var showMap = false
+    @State private var showSearch = false
     @State private var searchText = ""
+    @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
 
     private var parks: [Park] { store.entries.map(\.park) }
+
+    private var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     private var visits: [String: Int] {
         let centers = catalog.entries.compactMap(\.center)
         return ParkListing.visitCounts(parks: parks, sessionCenters: centers)
     }
 
+    /// While searching, order is relevance (best hit first); otherwise the chosen sort.
     private var sortedParks: [Park] {
-        ParkListing.sorted(
-            ParkSearch.filter(parks, query: searchText),
+        if isSearching {
+            return ParkSearch.rank(parks, query: searchText)
+        }
+        return ParkListing.sorted(
+            parks,
             favorites: favorites.ids,
             visits: visits,
             userLocation: location.coordinate,
             sort: sort
         )
+    }
+
+    private func toggleSearch() {
+        withAnimation(.snappy(duration: 0.25)) {
+            showSearch.toggle()
+            if !showSearch { searchText = "" }
+        }
+        searchFieldFocused = showSearch
     }
 
     private enum SortChoice: Hashable {
@@ -65,6 +83,15 @@ struct ParksView: View {
                                         .font(.largeTitle.bold())
                                         .foregroundStyle(Color.rpplText)
                                     Spacer()
+                                    if !parks.isEmpty {
+                                        Button(action: toggleSearch) {
+                                            Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
+                                                .font(.title3.weight(.semibold))
+                                                .frame(width: 44, height: 44)
+                                        }
+                                        .buttonStyle(.borderless)
+                                        .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
+                                    }
                                     if editorEnabled {
                                         Button {
                                             showEditor = true
@@ -77,19 +104,24 @@ struct ParksView: View {
                                         .accessibilityLabel(Text("Add park"))
                                     }
                                 }
-                                Picker("Sort", selection: sortChoice) {
-                                    Text("Nearby").tag(SortChoice.sort(.distance))
-                                    Text("Most visited").tag(SortChoice.sort(.visits))
-                                    Text("View on map").tag(SortChoice.map)
+                                if showSearch {
+                                    ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                                        .transition(.move(edge: .top).combined(with: .opacity))
+                                } else {
+                                    Picker("Sort", selection: sortChoice) {
+                                        Text("Nearby").tag(SortChoice.sort(.distance))
+                                        Text("Most visited").tag(SortChoice.sort(.visits))
+                                        Text("View on map").tag(SortChoice.map)
+                                    }
+                                    .pickerStyle(.segmented)
                                 }
-                                .pickerStyle(.segmented)
                             }
                             .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                         }
 
-                        if sort == .distance, location.availability != .available {
+                        if !isSearching, sort == .distance, location.availability != .available {
                             ParksLocationNeededCard(
                                 availability: location.availability,
                                 onRequestAccess: { location.refresh() },
@@ -128,11 +160,6 @@ struct ParksView: View {
                     .scrollContentBackground(.hidden)
                     .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
                     .contentMargins(.top, 8, for: .scrollContent)
-                    .searchable(
-                        text: $searchText,
-                        placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: Text("Search parks")
-                    )
                 }
             }
             .background(Color.rpplBackground)
@@ -161,6 +188,36 @@ struct ParksView: View {
 
 extension Park: Hashable {
     public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
+private struct ParkSearchField: View {
+    @Binding var text: String
+    var isFocused: FocusState<Bool>.Binding
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(Color.rpplMuted)
+            TextField("Search parks", text: $text)
+                .focused(isFocused)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .foregroundStyle(Color.rpplText)
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.rpplMuted)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Clear search"))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
 }
 
 private struct ParkCard: View {

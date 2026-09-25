@@ -168,7 +168,11 @@ struct ParkDetailView: View {
         return VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Today")
 
-            if day.isOpen {
+            if !day.isScheduleKnown {
+                Text("Opening hours unknown")
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.rpplMuted)
+            } else if day.isOpen {
                 ForEach(Array(day.windows.enumerated()), id: \.offset) { _, window in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(ParkFormatting.openFromTo(window))

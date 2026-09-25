@@ -406,6 +406,24 @@ struct LogbookView: View {
     }
 }
 
+extension SessionHighlight {
+    var badgeIcon: String {
+        switch self {
+        case .longest: "clock.fill"
+        case .mostWaterTime: "water.waves"
+        case .mostLaps: "arrow.triangle.2.circlepath"
+        }
+    }
+
+    var badgeTint: Color {
+        switch self {
+        case .longest: .orange
+        case .mostWaterTime: .blue
+        case .mostLaps: .purple
+        }
+    }
+}
+
 private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
@@ -419,24 +437,31 @@ private struct SessionCard: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    (
-                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                            .foregroundStyle(Color.rpplText)
-                        + (entry.highlights.isEmpty
-                            ? Text("")
-                            : Text(" - \(LogbookFormatting.joinedSessionHighlights(entry.highlights))")
-                                .foregroundStyle(Color.rpplMuted))
-                    )
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.75)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                        .foregroundStyle(Color.rpplText)
+                        .font(.headline)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     Text(entry.cityName ?? "-")
                         .font(.caption)
                         .foregroundStyle(Color.rpplMuted)
                         .lineLimit(1)
+                }
+
+                if !entry.highlights.isEmpty {
+                    FlowLayout(spacing: 6) {
+                        ForEach(entry.highlights, id: \.rawValue) { highlight in
+                            ParkChip(
+                                text: LogbookFormatting.sessionHighlightLabel(highlight),
+                                systemImage: highlight.badgeIcon,
+                                tint: highlight.badgeTint,
+                                fill: highlight.badgeTint.opacity(0.14)
+                            )
+                        }
+                    }
                 }
 
                 Text(sessionMetaText)

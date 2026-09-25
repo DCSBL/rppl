@@ -93,10 +93,15 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// Durations a booking can span, in minutes (`[60, 120]` = per 1 or 2 hours).
     public var bookingMinutes: [Int]?
     public var note: String?
+    /// `true` when the park doesn't publish which days its blocks/windows apply to (e.g. no weekly
+    /// schedule on their site) — `slots`/`rules` may still list block times, but we can't say which
+    /// days they're actually open. Overrides any day/week computation with "unknown" for every day.
+    public var hoursUnknown: Bool?
 
     enum CodingKeys: String, CodingKey {
         case booking, rules, slots, numbered, note
         case bookingMinutes = "booking_minutes"
+        case hoursUnknown = "hours_unknown"
     }
 
     public init(
@@ -105,7 +110,8 @@ public struct ParkOpening: Codable, Equatable, Sendable {
         slots: [ParkSlot]? = nil,
         numbered: Bool? = nil,
         bookingMinutes: [Int]? = nil,
-        note: String? = nil
+        note: String? = nil,
+        hoursUnknown: Bool? = nil
     ) {
         self.booking = booking
         self.rules = rules
@@ -113,6 +119,7 @@ public struct ParkOpening: Codable, Equatable, Sendable {
         self.numbered = numbered
         self.bookingMinutes = bookingMinutes
         self.note = note
+        self.hoursUnknown = hoursUnknown
     }
 }
 
@@ -134,8 +141,17 @@ public struct ParkDaySchedule: Equatable, Sendable {
     public var windows: [ParkTimeWindow]
     /// Slots that fit inside an open window (or are fixed for the day when the park has no drop-in rules).
     public var availableSlots: [ParkSlot]
+    /// `false` when `opening.hoursUnknown` is set — the park's weekly day pattern isn't published, so
+    /// we can't tell which days its blocks/windows actually apply to.
+    public var isScheduleKnown: Bool
 
-    public var isOpen: Bool { !windows.isEmpty || !availableSlots.isEmpty }
+    public init(windows: [ParkTimeWindow], availableSlots: [ParkSlot], isScheduleKnown: Bool = true) {
+        self.windows = windows
+        self.availableSlots = availableSlots
+        self.isScheduleKnown = isScheduleKnown
+    }
+
+    public var isOpen: Bool { isScheduleKnown && (!windows.isEmpty || !availableSlots.isEmpty) }
 }
 
 public struct ParkScheduleLine: Equatable, Sendable {
@@ -166,6 +182,9 @@ public enum ParkOpenStatus: Equatable, Sendable {
     case opensTomorrow
     /// Not open today, and the next opening isn't tomorrow either (or there's no schedule at all).
     case closed
+    /// The park only publishes fixed block times with no confirmed weekly day pattern, so open/closed
+    /// can't be determined for any given day.
+    case unknown
 }
 
 public enum ParkSchedule {
@@ -200,8 +219,11 @@ public enum ParkSchedule {
         on date: Date,
         timeZone: TimeZone
     ) -> ParkDaySchedule {
-        let closed = ParkDaySchedule(windows: [], availableSlots: [])
+        let closed = ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: true)
         guard let opening else { return closed }
+        guard opening.hoursUnknown != true else {
+            return ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: false)
+        }
 
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
@@ -254,12 +276,15 @@ public enum ParkSchedule {
         let nowMinute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
 
         let today = day(for: opening, on: date, timeZone: timeZone)
+        guard today.isScheduleKnown else { return .unknown }
         if today.windows.contains(where: { nowMinute < $0.endMinute }) {
             return .openToday
         }
 
         guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else { return .closed }
-        return day(for: opening, on: tomorrow, timeZone: timeZone).isOpen ? .opensTomorrow : .closed
+        let tomorrowDay = day(for: opening, on: tomorrow, timeZone: timeZone)
+        guard tomorrowDay.isScheduleKnown else { return .unknown }
+        return tomorrowDay.isOpen ? .opensTomorrow : .closed
     }
 
     public static func minutes(_ time: String) -> Int? {
