@@ -151,4 +151,3 @@ private struct ParksSearchPin {
     let name: String
     let coordinate: CLLocationCoordinate2D
 }
-
