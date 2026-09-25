@@ -161,8 +161,8 @@ struct ParksView: View {
                         if !parks.isEmpty {
                             Button(action: toggleSearch) {
                                 Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
-                                    .font(.title3.weight(.semibold))
-                                    .frame(width: 44, height: 44)
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 34, height: 34)
                             }
                             .buttonStyle(.glass)
                             .buttonBorderShape(.circle)
@@ -173,8 +173,8 @@ struct ParksView: View {
                                 showEditor = true
                             } label: {
                                 Image(systemName: "plus")
-                                    .font(.title3.weight(.semibold))
-                                    .frame(width: 44, height: 44)
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 34, height: 34)
                             }
                             .buttonStyle(.glass)
                             .buttonBorderShape(.circle)
