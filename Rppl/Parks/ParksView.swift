@@ -37,19 +37,19 @@ struct ParksView: View {
         ParkFilters(openOnDate: openFilterDate, cableDirections: cableFilter, favoritesOnly: favoritesOnly)
     }
 
-    private var filteredParks: [Park] {
+    private func filteredParks(_ parks: [Park]) -> [Park] {
         ParkListing.filtered(parks, favorites: favorites.ids, filters: filters)
     }
 
     /// While searching, order is relevance (best hit first); otherwise the chosen sort.
-    private var sortedParks: [Park] {
+    private func sortedParks(_ filtered: [Park], visitCounts: [String: Int]) -> [Park] {
         if isSearching {
-            return ParkSearch.rank(filteredParks, query: searchText)
+            return ParkSearch.rank(filtered, query: searchText)
         }
         return ParkListing.sorted(
-            filteredParks,
+            filtered,
             favorites: favorites.ids,
-            visits: visits,
+            visits: visitCounts,
             userLocation: location.coordinate,
             sort: sort
         )
@@ -94,13 +94,19 @@ struct ParksView: View {
     }
 
     var body: some View {
+        // Computed once per body evaluation instead of re-filtering/sorting on every access below.
+        let allParks = parks
+        let visitCounts = visits
+        let visibleParks = filteredParks(allParks)
+        let orderedParks = sortedParks(visibleParks, visitCounts: visitCounts)
+
         NavigationStack {
             ZStack(alignment: .top) {
                 Color.rpplBackground.ignoresSafeArea()
 
                 // The map is full height, bleeding under the translucent header below.
                 if showMap {
-                    ParksMapView(parks: filteredParks, location: location, topInset: headerHeight)
+                    ParksMapView(parks: visibleParks, location: location, topInset: headerHeight)
                         .ignoresSafeArea()
                 } else {
                     List {
@@ -115,25 +121,24 @@ struct ParksView: View {
                             .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
-                        } else if parks.isEmpty {
+                        } else if allParks.isEmpty {
                             Text("No parks yet")
                                 .foregroundStyle(Color.rpplMuted)
                                 .listRowBackground(Color.clear)
-                        } else if filters.isActive, filteredParks.isEmpty {
+                        } else if filters.isActive, visibleParks.isEmpty {
                             ParksNoMatchCard(onClear: clearFilters)
                                 .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
-                        } else if sortedParks.isEmpty {
+                        } else if orderedParks.isEmpty {
                             Text("No parks found")
                                 .foregroundStyle(Color.rpplMuted)
                                 .listRowBackground(Color.clear)
                         } else {
-                            let counts = visits
-                            ForEach(sortedParks) { park in
+                            ForEach(orderedParks) { park in
                                 ParkCard(
                                     park: park,
-                                    visitCount: counts[park.id] ?? 0,
+                                    visitCount: visitCounts[park.id] ?? 0,
                                     distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
                                     isFavorite: favorites.contains(park.id),
                                     entry: store.entry(id: park.id)
@@ -158,7 +163,7 @@ struct ParksView: View {
                             .font(.largeTitle.bold())
                             .foregroundStyle(Color.rpplText)
                         Spacer()
-                        if !parks.isEmpty {
+                        if !allParks.isEmpty {
                             Button(action: toggleSearch) {
                                 Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
                                     .font(.subheadline.weight(.semibold))
@@ -192,7 +197,7 @@ struct ParksView: View {
                         }
                         .pickerStyle(.segmented)
                     }
-                    if !parks.isEmpty {
+                    if !allParks.isEmpty {
                         ParksFilterBar(
                             openDate: $openFilterDate,
                             cableDirections: $cableFilter,
