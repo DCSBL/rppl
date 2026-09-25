@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-09-24
+updated_at: 2026-09-25
 history:
   - date: 2026-09-24
     description: initial
@@ -9,6 +9,8 @@ history:
     description: add cable trace and refine dock location
   - date: 2026-09-24
     description: add block schedule and prices
+  - date: 2026-09-25
+    description: add seasonal opening hours
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
@@ -38,12 +40,29 @@ cables:
       - { lat: 51.99171948645172, lon: 4.238748427146507 }
       - { lat: 51.99231557307252, lon: 4.238651623891362 }
 
-# Fixed-start 80-minute blocks. Source: kabelskibaan.nl/openingstijden.
+# Seasonal drop-in windows (rules) plus fixed-start 80-minute blocks (slots).
+# Monday and Tuesday, and Thursday in September, are booking-only ("op aanvraag") and
+# have no listed hours. Source: kabelskibaan.nl/openingstijden.
 opening:
   booking: required
   note: >-
     Book a block online in advance. Arrive 30 minutes before your start time. Outside
-    regular hours the park can be booked exclusively.
+    regular hours the park can be booked exclusively. Monday, Tuesday and (in September)
+    Thursday are by request only. Closed on Koningsdag. Hemelvaart and Pinksteren use
+    weekend hours. During summer holiday (18 July–30 August) the park uses August hours.
+  rules:
+    - { label: April, months: [4], days: [weekend], open: "14:00", close: "17:00" }
+    - { label: May, months: [5], days: [wed, thu, fri], open: "15:30", close: "20:00" }
+    - { label: May, months: [5], days: [weekend], open: "12:30", close: "18:30" }
+    - { label: June, months: [6], days: [wed, thu, fri], open: "15:30", close: "21:30" }
+    - { label: June, months: [6], days: [weekend], open: "12:30", close: "20:00" }
+    - { label: July, months: [7], days: [wed, thu, fri], open: "15:30", close: "21:30" }
+    - { label: July, months: [7], days: [sat], open: "12:30", close: "21:30" }
+    - { label: July, months: [7], days: [sun], open: "12:30", close: "20:00" }
+    - { label: August, months: [8], days: [wed, thu, fri, sat], open: "12:30", close: "21:30" }
+    - { label: August, months: [8], days: [sun], open: "12:30", close: "20:00" }
+    - { label: September, months: [9], days: [wed, fri], open: "15:30", close: "20:00" }
+    - { label: September, months: [9], days: [weekend], open: "12:30", close: "20:00" }
   slots:
     - { id: "1", start: "12:30", end: "13:50" }
     - { id: "2", start: "14:00", end: "15:20" }
