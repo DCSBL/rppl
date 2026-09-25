@@ -81,12 +81,13 @@ enum LogbookFormatting {
         case .longest: return String(localized: "Longest")
         case .mostWaterTime: return String(localized: "Most water time")
         case .mostLaps: return String(localized: "Most laps")
-        case .mostFalls: return String(localized: "Most falls")
+        case .mostFalls: return String(localized: "Most wipeouts")
         }
     }
 
+    /// A fall is a shame, not a bad thing — keep this playful, not alarming.
     static func fallDetectedLabel() -> String {
-        String(localized: "Fall detected")
+        String(localized: "Wipeout")
     }
 
     static func joinedSetHighlights(_ highlights: [SetHighlight]) -> String {

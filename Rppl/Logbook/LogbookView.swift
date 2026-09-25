@@ -421,7 +421,8 @@ extension SessionHighlight {
         case .longest: .orange
         case .mostWaterTime: .blue
         case .mostLaps: .purple
-        case .mostFalls: .red
+        // A fall is a shame, not a bad thing — playful pink, not alarm red.
+        case .mostFalls: .pink
         }
     }
 }

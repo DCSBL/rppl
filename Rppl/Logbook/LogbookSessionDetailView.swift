@@ -802,11 +802,12 @@ private struct SetDetailCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
                 if set.fallDetected {
+                    // A fall is a shame, not a bad thing — playful pink, not alarm red.
                     ParkChip(
                         text: LogbookFormatting.fallDetectedLabel(),
                         systemImage: "figure.fall",
-                        tint: .red,
-                        fill: Color.red.opacity(0.14)
+                        tint: .pink,
+                        fill: Color.pink.opacity(0.14)
                     )
                     .padding(.top, 2)
                 }
