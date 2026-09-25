@@ -108,7 +108,8 @@ struct ParksView: View {
                                                 .font(.title3.weight(.semibold))
                                                 .frame(width: 44, height: 44)
                                         }
-                                        .buttonStyle(.borderless)
+                                        .buttonStyle(.glass)
+                                        .buttonBorderShape(.circle)
                                         .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
                                     }
                                     if editorEnabled {
@@ -119,7 +120,8 @@ struct ParksView: View {
                                                 .font(.title3.weight(.semibold))
                                                 .frame(width: 44, height: 44)
                                         }
-                                        .buttonStyle(.borderless)
+                                        .buttonStyle(.glass)
+                                        .buttonBorderShape(.circle)
                                         .accessibilityLabel(Text("Add park"))
                                     }
                                 }
