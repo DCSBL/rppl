@@ -7,7 +7,6 @@ import Foundation
 /// v4: distilled `mapTracks` for session heatmap maps (phone + Watch).
 /// v5: medoid most-common-path selection replaces mean-coordinate averaging.
 /// v6: session map heatmap only; drop averaged track and speed coloring.
-/// v7: `FallDetector` — per-set `fallDetected` + session `fallCount`/`mostFalls` badge.
 public enum SessionAnalyzer {
-    public static let version = 7
+    public static let version = 6
 }
