@@ -41,6 +41,7 @@ struct ParksMapView: View {
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .mapControls {
+            MapUserLocationButton()
             MapCompass()
             MapPitchToggle()
             MapScaleView()
@@ -51,37 +52,28 @@ struct ParksMapView: View {
                     onClose()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
+                        .font(.title3.weight(.semibold))
+                        .frame(width: 44, height: 44)
                 }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
                 .accessibilityLabel(Text("Close map"))
 
                 Button {
                     usesSatellite.toggle()
                 } label: {
                     Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
+                        .font(.title3.weight(.semibold))
+                        .frame(width: 44, height: 44)
                 }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
                 .accessibilityLabel(
                     usesSatellite
                         ? Text("Show standard map")
                         : Text("Show satellite map")
                 )
-
-                Button {
-                    focusOnUserLocation()
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(.thinMaterial, in: Circle())
-                }
-                .accessibilityLabel(Text("Here"))
             }
-            .foregroundStyle(Color.rpplText)
             .padding(.top, 8)
             .padding(.trailing, 12)
         }
@@ -110,19 +102,6 @@ struct ParksMapView: View {
             Button("OK", role: .cancel) {}
         }
         .onAppear { location.refresh() }
-    }
-
-    private func focusOnUserLocation() {
-        location.refresh()
-        guard let coordinate = location.coordinate else { return }
-        withAnimation {
-            position = .camera(
-                MapCamera(
-                    centerCoordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon),
-                    distance: 5_000
-                )
-            )
-        }
     }
 
     /// Countries and towns only: address results without a street.

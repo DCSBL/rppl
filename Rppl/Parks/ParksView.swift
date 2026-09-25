@@ -91,57 +91,62 @@ struct ParksView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Parks")
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(Color.rpplText)
-                        Spacer()
+                // The map is a full-screen destination with its own controls (see ParksMapView);
+                // showing this header on top of it duplicates buttons and fights the sort Picker
+                // for the "View on map" selection.
+                if !showMap {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Parks")
+                                .font(.largeTitle.bold())
+                                .foregroundStyle(Color.rpplText)
+                            Spacer()
+                            if !parks.isEmpty {
+                                Button(action: toggleSearch) {
+                                    Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
+                                        .font(.title3.weight(.semibold))
+                                        .frame(width: 44, height: 44)
+                                }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
+                                .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
+                            }
+                            if editorEnabled {
+                                Button {
+                                    showEditor = true
+                                } label: {
+                                    Image(systemName: "plus")
+                                        .font(.title3.weight(.semibold))
+                                        .frame(width: 44, height: 44)
+                                }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
+                                .accessibilityLabel(Text("Add park"))
+                            }
+                        }
+                        if showSearch {
+                            ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                        } else {
+                            Picker("Sort", selection: sortChoice) {
+                                Text("Nearby").tag(SortChoice.sort(.distance))
+                                Text("Most visited").tag(SortChoice.sort(.visits))
+                                Text("View on map").tag(SortChoice.map)
+                            }
+                            .pickerStyle(.segmented)
+                        }
                         if !parks.isEmpty {
-                            Button(action: toggleSearch) {
-                                Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
-                                    .font(.title3.weight(.semibold))
-                                    .frame(width: 44, height: 44)
-                            }
-                            .buttonStyle(.glass)
-                            .buttonBorderShape(.circle)
-                            .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
-                        }
-                        if editorEnabled {
-                            Button {
-                                showEditor = true
-                            } label: {
-                                Image(systemName: "plus")
-                                    .font(.title3.weight(.semibold))
-                                    .frame(width: 44, height: 44)
-                            }
-                            .buttonStyle(.glass)
-                            .buttonBorderShape(.circle)
-                            .accessibilityLabel(Text("Add park"))
+                            ParksFilterBar(
+                                openDate: $openFilterDate,
+                                cableDirections: $cableFilter,
+                                favoritesOnly: $favoritesOnly
+                            )
                         }
                     }
-                    if showSearch {
-                        ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    } else {
-                        Picker("Sort", selection: sortChoice) {
-                            Text("Nearby").tag(SortChoice.sort(.distance))
-                            Text("Most visited").tag(SortChoice.sort(.visits))
-                            Text("View on map").tag(SortChoice.map)
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                    if !parks.isEmpty {
-                        ParksFilterBar(
-                            openDate: $openFilterDate,
-                            cableDirections: $cableFilter,
-                            favoritesOnly: $favoritesOnly
-                        )
-                    }
+                    .padding(.horizontal, LogbookLayout.horizontalInset)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
                 }
-                .padding(.horizontal, LogbookLayout.horizontalInset)
-                .padding(.top, 8)
-                .padding(.bottom, 8)
 
                 if showMap {
                     ParksMapView(parks: filteredParks, location: location, onClose: { showMap = false })
