@@ -10,7 +10,7 @@ public enum HighlightAssigner {
     static let minimumSetsForShortest = 3
 
     /// Fixed display order for session badges.
-    public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps]
+    public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps, .mostFalls]
 
     public static func assignSetHighlights(_ sets: [SetSegmentStats]) -> [SetSegmentStats] {
         guard sets.count >= 2 else {
@@ -68,6 +68,10 @@ public enum HighlightAssigner {
 
         if let laps = uniqueMaxSession(sessions, value: \.lapCount) {
             byId[laps.id, default: []].append(.mostLaps)
+        }
+
+        if let falls = uniqueMaxSession(sessions, value: \.fallCount) {
+            byId[falls.id, default: []].append(.mostFalls)
         }
 
         return byId

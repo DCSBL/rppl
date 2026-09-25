@@ -412,6 +412,7 @@ extension SessionHighlight {
         case .longest: "clock.fill"
         case .mostWaterTime: "water.waves"
         case .mostLaps: "arrow.triangle.2.circlepath"
+        case .mostFalls: "figure.fall"
         }
     }
 
@@ -420,6 +421,8 @@ extension SessionHighlight {
         case .longest: .orange
         case .mostWaterTime: .blue
         case .mostLaps: .purple
+        // A fall is a shame, not a bad thing — playful pink, not alarm red.
+        case .mostFalls: .pink
         }
     }
 }

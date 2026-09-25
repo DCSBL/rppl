@@ -101,6 +101,99 @@ struct DerivedSessionViewTests {
         #expect(ensured.cityName == "Utrecht")
     }
 
+    /// Answers "will existing sessions be retrofitted?": a session recorded and analyzed before
+    /// `FallDetector` shipped has a sidecar stamped with the old `analyzerVersion` and no
+    /// `fallDetected` data (the pre-v7 shape). Bumping `SessionAnalyzer.version` in that commit is
+    /// what makes `ensureDerivedView` treat it as stale and rebuild from the still-on-disk raw
+    /// detections/locations — the same lazy path `staleAnalyzerVersionRebuilds` exercises, just
+    /// with a real fall in the raw data to prove the rebuilt stats pick it up.
+    @Test func preFallDetectorSidecarIsRetrofittedOnNextEnsure() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("DerivedRetrofit-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = SessionFileStore(rootURL: root)
+        let start = Date(timeIntervalSince1970: 1_700_000_300)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Watch7,1",
+            systemVersion: "26.0",
+            startedAt: start,
+            endedAt: start.addingTimeInterval(120)
+        )
+        _ = try store.createSession(manifest: manifest)
+        try store.appendDetection(
+            DetectionEvent(code: DetectionCodes.inactive, timestamp: start, reason: "session_start", detectorId: "session_start"),
+            sessionId: manifest.sessionId
+        )
+        try store.appendDetection(
+            DetectionEvent(
+                code: DetectionCodes.riding,
+                timestamp: start.addingTimeInterval(10),
+                reason: "ride_enter",
+                detectorId: "ride_enter"
+            ),
+            sessionId: manifest.sessionId
+        )
+        try store.appendDetection(
+            DetectionEvent(
+                code: DetectionCodes.inactive,
+                timestamp: start.addingTimeInterval(100),
+                reason: "ride_exit",
+                detectorId: "ride_exit"
+            ),
+            sessionId: manifest.sessionId
+        )
+        // A real fall in the raw GPS: cable speed collapsing to a near-stop within 1 s.
+        try store.appendLocationSamples([
+            LocationSample(
+                timestamp: start.addingTimeInterval(90),
+                latitude: 52.0,
+                longitude: 5.0,
+                horizontalAccuracy: 5,
+                speed: 8.3
+            ),
+            LocationSample(
+                timestamp: start.addingTimeInterval(91),
+                latitude: 52.0001,
+                longitude: 5.0,
+                horizontalAccuracy: 5,
+                speed: 1.4
+            ),
+        ], sessionId: manifest.sessionId)
+
+        // Simulate a sidecar written by the pre-FallDetector app: correct math for its time, but
+        // `fallDetected` defaults to `false` because that field did not exist yet.
+        let staleStats = SessionStatsBuilder.build(
+            manifest: manifest,
+            detections: try store.readDetections(sessionId: manifest.sessionId),
+            locations: try store.readLocationSamples(sessionId: manifest.sessionId),
+            health: []
+        )
+        #expect(staleStats.sets.first?.fallDetected == true) // sanity: today's builder does see it
+        var preShipStats = staleStats
+        preShipStats.sets = staleStats.sets.map { set in
+            var copy = set
+            copy.fallDetected = false // what the pre-v7 builder would have written
+            return copy
+        }
+        try store.writeDerivedView(
+            DerivedSessionView(analyzerVersion: SessionAnalyzer.version - 1, stats: preShipStats),
+            sessionId: manifest.sessionId
+        )
+
+        let stale = try store.readDerivedView(sessionId: manifest.sessionId)
+        #expect(stale?.isCurrentAnalyzer == false)
+        #expect(stale?.stats.sets.first?.fallDetected == false)
+
+        let retrofitted = try store.ensureDerivedView(sessionId: manifest.sessionId)
+        #expect(retrofitted.isCurrentAnalyzer)
+        #expect(retrofitted.stats.sets.first?.fallDetected == true)
+        #expect(retrofitted.stats.fallCount == 1)
+    }
+
     @Test func loadSummaryMatchesFullStatsWithoutRequiringMotion() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("DerivedSummary-\(UUID().uuidString)", isDirectory: true)
@@ -211,6 +304,50 @@ struct DerivedSessionViewTests {
         let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
         #expect(object?["lapCount"] as? Int == 3)
         #expect(object?["setCount"] == nil)
+    }
+
+    @Test func setSegmentStatsDefaultsFallDetectedFalseWhenMissing() throws {
+        // Pre-FallDetector derived JSON never wrote this key — must decode as false, not crash.
+        let json = """
+        {
+          "index": 0,
+          "startedAt": "2024-01-01T00:00:00Z",
+          "endedAt": "2024-01-01T00:10:00Z",
+          "duration": 600,
+          "distanceMeters": 1200,
+          "lapCount": 0,
+          "highlights": []
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let set = try decoder.decode(SetSegmentStats.self, from: Data(json.utf8))
+        #expect(!set.fallDetected)
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let encoded = try encoder.encode(set)
+        let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        #expect(object?["fallDetected"] as? Bool == false)
+    }
+
+    @Test func setSegmentStatsRoundTripsFallDetectedTrue() throws {
+        let set = SetSegmentStats(
+            index: 1,
+            startedAt: Date(timeIntervalSince1970: 0),
+            endedAt: Date(timeIntervalSince1970: 60),
+            duration: 60,
+            distanceMeters: 300,
+            fallDetected: true
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let data = try encoder.encode(set)
+        let decoded = try decoder.decode(SetSegmentStats.self, from: data)
+        #expect(decoded == set)
+        #expect(decoded.fallDetected)
     }
 
     @Test func sessionStatsForwardMigratesRideCountAndRides() throws {

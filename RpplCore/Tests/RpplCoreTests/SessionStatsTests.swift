@@ -374,6 +374,177 @@ struct SessionStatsBuilderTests {
         #expect(stats.waterTemperatureAvailable)
         #expect(stats.averageWaterTemperatureCelsius == nil)
     }
+
+    @Test func setWithSpeedCliffFlagsFallDetected() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
+        ]
+        let locations = [
+            location(at: 90, lat: 52.0, lon: 5.0, speedMps: 8.3), // ~30 km/h cable speed
+            location(at: 91, lat: 52.0001, lon: 5.0, speedMps: 1.4), // ~5 km/h: a cliff
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(120)),
+            detections: detections,
+            locations: locations,
+            health: []
+        )
+        #expect(stats.sets[0].fallDetected)
+        #expect(stats.fallCount == 1)
+    }
+
+    @Test func gentleDecelInSetLeavesFallDetectedFalse() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
+        ]
+        // 30 -> 0 km/h spread over 10 s: a controlled glide, not a cliff.
+        let locations = (0...10).map { i in
+            location(
+                at: 80 + Double(i),
+                lat: 52.0 + Double(i) * 0.00001,
+                lon: 5.0,
+                speedMps: max(0, 8.3 - Double(i) * 0.83)
+            )
+        }
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(120)),
+            detections: detections,
+            locations: locations,
+            health: []
+        )
+        #expect(!stats.sets[0].fallDetected)
+        #expect(stats.fallCount == 0)
+    }
+
+    @Test func fallCountSumsOnlyFlaggedSetsAcrossSession() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 50, id: "p1"),
+            detection(code: DetectionCodes.riding, at: 100, id: "r2"),
+            detection(code: DetectionCodes.inactive, at: 150, id: "p2"),
+        ]
+        let locations = [
+            // Set 1 (10-50): plain cable-speed cruise, clean exit — no cliff in window.
+            location(at: 20, lat: 52.0, lon: 5.0, speedMps: 8.3),
+            location(at: 21, lat: 52.0001, lon: 5.0, speedMps: 8.1),
+            // Set 2 (100-150): a hard cliff right before exit.
+            location(at: 140, lat: 52.001, lon: 5.0, speedMps: 8.3),
+            location(at: 141, lat: 52.0011, lon: 5.0, speedMps: 1.1),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(200)),
+            detections: detections,
+            locations: locations,
+            health: []
+        )
+        #expect(stats.sets.count == 2)
+        #expect(!stats.sets[0].fallDetected)
+        #expect(stats.sets[1].fallDetected)
+        #expect(stats.fallCount == 1)
+    }
+
+    @Test func gpsBlackoutAfterCableSpeedAlsoFlagsFallDetected() {
+        // Cable speed, then GPS goes silent for 4 s, resumes near-stopped — the cliff itself is
+        // never sampled, only the gap is. Mirrors the real "failed start" session.
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 30, id: "p1"),
+        ]
+        let locations = [
+            location(at: 15, lat: 52.0, lon: 5.0, speedMps: 8.3),
+            location(at: 16, lat: 52.0001, lon: 5.0, speedMps: 8.1),
+            location(at: 20, lat: 52.0002, lon: 5.0, speedMps: 0.3),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(60)),
+            detections: detections,
+            locations: locations,
+            health: []
+        )
+        #expect(stats.sets[0].fallDetected)
+    }
+
+    @Test func maxHorizontalAccuracyParameterGatesFallDetection() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 100, id: "p1"),
+        ]
+        // Both samples sit just past the default 25 m accuracy gate.
+        let locations = [
+            location(at: 90, lat: 52.0, lon: 5.0, accuracy: 30, speedMps: 8.3),
+            location(at: 91, lat: 52.0001, lon: 5.0, accuracy: 30, speedMps: 1.4),
+        ]
+
+        let defaultGated = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(120)),
+            detections: detections,
+            locations: locations,
+            health: []
+        )
+        #expect(!defaultGated.sets[0].fallDetected)
+
+        let widened = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(120)),
+            detections: detections,
+            locations: locations,
+            health: [],
+            maxHorizontalAccuracyM: 35
+        )
+        #expect(widened.sets[0].fallDetected)
+    }
+}
+
+@Suite("SessionStats.fallCount")
+struct SessionStatsFallCountTests {
+    private func set(index: Int, fallDetected: Bool) -> SetSegmentStats {
+        SetSegmentStats(
+            index: index,
+            startedAt: t0,
+            endedAt: t0.addingTimeInterval(60),
+            duration: 60,
+            distanceMeters: 300,
+            fallDetected: fallDetected
+        )
+    }
+
+    private func stats(sets: [SetSegmentStats]) -> SessionStats {
+        SessionStats(
+            startedAt: t0,
+            endedAt: t0.addingTimeInterval(600),
+            totalDuration: 600,
+            totalDistanceMeters: sets.reduce(0) { $0 + $1.distanceMeters },
+            activeEnergyKilocalories: nil,
+            setCount: sets.count,
+            ridingDuration: 300,
+            inactiveDuration: 300,
+            ridingInactiveRatio: 0.5,
+            sets: sets
+        )
+    }
+
+    @Test func zeroWhenNoSetsFlagged() {
+        #expect(stats(sets: [set(index: 1, fallDetected: false), set(index: 2, fallDetected: false)]).fallCount == 0)
+    }
+
+    @Test func countsOnlyFlaggedSets() {
+        let value = stats(sets: [
+            set(index: 1, fallDetected: true),
+            set(index: 2, fallDetected: false),
+            set(index: 3, fallDetected: true),
+        ]).fallCount
+        #expect(value == 2)
+    }
+
+    @Test func zeroWhenNoSets() {
+        #expect(stats(sets: []).fallCount == 0)
+    }
 }
 
 @Suite("LiveSetTracker")

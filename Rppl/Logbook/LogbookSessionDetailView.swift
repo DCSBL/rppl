@@ -785,6 +785,14 @@ private struct SetDetailCard: View {
         SessionLocationHelpers.averageSpeedKmh(for: set)
     }
 
+    private var highlightsAccessibilityLabel: String {
+        var parts = set.highlights.map(LogbookFormatting.setHighlightLabel)
+        if set.fallDetected {
+            parts.append(LogbookFormatting.fallDetectedLabel())
+        }
+        return parts.joined(separator: " ")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
@@ -795,7 +803,7 @@ private struct SetDetailCard: View {
                     .minimumScaleFactor(0.75)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if !set.highlights.isEmpty {
+                if !set.highlights.isEmpty || set.fallDetected {
                     FlowLayout(spacing: 6) {
                         ForEach(set.highlights, id: \.rawValue) { highlight in
                             ParkChip(
@@ -805,8 +813,17 @@ private struct SetDetailCard: View {
                                 fill: highlight.badgeTint.opacity(0.14)
                             )
                         }
+                        if set.fallDetected {
+                            // A fall is a shame, not a bad thing — playful pink, not alarm red.
+                            ParkChip(
+                                text: LogbookFormatting.fallDetectedLabel(),
+                                systemImage: "figure.fall",
+                                tint: .pink,
+                                fill: Color.pink.opacity(0.14)
+                            )
+                        }
                     }
-                    .accessibilityLabel(LogbookFormatting.joinedSetHighlights(set.highlights))
+                    .accessibilityLabel(highlightsAccessibilityLabel)
                 }
             }
 

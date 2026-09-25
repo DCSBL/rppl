@@ -16,6 +16,9 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var averageSpeedKmh: Double?
     /// Peak usable GPS sample speed (km/h); see `LocationSpeedStats.peakSpeedKmh`.
     public var peakSpeedKmh: Double?
+    /// GPS speed collapsed to near-zero within a couple seconds inside this set — a fall or hard
+    /// letting-go rather than a controlled stop; see `FallDetector`.
+    public var fallDetected: Bool
     /// Record badges for this set within the session (empty if none).
     public var highlights: [SetHighlight]
 
@@ -29,6 +32,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         sustainedSpeedKmh: Double? = nil,
         averageSpeedKmh: Double? = nil,
         peakSpeedKmh: Double? = nil,
+        fallDetected: Bool = false,
         highlights: [SetHighlight] = []
     ) {
         self.index = index
@@ -40,6 +44,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.sustainedSpeedKmh = sustainedSpeedKmh
         self.averageSpeedKmh = averageSpeedKmh
         self.peakSpeedKmh = peakSpeedKmh
+        self.fallDetected = fallDetected
         self.highlights = highlights
     }
 
@@ -59,6 +64,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         sustainedSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .sustainedSpeedKmh)
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
         peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
+        fallDetected = try container.decodeIfPresent(Bool.self, forKey: .fallDetected) ?? false
         highlights = try container.decodeIfPresent([SetHighlight].self, forKey: .highlights) ?? []
     }
 
@@ -73,6 +79,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         try container.encodeIfPresent(sustainedSpeedKmh, forKey: .sustainedSpeedKmh)
         try container.encodeIfPresent(averageSpeedKmh, forKey: .averageSpeedKmh)
         try container.encodeIfPresent(peakSpeedKmh, forKey: .peakSpeedKmh)
+        try container.encode(fallDetected, forKey: .fallDetected)
         try container.encode(highlights, forKey: .highlights)
     }
 
@@ -81,7 +88,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         case lapCount
         /// Intermediate slang mis-rename (circuit crossings briefly called sets).
         case legacyLapSetCount = "setCount"
-        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, highlights
+        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, fallDetected, highlights
     }
 }
 
@@ -128,6 +135,11 @@ public struct SessionStats: Codable, Equatable, Sendable {
     /// Sum of per-set crossing counts.
     public var totalLapCount: Int {
         sets.reduce(0) { $0 + $1.lapCount }
+    }
+
+    /// Sets flagged by `FallDetector`.
+    public var fallCount: Int {
+        sets.reduce(0) { $0 + ($1.fallDetected ? 1 : 0) }
     }
 
     public init(
