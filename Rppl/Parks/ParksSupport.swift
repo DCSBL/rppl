@@ -366,6 +366,7 @@ extension ParkOpenStatus {
         case .openToday: String(localized: "Open today")
         case .opensTomorrow: String(localized: "Opens tomorrow")
         case .closed: String(localized: "Closed")
+        case .unknown: String(localized: "Opening hours unknown")
         }
     }
 
@@ -374,6 +375,7 @@ extension ParkOpenStatus {
         case .openToday: .green
         case .opensTomorrow: .yellow
         case .closed: .red
+        case .unknown: .gray
         }
     }
 }

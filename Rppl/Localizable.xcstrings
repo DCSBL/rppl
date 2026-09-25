@@ -3955,6 +3955,22 @@
         }
       }
     },
+    "Opening hours unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours unknown"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openingstijden onbekend"
+          }
+        }
+      }
+    },
     "Opens tomorrow" : {
       "localizations" : {
         "en" : {
