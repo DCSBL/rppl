@@ -337,6 +337,38 @@ struct ParksTests {
         #expect(counts == ["near": 2])
     }
 
+    @Test func filteringByFavoritesCableAndOpenDate() throws {
+        let project7 = try project7()
+        let wetNWild = try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+        let parks = [project7, wetNWild]
+
+        #expect(ParkFilters().isActive == false)
+
+        let favoritesOnly = ParkFilters(favoritesOnly: true)
+        #expect(favoritesOnly.isActive)
+        #expect(ParkListing.filtered(parks, favorites: [], filters: favoritesOnly).isEmpty)
+        #expect(
+            ParkListing.filtered(parks, favorites: [wetNWild.id], filters: favoritesOnly).map(\.id)
+                == [wetNWild.id]
+        )
+
+        let ccwOnly = ParkFilters(cableDirections: [.counterClockwise])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: ccwOnly).map(\.id) == [wetNWild.id])
+        let cwOnly = ParkFilters(cableDirections: [.clockwise])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: cwOnly).map(\.id) == [project7.id])
+        let twoDOnly = ParkFilters(cableDirections: [.twoD])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: twoDOnly).isEmpty)
+
+        // 2026-09-24 (Thursday) project7 is open; 2026-10-07 both are closed.
+        let openThursday = ParkFilters(openOnDate: date("2026-09-24"))
+        #expect(ParkListing.filtered(parks, favorites: [], filters: openThursday).map(\.id).contains(project7.id))
+        let closedDay = ParkFilters(openOnDate: date("2026-10-07"))
+        #expect(ParkListing.filtered(parks, favorites: [], filters: closedDay).isEmpty)
+
+        // Cleared filters show everything, including closed parks.
+        #expect(ParkListing.filtered(parks, favorites: [], filters: ParkFilters()).map(\.id) == parks.map(\.id))
+    }
+
     // MARK: - Editing
 
     private func tempDir() throws -> URL {
