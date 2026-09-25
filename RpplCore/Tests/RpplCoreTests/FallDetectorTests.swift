@@ -68,4 +68,38 @@ struct FallDetectorTests {
         #expect(!FallDetector.detectsFall(in: [location(at: 0, speedKmh: 30)]))
         #expect(!FallDetector.detectsFall(in: []))
     }
+
+    /// A real fall can knock GPS out entirely — no two fixes ever show the cliff, only the gap
+    /// does. Mirrors the real "failed start" set in `Fixtures/FallDetection`: cable speed, then a
+    /// 4 s silence, then a near-stop.
+    @Test func flagsCableSpeedFollowedByGpsBlackoutThenNearStop() {
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: 29),
+            location(at: 2, speedKmh: 20),
+            // GPS silent for 4 s (no samples at offsets 3-5), resumes near-stopped.
+            location(at: 6, speedKmh: 1),
+        ]
+        #expect(FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func doesNotFlagAGapThatResumesAtCableSpeed() {
+        // A brief GPS flake mid-ride that resumes fast is not a stop.
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 1, speedKmh: 29),
+            location(at: 5, speedKmh: 27),
+        ]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
+
+    @Test func doesNotFlagAShortGapEvenIfSlowAfter() {
+        // 2.9 s: past the cliff window (2.5 s) but under the blackout bar (3.0 s) — neither
+        // rule should fire.
+        let samples = [
+            location(at: 0, speedKmh: 28),
+            location(at: 2.9, speedKmh: 2),
+        ]
+        #expect(!FallDetector.detectsFall(in: samples))
+    }
 }
