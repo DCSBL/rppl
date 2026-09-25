@@ -71,56 +71,54 @@ struct ParksView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Parks")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.rpplText)
+                        Spacer()
+                        if !parks.isEmpty {
+                            Button(action: toggleSearch) {
+                                Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
+                                    .font(.title3.weight(.semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
+                        }
+                        if editorEnabled {
+                            Button {
+                                showEditor = true
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.title3.weight(.semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(Text("Add park"))
+                        }
+                    }
+                    if showSearch {
+                        ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    } else {
+                        Picker("Sort", selection: sortChoice) {
+                            Text("Nearby").tag(SortChoice.sort(.distance))
+                            Text("Most visited").tag(SortChoice.sort(.visits))
+                            Text("View on map").tag(SortChoice.map)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                }
+                .padding(.horizontal, LogbookLayout.horizontalInset)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+
                 if showMap {
                     ParksMapView(parks: parks, location: location, onClose: { showMap = false })
                 } else {
                     List {
-                        Section {
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack {
-                                    Text("Parks")
-                                        .font(.largeTitle.bold())
-                                        .foregroundStyle(Color.rpplText)
-                                    Spacer()
-                                    if !parks.isEmpty {
-                                        Button(action: toggleSearch) {
-                                            Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
-                                                .font(.title3.weight(.semibold))
-                                                .frame(width: 44, height: 44)
-                                        }
-                                        .buttonStyle(.borderless)
-                                        .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
-                                    }
-                                    if editorEnabled {
-                                        Button {
-                                            showEditor = true
-                                        } label: {
-                                            Image(systemName: "plus")
-                                                .font(.title3.weight(.semibold))
-                                                .frame(width: 44, height: 44)
-                                        }
-                                        .buttonStyle(.borderless)
-                                        .accessibilityLabel(Text("Add park"))
-                                    }
-                                }
-                                if showSearch {
-                                    ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
-                                        .transition(.move(edge: .top).combined(with: .opacity))
-                                } else {
-                                    Picker("Sort", selection: sortChoice) {
-                                        Text("Nearby").tag(SortChoice.sort(.distance))
-                                        Text("Most visited").tag(SortChoice.sort(.visits))
-                                        Text("View on map").tag(SortChoice.map)
-                                    }
-                                    .pickerStyle(.segmented)
-                                }
-                            }
-                            .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                        }
-
                         if !isSearching, sort == .distance, location.availability != .available {
                             ParksLocationNeededCard(
                                 availability: location.availability,
