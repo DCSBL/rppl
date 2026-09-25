@@ -14,7 +14,7 @@ struct ParksMapView: View {
     @State private var detailPark: Park?
     @State private var query = ""
     @State private var searchFailed = false
-    @State private var mapStyleChoice: ParksMapStyleChoice = .standard
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var searchPin: ParksSearchPin?
 
     private var parkMatches: [Park] {
@@ -39,7 +39,7 @@ struct ParksMapView: View {
             }
             UserAnnotation()
         }
-        .mapStyle(mapStyleChoice.mapStyle)
+        .mapStyle(usesSatellite ? .hybrid : .standard)
         .mapControls {
             MapCompass()
             MapPitchToggle()
@@ -57,24 +57,19 @@ struct ParksMapView: View {
                 }
                 .accessibilityLabel(Text("Close map"))
 
-                Menu {
-                    ForEach(ParksMapStyleChoice.allCases) { choice in
-                        Button {
-                            mapStyleChoice = choice
-                        } label: {
-                            Label(choice.title, systemImage: choice.symbol)
-                            if choice == mapStyleChoice {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
+                Button {
+                    usesSatellite.toggle()
                 } label: {
-                    Image(systemName: mapStyleChoice.symbol)
+                    Image(systemName: usesSatellite ? "map" : "globe.europe.africa.fill")
                         .font(.body.weight(.semibold))
                         .frame(width: 40, height: 40)
                         .background(.thinMaterial, in: Circle())
                 }
-                .accessibilityLabel(Text("Map style"))
+                .accessibilityLabel(
+                    usesSatellite
+                        ? Text("Show standard map")
+                        : Text("Show satellite map")
+                )
 
                 Button {
                     focusOnUserLocation()
@@ -155,36 +150,4 @@ struct ParksMapView: View {
 private struct ParksSearchPin {
     let name: String
     let coordinate: CLLocationCoordinate2D
-}
-
-private enum ParksMapStyleChoice: String, CaseIterable, Identifiable {
-    case standard
-    case satellite
-    case hybrid
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .standard: String(localized: "Standard")
-        case .satellite: String(localized: "Satellite")
-        case .hybrid: String(localized: "Hybrid")
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .standard: "map"
-        case .satellite: "globe.americas.fill"
-        case .hybrid: "square.stack.3d.up.fill"
-        }
-    }
-
-    var mapStyle: MapStyle {
-        switch self {
-        case .standard: .standard
-        case .satellite: .imagery
-        case .hybrid: .hybrid
-        }
-    }
 }
