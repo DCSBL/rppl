@@ -5,12 +5,19 @@ import RpplCore
 import UserNotifications
 
 /// Opt-in, fully local "welcome to <park>" notification: geofences the favorite + nearest parks
-/// with small always-on-device regions, and fires a one-shot local notification on confirmed
-/// arrival. No background continuous tracking, no server — CoreLocation delivers region
-/// enter/exit events to the app without Rppl polling location itself.
+/// with small on-device regions, and fires a one-shot local notification on confirmed arrival.
+/// No continuous tracking, no server — CoreLocation delivers region enter/exit events to the app
+/// without Rppl polling location itself.
 ///
-/// Default off. Turning it on requests Always location + notification permission; either denial
-/// turns it back off with an explanation instead of silently degrading.
+/// Deliberately asks for **When In Use** location only, not Always: simpler ask, easier to reason
+/// about for users, and it's the same permission Rppl already requests for map/distance features.
+/// The trade-off is real and stated in the Settings footer: region events only reach a When In Use
+/// app while Rppl is still running in the foreground or background — not once iOS has fully
+/// suspended/terminated it after a while unused, and never after a manual force-quit (that stops
+/// delivery regardless of authorization level). Reopening Rppl re-arms monitoring.
+///
+/// Default off. Turning it on requests location + notification permission; either denial turns it
+/// back off with an explanation instead of silently degrading.
 @Observable
 @MainActor
 final class ParkArrivalController: NSObject {
@@ -18,7 +25,7 @@ final class ParkArrivalController: NSObject {
 
     private(set) var isEnabled: Bool
     private(set) var authorizationStatus: CLAuthorizationStatus
-    /// Set when the user turned the feature on but Always location or notifications got denied —
+    /// Set when the user turned the feature on but location or notifications got denied —
     /// the Settings toggle reads this to show why it snapped back off.
     private(set) var permissionDenied = false
     /// Tapped-notification hand-off for `ContentView` to open that park (and, first time, the
@@ -43,17 +50,14 @@ final class ParkArrivalController: NSObject {
         UNUserNotificationCenter.current().delegate = self
     }
 
-    /// Turns the feature on: requests Always location (upgrading from When In Use if needed) and
-    /// notification permission. Any denial reverts the toggle and sets `permissionDenied`.
+    /// Turns the feature on: requests When In Use location + notification permission. Any denial
+    /// reverts the toggle and sets `permissionDenied`.
     func enable() async {
         permissionDenied = false
         if locationManager.authorizationStatus == .notDetermined {
-            await requestLocationAuthorization(always: false)
+            await requestLocationAuthorization()
         }
-        if locationManager.authorizationStatus == .authorizedWhenInUse {
-            await requestLocationAuthorization(always: true)
-        }
-        guard locationManager.authorizationStatus == .authorizedAlways else {
+        guard Self.isAuthorizedForMonitoring(locationManager.authorizationStatus) else {
             finishEnable(granted: false)
             return
         }
@@ -74,7 +78,7 @@ final class ParkArrivalController: NSObject {
     /// Re-derives the monitored region set from the current favorites + nearest parks. Called on
     /// app foreground and right after enabling — never on a background timer.
     func refreshMonitoredRegionsIfEnabled() {
-        guard isEnabled, locationManager.authorizationStatus == .authorizedAlways else { return }
+        guard isEnabled, Self.isAuthorizedForMonitoring(locationManager.authorizationStatus) else { return }
         if ParkStore.shared.entries.isEmpty {
             ParkStore.shared.reload()
         }
@@ -101,15 +105,15 @@ final class ParkArrivalController: NSObject {
         WakeLog.debug(.permissions, "park arrival: enabled")
     }
 
-    private func requestLocationAuthorization(always: Bool) async {
+    private func requestLocationAuthorization() async {
         await withCheckedContinuation { continuation in
             authorizationContinuation = continuation
-            if always {
-                locationManager.requestAlwaysAuthorization()
-            } else {
-                locationManager.requestWhenInUseAuthorization()
-            }
+            locationManager.requestWhenInUseAuthorization()
         }
+    }
+
+    private static func isAuthorizedForMonitoring(_ status: CLAuthorizationStatus) -> Bool {
+        status == .authorizedWhenInUse || status == .authorizedAlways
     }
 
     private func requestNotificationPermission() async -> Bool {

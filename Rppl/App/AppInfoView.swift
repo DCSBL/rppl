@@ -47,7 +47,7 @@ struct AppInfoView: View {
                     Text("Park arrival notifications")
                 } footer: {
                     Text(
-                        "Off by default. When on, Rppl watches for you crossing into your favorite and nearby parks on-device — no server, no background tracking — and sends one local \"Welcome to…\" notification per visit. Always off unless you turn it on here."
+                        "Off by default. When on, Rppl watches for you crossing into your favorite and nearby parks on-device — no server, no continuous tracking — and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up. Always off unless you turn it on here."
                     )
                 }
 
@@ -192,7 +192,7 @@ struct AppInfoView: View {
             .tint(Color.rpplAccent)
             if parkArrival.permissionDenied {
                 Text(
-                    "Location or notification access was denied, so this stayed off. Allow both \"Always\" location and notifications in Settings, then try again."
+                    "Location or notification access was denied, so this stayed off. Allow both location and notifications in Settings, then try again."
                 )
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)

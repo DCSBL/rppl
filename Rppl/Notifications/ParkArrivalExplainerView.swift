@@ -22,6 +22,9 @@ struct ParkArrivalExplainerView: View {
                     "Once you're clearly at a park (not just passing by), Rppl sends this one local notification, then stays quiet about that park for the rest of the day."
                 )
                 Text(
+                    "This needs Rppl to still be running in the background, so if you haven't opened it in a while, reopen it once to keep the notifications coming."
+                )
+                Text(
                     "Turn this off anytime in Rppl settings."
                 )
             }
