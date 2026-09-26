@@ -906,7 +906,7 @@ private struct SetDetailCard: View {
     }
 }
 
-/// One bar per set (minutes riding); highlighted sets in full tint.
+/// One bar per set, height = minutes. One color: highlight badges live on the set cards.
 private struct SetDurationChart: View {
     let sets: [SetSegmentStats]
 
@@ -917,11 +917,7 @@ private struct SetDurationChart: View {
                     x: .value("Set", String(set.index)),
                     y: .value("Duration", set.duration / 60)
                 )
-                .foregroundStyle(
-                    set.highlights.isEmpty
-                        ? MetricKind.sets.tint.opacity(0.45)
-                        : MetricKind.sets.tint
-                )
+                .foregroundStyle(MetricKind.sets.tint)
                 .cornerRadius(3)
             }
             .chartYAxis {
