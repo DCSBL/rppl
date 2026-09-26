@@ -2673,7 +2673,8 @@
             "value" : "TOTAAL"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Total calories" : {
       "localizations" : {
@@ -5920,6 +5921,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elke session in iCloud Drive staat al in het logboek op deze iPhone."
+          }
+        }
+      }
+    },
+    "Total" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totaal"
           }
         }
       }
