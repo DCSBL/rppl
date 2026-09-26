@@ -7,7 +7,17 @@ import RpplCore
 
 // MARK: - Lifecycle
 extension WatchSessionController {
+    /// Location + motion refresh synchronously (local, cheap). Health status is fetched off the
+    /// main thread: `authorizationStatus(for:)` is a synchronous XPC round-trip to `healthd`, and
+    /// a stalled `healthd` blocked the main thread past the 10s watchdog (crash loop, #191).
     func refreshPermissionStatus() {
+        refreshLocalPermissionStatus()
+        // Health status cannot change the UI while recording; avoid healthd traffic mid-ride.
+        guard !isRunning else { return }
+        Task { await refreshHealthPermissionStatus() }
+    }
+
+    private func refreshLocalPermissionStatus() {
         let loc = locationManager.authorizationStatus
         locationAuthStatus = Self.locationLabel(loc)
         locationPermission = Self.locationPermissionState(loc)
@@ -37,13 +47,19 @@ extension WatchSessionController {
             motionPermission = .unavailable
             motionAvailability = "unavailable (skipped)"
         }
+    }
 
+    /// Awaitable Health refresh for callers that act on `healthPermission` right after.
+    func refreshHealthPermissionStatus() async {
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
             healthPermission = .unavailable
+            isHealthPermissionResolved = true
             return
         }
-        switch healthStore.authorizationStatus(for: workoutType) {
+        let status = await workoutAuthorizationStatus()
+        isHealthPermissionResolved = true
+        switch status {
         case .notDetermined:
             healthAuthStatus = String(localized: "workout: notDetermined")
             healthPermission = .notDetermined
@@ -57,6 +73,26 @@ extension WatchSessionController {
             healthAuthStatus = String(localized: "workout: unknown")
             healthPermission = .notDetermined
         }
+    }
+
+    /// Coalesces concurrent lookups so a stalled `healthd` never piles up blocked threads.
+    private func workoutAuthorizationStatus() async -> HKAuthorizationStatus {
+        if let inFlight = healthStatusLookup {
+            return await inFlight.value
+        }
+        let store = healthStore
+        let type = workoutType
+        let lookup = Task {
+            await withCheckedContinuation { (continuation: CheckedContinuation<HKAuthorizationStatus, Never>) in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    continuation.resume(returning: store.authorizationStatus(for: type))
+                }
+            }
+        }
+        healthStatusLookup = lookup
+        let status = await lookup.value
+        healthStatusLookup = nil
+        return status
     }
 
     /// Safe to call repeatedly. System may only show the sheet while status is notDetermined.
@@ -80,6 +116,7 @@ extension WatchSessionController {
 
         errorText = nil
         refreshPermissionStatus()
+        await refreshHealthPermissionStatus()
 
         // Brief yield so the permissions list can paint before HealthKit blocks on its sheet.
         try? await Task.sleep(for: .milliseconds(150))
@@ -113,7 +150,7 @@ extension WatchSessionController {
             WakeLog.debug(.permissions, "Health unavailable")
             return
         }
-        refreshPermissionStatus()
+        await refreshHealthPermissionStatus()
         if !force, healthPermission != .notDetermined {
             WakeLog.debug(.permissions, "Health skip request status=\(healthPermission.rawValue)")
             return
@@ -127,7 +164,7 @@ extension WatchSessionController {
             errorText = String(localized: "Health auth: \(error.localizedDescription)")
             WakeLog.error(.permissions, "Health auth: \(error.localizedDescription)")
         }
-        refreshPermissionStatus()
+        await refreshHealthPermissionStatus()
     }
 
     func requestMotionPermission() async {
