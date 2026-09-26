@@ -24,4 +24,73 @@ struct CableSpeedEstimatorTests {
         #expect(abs(estimates[0].speedKmh - 24.5) < 1)
         #expect(abs(estimates[1].speedKmh - 32.5) < 1)
     }
+
+    @Test func roundsToNearestHalf() {
+        #expect(CableSpeedEstimator.roundedToHalfKmh(28.24) == 28.0)
+        #expect(CableSpeedEstimator.roundedToHalfKmh(28.26) == 28.5)
+        #expect(CableSpeedEstimator.roundedToHalfKmh(28.76) == 29.0)
+    }
+
+    // MARK: - Per-set fallback
+
+    private func locations(
+        speedKmh: Double,
+        duration: TimeInterval,
+        start: Date = Date(timeIntervalSince1970: 0)
+    ) -> [LocationSample] {
+        let speedMps = SpeedUnits.metersPerSecond(fromKilometersPerHour: speedKmh)
+        return stride(from: 0, through: duration, by: 1).map { offset in
+            LocationSample(
+                timestamp: start.addingTimeInterval(offset),
+                latitude: 52.0 + offset * 0.00001,
+                longitude: 4.0,
+                horizontalAccuracy: 5,
+                speed: speedMps
+            )
+        }
+    }
+
+    @Test func shortSetFallsBackToSessionValueEvenWhenSpeedDiffers() {
+        let start = Date(timeIntervalSince1970: 0)
+        let shortSet = locations(speedKmh: 40, duration: 30, start: start)
+        let value = CableSpeedEstimator.cableSpeedKmh(
+            setWindow: (start: start, end: start.addingTimeInterval(30)),
+            sessionSpeedKmh: 24.5,
+            locations: shortSet
+        )
+        #expect(value == 24.5)
+    }
+
+    @Test func longSetOverridesSessionValueWhenClearlyDifferent() {
+        let start = Date(timeIntervalSince1970: 0)
+        let longSet = locations(speedKmh: 32, duration: 90, start: start)
+        let value = CableSpeedEstimator.cableSpeedKmh(
+            setWindow: (start: start, end: start.addingTimeInterval(90)),
+            sessionSpeedKmh: 24.5,
+            locations: longSet
+        )
+        #expect(value == 32.0)
+    }
+
+    @Test func longSetKeepsSessionValueWhenCloseEnough() {
+        let start = Date(timeIntervalSince1970: 0)
+        let longSet = locations(speedKmh: 25.5, duration: 90, start: start)
+        let value = CableSpeedEstimator.cableSpeedKmh(
+            setWindow: (start: start, end: start.addingTimeInterval(90)),
+            sessionSpeedKmh: 24.5,
+            locations: longSet
+        )
+        #expect(value == 24.5)
+    }
+
+    @Test func nilSessionSpeedGivesNoEstimate() {
+        let start = Date(timeIntervalSince1970: 0)
+        let longSet = locations(speedKmh: 25.5, duration: 90, start: start)
+        let value = CableSpeedEstimator.cableSpeedKmh(
+            setWindow: (start: start, end: start.addingTimeInterval(90)),
+            sessionSpeedKmh: nil,
+            locations: longSet
+        )
+        #expect(value == nil)
+    }
 }

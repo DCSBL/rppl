@@ -37,6 +37,10 @@ public enum SessionStatsBuilder {
 
         let setWindows = Self.setWindows(from: phases)
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
+        let sessionCableSpeedKmh = CableSpeedEstimator.cableSpeedKmh(
+            setWindows: setWindows.map { (start: $0.start, end: $0.end) },
+            locations: sortedLocations
+        )
         var sets: [SetSegmentStats] = []
         var totalDistance = 0.0
         var lapTracker = LapSetTracker(thresholds: lapThresholds)
@@ -70,6 +74,11 @@ public enum SessionStatsBuilder {
                 maxHorizontalAccuracyM: maxHorizontalAccuracyM
             )
             let peak = LocationSpeedStats.peakSpeedKmh(from: setLocations)
+            let cableSpeed = CableSpeedEstimator.cableSpeedKmh(
+                setWindow: (start: window.start, end: window.end),
+                sessionSpeedKmh: sessionCableSpeedKmh,
+                locations: sortedLocations
+            )
             sets.append(
                 SetSegmentStats(
                     index: index + 1,
@@ -80,7 +89,8 @@ public enum SessionStatsBuilder {
                     lapCount: laps,
                     sustainedSpeedKmh: sustained,
                     averageSpeedKmh: average,
-                    peakSpeedKmh: peak
+                    peakSpeedKmh: peak,
+                    cableSpeedKmh: cableSpeed
                 )
             )
             totalDistance += distance
@@ -121,10 +131,7 @@ public enum SessionStatsBuilder {
             sets: highlightedSets,
             averageWaterTemperatureCelsius: waterAverage,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
-            cableSpeedKmh: CableSpeedEstimator.cableSpeedKmh(
-                setWindows: setWindows.map { (start: $0.start, end: $0.end) },
-                locations: sortedLocations
-            )
+            cableSpeedKmh: sessionCableSpeedKmh
         )
     }
 
