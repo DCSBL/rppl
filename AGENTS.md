@@ -33,7 +33,7 @@ _Only use linear issues when one is given by the user_
 - Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
 
-Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Detection thresholds: [Docs/RideDetection.md](Docs/RideDetection.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md).
+Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer: [Docs/DataCollection.md](Docs/DataCollection.md). Session on-disk layout: [Docs/SessionStorage.md](Docs/SessionStorage.md). Pre-commit gate: [Docs/DevWorkflow.md](Docs/DevWorkflow.md). Detection thresholds: [Docs/RideDetection.md](Docs/RideDetection.md). System design: [Docs/DESIGN.md](Docs/DESIGN.md). Core library UML / DetectionEngine: [RpplCore/DESIGN.md](RpplCore/DESIGN.md). UI look + voice and tone: [Docs/DesignLanguage.md](Docs/DesignLanguage.md).
 
 ## Wakeboard slang (all locales)
 
@@ -131,7 +131,8 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
-| UI / Info.plist copy (any locale) | `*.xcstrings` · `scripts/format-xcstrings.py` · Wakeboard slang section above |
+| UI / Info.plist copy (any locale) | `*.xcstrings` · `scripts/format-xcstrings.py` · Wakeboard slang section above · voice rules in [Docs/DesignLanguage.md](Docs/DesignLanguage.md#voice-and-tone) |
+| Tiles, gauges, metric symbols / tints | `Rppl/Design/` · [Docs/DesignLanguage.md](Docs/DesignLanguage.md) |
 
 ## Out of scope unless explicitly asked
 
