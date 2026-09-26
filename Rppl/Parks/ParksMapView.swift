@@ -23,7 +23,7 @@ struct ParksMapView: View {
     @State private var pendingRecenter = false
 
     /// Below this camera distance, cable traces are close enough to read; above it they're just clutter.
-    private static let cableLineVisibleDistance: CLLocationDistance = 3_000
+    private static let cableLineVisibleDistance: CLLocationDistance = 10_000
     /// "Reasonable distance" for the here/reset button: close enough to be useful, wide enough to
     /// see nearby landmarks around the park.
     private static let recenterCameraDistance: CLLocationDistance = 5_000
