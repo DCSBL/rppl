@@ -143,6 +143,22 @@
         }
       }
     },
+    "Avg speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avg speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gem. snelheid"
+          }
+        }
+      }
+    },
     "Cable Park" : {
       "localizations" : {
         "en" : {
@@ -155,6 +171,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kabelpark"
+          }
+        }
+      }
+    },
+    "Calories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calorieën"
           }
         }
       }

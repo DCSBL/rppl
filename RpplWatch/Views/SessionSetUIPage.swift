@@ -1,8 +1,7 @@
 import SwiftUI
-import MapKit
 import RpplCore
 
-/// Product session UI: one-screen set view; scrollable inactive overview.
+/// Product session UI: one-screen set view; fitted inactive overview (extra metrics scroll below a sticky header).
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -175,44 +174,50 @@ struct SessionSetUIPage: View {
         )
     }
 
-    // MARK: - Inactive (scrollable overview)
+    // MARK: - Inactive (fitted; extra metrics scroll in below a sticky header)
 
     private var inactiveView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
+                if let calories = session.activeEnergyKilocalories {
+                    SessionMetricRow(
+                        label: "Calories",
+                        metric: .energy,
+                        value: SessionFormatters.calories(calories)
+                    )
+                }
+                if let averageSpeed = session.sessionAverageSpeedKmh {
+                    SessionMetricRow(
+                        label: "Avg speed",
+                        metric: .speed,
+                        value: SessionFormatters.averageSpeed(averageSpeed)
+                    )
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+            .padding(.top, 6)
+        }
+        .safeAreaInset(edge: .top) {
+            VStack(alignment: .leading, spacing: 8) {
                 statusLine(primary: "Inactive", color: .gray)
 
-                if let coordinate = sessionStartCoordinate {
-                    SessionStartMapPinView(coordinate: coordinate)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
-
-                Text("Session")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .alwaysOnSecondaryChrome(isLuminanceReduced)
-
                 SessionMetricRow(
-                    label: "Elapsed",
+                    label: "Session",
                     metric: .duration,
                     value: SessionFormatters.elapsed(session.elapsed),
                     valueColor: .yellow,
                     isPrimaryMetric: true
                 )
                 SessionMetricRow(
-                    label: "Distance",
-                    metric: .distance,
-                    value: SessionFormatters.distance(session.totalDistanceM)
+                    label: "Inactive for",
+                    metric: .inactive,
+                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
                 )
                 SessionMetricRow(
                     label: "Sets",
                     metric: .sets,
                     value: "\(session.setCount)"
-                )
-                SessionMetricRow(
-                    label: "Inactive for",
-                    metric: .inactive,
-                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
                 )
                 if session.waterTemperatureAvailable {
                     SessionMetricRow(
@@ -222,33 +227,10 @@ struct SessionSetUIPage: View {
                             ?? TemperatureFormat.placeholder
                     )
                 }
-
-                heartRateRow
-
-                Divider()
-                    .padding(.vertical, 2)
-                    .alwaysOnSecondaryChrome(isLuminanceReduced)
-
-                WatchLastSetSection(
-                    duration: session.lastSetDuration,
-                    distanceMeters: session.lastSetMeters,
-                    lapCount: session.lastSetLapCount,
-                    didCompleteSet: session.didCompleteSet
-                )
-                .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
         }
-    }
-
-    private var sessionStartCoordinate: CLLocationCoordinate2D? {
-        guard WatchDisplayLayout.showsSessionOverviewStartMap,
-              let latitude = session.sessionStartLatitude,
-              let longitude = session.sessionStartLongitude else {
-            return nil
-        }
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
     @ViewBuilder
