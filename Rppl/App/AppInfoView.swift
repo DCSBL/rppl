@@ -7,7 +7,9 @@ struct AppInfoView: View {
 
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
+    @State private var isTogglingParkArrival = false
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -32,6 +34,16 @@ struct AppInfoView: View {
                 }
 
                 PhonePermissionsListSection(permissions: permissions)
+
+                Section {
+                    parkArrivalRow
+                } header: {
+                    Text("Park arrival notifications")
+                } footer: {
+                    Text(
+                        "Off by default. When on, Rppl watches for you crossing into your favorite and nearby parks on-device — no server, no background tracking — and sends one local \"Welcome to…\" notification per visit. Always off unless you turn it on here."
+                    )
+                }
 
                 if AppReleaseChannel.allowsDebugTools {
                     Section {
@@ -138,6 +150,46 @@ struct AppInfoView: View {
                 Text(
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var parkArrivalRow: some View {
+        if isTogglingParkArrival {
+            HStack {
+                Text("Notify on arrival")
+                Spacer()
+                ProgressView()
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Notify on arrival")
+            .accessibilityValue("Updating")
+        } else {
+            Toggle(
+                "Notify on arrival",
+                isOn: Binding(
+                    get: { parkArrival.isEnabled },
+                    set: { newValue in
+                        isTogglingParkArrival = true
+                        Task {
+                            if newValue {
+                                await parkArrival.enable()
+                            } else {
+                                parkArrival.disable()
+                            }
+                            isTogglingParkArrival = false
+                        }
+                    }
+                )
+            )
+            .tint(Color.rpplAccent)
+            if parkArrival.permissionDenied {
+                Text(
+                    "Location or notification access was denied, so this stayed off. Allow both \"Always\" location and notifications in Settings, then try again."
+                )
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
             }
         }
     }

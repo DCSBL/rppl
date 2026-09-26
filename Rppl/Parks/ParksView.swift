@@ -3,6 +3,8 @@ import RpplCore
 import SwiftUI
 
 struct ParksView: View {
+    @Binding var navigation: ParksNavigationRequest
+    @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
@@ -125,7 +127,7 @@ struct ParksView: View {
         let visibleParks = filteredParks(allParks)
         let orderedParks = sortedParks(visibleParks, visitCounts: visitCounts)
 
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack(alignment: .top) {
                 RpplBackdrop()
 
@@ -276,6 +278,13 @@ struct ParksView: View {
             guard mapPendingRecenter, let coordinate else { return }
             mapPendingRecenter = false
             moveMap(to: coordinate)
+        }
+        .onChange(of: navigation.openParkId) { _, parkId in
+            guard let parkId else { return }
+            navigation.openParkId = nil
+            if store.entries.isEmpty { store.reload() }
+            guard let park = store.entry(id: parkId)?.park else { return }
+            path.append(park)
         }
     }
 }
