@@ -110,7 +110,7 @@ struct LogbookSessionDetailView: View {
             }
         }
         .alert(
-            "Export Session?",
+            "Export session?",
             isPresented: $showExportExplainer
         ) {
             Button("Understood") {
@@ -122,7 +122,7 @@ struct LogbookSessionDetailView: View {
             Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
         }
         .alert(
-            "Could Not Export",
+            "Could not export",
             isPresented: $showExportError,
             presenting: exportErrorText
         ) { _ in

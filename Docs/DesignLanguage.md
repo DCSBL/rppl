@@ -94,14 +94,15 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 
 1. **Short.** A label is one or two words. A sentence says one thing.
 2. **Sentence case everywhere**: titles, buttons, alerts, tabs. "Delete session?", not "Delete Session?". Proper names keep their capitals: Rppl, Apple Watch, iCloud Drive, Water Lock, Health, Apple Weather.
-3. **Talk to the rider.** English "you", contractions are fine ("can't", "don't"). Dutch: always *je / jouw*, never *u*.
-4. **Buttons start with a verb**: Export, Delete, Try again, Show example session. Cancel stays Cancel.
-5. **Errors: what happened, then what to do.** "Couldn't export. Try again from the logbook." No blame, no codes up front, no exclamation marks.
-6. **Empty states: what's missing and how to get it.** "No sessions yet. Record a park day on Apple Watch."
-7. **Confirmations:** the question is the title ("Delete session?"), the consequence is the message, the destructive button repeats the verb ("Delete").
-8. **Numbers come from the Core formatters** (`DistanceFormat`, `DurationFormat`, `TemperatureFormat`, `EnergyFormat`). Never build units by hand. The locale decides decimal comma and km or mi.
-9. **Watch is shorter still.** Buttons at most two words. Metric captions short enough to fit under a number (DIST, LAPS).
-10. **Wakeboard slang** follows [AGENTS.md](../AGENTS.md#wakeboard-slang-all-locales): English jargon stays English in every locale.
+3. **Talk to the rider.** English "you". Dutch: always *je / jouw*, never *u*.
+4. **Buttons start with a verb**: Export, Delete, Try again, Show example session. Cancel stays Cancel. Dutch buttons use the infinitive, like iOS itself: *Verwijderen*, *Opnieuw proberen*, *Alles selecteren*.
+5. **Errors: what happened, then what to do.** "Could not export. Try again from the logbook." No blame, no codes up front, no exclamation marks. Dutch alert titles use *… mislukt* ("Exporteren mislukt").
+6. **App Intent titles are the exception**: Shortcuts and the Action Button follow Apple's Title Case ("Start Cable Park Session").
+7. **Empty states: what's missing and how to get it.** "No sessions yet. Record a park day on Apple Watch."
+8. **Confirmations:** the question is the title ("Delete session?"), the consequence is the message, the destructive button repeats the verb ("Delete").
+9. **Numbers come from the Core formatters** (`DistanceFormat`, `DurationFormat`, `TemperatureFormat`, `EnergyFormat`). Never build units by hand. The locale decides decimal comma and km or mi.
+10. **Watch is shorter still.** Buttons at most two words. Metric captions short enough to fit under a number (DIST, LAPS).
+11. **Wakeboard slang** follows [AGENTS.md](../AGENTS.md#wakeboard-slang-all-locales): English jargon stays English in every locale.
 
 ### One word per thing
 
@@ -122,7 +123,7 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 | Before | After |
 |--------|-------|
 | Delete Session? | Delete session? |
-| Could Not Export | Couldn't export |
+| Could Not Export | Could not export |
 | Try Again | Try again |
 | Logbook · "Park days and sets" above a list called "Sessions" | Logbook · "Sessions and sets" |
 | End Session? | End session? |

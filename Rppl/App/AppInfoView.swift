@@ -124,13 +124,13 @@ struct AppInfoView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
             .alert(
-                "Turn Off iCloud Drive?",
+                "Turn off iCloud Drive?",
                 isPresented: $showDisableDeleteConfirm
             ) {
-                Button("Delete iCloud Copies", role: .destructive) {
+                Button("Delete iCloud copies", role: .destructive) {
                     beginDisableSync(deleteCopies: true)
                 }
-                Button("Keep iCloud Copies") {
+                Button("Keep iCloud copies") {
                     beginDisableSync(deleteCopies: false)
                 }
                 Button("Cancel", role: .cancel) {}

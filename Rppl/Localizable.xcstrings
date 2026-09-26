@@ -471,38 +471,6 @@
         }
       }
     },
-    "Could Not Delete Session" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could Not Delete Session"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session verwijderen mislukt"
-          }
-        }
-      }
-    },
-    "Could Not Export" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could Not Export"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exporteren mislukt"
-          }
-        }
-      }
-    },
     "Could Not Import Session" : {
       "localizations" : {
         "en" : {
@@ -612,22 +580,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen uit Rppl"
-          }
-        }
-      }
-    },
-    "Delete Session?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete Session?"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session verwijderen?"
           }
         }
       }
@@ -775,22 +727,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Session-JSON exporteren"
-          }
-        }
-      }
-    },
-    "Export Session?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export Session?"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session exporteren?"
           }
         }
       }
@@ -1721,22 +1657,6 @@
         }
       }
     },
-    "Park days and sets" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park days and sets"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parkdagen en sets"
-          }
-        }
-      }
-    },
     "Pending transfers: %lld" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1934,22 +1854,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Machtigingen vragen"
-          }
-        }
-      }
-    },
-    "Delete from This iPhone" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete from This iPhone"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verwijderen van deze iPhone"
           }
         }
       }
@@ -2788,22 +2692,6 @@
         }
       }
     },
-    "Try Again" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try Again"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opnieuw proberen"
-          }
-        }
-      }
-    },
     "Try again later." : {
       "localizations" : {
         "en" : {
@@ -3053,6 +2941,12 @@
             "state" : "translated",
             "value" : "Already in logbook"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staat al in je logboek"
+          }
         }
       }
     },
@@ -3063,20 +2957,34 @@
             "state" : "translated",
             "value" : "Could not import session"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session importeren mislukt"
+          }
         }
       }
     },
     "Data" : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
+          }
+        }
+      }
     },
     "Date unknown" : {
-
-    },
-    "Delete iCloud Copies" : {
-
-    },
-    "Deselect All" : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum onbekend"
+          }
+        }
+      }
     },
     "Done" : {
       "localizations" : {
@@ -3094,21 +3002,25 @@
         }
       }
     },
-    "Every park day in iCloud Drive is already in this iPhone logbook." : {
+    "iCloud Drive" : {
       "localizations" : {
-        "en" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Every park day in iCloud Drive is already in this iPhone logbook."
+            "value" : "iCloud Drive"
           }
         }
       }
     },
-    "iCloud Drive" : {
-
-    },
     "iCloud Drive unavailable" : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud Drive niet beschikbaar"
+          }
+        }
+      }
     },
     "Import from file" : {
       "localizations" : {
@@ -3127,13 +3039,24 @@
       }
     },
     "Import from iCloud" : {
-
-    },
-    "Keep iCloud Copies" : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeren uit iCloud"
+          }
+        }
+      }
     },
     "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud." : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewaart je logboek als back-up in je iCloud Drive, zodat je het kunt terugzetten. Gebruikt je Apple-account, geen Rppl-cloud."
+          }
+        }
+      }
     },
     "No sessions to import" : {
       "localizations" : {
@@ -3142,14 +3065,14 @@
             "state" : "translated",
             "value" : "No sessions to import"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen sessions om te importeren"
+          }
         }
       }
-    },
-    "Not Now" : {
-
-    },
-    "Select All" : {
-
     },
     "Show" : {
       "localizations" : {
@@ -3158,14 +3081,24 @@
             "state" : "translated",
             "value" : "Show"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tonen"
+          }
         }
       }
     },
     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files." : {
-
-    },
-    "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook." : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppen met het logboek syncen naar iCloud Drive? Je kunt de kopieën in iCloud Drive nu verwijderen, of ze in Bestanden laten staan."
+          }
+        }
+      }
     },
     "This session is already in your logbook." : {
       "localizations" : {
@@ -3173,6 +3106,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This session is already in your logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze session staat al in je logboek."
           }
         }
       }
@@ -3193,11 +3132,15 @@
         }
       }
     },
-    "Turn Off iCloud Drive?" : {
-
-    },
     "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore." : {
-
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met iCloud Drive aan staat je logboek in je iCloud-documenten. iCloud-reservekopie van je toestel staat daar los van en helpt alleen na een volledig herstel van je toestel."
+          }
+        }
+      }
     },
     "Could not read this session export. Re-export from Rppl and try again." : {
       "localizations" : {
@@ -3205,6 +3148,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Could not read this session export. Re-export from Rppl and try again."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan deze session-export niet lezen. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
           }
         }
       }
@@ -3216,6 +3165,12 @@
             "state" : "translated",
             "value" : "This export is missing %@. Re-export from a current Rppl build, or pick a different file."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In deze export ontbreekt %@. Exporteer opnieuw met een actuele versie van Rppl, of kies een ander bestand."
+          }
         }
       }
     },
@@ -3225,6 +3180,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This export has an empty value at %@. Re-export from Rppl and try again."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze export heeft een lege waarde bij %@. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
           }
         }
       }
@@ -3236,6 +3197,12 @@
             "state" : "translated",
             "value" : "This export has an unexpected value at %@. Re-export from Rppl and try again."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze export heeft een onverwachte waarde bij %@. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
+          }
         }
       }
     },
@@ -3246,6 +3213,12 @@
             "state" : "translated",
             "value" : "This export looks corrupted at %@. Re-export from Rppl and try again."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze export lijkt beschadigd bij %@. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
+          }
         }
       }
     },
@@ -3255,6 +3228,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This file is not a Rppl session export JSON."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit bestand is geen Rppl-session-export (JSON)."
           }
         }
       }
@@ -5727,6 +5706,204 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doorgaan met traceren"
+          }
+        }
+      }
+    },
+    "Could not delete session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could Not Delete Session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session verwijderen mislukt"
+          }
+        }
+      }
+    },
+    "Could not export" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could Not Export"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporteren mislukt"
+          }
+        }
+      }
+    },
+    "Delete session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Session?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session verwijderen?"
+          }
+        }
+      }
+    },
+    "Export session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Session?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session exporteren?"
+          }
+        }
+      }
+    },
+    "Delete from this iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete from This iPhone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen van deze iPhone"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnieuw proberen"
+          }
+        }
+      }
+    },
+    "Delete iCloud copies" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud-kopieën verwijderen"
+          }
+        }
+      }
+    },
+    "Keep iCloud copies" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud-kopieën bewaren"
+          }
+        }
+      }
+    },
+    "Deselect all" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles deselecteren"
+          }
+        }
+      }
+    },
+    "Select all" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles selecteren"
+          }
+        }
+      }
+    },
+    "Not now" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet nu"
+          }
+        }
+      }
+    },
+    "Turn off iCloud Drive?" : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud Drive uitzetten?"
+          }
+        }
+      }
+    },
+    "Sessions and sets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park days and sets"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions en sets"
+          }
+        }
+      }
+    },
+    "These sessions are in your iCloud Drive. Choose which to add to this iPhone logbook." : {
+      "localizations" : {
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze sessions staan in je iCloud Drive. Kies welke je aan het logboek op deze iPhone toevoegt."
+          }
+        }
+      }
+    },
+    "Every session in iCloud Drive is already in this iPhone logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every park day in iCloud Drive is already in this iPhone logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke session in iCloud Drive staat al in het logboek op deze iPhone."
           }
         }
       }
