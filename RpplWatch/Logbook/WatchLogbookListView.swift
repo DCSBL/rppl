@@ -105,14 +105,17 @@ private struct WatchSessionRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     WatchSetMetricLine(
                         label: "Duration",
+                        metric: .duration,
                         value: SessionFormatters.elapsed(entry.stats.totalDuration)
                     )
                     WatchSetMetricLine(
                         label: "Distance",
+                        metric: .distance,
                         value: SessionFormatters.distance(entry.stats.totalDistanceMeters)
                     )
                     WatchSetMetricLine(
                         label: "Sets",
+                        metric: .sets,
                         value: "\(entry.stats.setCount)"
                     )
                 }
