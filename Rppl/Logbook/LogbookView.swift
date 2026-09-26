@@ -398,7 +398,7 @@ extension SessionHighlight {
         case .longest: "clock.fill"
         case .mostWaterTime: "water.waves"
         case .mostLaps: "arrow.triangle.2.circlepath"
-        case .highestRidePercentage: "percent"
+        case .highestRidePercentage: "chart.pie.fill"
         case .mostCalories: "flame.fill"
         case .longestSetEver: "ruler"
         }
