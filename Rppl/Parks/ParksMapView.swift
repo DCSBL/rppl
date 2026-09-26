@@ -23,7 +23,7 @@ struct ParksMapView: View {
     @State private var pendingRecenter = false
 
     /// Below this camera distance, cable traces are close enough to read; above it they're just clutter.
-    private static let cableLineVisibleDistance: CLLocationDistance = 3_000
+    private static let cableLineVisibleDistance: CLLocationDistance = 10_000
     /// "Reasonable distance" for the here/reset button: close enough to be useful, wide enough to
     /// see nearby landmarks around the park.
     private static let recenterCameraDistance: CLLocationDistance = 5_000
@@ -54,10 +54,11 @@ struct ParksMapView: View {
                 ForEach(parks) { park in
                     ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
                         if let points = cable.points, points.count >= 2 {
-                            MapPolyline(coordinates: points.map {
+                            let line = points.map {
                                 CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
-                            })
-                            .stroke(Color.orange, lineWidth: 3)
+                            }
+                            MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
+                                .stroke(Color.orange, lineWidth: 3)
                         }
                     }
                 }
@@ -79,15 +80,18 @@ struct ParksMapView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }
-        .overlay(alignment: .topTrailing) {
+        .overlay(alignment: .bottomTrailing) {
+            // Bottom-trailing, like Apple Maps' own locate-me/layers buttons: keeps these clear
+            // of the floating header above (which draws on top of this view and previously hid
+            // top-trailing controls whenever its measured height lagged a layout pass behind).
             VStack(spacing: 8) {
                 MapStyleToggleButton(usesSatellite: $usesSatellite)
                 MapRecenterButton(action: recenterOnUser)
             }
-            .padding(.top, topInset + 8)
             .padding(.trailing, 12)
+            .padding(.bottom, 12)
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .top)
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
         .searchSuggestions {
             ForEach(parkMatches) { park in
@@ -163,8 +167,8 @@ private struct ParksSearchPin {
     let coordinate: CLLocationCoordinate2D
 }
 
-/// Standard/satellite toggle, styled to match MapKit's own controls (MapCompass, MapScaleView)
-/// rather than the app's own button chrome.
+/// Standard/satellite toggle, using the same native Liquid Glass chrome as the rest of the app's
+/// floating buttons (see the search/add buttons in ParksView) instead of hand-rolled material.
 private struct MapStyleToggleButton: View {
     @Binding var usesSatellite: Bool
 
@@ -174,14 +178,10 @@ private struct MapStyleToggleButton: View {
         } label: {
             Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
                 .font(.system(size: 15, weight: .medium))
-                .frame(width: 32, height: 32)
+                .frame(width: 34, height: 34)
         }
-        .buttonStyle(.borderless)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(.separator, lineWidth: 0.5)
-        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
         .accessibilityLabel(
             usesSatellite
                 ? Text("Show standard map")
@@ -199,14 +199,10 @@ private struct MapRecenterButton: View {
         Button(action: action) {
             Image(systemName: "location.fill")
                 .font(.system(size: 15, weight: .medium))
-                .frame(width: 32, height: 32)
+                .frame(width: 34, height: 34)
         }
-        .buttonStyle(.borderless)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(.separator, lineWidth: 0.5)
-        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
         .accessibilityLabel(Text("Center on my location"))
     }
 }
