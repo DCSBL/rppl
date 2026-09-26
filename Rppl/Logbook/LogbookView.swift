@@ -398,6 +398,9 @@ extension SessionHighlight {
         case .longest: "clock.fill"
         case .mostWaterTime: "water.waves"
         case .mostLaps: "arrow.triangle.2.circlepath"
+        case .highestRidePercentage: "percent"
+        case .mostCalories: "flame.fill"
+        case .longestSetEver: "ruler"
         }
     }
 
@@ -406,6 +409,9 @@ extension SessionHighlight {
         case .longest: .orange
         case .mostWaterTime: .blue
         case .mostLaps: .purple
+        case .highestRidePercentage: .green
+        case .mostCalories: .red
+        case .longestSetEver: .yellow
         }
     }
 }

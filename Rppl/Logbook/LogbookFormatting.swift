@@ -92,6 +92,9 @@ enum LogbookFormatting {
         case .longest: return String(localized: "Longest")
         case .mostWaterTime: return String(localized: "Most water time")
         case .mostLaps: return String(localized: "Most laps")
+        case .highestRidePercentage: return String(localized: "Highest ride %")
+        case .mostCalories: return String(localized: "Most calories")
+        case .longestSetEver: return String(localized: "Longest set ever")
         }
     }
 
