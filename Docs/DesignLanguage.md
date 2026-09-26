@@ -56,7 +56,7 @@ Every metric has one symbol and one tint, everywhere: tile header, chip, chart, 
 | Sets | `.sets` | `flag.checkered` | `RpplMetricSets` |
 | Laps | `.laps` | `arrow.triangle.2.circlepath` | `RpplMetricLaps` |
 | Duration | `.duration` | `clock` | `RpplMetricTime` |
-| Riding | `.riding` | `figure.surfing` | `RpplMetricRiding` |
+| Riding | `.riding` | `figure.surfing` (Watch only; iOS uses the MDI `ski-water` glyph via `MetricIcon`) | `RpplMetricRiding` |
 | Inactive | `.inactive` | `pause.circle` | `RpplMuted` |
 | Water temperature | `.water` | `thermometer.medium` | `RpplMetricWater` |
 | Air | `.air` | `cloud.sun` | `RpplMetricAir` |

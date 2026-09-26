@@ -9,16 +9,16 @@ private struct DesignGallery: View {
                 totalsTile
 
                 InfoTileGrid {
-                    InfoTile("Max speed", metric: .speed) {
+                    InfoTile("Speed", metric: .speed) {
                         MetricValue(LogbookFormatting.speedKilometersPerHour(42.2))
-                        Gauge(value: MetricDisplay.fraction(28.5, of: 42.2)) {
-                            Text("Avg speed")
+                        Gauge(value: MetricDisplay.fraction(31.5, of: 42.2)) {
+                            Text("Cable speed")
                         }
                         .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
                         StatChip(
                             metric: .speed,
-                            value: LogbookFormatting.speedKilometersPerHour(28.5),
-                            caption: "Avg speed"
+                            value: LogbookFormatting.speedKilometersPerHour(31.5),
+                            caption: "Cable speed"
                         )
                     }
 
