@@ -3,7 +3,11 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 RpplCore/.build/
-.swiftpm/
+.swiftpm/*
+# Shared RpplCore scheme: Xcode Cloud PR workflow tests it (includes RpplCoreTests).
+!RpplCore/.swiftpm/xcode/
+RpplCore/.swiftpm/xcode/*
+!RpplCore/.swiftpm/xcode/xcshareddata/
 /Exports/
 .worktrees/
 

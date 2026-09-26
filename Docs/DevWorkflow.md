@@ -101,10 +101,16 @@ Keep two workflows in App Store Connect / Xcode:
 
 | Workflow | Start condition | Actions |
 |----------|-----------------|---------|
-| **PR / Core tests** | Pull Request Changes | Test (`RpplCore` via `swift test`) |
+| **PR / Core tests** | Pull Request Changes | Test (workspace `RpplCore`, scheme **RpplCore**, iOS Simulator) |
 | **Nightly TestFlight** | On a Schedule for a Branch (`main`) | Test → Archive (scheme **Rppl**) → Deploy to TestFlight |
 
 Optional: add **Manual Start** on `main` to the nightly workflow for on-demand TestFlight builds.
+
+The PR workflow opens the `RpplCore` package directly. Xcode's auto-generated `RpplCore` scheme only builds the library, so Xcode Cloud fails with "There are no test bundles available to test". The shared scheme in `RpplCore/.swiftpm/xcode/xcshareddata/xcschemes/RpplCore.xcscheme` (whitelisted in `.gitignore`) adds `RpplCoreTests` to its Test action. Reproduce locally:
+
+```bash
+cd RpplCore && xcodebuild test -scheme RpplCore -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
 
 ### Nightly schedule
 

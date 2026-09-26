@@ -68,7 +68,8 @@ public enum ParkSearch {
     }
 
     private static func wordsMatch(_ queryWord: String, _ parkWord: String) -> Bool {
-        if parkWord.hasPrefix(queryWord) || queryWord.hasPrefix(parkWord) { return true }
+        // One-way prefix only: a short park word ("Nieuw") must not swallow a longer query ("nieuwegien").
+        if parkWord.hasPrefix(queryWord) { return true }
         let tolerance = editTolerance(for: queryWord.count)
         guard tolerance > 0 else { return false }
         return levenshtein(queryWord, parkWord, threshold: tolerance) <= tolerance
