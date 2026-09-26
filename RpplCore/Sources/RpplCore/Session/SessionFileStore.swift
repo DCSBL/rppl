@@ -44,6 +44,9 @@ public final class SessionFileStore: @unchecked Sendable {
     public let rootURL: URL
     private let fileManager: FileManager
     private let encoder: JSONEncoder
+    /// Pretty-printed for `manifest.json` only — humans open this file directly; JSONL streams
+    /// must stay one line per record, so they keep using `encoder`.
+    private let manifestEncoder: JSONEncoder
     private let decoder: JSONDecoder
     private let lock = NSRecursiveLock()
     /// `sessionId` → package directory. Rebuilt by scanning `manifest.json` files.
@@ -55,6 +58,9 @@ public final class SessionFileStore: @unchecked Sendable {
         self.encoder = JSONEncoder()
         self.encoder.dateEncodingStrategy = .iso8601
         self.encoder.outputFormatting = [.sortedKeys]
+        self.manifestEncoder = JSONEncoder()
+        self.manifestEncoder.dateEncodingStrategy = .iso8601
+        self.manifestEncoder.outputFormatting = [.sortedKeys, .prettyPrinted]
         self.decoder = JSONDecoder()
         self.decoder.dateDecodingStrategy = .iso8601
     }
@@ -64,7 +70,26 @@ public final class SessionFileStore: @unchecked Sendable {
         defer { lock.unlock() }
 
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        rewritePrettyPrintedManifestsIfNeeded()
     }
+
+    /// One-time pretty-print pass over existing `manifest.json` files on disk (schema/content
+    /// unchanged, only whitespace). Runs at most once per root per install; flagged in
+    /// `UserDefaults` rather than a manifest schema bump.
+    private func rewritePrettyPrintedManifestsIfNeeded() {
+        let key = Self.manifestPrettyPrintDefaultsKeyPrefix + rootURL.standardizedFileURL.path
+        let defaults = TesterIdentity.preferredStore()
+        guard !defaults.bool(forKey: key) else { return }
+        if let ids = try? rebuildPackageIndex().keys {
+            for sessionId in ids {
+                guard let manifest = try? readManifest(sessionId: sessionId) else { continue }
+                try? writeManifest(manifest)
+            }
+        }
+        defaults.set(true, forKey: key)
+    }
+
+    private static let manifestPrettyPrintDefaultsKeyPrefix = "wakeTracker.manifestPrettyPrintDone."
 
     /// Resolves the on-disk package directory for `sessionId` (folder name may differ).
     public func sessionDirectory(for sessionId: String) throws -> URL {
@@ -129,7 +154,7 @@ public final class SessionFileStore: @unchecked Sendable {
         defer { lock.unlock() }
 
         let url = try sessionDirectory(for: manifest.sessionId).appendingPathComponent("manifest.json")
-        let data = try encoder.encode(manifest)
+        let data = try manifestEncoder.encode(manifest)
         try data.write(to: url, options: [.atomic])
     }
 
