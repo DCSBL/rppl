@@ -416,7 +416,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl may use location to display session tracks.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map and sorts cable parks by distance from you.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map, sorts cable parks by distance from you, and, if you turn on park arrival notifications, watches for you crossing into a park.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl uses motion APIs when reviewing session context on iPhone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -474,7 +474,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl may use location to display session tracks.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map and sorts cable parks by distance from you.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Rppl shows GPS tracks from Apple Watch sessions on the map, sorts cable parks by distance from you, and, if you turn on park arrival notifications, watches for you crossing into a park.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Rppl uses motion APIs when reviewing session context on iPhone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

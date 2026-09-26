@@ -1,6 +1,6 @@
 # Terms & Privacy Policy
 
-**Last updated:** 24 September 2026
+**Last updated:** 26 September 2026
 
 ## A note from Duco
 
@@ -72,6 +72,8 @@ Collected only to process your cable-park activity on your devices:
 - A random install-scoped identifier created on first launch (not a name or account; new ID after reinstall)
 
 Apple HealthKit data is used only to support health and fitness features (workout recording and related metrics), not for advertising or data brokering. We do not upload this information to a Rppl server. Transfer between Watch and iPhone uses Apple Watch Connectivity on your devices.
+
+**Park arrival notifications (opt-in, off by default):** If you turn this on in Rppl → Settings, your iPhone monitors a small set of park locations (your favorites plus the nearest others) using Apple's on-device region monitoring, and sends a local "Welcome to…" notification when you clearly arrive at one. This runs entirely on your device — Rppl does not track your location continuously or send it to a Rppl server — but it does use Apple WeatherKit as described below, and it requires Location access to work. Turn it off anytime; doing so stops the monitoring immediately.
 
 **Apple Services:** To provide a complete experience, Rppl requests data from native Apple services:
 

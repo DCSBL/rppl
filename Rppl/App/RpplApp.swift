@@ -18,6 +18,7 @@ struct RpplApp: App {
                     await PhoneICloudDriveController.shared.refreshAvailability()
                     PhoneICloudDriveController.shared.applyPreferredRootIfNeeded(reason: "active")
                 }
+                ParkArrivalController.shared.refreshMonitoredRegionsIfEnabled()
             }
         }
     }
@@ -27,5 +28,6 @@ struct RpplApp: App {
         _ = TesterIdentity.resolve()
         PhoneConnectivityService.shared.activate()
         PhoneICloudDriveController.shared.start()
+        ParkArrivalController.shared.refreshMonitoredRegionsIfEnabled()
     }
 }
