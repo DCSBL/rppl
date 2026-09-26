@@ -85,7 +85,10 @@ final class SessionCatalog {
                         id: entry.manifest.sessionId,
                         totalDuration: stats.totalDuration,
                         ridingDuration: stats.ridingDuration,
-                        lapCount: stats.totalLapCount
+                        lapCount: stats.totalLapCount,
+                        ridingInactiveRatio: stats.ridingInactiveRatio,
+                        totalEnergyKilocalories: stats.totalEnergyKilocalories ?? stats.activeEnergyKilocalories,
+                        longestSetDistanceMeters: stats.sets.map(\.distanceMeters).max()
                     )
                 }
             )
