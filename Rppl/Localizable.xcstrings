@@ -438,6 +438,22 @@
         }
       }
     },
+    "Center on my location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Center on my location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naar mijn locatie"
+          }
+        }
+      }
+    },
     "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated." : {
       "localizations" : {
         "en" : {
