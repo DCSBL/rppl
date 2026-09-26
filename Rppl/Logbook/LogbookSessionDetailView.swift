@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 import MapKit
 import RpplCore
 
@@ -505,6 +506,9 @@ struct LogbookSessionDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
                 } else {
+                    if stats.sets.count > 1 {
+                        SetDurationChart(sets: stats.sets)
+                    }
                     ForEach(stats.sets) { set in
                         SetDetailCard(
                             set: set,
@@ -817,12 +821,17 @@ private struct SetDetailCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Set \(set.index)")
-                    .foregroundStyle(Color.rpplText)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.75)
-                    .fixedSize(horizontal: false, vertical: true)
+                Label {
+                    Text("Set \(set.index)")
+                } icon: {
+                    Image(systemName: MetricKind.sets.systemImage)
+                        .foregroundStyle(MetricKind.sets.tint)
+                }
+                .foregroundStyle(Color.rpplText)
+                .font(.headline)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
 
                 if !set.highlights.isEmpty {
                     FlowLayout(spacing: 6) {
@@ -871,29 +880,19 @@ private struct SetDetailCard: View {
                     .logbookNestedBackground(Color.rpplFill)
             }
 
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ],
-                spacing: 8
-            ) {
-                setStatTile(
-                    LogbookFormatting.duration(set.duration),
-                    label: "Duration"
+            FlowLayout(spacing: 16) {
+                StatChip(metric: .duration, value: LogbookFormatting.compactDuration(set.duration), caption: "Duration")
+                StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(set.distanceMeters), caption: "Distance")
+                StatChip(metric: .laps, value: "\(set.lapCount)", caption: "Laps")
+                StatChip(
+                    metric: .speed,
+                    value: maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                    caption: "Max speed"
                 )
-                setStatTile(
-                    LogbookFormatting.distanceKilometers(set.distanceMeters),
-                    label: "Distance"
-                )
-                setStatTile("\(set.lapCount)", label: "Laps")
-                setStatTile(
-                    maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                    label: "Max speed"
-                )
-                setStatTile(
-                    averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                    label: "Avg speed"
+                StatChip(
+                    metric: .speed,
+                    value: averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                    caption: "Avg speed"
                 )
             }
 
@@ -901,25 +900,40 @@ private struct SetDetailCard: View {
                 LogbookFormatting.sessionTimeRange(start: set.startedAt, end: set.endedAt)
             )
             .font(.caption)
-            .foregroundStyle(Color.rpplMuted)
+            .foregroundStyle(RpplDesign.secondaryText)
         }
-        .logbookCardChrome()
+        .rpplTileChrome()
     }
+}
 
-    private func setStatTile(_ value: String, label: LocalizedStringKey) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.subheadline.bold())
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
+/// One bar per set, height = minutes. One color: highlight badges live on the set cards.
+private struct SetDurationChart: View {
+    let sets: [SetSegmentStats]
+
+    var body: some View {
+        InfoTile("Duration", metric: .duration) {
+            Chart(sets) { set in
+                BarMark(
+                    x: .value("Set", String(set.index)),
+                    y: .value("Duration", set.duration / 60)
+                )
+                .foregroundStyle(MetricKind.sets.tint)
+                .cornerRadius(3)
+            }
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let minutes = value.as(Double.self) {
+                            Text(verbatim: Duration.seconds(minutes * 60).formatted(
+                                .units(allowed: [.minutes], width: .narrow)
+                            ))
+                        }
+                    }
+                }
+            }
+            .frame(height: 140)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(8)
-        .logbookNestedBackground(Color.rpplFill)
     }
 }
 
