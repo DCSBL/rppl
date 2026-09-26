@@ -30,18 +30,28 @@ struct MetricValue: View {
 
     private let parts: MetricDisplay.Parts
     private let size: Size
+    private let caption: LocalizedStringKey?
 
     /// `formatted` comes from the Core formatters; the unit is split off when it is a plain suffix.
-    init(_ formatted: String, size: Size = .large) {
+    /// `caption` names the value when the tile title no longer does (e.g. a shared "Sets & Laps" tile).
+    init(_ formatted: String, size: Size = .large, caption: LocalizedStringKey? = nil) {
         self.parts = MetricDisplay.split(formatted)
         self.size = size
+        self.caption = caption
     }
 
     var body: some View {
-        Text(attributed)
-            .foregroundStyle(Color.rpplText)
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
+        VStack(alignment: .leading, spacing: 2) {
+            Text(attributed)
+                .foregroundStyle(Color.rpplText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            if let caption {
+                Text(caption)
+                    .font(.caption2)
+                    .foregroundStyle(RpplDesign.secondaryText)
+            }
+        }
     }
 
     private var attributed: AttributedString {

@@ -404,7 +404,10 @@ struct LogbookSessionDetailView: View {
 
     private func speedTile(_ stats: SessionStats) -> some View {
         InfoTile("Speed", metric: .speed) {
-            MetricValue(displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-")
+            MetricValue(
+                displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                caption: "Max speed"
+            )
             if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
                 Gauge(value: MetricDisplay.fraction(cable, of: max)) {
                     Text("Cable speed")
@@ -446,9 +449,9 @@ struct LogbookSessionDetailView: View {
 
     /// Full width: every set on the session timeline at its real start and length.
     private func setsTile(_ stats: SessionStats, start: Date, end: Date) -> some View {
-        InfoTile("Sets", metric: .sets) {
+        InfoTile("Sets & laps", metric: .sets) {
             HStack(alignment: .firstTextBaseline, spacing: 16) {
-                MetricValue("\(stats.setCount)")
+                MetricValue("\(stats.setCount)", caption: "Sets")
                 StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
                 Spacer(minLength: 0)
             }
@@ -472,8 +475,8 @@ struct LogbookSessionDetailView: View {
     }
 
     private func distanceTile(_ stats: SessionStats) -> some View {
-        InfoTile("Distance", metric: .distance) {
-            MetricValue(LogbookFormatting.distanceKilometers(stats.totalDistanceMeters))
+        InfoTile("Distance & duration", metric: .distance) {
+            MetricValue(LogbookFormatting.distanceKilometers(stats.totalDistanceMeters), caption: "Distance")
             StatChip(
                 metric: .duration,
                 value: LogbookFormatting.compactDuration(stats.totalDuration),
@@ -485,8 +488,8 @@ struct LogbookSessionDetailView: View {
     @ViewBuilder
     private func energyTile(_ stats: SessionStats) -> some View {
         if let total = stats.totalEnergyKilocalories {
-            InfoTile("Total calories", metric: .energy) {
-                MetricValue(LogbookFormatting.kilocalories(total))
+            InfoTile("Calories", metric: .energy) {
+                MetricValue(LogbookFormatting.kilocalories(total), caption: "Total calories")
                 if let active = stats.activeEnergyKilocalories {
                     StatChip(
                         metric: .energy,

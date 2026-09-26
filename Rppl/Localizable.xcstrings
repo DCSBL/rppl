@@ -5950,6 +5950,38 @@
           }
         }
       }
+    },
+    "Sets & laps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets & laps"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets & laps"
+          }
+        }
+      }
+    },
+    "Distance & duration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance & duration"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afstand & duur"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
