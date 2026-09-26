@@ -10,6 +10,8 @@ struct AppInfoView: View {
     @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
     @State private var isTogglingParkArrival = false
+    @State private var isSendingTestArrival = false
+    @State private var testArrivalParkName: String?
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -37,6 +39,10 @@ struct AppInfoView: View {
 
                 Section {
                     parkArrivalRow
+
+                    if AppReleaseChannel.allowsDebugTools {
+                        testArrivalRow
+                    }
                 } header: {
                     Text("Park arrival notifications")
                 } footer: {
@@ -191,6 +197,31 @@ struct AppInfoView: View {
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var testArrivalRow: some View {
+        Button {
+            isSendingTestArrival = true
+            testArrivalParkName = nil
+            Task {
+                testArrivalParkName = await parkArrival.sendTestArrivalNotification()
+                isSendingTestArrival = false
+            }
+        } label: {
+            if isSendingTestArrival {
+                ProgressView()
+            } else {
+                Label("Send test arrival in 10s", systemImage: "bell.badge")
+            }
+        }
+        .disabled(isSendingTestArrival)
+
+        if let testArrivalParkName {
+            Text("Background the app now — \"Welcome to \(testArrivalParkName)\" fires in ~10s.")
+                .font(.caption)
+                .foregroundStyle(Color.rpplMuted)
         }
     }
 

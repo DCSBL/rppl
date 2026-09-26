@@ -159,20 +159,41 @@ final class ParkArrivalController: NSObject {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
         let weather = await ParksWeatherProvider().weather(for: park)
-        await scheduleNotification(for: park, weather: weather)
+        await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
         Self.setLastNotifiedDate(parkID: parkID, date: Date())
     }
 
-    private func scheduleNotification(for park: Park, weather: ParkWeather?) async {
+    /// Debug-tools-only: fires a real local notification ~10s from now for the 7th park in the
+    /// list, as if a geofence had just fired — lets you background the app and see the actual
+    /// tap → park-detail deep link without walking into a real park or using Simulator location.
+    /// Ignores `isEnabled` / cooldown; still requests notification permission if not yet granted.
+    func sendTestArrivalNotification() async -> String? {
+        guard await requestNotificationPermission() else { return nil }
+        if ParkStore.shared.entries.isEmpty {
+            ParkStore.shared.reload()
+        }
+        guard let park = ParkStore.shared.entries.dropFirst(6).first?.park else { return nil }
+        let weather = await ParksWeatherProvider().weather(for: park)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+        await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
+        return park.name
+    }
+
+    private func scheduleNotification(
+        for park: Park,
+        weather: ParkWeather?,
+        trigger: UNNotificationTrigger?,
+        identifierSuffix: String
+    ) async {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Welcome to \(park.name)")
         content.body = Self.notificationBody(park: park, weather: weather)
         content.sound = .default
         content.userInfo = ["parkID": park.id]
         let request = UNNotificationRequest(
-            identifier: "park-arrival.\(park.id)",
+            identifier: "park-arrival.\(park.id)\(identifierSuffix)",
             content: content,
-            trigger: nil
+            trigger: trigger
         )
         try? await UNUserNotificationCenter.current().add(request)
     }
