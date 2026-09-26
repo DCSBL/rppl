@@ -209,6 +209,22 @@
         }
       }
     },
+    "Cable speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable-snelheid"
+          }
+        }
+      }
+    },
     "Finish" : {
       "localizations" : {
         "en" : {

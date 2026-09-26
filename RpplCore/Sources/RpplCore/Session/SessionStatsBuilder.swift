@@ -120,7 +120,11 @@ public enum SessionStatsBuilder {
             ridingInactiveRatio: ratio,
             sets: highlightedSets,
             averageWaterTemperatureCelsius: waterAverage,
-            waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false
+            waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
+            cableSpeedKmh: CableSpeedEstimator.cableSpeedKmh(
+                setWindows: setWindows.map { (start: $0.start, end: $0.end) },
+                locations: sortedLocations
+            )
         )
     }
 

@@ -147,6 +147,15 @@ struct LogbookSessionDetailView: View {
             ?? SessionLocationHelpers.peakSpeedKmh(sets: stats.sets, locations: allLocations)
     }
 
+    private var displayedCableSpeedKmh: Double? {
+        guard let stats = sessionStats else { return nil }
+        return stats.cableSpeedKmh
+            ?? CableSpeedEstimator.cableSpeedKmh(
+                setWindows: stats.sets.map { (start: $0.startedAt, end: $0.endedAt) },
+                locations: allLocations
+            )
+    }
+
     @ViewBuilder
     private var sessionMap: some View {
         if sessionMapTrackData == nil, mapFrame == nil {
@@ -407,6 +416,11 @@ struct LogbookSessionDetailView: View {
                 metric: .speed,
                 value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
                 caption: "Avg speed"
+            )
+            StatChip(
+                metric: .speed,
+                value: displayedCableSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                caption: "Cable speed"
             )
         }
     }
