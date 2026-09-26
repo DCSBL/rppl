@@ -1,3 +1,4 @@
+import MapKit
 import RpplCore
 import SwiftUI
 
@@ -18,6 +19,9 @@ struct ParksView: View {
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
     @State private var headerHeight: CGFloat = 0
+    @State private var mapPosition: MapCameraPosition = .automatic
+    @State private var mapPendingRecenter = false
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -60,6 +64,27 @@ struct ParksView: View {
             openFilterDate = nil
             cableFilter = []
             favoritesOnly = false
+        }
+    }
+
+    /// "Reasonable distance" for the here/reset button: close enough to be useful, wide enough to
+    /// see nearby landmarks around the park.
+    private static let recenterCameraDistance: CLLocationDistance = 5_000
+
+    /// Jumps the map to the user's location at a reasonable distance; requests a fresh fix first if needed.
+    private func recenterOnUser() {
+        if let coordinate = location.coordinate {
+            moveMap(to: coordinate)
+        } else {
+            mapPendingRecenter = true
+            location.refresh()
+        }
+    }
+
+    private func moveMap(to coordinate: ParkCoordinate) {
+        let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
+        withAnimation {
+            mapPosition = .camera(MapCamera(centerCoordinate: center, distance: Self.recenterCameraDistance))
         }
     }
 
@@ -106,7 +131,7 @@ struct ParksView: View {
 
                 // The map is full height, bleeding under the translucent header below.
                 if showMap {
-                    ParksMapView(parks: visibleParks, location: location, topInset: headerHeight)
+                    ParksMapView(parks: visibleParks, location: location, topInset: headerHeight, position: $mapPosition)
                         .ignoresSafeArea()
                 } else {
                     List {
@@ -214,6 +239,18 @@ struct ParksView: View {
                     of: { $0.size.height },
                     action: { headerHeight = $0 }
                 )
+
+                // Pinned to the header's own measured height, in this same layer, so it always
+                // draws above the map and never lags the header by a layout pass.
+                if showMap {
+                    VStack(spacing: 8) {
+                        MapStyleToggleButton(usesSatellite: $mapUsesSatellite)
+                        MapRecenterButton(action: recenterOnUser)
+                    }
+                    .padding(.top, headerHeight + 8)
+                    .padding(.trailing, 12)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                }
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
@@ -235,11 +272,56 @@ struct ParksView: View {
             guard newPhase == .active else { return }
             location.refresh()
         }
+        .onChange(of: location.coordinate) { _, coordinate in
+            guard mapPendingRecenter, let coordinate else { return }
+            mapPendingRecenter = false
+            moveMap(to: coordinate)
+        }
     }
 }
 
 extension Park: Hashable {
     public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
+/// Standard/satellite toggle for the map, using the same native Liquid Glass chrome as the
+/// search/add buttons above.
+private struct MapStyleToggleButton: View {
+    @Binding var usesSatellite: Bool
+
+    var body: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
+        } label: {
+            Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 34, height: 34)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .accessibilityLabel(
+            usesSatellite
+                ? Text("Show standard map")
+                : Text("Show satellite map")
+        )
+    }
+}
+
+/// Recenters the map on the user's current location at a fixed, useful zoom — unlike MapKit's own
+/// user-location button, which recenters without changing the current zoom level.
+private struct MapRecenterButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "location.fill")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 34, height: 34)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .accessibilityLabel(Text("Center on my location"))
+    }
 }
 
 /// Filter pills row: Open (datepicker), Cable (multi-pick), Favourites only (toggle).
