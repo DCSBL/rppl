@@ -5,7 +5,6 @@ enum LogbookLayout {
 
     /// Outer session / totals / detail cards (Liquid Glass nest base).
     static let cardCornerRadius: CGFloat = 24
-    static let cardPadding: CGFloat = 16
 
     /// Fallback when a nested shape sits far from the card corners (e.g. grid tiles).
     static let nestedMinimumCornerRadius: CGFloat = 8
@@ -18,9 +17,7 @@ enum LogbookLayout {
 extension View {
     /// Card padding + fill + `containerShape` so nested concentric radii resolve.
     func logbookCardChrome() -> some View {
-        padding(LogbookLayout.cardPadding)
-            .background(Color.rpplCard, in: .rect(cornerRadius: LogbookLayout.cardCornerRadius))
-            .containerShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
+        rpplTileChrome()
     }
 
     /// Nested fill (icon well, stat tiles, placeholders) concentric to the card.

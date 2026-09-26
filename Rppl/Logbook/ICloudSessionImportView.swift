@@ -97,7 +97,7 @@ struct ICloudSessionImportView: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.rpplBackground)
+            .background(RpplBackdrop())
             .navigationTitle("Import from iCloud")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

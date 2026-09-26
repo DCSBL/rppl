@@ -118,9 +118,9 @@ struct AppInfoView: View {
                 .listRowSeparator(.hidden)
             }
             .scrollContentBackground(.hidden)
-            .background(Color.rpplBackground)
+            .background(RpplBackdrop())
             .navigationTitle("Rppl")
-            .toolbarBackground(Color.rpplBackground, for: .navigationBar)
+            .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
             .alert(
