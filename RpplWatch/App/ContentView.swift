@@ -16,6 +16,9 @@ struct ContentView: View {
                 )
             } else if session.isRunning {
                 ActiveSessionView(session: session)
+            } else if !session.isHealthPermissionResolved {
+                // Health status loads off-main; avoid flashing onboarding for returning users.
+                ProgressView()
             } else if session.areRecordingPermissionsReady {
                 IdleSessionView(session: session, transfer: transfer)
             } else {

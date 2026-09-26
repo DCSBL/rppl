@@ -51,6 +51,9 @@ final class WatchSessionController: NSObject {
     /// Structured gate states for Watch permissions onboarding.
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
+    /// False until the first off-main Health status lookup returns; gates onboarding vs idle.
+    var isHealthPermissionResolved = false
+    @ObservationIgnored var healthStatusLookup: Task<HKAuthorizationStatus, Never>?
     var motionPermission: WatchPermissionState = .notDetermined
     /// True while an auto or manual system permission sheet sequence is in flight.
     /// Kept separate from ProgressView so the list stays interactive while HealthKit warms up.
@@ -198,7 +201,7 @@ final class WatchSessionController: NSObject {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.activityType = .fitness
-        refreshPermissionStatus()
+        // Permission status is refreshed from ContentView.onAppear — never block init on healthd.
 
         if CMWaterSubmersionManager.waterSubmersionAvailable {
             let manager = CMWaterSubmersionManager()
