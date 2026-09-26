@@ -148,11 +148,11 @@ struct LogbookView: View {
                     }
             }
             .alert(
-                "Delete Session?",
+                "Delete session?",
                 isPresented: $showDeleteConfirmation
             ) {
                 if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
-                    Button("Delete from This iPhone", role: .destructive) {
+                    Button("Delete from this iPhone", role: .destructive) {
                         if let sessionId = pendingDeleteSessionId {
                             hideSessionFromLogbook(sessionId)
                         }
@@ -179,7 +179,7 @@ struct LogbookView: View {
                 Text(deleteConfirmationMessage)
             }
             .alert(
-                "Could Not Delete Session",
+                "Could not delete session",
                 isPresented: $showActionError,
                 presenting: actionErrorText
             ) { _ in
@@ -244,7 +244,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Park days and sets")
+            Text("Sessions and sets")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }

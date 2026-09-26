@@ -96,7 +96,7 @@ struct PhonePermissionDetailView: View {
                     Button {
                         Task { await request(force: true) }
                     } label: {
-                        Text("Try Again")
+                        Text("Try again")
                     }
                     .disabled(isRequesting)
                     Button {
