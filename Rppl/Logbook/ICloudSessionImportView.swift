@@ -37,7 +37,7 @@ struct ICloudSessionImportView: View {
                                 selected = Set(summaries.map(\.sessionId))
                             }
                         } label: {
-                            Text(allSelected ? "Deselect All" : "Select All")
+                            Text(allSelected ? "Deselect all" : "Select all")
                                 .font(.body.weight(.semibold))
                         }
                         .tint(Color.rpplAccent)
@@ -80,7 +80,7 @@ struct ICloudSessionImportView: View {
                         }
                     } footer: {
                         Text(
-                            "These park days are in your iCloud Drive. Choose which to add to this iPhone logbook."
+                            "These sessions are in your iCloud Drive. Choose which to add to this iPhone logbook."
                         )
                     }
                 }
@@ -97,12 +97,12 @@ struct ICloudSessionImportView: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.rpplBackground)
+            .background(RpplBackdrop())
             .navigationTitle("Import from iCloud")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(summaries.isEmpty ? "Done" : "Not Now") { onCancel() }
+                    Button(summaries.isEmpty ? "Done" : "Not now") { onCancel() }
                 }
                 if !summaries.isEmpty {
                     ToolbarItem(placement: .confirmationAction) {
@@ -124,7 +124,7 @@ struct ICloudSessionImportView: View {
     private var emptyStateDescription: String {
         if iCloudImportEnabled {
             return String(
-                localized: "Every park day in iCloud Drive is already in this iPhone logbook."
+                localized: "Every session in iCloud Drive is already in this iPhone logbook."
             )
         }
         return String(

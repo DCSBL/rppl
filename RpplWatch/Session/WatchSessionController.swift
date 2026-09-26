@@ -38,8 +38,15 @@ final class WatchSessionController: NSObject {
     var lastHorizontalAccuracy: Double?
     var lastHeartRate: Double?
     var lastSpeedMps: Double?
+    /// Cumulative active energy this session (mirrors `HKLiveWorkoutBuilder` statistics).
+    var activeEnergyKilocalories: Double?
     /// Set-gated session distance (sum of set meters). Not dock/pause walking.
     var totalDistanceM: Double { liveSetTracker.sessionSetMeters }
+    /// Session-wide average speed (total set distance over elapsed time), nil before any movement.
+    var sessionAverageSpeedKmh: Double? {
+        guard elapsed > 0, totalDistanceM > 0 else { return nil }
+        return (totalDistanceM / elapsed) * 3.6
+    }
     var currentSetDuration: TimeInterval = 0
     var currentInactiveDuration: TimeInterval = 0
     var filterRejectionReason: String?
@@ -51,6 +58,9 @@ final class WatchSessionController: NSObject {
     /// Structured gate states for Watch permissions onboarding.
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
+    /// False until the first off-main Health status lookup returns; gates onboarding vs idle.
+    var isHealthPermissionResolved = false
+    @ObservationIgnored var healthStatusLookup: Task<HKAuthorizationStatus, Never>?
     var motionPermission: WatchPermissionState = .notDetermined
     /// True while an auto or manual system permission sheet sequence is in flight.
     /// Kept separate from ProgressView so the list stays interactive while HealthKit warms up.
@@ -198,7 +208,7 @@ final class WatchSessionController: NSObject {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.activityType = .fitness
-        refreshPermissionStatus()
+        // Permission status is refreshed from ContentView.onAppear — never block init on healthd.
 
         if CMWaterSubmersionManager.waterSubmersionAvailable {
             let manager = CMWaterSubmersionManager()

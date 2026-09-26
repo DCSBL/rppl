@@ -23,10 +23,10 @@ struct LegalTermsPrivacyView: View {
             .textSelection(.enabled)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.rpplBackground)
+        .background(RpplBackdrop())
         .navigationTitle("Terms & Privacy")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.rpplBackground, for: .navigationBar)
+        .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .tint(Color.rpplAccent)
     }

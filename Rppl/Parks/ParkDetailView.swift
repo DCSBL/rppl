@@ -51,7 +51,7 @@ struct ParkDetailView: View {
             .padding(.horizontal, LogbookLayout.horizontalInset)
             .padding(.vertical, 8)
         }
-        .background(Color.rpplBackground)
+        .background(RpplBackdrop())
         .navigationTitle(park.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -504,7 +504,12 @@ struct ParkDetailView: View {
     }
 
     private func sectionTitle(_ key: LocalizedStringKey) -> some View {
-        Text(key).font(.headline).foregroundStyle(Color.rpplText)
+        Text(key)
+            .textCase(.uppercase)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(RpplDesign.headerColor)
+            .accessibilityLabel(Text(key))
+            .accessibilityAddTraits(.isHeader)
     }
 
     private func slotLabel(_ slot: ParkSlot) -> String? {

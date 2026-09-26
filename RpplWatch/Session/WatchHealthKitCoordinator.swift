@@ -179,8 +179,8 @@ extension WatchSessionController {
     /// Returns true if an HK workout session is running.
     func startWorkoutIfAuthorized() async -> Bool {
         refreshPermissionStatus()
-        let status = healthStore.authorizationStatus(for: workoutType)
-        if status == .sharingDenied {
+        await refreshHealthPermissionStatus()
+        if healthPermission == .denied {
             errorText = String(localized: "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout.")
             WakeLog.debug(.workout, "sharingDenied — sensors-only")
             return false

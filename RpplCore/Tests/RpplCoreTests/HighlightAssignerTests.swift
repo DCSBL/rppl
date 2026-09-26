@@ -139,6 +139,60 @@ struct HighlightAssignerTests {
         #expect(map["a"] == [.longest])
         #expect(map["b"] == [.mostWaterTime])
     }
+
+    @Test func sessionHighestRidePercentageWinner() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(
+                id: "a", totalDuration: 3600, ridingDuration: 500, lapCount: 2,
+                ridingInactiveRatio: 0.4
+            ),
+            SessionHighlightInput(
+                id: "b", totalDuration: 1800, ridingDuration: 1500, lapCount: 2,
+                ridingInactiveRatio: 0.9
+            ),
+        ])
+        #expect(map["b"]?.contains(.highestRidePercentage) == true)
+        #expect(map["a"]?.contains(.highestRidePercentage) != true)
+    }
+
+    @Test func sessionMostCaloriesWinner() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(
+                id: "a", totalDuration: 3600, ridingDuration: 500, lapCount: 2,
+                totalEnergyKilocalories: 300
+            ),
+            SessionHighlightInput(
+                id: "b", totalDuration: 1800, ridingDuration: 1500, lapCount: 2,
+                totalEnergyKilocalories: 700
+            ),
+        ])
+        #expect(map["b"]?.contains(.mostCalories) == true)
+        #expect(map["a"]?.contains(.mostCalories) != true)
+    }
+
+    @Test func sessionMostCaloriesSkipsMissingValues() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(id: "a", totalDuration: 3600, ridingDuration: 500, lapCount: 2),
+            SessionHighlightInput(id: "b", totalDuration: 1800, ridingDuration: 1500, lapCount: 2),
+        ])
+        #expect(map["a"]?.contains(.mostCalories) != true)
+        #expect(map["b"]?.contains(.mostCalories) != true)
+    }
+
+    @Test func sessionLongestSetEverWinner() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            SessionHighlightInput(
+                id: "a", totalDuration: 3600, ridingDuration: 500, lapCount: 2,
+                longestSetDistanceMeters: 1200
+            ),
+            SessionHighlightInput(
+                id: "b", totalDuration: 1800, ridingDuration: 1500, lapCount: 2,
+                longestSetDistanceMeters: 2500
+            ),
+        ])
+        #expect(map["b"]?.contains(.longestSetEver) == true)
+        #expect(map["a"]?.contains(.longestSetEver) != true)
+    }
 }
 
 @Suite("LocationSpeedStats.sustained")

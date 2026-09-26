@@ -118,19 +118,19 @@ struct AppInfoView: View {
                 .listRowSeparator(.hidden)
             }
             .scrollContentBackground(.hidden)
-            .background(Color.rpplBackground)
+            .background(RpplBackdrop())
             .navigationTitle("Rppl")
-            .toolbarBackground(Color.rpplBackground, for: .navigationBar)
+            .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
             .alert(
-                "Turn Off iCloud Drive?",
+                "Turn off iCloud Drive?",
                 isPresented: $showDisableDeleteConfirm
             ) {
-                Button("Delete iCloud Copies", role: .destructive) {
+                Button("Delete iCloud copies", role: .destructive) {
                     beginDisableSync(deleteCopies: true)
                 }
-                Button("Keep iCloud Copies") {
+                Button("Keep iCloud copies") {
                     beginDisableSync(deleteCopies: false)
                 }
                 Button("Cancel", role: .cancel) {}
