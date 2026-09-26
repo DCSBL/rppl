@@ -409,16 +409,41 @@ struct LogbookSessionDetailView: View {
                 caption: "Max speed"
             )
             if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
+                // Names the bar and shows the exact cable speed it plots, then 0/max ticks
+                // below so the fill (cable speed) and the 100% end (max speed) both read at a glance.
+                HStack(spacing: 4) {
+                    MetricIcon(metric: .speed)
+                        .imageScale(.small)
+                        .foregroundStyle(MetricKind.speed.tint)
+                        .accessibilityHidden(true)
+                    Text("Cable speed")
+                        .font(.caption2)
+                        .foregroundStyle(RpplDesign.secondaryText)
+                    Spacer()
+                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(cable))
+                        .font(.caption2.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(Color.rpplText)
+                }
                 Gauge(value: MetricDisplay.fraction(cable, of: max)) {
                     Text("Cable speed")
                 }
                 .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
                 .accessibilityHidden(true)
+                HStack {
+                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(0))
+                    Spacer()
+                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(max))
+                }
+                .font(.caption2)
+                .monospacedDigit()
+                .foregroundStyle(RpplDesign.secondaryText)
+                .accessibilityHidden(true)
             }
             StatChip(
                 metric: .speed,
-                value: displayedCableSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                caption: "Cable speed"
+                value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                caption: "Average speed"
             )
         }
     }

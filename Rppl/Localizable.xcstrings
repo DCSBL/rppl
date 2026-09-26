@@ -5982,6 +5982,22 @@
           }
         }
       }
+    },
+    "Average speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemiddelde snelheid"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
