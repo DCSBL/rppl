@@ -44,6 +44,9 @@ public final class SessionFileStore: @unchecked Sendable {
     public let rootURL: URL
     private let fileManager: FileManager
     private let encoder: JSONEncoder
+    /// Pretty-printed for `manifest.json` only — humans open this file directly; JSONL streams
+    /// must stay one line per record, so they keep using `encoder`.
+    private let manifestEncoder: JSONEncoder
     private let decoder: JSONDecoder
     private let lock = NSRecursiveLock()
     /// `sessionId` → package directory. Rebuilt by scanning `manifest.json` files.
@@ -55,6 +58,9 @@ public final class SessionFileStore: @unchecked Sendable {
         self.encoder = JSONEncoder()
         self.encoder.dateEncodingStrategy = .iso8601
         self.encoder.outputFormatting = [.sortedKeys]
+        self.manifestEncoder = JSONEncoder()
+        self.manifestEncoder.dateEncodingStrategy = .iso8601
+        self.manifestEncoder.outputFormatting = [.sortedKeys, .prettyPrinted]
         self.decoder = JSONDecoder()
         self.decoder.dateDecodingStrategy = .iso8601
     }
@@ -129,7 +135,7 @@ public final class SessionFileStore: @unchecked Sendable {
         defer { lock.unlock() }
 
         let url = try sessionDirectory(for: manifest.sessionId).appendingPathComponent("manifest.json")
-        let data = try encoder.encode(manifest)
+        let data = try manifestEncoder.encode(manifest)
         try data.write(to: url, options: [.atomic])
     }
 
