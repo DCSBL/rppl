@@ -18,6 +18,17 @@ struct ParksMapView: View {
     @State private var searchFailed = false
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var searchPin: ParksSearchPin?
+    @State private var favorites = ParkFavorites.shared
+    @State private var cameraDistance: CLLocationDistance = .greatestFiniteMagnitude
+    @State private var pendingRecenter = false
+
+    /// Below this camera distance, cable traces are close enough to read; above it they're just clutter.
+    private static let cableLineVisibleDistance: CLLocationDistance = 3_000
+    /// "Reasonable distance" for the here/reset button: close enough to be useful, wide enough to
+    /// see nearby landmarks around the park.
+    private static let recenterCameraDistance: CLLocationDistance = 5_000
+
+    private var showsCableLines: Bool { cameraDistance < Self.cableLineVisibleDistance }
 
     private var parkMatches: [Park] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -28,12 +39,28 @@ struct ParksMapView: View {
     var body: some View {
         Map(position: $position, selection: $selectedID) {
             ForEach(parks) { park in
-                Marker(
-                    park.name,
-                    coordinate: CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
-                )
-                .tint(.red)
-                .tag(park.id)
+                let coordinate = CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
+                if favorites.contains(park.id) {
+                    Marker(park.name, systemImage: "star.fill", coordinate: coordinate)
+                        .tint(.yellow)
+                        .tag(park.id)
+                } else {
+                    Marker(park.name, coordinate: coordinate)
+                        .tint(.red)
+                        .tag(park.id)
+                }
+            }
+            if showsCableLines {
+                ForEach(parks) { park in
+                    ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
+                        if let points = cable.points, points.count >= 2 {
+                            MapPolyline(coordinates: points.map {
+                                CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                            })
+                            .stroke(Color.orange, lineWidth: 3)
+                        }
+                    }
+                }
             }
             if let searchPin {
                 Marker(searchPin.name, systemImage: "magnifyingglass", coordinate: searchPin.coordinate)
@@ -42,19 +69,23 @@ struct ParksMapView: View {
             UserAnnotation()
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
+        .onMapCameraChange(frequency: .onEnd) { context in
+            cameraDistance = context.camera.distance
+        }
         .mapControls {
-            MapUserLocationButton()
             MapCompass()
-            MapPitchToggle()
             MapScaleView()
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }
         .overlay(alignment: .topTrailing) {
-            MapStyleToggleButton(usesSatellite: $usesSatellite)
-                .padding(.top, topInset + 8)
-                .padding(.trailing, 12)
+            VStack(spacing: 8) {
+                MapStyleToggleButton(usesSatellite: $usesSatellite)
+                MapRecenterButton(action: recenterOnUser)
+            }
+            .padding(.top, topInset + 8)
+            .padding(.trailing, 12)
         }
         .ignoresSafeArea()
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
@@ -69,6 +100,11 @@ struct ParksMapView: View {
             }
         }
         .onSubmit(of: .search) { Task { await search() } }
+        .onChange(of: location.coordinate) { _, coordinate in
+            guard pendingRecenter, let coordinate else { return }
+            pendingRecenter = false
+            moveCamera(to: coordinate)
+        }
         .onChange(of: selectedID) { _, id in
             guard let id, let park = parks.first(where: { $0.id == id }) else { return }
             selectedID = nil
@@ -103,6 +139,23 @@ struct ParksMapView: View {
             position = .camera(MapCamera(centerCoordinate: center, distance: max(region * 3, 5_000)))
         }
     }
+
+    /// Jumps to the user's location at a reasonable distance; requests a fresh fix first if needed.
+    private func recenterOnUser() {
+        if let coordinate = location.coordinate {
+            moveCamera(to: coordinate)
+        } else {
+            pendingRecenter = true
+            location.refresh()
+        }
+    }
+
+    private func moveCamera(to coordinate: ParkCoordinate) {
+        let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
+        withAnimation {
+            position = .camera(MapCamera(centerCoordinate: center, distance: Self.recenterCameraDistance))
+        }
+    }
 }
 
 private struct ParksSearchPin {
@@ -110,7 +163,7 @@ private struct ParksSearchPin {
     let coordinate: CLLocationCoordinate2D
 }
 
-/// Standard/satellite toggle, styled to match MapKit's own controls (MapCompass, MapPitchToggle)
+/// Standard/satellite toggle, styled to match MapKit's own controls (MapCompass, MapScaleView)
 /// rather than the app's own button chrome.
 private struct MapStyleToggleButton: View {
     @Binding var usesSatellite: Bool
@@ -134,5 +187,26 @@ private struct MapStyleToggleButton: View {
                 ? Text("Show standard map")
                 : Text("Show satellite map")
         )
+    }
+}
+
+/// Recenters the map on the user's current location at a fixed, useful zoom — unlike MapKit's own
+/// user-location button, which recenters without changing the current zoom level.
+private struct MapRecenterButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "location.fill")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.borderless)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(.separator, lineWidth: 0.5)
+        }
+        .accessibilityLabel(Text("Center on my location"))
     }
 }
