@@ -10,8 +10,10 @@ struct ParksMapView: View {
     /// Height of the floating header above this view, so its own controls sit below it
     /// instead of hiding underneath.
     var topInset: CGFloat = 0
+    /// Owned by the parent: the style-toggle/recenter buttons live in its header overlay
+    /// (see ParksView), sharing this same camera so they can drive it directly.
+    @Binding var position: MapCameraPosition
 
-    @State private var position: MapCameraPosition = .automatic
     @State private var selectedID: String?
     @State private var detailPark: Park?
     @State private var query = ""
@@ -20,13 +22,9 @@ struct ParksMapView: View {
     @State private var searchPin: ParksSearchPin?
     @State private var favorites = ParkFavorites.shared
     @State private var cameraDistance: CLLocationDistance = .greatestFiniteMagnitude
-    @State private var pendingRecenter = false
 
     /// Below this camera distance, cable traces are close enough to read; above it they're just clutter.
-    private static let cableLineVisibleDistance: CLLocationDistance = 10_000
-    /// "Reasonable distance" for the here/reset button: close enough to be useful, wide enough to
-    /// see nearby landmarks around the park.
-    private static let recenterCameraDistance: CLLocationDistance = 5_000
+    private static let cableLineVisibleDistance: CLLocationDistance = 30_000
 
     private var showsCableLines: Bool { cameraDistance < Self.cableLineVisibleDistance }
 
@@ -80,18 +78,7 @@ struct ParksMapView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }
-        .overlay(alignment: .bottomTrailing) {
-            // Bottom-trailing, like Apple Maps' own locate-me/layers buttons: keeps these clear
-            // of the floating header above (which draws on top of this view and previously hid
-            // top-trailing controls whenever its measured height lagged a layout pass behind).
-            VStack(spacing: 8) {
-                MapStyleToggleButton(usesSatellite: $usesSatellite)
-                MapRecenterButton(action: recenterOnUser)
-            }
-            .padding(.trailing, 12)
-            .padding(.bottom, 12)
-        }
-        .ignoresSafeArea(edges: .top)
+        .ignoresSafeArea()
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
         .searchSuggestions {
             ForEach(parkMatches) { park in
@@ -104,11 +91,6 @@ struct ParksMapView: View {
             }
         }
         .onSubmit(of: .search) { Task { await search() } }
-        .onChange(of: location.coordinate) { _, coordinate in
-            guard pendingRecenter, let coordinate else { return }
-            pendingRecenter = false
-            moveCamera(to: coordinate)
-        }
         .onChange(of: selectedID) { _, id in
             guard let id, let park = parks.first(where: { $0.id == id }) else { return }
             selectedID = nil
@@ -143,66 +125,9 @@ struct ParksMapView: View {
             position = .camera(MapCamera(centerCoordinate: center, distance: max(region * 3, 5_000)))
         }
     }
-
-    /// Jumps to the user's location at a reasonable distance; requests a fresh fix first if needed.
-    private func recenterOnUser() {
-        if let coordinate = location.coordinate {
-            moveCamera(to: coordinate)
-        } else {
-            pendingRecenter = true
-            location.refresh()
-        }
-    }
-
-    private func moveCamera(to coordinate: ParkCoordinate) {
-        let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
-        withAnimation {
-            position = .camera(MapCamera(centerCoordinate: center, distance: Self.recenterCameraDistance))
-        }
-    }
 }
 
 private struct ParksSearchPin {
     let name: String
     let coordinate: CLLocationCoordinate2D
-}
-
-/// Standard/satellite toggle, using the same native Liquid Glass chrome as the rest of the app's
-/// floating buttons (see the search/add buttons in ParksView) instead of hand-rolled material.
-private struct MapStyleToggleButton: View {
-    @Binding var usesSatellite: Bool
-
-    var body: some View {
-        Button {
-            withAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
-        } label: {
-            Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 34, height: 34)
-        }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .accessibilityLabel(
-            usesSatellite
-                ? Text("Show standard map")
-                : Text("Show satellite map")
-        )
-    }
-}
-
-/// Recenters the map on the user's current location at a fixed, useful zoom — unlike MapKit's own
-/// user-location button, which recenters without changing the current zoom level.
-private struct MapRecenterButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "location.fill")
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 34, height: 34)
-        }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .accessibilityLabel(Text("Center on my location"))
-    }
 }
