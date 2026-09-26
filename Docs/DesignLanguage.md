@@ -84,7 +84,7 @@ All tints reach at least 4.3:1 against light and dark tiles (graphics need 3:1).
 
 ## Watch
 
-Same metric symbols, tints and header style. watchOS materials and container backgrounds instead of tiles in tiles. The riding view fits one screen on Ultra without scrolling. Native `Gauge` styles (`.accessoryCircular`) where a ring helps.
+Same metric symbols, tints and header style: `WatchMetric` in `RpplWatch/Views/WatchMetric.swift` mirrors `MetricKind`; keep the two in sync. Metric rows show the symbol in its tint next to the caps caption; the riding view tints its captions (DIST, speed, LAPS). watchOS materials and container backgrounds instead of tiles in tiles. The riding view fits one screen on Ultra without scrolling. Native `Gauge` styles (`.accessoryCircular`) where a ring helps.
 
 ## Voice and tone
 
