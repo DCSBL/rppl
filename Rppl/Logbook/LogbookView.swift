@@ -262,8 +262,6 @@ struct LogbookView: View {
             ? "-"
             : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
 
-        let setsLapsMax = Double(max(totals.totalSets, totals.totalLaps))
-
         return InfoTile("Total", metric: .riding) {
             Group {
                 if useAccessibilityLayout {
@@ -288,33 +286,16 @@ struct LogbookView: View {
             Divider()
                 .overlay(Color.rpplFill)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(
-                    catalog.isLoading
-                        ? "—"
-                        : LogbookFormatting.totalsFooter(
-                            sets: totals.totalSets,
-                            laps: totals.totalLaps
-                        )
-                )
-                .font(.caption)
-                .foregroundStyle(RpplDesign.secondaryText)
-
-                if !catalog.isLoading, setsLapsMax > 0 {
-                    // Decorative: the footer text above carries both numbers.
-                    VStack(spacing: 5) {
-                        Gauge(value: MetricDisplay.fraction(Double(totals.totalSets), of: setsLapsMax)) {
-                            Text("Sets")
-                        }
-                        .gaugeStyle(.rpplBar(tint: MetricKind.sets.tint, height: 6))
-                        Gauge(value: MetricDisplay.fraction(Double(totals.totalLaps), of: setsLapsMax)) {
-                            Text("Laps")
-                        }
-                        .gaugeStyle(.rpplBar(tint: MetricKind.laps.tint, height: 6))
-                    }
-                    .accessibilityHidden(true)
-                }
-            }
+            Text(
+                catalog.isLoading
+                    ? "—"
+                    : LogbookFormatting.totalsFooter(
+                        sets: totals.totalSets,
+                        laps: totals.totalLaps
+                    )
+            )
+            .font(.caption)
+            .foregroundStyle(RpplDesign.secondaryText)
         }
     }
 
@@ -464,18 +445,26 @@ private struct SessionCard: View {
                 HStack(alignment: .center, spacing: 12) {
                     activityIcon
 
-                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                        .foregroundStyle(Color.rpplText)
-                        .font(.headline)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.75)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                            .foregroundStyle(Color.rpplText)
+                            .font(.headline)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.75)
 
-                    Text(entry.cityName ?? "-")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                        .lineLimit(1)
+                        // Park name wraps instead of truncating: it is how riders tell sessions apart.
+                        Label {
+                            Text(entry.cityName ?? "-")
+                        } icon: {
+                            Image(systemName: MetricKind.park.systemImage)
+                                .foregroundStyle(MetricKind.park.tint)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(RpplDesign.secondaryText)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 if !entry.highlights.isEmpty {
