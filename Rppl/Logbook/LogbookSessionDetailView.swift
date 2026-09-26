@@ -334,12 +334,12 @@ struct LogbookSessionDetailView: View {
             VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
                 if let manifest {
                     sessionInfoTile(manifest: manifest, stats: stats)
+                    setsTile(stats, start: manifest.startedAt, end: manifest.endedAt ?? stats.endedAt)
                 }
 
                 InfoTileGrid {
                     speedTile(stats)
                     ridingTile(stats)
-                    setsTile(stats)
                     distanceTile(stats)
                     if stats.waterTemperatureAvailable {
                         InfoTile("Water temperature", metric: .water) {
@@ -435,11 +435,30 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private func setsTile(_ stats: SessionStats) -> some View {
+    /// Full width: every set on the session timeline at its real start and length.
+    private func setsTile(_ stats: SessionStats, start: Date, end: Date) -> some View {
         InfoTile("Sets", metric: .sets) {
-            MetricValue("\(stats.setCount)")
-            SegmentDots(count: stats.setCount, tint: MetricKind.sets.tint)
-            StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
+            HStack(alignment: .firstTextBaseline, spacing: 16) {
+                MetricValue("\(stats.setCount)")
+                StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
+                Spacer(minLength: 0)
+            }
+            if !stats.sets.isEmpty, end > start {
+                TimelineBar(
+                    spans: stats.sets.map {
+                        MetricDisplay.span(from: $0.startedAt, to: $0.endedAt, inRangeFrom: start, to: end)
+                    },
+                    tint: MetricKind.sets.tint
+                )
+                HStack {
+                    Text(start.formatted(date: .omitted, time: .shortened))
+                    Spacer()
+                    Text(end.formatted(date: .omitted, time: .shortened))
+                }
+                .font(.caption2)
+                .monospacedDigit()
+                .foregroundStyle(RpplDesign.secondaryText)
+            }
         }
     }
 

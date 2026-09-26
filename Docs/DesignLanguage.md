@@ -25,7 +25,7 @@ Code lives in `Rppl/Design/`. `DesignGallery.swift` has previews for light, dark
 | `MetricValue` | The big number. Splits `"42,2 km/h"` into a large value and a small muted unit (`MetricDisplay.split` in Core). |
 | `Gauge` + `.rpplRing(tint:)` | Share of a whole: riding vs inactive. |
 | `Gauge` + `.rpplBar(tint:)` | A value against a max: avg vs max speed, sets vs laps. |
-| `SegmentDots` | One dot per item (sets). Caps at 24 with "+N". Decorative. |
+| `TimelineBar` | Spans on a timeline at their real position and length (sets across a session, `MetricDisplay.span` in Core). Decorative. |
 | `StatChip` | Symbol + value (+ caption) in compact rows, like session cards. |
 | Swift Charts | Series over time or per set. Always with an accessibility chart descriptor. |
 
@@ -70,7 +70,7 @@ All tints reach at least 4.3:1 against light and dark tiles (graphics need 3:1).
 ### When to draw a graphic
 
 - A ring or bar only when the proportion means something to a rider (riding share, avg vs max).
-- Dots when the count is small and countable (sets in a session).
+- A timeline when *when* and *how long* matter (sets across a session): position and width are real time, never a count.
 - A chart when there is a series (per set, over time).
 - One number on its own stays a number. Don't chart it.
 

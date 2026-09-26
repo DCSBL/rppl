@@ -114,27 +114,29 @@ extension GaugeStyle where Self == BarGaugeStyle {
     }
 }
 
-/// One dot per item (e.g. sets). Decorative: pair it with the count as text.
-struct SegmentDots: View {
-    let count: Int
+/// Horizontal timeline: one tinted segment per span (fractions of the whole, e.g. sets in a session).
+/// Decorative: pair it with the count and times as text.
+struct TimelineBar: View {
+    let spans: [ClosedRange<Double>]
     var tint: Color
-    var maxVisible = 24
-    var diameter: CGFloat = 8
+    var height: CGFloat = 14
 
     var body: some View {
-        let visible = count > maxVisible ? maxVisible - 1 : max(count, 0)
-        FlowLayout(spacing: 4) {
-            ForEach(0..<visible, id: \.self) { _ in
-                Circle()
-                    .fill(tint)
-                    .frame(width: diameter, height: diameter)
-            }
-            if count > visible {
-                Text(verbatim: "+\(count - visible)")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(RpplDesign.secondaryText)
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(tint.opacity(0.15))
+                ForEach(spans.indices, id: \.self) { index in
+                    let span = spans[index]
+                    Rectangle()
+                        .fill(tint)
+                        .frame(width: max(2, proxy.size.width * (span.upperBound - span.lowerBound)))
+                        .offset(x: proxy.size.width * span.lowerBound)
+                }
             }
         }
+        .frame(height: height)
+        .clipShape(.rect(cornerRadius: height / 3, style: .continuous))
         .accessibilityHidden(true)
     }
 }

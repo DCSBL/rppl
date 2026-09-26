@@ -35,7 +35,7 @@ private struct DesignGallery: View {
 
                     InfoTile("Sets", metric: .sets) {
                         MetricValue("10")
-                        SegmentDots(count: 10, tint: MetricKind.sets.tint)
+                        TimelineBar(spans: [0.02...0.1, 0.18...0.3, 0.45...0.52, 0.7...0.86], tint: MetricKind.sets.tint)
                     }
 
                     InfoTile("Distance", metric: .distance) {
@@ -52,8 +52,6 @@ private struct DesignGallery: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .rpplTileChrome()
 
-                SegmentDots(count: 40, tint: MetricKind.sets.tint)
-                    .rpplTileChrome()
             }
             .padding(16)
         }
