@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SessionMetricRow: View {
     let label: LocalizedStringKey
+    var metric: WatchMetric?
     let value: String
     var valueColor: Color = .primary
     /// When true, value stays full brightness under Always On (primary hero metric).
@@ -16,7 +17,7 @@ struct SessionMetricRow: View {
                 .monospacedDigit()
                 .foregroundStyle(valueColor)
                 .opacity(primaryValueOpacity)
-            Text(label)
+            WatchMetricCaption(label: label, metric: metric)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)

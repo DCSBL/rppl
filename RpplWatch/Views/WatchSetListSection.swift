@@ -8,7 +8,7 @@ struct WatchSetListSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Sets")
+            WatchMetricCaption(label: "Sets", metric: .sets)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
@@ -40,19 +40,23 @@ private struct WatchSetRow: View {
 
             WatchSetMetricLine(
                 label: "Duration",
+                metric: .duration,
                 value: SessionFormatters.segmentDuration(set.duration)
             )
             WatchSetMetricLine(
                 label: "Distance",
+                metric: .distance,
                 value: SessionFormatters.distance(set.distanceMeters)
             )
             WatchSetMetricLine(
                 label: "Laps",
+                metric: .laps,
                 value: "\(set.lapCount)"
             )
             if let averageSpeed = set.averageSpeedKmh {
                 WatchSetMetricLine(
                     label: "Avg speed",
+                    metric: .speed,
                     value: SessionFormatters.averageSpeed(averageSpeed)
                 )
             }
@@ -69,7 +73,7 @@ struct WatchLastSetSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Last set")
+            WatchMetricCaption(label: "Last set", metric: .sets)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
@@ -77,14 +81,17 @@ struct WatchLastSetSection: View {
             if didCompleteSet {
                 WatchSetMetricLine(
                     label: "Duration",
+                    metric: .duration,
                     value: SessionFormatters.segmentDuration(duration)
                 )
                 WatchSetMetricLine(
                     label: "Distance",
+                    metric: .distance,
                     value: SessionFormatters.distance(distanceMeters)
                 )
                 WatchSetMetricLine(
                     label: "Laps",
+                    metric: .laps,
                     value: "\(lapCount)"
                 )
             } else {
@@ -98,11 +105,12 @@ struct WatchLastSetSection: View {
 
 struct WatchSetMetricLine: View {
     let label: LocalizedStringKey
+    var metric: WatchMetric?
     let value: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(label)
+            WatchMetricCaption(label: label, metric: metric)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             Text(value)

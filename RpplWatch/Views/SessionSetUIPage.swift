@@ -44,10 +44,12 @@ struct SessionSetUIPage: View {
 
                 SessionMetricRow(
                     label: "Distance",
+                    metric: .distance,
                     value: SessionFormatters.distance(session.totalDistanceM)
                 )
                 SessionMetricRow(
                     label: "Sets",
+                    metric: .sets,
                     value: "\(session.setCount)"
                 )
 
@@ -98,7 +100,7 @@ struct SessionSetUIPage: View {
                         .alwaysOnSupportingMetric(isLuminanceReduced)
                     Text("DIST")
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(WatchMetric.distance.tint)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
@@ -112,7 +114,7 @@ struct SessionSetUIPage: View {
                         .alwaysOnSupportingMetric(isLuminanceReduced)
                     Text(DistanceFormat.speedUnitSymbol().uppercased())
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(WatchMetric.speed.tint)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
@@ -126,7 +128,7 @@ struct SessionSetUIPage: View {
                         .alwaysOnSupportingMetric(isLuminanceReduced)
                     Text("LAPS")
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(WatchMetric.laps.tint)
                         .alwaysOnSecondaryChrome(isLuminanceReduced)
                 }
                 .frame(maxWidth: .infinity)
@@ -192,25 +194,30 @@ struct SessionSetUIPage: View {
 
                 SessionMetricRow(
                     label: "Elapsed",
+                    metric: .duration,
                     value: SessionFormatters.elapsed(session.elapsed),
                     valueColor: .yellow,
                     isPrimaryMetric: true
                 )
                 SessionMetricRow(
                     label: "Distance",
+                    metric: .distance,
                     value: SessionFormatters.distance(session.totalDistanceM)
                 )
                 SessionMetricRow(
                     label: "Sets",
+                    metric: .sets,
                     value: "\(session.setCount)"
                 )
                 SessionMetricRow(
                     label: "Inactive for",
+                    metric: .inactive,
                     value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
                 )
                 if session.waterTemperatureAvailable {
                     SessionMetricRow(
                         label: "Water",
+                        metric: .water,
                         value: session.averageWaterTemperatureCelsius.map(SessionFormatters.waterTemp)
                             ?? TemperatureFormat.placeholder
                     )
