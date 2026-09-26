@@ -24,7 +24,7 @@ struct ParksMapView: View {
     @State private var cameraDistance: CLLocationDistance = .greatestFiniteMagnitude
 
     /// Below this camera distance, cable traces are close enough to read; above it they're just clutter.
-    private static let cableLineVisibleDistance: CLLocationDistance = 10_000
+    private static let cableLineVisibleDistance: CLLocationDistance = 30_000
 
     private var showsCableLines: Bool { cameraDistance < Self.cableLineVisibleDistance }
 
