@@ -61,7 +61,7 @@ private struct DesignGallery: View {
     }
 
     private var totalsTile: some View {
-        InfoTile("TOTAL", metric: .distance) {
+        InfoTile("Total", metric: .riding) {
             HStack(alignment: .firstTextBaseline) {
                 totalMetric(value: "4", label: "Sessions")
                 totalMetric(value: LogbookFormatting.distanceKilometers(61_000), label: "Distance")
