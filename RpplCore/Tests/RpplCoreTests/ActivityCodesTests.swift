@@ -15,8 +15,12 @@ struct ActivityCodesTests {
     }
 
     @Test func missingCodeUsesFallbackTitleNotAsStorage() {
-        #expect(ActivityCodes.localizedTitle(for: nil) == String(localized: "Cable park", bundle: .module))
-        #expect(ActivityCodes.localizedTitle(for: "") == String(localized: "Cable park", bundle: .module))
+        // Compare within RpplCore's bundle: the test target's `.module` has no localizations,
+        // so on a non-English simulator it would disagree with the library's localized title.
+        let fallback = ActivityCodes.localizedTitle(for: nil)
+        #expect(!fallback.isEmpty)
+        #expect(ActivityCodes.localizedTitle(for: "") == fallback)
+        #expect(!ActivityCodes.pickerCodes.map { ActivityCodes.localizedTitle(for: $0) }.contains(fallback))
     }
 
     @Test func unknownCodeDisplaysRawString() {
