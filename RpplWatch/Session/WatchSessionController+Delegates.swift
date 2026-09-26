@@ -115,6 +115,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
                let statistics = workoutBuilder.statistics(for: energyType),
                let value = statistics.sumQuantity()?.doubleValue(for: .kilocalorie()) {
                 energy = value
+                activeEnergyKilocalories = value
             }
             if let basalType = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned),
                collectedTypes.contains(basalType),

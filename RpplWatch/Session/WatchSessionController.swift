@@ -38,8 +38,15 @@ final class WatchSessionController: NSObject {
     var lastHorizontalAccuracy: Double?
     var lastHeartRate: Double?
     var lastSpeedMps: Double?
+    /// Cumulative active energy this session (mirrors `HKLiveWorkoutBuilder` statistics).
+    var activeEnergyKilocalories: Double?
     /// Set-gated session distance (sum of set meters). Not dock/pause walking.
     var totalDistanceM: Double { liveSetTracker.sessionSetMeters }
+    /// Session-wide average speed (total set distance over elapsed time), nil before any movement.
+    var sessionAverageSpeedKmh: Double? {
+        guard elapsed > 0, totalDistanceM > 0 else { return nil }
+        return (totalDistanceM / elapsed) * 3.6
+    }
     var currentSetDuration: TimeInterval = 0
     var currentInactiveDuration: TimeInterval = 0
     var filterRejectionReason: String?

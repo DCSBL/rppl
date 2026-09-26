@@ -52,4 +52,8 @@ enum SessionFormatters {
     static func waterTemp(_ celsius: Double) -> String {
         TemperatureFormat.celsius(celsius)
     }
+
+    static func calories(_ kilocalories: Double) -> String {
+        EnergyFormat.kilocalories(kilocalories)
+    }
 }

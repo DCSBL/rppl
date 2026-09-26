@@ -9,6 +9,7 @@ enum WatchMetric {
     case duration
     case inactive
     case water
+    case energy
 
     var systemImage: String {
         switch self {
@@ -19,6 +20,7 @@ enum WatchMetric {
         case .duration: "clock"
         case .inactive: "pause.circle"
         case .water: "thermometer.medium"
+        case .energy: "flame"
         }
     }
 
@@ -31,6 +33,7 @@ enum WatchMetric {
         case .duration: Color.rpplMetricTime
         case .inactive: Color.secondary
         case .water: Color.rpplMetricWater
+        case .energy: Color.rpplMetricEnergy
         }
     }
 }
