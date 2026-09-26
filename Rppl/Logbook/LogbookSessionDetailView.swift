@@ -403,20 +403,15 @@ struct LogbookSessionDetailView: View {
     }
 
     private func speedTile(_ stats: SessionStats) -> some View {
-        InfoTile("Max speed", metric: .speed) {
+        InfoTile("Speed", metric: .speed) {
             MetricValue(displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-")
-            if let max = displayedMaxSpeedKmh, let average = stats.averageSpeedKmh, max > 0 {
-                Gauge(value: MetricDisplay.fraction(average, of: max)) {
-                    Text("Avg speed")
+            if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
+                Gauge(value: MetricDisplay.fraction(cable, of: max)) {
+                    Text("Cable speed")
                 }
                 .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
                 .accessibilityHidden(true)
             }
-            StatChip(
-                metric: .speed,
-                value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                caption: "Avg speed"
-            )
             StatChip(
                 metric: .speed,
                 value: displayedCableSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
@@ -828,8 +823,8 @@ private struct SetDetailCard: View {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
     }
 
-    private var averageSpeedKmh: Double? {
-        SessionLocationHelpers.averageSpeedKmh(for: set)
+    private var cableSpeedKmh: Double? {
+        SessionLocationHelpers.cableSpeedKmh(for: set, locations: locations)
     }
 
     var body: some View {
@@ -897,7 +892,6 @@ private struct SetDetailCard: View {
             FlowLayout(spacing: 16) {
                 StatChip(metric: .duration, value: LogbookFormatting.compactDuration(set.duration), caption: "Duration")
                 StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(set.distanceMeters), caption: "Distance")
-                StatChip(metric: .laps, value: "\(set.lapCount)", caption: "Laps")
                 StatChip(
                     metric: .speed,
                     value: maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
@@ -905,8 +899,8 @@ private struct SetDetailCard: View {
                 )
                 StatChip(
                     metric: .speed,
-                    value: averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                    caption: "Avg speed"
+                    value: cableSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                    caption: "Cable speed"
                 )
             }
 

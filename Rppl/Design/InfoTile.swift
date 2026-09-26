@@ -6,6 +6,7 @@ struct InfoTile<Content: View>: View {
     private let systemImage: String
     private let tint: Color
     private let content: Content
+    private var metric: MetricKind?
 
     init(
         _ title: LocalizedStringKey,
@@ -21,11 +22,12 @@ struct InfoTile<Content: View>: View {
 
     init(_ title: LocalizedStringKey, metric: MetricKind, @ViewBuilder content: () -> Content) {
         self.init(title, systemImage: metric.systemImage, tint: metric.tint, content: content)
+        self.metric = metric
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: RpplDesign.tileContentSpacing) {
-            TileHeader(title: title, systemImage: systemImage, tint: tint)
+            TileHeader(title: title, systemImage: systemImage, tint: tint, metric: metric)
             content
         }
         // maxHeight lets tiles in one grid row share the tallest height.
@@ -38,10 +40,11 @@ struct TileHeader: View {
     let title: LocalizedStringKey
     let systemImage: String
     var tint: Color = RpplDesign.headerColor
+    var metric: MetricKind?
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: systemImage)
+            MetricIcon(metric: metric, systemImage: systemImage)
                 .foregroundStyle(tint)
                 .accessibilityHidden(true)
             Text(title)

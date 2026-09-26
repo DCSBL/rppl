@@ -16,7 +16,7 @@ enum RpplDesign {
 }
 
 /// One SF Symbol + tint per metric, shared by tiles, chips, charts (and mirrored on Watch).
-enum MetricKind: CaseIterable {
+enum MetricKind: CaseIterable, Equatable {
     case distance
     case speed
     case sets
@@ -61,6 +61,32 @@ enum MetricKind: CaseIterable {
         case .water: Color.rpplMetricWater
         case .air, .humidity: Color.rpplMetricAir
         case .energy, .heartRate: Color.rpplMetricEnergy
+        }
+    }
+}
+
+/// Renders a metric's icon: the MDI ski-water glyph for `.riding`, an SF Symbol otherwise.
+/// `systemImage` lets call sites that already resolved `MetricKind.systemImage` skip re-deriving it.
+struct MetricIcon: View {
+    var metric: MetricKind?
+    var systemImage: String
+
+    init(metric: MetricKind) {
+        self.metric = metric
+        self.systemImage = metric.systemImage
+    }
+
+    init(metric: MetricKind?, systemImage: String) {
+        self.metric = metric
+        self.systemImage = systemImage
+    }
+
+    var body: some View {
+        if metric == .riding {
+            MDIIconView(icon: .skiWater)
+                .frame(width: 14, height: 14)
+        } else {
+            Image(systemName: systemImage)
         }
     }
 }

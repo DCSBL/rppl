@@ -2,11 +2,10 @@ import Foundation
 import RpplCore
 
 enum SessionLocationHelpers {
-    static func averageSpeedKmh(for set: SetSegmentStats) -> Double? {
-        if let trimmed = set.averageSpeedKmh { return trimmed }
-        return LocationSpeedStats.averageSpeedKmh(
-            distanceMeters: set.distanceMeters,
-            duration: set.duration
+    static func cableSpeedKmh(for set: SetSegmentStats, locations: [LocationSample]) -> Double? {
+        CableSpeedEstimator.cableSpeedKmh(
+            setWindows: [(start: set.startedAt, end: set.endedAt)],
+            locations: locations
         )
     }
 

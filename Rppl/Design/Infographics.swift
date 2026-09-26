@@ -93,7 +93,7 @@ struct BarGaugeStyle: GaugeStyle {
                 GeometryReader { proxy in
                     if configuration.value > 0 {
                         Capsule()
-                            .fill(tint.gradient)
+                            .fill(tint)
                             .frame(width: max(height, proxy.size.width * configuration.value))
                     }
                 }
@@ -150,7 +150,7 @@ struct StatChip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
-                Image(systemName: metric.systemImage)
+                MetricIcon(metric: metric)
                     .imageScale(.small)
                     .foregroundStyle(metric.tint)
                     .accessibilityHidden(true)
