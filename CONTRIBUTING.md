@@ -14,6 +14,7 @@ Thanks for taking an interest. This file is for people changing the code or docs
 | On-disk session layout | [Docs/SessionStorage.md](Docs/SessionStorage.md) |
 | Set / pause thresholds | [Docs/RideDetection.md](Docs/RideDetection.md) |
 | Xcode, hooks, `make check` | [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
+| UI look, voice and tone | [Docs/DesignLanguage.md](Docs/DesignLanguage.md) |
 | Terms & privacy | [LEGAL.md](LEGAL.md) |
 
 ```

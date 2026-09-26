@@ -110,20 +110,24 @@ struct WatchSessionDetailView: View {
 
             SessionMetricRow(
                 label: "Distance",
+                metric: .distance,
                 value: SessionFormatters.distance(stats.totalDistanceMeters)
             )
             SessionMetricRow(
                 label: "Sets",
+                metric: .sets,
                 value: "\(stats.setCount)"
             )
             SessionMetricRow(
                 label: "Laps",
+                metric: .laps,
                 value: "\(stats.totalLapCount)"
             )
 
             if let maxSpeed = stats.maxSpeedKmh ?? stats.topSpeedKmh {
                 SessionMetricRow(
                     label: "Max speed",
+                    metric: .speed,
                     value: SessionFormatters.averageSpeed(maxSpeed)
                 )
             }

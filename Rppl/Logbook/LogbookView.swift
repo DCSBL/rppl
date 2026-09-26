@@ -40,6 +40,7 @@ struct LogbookView: View {
                             state: connectivity.syncState,
                             pendingCount: connectivity.pendingAckCount
                         )
+                        .rpplTileChrome()
                         .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -133,7 +134,7 @@ struct LogbookView: View {
             .scrollContentBackground(.hidden)
             .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
             .contentMargins(.top, 8, for: .scrollContent)
-            .background(Color.rpplBackground)
+            .background(RpplBackdrop())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
             .tint(Color.rpplAccent)
@@ -148,11 +149,11 @@ struct LogbookView: View {
                     }
             }
             .alert(
-                "Delete Session?",
+                "Delete session?",
                 isPresented: $showDeleteConfirmation
             ) {
                 if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
-                    Button("Delete from This iPhone", role: .destructive) {
+                    Button("Delete from this iPhone", role: .destructive) {
                         if let sessionId = pendingDeleteSessionId {
                             hideSessionFromLogbook(sessionId)
                         }
@@ -179,7 +180,7 @@ struct LogbookView: View {
                 Text(deleteConfirmationMessage)
             }
             .alert(
-                "Could Not Delete Session",
+                "Could not delete session",
                 isPresented: $showActionError,
                 presenting: actionErrorText
             ) { _ in
@@ -244,7 +245,7 @@ struct LogbookView: View {
             Text("Logbook")
                 .font(.largeTitle.bold())
                 .foregroundStyle(Color.rpplText)
-            Text("Park days and sets")
+            Text("Sessions and sets")
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
         }
@@ -261,20 +262,10 @@ struct LogbookView: View {
             ? "-"
             : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
 
-        return VStack(alignment: .leading, spacing: 16) {
-            Label {
-                Text("TOTAL")
-            } icon: {
-                MDIIconView(icon: .skiWater)
-                    .frame(width: 14, height: 14)
-            }
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Color.rpplAccent)
-            .labelStyle(.titleAndIcon)
-
+        return InfoTile("Total", metric: .riding) {
             Group {
                 if useAccessibilityLayout {
-                    VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                         totalMetric(value: sessionsValue, label: "Sessions")
                         totalDivider(horizontal: true)
                         totalMetric(value: distanceValue, label: "Distance")
@@ -303,10 +294,9 @@ struct LogbookView: View {
                         laps: totals.totalLaps
                     )
             )
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
+            .font(.caption)
+            .foregroundStyle(RpplDesign.secondaryText)
         }
-        .logbookCardChrome()
     }
 
     private func totalDivider(horizontal: Bool) -> some View {
@@ -318,17 +308,13 @@ struct LogbookView: View {
 
     private func totalMetric(value: String, label: LocalizedStringKey) -> some View {
         VStack(spacing: 4) {
-            Text(value)
-                .font(.title2.bold())
-                .foregroundStyle(Color.rpplText)
-                .monospacedDigit()
-                .minimumScaleFactor(0.7)
-                .lineLimit(1)
+            MetricValue(value, size: .medium)
             Text(label)
                 .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
+                .foregroundStyle(RpplDesign.secondaryText)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 
     private var sessionsHeader: some View {
@@ -412,6 +398,9 @@ extension SessionHighlight {
         case .longest: "clock.fill"
         case .mostWaterTime: "water.waves"
         case .mostLaps: "arrow.triangle.2.circlepath"
+        case .highestRidePercentage: "percent"
+        case .mostCalories: "flame.fill"
+        case .longestSetEver: "ruler"
         }
     }
 
@@ -420,6 +409,9 @@ extension SessionHighlight {
         case .longest: .orange
         case .mostWaterTime: .blue
         case .mostLaps: .purple
+        case .highestRidePercentage: .green
+        case .mostCalories: .red
+        case .longestSetEver: .yellow
         }
     }
 }
@@ -456,19 +448,29 @@ private struct SessionCard: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
-                        .foregroundStyle(Color.rpplText)
-                        .font(.headline)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.75)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(alignment: .center, spacing: 12) {
+                    activityIcon
 
-                    Text(entry.cityName ?? "-")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
+                            .foregroundStyle(Color.rpplText)
+                            .font(.headline)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.75)
+
+                        // Park name wraps instead of truncating: it is how riders tell sessions apart.
+                        Label {
+                            Text(entry.cityName ?? "-")
+                        } icon: {
+                            Image(systemName: MetricKind.park.systemImage)
+                                .foregroundStyle(MetricKind.park.tint)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(RpplDesign.secondaryText)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 if !entry.highlights.isEmpty {
@@ -495,8 +497,6 @@ private struct SessionCard: View {
                     .overlay(Color.rpplFill)
 
                 sessionStatsSummary
-                    .font(.caption)
-                    .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -507,12 +507,24 @@ private struct SessionCard: View {
                 .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .logbookCardChrome()
+        .rpplTileChrome()
         .background(
-            RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
                 .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
         )
         .animation(.easeOut(duration: 0.3), value: isHighlighted)
+    }
+
+    private var activityIcon: some View {
+        MDIIconView(icon: .skiWater)
+            .foregroundStyle(MetricKind.riding.tint)
+            .frame(width: 20, height: 20)
+            .frame(width: 36, height: 36)
+            .background(
+                MetricKind.riding.tint.opacity(0.16),
+                in: .rect(cornerRadius: 10, style: .continuous)
+            )
+            .accessibilityHidden(true)
     }
 
     private var sessionMetaText: String {
@@ -548,9 +560,9 @@ private struct SessionCard: View {
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                statLabel("water.waves", value: distanceText)
-                statLabel("flag.checkered", value: setsText)
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+                StatChip(metric: .distance, value: distanceText)
+                StatChip(metric: .sets, value: setsText)
+                StatChip(metric: .laps, value: lapsText)
             }
         } else {
             ViewThatFits(in: .horizontal) {
@@ -562,27 +574,15 @@ private struct SessionCard: View {
     }
 
     private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 16) {
             if includeDistance {
-                statLabel("water.waves", value: distanceText)
+                StatChip(metric: .distance, value: distanceText)
             }
-            statLabel("flag.checkered", value: setsText)
+            StatChip(metric: .sets, value: setsText)
             if includeLaps {
-                statLabel("arrow.triangle.2.circlepath", value: lapsText)
+                StatChip(metric: .laps, value: lapsText)
             }
         }
-    }
-
-    private func statLabel(_ symbol: String, value: String) -> some View {
-        HStack(alignment: .center, spacing: 4) {
-            Image(systemName: symbol)
-                .imageScale(.small)
-            Text(value)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-        }
-        .fixedSize(horizontal: true, vertical: false)
-        .accessibilityElement(children: .combine)
     }
 }
 

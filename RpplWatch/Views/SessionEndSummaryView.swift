@@ -36,10 +36,12 @@ struct SessionEndSummaryView: View {
 
                 SessionMetricRow(
                     label: "Distance",
+                    metric: .distance,
                     value: SessionFormatters.distance(summary.distanceMeters)
                 )
                 SessionMetricRow(
                     label: "Sets",
+                    metric: .sets,
                     value: "\(summary.setCount)"
                 )
 

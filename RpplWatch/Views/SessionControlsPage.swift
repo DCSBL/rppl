@@ -50,11 +50,11 @@ struct SessionControlsPage: View {
             }
         }
         .confirmationDialog(
-            "End Session?",
+            "End session?",
             isPresented: $showStopConfirmation,
             titleVisibility: .visible
         ) {
-            Button("End Session", role: .destructive) {
+            Button("End session", role: .destructive) {
                 WakeLog.debug(.ui, "confirm Stop session")
                 Task { await session.stopSession() }
             }
@@ -63,7 +63,7 @@ struct SessionControlsPage: View {
             Text("Stops recording and queues transfer to iPhone.")
         }
         .confirmationDialog(
-            "Discard Session?",
+            "Discard session?",
             isPresented: $showDiscardConfirmation,
             titleVisibility: .visible
         ) {

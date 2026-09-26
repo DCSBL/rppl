@@ -10,7 +10,9 @@ public enum HighlightAssigner {
     static let minimumSetsForShortest = 3
 
     /// Fixed display order for session badges.
-    public static let sessionOrder: [SessionHighlight] = [.longest, .mostWaterTime, .mostLaps]
+    public static let sessionOrder: [SessionHighlight] = [
+        .longest, .mostWaterTime, .mostLaps, .highestRidePercentage, .mostCalories, .longestSetEver,
+    ]
 
     public static func assignSetHighlights(_ sets: [SetSegmentStats]) -> [SetSegmentStats] {
         guard sets.count >= 2 else {
@@ -68,6 +70,18 @@ public enum HighlightAssigner {
 
         if let laps = uniqueMaxSession(sessions, value: \.lapCount) {
             byId[laps.id, default: []].append(.mostLaps)
+        }
+
+        if let ratio = uniqueMaxSession(sessions, value: { $0.ridingInactiveRatio }) {
+            byId[ratio.id, default: []].append(.highestRidePercentage)
+        }
+
+        if let calories = uniqueMaxSession(sessions, value: { $0.totalEnergyKilocalories }) {
+            byId[calories.id, default: []].append(.mostCalories)
+        }
+
+        if let longestSet = uniqueMaxSession(sessions, value: { $0.longestSetDistanceMeters }) {
+            byId[longestSet.id, default: []].append(.longestSetEver)
         }
 
         return byId
@@ -131,5 +145,20 @@ public enum HighlightAssigner {
         let winners = sessions.filter { $0[keyPath: value] == best }
         guard winners.count < sessions.count else { return nil }
         return winners.first
+    }
+
+    /// Unique max among sessions with a non-nil value; ties or all-missing → nil.
+    private static func uniqueMaxSession(
+        _ sessions: [SessionHighlightInput],
+        value: (SessionHighlightInput) -> Double?
+    ) -> SessionHighlightInput? {
+        let scored = sessions.compactMap { session -> (SessionHighlightInput, Double)? in
+            guard let scoredValue = value(session) else { return nil }
+            return (session, scoredValue)
+        }
+        guard scored.count >= 2 else { return nil }
+        guard let best = scored.map(\.1).max() else { return nil }
+        if scored.allSatisfy({ $0.1 == best }) { return nil }
+        return scored.filter { $0.1 == best }.map(\.0).first
     }
 }

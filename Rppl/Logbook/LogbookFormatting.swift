@@ -14,6 +14,17 @@ enum LogbookFormatting {
         return formatted.isEmpty ? DurationFormat.units(0, width: .wide) : formatted
     }
 
+    /// Narrow units ("1h 19m 36s") for tiles and chips where width is tight.
+    static func compactDuration(_ interval: TimeInterval) -> String {
+        let total = max(0, interval.rounded())
+        let formatted = DurationFormat.units(total, width: .narrow)
+        return formatted.isEmpty ? DurationFormat.units(0, width: .narrow) : formatted
+    }
+
+    static func percent(_ fraction: Double) -> String {
+        fraction.formatted(.percent.precision(.fractionLength(0)))
+    }
+
     static func distanceKilometers(_ meters: Double) -> String {
         DistanceFormat.kilometers(meters)
     }
@@ -81,6 +92,9 @@ enum LogbookFormatting {
         case .longest: return String(localized: "Longest")
         case .mostWaterTime: return String(localized: "Most water time")
         case .mostLaps: return String(localized: "Most laps")
+        case .highestRidePercentage: return String(localized: "Highest ride %")
+        case .mostCalories: return String(localized: "Most calories")
+        case .longestSetEver: return String(localized: "Longest set ever")
         }
     }
 

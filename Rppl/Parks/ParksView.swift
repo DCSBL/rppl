@@ -127,7 +127,7 @@ struct ParksView: View {
 
         NavigationStack {
             ZStack(alignment: .top) {
-                Color.rpplBackground.ignoresSafeArea()
+                RpplBackdrop()
 
                 // The map is full height, bleeding under the translucent header below.
                 if showMap {
@@ -233,7 +233,7 @@ struct ParksView: View {
                 .padding(.horizontal, LogbookLayout.horizontalInset)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
-                .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackground))
+                .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
                 .onGeometryChange(
                     for: CGFloat.self,
                     of: { $0.size.height },
