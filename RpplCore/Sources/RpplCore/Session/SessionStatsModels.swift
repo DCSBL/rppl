@@ -117,6 +117,10 @@ public struct SessionStats: Codable, Equatable, Sendable {
         sets.compactMap(\.peakSpeedKmh).max()
     }
 
+    /// Most common riding speed across the whole session (km/h), an estimate of the cable speed.
+    /// Session-level on purpose: cable speed rarely changes mid-session.
+    public var cableSpeedKmh: Double?
+
     /// Set meters / riding duration (km/h).
     public var averageSpeedKmh: Double? {
         LocationSpeedStats.averageSpeedKmh(
@@ -143,7 +147,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         ridingInactiveRatio: Double,
         sets: [SetSegmentStats],
         averageWaterTemperatureCelsius: Double? = nil,
-        waterTemperatureAvailable: Bool = false
+        waterTemperatureAvailable: Bool = false,
+        cableSpeedKmh: Double? = nil
     ) {
         self.startedAt = startedAt
         self.endedAt = endedAt
@@ -158,6 +163,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         self.sets = sets
         self.averageWaterTemperatureCelsius = averageWaterTemperatureCelsius
         self.waterTemperatureAvailable = waterTemperatureAvailable
+        self.cableSpeedKmh = cableSpeedKmh
     }
 
     public init(from decoder: Decoder) throws {
@@ -186,6 +192,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
             forKey: .averageWaterTemperatureCelsius
         )
         waterTemperatureAvailable = try container.decodeIfPresent(Bool.self, forKey: .waterTemperatureAvailable) ?? false
+        cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -203,6 +210,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         try container.encode(sets, forKey: .sets)
         try container.encodeIfPresent(averageWaterTemperatureCelsius, forKey: .averageWaterTemperatureCelsius)
         try container.encode(waterTemperatureAvailable, forKey: .waterTemperatureAvailable)
+        try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -212,6 +220,6 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case legacyRideCount = "rideCount"
         case legacyRides = "rides"
         case ridingDuration, inactiveDuration, ridingInactiveRatio
-        case averageWaterTemperatureCelsius, waterTemperatureAvailable
+        case averageWaterTemperatureCelsius, waterTemperatureAvailable, cableSpeedKmh
     }
 }

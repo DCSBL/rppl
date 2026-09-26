@@ -119,7 +119,8 @@ public enum SessionTimelineRebase {
             ridingInactiveRatio: stats.ridingInactiveRatio,
             sets: stats.sets.map { shift($0, by: delta) },
             averageWaterTemperatureCelsius: stats.averageWaterTemperatureCelsius,
-            waterTemperatureAvailable: stats.waterTemperatureAvailable
+            waterTemperatureAvailable: stats.waterTemperatureAvailable,
+            cableSpeedKmh: stats.cableSpeedKmh
         )
     }
 
