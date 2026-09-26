@@ -105,6 +105,15 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 - **`cd RpplCore && swift test`:** source of truth on macOS / Xcode Cloud. On Linux it currently fails (`import Compression` — Apple framework). Do not treat that failure as a Cloud Agent environment bug; keep Core pure where possible, but do not invent Linux shims unless explicitly asked.
 - Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
 
+### PR workflow for code-change requests
+
+When the user asks for a code change, go straight to a PR — do not stop to ask permission to open one:
+
+1. Implement the change on the designated branch/worktree, commit in small concrete increments (see Source management above).
+2. Run whatever gate steps are available in this environment (`pre-commit run`, `make lint`); it is expected and OK that macOS-only steps (`swift test`, `xcodebuild`, `make check`/`make gate`) cannot run here — don't block on them, and don't fake or skip them via `--no-verify`/`SKIP` to work around a real failure in what *can* run.
+3. Push and open the PR using the repo's template (`.github/PULL_REQUEST_TEMPLATE.md`) and the title format in [contributions/agent.md](contributions/agent.md). Note in the PR body which checks could not run in this environment and why (Linux Cloud Agent, per Cloud Agents section above).
+4. After opening it, subscribe to and monitor the PR (CI, reviews) and drive it per the standard CI/review-handling rules — fix what's fixable, flag what isn't, keep it moving toward mergeable instead of leaving it and waiting to be asked again.
+
 ## Apple platform
 
 - Active Apple Developer account; iCloud Documents container `iCloud.nl.dcsbl.rppl` is configured for phone logbook sync ([`PhoneICloudDriveController.swift`](Rppl/Connectivity/PhoneICloudDriveController.swift)).
