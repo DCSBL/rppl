@@ -83,7 +83,7 @@ struct LogbookSessionDetailView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
-        .background(Color.rpplBackground)
+        .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
@@ -265,8 +265,8 @@ struct LogbookSessionDetailView: View {
                 ParkDetailContainer(park: park)
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "mappin.and.ellipse")
-                        .foregroundStyle(Color.rpplAccent)
+                    Image(systemName: MetricKind.park.systemImage)
+                        .foregroundStyle(MetricKind.park.tint)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(park.name)
                             .font(.headline)
@@ -281,7 +281,7 @@ struct LogbookSessionDetailView: View {
                         .foregroundStyle(Color.rpplMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .logbookCardChrome()
+                .rpplTileChrome()
             }
             .buttonStyle(.plain)
         }
@@ -330,99 +330,146 @@ struct LogbookSessionDetailView: View {
     @ViewBuilder
     private var sessionStatsCard: some View {
         if let stats = sessionStats {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Session")
-                    .font(.headline)
-                    .foregroundStyle(Color.rpplText)
-
+            VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
                 if let manifest {
-                    LabeledContent("Time") {
-                        Text(
-                            LogbookFormatting.sessionTimeRange(
-                                start: manifest.startedAt,
-                                end: manifest.endedAt ?? stats.endedAt
-                            )
-                        )
-                        .multilineTextAlignment(.trailing)
-                    }
-
-                    LabeledContent("Location") {
-                        Menu {
-                            Picker("Park", selection: parkSelection) {
-                                Text("No park").tag(String?.none)
-                                ForEach(parks) { park in
-                                    Text(park.name).tag(String?.some(park.id))
-                                }
-                            }
-                        } label: {
-                            Text(cityName ?? "-")
-                        }
-                    }
+                    sessionInfoTile(manifest: manifest, stats: stats)
                 }
 
-                statsGrid {
-                    statTile(
-                        LogbookFormatting.duration(stats.totalDuration),
-                        label: "Duration"
-                    )
-                    statTile(
-                        LogbookFormatting.distanceKilometers(stats.totalDistanceMeters),
-                        label: "Distance"
-                    )
-                    statTile(
-                        displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                        label: "Max speed"
-                    )
-                    statTile(
-                        stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
-                        label: "Avg speed"
-                    )
-                    statTile("\(stats.setCount)", label: "Sets")
-                    statTile("\(stats.totalLapCount)", label: "Laps")
-                    statTile(
-                        "\(Int((stats.ridingInactiveRatio * 100).rounded()))% · "
-                            + LogbookFormatting.duration(stats.ridingDuration),
-                        label: "Riding"
-                    )
-                    statTile(
-                        LogbookFormatting.duration(stats.inactiveDuration),
-                        label: "Inactive"
-                    )
+                InfoTileGrid {
+                    speedTile(stats)
+                    ridingTile(stats)
+                    setsTile(stats)
+                    distanceTile(stats)
                     if stats.waterTemperatureAvailable {
-                        statTile(
-                            stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
-                                ?? TemperatureFormat.placeholder,
-                            label: "Water temperature"
-                        )
+                        InfoTile("Water temperature", metric: .water) {
+                            MetricValue(
+                                stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
+                                    ?? TemperatureFormat.placeholder
+                            )
+                        }
                     }
                     if let weather = manifest?.weather {
-                        statTile(
-                            LogbookFormatting.airTemperature(weather.temperatureCelsius),
-                            label: "Air temperature"
-                        )
-                        statTile(
-                            LogbookFormatting.humidityPercent(weather.humidityPercent),
-                            label: "Humidity"
-                        )
-                    }
-                    if let total = stats.totalEnergyKilocalories {
-                        if let calories = stats.activeEnergyKilocalories {
-                            statTile(
-                                LogbookFormatting.kilocalories(calories),
-                                label: "Active calories"
+                        InfoTile("Air temperature", metric: .air) {
+                            MetricValue(LogbookFormatting.airTemperature(weather.temperatureCelsius))
+                            StatChip(
+                                metric: .humidity,
+                                value: LogbookFormatting.humidityPercent(weather.humidityPercent),
+                                caption: "Humidity"
                             )
                         }
-                        statTile(
-                            LogbookFormatting.kilocalories(total),
-                            label: "Total calories"
-                        )
-                    } else {
-                        missingCaloriesTile
                     }
+                    energyTile(stats)
                 }
             }
-            .foregroundStyle(Color.rpplText)
-            .logbookCardChrome()
+        }
+    }
+
+    private func sessionInfoTile(manifest: SessionManifest, stats: SessionStats) -> some View {
+        InfoTile("Session", metric: .duration) {
+            LabeledContent("Time") {
+                Text(
+                    LogbookFormatting.sessionTimeRange(
+                        start: manifest.startedAt,
+                        end: manifest.endedAt ?? stats.endedAt
+                    )
+                )
+                .multilineTextAlignment(.trailing)
+            }
+
+            LabeledContent("Location") {
+                Menu {
+                    Picker("Park", selection: parkSelection) {
+                        Text("No park").tag(String?.none)
+                        ForEach(parks) { park in
+                            Text(park.name).tag(String?.some(park.id))
+                        }
+                    }
+                } label: {
+                    Text(cityName ?? "-")
+                }
+            }
+        }
+        .foregroundStyle(Color.rpplText)
+    }
+
+    private func speedTile(_ stats: SessionStats) -> some View {
+        InfoTile("Max speed", metric: .speed) {
+            MetricValue(displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-")
+            if let max = displayedMaxSpeedKmh, let average = stats.averageSpeedKmh, max > 0 {
+                Gauge(value: MetricDisplay.fraction(average, of: max)) {
+                    Text("Avg speed")
+                }
+                .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
+                .accessibilityHidden(true)
+            }
+            StatChip(
+                metric: .speed,
+                value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                caption: "Avg speed"
+            )
+        }
+    }
+
+    private func ridingTile(_ stats: SessionStats) -> some View {
+        InfoTile("Riding", metric: .riding) {
+            Gauge(value: MetricDisplay.fraction(stats.ridingInactiveRatio, of: 1)) {
+                Text("Riding")
+            } currentValueLabel: {
+                Text(LogbookFormatting.percent(stats.ridingInactiveRatio))
+            }
+            .gaugeStyle(.rpplRing(tint: MetricKind.riding.tint, lineWidth: 9))
+            .frame(maxWidth: 96)
+            .frame(maxWidth: .infinity)
+
+            StatChip(
+                metric: .riding,
+                value: LogbookFormatting.compactDuration(stats.ridingDuration),
+                caption: "Riding"
+            )
+            StatChip(
+                metric: .inactive,
+                value: LogbookFormatting.compactDuration(stats.inactiveDuration),
+                caption: "Inactive"
+            )
+        }
+    }
+
+    private func setsTile(_ stats: SessionStats) -> some View {
+        InfoTile("Sets", metric: .sets) {
+            MetricValue("\(stats.setCount)")
+            SegmentDots(count: stats.setCount, tint: MetricKind.sets.tint)
+            StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
+        }
+    }
+
+    private func distanceTile(_ stats: SessionStats) -> some View {
+        InfoTile("Distance", metric: .distance) {
+            MetricValue(LogbookFormatting.distanceKilometers(stats.totalDistanceMeters))
+            StatChip(
+                metric: .duration,
+                value: LogbookFormatting.compactDuration(stats.totalDuration),
+                caption: "Duration"
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func energyTile(_ stats: SessionStats) -> some View {
+        if let total = stats.totalEnergyKilocalories {
+            InfoTile("Total calories", metric: .energy) {
+                MetricValue(LogbookFormatting.kilocalories(total))
+                if let active = stats.activeEnergyKilocalories {
+                    StatChip(
+                        metric: .energy,
+                        value: LogbookFormatting.kilocalories(active),
+                        caption: "Active calories"
+                    )
+                }
+            }
+        } else {
+            InfoTile("Calories", metric: .energy) {
+                missingCaloriesValue
+            }
         }
     }
 
@@ -453,63 +500,26 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private func statsGrid<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ],
-            spacing: 12
-        ) {
-            content()
-        }
-    }
-
-    private var missingCaloriesTile: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Text("-")
-                    .font(.title3.bold())
-                Button {
-                    showsMissingCaloriesInfo = true
-                } label: {
-                    Image(systemName: "info.circle")
-                        .font(.footnote)
-                        .foregroundStyle(Color.rpplMuted)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("About missing calories")
-                .popover(isPresented: $showsMissingCaloriesInfo) {
-                    Text("No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit.")
-                        .font(.footnote)
-                        .padding()
-                        .frame(maxWidth: 260)
-                        .presentationCompactAdaptation(.popover)
-                }
+    private var missingCaloriesValue: some View {
+        HStack(spacing: 6) {
+            MetricValue("-")
+            Button {
+                showsMissingCaloriesInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.footnote)
+                    .foregroundStyle(RpplDesign.secondaryText)
             }
-            Text("Calories")
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
+            .buttonStyle(.plain)
+            .accessibilityLabel("About missing calories")
+            .popover(isPresented: $showsMissingCaloriesInfo) {
+                Text("No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit.")
+                    .font(.footnote)
+                    .padding()
+                    .frame(maxWidth: 260)
+                    .presentationCompactAdaptation(.popover)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .logbookNestedBackground(Color.rpplFill)
-    }
-
-    private func statTile(_ value: String, label: LocalizedStringKey) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.title3.bold())
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .logbookNestedBackground(Color.rpplFill)
     }
 
     private func mapPlaceholder(_ message: LocalizedStringKey) -> some View {
