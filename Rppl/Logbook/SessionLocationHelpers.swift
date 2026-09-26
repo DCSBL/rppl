@@ -3,7 +3,8 @@ import RpplCore
 
 enum SessionLocationHelpers {
     static func cableSpeedKmh(for set: SetSegmentStats, locations: [LocationSample]) -> Double? {
-        CableSpeedEstimator.cableSpeedKmh(
+        if let cableSpeed = set.cableSpeedKmh { return cableSpeed }
+        return CableSpeedEstimator.cableSpeedKmh(
             setWindows: [(start: set.startedAt, end: set.endedAt)],
             locations: locations
         )
