@@ -70,7 +70,26 @@ public final class SessionFileStore: @unchecked Sendable {
         defer { lock.unlock() }
 
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        rewritePrettyPrintedManifestsIfNeeded()
     }
+
+    /// One-time pretty-print pass over existing `manifest.json` files on disk (schema/content
+    /// unchanged, only whitespace). Runs at most once per root per install; flagged in
+    /// `UserDefaults` rather than a manifest schema bump.
+    private func rewritePrettyPrintedManifestsIfNeeded() {
+        let key = Self.manifestPrettyPrintDefaultsKeyPrefix + rootURL.standardizedFileURL.path
+        let defaults = TesterIdentity.preferredStore()
+        guard !defaults.bool(forKey: key) else { return }
+        if let ids = try? rebuildPackageIndex().keys {
+            for sessionId in ids {
+                guard let manifest = try? readManifest(sessionId: sessionId) else { continue }
+                try? writeManifest(manifest)
+            }
+        }
+        defaults.set(true, forKey: key)
+    }
+
+    private static let manifestPrettyPrintDefaultsKeyPrefix = "wakeTracker.manifestPrettyPrintDone."
 
     /// Resolves the on-disk package directory for `sessionId` (folder name may differ).
     public func sessionDirectory(for sessionId: String) throws -> URL {
