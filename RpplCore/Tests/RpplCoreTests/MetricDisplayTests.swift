@@ -47,6 +47,31 @@ struct MetricDisplayTests {
         #expect(MetricDisplay.fraction(-1, of: 10) == 0)
     }
 
+    @Test func spanPlacesSegmentInsideRange() {
+        let t0 = Date(timeIntervalSince1970: 0)
+        let span = MetricDisplay.span(
+            from: t0.addingTimeInterval(25),
+            to: t0.addingTimeInterval(50),
+            inRangeFrom: t0,
+            to: t0.addingTimeInterval(100)
+        )
+        #expect(span == 0.25...0.5)
+    }
+
+    @Test func spanClampsToRangeAndHandlesEmptyRange() {
+        let t0 = Date(timeIntervalSince1970: 0)
+        let clamped = MetricDisplay.span(
+            from: t0.addingTimeInterval(-10),
+            to: t0.addingTimeInterval(200),
+            inRangeFrom: t0,
+            to: t0.addingTimeInterval(100)
+        )
+        #expect(clamped == 0...1)
+
+        let empty = MetricDisplay.span(from: t0, to: t0.addingTimeInterval(5), inRangeFrom: t0, to: t0)
+        #expect(empty == 0...0)
+    }
+
     @Test func fractionIsZeroForInvalidInput() {
         #expect(MetricDisplay.fraction(1, of: 0) == 0)
         #expect(MetricDisplay.fraction(1, of: -5) == 0)
