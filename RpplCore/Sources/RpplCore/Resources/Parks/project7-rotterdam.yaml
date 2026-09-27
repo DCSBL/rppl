@@ -25,7 +25,7 @@ location:
   lon: 4.573426
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Hollandsche IJssel at
-# Krimpen a/d IJssel, ~7 km away). Estimate only — not measured at the park itself.
+# Krimpen a/d IJssel, ~7 km away). Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: krimpenaandeijssel.hollandscheijssel }
 
 phone: 010 - 2600 110

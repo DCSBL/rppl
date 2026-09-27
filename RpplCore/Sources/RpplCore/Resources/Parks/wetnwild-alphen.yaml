@@ -17,8 +17,8 @@ location:
   lon: 4.6779432055000365
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Gouda voorhaven, ~16 km
-# away) that reports at all — closer Hollandsche IJssel stations exist but haven't reported in
-# years. Estimate only — not measured at the park itself, and this one updates infrequently.
+# away) that reports at all - closer Hollandsche IJssel stations exist but haven't reported in
+# years. Estimate only - not measured at the park itself, and this one updates infrequently.
 water_temperature: { provider: rws_nl, station_id: gouda.voorhaven }
 
 phone: 0172 472 412

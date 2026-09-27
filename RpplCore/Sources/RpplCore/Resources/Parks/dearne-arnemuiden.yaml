@@ -26,8 +26,8 @@ email: dearne@zeelandnet.nl
 website: https://watersportverhuurbedrijfdearne.nl/watersport/
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Arnemuiden Oranjeplaat,
-# ~0.7 km from the dock — the same landmark the park's own directions use). Reports frequently
-# (latest reading same-day as this lookup). Estimate only — not measured at the park itself.
+# ~0.7 km from the dock - the same landmark the park's own directions use). Reports frequently
+# (latest reading same-day as this lookup). Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: arnemuiden.oranjeplaat }
 
 links:
@@ -36,11 +36,11 @@ links:
 
 cables:
   - name: Wakeboardbaan
-    # Site's own description: a "tweemast-wakeboardbaan" (two-mast course) — a 2-point "2.0"
+    # Site's own description: a "tweemast-wakeboardbaan" (two-mast course) - a 2-point "2.0"
     # cable, not a full-size loop. No source map/satellite view to trace points from.
     direction: 2d
     description: >-
-      Two-mast cable — you're the only rider on the water for your session, no queue and no
+      Two-mast cable - you're the only rider on the water for your session, no queue and no
       swimming back after a fall.
 
 opening:

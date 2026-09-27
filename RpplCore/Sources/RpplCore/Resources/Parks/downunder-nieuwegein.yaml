@@ -18,7 +18,7 @@ location:
   lon: 5.124218887481674
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Lekkanaal, ~3 km away).
-# Estimate only — not measured at the park itself.
+# Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 
 phone: 030 287 7777

@@ -6,7 +6,7 @@
 #   https://www.cableparkviewalmere.nl/wakeboarden/    (Alta Twin clinic cable description)
 # Main-cable direction (ccw) confirmed by the user, not stated on the site. Length/points left out
 # (not confirmed). `location` is the Google Maps business pin for the confirmed official address
-# (Bergsmapad 1, 1324 ZK Almere) — the site itself publishes no coordinates.
+# (Bergsmapad 1, 1324 ZK Almere) - the site itself publishes no coordinates.
 version: 1
 id: view-almere
 created_at: 2026-09-27
@@ -26,9 +26,9 @@ location:
   lon: 5.2152087
 
 # Nearest official Rijkswaterstaat surface-water temperature station that actually reports (Pampus,
-# oost, ~8.7 km away, in the Markermeer) — checked via the WaterWebServices catalog/observation
+# oost, ~8.7 km away, in the Markermeer) - checked via the WaterWebServices catalog/observation
 # endpoints on 2026-09-27; closer Almere/Gooimeer "zwemwater" stations exist (surfstrandalmere,
-# almerehaven.zwemstrand, …) but stopped reporting around 2010. Estimate only — not measured at the
+# almerehaven.zwemstrand, …) but stopped reporting around 2010. Estimate only - not measured at the
 # park itself.
 water_temperature: { provider: rws_nl, station_id: pampus.oost }
 
@@ -48,7 +48,7 @@ cables:
     length_m: 200 # site says "zo'n 200 meter" (approximate)
 
 # Source: cableparkviewalmere.nl/contact/ opening-hours table (September 2026). Booking policy
-# and rental/clinic pricing suggest no numbered/fixed blocks — riders just show up within a window.
+# and rental/clinic pricing suggest no numbered/fixed blocks - riders just show up within a window.
 opening:
   booking: optional
   numbered: false
