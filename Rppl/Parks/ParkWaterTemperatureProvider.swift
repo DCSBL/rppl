@@ -92,8 +92,87 @@ struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
     }
 }
 
-/// Estimated ambient water temperature per park, opt-in and provider-generic (today only
-/// `"rws_nl"` exists; a future country adds another entry to `fetchers`, not a new abstraction).
+/// MOW-HIC ("Hydrologisch Informatiecentrum") KiWIS web service — Flemish government open data
+/// for Belgium's navigable waterways (canals, tidal rivers), the water bodies Belgian cable parks
+/// sit on. Freely accessible without a token for occasional queries (Vlaamse open data; see
+/// https://hicws.vlaanderen.be and https://waterinfo.vlaanderen.be). Looks up the latest surface
+/// water-temperature reading for a station by its opaque `ts_id` (a KiWIS time-series id, not a
+/// station code — HIC stations can report several water-temperature series each).
+struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
+    private static let endpoint = URL(string: "https://hicws.vlaanderen.be/KiWIS/KiWIS")!
+
+    func fetch(_ source: ParkWaterTemperatureSource) async -> ParkWaterTemperature? {
+        var components = URLComponents(url: Self.endpoint, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "service", value: "kisters"),
+            URLQueryItem(name: "type", value: "queryServices"),
+            URLQueryItem(name: "request", value: "getTimeseriesValues"),
+            URLQueryItem(name: "format", value: "json"),
+            URLQueryItem(name: "metadata", value: "true"),
+            URLQueryItem(name: "period", value: "P1D"),
+            URLQueryItem(name: "returnfields", value: "Timestamp,Value,Quality Code"),
+            URLQueryItem(name: "ts_id", value: source.stationId),
+        ]
+        guard let url = components.url else { return nil }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
+            return Self.parse(data)
+        } catch {
+            return nil
+        }
+    }
+
+    private static func parse(_ data: Data) -> ParkWaterTemperature? {
+        guard
+            let decoded = try? JSONDecoder().decode([KiWISTimeseries].self, from: data),
+            let series = decoded.first,
+            let latest = series.data.max(by: { $0.timestamp < $1.timestamp }),
+            let observedAt = timestampFormatter.date(from: latest.timestamp)
+        else { return nil }
+        return ParkWaterTemperature(
+            celsius: latest.value,
+            observedAt: observedAt,
+            stationName: series.stationName ?? series.tsId,
+            providerName: "Vlaamse Waterweg"
+        )
+    }
+
+    private static let timestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private struct KiWISTimeseries: Decodable {
+        let tsId: String
+        let stationName: String?
+        let data: [KiWISDataPoint]
+        enum CodingKeys: String, CodingKey {
+            case tsId = "ts_id"
+            case stationName = "station_name"
+            case data
+        }
+    }
+
+    /// Each row is `[Timestamp, Value, "Quality Code"]` — a heterogeneous JSON array, not an
+    /// object, per `returnfields` above. Only the first two columns are read.
+    private struct KiWISDataPoint: Decodable {
+        let timestamp: String
+        let value: Double
+
+        init(from decoder: Decoder) throws {
+            var container = try decoder.unkeyedContainer()
+            timestamp = try container.decode(String.self)
+            value = try container.decode(Double.self)
+        }
+    }
+}
+
+/// Estimated ambient water temperature per park, opt-in and provider-generic (today `"rws_nl"`
+/// and `"hic_be"` exist; a future country adds another entry to `fetchers`, not a new
+/// abstraction).
 ///
 /// Shared (`.shared`) rather than per-view so the cache and failure backoff apply across
 /// park-detail navigations and geofence arrivals, matching `ParksWeatherProvider`.
@@ -103,7 +182,8 @@ final class ParkWaterTemperatureProvider {
     static let shared = ParkWaterTemperatureProvider()
 
     private static let fetchers: [String: any ParkWaterTemperatureFetching] = [
-        "rws_nl": RWSWaterTemperatureClient()
+        "rws_nl": RWSWaterTemperatureClient(),
+        "hic_be": HICWaterTemperatureClient(),
     ]
 
     private var cache: [String: (date: Date, reading: ParkWaterTemperature)] = [:]
