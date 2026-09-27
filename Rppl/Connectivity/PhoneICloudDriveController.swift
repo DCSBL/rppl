@@ -609,6 +609,9 @@ final class PhoneICloudDriveController: NSObject {
         coordinator.coordinate(readingItemAt: sessionDir, options: [], error: &error) { url in
             summary = try? RemoteSessionSummaryReader.read(sessionDirectory: url)
         }
+        if let error {
+            WakeLog.error(.store, "read manifest \(sessionDir.lastPathComponent): \(error.localizedDescription)")
+        }
         return summary
     }
 
