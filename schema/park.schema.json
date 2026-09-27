@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/DCSBL/rppl-parks/main/schema/park.schema.json",
+  "$id": "https://raw.githubusercontent.com/DCSBL/rppl/main/schema/park.schema.json",
   "title": "Rppl cable-park definition",
   "description": "Mirrors RpplCore/Sources/RpplCore/Parks/ParkModels.swift + ParkOpening.swift. Keep the two in sync by hand (see rppl repo issue #273).",
   "type": "object",
@@ -15,7 +15,7 @@
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-      "description": "Kebab-case slug, unique across the repo. Must match the file name (parks/<id>.yaml)."
+      "description": "Kebab-case slug, unique across the repo. Must match the file name (RpplCore/Sources/RpplCore/Resources/Parks/<id>.yaml)."
     },
     "created_at": { "$ref": "#/$defs/date" },
     "updated_at": { "$ref": "#/$defs/date" },
