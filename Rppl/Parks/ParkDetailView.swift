@@ -242,29 +242,11 @@ struct ParkDetailView: View {
 
             if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow {
                 Divider().overlay(Color.rpplFill)
-                if let weather {
-                    weatherRow(weather)
-                }
-                if let waterTemperature {
-                    waterTemperatureRow(waterTemperature)
-                } else if showsWaterTemperaturePromptRow {
-                    waterTemperaturePromptRow
-                }
+                conditionsSection(weather: weather, waterTemperature: waterTemperature)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
-    }
-
-    private func waterTemperatureRow(_ reading: ParkWaterTemperature) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Label(String(localized: "Water \(TemperatureFormat.celsius(reading.celsius))"), systemImage: "water.waves")
-                .font(.subheadline)
-                .foregroundStyle(Color.rpplText)
-            Text(String(localized: "Estimate near \(reading.stationName), via \(reading.providerName)"))
-                .font(.caption2)
-                .foregroundStyle(Color.rpplMuted)
-        }
     }
 
     private var waterTemperaturePromptRow: some View {
@@ -278,21 +260,38 @@ struct ParkDetailView: View {
         .foregroundStyle(Color.rpplAccent)
     }
 
-    private func weatherRow(_ weather: ParkWeather) -> some View {
+    private func conditionsSection(weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             FlowLayout(spacing: 16) {
-                Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
-                Label(windSummary(weather), systemImage: "wind")
-                Label(weather.rainForecast.label, systemImage: "cloud.rain")
-                if weather.isHighUV {
-                    Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
-                        .foregroundStyle(.orange)
+                if let weather {
+                    Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
+                    Label(windSummary(weather), systemImage: "wind")
+                    Label(weather.rainForecast.label, systemImage: "cloud.rain")
+                    if weather.isHighUV {
+                        Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
+                            .foregroundStyle(.orange)
+                    }
+                }
+                if let waterTemperature {
+                    Label(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
                 }
             }
             .font(.subheadline)
             .foregroundStyle(Color.rpplText)
 
-            if let legal = weather.legalURL {
+            if waterTemperature == nil, showsWaterTemperaturePromptRow {
+                waterTemperaturePromptRow
+            }
+
+            if let waterTemperature {
+                Text(String(
+                    localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
+                ))
+                .font(.caption2)
+                .foregroundStyle(Color.rpplMuted)
+            }
+
+            if let weather, let legal = weather.legalURL {
                 Link(destination: legal) {
                     HStack(spacing: 4) {
                         if let mark = colorScheme == .dark ? weather.markDarkURL : weather.markLightURL {
@@ -318,6 +317,16 @@ struct ParkDetailView: View {
         let speed = DistanceFormat.kilometersPerHour(weather.windKmh)
         let beaufort = BeaufortScale.label(forKmh: weather.windKmh)
         return "\(direction.name) · \(speed) · \(beaufort)"
+    }
+
+    /// When the station reading was taken, not when the app fetched it.
+    private func observedAtText(_ date: Date) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        if Calendar.current.isDateInToday(date) {
+            return String(localized: "Today at \(time)")
+        }
+        let day = date.formatted(date: .numeric, time: .omitted)
+        return String(localized: "\(day) at \(time)")
     }
 
     private var openingTimesCard: some View {
