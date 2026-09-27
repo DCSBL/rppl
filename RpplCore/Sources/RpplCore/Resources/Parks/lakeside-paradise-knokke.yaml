@@ -73,6 +73,7 @@ cables:
 # until Lakeside Paradise unblocks the account.
 opening:
   booking: required
+  hours_unknown: true
   note: >-
     Pro Cable: open daily (by reservation) from 30 March through the autumn school break;
     in winter, weekends and Flemish school holidays only, 12:00-16:00. Small Cable 2.0: from
