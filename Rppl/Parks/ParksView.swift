@@ -289,10 +289,6 @@ struct ParksView: View {
     }
 }
 
-extension Park: Hashable {
-    public func hash(into hasher: inout Hasher) { hasher.combine(id) }
-}
-
 /// Standard/satellite toggle for the map, using the same native Liquid Glass chrome as the
 /// search/add buttons above.
 private struct MapStyleToggleButton: View {
@@ -352,7 +348,7 @@ private struct ParksFilterBar: View {
         guard !cableDirections.isEmpty else { return String(localized: "Cable") }
         return Self.cableChoices
             .filter { cableDirections.contains($0) }
-            .map(Self.label(for:))
+            .map { Self.label(for: $0) }
             .joined(separator: ", ")
     }
 

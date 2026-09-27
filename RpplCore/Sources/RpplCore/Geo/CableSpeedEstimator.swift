@@ -87,23 +87,30 @@ public enum CableSpeedEstimator {
         let moving = speedsKmh.filter { $0 > thresholds.stoppedSpeedKmh }
         guard moving.count >= minSamples else { return [] }
 
-        var bins: [Int: Int] = [:]
-        for speed in moving { bins[Int((speed / binWidthKmh).rounded(.down)), default: 0] += 1 }
+        // Track each bin's actual sample sum alongside its count, so a peak's reported speed is
+        // the true mean of its samples — not the bin's midpoint, which biases constant-speed sets
+        // (e.g. exactly 32.0 km/h floors into bin 32, whose midpoint is 32.5).
+        var bins: [Int: (count: Int, sum: Double)] = [:]
+        for speed in moving {
+            let bin = Int((speed / binWidthKmh).rounded(.down))
+            let existing = bins[bin] ?? (count: 0, sum: 0)
+            bins[bin] = (count: existing.count + 1, sum: existing.sum + speed)
+        }
 
         // Each bin's score includes its neighbours so GPS jitter across a bin edge does not split a peak.
-        func score(_ bin: Int) -> Int { (bins[bin - 1] ?? 0) + (bins[bin] ?? 0) + (bins[bin + 1] ?? 0) }
+        func score(_ bin: Int) -> Int {
+            (bins[bin - 1]?.count ?? 0) + (bins[bin]?.count ?? 0) + (bins[bin + 1]?.count ?? 0)
+        }
 
         var remaining = bins
         var result: [Estimate] = []
         while let peak = remaining.keys.max(by: { score($0) < score($1) || (score($0) == score($1) && $0 > $1) }),
               score(peak) > 0, result.count < 3 {
             let members = (peak - 1...peak + 1).filter { remaining[$0] != nil }
-            let count = members.reduce(0) { $0 + (remaining[$1] ?? 0) }
+            let count = members.reduce(0) { $0 + (remaining[$1]?.count ?? 0) }
             guard Double(count) / Double(moving.count) >= 0.1 else { break }
-            let weighted = members.reduce(0.0) {
-                $0 + (Double($1) + 0.5) * binWidthKmh * Double(remaining[$1] ?? 0)
-            }
-            result.append(Estimate(speedKmh: weighted / Double(count), share: Double(count) / Double(moving.count)))
+            let sum = members.reduce(0.0) { $0 + (remaining[$1]?.sum ?? 0) }
+            result.append(Estimate(speedKmh: sum / Double(count), share: Double(count) / Double(moving.count)))
             // Drop this peak and its shoulders so the next iteration finds a separate one.
             for bin in (peak - 2...peak + 2) { remaining[bin] = nil }
             // score() reads `bins`, so mask consumed bins there too.

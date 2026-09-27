@@ -71,11 +71,12 @@ final class PhonePermissionsController: NSObject {
         healthStore.getRequestStatusForAuthorization(
             toShare: [], read: [workoutType, heartRateType]
         ) { [weak self] status, _ in
+            guard let self else { return }
             let state: WatchPermissionState = switch status {
             case .unnecessary: .authorized
             default: .notDetermined
             }
-            Task { @MainActor in self?.healthPermission = state }
+            Task { @MainActor in self.healthPermission = state }
         }
     }
 

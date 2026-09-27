@@ -93,8 +93,9 @@ struct SessionEndSummaryView: View {
     }
 
     private func loadMapTracks() async {
+        let store = Self.store
         if let derived = try? await StoreIO.runOffMain({
-            try Self.store.readDerivedView(sessionId: summary.sessionId)
+            try store.readDerivedView(sessionId: summary.sessionId)
         }) {
             mapFrame = derived.mapFrame
             if let tracks = derived.mapTracks {
@@ -103,11 +104,11 @@ struct SessionEndSummaryView: View {
             }
         }
 
-        guard Self.store.hasRawStreams(sessionId: summary.sessionId) else { return }
+        guard store.hasRawStreams(sessionId: summary.sessionId) else { return }
         let built = try? await StoreIO.runOffMain { () -> (SessionMapTrackData?, MapTrackFrame?) in
-            let locations = try Self.store.readLocationSamples(sessionId: summary.sessionId)
-            let detections = try Self.store.readDetections(sessionId: summary.sessionId)
-            let manifest = try Self.store.readManifest(sessionId: summary.sessionId)
+            let locations = try store.readLocationSamples(sessionId: summary.sessionId)
+            let detections = try store.readDetections(sessionId: summary.sessionId)
+            let manifest = try store.readManifest(sessionId: summary.sessionId)
             let stats = SessionStatsBuilder.build(
                 manifest: manifest,
                 detections: detections,

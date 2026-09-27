@@ -10,7 +10,7 @@ enum WatchSessionDetailSource: Equatable {
 struct WatchSessionDetailView: View {
     let source: WatchSessionDetailSource
 
-    private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
+    private nonisolated static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
     private static let store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
 
     @State private var manifest: SessionManifest?
@@ -157,9 +157,10 @@ struct WatchSessionDetailView: View {
     }
 
     private func loadMapDataIfNeeded(sessionId: String, stats: SessionStats) async {
+        let store = Self.store
         if mapTracks == nil {
             if let derived = try? await StoreIO.runOffMain({
-                try Self.store.readDerivedView(sessionId: sessionId)
+                try store.readDerivedView(sessionId: sessionId)
             }) {
                 mapFrame = derived.mapFrame
                 if let tracks = derived.mapTracks {
@@ -168,9 +169,9 @@ struct WatchSessionDetailView: View {
             }
         }
 
-        if mapTracks == nil, Self.store.hasRawStreams(sessionId: sessionId) {
+        if mapTracks == nil, store.hasRawStreams(sessionId: sessionId) {
             let built = try? await StoreIO.runOffMain {
-                let locations = try Self.store.readLocationSamples(sessionId: sessionId)
+                let locations = try store.readLocationSamples(sessionId: sessionId)
                 return SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
             }
             if let built {
@@ -184,9 +185,9 @@ struct WatchSessionDetailView: View {
                     latitude: mapTracks.start.latitude,
                     longitude: mapTracks.start.longitude
                 )
-            } else if Self.store.hasRawStreams(sessionId: sessionId) {
+            } else if store.hasRawStreams(sessionId: sessionId) {
                 let peek = try? await StoreIO.runOffMain {
-                    try Self.store.peekLocationSamples(sessionId: sessionId, limit: 1)
+                    try store.peekLocationSamples(sessionId: sessionId, limit: 1)
                 }
                 if let first = peek?.first {
                     startCoordinate = CLLocationCoordinate2D(
@@ -231,7 +232,7 @@ struct WatchSessionDetailView: View {
         }
     }
 
-    private static func loadBundledExample() throws -> SessionLoadBundle {
+    private nonisolated static func loadBundledExample() throws -> SessionLoadBundle {
         guard let url = Bundle.main.url(
             forResource: exampleFileName,
             withExtension: "json",

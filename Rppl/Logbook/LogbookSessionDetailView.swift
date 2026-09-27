@@ -14,7 +14,7 @@ struct LogbookSessionDetailView: View {
     var store: SessionFileStore?
 
     private static let setMapPointBudget = 200
-    private static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
+    private nonisolated static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
 
     @State private var manifest: SessionManifest?
     @State private var showsMissingCaloriesInfo = false
@@ -353,7 +353,7 @@ struct LogbookSessionDetailView: View {
                     if stats.waterTemperatureAvailable {
                         InfoTile("Water temperature", metric: .water) {
                             MetricValue(
-                                stats.averageWaterTemperatureCelsius.map(LogbookFormatting.waterTemperature)
+                                stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
                                     ?? TemperatureFormat.placeholder
                             )
                         }
@@ -405,7 +405,7 @@ struct LogbookSessionDetailView: View {
     private func speedTile(_ stats: SessionStats) -> some View {
         InfoTile("Speed", metric: .speed) {
             MetricValue(
-                displayedMaxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                displayedMaxSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
                 caption: "Max speed"
             )
             if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
@@ -442,7 +442,7 @@ struct LogbookSessionDetailView: View {
             }
             StatChip(
                 metric: .speed,
-                value: stats.averageSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                value: stats.averageSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
                 caption: "Average speed"
             )
         }
@@ -735,7 +735,7 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private static func loadBundledExample() throws -> SessionLoadBundle {
+    private nonisolated static func loadBundledExample() throws -> SessionLoadBundle {
         guard let url = Bundle.main.url(
             forResource: exampleFileName,
             withExtension: "json",
@@ -922,12 +922,12 @@ private struct SetDetailCard: View {
                 StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(set.distanceMeters), caption: "Distance")
                 StatChip(
                     metric: .speed,
-                    value: maxSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                    value: maxSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
                     caption: "Max speed"
                 )
                 StatChip(
                     metric: .speed,
-                    value: cableSpeedKmh.map(LogbookFormatting.speedKilometersPerHour) ?? "-",
+                    value: cableSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
                     caption: "Cable speed"
                 )
             }

@@ -223,7 +223,7 @@ struct SessionSetUIPage: View {
                     SessionMetricRow(
                         label: "Water",
                         metric: .water,
-                        value: session.averageWaterTemperatureCelsius.map(SessionFormatters.waterTemp)
+                        value: session.averageWaterTemperatureCelsius.map { SessionFormatters.waterTemp($0) }
                             ?? TemperatureFormat.placeholder
                     )
                 }

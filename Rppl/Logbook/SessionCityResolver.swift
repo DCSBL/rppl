@@ -1,5 +1,6 @@
 import CoreLocation
 import Foundation
+import MapKit
 import RpplCore
 
 /// Reverse-geocodes **session GPS samples** (Watch JSONL) to a city name.
@@ -10,7 +11,6 @@ import RpplCore
 final class SessionCityResolver {
     static let shared = SessionCityResolver()
 
-    private let geocoder = CLGeocoder()
     private var cache: [String: String] = [:]
 
     private init() {}
@@ -25,9 +25,10 @@ final class SessionCityResolver {
 
         // Coordinate comes from imported Watch track points — not a phone location fix.
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        guard let request = MKReverseGeocodingRequest(location: location) else { return nil }
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let city = Self.city(from: placemarks.first) else { return nil }
+            let mapItems = try await request.mapItems
+            guard let city = Self.city(from: mapItems.first) else { return nil }
             cache[sessionId] = city
             WakeLog.debug(.ui, "geocoded \(sessionId.prefix(8))… → \(city)")
             return city
@@ -46,10 +47,10 @@ final class SessionCityResolver {
         cache[sessionId] = cityName
     }
 
-    /// `locality` is the city; ignore `name` (often a venue) and country/admin fields.
-    private static func city(from placemark: CLPlacemark?) -> String? {
-        guard let placemark else { return nil }
-        let locality = placemark.locality?.trimmingCharacters(in: .whitespacesAndNewlines)
+    /// City only; ignore the item's `name` (often a venue) and country/admin fields.
+    private static func city(from mapItem: MKMapItem?) -> String? {
+        guard let mapItem else { return nil }
+        let locality = mapItem.addressRepresentations?.cityName?.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let locality, !locality.isEmpty else { return nil }
         return locality
     }
