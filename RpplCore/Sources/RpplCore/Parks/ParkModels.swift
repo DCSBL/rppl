@@ -161,7 +161,7 @@ public struct ParkHistoryEntry: Codable, Equatable, Sendable {
     }
 }
 
-public struct Park: Codable, Equatable, Sendable, Identifiable {
+public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public static let currentVersion = 1
 
     public var version: Int
@@ -239,6 +239,11 @@ public struct Park: Codable, Equatable, Sendable, Identifiable {
         self.history = history
         self.author = author
         self.basedOnUpdatedAt = basedOnUpdatedAt
+    }
+
+    /// `id` alone: cheaper than hashing `cables`/`history`, and still consistent with `==`.
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 
     public var resolvedTimeZone: TimeZone {

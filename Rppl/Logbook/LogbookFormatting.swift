@@ -99,6 +99,6 @@ enum LogbookFormatting {
     }
 
     static func joinedSetHighlights(_ highlights: [SetHighlight]) -> String {
-        highlights.map(setHighlightLabel).joined(separator: " ")
+        highlights.map { setHighlightLabel($0) }.joined(separator: " ")
     }
 }

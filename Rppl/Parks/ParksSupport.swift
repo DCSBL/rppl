@@ -188,7 +188,7 @@ enum ParkFormatting {
 
     static func days(_ tokens: [String]?) -> String? {
         guard let tokens, !tokens.isEmpty else { return nil }
-        return tokens.map(dayName).joined(separator: ", ")
+        return tokens.map { dayName($0) }.joined(separator: ", ")
     }
 
     /// Slang: a cable that goes round is "full size"; a 2-point cable is "2.0".

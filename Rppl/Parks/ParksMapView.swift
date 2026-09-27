@@ -123,7 +123,11 @@ struct ParksMapView: View {
         }
     }
 
-    /// Countries and towns only: address results without a street.
+    /// `MKMapItem.placemark` (and its `thoroughfare`/`region`) is gone in the iOS 26 API, so a
+    /// street-free administrative match can no longer be preferred explicitly — take MapKit's
+    /// own best address match and frame it at a fixed, comfortable zoom.
+    private static let searchCameraDistance: CLLocationDistance = 60_000
+
     private func search() async {
         let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -131,16 +135,14 @@ struct ParksMapView: View {
         request.naturalLanguageQuery = text
         request.resultTypes = .address
         let items = (try? await MKLocalSearch(request: request).start())?.mapItems ?? []
-        let place = items.first { $0.placemark.thoroughfare == nil } ?? items.first
-        guard let place else {
+        guard let place = items.first else {
             searchFailed = true
             return
         }
-        let center = place.placemark.coordinate
-        let region = (place.placemark.region as? CLCircularRegion)?.radius ?? 20_000
+        let center = place.location.coordinate
         searchPin = ParksSearchPin(name: place.name ?? text, coordinate: center)
         withAnimation {
-            position = .camera(MapCamera(centerCoordinate: center, distance: max(region * 3, 5_000)))
+            position = .camera(MapCamera(centerCoordinate: center, distance: Self.searchCameraDistance))
         }
     }
 }
