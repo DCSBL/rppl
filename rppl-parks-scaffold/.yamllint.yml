@@ -1,0 +1,14 @@
+# Relaxed yamllint config for hand-authored park data files (long URLs,
+# inline flow mappings for coordinates/prices are normal here).
+extends: default
+
+rules:
+  line-length: disable
+  document-start: disable
+  truthy:
+    check-keys: false
+  comments:
+    min-spaces-from-content: 1
+  # House style uses padded flow mappings for coordinates/prices/links, e.g.
+  # `{ lat: 52.0, lon: 5.0 }` — see any file under RpplCore's bundled parks.
+  braces: disable

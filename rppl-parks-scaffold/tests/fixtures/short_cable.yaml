@@ -1,0 +1,8 @@
+version: 1
+id: short-cable
+name: Short Cable Park
+location: { lat: 52.0, lon: 5.0 }
+cables:
+  - name: Broken cable
+    points:
+      - { lat: 52.0, lon: 5.0 }

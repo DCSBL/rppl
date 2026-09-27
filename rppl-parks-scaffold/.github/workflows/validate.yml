@@ -1,0 +1,46 @@
+# Main spam/junk filter for community park PRs: YAML lint, JSON-schema
+# validation against schema/park.schema.json, and sanity checks (duplicate
+# id, out-of-range coordinates, under-specified cables, placeholder text).
+#
+# CODEOWNERS still requires an explicit maintainer approval on top of this
+# green check before anything merges to main.
+
+name: Validate parks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "parks/**"
+      - "schema/**"
+      - "scripts/validate_parks.py"
+      - ".github/workflows/validate.yml"
+
+concurrency:
+  group: validate-parks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install "pyyaml==6.0.2" "jsonschema==4.23.0" "yamllint==1.35.1"
+
+      - name: YAML lint
+        run: yamllint --config-file .yamllint.yml parks/
+
+      - name: Schema + sanity validation
+        run: python3 scripts/validate_parks.py
