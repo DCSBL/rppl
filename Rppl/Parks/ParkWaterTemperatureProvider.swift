@@ -2,6 +2,36 @@ import Foundation
 import Observation
 import RpplCore
 
+/// Locale-independent, engineer-readable description of a network failure. `error.localizedDescription`
+/// renders in the *device's* language (e.g. "geannuleerd" on a Dutch device for a cancelled request),
+/// which makes debug logs cryptic and inconsistent across devices. This always reads in English and
+/// names the likely cause instead of a bare status word.
+private func describeWaterTemperatureError(_ error: Error) -> String {
+    guard let urlError = error as? URLError else {
+        return "\(type(of: error)): \(error)"
+    }
+    switch urlError.code {
+    case .cancelled:
+        return "request was cancelled before completing — almost always means the fetch timeout budget "
+            + "elapsed while waiting on the server, or a newer fetch superseded this one"
+    case .timedOut:
+        return "timed out at the network layer (slow or unresponsive connection)"
+    case .notConnectedToInternet:
+        return "device has no internet connection"
+    case .networkConnectionLost:
+        return "network connection was lost mid-request"
+    case .cannotFindHost:
+        return "DNS lookup failed (cannot find host)"
+    case .cannotConnectToHost:
+        return "cannot connect to host (server unreachable or refusing connections)"
+    case .secureConnectionFailed, .serverCertificateUntrusted, .serverCertificateHasBadDate,
+        .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid, .clientCertificateRejected:
+        return "TLS/certificate failure"
+    default:
+        return "URLError \(urlError.code.rawValue) (\(urlError.code))"
+    }
+}
+
 /// Rijkswaterstaat WaterWebServices ("OphalenLaatsteWaarnemingen") — CC0-licensed Dutch government
 /// open data. Looks up the latest surface-water temperature at a station by its opaque code.
 /// https://rijkswaterstaatdata.nl/waterdata/
@@ -50,10 +80,12 @@ struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
             }
             return reading
         } catch {
-            WakeLog.error(
-                .water,
-                "RWS: request for station \(source.stationId) failed: \(error.localizedDescription)"
-            )
+            let message = "RWS: request for station \(source.stationId) failed: \(describeWaterTemperatureError(error))"
+            if (error as? URLError)?.code == .cancelled {
+                WakeLog.warning(.water, message)
+            } else {
+                WakeLog.error(.water, message)
+            }
             return nil
         }
     }
@@ -168,10 +200,12 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
             }
             return reading
         } catch {
-            WakeLog.error(
-                .water,
-                "HIC: request for ts_id \(source.stationId) failed: \(error.localizedDescription)"
-            )
+            let message = "HIC: request for ts_id \(source.stationId) failed: \(describeWaterTemperatureError(error))"
+            if (error as? URLError)?.code == .cancelled {
+                WakeLog.warning(.water, message)
+            } else {
+                WakeLog.error(.water, message)
+            }
             return nil
         }
     }
@@ -353,6 +387,12 @@ final class ParkWaterTemperatureProvider {
                 source: source, reading: reading, statusText: String(localized: "Fetched just now.")
             )
         } catch {
+            WakeLog.warning(
+                .water,
+                "\(park.name): manual \"Fetch now\" timed out after \(Int(Self.fetchTimeout))s "
+                    + "(\(source.provider)/\(source.stationId)) — see the other \(source.provider) log line "
+                    + "at nearly the same timestamp for the underlying network error"
+            )
             lastFailure[key] = Date()
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: nil,
