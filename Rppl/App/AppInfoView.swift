@@ -10,8 +10,6 @@ struct AppInfoView: View {
     @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
     @State private var isTogglingParkArrival = false
-    @State private var isSendingTestArrival = false
-    @State private var testArrivalParkName: String?
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -41,13 +39,17 @@ struct AppInfoView: View {
                     parkArrivalRow
 
                     if AppReleaseChannel.allowsDebugTools {
-                        testArrivalRow
+                        NavigationLink {
+                            ParkArrivalDebugView()
+                        } label: {
+                            Label("Debug park arrival", systemImage: "ladybug")
+                        }
                     }
                 } header: {
                     Text("Park arrival notifications")
                 } footer: {
                     Text(
-                        "Off by default. When on, Rppl watches for you crossing into your favorite and nearby parks on-device — no server, no continuous tracking — and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up. Always off unless you turn it on here."
+                        "When on, Rppl watches for you crossing into your favorite and nearby parks on your device (no server, no continuous tracking) and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up."
                     )
                 }
 
@@ -197,31 +199,6 @@ struct AppInfoView: View {
                 .font(.caption)
                 .foregroundStyle(Color.rpplMuted)
             }
-        }
-    }
-
-    @ViewBuilder
-    private var testArrivalRow: some View {
-        Button {
-            isSendingTestArrival = true
-            testArrivalParkName = nil
-            Task {
-                testArrivalParkName = await parkArrival.sendTestArrivalNotification()
-                isSendingTestArrival = false
-            }
-        } label: {
-            if isSendingTestArrival {
-                ProgressView()
-            } else {
-                Label("Send test arrival in 10s", systemImage: "bell.badge")
-            }
-        }
-        .disabled(isSendingTestArrival)
-
-        if let testArrivalParkName {
-            Text("Background the app now — \"Welcome to \(testArrivalParkName)\" fires in ~10s.")
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
         }
     }
 
