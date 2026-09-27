@@ -26,7 +26,8 @@ struct RpplApp: App {
     init() {
         WakeLog.debug(.lifecycle, "RpplApp init")
         _ = TesterIdentity.resolve()
-        PhoneConnectivityService.shared.activate()
+        // .shared's own init() already calls activate(); don't double-activate WCSession here.
+        _ = PhoneConnectivityService.shared
         PhoneICloudDriveController.shared.start()
         ParkArrivalController.shared.refreshMonitoredRegionsIfEnabled()
     }
