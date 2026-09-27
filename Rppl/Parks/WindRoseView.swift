@@ -10,7 +10,7 @@ struct WindRoseView: View {
     var mapHeading: Double = 0
 
     private static let calmThresholdKmh = 1.0
-    private static let dialSize: CGFloat = 30
+    private static let dialSize: CGFloat = 22
 
     private var direction: CompassDirection8 { CompassDirection8(degrees: directionDegrees) }
     private var isCalm: Bool { speedKmh < Self.calmThresholdKmh }
@@ -18,31 +18,31 @@ struct WindRoseView: View {
     var body: some View {
         HStack(spacing: 4) {
             ZStack {
-                Circle().fill(.ultraThinMaterial)
+                Circle().fill(.regularMaterial)
                 Text(verbatim: "N")
-                    .font(.system(size: 7, weight: .bold))
-                    .foregroundStyle(Color.rpplMuted)
-                    .offset(y: -(Self.dialSize / 2 - 5))
+                    .font(.system(size: 6, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .offset(y: -(Self.dialSize / 2 - 4))
                     .rotationEffect(.degrees(-mapHeading))
                 if !isCalm {
                     WindNeedle()
                         .fill(Color.rpplAccent)
-                        .frame(width: 6, height: Self.dialSize * 0.6)
+                        .frame(width: 4, height: Self.dialSize * 0.5)
                         .rotationEffect(.degrees(directionDegrees - mapHeading))
                 }
             }
             .frame(width: Self.dialSize, height: Self.dialSize)
-            .overlay(Circle().strokeBorder(Color.rpplText.opacity(0.08), lineWidth: 1))
+            .overlay(Circle().strokeBorder(.primary.opacity(0.2), lineWidth: 1))
 
             if !isCalm {
                 Text(DistanceFormat.kilometersPerHour(speedKmh))
                     .font(.caption2)
-                    .foregroundStyle(Color.rpplMuted)
+                    .foregroundStyle(.primary)
             }
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
-        .background(.ultraThinMaterial, in: Capsule())
+        .background(.regularMaterial, in: Capsule())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
     }
