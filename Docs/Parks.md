@@ -62,6 +62,9 @@ prices:  [{ name: Day pass, price: "€25", note: optional }]
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
+
+# Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
+water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 ```
 
 ### Opening rules and slots
@@ -87,6 +90,13 @@ Rules and slots share optional selectors, all of which must match a date:
 - Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
 - Special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. There is no closed-day rule or UI for them yet.
 - Cables are called "full size" (`cw`/`ccw`) or "2.0" (`2d`). The map shows an arrow on each start point, pointing towards the next traced point.
+
+### Water temperature (opt-in)
+
+- Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row, and the arrival notification includes it.
+- `water_temperature.provider` is an opaque provider id (today only `rws_nl`, Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data); `station_id` is that provider's opaque station code. A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
+- Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
+- `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`. Any failure or timeout just hides the row/segment — same fail-open convention as weather.
 
 ### Cable length
 
