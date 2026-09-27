@@ -11,7 +11,7 @@ struct ParkDetailView: View {
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
-    @State private var weatherProvider = ParksWeatherProvider()
+    @State private var weatherProvider = ParksWeatherProvider.shared
     @State private var weather: ParkWeather?
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var showEditor = false

@@ -27,7 +27,8 @@ struct ContentView: View {
         }
         .onAppear {
             WakeLog.debug(.lifecycle, "Watch ContentView onAppear")
-            transfer.activate()
+            // WatchTransferService.shared already activated at app launch (RpplWatchApp.init());
+            // re-activating on every appear was redundant and re-triggered WC's own console spam.
             transfer.refreshSyncState()
             // PermissionsOnboardingView auto-presents system sheets on first boot.
             session.refreshPermissionStatus()

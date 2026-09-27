@@ -54,10 +54,10 @@ final class ParkArrivalController: NSObject {
     /// reverts the toggle and sets `permissionDenied`.
     func enable() async {
         permissionDenied = false
-        if locationManager.authorizationStatus == .notDetermined {
+        if authorizationStatus == .notDetermined {
             await requestLocationAuthorization()
         }
-        guard Self.isAuthorizedForMonitoring(locationManager.authorizationStatus) else {
+        guard Self.isAuthorizedForMonitoring(authorizationStatus) else {
             finishEnable(granted: false)
             return
         }
@@ -78,7 +78,7 @@ final class ParkArrivalController: NSObject {
     /// Re-derives the monitored region set from the current favorites + nearest parks. Called on
     /// app foreground and right after enabling — never on a background timer.
     func refreshMonitoredRegionsIfEnabled() {
-        guard isEnabled, Self.isAuthorizedForMonitoring(locationManager.authorizationStatus) else { return }
+        guard isEnabled, Self.isAuthorizedForMonitoring(authorizationStatus) else { return }
         if ParkStore.shared.entries.isEmpty {
             ParkStore.shared.reload()
         }
@@ -162,7 +162,7 @@ final class ParkArrivalController: NSObject {
     private func handleArrival(parkID: String) async {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
-        let weather = await ParksWeatherProvider().weather(for: park)
+        let weather = await ParksWeatherProvider.shared.weather(for: park)
         do {
             try await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
             Self.setLastNotifiedDate(parkID: parkID, date: Date())
@@ -195,7 +195,7 @@ final class ParkArrivalController: NSObject {
         guard let park = ParkStore.shared.entry(id: parkID)?.park else {
             return .failure(String(localized: "Unknown park."))
         }
-        let weather = await ParksWeatherProvider().weather(for: park)
+        let weather = await ParksWeatherProvider.shared.weather(for: park)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)
         do {
             try await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
