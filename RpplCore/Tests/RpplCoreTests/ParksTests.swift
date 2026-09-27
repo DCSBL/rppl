@@ -487,6 +487,29 @@ struct ParksTests {
         #expect(entry.origin == .bundled && entry.park.name != "My Project 7")
     }
 
+    /// A bundled content fix made the same day as the override, with no `updated_at` bump, still
+    /// needs to surface as "Update available" — `based_on_revision` (bundled `history.count`)
+    /// catches what the day-granularity `updated_at`/`based_on_updated_at` comparison alone would
+    /// miss, since both read the same day string.
+    @Test func sameDayBundledFixSurfacesViaRevisionNotJustDate() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let bundled = try project7()
+        // Override was based on the current bundled updated_at (no date lag) but one history
+        // entry behind — simulating a same-day bundled fix that only appended to `history`.
+        var stale = bundled
+        stale.name = "My Project 7"
+        stale.basedOnUpdatedAt = bundled.updatedAt
+        stale.basedOnRevision = (bundled.history?.count ?? 0) - 1
+        try ParkCatalog.encode(stale).write(to: dir.appendingPathComponent("\(stale.id).yaml"), atomically: true, encoding: .utf8)
+
+        let sameDay = (bundled.updatedAt ?? "") > (stale.basedOnUpdatedAt ?? "")
+        #expect(!sameDay, "sanity: the date comparison alone can't see a same-day change")
+
+        let entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == stale.id })
+        #expect(entry.origin == .edited && entry.hasNewerBundled)
+    }
+
     @Test func slugIsAsciiAndUnique() {
         #expect(ParkCatalog.slug(from: "Wet 'n Wild Alphen!") == "wet-n-wild-alphen")
         #expect(ParkCatalog.slug(from: "Café Ünï", existing: ["cafe-uni"]) == "cafe-uni-2")

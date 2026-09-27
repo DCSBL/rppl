@@ -61,7 +61,10 @@ public enum ParkCatalog {
                     continue
                 }
                 var park = park
+                // `updatedAt` is day granularity, so a same-day bundled content change (a new
+                // history entry with no date bump) wouldn't otherwise register as newer.
                 let newer = (base.updatedAt ?? "") > (park.basedOnUpdatedAt ?? "")
+                    || (base.history?.count ?? 0) > (park.basedOnRevision ?? 0)
                 inheritWaterTemperatureIfMissing(&park, bundled: base)
                 entries[park.id] = ParkEntry(park: park, origin: .edited, bundledPark: base, hasNewerBundled: newer)
             }
@@ -82,6 +85,7 @@ public enum ParkCatalog {
         park.updatedAt = day
         if park.createdAt == nil { park.createdAt = day }
         park.basedOnUpdatedAt = bundledBase.map { $0.updatedAt ?? "" }
+        park.basedOnRevision = bundledBase.map { $0.history?.count ?? 0 }
         var history = park.history ?? []
         history.append(ParkHistoryEntry(date: day, description: bundledBase == nil ? "Edited in app" : "Edited in app (override)"))
         park.history = history
@@ -101,6 +105,7 @@ public enum ParkCatalog {
         guard let base = entry.bundledPark else { return }
         var park = entry.park
         park.basedOnUpdatedAt = base.updatedAt
+        park.basedOnRevision = base.history?.count ?? 0
         try removeUserFiles(id: park.id, in: userRoot)
         try encode(park).write(to: userRoot.appendingPathComponent("\(park.id).yaml"), atomically: true, encoding: .utf8)
     }
