@@ -25,4 +25,6 @@ enum AppSettingsKey {
     static let parkArrivalLastNotified = "rppl.parkArrivalLastNotified"
     /// First-time "here's why you got this / how it works" explainer, shown once on first tap.
     static let didShowParkArrivalExplainer = "rppl.didShowParkArrivalExplainer"
+    /// Estimated ambient water temperature per park, from an open government API (opt-in; default off).
+    static let parkWaterTemperatureEnabled = "rppl.parkWaterTemperatureEnabled"
 }
