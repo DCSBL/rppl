@@ -262,6 +262,10 @@ enum ParkFormatting {
 struct ParkWeather: Equatable, Sendable {
     var temperatureCelsius: Double
     var windKmh: Double
+    /// Meteorological "wind from" bearing, degrees clockwise from true north.
+    var windDirectionDegrees: Double
+    var isHighUV: Bool
+    var rainForecast: RainForecast
     var markLightURL: URL?
     var markDarkURL: URL?
     var legalURL: URL?
@@ -296,11 +300,15 @@ final class ParksWeatherProvider {
         do {
             let result = try await Self.withTimeout(Self.fetchTimeout) {
                 let service = WeatherService.shared
-                let current = try await service.weather(for: location, including: .current)
+                let (current, hourly) = try await service.weather(for: location, including: .current, .hourly)
                 let attribution = try? await service.attribution
+                let rainChances = hourly.map { HourlyRainChance(date: $0.date, chance: $0.precipitationChance) }
                 return ParkWeather(
                     temperatureCelsius: current.temperature.converted(to: .celsius).value,
                     windKmh: current.wind.speed.converted(to: .kilometersPerHour).value,
+                    windDirectionDegrees: current.wind.direction.converted(to: .degrees).value,
+                    isHighUV: current.uvIndex.category >= .high,
+                    rainForecast: RainForecastPlanner.forecast(from: rainChances),
                     markLightURL: attribution?.combinedMarkLightURL,
                     markDarkURL: attribution?.combinedMarkDarkURL,
                     legalURL: attribution?.legalPageURL

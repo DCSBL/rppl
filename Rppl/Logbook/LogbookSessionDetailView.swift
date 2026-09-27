@@ -366,6 +366,20 @@ struct LogbookSessionDetailView: View {
                                 value: LogbookFormatting.humidityPercent(weather.humidityPercent),
                                 caption: "Humidity"
                             )
+                            if let windSpeedKmh = weather.windSpeedKmh, let windDirectionDegrees = weather.windDirectionDegrees {
+                                StatChip(
+                                    metric: .wind,
+                                    value: LogbookFormatting.windSummary(kmh: windSpeedKmh, directionDegrees: windDirectionDegrees),
+                                    caption: "Wind"
+                                )
+                            }
+                            if let precipitation = weather.precipitationMmPerHour, precipitation > 0 {
+                                StatChip(
+                                    metric: .precipitation,
+                                    value: LogbookFormatting.precipitation(precipitation),
+                                    caption: "Precipitation"
+                                )
+                            }
                         }
                     }
                     energyTile(stats)

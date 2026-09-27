@@ -137,7 +137,7 @@ struct ParkDetailView: View {
 
     private var mapCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ParkMap(park: park, usesSatellite: usesSatellite)
+            ParkMap(park: park, usesSatellite: usesSatellite, weather: weather)
                 .frame(height: 220)
                 .logbookNestedClip()
 
@@ -239,12 +239,14 @@ struct ParkDetailView: View {
 
     private func weatherRow(_ weather: ParkWeather) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 16) {
+            FlowLayout(spacing: 16) {
                 Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
-                Label(
-                    String(localized: "Wind \(DistanceFormat.kilometersPerHour(weather.windKmh))"),
-                    systemImage: "wind"
-                )
+                Label(windSummary(weather), systemImage: "wind")
+                Label(weather.rainForecast.label, systemImage: "cloud.rain")
+                if weather.isHighUV {
+                    Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
+                        .foregroundStyle(.orange)
+                }
             }
             .font(.subheadline)
             .foregroundStyle(Color.rpplText)
@@ -268,6 +270,13 @@ struct ParkDetailView: View {
                 }
             }
         }
+    }
+
+    private func windSummary(_ weather: ParkWeather) -> String {
+        let direction = CompassDirection8(degrees: weather.windDirectionDegrees)
+        let speed = DistanceFormat.kilometersPerHour(weather.windKmh)
+        let beaufort = BeaufortScale.label(forKmh: weather.windKmh)
+        return "\(direction.name) · \(speed) · \(beaufort)"
     }
 
     private var openingTimesCard: some View {
@@ -557,6 +566,7 @@ struct ParkDetailView: View {
 private struct ParkMap: View {
     let park: Park
     let usesSatellite: Bool
+    let weather: ParkWeather?
 
     @State private var mapHeading: Double = 0
 
@@ -587,6 +597,16 @@ private struct ParkMap: View {
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
+        }
+        .overlay(alignment: .topTrailing) {
+            if let weather {
+                WindRoseView(
+                    directionDegrees: weather.windDirectionDegrees,
+                    speedKmh: weather.windKmh,
+                    mapHeading: mapHeading
+                )
+                .padding(10)
+            }
         }
     }
 

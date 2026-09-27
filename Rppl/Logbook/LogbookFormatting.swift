@@ -49,6 +49,19 @@ enum LogbookFormatting {
         (percent / 100).formatted(.percent.precision(.fractionLength(0)))
     }
 
+    static func windSummary(kmh: Double, directionDegrees: Double) -> String {
+        let compass = CompassDirection8(degrees: directionDegrees).abbreviation
+        return "\(DistanceFormat.kilometersPerHour(kmh)) · \(compass)"
+    }
+
+    /// mm/h doesn't localize like temperature or speed — there's no imperial rain-rate unit in
+    /// everyday use, so only the decimal separator follows locale.
+    static func precipitation(_ millimetersPerHour: Double) -> String {
+        let fractionDigits = millimetersPerHour < 10 ? 1 : 0
+        let value = millimetersPerHour.formatted(.number.precision(.fractionLength(fractionDigits)))
+        return "\(value) mm/h"
+    }
+
     static func setCount(_ count: Int) -> String {
         String(localized: "\(count) sets")
     }

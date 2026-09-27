@@ -54,16 +54,30 @@ struct AirWeatherTimeoutError: Error {}
 struct AirWeatherSnapshot: Sendable {
     var celsius: Double
     var humidityPercent: Double
+    var windSpeedKmh: Double
+    var windDirectionDegrees: Double
+    var precipitationMmPerHour: Double
     var condition: HKWeatherCondition
 
     init(current: CurrentWeather) {
         celsius = current.temperature.converted(to: .celsius).value
         humidityPercent = current.humidity * 100
+        windSpeedKmh = current.wind.speed.converted(to: .kilometersPerHour).value
+        windDirectionDegrees = current.wind.direction.converted(to: .degrees).value
+        // WeatherKit models precipitation rate on the speed dimension (length/time) and has no
+        // native mm/h unit, so convert by hand from the m/s base value.
+        precipitationMmPerHour = current.precipitationIntensity.converted(to: .metersPerSecond).value * 3_600_000
         condition = current.condition.healthKitWeatherCondition
     }
 
     var sessionWeather: SessionWeather {
-        SessionWeather(temperatureCelsius: celsius, humidityPercent: humidityPercent)
+        SessionWeather(
+            temperatureCelsius: celsius,
+            humidityPercent: humidityPercent,
+            windSpeedKmh: windSpeedKmh,
+            windDirectionDegrees: windDirectionDegrees,
+            precipitationMmPerHour: precipitationMmPerHour
+        )
     }
 
     var healthKitMetadata: [String: Any] {

@@ -16,7 +16,13 @@ struct SessionFileStoreTests {
         _ = try store.createSession(manifest: manifest)
         #expect(try store.readManifest(sessionId: manifest.sessionId).weather == nil)
 
-        let weather = SessionWeather(temperatureCelsius: 18.5, humidityPercent: 62)
+        let weather = SessionWeather(
+            temperatureCelsius: 18.5,
+            humidityPercent: 62,
+            windSpeedKmh: 14.2,
+            windDirectionDegrees: 225,
+            precipitationMmPerHour: 0.4
+        )
         try store.updateWeather(weather, sessionId: manifest.sessionId)
         #expect(try store.readManifest(sessionId: manifest.sessionId).weather == weather)
     }
