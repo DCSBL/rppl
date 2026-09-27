@@ -4,8 +4,9 @@
 Usage:
     python3 scripts/validate_parks.py [park.yaml ...]
 
-With no arguments, validates every file under parks/*.yaml. Exits non-zero
-(and prints one line per problem) if any file fails.
+With no arguments, validates every file under
+RpplCore/Sources/RpplCore/Resources/Parks/*.yaml. Exits non-zero (and prints
+one line per problem) if any file fails.
 
 Checks, per the CI-validation issue:
   - YAML syntax (YAML lint)
@@ -36,7 +37,7 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "schema" / "park.schema.json"
-PARKS_DIR = REPO_ROOT / "parks"
+PARKS_DIR = REPO_ROOT / "RpplCore" / "Sources" / "RpplCore" / "Resources" / "Parks"
 
 # Obvious placeholder/junk markers a real park submission should never contain.
 PLACEHOLDER_PATTERNS = [
