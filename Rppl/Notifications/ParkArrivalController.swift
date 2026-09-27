@@ -336,22 +336,30 @@ extension ParkArrivalController: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 
-    /// Crashed on a cold launch from a notification tap: `await MainActor.run { ... }` here made
-    /// UIKit's async-delegate completion wait on our MainActor work, which reentered UIKit's own
-    /// state-restoration CATransaction-commit sync and hit an internal assertion
-    /// (`_performBlockAfterCATransactionCommitSynchronizes:` in the crash log). Returning
-    /// immediately and doing the state update in a detached `Task` avoids that reentrancy.
+    /// UIKit requires this completion handler to be called on the main thread and asserts otherwise
+    /// ("Call must be made on main thread" in `_performBlockAfterCATransactionCommitSynchronizes:`).
+    /// The `async` variant can't guarantee that: as a `nonisolated` witness, Swift's Objective-C
+    /// bridging thunk runs the body — and then calls UIKit's completion — on a background executor,
+    /// which crashed every notification tap. The completion-handler variant makes the hop explicit.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        guard let parkID = response.notification.request.content.userInfo["parkID"] as? String else { return }
-        Task { @MainActor in
-            let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
-            if isFirstTime {
-                UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let parkID = response.notification.request.content.userInfo["parkID"] as? String
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                if let parkID { self.handleNotificationTap(parkID: parkID) }
             }
-            pendingArrival = PendingParkArrival(parkID: parkID, isFirstTime: isFirstTime)
+            completionHandler()
         }
+    }
+
+    private func handleNotificationTap(parkID: String) {
+        let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        if isFirstTime {
+            UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        }
+        pendingArrival = PendingParkArrival(parkID: parkID, isFirstTime: isFirstTime)
     }
 }
