@@ -77,15 +77,29 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     }
 }
 
-/// Current weather captured once per session (Watch, via WeatherKit).
+/// Current weather captured once per session (Watch, via WeatherKit). Wind + precipitation are
+/// nil for sessions recorded before those fields existed.
 public struct SessionWeather: Codable, Equatable, Sendable {
     public var temperatureCelsius: Double
     /// Relative humidity, 0–100.
     public var humidityPercent: Double
+    public var windSpeedKmh: Double?
+    /// Meteorological "wind from" bearing, degrees clockwise from true north.
+    public var windDirectionDegrees: Double?
+    public var precipitationMmPerHour: Double?
 
-    public init(temperatureCelsius: Double, humidityPercent: Double) {
+    public init(
+        temperatureCelsius: Double,
+        humidityPercent: Double,
+        windSpeedKmh: Double? = nil,
+        windDirectionDegrees: Double? = nil,
+        precipitationMmPerHour: Double? = nil
+    ) {
         self.temperatureCelsius = temperatureCelsius
         self.humidityPercent = humidityPercent
+        self.windSpeedKmh = windSpeedKmh
+        self.windDirectionDegrees = windDirectionDegrees
+        self.precipitationMmPerHour = precipitationMmPerHour
     }
 }
 
