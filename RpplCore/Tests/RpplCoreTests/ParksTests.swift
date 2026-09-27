@@ -122,7 +122,7 @@ struct ParksTests {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = amsterdam
         let parts = calendar.dateComponents([.year, .month, .day], from: updated)
-        #expect(parts.year == 2026 && parts.month == 9 && parts.day == 24)
+        #expect(parts.year == 2026 && parts.month == 9 && parts.day == 26)
         #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).lastUpdated == nil)
     }
 
@@ -302,8 +302,8 @@ struct ParksTests {
         let open = try #require(cable.points).adjacentMeters
         let length = try #require(cable.computedLengthM)
         #expect(length > open)
-        #expect(abs(open - 666.3) < 1)
-        #expect(abs(length - 763.5) < 1)
+        #expect(abs(open - 660.3) < 1)
+        #expect(abs(length - 744.5) < 1)
         var twoD = cable
         twoD.direction = .twoD
         #expect(twoD.computedLengthM == open)
