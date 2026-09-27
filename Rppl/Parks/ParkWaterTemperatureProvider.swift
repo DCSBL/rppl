@@ -20,14 +20,40 @@ struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
             ],
             "LocatieLijst": [["Code": source.stationId]],
         ]
-        guard let payload = try? JSONSerialization.data(withJSONObject: body) else { return nil }
+        guard let payload = try? JSONSerialization.data(withJSONObject: body) else {
+            WakeLog.error(.water, "RWS: failed to encode request body for station \(source.stationId)")
+            return nil
+        }
         request.httpBody = payload
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
-            return Self.parse(data)
+            guard let http = response as? HTTPURLResponse else {
+                WakeLog.warning(.water, "RWS: response for station \(source.stationId) was not HTTP")
+                return nil
+            }
+            guard (200...299).contains(http.statusCode) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.error(
+                    .water,
+                    "RWS: station \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
+                )
+                return nil
+            }
+            guard let reading = Self.parse(data) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.warning(
+                    .water,
+                    "RWS: station \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
+                )
+                return nil
+            }
+            return reading
         } catch {
+            WakeLog.error(
+                .water,
+                "RWS: request for station \(source.stationId) failed: \(error.localizedDescription)"
+            )
             return nil
         }
     }
@@ -113,13 +139,39 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
             URLQueryItem(name: "returnfields", value: "Timestamp,Value,Quality Code"),
             URLQueryItem(name: "ts_id", value: source.stationId),
         ]
-        guard let url = components.url else { return nil }
+        guard let url = components.url else {
+            WakeLog.error(.water, "HIC: failed to build request URL for ts_id \(source.stationId)")
+            return nil
+        }
 
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
-            return Self.parse(data)
+            guard let http = response as? HTTPURLResponse else {
+                WakeLog.warning(.water, "HIC: response for ts_id \(source.stationId) was not HTTP")
+                return nil
+            }
+            guard (200...299).contains(http.statusCode) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.error(
+                    .water,
+                    "HIC: ts_id \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
+                )
+                return nil
+            }
+            guard let reading = Self.parse(data) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.warning(
+                    .water,
+                    "HIC: ts_id \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
+                )
+                return nil
+            }
+            return reading
         } catch {
+            WakeLog.error(
+                .water,
+                "HIC: request for ts_id \(source.stationId) failed: \(error.localizedDescription)"
+            )
             return nil
         }
     }
@@ -199,7 +251,11 @@ final class ParkWaterTemperatureProvider {
     /// failed — callers simply don't show a row, no error surfaced (fail-open, like park weather).
     func temperature(for park: Park) async -> ParkWaterTemperature? {
         guard UserDefaults.standard.bool(forKey: AppSettingsKey.parkWaterTemperatureEnabled) else { return nil }
-        guard let source = park.waterTemperature, let fetcher = Self.fetchers[source.provider] else { return nil }
+        guard let source = park.waterTemperature else { return nil }
+        guard let fetcher = Self.fetchers[source.provider] else {
+            WakeLog.warning(.water, "\(park.name): unknown provider \"\(source.provider)\"")
+            return nil
+        }
 
         let key = Self.cacheKey(source)
         if let hit = cache[key], Date().timeIntervalSince(hit.date) < Self.maxAge {
@@ -218,7 +274,10 @@ final class ParkWaterTemperatureProvider {
             lastFailure[key] = nil
             return reading
         } catch {
-            WakeLog.debug(.ui, "park water temperature: timed out")
+            WakeLog.warning(
+                .water,
+                "\(park.name): fetch timed out after \(Int(Self.fetchTimeout))s (\(source.provider)/\(source.stationId))"
+            )
             lastFailure[key] = Date()
             return nil
         }
