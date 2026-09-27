@@ -4,6 +4,7 @@ import CoreMotion
 import HealthKit
 import RpplCore
 import Observation
+import UserNotifications
 
 /// Reads / requests iPhone companion permissions. Never gates WatchConnectivity sync.
 @Observable
@@ -14,6 +15,9 @@ final class PhonePermissionsController: NSObject {
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
     var motionPermission: WatchPermissionState = .notDetermined
+    /// Not a `WatchPermissionKind` case — notifications aren't part of the Watch recording gate
+    /// this enum was built for, so this row is added separately in `PhonePermissionsListSection`.
+    var notificationPermission: WatchPermissionState = .notDetermined
 
     var permissionStates: [WatchPermissionKind: WatchPermissionState] {
         [
@@ -36,6 +40,7 @@ final class PhonePermissionsController: NSObject {
 
     func refresh() {
         locationPermission = Self.locationState(locationManager.authorizationStatus)
+        Task { await refreshNotifications() }
 
         if HKHealthStore.isHealthDataAvailable() {
             refreshHealth()
@@ -157,6 +162,31 @@ final class PhonePermissionsController: NSObject {
         case .notDetermined: return .notDetermined
         case .restricted, .denied: return .denied
         case .authorizedAlways, .authorizedWhenInUse: return .authorized
+        @unknown default: return .notDetermined
+        }
+    }
+
+    private func refreshNotifications() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationPermission = Self.notificationState(settings.authorizationStatus)
+    }
+
+    /// Only prompts while undetermined — notifications have no re-prompt API after deny, same as
+    /// Motion. Used by the standalone Notifications row in `PhonePermissionsListSection`.
+    func requestNotifications() async {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        if settings.authorizationStatus == .notDetermined {
+            _ = try? await center.requestAuthorization(options: [.alert, .sound])
+        }
+        await refreshNotifications()
+    }
+
+    private static func notificationState(_ status: UNAuthorizationStatus) -> WatchPermissionState {
+        switch status {
+        case .notDetermined: return .notDetermined
+        case .denied: return .denied
+        case .authorized, .provisional, .ephemeral: return .authorized
         @unknown default: return .notDetermined
         }
     }

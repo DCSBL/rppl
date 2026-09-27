@@ -2,7 +2,9 @@ import SwiftUI
 import UIKit
 import RpplCore
 
-/// Always-visible companion permission rows (About). Fixed Location → Health → Motion order.
+/// Always-visible companion permission rows (About). Fixed Location → Health → Motion →
+/// Notifications order. Notifications isn't a `WatchPermissionKind` (that enum backs the Watch
+/// recording gate, where a notifications row wouldn't belong), so it's appended separately here.
 struct PhonePermissionsListSection: View {
     @Bindable var permissions: PhonePermissionsController
 
@@ -13,10 +15,20 @@ struct PhonePermissionsListSection: View {
                     PhonePermissionDetailView(kind: kind, permissions: permissions)
                 } label: {
                     PhonePermissionRowView(
-                        kind: kind,
+                        title: kind.phoneTitle,
+                        systemImage: kind.phoneSystemImage,
                         state: permissions.permissionStates[kind] ?? .notDetermined
                     )
                 }
+            }
+            NavigationLink {
+                PhoneNotificationPermissionDetailView(permissions: permissions)
+            } label: {
+                PhonePermissionRowView(
+                    title: String(localized: "Notifications"),
+                    systemImage: "bell.fill",
+                    state: permissions.notificationPermission
+                )
             }
         } header: {
             Text("Permissions")
@@ -30,15 +42,16 @@ struct PhonePermissionsListSection: View {
 }
 
 private struct PhonePermissionRowView: View {
-    let kind: WatchPermissionKind
+    let title: String
+    let systemImage: String
     let state: WatchPermissionState
 
     var body: some View {
         HStack {
             Label {
-                Text(kind.phoneTitle)
+                Text(title)
             } icon: {
-                Image(systemName: kind.phoneSystemImage)
+                Image(systemName: systemImage)
             }
             Spacer(minLength: 8)
             Image(systemName: statusSymbol)
@@ -46,7 +59,7 @@ private struct PhonePermissionRowView: View {
                 .accessibilityHidden(true)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(kind.phoneTitle), \(state.phoneAccessibilityLabel)")
+        .accessibilityLabel("\(title), \(state.phoneAccessibilityLabel)")
     }
 
     private var statusSymbol: String {
@@ -152,6 +165,83 @@ struct PhonePermissionDetailView: View {
         if let url = kind.phoneSettingsURL {
             openURL(url)
         }
+    }
+}
+
+/// Same shape as `PhonePermissionDetailView`, standalone because notifications aren't a
+/// `WatchPermissionKind`. Used for the Settings permissions list row, and by the park-arrival
+/// feature (its own denial message points back here).
+struct PhoneNotificationPermissionDetailView: View {
+    @Bindable var permissions: PhonePermissionsController
+    @Environment(\.openURL) private var openURL
+    @State private var isRequesting = false
+
+    private var state: WatchPermissionState { permissions.notificationPermission }
+
+    var body: some View {
+        List {
+            Section {
+                Label("Notifications", systemImage: "bell.fill")
+                statusLine
+                Text("Needed for park arrival notifications, if you turn that on in Park arrival notifications above.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if state == .denied {
+                Section {
+                    Text("On iPhone, open Settings > Notifications > Rppl, then turn on Allow Notifications.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    } label: {
+                        Text("Open Settings")
+                    }
+                } header: {
+                    Text("How to fix")
+                }
+            }
+
+            if state == .notDetermined {
+                Section {
+                    Button {
+                        Task { await request() }
+                    } label: {
+                        if isRequesting {
+                            ProgressView()
+                        } else {
+                            Text("Allow Notifications")
+                        }
+                    }
+                    .disabled(isRequesting)
+                }
+            }
+        }
+        .navigationTitle("Notifications")
+        .tint(Color.rpplAccent)
+    }
+
+    private var statusLine: some View {
+        switch state {
+        case .authorized:
+            Text("Allowed").foregroundStyle(.green)
+        case .unavailable:
+            Text("Not available on this device").foregroundStyle(.secondary)
+        case .notDetermined:
+            Text("Not decided yet").foregroundStyle(.orange)
+        case .denied:
+            Text("Denied").foregroundStyle(.red)
+        }
+    }
+
+    private func request() async {
+        guard !isRequesting else { return }
+        isRequesting = true
+        defer { isRequesting = false }
+        await permissions.requestNotifications()
     }
 }
 
