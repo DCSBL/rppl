@@ -279,7 +279,9 @@ struct ParksView: View {
             mapPendingRecenter = false
             moveMap(to: coordinate)
         }
-        .onChange(of: navigation.openParkId) { _, parkId in
+        // `initial: true`: TabView builds this view lazily, so a notification tap before the Parks
+        // tab was ever opened creates it with `openParkId` already set — a plain onChange never fires.
+        .onChange(of: navigation.openParkId, initial: true) { _, parkId in
             guard let parkId else { return }
             navigation.openParkId = nil
             if store.entries.isEmpty { store.reload() }
