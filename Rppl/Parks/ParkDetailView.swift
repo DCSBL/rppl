@@ -15,6 +15,9 @@ struct ParkDetailView: View {
     @State private var weather: ParkWeather?
     @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
     @State private var waterTemperature: ParkWaterTemperature?
+    @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
+    @AppStorage(AppSettingsKey.didDeclineParkWaterTemperaturePrompt) private var didDeclineWaterTemperaturePrompt = false
+    @State private var showWaterTemperaturePrompt = false
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var showEditor = false
     @State private var showMail = false
@@ -28,6 +31,12 @@ struct ParkDetailView: View {
     private var changedSections: [ParkSection] {
         guard let base = entry?.bundledPark else { return [] }
         return ParkDiff.changedSections(from: base, to: park)
+    }
+
+    /// The park has a configured source but the (global) feature is off and the user hasn't already
+    /// dismissed the inline offer — so there's something to invite them to turn on.
+    private var showsWaterTemperaturePromptRow: Bool {
+        park.waterTemperature != nil && !waterTemperatureEnabled && !didDeclineWaterTemperaturePrompt
     }
 
     var body: some View {
@@ -82,6 +91,25 @@ struct ParkDetailView: View {
             async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
             weather = await weatherResult
             waterTemperature = await waterTemperatureResult
+        }
+        .onChange(of: waterTemperatureEnabled) { _, isEnabled in
+            guard isEnabled else { return }
+            Task { waterTemperature = await waterTemperatureProvider.temperature(for: park) }
+        }
+        .alert(
+            String(localized: "Show water temperature?"),
+            isPresented: $showWaterTemperaturePrompt
+        ) {
+            Button(String(localized: "Not now"), role: .cancel) {
+                didDeclineWaterTemperaturePrompt = true
+            }
+            Button(String(localized: "OK")) {
+                waterTemperatureEnabled = true
+            }
+        } message: {
+            Text(
+                "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings."
+            )
         }
     }
 
@@ -212,13 +240,15 @@ struct ParkDetailView: View {
                     .foregroundStyle(.red)
             }
 
-            if weather != nil || waterTemperature != nil {
+            if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow {
                 Divider().overlay(Color.rpplFill)
                 if let weather {
                     weatherRow(weather)
                 }
                 if let waterTemperature {
                     waterTemperatureRow(waterTemperature)
+                } else if showsWaterTemperaturePromptRow {
+                    waterTemperaturePromptRow
                 }
             }
         }
@@ -235,6 +265,17 @@ struct ParkDetailView: View {
                 .font(.caption2)
                 .foregroundStyle(Color.rpplMuted)
         }
+    }
+
+    private var waterTemperaturePromptRow: some View {
+        Button {
+            showWaterTemperaturePrompt = true
+        } label: {
+            Label(String(localized: "Show water temperature"), systemImage: "water.waves")
+                .font(.subheadline)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.rpplAccent)
     }
 
     private func weatherRow(_ weather: ParkWeather) -> some View {

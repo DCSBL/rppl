@@ -121,7 +121,7 @@ final class ParkWaterTemperatureProvider {
         guard UserDefaults.standard.bool(forKey: AppSettingsKey.parkWaterTemperatureEnabled) else { return nil }
         guard let source = park.waterTemperature, let fetcher = Self.fetchers[source.provider] else { return nil }
 
-        let key = "\(source.provider)|\(source.stationId)"
+        let key = Self.cacheKey(source)
         if let hit = cache[key], Date().timeIntervalSince(hit.date) < Self.maxAge {
             return hit.reading
         }
@@ -144,6 +144,88 @@ final class ParkWaterTemperatureProvider {
         }
     }
 
+    /// Debug screen only: current settings/cache/backoff state for a park, without fetching.
+    func debugSnapshot(for park: Park) -> ParkWaterTemperatureDebugStatus {
+        guard let source = park.waterTemperature else {
+            return ParkWaterTemperatureDebugStatus(
+                source: nil, reading: nil, statusText: String(localized: "No water_temperature configured for this park.")
+            )
+        }
+        guard Self.fetchers[source.provider] != nil else {
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: nil,
+                statusText: String(localized: "Unknown provider \"\(source.provider)\".")
+            )
+        }
+        let enabledPrefix = UserDefaults.standard.bool(forKey: AppSettingsKey.parkWaterTemperatureEnabled)
+            ? "" : String(localized: "Setting is off (won't auto-fetch). ")
+        let key = Self.cacheKey(source)
+        if let failedAt = lastFailure[key], Date().timeIntervalSince(failedAt) < Self.failureBackoff {
+            let retryAt = failedAt.addingTimeInterval(Self.failureBackoff)
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: cache[key]?.reading,
+                statusText: enabledPrefix + String(
+                    localized: "Last attempt failed; backing off until \(retryAt.formatted(date: .omitted, time: .standard))."
+                )
+            )
+        }
+        if let hit = cache[key] {
+            let validUntil = hit.date.addingTimeInterval(Self.maxAge)
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: hit.reading,
+                statusText: enabledPrefix + String(
+                    localized: "Cached from \(hit.date.formatted(date: .omitted, time: .standard)), valid until \(validUntil.formatted(date: .omitted, time: .standard))."
+                )
+            )
+        }
+        return ParkWaterTemperatureDebugStatus(
+            source: source, reading: nil, statusText: enabledPrefix + String(localized: "Not fetched yet.")
+        )
+    }
+
+    /// Debug screen only: a real network fetch that ignores the setting toggle, cache freshness and
+    /// failure backoff — so a developer can tell "the fetch itself is broken" apart from "the
+    /// setting is off" or "still inside the 4h cache window". Updates the shared cache on success,
+    /// same as a normal fetch would, so the park screen picks it up too.
+    func debugRefresh(for park: Park) async -> ParkWaterTemperatureDebugStatus {
+        guard let source = park.waterTemperature else {
+            return ParkWaterTemperatureDebugStatus(
+                source: nil, reading: nil, statusText: String(localized: "No water_temperature configured for this park.")
+            )
+        }
+        guard let fetcher = Self.fetchers[source.provider] else {
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: nil,
+                statusText: String(localized: "Unknown provider \"\(source.provider)\".")
+            )
+        }
+        let key = Self.cacheKey(source)
+        do {
+            guard let reading = try await Self.withTimeout(Self.fetchTimeout, { await fetcher.fetch(source) }) else {
+                lastFailure[key] = Date()
+                return ParkWaterTemperatureDebugStatus(
+                    source: source, reading: nil,
+                    statusText: String(localized: "Fetch returned no data (station may be unreachable, or have no recent reading).")
+                )
+            }
+            cache[key] = (Date(), reading)
+            lastFailure[key] = nil
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: reading, statusText: String(localized: "Fetched just now.")
+            )
+        } catch {
+            lastFailure[key] = Date()
+            return ParkWaterTemperatureDebugStatus(
+                source: source, reading: nil,
+                statusText: String(localized: "Timed out after \(Int(Self.fetchTimeout))s.")
+            )
+        }
+    }
+
+    private static func cacheKey(_ source: ParkWaterTemperatureSource) -> String {
+        "\(source.provider)|\(source.stationId)"
+    }
+
     private static func withTimeout<T: Sendable>(
         _ seconds: TimeInterval,
         _ work: @escaping @Sendable () async -> T
@@ -164,3 +246,11 @@ final class ParkWaterTemperatureProvider {
 }
 
 private struct ParkWaterTemperatureTimeoutError: Error {}
+
+/// Debug screen only: a park's configured source, cached reading (if any) and a human-readable
+/// explanation of the current cache/backoff/settings state.
+struct ParkWaterTemperatureDebugStatus: Equatable {
+    var source: ParkWaterTemperatureSource?
+    var reading: ParkWaterTemperature?
+    var statusText: String
+}

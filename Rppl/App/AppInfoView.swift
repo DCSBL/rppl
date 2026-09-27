@@ -57,11 +57,18 @@ struct AppInfoView: View {
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
                         .tint(Color.rpplAccent)
+                    if AppReleaseChannel.allowsDebugTools {
+                        NavigationLink {
+                            ParkWaterTemperatureDebugView()
+                        } label: {
+                            Label("Debug water temperature", systemImage: "ladybug")
+                        }
+                    }
                 } header: {
                     Text("Park water temperature")
                 } footer: {
                     Text(
-                        "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default."
+                        "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate."
                     )
                 }
 
