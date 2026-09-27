@@ -2,7 +2,7 @@
 #   https://www.cableparkaquabest.nl (home, /english)
 #   https://www.cableparkaquabest.nl/contact
 #   https://www.cableparkaquabest.nl/openingstijden
-#   https://www.cableparkaquabest.nl/tarieven (prices are rendered as images — not readable text,
+#   https://www.cableparkaquabest.nl/tarieven (prices are rendered as images - not readable text,
 #     so no prices field; verify on-site or via the site's own price-list images before adding one)
 #   https://www.cableparkaquabest.nl/wakeboardenbeginners
 #   https://www.cableparkaquabest.nl/wakeboarden-gevorderden
@@ -13,7 +13,7 @@
 # Water temperature: Rijkswaterstaat waterwebservices catalog (METADATASERVICES/OphalenCatalogus)
 # queried 2026-09-27 for the nearest official surface-water temperature ("OW"/"T") station to the
 # dock above. The Ekkersweijer plas itself isn't a monitored rijkswater; several closer stations
-# in the region exist but haven't reported in years (some since the 1980s/90s) — Poeldonk, Dungense
+# in the region exist but haven't reported in years (some since the 1980s/90s) - Poeldonk, Dungense
 # Brug (~21 km, on the Zuid-Willemsvaart near Den Bosch) is the nearest one still reporting
 # (last seen 2026-08-11).
 version: 1
@@ -37,7 +37,7 @@ location:
   lon: 5.438156
 
 # Nearest official RWS surface-water temperature station still reporting (~21 km away, on the
-# Zuid-Willemsvaart). Estimate only — not measured at the park itself, and this station reports
+# Zuid-Willemsvaart). Estimate only - not measured at the park itself, and this station reports
 # infrequently (last reading 2026-08-11 as of this writing).
 water_temperature: { provider: rws_nl, station_id: poeldonk.dungensebrug }
 
@@ -63,7 +63,7 @@ cables:
     direction: 2d
     description: >-
       2-mast cable trainer used for beginner instruction and the Saturday/Sunday morning
-      wakeboard clinic. Opening hours depend on reservation volume — call ahead to confirm.
+      wakeboard clinic. Opening hours depend on reservation volume - call ahead to confirm.
 
 # Regular 2026 season hours (through 30 September); October has separate, shorter weekend hours.
 # The cable only runs with at least 1 paying customer or 3 season-pass holders present, may close
