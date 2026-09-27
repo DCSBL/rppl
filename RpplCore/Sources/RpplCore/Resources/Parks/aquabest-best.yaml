@@ -9,6 +9,13 @@
 #   https://www.cableparkaquabest.nl/obstacles
 #   https://www.cableparkaquabest.nl/s/Plattegrond-Cablepark-Aquabest (official floor plan/map;
 #     schematic, not geo-referenced, so cable points weren't traced from it)
+#
+# Water temperature: Rijkswaterstaat waterwebservices catalog (METADATASERVICES/OphalenCatalogus)
+# queried 2026-09-27 for the nearest official surface-water temperature ("OW"/"T") station to the
+# dock above. The Ekkersweijer plas itself isn't a monitored rijkswater; several closer stations
+# in the region exist but haven't reported in years (some since the 1980s/90s) — Poeldonk, Dungense
+# Brug (~21 km, on the Zuid-Willemsvaart near Den Bosch) is the nearest one still reporting
+# (last seen 2026-08-11).
 version: 1
 id: aquabest-best
 created_at: 2026-09-27
@@ -16,6 +23,8 @@ updated_at: 2026-09-27
 history:
   - date: 2026-09-27
     description: initial, from cableparkaquabest.nl
+  - date: 2026-09-27
+    description: add water_temperature (nearest still-reporting RWS station)
 
 author: Rppl
 name: Cablepark Aquabest
@@ -26,6 +35,11 @@ timezone: Europe/Amsterdam
 location:
   lat: 51.500230
   lon: 5.438156
+
+# Nearest official RWS surface-water temperature station still reporting (~21 km away, on the
+# Zuid-Willemsvaart). Estimate only — not measured at the park itself, and this station reports
+# infrequently (last reading 2026-08-11 as of this writing).
+water_temperature: { provider: rws_nl, station_id: poeldonk.dungensebrug }
 
 phone: +31 (0)499 392 121
 email: info@cableparkaquabest.nl
