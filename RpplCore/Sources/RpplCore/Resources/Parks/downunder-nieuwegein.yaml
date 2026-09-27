@@ -1,10 +1,12 @@
 version: 1
 id: downunder-nieuwegein
 created_at: 2026-09-24
-updated_at: 2026-09-24
+updated_at: 2026-09-25
 history:
   - date: 2026-09-24
     description: initial
+  - date: 2026-09-25
+    description: refine main cable trace and add short cable trace (in-app edit)
 
 author: Rppl
 name: Cable Park Down Under
@@ -36,13 +38,17 @@ cables:
     direction: ccw
     length_m: 720
     points:
-      - { lat: 52.04847716280033, lon: 5.12449809781112 }
-      - { lat: 52.04696922828588, lon: 5.123267622750089 }
-      - { lat: 52.04639696591422, lon: 5.123594214660459 }
-      - { lat: 52.046601617325294, lon: 5.126200783281035 }
-      - { lat: 52.04770251144333, lon: 5.127018302993614 }
+      - { lat: 52.0483002679678, lon: 5.12451678252681 }
+      - { lat: 52.0468762658451, lon: 5.12329772411925 }
+      - { lat: 52.0463889964493, lon: 5.12364836681196 }
+      - { lat: 52.046562682144, lon: 5.12613465170407 }
+      - { lat: 52.0475684466966, lon: 5.12699037836458 }
   - name: Short cable
+    direction: 2d
     description: Short cable for improving your skills with guidance.
+    points:
+      - { lat: 52.0487455425389, lon: 5.12379010152744 }
+      - { lat: 52.0471741376414, lon: 5.12284952868272 }
 
 # Regular season hours from the 2025 schedule (start times on the full hour). The park
 # publishes new hours per season, so verify. The cable closes at the latest half an hour
