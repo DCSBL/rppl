@@ -1,0 +1,58 @@
+# Sources (fetched 2026-09-27):
+#   https://watersportverhuurbedrijfdearne.nl/watersport/
+#   https://watersportverhuurbedrijfdearne.nl/
+#   https://watersportverhuurbedrijfdearne.nl/contact-bootverhuur-arne/
+version: 1
+id: dearne-arnemuiden
+created_at: 2026-09-27
+updated_at: 2026-09-27
+history:
+  - date: 2026-09-27
+    description: initial
+
+author: Rppl
+name: Watersportverhuurbedrijf De Arne
+address: Muidenweg 2, 4341 PZ Arnemuiden
+timezone: Europe/Amsterdam
+# Dock (Google Maps pin for "Watersportbedrijf De Arne", from the site's own contact-page map embed).
+location:
+  lat: 51.51027390600649
+  lon: 3.7009570633249704
+
+phone: 0118-601419
+email: dearne@zeelandnet.nl
+website: https://watersportverhuurbedrijfdearne.nl/watersport/
+
+links:
+  - { kind: facebook, url: "https://www.facebook.com/wsbdearne" }
+  - { kind: instagram, url: "https://www.instagram.com/wsbdearne/?hl=nl" }
+
+cables:
+  - name: Wakeboardbaan
+    # Site's own description: a "tweemast-wakeboardbaan" (two-mast course) — a 2-point "2.0"
+    # cable, not a full-size loop. No source map/satellite view to trace points from.
+    direction: 2d
+    description: >-
+      Two-mast cable — you're the only rider on the water for your session, no queue and no
+      swimming back after a fall.
+
+opening:
+  booking: required
+  numbered: false
+  note: >-
+    The wakeboard/waterski cable runs May 1 through September 30 only (other De Arne facilities
+    are open longer). Closed Saturdays. Evening hours by appointment.
+  rules:
+    - { label: Season, months: [5, 6, 7, 8, 9], days: [sun, mon, tue, wed, thu, fri], open: "09:00", close: "17:30" }
+
+prices:
+  - { name: 15 min, price: "€18", note: Includes helmet and impact vest }
+  - { name: 30 min, price: "€36", note: Includes helmet and impact vest }
+  - { name: 60 min, price: "€72", note: Includes helmet and impact vest }
+  - { name: Wakeboard/waterski rental, price: "€7", note: per person }
+  - { name: Pro wakeboard rental, price: "€10", note: per person }
+  - { name: Wetsuit rental, price: "€7", note: per person }
+  - { name: 11-ride card, price: "€180" }
+
+facilities:
+  - rental
