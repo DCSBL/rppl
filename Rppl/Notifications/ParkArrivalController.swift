@@ -256,6 +256,9 @@ final class ParkArrivalController: NSObject {
         content.title = String(localized: "Welcome to \(park.name)")
         content.body = Self.notificationBody(park: park, weather: weather)
         content.sound = .default
+        // Relevant right now, not later: breaks through Focus and skips the scheduled summary.
+        // The only notification type Rppl sends today, so this doesn't crowd out anything else.
+        content.interruptionLevel = .timeSensitive
         content.userInfo = ["parkID": park.id]
         let request = UNNotificationRequest(
             identifier: "park-arrival.\(park.id)\(identifierSuffix)",
@@ -272,8 +275,16 @@ final class ParkArrivalController: NSObject {
             let wind = Int(weather.windKmh.rounded())
             parts.append(String(localized: "\(temperature)°C, wind \(wind) km/h"))
         }
-        parts.append(park.openStatus().badgeText)
+        parts.append(openingHoursText(for: park))
+        parts.append(String(localized: "Read more about this park."))
         return parts.joined(separator: " · ")
+    }
+
+    private static func openingHoursText(for park: Park) -> String {
+        let day = park.schedule()
+        guard day.isScheduleKnown else { return String(localized: "Opening hours unknown") }
+        guard day.isOpen, !day.windows.isEmpty else { return park.openStatus().badgeText }
+        return day.windows.map(ParkFormatting.openFromTo).joined(separator: ", ")
     }
 
     private static func lastNotifiedDate(parkID: String) -> Date? {
@@ -325,12 +336,17 @@ extension ParkArrivalController: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 
+    /// Crashed on a cold launch from a notification tap: `await MainActor.run { ... }` here made
+    /// UIKit's async-delegate completion wait on our MainActor work, which reentered UIKit's own
+    /// state-restoration CATransaction-commit sync and hit an internal assertion
+    /// (`_performBlockAfterCATransactionCommitSynchronizes:` in the crash log). Returning
+    /// immediately and doing the state update in a detached `Task` avoids that reentrancy.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
         guard let parkID = response.notification.request.content.userInfo["parkID"] as? String else { return }
-        await MainActor.run {
+        Task { @MainActor in
             let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
             if isFirstTime {
                 UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
