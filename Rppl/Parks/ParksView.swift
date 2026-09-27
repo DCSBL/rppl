@@ -448,12 +448,12 @@ private struct ParksOpenDatePicker: View {
 
             HStack {
                 Button(String(localized: "Today")) { date = Date() }
-                Spacer()
+                Spacer(minLength: 12)
                 Button(String(localized: "Clear"), role: .destructive) { date = nil }
             }
         }
         .padding()
-        .frame(width: 320)
+        .fixedSize()
         .presentationCompactAdaptation(.popover)
     }
 }
