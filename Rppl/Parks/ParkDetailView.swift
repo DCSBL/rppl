@@ -284,9 +284,11 @@ struct ParkDetailView: View {
             }
 
             if let waterTemperature {
-                Text(String(localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName)"))
-                    .font(.caption2)
-                    .foregroundStyle(Color.rpplMuted)
+                Text(String(
+                    localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
+                ))
+                .font(.caption2)
+                .foregroundStyle(Color.rpplMuted)
             }
 
             if let weather, let legal = weather.legalURL {
@@ -315,6 +317,16 @@ struct ParkDetailView: View {
         let speed = DistanceFormat.kilometersPerHour(weather.windKmh)
         let beaufort = BeaufortScale.label(forKmh: weather.windKmh)
         return "\(direction.name) · \(speed) · \(beaufort)"
+    }
+
+    /// When the station reading was taken, not when the app fetched it.
+    private func observedAtText(_ date: Date) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        if Calendar.current.isDateInToday(date) {
+            return String(localized: "Today at \(time)")
+        }
+        let day = date.formatted(date: .numeric, time: .omitted)
+        return String(localized: "\(day) at \(time)")
     }
 
     private var openingTimesCard: some View {

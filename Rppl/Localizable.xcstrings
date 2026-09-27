@@ -6031,22 +6031,6 @@
         }
       }
     },
-    "Estimate near %@, via %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estimate near %@, via %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schatting nabij %@, via %@"
-          }
-        }
-      }
-    },
     "water ~%lld°C" : {
       "localizations" : {
         "en" : {
@@ -6219,6 +6203,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl haalt dit op via een externe, officiële dienst (Rijkswaterstaat). De waarde is een schatting. Je kan dit later aanpassen in Instellingen."
+          }
+        }
+      }
+    },
+    "Estimate near %@, via %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimate near %@, via %@ · %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schatting nabij %@, via %@ · %@"
+          }
+        }
+      }
+    },
+    "Today at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today at %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vandaag om %@"
+          }
+        }
+      }
+    },
+    "%@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ at %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ om %@"
           }
         }
       }
