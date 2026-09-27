@@ -554,6 +554,26 @@ struct ParksTests {
         let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
         #expect(decoded.waterTemperature == nil)
     }
+
+    @Test func staleOverridePredatingWaterTemperatureInheritsBundledSource() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var base = try project7()
+        // Simulate an in-app edit (e.g. re-traced cable) saved before `water_temperature` existed
+        // on the bundled park.
+        base.waterTemperature = nil
+        var edit = base
+        edit.name = "My Project 7"
+        try ParkCatalog.save(edit, to: dir, bundledBase: base)
+
+        let bundledSource = try #require(try project7().waterTemperature)
+        let entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == "project7-rotterdam" })
+        #expect(entry.origin == .edited && entry.park.name == "My Project 7")
+        #expect(entry.park.waterTemperature == bundledSource)
+
+        let loaded = try #require(ParkCatalog.load(userRoot: dir).first { $0.id == "project7-rotterdam" })
+        #expect(loaded.waterTemperature == bundledSource)
+    }
 }
 
 private extension Array where Element == ParkCablePoint {
