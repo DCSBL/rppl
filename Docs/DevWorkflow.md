@@ -91,6 +91,19 @@ It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
 
 To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`** (drop **`RpplCore tests`** if it was required).
 
+### Validate parks (Linux)
+
+Workflow: [`.github/workflows/parks-validate.yml`](../.github/workflows/parks-validate.yml).
+
+Spam/junk filter for changes to `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`. Only runs when park data, the schema, the validator script, or the yamllint config change. Steps:
+
+1. **YAML lint** — `yamllint --config-file .yamllint.yml RpplCore/Sources/RpplCore/Resources/Parks/` (relaxed house-style config: long lines, flow mappings and no `---` document start are normal for hand-authored park files).
+2. **Schema + sanity validation** — `python3 scripts/validate_parks.py` against [`schema/park.schema.json`](../schema/park.schema.json) (hand-kept in sync with `ParkModels.swift` / `ParkOpening.swift`), plus sanity checks: duplicate `id`, out-of-range or `(0, 0)` coordinates, a cable with fewer than 2 points, obvious placeholder/TODO text.
+
+This does not replace human review of park data (sourcing, accuracy) — see the `park-data-collection` skill and its no-guessing/domain-restricted rules.
+
+Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_test.sh` asserts each fixture passes/fails as expected — run it after touching the schema or validator).
+
 ## Xcode Cloud
 
 **RpplCore `swift test`** and nightly TestFlight builds run in Xcode Cloud, not GitHub Actions. Local/push gate still runs Core tests through `xcode-gate` / `make test-core`.

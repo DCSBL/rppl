@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Smoke test for scripts/validate_parks.py: the one valid fixture must pass,
 # each invalid fixture must fail. Run from the repo root:
-#   bash tests/smoke_test.sh
+#   bash scripts/parks-tests/smoke_test.sh
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
-FIXTURES=tests/fixtures
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+FIXTURES=scripts/parks-tests/fixtures
 FAIL=0
 
 check_passes() {
