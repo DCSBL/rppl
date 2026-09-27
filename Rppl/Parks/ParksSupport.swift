@@ -259,7 +259,7 @@ enum ParkFormatting {
     }
 }
 
-struct ParkWeather: Equatable {
+struct ParkWeather: Equatable, Sendable {
     var temperatureCelsius: Double
     var windKmh: Double
     var markLightURL: URL?
@@ -268,36 +268,78 @@ struct ParkWeather: Equatable {
 }
 
 /// Current air temperature and wind at a park via WeatherKit. Failures just hide the weather row.
+///
+/// Shared (`.shared`) rather than per-view so the success cache and failure backoff below actually
+/// apply across park-detail navigations and geofence arrivals, instead of resetting every time a
+/// caller makes its own instance.
 @Observable
 @MainActor
 final class ParksWeatherProvider {
+    static let shared = ParksWeatherProvider()
+
     private var cache: [String: (date: Date, weather: ParkWeather)] = [:]
+    private var lastFailure: [String: Date] = [:]
     private static let maxAge: TimeInterval = 15 * 60
+    /// Skip re-hitting WeatherKit for a park that just failed (e.g. a provisioning/auth outage) —
+    /// without this, every screen visit or geofence arrival retried an already-failing request.
+    private static let failureBackoff: TimeInterval = 5 * 60
+    private static let fetchTimeout: TimeInterval = 8
 
     func weather(for park: Park) async -> ParkWeather? {
         if let hit = cache[park.id], Date().timeIntervalSince(hit.date) < Self.maxAge {
             return hit.weather
         }
+        if let failedAt = lastFailure[park.id], Date().timeIntervalSince(failedAt) < Self.failureBackoff {
+            return nil
+        }
         let location = CLLocation(latitude: park.location.lat, longitude: park.location.lon)
         do {
-            let service = WeatherService.shared
-            let current = try await service.weather(for: location, including: .current)
-            let attribution = try? await service.attribution
-            let result = ParkWeather(
-                temperatureCelsius: current.temperature.converted(to: .celsius).value,
-                windKmh: current.wind.speed.converted(to: .kilometersPerHour).value,
-                markLightURL: attribution?.combinedMarkLightURL,
-                markDarkURL: attribution?.combinedMarkDarkURL,
-                legalURL: attribution?.legalPageURL
-            )
+            let result = try await Self.withTimeout(Self.fetchTimeout) {
+                let service = WeatherService.shared
+                let current = try await service.weather(for: location, including: .current)
+                let attribution = try? await service.attribution
+                return ParkWeather(
+                    temperatureCelsius: current.temperature.converted(to: .celsius).value,
+                    windKmh: current.wind.speed.converted(to: .kilometersPerHour).value,
+                    markLightURL: attribution?.combinedMarkLightURL,
+                    markDarkURL: attribution?.combinedMarkDarkURL,
+                    legalURL: attribution?.legalPageURL
+                )
+            }
             cache[park.id] = (Date(), result)
+            lastFailure[park.id] = nil
             return result
+        } catch is ParksWeatherTimeoutError {
+            WakeLog.debug(.ui, "park weather: timed out")
+            lastFailure[park.id] = Date()
+            return nil
         } catch {
             WakeLog.error(.ui, "park weather: \(error)")
+            lastFailure[park.id] = Date()
             return nil
         }
     }
+
+    private static func withTimeout<T: Sendable>(
+        _ seconds: TimeInterval,
+        _ work: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await work() }
+            group.addTask {
+                try await Task.sleep(for: .seconds(seconds))
+                throw ParksWeatherTimeoutError()
+            }
+            guard let result = try await group.next() else {
+                throw ParksWeatherTimeoutError()
+            }
+            group.cancelAll()
+            return result
+        }
+    }
 }
+
+private struct ParksWeatherTimeoutError: Error {}
 
 /// Wrapping row of chips.
 struct FlowLayout: Layout {

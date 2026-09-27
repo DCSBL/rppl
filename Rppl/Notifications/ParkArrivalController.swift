@@ -162,7 +162,7 @@ final class ParkArrivalController: NSObject {
     private func handleArrival(parkID: String) async {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
-        let weather = await ParksWeatherProvider().weather(for: park)
+        let weather = await ParksWeatherProvider.shared.weather(for: park)
         do {
             try await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
             Self.setLastNotifiedDate(parkID: parkID, date: Date())
@@ -195,7 +195,7 @@ final class ParkArrivalController: NSObject {
         guard let park = ParkStore.shared.entry(id: parkID)?.park else {
             return .failure(String(localized: "Unknown park."))
         }
-        let weather = await ParksWeatherProvider().weather(for: park)
+        let weather = await ParksWeatherProvider.shared.weather(for: park)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)
         do {
             try await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
