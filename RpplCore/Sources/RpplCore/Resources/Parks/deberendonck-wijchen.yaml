@@ -30,9 +30,9 @@ facilities:
 
 # Source: deberendonck.nl tarieven page
 prices:
-  - { name: 1,5 uur, price: "€18,50", note: "kids t/m 15 jr" }
-  - { name: 1,5 uur, price: "€21,50", note: student }
-  - { name: 1,5 uur, price: "€26,50", note: "volwassene 16+" }
+  - { name: "1,5 uur", price: "€18,50", note: "kids t/m 15 jr" }
+  - { name: "1,5 uur", price: "€21,50", note: student }
+  - { name: "1,5 uur", price: "€26,50", note: "volwassene 16+" }
   - { name: 3 uur, price: "€28,50", note: "kids t/m 15 jr" }
   - { name: 3 uur, price: "€31,50", note: student }
   - { name: 3 uur, price: "€36,50", note: "volwassene 16+" }
