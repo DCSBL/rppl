@@ -15,6 +15,10 @@ location:
   lat: 52.048428101966046
   lon: 5.124218887481674
 
+# Nearest official Rijkswaterstaat surface-water temperature station (Lekkanaal, ~3 km away).
+# Estimate only — not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
+
 phone: 030 287 7777
 email: info@downunder.nl
 website: https://downunder.nl/sports/sport/waterskien/
