@@ -336,12 +336,17 @@ extension ParkArrivalController: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 
+    /// Crashed on a cold launch from a notification tap: `await MainActor.run { ... }` here made
+    /// UIKit's async-delegate completion wait on our MainActor work, which reentered UIKit's own
+    /// state-restoration CATransaction-commit sync and hit an internal assertion
+    /// (`_performBlockAfterCATransactionCommitSynchronizes:` in the crash log). Returning
+    /// immediately and doing the state update in a detached `Task` avoids that reentrancy.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
         guard let parkID = response.notification.request.content.userInfo["parkID"] as? String else { return }
-        await MainActor.run {
+        Task { @MainActor in
             let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
             if isFirstTime {
                 UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
