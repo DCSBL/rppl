@@ -6015,22 +6015,6 @@
         }
       }
     },
-    "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Indien ingeschakeld toont Rppl een geschatte watertemperatuur bij parken met een nabije officiële bron, en wordt dit meegestuurd met de aankomstmelding. Geschat via het dichtstbijzijnde officiële overheidsmeetstation (niet gemeten bij het park zelf), maximaal één keer per 4 uur per park opgehaald. Standaard uit."
-          }
-        }
-      }
-    },
     "Water %@" : {
       "localizations" : {
         "en" : {
@@ -6171,6 +6155,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wind uit %@, %@"
+          }
+        }
+      }
+    },
+    "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruikt een externe, officiële overheidsdienst (Rijkswaterstaat) bij parken met een nabije bron, voor het parkscherm en de aankomstmelding. De waarde is een schatting."
+          }
+        }
+      }
+    },
+    "Show water temperature" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show water temperature"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toon watertemperatuur"
+          }
+        }
+      }
+    },
+    "Show water temperature?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show water temperature?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watertemperatuur tonen?"
+          }
+        }
+      }
+    },
+    "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl haalt dit op via een externe, officiële dienst (Rijkswaterstaat). De waarde is een schatting. Je kan dit later aanpassen in Instellingen."
           }
         }
       }

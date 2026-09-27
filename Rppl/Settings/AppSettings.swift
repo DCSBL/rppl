@@ -27,4 +27,6 @@ enum AppSettingsKey {
     static let didShowParkArrivalExplainer = "rppl.didShowParkArrivalExplainer"
     /// Estimated ambient water temperature per park, from an open government API (opt-in; default off).
     static let parkWaterTemperatureEnabled = "rppl.parkWaterTemperatureEnabled"
+    /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
+    static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
 }
