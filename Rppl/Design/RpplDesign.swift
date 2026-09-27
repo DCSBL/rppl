@@ -27,6 +27,8 @@ enum MetricKind: CaseIterable, Equatable {
     case water
     case air
     case humidity
+    case wind
+    case precipitation
     case energy
     case heartRate
     case park
@@ -43,6 +45,8 @@ enum MetricKind: CaseIterable, Equatable {
         case .water: "thermometer.medium"
         case .air: "cloud.sun"
         case .humidity: "humidity"
+        case .wind: "wind"
+        case .precipitation: "cloud.rain"
         case .energy: "flame"
         case .heartRate: "heart.fill"
         case .park: "mappin.and.ellipse"
@@ -59,7 +63,7 @@ enum MetricKind: CaseIterable, Equatable {
         case .riding: Color.rpplMetricRiding
         case .inactive: Color.rpplMuted
         case .water: Color.rpplMetricWater
-        case .air, .humidity: Color.rpplMetricAir
+        case .air, .humidity, .wind, .precipitation: Color.rpplMetricAir
         case .energy, .heartRate: Color.rpplMetricEnergy
         }
     }
