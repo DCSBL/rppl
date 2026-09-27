@@ -554,6 +554,22 @@ struct ParksTests {
         let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
         #expect(decoded.waterTemperature == nil)
     }
+
+    @Test func wakesysFlagRoundTripsThroughYAML() throws {
+        var park = Park(id: "x", name: "X", location: ParkCoordinate(lat: 52, lon: 4))
+        park.wakesys = true
+        let yaml = try ParkCatalog.encode(park)
+        #expect(yaml.contains("wakesys: true"))
+        let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(decoded.wakesys == true)
+    }
+
+    @Test func parkWithoutWakesysFlagDecodesToNil() throws {
+        let park = Park(id: "x", name: "X", location: ParkCoordinate(lat: 52, lon: 4))
+        let yaml = try ParkCatalog.encode(park)
+        let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(decoded.wakesys == nil)
+    }
 }
 
 private extension Array where Element == ParkCablePoint {

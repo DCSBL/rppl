@@ -211,10 +211,13 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     /// Optional source for an estimated ambient water temperature at this park (nearest official
     /// station, not a sensor at the park itself). Absent means the feature has nothing to show here.
     public var waterTemperature: ParkWaterTemperatureSource?
+    /// Whether this park's booking system is Wakesys (shared across several parks). Absent/`nil`
+    /// means unknown/not Wakesys; defaults to `false` at call sites, not on decode.
+    public var wakesys: Bool?
 
     enum CodingKeys: String, CodingKey {
         case version, id, history, author, name, location, address, timezone, cables, opening
-        case phone, email, website, prices, links, description, facilities
+        case phone, email, website, prices, links, description, facilities, wakesys
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case basedOnUpdatedAt = "based_on_updated_at"
@@ -238,6 +241,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         description: String? = nil,
         facilities: [String]? = nil,
         waterTemperature: ParkWaterTemperatureSource? = nil,
+        wakesys: Bool? = nil,
         createdAt: String? = nil,
         updatedAt: String? = nil,
         history: [ParkHistoryEntry]? = nil,
@@ -260,6 +264,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.description = description
         self.facilities = facilities
         self.waterTemperature = waterTemperature
+        self.wakesys = wakesys
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.history = history

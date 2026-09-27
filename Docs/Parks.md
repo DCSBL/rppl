@@ -63,6 +63,7 @@ prices:  [{ name: Day pass, price: "€25", note: optional }]
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
+wakesys: true                     # optional, default false — this park's booking system is Wakesys (shared by several parks)
 
 # Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
@@ -98,6 +99,11 @@ Rules and slots share optional selectors, all of which must match a date:
 - `water_temperature.provider` is an opaque provider id (today only `rws_nl`, Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data); `station_id` is that provider's opaque station code. A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
 - Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
 - `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`. Any failure or timeout just hides the row/segment — same fail-open convention as weather.
+
+### Wakesys badge
+
+- `wakesys: true` marks a park whose booking system is Wakesys (several parks share the same booking platform, under their own accounts/subdomain). Optional, defaults to `false`/absent.
+- Shown today only as a "Wakesys" chip on the park card and on the detail page's booking button — not used to filter or group parks yet.
 
 ### Cable length
 

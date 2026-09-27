@@ -90,6 +90,10 @@
         "provider": { "type": "string", "minLength": 1 },
         "station_id": { "type": "string", "minLength": 1 }
       }
+    },
+    "wakesys": {
+      "type": "boolean",
+      "description": "Whether this park's booking system is Wakesys. Optional, defaults to false."
     }
   },
   "$defs": {
