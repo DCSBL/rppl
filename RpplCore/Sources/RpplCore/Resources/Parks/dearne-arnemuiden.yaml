@@ -9,6 +9,8 @@ updated_at: 2026-09-27
 history:
   - date: 2026-09-27
     description: initial
+  - date: 2026-09-27
+    description: add water_temperature (Arnemuiden Oranjeplaat, nearest reporting RWS station)
 
 author: Rppl
 name: Watersportverhuurbedrijf De Arne
@@ -22,6 +24,11 @@ location:
 phone: 0118-601419
 email: dearne@zeelandnet.nl
 website: https://watersportverhuurbedrijfdearne.nl/watersport/
+
+# Nearest official Rijkswaterstaat surface-water temperature station (Arnemuiden Oranjeplaat,
+# ~0.7 km from the dock — the same landmark the park's own directions use). Reports frequently
+# (latest reading same-day as this lookup). Estimate only — not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: arnemuiden.oranjeplaat }
 
 links:
   - { kind: facebook, url: "https://www.facebook.com/wsbdearne" }
