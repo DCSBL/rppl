@@ -1,6 +1,21 @@
 # Terms & Privacy Policy
 
-**Last updated:** 26 September 2026
+**Last updated:** 27 September 2026
+
+## Your data stays with you
+
+Rppl collects data **only locally**, on your Apple Watch and iPhone. There is no Rppl server and no account. Your sessions are never sent to us.
+
+Because we never receive your data, we **cannot** process, sell, or share it, use it for advertising, or build a profile of you. And we would not want to.
+
+**Crash reports & analytics.** If "Share With App Developers" is on in iOS Settings → Privacy & Security → Analytics & Improvements, Apple sends us anonymous crash reports and usage metrics. This is an Apple setting: we have no influence over it and cannot link that data to you.
+
+**TestFlight.** If you test a beta through TestFlight, Apple does show us:
+
+- Your name and email address (when you were invited by email)
+- Which builds you installed, when, and how often you opened them
+- Crash reports, including device model and iOS / watchOS version
+- Feedback and screenshots you send through TestFlight, with device details (model, OS version, battery level, free storage, network type, time zone)
 
 ## A note from Duco
 
@@ -26,92 +41,66 @@ I hope that, like me, you enjoy tracking your sessions!
 
 ## About Rppl
 
-**Rppl** is a single document for terms of use and privacy. Written in English; Dutch and EU law apply. Developer: Duco Sebel (the Netherlands). Rppl is a hobby project and no money is earned from the app today. Using Rppl is entirely your own choice.
+Rppl is a hobby project by Duco Sebel (the Netherlands). It earns no money today, and using it is entirely your choice. This document covers both the terms of use and privacy.
 
-Source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: copy and modify for noncommercial use only; selling the app or other commercial use is not allowed). This document governs **app use and personal data**.
+The source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: noncommercial use only).
 
-In-app copy: **iPhone → Rppl → Legal → Terms & Privacy policy**. Keep that UI in sync with this file.
+## What the app collects
 
-## Privacy
+Only to record and show your cable-park sessions:
 
-**Privacy first.** Session data is processed on your Apple Watch and iPhone to run the activity. We do not operate a Rppl cloud that receives your sets.
+- GPS location (routes, speed, set detection), with precise coordinates
+- Accelerometer and gyroscope (device motion)
+- Heart rate and energy, through Apple Health when you allow it
+- Set / inactive detections derived from the sensors above
+- Water temperature, when available (Apple Watch Ultra)
+- A random install ID created on first launch (not a name or account; reinstalling creates a new one)
 
-**Stays on your side.** Data is stored on your devices, in the Apple Health app when you allow Health access, in your iCloud Drive (Documents) when phone logbook sync is enabled (default on; you can turn it off in rppl → Data), and in your iCloud backup if you back up that device. Device backup and Documents in iCloud are different Apple features.
+Again: none of this is sent to us, sold, or used for advertising.
 
-**Legal basis (GDPR).** Our legal basis for processing your health and location data is your explicit consent, which you provide through iOS and watchOS system permission prompts.
+**Where it is stored:** on your Watch and iPhone, in Apple Health (when allowed), in your iCloud Drive when logbook sync is on (default on; turn it off in Rppl → Data), and in your iCloud backup if you use one. Watch and iPhone exchange data directly through Apple Watch Connectivity.
 
-**Never shared by us.** Your data remains yours. We do not sell, rent, or share it with third parties unless you explicitly choose to, for example by exporting/sharing a session yourself.
+**Legal basis (GDPR):** your consent, given through the iOS and watchOS permission prompts.
 
-### Export / sharing
+## Apple services
 
-Export exists so you can share **raw, unfiltered** session data for analysis. Rppl does not upload exports to a Rppl cloud; sharing only happens when you use Share, AirDrop, Files, email, or another channel you choose.
+Some features request data from Apple:
 
-An export can include:
+- **Apple WeatherKit:** your current location, to get weather and water temperature for your session. The Parks tab sends a park's location (not yours) to show its current temperature and wind.
+- **Apple Maps:** route maps, park maps, and directions to a park.
 
-- Session metadata, including a random install-scoped identifier
-- Set / pause (inactive) detections
-- GPS locations with **precise coordinates (not anonymized)**
-- Device motion
-- Heart rate and energy (when Health access was allowed)
-- Water temperature when available
-- Derived session stats
+**Park arrival notifications** (opt-in, off by default): your iPhone watches a few park locations (your favorites plus the nearest others) with Apple's on-device region monitoring, and shows a local "Welcome to…" notification when you arrive. Requires Location access. Turn it off anytime in Rppl → Settings.
 
-A unique random install identifier is created on first app launch and stored on your device. Reinstalling the app generates a new ID. It is not a name or account.
+Before adding any new third-party service that handles your data, we will ask your permission.
 
-If you share an export, **you** choose who receives it and remain responsible for that share and how the data is used afterward. We may **ask** for a copy when analytics look wrong — sending one is always **fully your choice**.
+## Export & sharing
 
-## What the app collects & Third-Party APIs
+You can export a session's raw, unfiltered data (everything listed under What the app collects, plus derived stats) for analysis. Nothing leaves your device unless you share it yourself, through Share, AirDrop, Files, email, or another channel you choose. You decide who receives it and are responsible for that share.
 
-Collected only to process your cable-park activity on your devices:
+We may ask for an export when stats look wrong. Sending one is always your choice.
 
-- GPS location (routes, speed, set detection) — precise coordinates; not anonymized in storage or export
-- Accelerometer and gyroscope / device motion
-- Heart rate and energy estimates (via HealthKit when allowed)
-- Automatic set / inactive detections derived from the sensors above
-- Water temperature when available (Apple Watch Ultra)
-- A random install-scoped identifier created on first launch (not a name or account; new ID after reinstall)
+## Age
 
-Apple HealthKit data is used only to support health and fitness features (workout recording and related metrics), not for advertising or data brokering. We do not upload this information to a Rppl server. Transfer between Watch and iPhone uses Apple Watch Connectivity on your devices.
+Rppl can be used at any age. If you are under the digital age of consent in your country (16 in the Netherlands), ask a parent or guardian before granting Health and Location access.
 
-**Park arrival notifications (opt-in, off by default):** If you turn this on in Rppl → Settings, your iPhone monitors a small set of park locations (your favorites plus the nearest others) using Apple's on-device region monitoring, and sends a local "Welcome to…" notification when you clearly arrive at one. This runs entirely on your device — Rppl does not track your location continuously or send it to a Rppl server — but it does use Apple WeatherKit as described below, and it requires Location access to work. Turn it off anytime; doing so stops the monitoring immediately.
+## Safety & liability
 
-**Apple Services:** To provide a complete experience, Rppl requests data from native Apple services:
+Wakeboarding can be dangerous. Never let data from Rppl push you into unsafe choices. You are responsible for your own safety, judgment, and gear, including your Watch on the water.
 
-- **Apple WeatherKit:** Your current location is sent to Apple WeatherKit to retrieve air weather (temperature, humidity, condition) and water temperature (Apple Watch Ultra, when available) for your session. In the Parks tab, the location of a park (not yours) is sent to Apple WeatherKit to show its current temperature and wind.
-- **Apple Maps:** Used to display your route maps and park maps, and to open directions to a park.
+Rppl is provided as-is, without warranties. We are not liable for injuries, damage, or lost data from using it, except where EU law does not allow excluding liability (gross negligence or intent).
 
-If future updates require integrating new third-party APIs that process your data, we will ask for your explicit permission first.
+Park info in the Parks tab is collected by hand from public sources and may be outdated or wrong. Always check with the park before you travel or book.
 
-**Crash Reporting & Analytics:** If you have enabled "Share With App Developers" in your iOS Privacy & Security settings, Apple provides us with anonymous crash reports and usage metrics to help fix bugs.
+## Changes & costs
 
-## Age Requirement
-
-Rppl can be used at any age. However, if you are under the legal age of digital consent in your country (for example, under 16 in the EU), you must have permission from your parent or legal guardian to grant device permissions like Apple Health and Location access.
-
-## Your responsibility & Safety
-
-Wakeboarding and water sports can be dangerous. Rppl must not be used to make unsafe or unwise decisions. **Do not attempt dangerous maneuvers, ignore safety rules, or act recklessly based on data from this app.** You remain solely responsible for your safety, judgment, and equipment.
-
-By using this app you take your (expensive) Apple Watch on the water. That risk is yours alone. We are not liable for loss, damage, data loss, or any injuries arising from your use of the app, taking a Watch into a wet environment, or your own unsafe choices. To the extent strictly required by EU law, liability for our own gross negligence or intentional misconduct is not excluded, but the app is otherwise provided strictly as-is, without warranties.
-
-Park information in the Parks tab (opening times, blocks, prices, contact details, cable layouts, locations and directions) is collected by hand from public sources and may be incomplete, outdated or wrong. Parks change their hours and rules without notice. We give no guarantee that it is correct and are not liable for any loss, cost or inconvenience arising from relying on it, such as a trip to a closed park or a missed booking. Always verify with the park itself before you travel or book.
-
-## Service changes & costs
-
-We may change, pause, or remove features, or stop offering the app, at any time.
-
-We do not plan to monetize heavily, but we may add paid features or ask for donations to cover possible costs of running and distributing the app (for example Apple fees, tooling, or infrastructure). We currently do not plan to make existing features paid; however, these terms allow us to do so if needed in the future. Any such decision would be communicated via App Store release notes before taking effect.
-
-Material changes to these terms or privacy practices will be communicated to you via App Store release notes or an in-app notice. Continued use after changes means you accept the updated terms.
+We may change, pause, or stop the app at any time. We may add paid features or ask for donations to cover costs such as Apple fees; we do not plan to make existing features paid. Material changes to these terms are announced in the App Store release notes or in the app. Continuing to use Rppl means you accept them.
 
 ## Law & your rights
 
-These terms and the processing described here are governed by the laws of the Netherlands, and where applicable by EU law (including the GDPR for personal data).
+Dutch law applies, and EU law where relevant (including the GDPR).
 
-Depending on your situation you may have rights of access, rectification, erasure, restriction, and objection. Because processing is local on your devices, exercise those rights mainly via your device controls, Health permissions, and deleting sessions or the app itself. Contact us if you need help.
+You have the right to access, correct, erase, restrict, and object to processing of your data. Since your data lives only on your devices, you exercise these rights yourself: through device settings, Health permissions, or by deleting sessions or the app. Need help? Get in touch.
 
 ## Contact
 
-Questions about privacy or these terms: [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl)
-
-Duco Sebel · Netherlands
+[rppl@dcsbl.nl](mailto:rppl@dcsbl.nl) · Duco Sebel, Netherlands
