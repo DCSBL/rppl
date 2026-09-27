@@ -16,6 +16,15 @@ public enum CableSpeedEstimator {
     public static let binWidthKmh = 1.0
     /// Min usable samples before an estimate is trusted.
     public static let minSamples = 20
+    /// A set only overrides the session-wide speed by this much (km/h) or more.
+    public static let setOverrideThresholdKmh = 2.0
+    /// Min span of usable samples before a set's own speed is trusted over the session value.
+    public static let minSetSampleSpan: TimeInterval = 60
+
+    /// Nearest 0.5 km/h — cable speeds are set in coarse steps, not fractions.
+    public static func roundedToHalfKmh(_ speedKmh: Double) -> Double {
+        (speedKmh * 2).rounded() / 2
+    }
 
     /// Dominant cable speed (km/h) across set windows; nil when too little data.
     public static func cableSpeedKmh(
@@ -23,12 +32,50 @@ public enum CableSpeedEstimator {
         locations: [LocationSample],
         thresholds: DetectionThresholds = .default
     ) -> Double? {
-        let speeds = setWindows.flatMap { window -> [Double] in
+        let speeds = usableSpeedsKmh(setWindows: setWindows, locations: locations, thresholds: thresholds)
+        guard let speedKmh = estimates(speedsKmh: speeds, thresholds: thresholds).first?.speedKmh else { return nil }
+        return roundedToHalfKmh(speedKmh)
+    }
+
+    /// Per-set cable speed: the session-wide value, unless this set's own usable samples span at
+    /// least `minSetSampleSpan` and its own estimate differs by `setOverrideThresholdKmh` or more —
+    /// a short set is too easily thrown off by a single sprint or fall to trust on its own.
+    public static func cableSpeedKmh(
+        setWindow: (start: Date, end: Date),
+        sessionSpeedKmh: Double?,
+        locations: [LocationSample],
+        thresholds: DetectionThresholds = .default
+    ) -> Double? {
+        guard let sessionSpeedKmh else { return nil }
+        let roundedSession = roundedToHalfKmh(sessionSpeedKmh)
+
+        let samples = SetLocationFilter.samples(in: locations, from: setWindow.start, to: setWindow.end)
+        let usable = LocationSpeedStats.usableSpeeds(from: samples, thresholds: thresholds)
+        guard let first = usable.first?.timestamp, let last = usable.last?.timestamp,
+              last.timeIntervalSince(first) >= minSetSampleSpan else {
+            return roundedSession
+        }
+
+        let speedsKmh = usable.map { SpeedUnits.kilometersPerHour(fromMetersPerSecond: $0.speedMps) }
+        guard let setSpeedKmh = estimates(speedsKmh: speedsKmh, thresholds: thresholds).first?.speedKmh else {
+            return roundedSession
+        }
+
+        let roundedSet = roundedToHalfKmh(setSpeedKmh)
+        guard abs(roundedSet - roundedSession) >= setOverrideThresholdKmh else { return roundedSession }
+        return roundedSet
+    }
+
+    private static func usableSpeedsKmh(
+        setWindows: [(start: Date, end: Date)],
+        locations: [LocationSample],
+        thresholds: DetectionThresholds
+    ) -> [Double] {
+        setWindows.flatMap { window -> [Double] in
             let samples = SetLocationFilter.samples(in: locations, from: window.start, to: window.end)
             return LocationSpeedStats.usableSpeeds(from: samples, thresholds: thresholds)
                 .map { SpeedUnits.kilometersPerHour(fromMetersPerSecond: $0.speedMps) }
         }
-        return estimates(speedsKmh: speeds, thresholds: thresholds).first?.speedKmh
     }
 
     /// Distinct speed peaks, dominant first. Speeds at/below the stopped threshold are ignored

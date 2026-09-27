@@ -16,6 +16,9 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
     public var averageSpeedKmh: Double?
     /// Peak usable GPS sample speed (km/h); see `LocationSpeedStats.peakSpeedKmh`.
     public var peakSpeedKmh: Double?
+    /// This set's cable speed (km/h), rounded to 0.5; see `CableSpeedEstimator.cableSpeedKmh(setWindow:...)`.
+    /// Session-wide value unless this set's own estimate clears the override threshold.
+    public var cableSpeedKmh: Double?
     /// Record badges for this set within the session (empty if none).
     public var highlights: [SetHighlight]
 
@@ -29,6 +32,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         sustainedSpeedKmh: Double? = nil,
         averageSpeedKmh: Double? = nil,
         peakSpeedKmh: Double? = nil,
+        cableSpeedKmh: Double? = nil,
         highlights: [SetHighlight] = []
     ) {
         self.index = index
@@ -40,6 +44,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.sustainedSpeedKmh = sustainedSpeedKmh
         self.averageSpeedKmh = averageSpeedKmh
         self.peakSpeedKmh = peakSpeedKmh
+        self.cableSpeedKmh = cableSpeedKmh
         self.highlights = highlights
     }
 
@@ -59,6 +64,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         sustainedSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .sustainedSpeedKmh)
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
         peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
+        cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
         highlights = try container.decodeIfPresent([SetHighlight].self, forKey: .highlights) ?? []
     }
 
@@ -73,6 +79,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         try container.encodeIfPresent(sustainedSpeedKmh, forKey: .sustainedSpeedKmh)
         try container.encodeIfPresent(averageSpeedKmh, forKey: .averageSpeedKmh)
         try container.encodeIfPresent(peakSpeedKmh, forKey: .peakSpeedKmh)
+        try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
         try container.encode(highlights, forKey: .highlights)
     }
 
@@ -81,7 +88,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         case lapCount
         /// Intermediate slang mis-rename (circuit crossings briefly called sets).
         case legacyLapSetCount = "setCount"
-        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, highlights
+        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, cableSpeedKmh, highlights
     }
 }
 
@@ -118,7 +125,9 @@ public struct SessionStats: Codable, Equatable, Sendable {
     }
 
     /// Most common riding speed across the whole session (km/h), an estimate of the cable speed.
-    /// Session-level on purpose: cable speed rarely changes mid-session.
+    /// Cable speed rarely changes mid-session, so each set's own `cableSpeedKmh` defaults to this
+    /// value too; a set only overrides it when its own estimate clearly disagrees (see
+    /// `CableSpeedEstimator`).
     public var cableSpeedKmh: Double?
 
     /// Set meters / riding duration (km/h).
