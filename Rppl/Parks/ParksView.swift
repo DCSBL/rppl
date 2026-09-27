@@ -235,7 +235,9 @@ struct ParksView: View {
                 .padding(.horizontal, LogbookLayout.horizontalInset)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
-                .background(showMap ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
+                // `.regularMaterial` (not `.ultraThinMaterial`): the header sits over map/satellite
+                // imagery of any color, so it needs enough opacity to keep its text and pills legible.
+                .background(showMap ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
                 .onGeometryChange(
                     for: CGFloat.self,
                     of: { $0.size.height },
