@@ -64,36 +64,19 @@
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location Always and When In Use Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl may use location to display session tracks."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl kan locatie gebruiken om session-sporen te tonen."
-          }
-        }
-      }
-    },
     "NSLocationWhenInUseUsageDescription" : {
       "comment" : "Privacy - Location When In Use Usage Description",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map and sorts cable parks by distance from you."
+            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map, sorts cable parks by distance from you, and, if you turn on park arrival notifications, watches for you crossing into a park."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart en sorteert cable parks op afstand tot jou."
+            "value" : "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart, sorteert cable parks op afstand tot jou, en houdt bij, als je park arrival-notificaties aanzet, in de gaten of je een park nadert."
           }
         }
       }
