@@ -163,24 +163,87 @@ final class ParkArrivalController: NSObject {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
         let weather = await ParksWeatherProvider().weather(for: park)
-        await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
-        Self.setLastNotifiedDate(parkID: parkID, date: Date())
+        do {
+            try await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
+            Self.setLastNotifiedDate(parkID: parkID, date: Date())
+        } catch {
+            WakeLog.error(.permissions, "park arrival notification for \(parkID): \(error.localizedDescription)")
+        }
     }
 
-    /// Debug-tools-only: fires a real local notification ~10s from now for the 7th park in the
-    /// list, as if a geofence had just fired — lets you background the app and see the actual
-    /// tap → park-detail deep link without walking into a real park or using Simulator location.
-    /// Ignores `isEnabled` / cooldown; still requests notification permission if not yet granted.
-    func sendTestArrivalNotification() async -> String? {
-        guard await requestNotificationPermission() else { return nil }
+    /// Debug screen only. The real reflection of what CoreLocation is actually watching right now
+    /// (not just what Rppl intended to monitor) — sorted for stable list ordering.
+    var monitoredParkIDs: [String] {
+        locationManager.monitoredRegions.map(\.identifier).sorted()
+    }
+
+    enum TestNotificationOutcome: Equatable {
+        case success
+        case failure(String)
+    }
+
+    /// Debug screen only: fires a real local notification for `parkID` after `delay`, as if a
+    /// geofence had just fired for it. Ignores `isEnabled` / cooldown; still requests notification
+    /// permission if not yet granted. Surfaces the actual `add(_:)` failure instead of swallowing it.
+    func sendTestArrivalNotification(parkID: String, delay: TimeInterval) async -> TestNotificationOutcome {
+        guard await requestNotificationPermission() else {
+            return .failure(String(localized: "Notification permission is not granted."))
+        }
         if ParkStore.shared.entries.isEmpty {
             ParkStore.shared.reload()
         }
-        guard let park = ParkStore.shared.entries.dropFirst(6).first?.park else { return nil }
+        guard let park = ParkStore.shared.entry(id: parkID)?.park else {
+            return .failure(String(localized: "Unknown park."))
+        }
         let weather = await ParksWeatherProvider().weather(for: park)
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
-        await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
-        return park.name
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)
+        do {
+            try await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
+            return .success
+        } catch {
+            WakeLog.error(.permissions, "park arrival test notification: \(error.localizedDescription)")
+            return .failure(error.localizedDescription)
+        }
+    }
+
+    /// Debug screen only: fires immediately, with no park/weather involved, to isolate whether
+    /// local notifications work on this device/build at all.
+    func sendImmediateDiagnosticNotification() async -> TestNotificationOutcome {
+        guard await requestNotificationPermission() else {
+            return .failure(String(localized: "Notification permission is not granted."))
+        }
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Rppl test notification")
+        content.body = String(localized: "If you see this, local notifications work on this device.")
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: "park-arrival.diagnostic", content: content, trigger: nil)
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+            return .success
+        } catch {
+            return .failure(error.localizedDescription)
+        }
+    }
+
+    /// Debug screen only: a human-readable snapshot of the current notification permission.
+    func notificationSettingsSummary() async -> String {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        switch settings.authorizationStatus {
+        case .notDetermined:
+            return String(localized: "Not determined")
+        case .denied:
+            return String(localized: "Denied")
+        case .authorized:
+            let alerts = settings.alertSetting == .enabled
+            let sound = settings.soundSetting == .enabled
+            return String(localized: "Authorized (alerts \(alerts ? "on" : "off"), sound \(sound ? "on" : "off"))")
+        case .provisional:
+            return String(localized: "Provisional (quiet delivery only)")
+        case .ephemeral:
+            return String(localized: "Ephemeral (App Clip)")
+        @unknown default:
+            return String(localized: "Unknown")
+        }
     }
 
     private func scheduleNotification(
@@ -188,7 +251,7 @@ final class ParkArrivalController: NSObject {
         weather: ParkWeather?,
         trigger: UNNotificationTrigger?,
         identifierSuffix: String
-    ) async {
+    ) async throws {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Welcome to \(park.name)")
         content.body = Self.notificationBody(park: park, weather: weather)
@@ -199,7 +262,7 @@ final class ParkArrivalController: NSObject {
             content: content,
             trigger: trigger
         )
-        try? await UNUserNotificationCenter.current().add(request)
+        try await UNUserNotificationCenter.current().add(request)
     }
 
     private static func notificationBody(park: Park, weather: ParkWeather?) -> String {
