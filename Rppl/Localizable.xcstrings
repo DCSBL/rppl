@@ -6223,6 +6223,22 @@
         }
       }
     },
+    "Not available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet beschikbaar"
+          }
+        }
+      }
+    },
     "Today at %@" : {
       "localizations" : {
         "en" : {

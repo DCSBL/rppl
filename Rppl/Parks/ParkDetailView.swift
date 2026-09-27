@@ -15,6 +15,9 @@ struct ParkDetailView: View {
     @State private var weather: ParkWeather?
     @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
     @State private var waterTemperature: ParkWaterTemperature?
+    /// Set once a water-temperature fetch attempt (successful or not) has completed, so "Not
+    /// available" doesn't flash before the initial `.task` fetch resolves.
+    @State private var waterTemperatureChecked = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
     @AppStorage(AppSettingsKey.didDeclineParkWaterTemperaturePrompt) private var didDeclineWaterTemperaturePrompt = false
     @State private var showWaterTemperaturePrompt = false
@@ -37,6 +40,13 @@ struct ParkDetailView: View {
     /// dismissed the inline offer — so there's something to invite them to turn on.
     private var showsWaterTemperaturePromptRow: Bool {
         park.waterTemperature != nil && !waterTemperatureEnabled && !didDeclineWaterTemperaturePrompt
+    }
+
+    /// The feature is on and a fetch attempt finished without a usable reading — no config, a
+    /// failed/timed-out fetch, or a reading older than the provider's freshness cutoff all land
+    /// here alike, shown as "Not available" instead of silently hiding the row.
+    private var showsWaterTemperatureUnavailable: Bool {
+        waterTemperatureEnabled && waterTemperatureChecked && waterTemperature == nil
     }
 
     var body: some View {
@@ -91,10 +101,14 @@ struct ParkDetailView: View {
             async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
             weather = await weatherResult
             waterTemperature = await waterTemperatureResult
+            waterTemperatureChecked = true
         }
         .onChange(of: waterTemperatureEnabled) { _, isEnabled in
             guard isEnabled else { return }
-            Task { waterTemperature = await waterTemperatureProvider.temperature(for: park) }
+            Task {
+                waterTemperature = await waterTemperatureProvider.temperature(for: park)
+                waterTemperatureChecked = true
+            }
         }
         .alert(
             String(localized: "Show water temperature?"),
@@ -240,7 +254,7 @@ struct ParkDetailView: View {
                     .foregroundStyle(.red)
             }
 
-            if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow {
+            if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow || showsWaterTemperatureUnavailable {
                 Divider().overlay(Color.rpplFill)
                 conditionsSection(weather: weather, waterTemperature: waterTemperature)
             }
@@ -274,6 +288,9 @@ struct ParkDetailView: View {
                 }
                 if let waterTemperature {
                     Label(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
+                } else if showsWaterTemperatureUnavailable {
+                    Label(String(localized: "Not available"), systemImage: "water.waves")
+                        .foregroundStyle(Color.rpplMuted)
                 }
             }
             .font(.subheadline)
