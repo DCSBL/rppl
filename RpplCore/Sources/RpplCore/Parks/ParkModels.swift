@@ -161,6 +161,26 @@ public struct ParkHistoryEntry: Codable, Equatable, Sendable {
     }
 }
 
+/// Where to look up an ambient water-temperature reading for this park's water. `provider` and
+/// `stationId` are opaque, provider-defined strings (like `DetectionCodes`) so a new provider —
+/// another country's open-data API, for example — needs no change to this type.
+public struct ParkWaterTemperatureSource: Codable, Equatable, Hashable, Sendable {
+    /// Opaque provider id, e.g. `"rws_nl"` for Rijkswaterstaat WaterWebServices.
+    public var provider: String
+    /// Opaque, provider-defined station/location identifier.
+    public var stationId: String
+
+    enum CodingKeys: String, CodingKey {
+        case provider
+        case stationId = "station_id"
+    }
+
+    public init(provider: String, stationId: String) {
+        self.provider = provider
+        self.stationId = stationId
+    }
+}
+
 public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public static let currentVersion = 1
 
@@ -188,6 +208,9 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var links: [ParkLink]?
     public var description: String?
     public var facilities: [String]?
+    /// Optional source for an estimated ambient water temperature at this park (nearest official
+    /// station, not a sensor at the park itself). Absent means the feature has nothing to show here.
+    public var waterTemperature: ParkWaterTemperatureSource?
 
     enum CodingKeys: String, CodingKey {
         case version, id, history, author, name, location, address, timezone, cables, opening
@@ -195,6 +218,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case basedOnUpdatedAt = "based_on_updated_at"
+        case waterTemperature = "water_temperature"
     }
 
     public init(
@@ -213,6 +237,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         links: [ParkLink]? = nil,
         description: String? = nil,
         facilities: [String]? = nil,
+        waterTemperature: ParkWaterTemperatureSource? = nil,
         createdAt: String? = nil,
         updatedAt: String? = nil,
         history: [ParkHistoryEntry]? = nil,
@@ -234,6 +259,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.links = links
         self.description = description
         self.facilities = facilities
+        self.waterTemperature = waterTemperature
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.history = history

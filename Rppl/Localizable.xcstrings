@@ -5998,6 +5998,86 @@
           }
         }
       }
+    },
+    "Park water temperature" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park water temperature"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watertemperatuur park"
+          }
+        }
+      }
+    },
+    "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indien ingeschakeld toont Rppl een geschatte watertemperatuur bij parken met een nabije officiële bron, en wordt dit meegestuurd met de aankomstmelding. Geschat via het dichtstbijzijnde officiële overheidsmeetstation (niet gemeten bij het park zelf), maximaal één keer per 4 uur per park opgehaald. Standaard uit."
+          }
+        }
+      }
+    },
+    "Water %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water %@"
+          }
+        }
+      }
+    },
+    "Estimate near %@, via %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimate near %@, via %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schatting nabij %@, via %@"
+          }
+        }
+      }
+    },
+    "water ~%lld°C" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "water ~%lld°C"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "water ~%lld°C"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

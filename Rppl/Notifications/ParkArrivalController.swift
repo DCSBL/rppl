@@ -163,8 +163,11 @@ final class ParkArrivalController: NSObject {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
         let weather = await ParksWeatherProvider.shared.weather(for: park)
+        let waterTemperature = await ParkWaterTemperatureProvider.shared.temperature(for: park)
         do {
-            try await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
+            try await scheduleNotification(
+                for: park, weather: weather, waterTemperature: waterTemperature, trigger: nil, identifierSuffix: ""
+            )
             Self.setLastNotifiedDate(parkID: parkID, date: Date())
         } catch {
             WakeLog.error(.permissions, "park arrival notification for \(parkID): \(error.localizedDescription)")
@@ -196,9 +199,12 @@ final class ParkArrivalController: NSObject {
             return .failure(String(localized: "Unknown park."))
         }
         let weather = await ParksWeatherProvider.shared.weather(for: park)
+        let waterTemperature = await ParkWaterTemperatureProvider.shared.temperature(for: park)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)
         do {
-            try await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
+            try await scheduleNotification(
+                for: park, weather: weather, waterTemperature: waterTemperature, trigger: trigger, identifierSuffix: "-test"
+            )
             return .success
         } catch {
             WakeLog.error(.permissions, "park arrival test notification: \(error.localizedDescription)")
@@ -249,12 +255,13 @@ final class ParkArrivalController: NSObject {
     private func scheduleNotification(
         for park: Park,
         weather: ParkWeather?,
+        waterTemperature: ParkWaterTemperature?,
         trigger: UNNotificationTrigger?,
         identifierSuffix: String
     ) async throws {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Welcome to \(park.name)")
-        content.body = Self.notificationBody(park: park, weather: weather)
+        content.body = Self.notificationBody(park: park, weather: weather, waterTemperature: waterTemperature)
         content.sound = .default
         // Relevant right now, not later: breaks through Focus and skips the scheduled summary.
         // The only notification type Rppl sends today, so this doesn't crowd out anything else.
@@ -268,12 +275,16 @@ final class ParkArrivalController: NSObject {
         try await UNUserNotificationCenter.current().add(request)
     }
 
-    private static func notificationBody(park: Park, weather: ParkWeather?) -> String {
+    private static func notificationBody(park: Park, weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> String {
         var parts: [String] = []
         if let weather {
             let temperature = Int(weather.temperatureCelsius.rounded())
             let wind = Int(weather.windKmh.rounded())
             parts.append(String(localized: "\(temperature)°C, wind \(wind) km/h"))
+        }
+        if let waterTemperature {
+            let temperature = Int(waterTemperature.celsius.rounded())
+            parts.append(String(localized: "water ~\(temperature)°C"))
         }
         parts.append(openingHoursText(for: park))
         parts.append(String(localized: "Read more about this park."))

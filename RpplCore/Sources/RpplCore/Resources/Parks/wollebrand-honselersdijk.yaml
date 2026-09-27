@@ -20,6 +20,10 @@ location:
   lat: 51.99278189793896
   lon: 4.239882979511977
 
+# Nearest official Rijkswaterstaat surface-water temperature station (Hoek van Holland, ~8 km
+# away). Estimate only — a tidal estuary station, not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: hoekvanholland }
+
 phone: 0174 - 64 11 44
 email: info@kabelskibaan.nl
 website: https://www.kabelskibaan.nl
