@@ -36,35 +36,11 @@ struct ParksMapView: View {
 
     var body: some View {
         Map(position: $position, selection: $selectedID) {
-            ForEach(parks) { park in
-                let coordinate = CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
-                if favorites.contains(park.id) {
-                    Marker(park.name, systemImage: "star.fill", coordinate: coordinate)
-                        .tint(.yellow)
-                        .tag(park.id)
-                } else {
-                    Marker(park.name, coordinate: coordinate)
-                        .tint(.red)
-                        .tag(park.id)
-                }
-            }
+            parkMarkers
             if showsCableLines {
-                ForEach(parks) { park in
-                    ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
-                        if let points = cable.points, points.count >= 2 {
-                            let line = points.map {
-                                CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
-                            }
-                            MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
-                                .stroke(Color.orange, lineWidth: 3)
-                        }
-                    }
-                }
+                cableLines
             }
-            if let searchPin {
-                Marker(searchPin.name, systemImage: "magnifyingglass", coordinate: searchPin.coordinate)
-                    .tint(.blue)
-            }
+            searchPinMarker
             UserAnnotation()
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
@@ -103,6 +79,48 @@ struct ParksMapView: View {
             Button("OK", role: .cancel) {}
         }
         .onAppear { location.refresh() }
+    }
+
+    @MapContentBuilder
+    private var parkMarkers: some MapContent {
+        ForEach(parks) { park in
+            let coordinate = CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
+            if favorites.contains(park.id) {
+                Marker(park.name, systemImage: "star.fill", coordinate: coordinate)
+                    .tint(.yellow)
+                    .tag(park.id)
+            } else {
+                Marker(park.name, coordinate: coordinate)
+                    .tint(.red)
+                    .tag(park.id)
+            }
+        }
+    }
+
+    @MapContentBuilder
+    private var cableLines: some MapContent {
+        ForEach(parks) { park in
+            ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
+                if let line = Self.cableLine(for: cable) {
+                    MapPolyline(coordinates: line)
+                        .stroke(Color.orange, lineWidth: 3)
+                }
+            }
+        }
+    }
+
+    private static func cableLine(for cable: ParkCable) -> [CLLocationCoordinate2D]? {
+        guard let points = cable.points, points.count >= 2 else { return nil }
+        let line = points.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+        return cable.direction?.isLoop == true ? line + [line[0]] : line
+    }
+
+    @MapContentBuilder
+    private var searchPinMarker: some MapContent {
+        if let searchPin {
+            Marker(searchPin.name, systemImage: "magnifyingglass", coordinate: searchPin.coordinate)
+                .tint(.blue)
+        }
     }
 
     /// Countries and towns only: address results without a street.
