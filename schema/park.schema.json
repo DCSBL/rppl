@@ -20,6 +20,11 @@
     "created_at": { "$ref": "#/$defs/date" },
     "updated_at": { "$ref": "#/$defs/date" },
     "based_on_updated_at": { "$ref": "#/$defs/date" },
+    "based_on_revision": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "On a user override: the bundled history.count it was edited from. Catches same-day bundled content changes that based_on_updated_at's day granularity can't."
+    },
     "author": { "type": "string", "minLength": 1 },
     "history": {
       "type": "array",
