@@ -144,7 +144,8 @@ struct ContentView: View {
         } message: {
             Text("This session is already in your logbook.")
         }
-        .onChange(of: parkArrival.pendingArrival) { _, arrival in
+        // `initial: true` covers a cold launch from the tap, where the arrival is set before this view appears.
+        .onChange(of: parkArrival.pendingArrival, initial: true) { _, arrival in
             guard let arrival else { return }
             selectedTab = .parks
             parksNavigation.openParkId = arrival.parkID

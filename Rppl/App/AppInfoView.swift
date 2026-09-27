@@ -10,6 +10,7 @@ struct AppInfoView: View {
     @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
     @State private var isTogglingParkArrival = false
+    @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private var versionFooter: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -50,6 +51,17 @@ struct AppInfoView: View {
                 } footer: {
                     Text(
                         "When on, Rppl watches for you crossing into your favorite and nearby parks on your device (no server, no continuous tracking) and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up."
+                    )
+                }
+
+                Section {
+                    Toggle("Water temperature", isOn: $waterTemperatureEnabled)
+                        .tint(Color.rpplAccent)
+                } header: {
+                    Text("Park water temperature")
+                } footer: {
+                    Text(
+                        "When on, shows an estimated water temperature on parks that have a nearby official source, and includes it in the arrival notification. Estimated from the nearest official government monitoring station (not measured at the park itself), fetched at most once every 4 hours per park. Off by default."
                     )
                 }
 

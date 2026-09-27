@@ -13,6 +13,8 @@ struct ParkDetailView: View {
     @Environment(\.openURL) private var openURL
     @State private var weatherProvider = ParksWeatherProvider.shared
     @State private var weather: ParkWeather?
+    @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
+    @State private var waterTemperature: ParkWaterTemperature?
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var showEditor = false
     @State private var showMail = false
@@ -76,7 +78,10 @@ struct ParkDetailView: View {
             Button(removeTitle, role: .destructive) { ParkStore.shared.removeUserVersion(id: park.id) }
         }
         .task {
-            weather = await weatherProvider.weather(for: park)
+            async let weatherResult = weatherProvider.weather(for: park)
+            async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
+            weather = await weatherResult
+            waterTemperature = await waterTemperatureResult
         }
     }
 
@@ -207,13 +212,29 @@ struct ParkDetailView: View {
                     .foregroundStyle(.red)
             }
 
-            if let weather {
+            if weather != nil || waterTemperature != nil {
                 Divider().overlay(Color.rpplFill)
-                weatherRow(weather)
+                if let weather {
+                    weatherRow(weather)
+                }
+                if let waterTemperature {
+                    waterTemperatureRow(waterTemperature)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
+    }
+
+    private func waterTemperatureRow(_ reading: ParkWaterTemperature) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(String(localized: "Water \(TemperatureFormat.celsius(reading.celsius))"), systemImage: "water.waves")
+                .font(.subheadline)
+                .foregroundStyle(Color.rpplText)
+            Text(String(localized: "Estimate near \(reading.stationName), via \(reading.providerName)"))
+                .font(.caption2)
+                .foregroundStyle(Color.rpplMuted)
+        }
     }
 
     private func weatherRow(_ weather: ParkWeather) -> some View {

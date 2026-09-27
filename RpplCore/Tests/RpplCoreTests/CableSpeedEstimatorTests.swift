@@ -63,15 +63,15 @@ struct CableSpeedEstimatorTests {
 
     @Test func longSetOverridesSessionValueWhenClearlyDifferent() {
         let start = Date(timeIntervalSince1970: 0)
-        // A constant 32 km/h falls in the [32, 33) bin, whose estimate is reported as its
-        // midpoint (32.5) — see CableSpeedEstimator.estimates' bin-center weighting.
+        // A constant 32 km/h is reported as its samples' true mean, not the [32, 33) bin's
+        // 32.5 midpoint — see CableSpeedEstimator.estimates' per-bin sample sums.
         let longSet = locations(speedKmh: 32, duration: 90, start: start)
         let value = CableSpeedEstimator.cableSpeedKmh(
             setWindow: (start: start, end: start.addingTimeInterval(90)),
             sessionSpeedKmh: 24.5,
             locations: longSet
         )
-        #expect(value == 32.5)
+        #expect(value == 32.0)
     }
 
     @Test func longSetKeepsSessionValueWhenCloseEnough() {

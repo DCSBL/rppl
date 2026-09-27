@@ -163,8 +163,11 @@ final class ParkArrivalController: NSObject {
         guard isEnabled, let park = ParkStore.shared.entry(id: parkID)?.park else { return }
         guard ParkArrivalPlanner.shouldNotify(lastNotifiedAt: Self.lastNotifiedDate(parkID: parkID)) else { return }
         let weather = await ParksWeatherProvider.shared.weather(for: park)
+        let waterTemperature = await ParkWaterTemperatureProvider.shared.temperature(for: park)
         do {
-            try await scheduleNotification(for: park, weather: weather, trigger: nil, identifierSuffix: "")
+            try await scheduleNotification(
+                for: park, weather: weather, waterTemperature: waterTemperature, trigger: nil, identifierSuffix: ""
+            )
             Self.setLastNotifiedDate(parkID: parkID, date: Date())
         } catch {
             WakeLog.error(.permissions, "park arrival notification for \(parkID): \(error.localizedDescription)")
@@ -196,9 +199,12 @@ final class ParkArrivalController: NSObject {
             return .failure(String(localized: "Unknown park."))
         }
         let weather = await ParksWeatherProvider.shared.weather(for: park)
+        let waterTemperature = await ParkWaterTemperatureProvider.shared.temperature(for: park)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)
         do {
-            try await scheduleNotification(for: park, weather: weather, trigger: trigger, identifierSuffix: "-test")
+            try await scheduleNotification(
+                for: park, weather: weather, waterTemperature: waterTemperature, trigger: trigger, identifierSuffix: "-test"
+            )
             return .success
         } catch {
             WakeLog.error(.permissions, "park arrival test notification: \(error.localizedDescription)")
@@ -249,12 +255,13 @@ final class ParkArrivalController: NSObject {
     private func scheduleNotification(
         for park: Park,
         weather: ParkWeather?,
+        waterTemperature: ParkWaterTemperature?,
         trigger: UNNotificationTrigger?,
         identifierSuffix: String
     ) async throws {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Welcome to \(park.name)")
-        content.body = Self.notificationBody(park: park, weather: weather)
+        content.body = Self.notificationBody(park: park, weather: weather, waterTemperature: waterTemperature)
         content.sound = .default
         // Relevant right now, not later: breaks through Focus and skips the scheduled summary.
         // The only notification type Rppl sends today, so this doesn't crowd out anything else.
@@ -268,12 +275,16 @@ final class ParkArrivalController: NSObject {
         try await UNUserNotificationCenter.current().add(request)
     }
 
-    private static func notificationBody(park: Park, weather: ParkWeather?) -> String {
+    private static func notificationBody(park: Park, weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> String {
         var parts: [String] = []
         if let weather {
             let temperature = Int(weather.temperatureCelsius.rounded())
             let wind = Int(weather.windKmh.rounded())
             parts.append(String(localized: "\(temperature)°C, wind \(wind) km/h"))
+        }
+        if let waterTemperature {
+            let temperature = Int(waterTemperature.celsius.rounded())
+            parts.append(String(localized: "water ~\(temperature)°C"))
         }
         parts.append(openingHoursText(for: park))
         parts.append(String(localized: "Read more about this park."))
@@ -336,22 +347,30 @@ extension ParkArrivalController: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 
-    /// Crashed on a cold launch from a notification tap: `await MainActor.run { ... }` here made
-    /// UIKit's async-delegate completion wait on our MainActor work, which reentered UIKit's own
-    /// state-restoration CATransaction-commit sync and hit an internal assertion
-    /// (`_performBlockAfterCATransactionCommitSynchronizes:` in the crash log). Returning
-    /// immediately and doing the state update in a detached `Task` avoids that reentrancy.
+    /// UIKit requires this completion handler to be called on the main thread and asserts otherwise
+    /// ("Call must be made on main thread" in `_performBlockAfterCATransactionCommitSynchronizes:`).
+    /// The `async` variant can't guarantee that: as a `nonisolated` witness, Swift's Objective-C
+    /// bridging thunk runs the body — and then calls UIKit's completion — on a background executor,
+    /// which crashed every notification tap. The completion-handler variant makes the hop explicit.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        guard let parkID = response.notification.request.content.userInfo["parkID"] as? String else { return }
-        Task { @MainActor in
-            let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
-            if isFirstTime {
-                UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let parkID = response.notification.request.content.userInfo["parkID"] as? String
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                if let parkID { self.handleNotificationTap(parkID: parkID) }
             }
-            pendingArrival = PendingParkArrival(parkID: parkID, isFirstTime: isFirstTime)
+            completionHandler()
         }
+    }
+
+    private func handleNotificationTap(parkID: String) {
+        let isFirstTime = !UserDefaults.standard.bool(forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        if isFirstTime {
+            UserDefaults.standard.set(true, forKey: AppSettingsKey.didShowParkArrivalExplainer)
+        }
+        pendingArrival = PendingParkArrival(parkID: parkID, isFirstTime: isFirstTime)
     }
 }

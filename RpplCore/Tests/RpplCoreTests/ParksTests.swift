@@ -531,6 +531,29 @@ struct ParksTests {
         #expect(abs(centroid.lat - (52.0 + 52.0 + 54.0) / 3) < 1e-9)
         #expect(abs(centroid.lon - (4.0 + 5.0 + 4.0) / 3) < 1e-9)
     }
+
+    @Test func bundledProject7HasWaterTemperatureSource() throws {
+        let park = try project7()
+        let source = try #require(park.waterTemperature)
+        #expect(source.provider == "rws_nl")
+        #expect(source.stationId == "krimpenaandeijssel.hollandscheijssel")
+    }
+
+    @Test func waterTemperatureSourceRoundTripsThroughYAML() throws {
+        var park = Park(id: "x", name: "X", location: ParkCoordinate(lat: 52, lon: 4))
+        park.waterTemperature = ParkWaterTemperatureSource(provider: "rws_nl", stationId: "hoekvanholland")
+        let yaml = try ParkCatalog.encode(park)
+        #expect(yaml.contains("station_id: hoekvanholland"))
+        let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(decoded.waterTemperature == park.waterTemperature)
+    }
+
+    @Test func parkWithoutWaterTemperatureSourceDecodesToNil() throws {
+        let park = Park(id: "x", name: "X", location: ParkCoordinate(lat: 52, lon: 4))
+        let yaml = try ParkCatalog.encode(park)
+        let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(decoded.waterTemperature == nil)
+    }
 }
 
 private extension Array where Element == ParkCablePoint {
