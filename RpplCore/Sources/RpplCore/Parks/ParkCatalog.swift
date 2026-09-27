@@ -39,7 +39,11 @@ public enum ParkCatalog {
         var byId: [String: Park] = [:]
         for park in loadBundled() { byId[park.id] = park }
         if let userRoot {
-            for park in loadDirectory(userRoot) { byId[park.id] = park }
+            for park in loadDirectory(userRoot) {
+                var park = park
+                inheritWaterTemperatureIfMissing(&park, bundled: byId[park.id])
+                byId[park.id] = park
+            }
         }
         return byId.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
@@ -56,7 +60,9 @@ public enum ParkCatalog {
                     entries[park.id] = ParkEntry(park: park, origin: .custom)
                     continue
                 }
+                var park = park
                 let newer = (base.updatedAt ?? "") > (park.basedOnUpdatedAt ?? "")
+                inheritWaterTemperatureIfMissing(&park, bundled: base)
                 entries[park.id] = ParkEntry(park: park, origin: .edited, bundledPark: base, hasNewerBundled: newer)
             }
         }
@@ -122,6 +128,14 @@ public enum ParkCatalog {
             n += 1
         }
         return candidate
+    }
+
+    /// A user override written before `water_temperature` existed on its park (or before the
+    /// bundled seed added a source) shouldn't permanently hide a source the bundled data has —
+    /// unlike the fields a park edit actually touches (cables, hours, …), this one has no editor
+    /// UI of its own, so there's nothing for the override to be intentionally overriding.
+    private static func inheritWaterTemperatureIfMissing(_ park: inout Park, bundled: Park?) {
+        if park.waterTemperature == nil { park.waterTemperature = bundled?.waterTemperature }
     }
 
     private static func removeUserFiles(id: String, in directory: URL) throws {
