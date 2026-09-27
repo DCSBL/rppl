@@ -85,16 +85,25 @@ struct ParksMapView: View {
     private var parkMarkers: some MapContent {
         ForEach(parks) { park in
             let coordinate = CLLocationCoordinate2D(latitude: park.location.lat, longitude: park.location.lon)
+            let color = Self.pinColor(for: park)
             if favorites.contains(park.id) {
                 Marker(park.name, systemImage: "star.fill", coordinate: coordinate)
-                    .tint(.yellow)
+                    .tint(color)
                     .tag(park.id)
             } else {
                 Marker(park.name, coordinate: coordinate)
-                    .tint(.red)
+                    .tint(color)
                     .tag(park.id)
             }
         }
+    }
+
+    /// Open (green) / opens tomorrow (yellow) / closed (red) / no opening-hours data (grey) — same
+    /// palette as the detail badge, so the map and the card agree. A favorite keeps its star glyph
+    /// but is colored the same way, rather than always yellow, so status doesn't disappear on tap.
+    private static func pinColor(for park: Park) -> Color {
+        guard park.opening != nil else { return ParkOpenStatus.unknown.badgeColor }
+        return park.openStatus().badgeColor
     }
 
     @MapContentBuilder
