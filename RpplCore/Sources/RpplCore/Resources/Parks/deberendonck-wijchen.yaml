@@ -4,10 +4,12 @@
 version: 1
 id: deberendonck-wijchen
 created_at: 2026-09-27
-updated_at: 2026-09-27
+updated_at: 2026-09-28
 history:
   - date: 2026-09-27
     description: initial
+  - date: 2026-09-28
+    description: add water_temperature (nearest reporting RWS station, Grave boven)
 
 author: Rppl
 name: De Berendonck
@@ -16,6 +18,12 @@ timezone: Europe/Amsterdam
 location:
   lat: 51.81116710326
   lon: 5.77213453579262
+
+# Nearest official Rijkswaterstaat surface-water temperature station that actually reports (Grave
+# boven, ~5.9 km away, on the Maas) - found via scripts/find-water-temperature-station.py on
+# 2026-09-28; closer stations (dukenburg, nijmegen.maaswaalkanaal, grave.beneden) haven't reported
+# since the 1980s/90s. Estimate only - not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: grave.boven }
 
 phone: 024-6411430
 email: info@deberendonck.nl

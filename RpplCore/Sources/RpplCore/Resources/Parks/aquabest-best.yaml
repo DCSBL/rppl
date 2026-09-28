@@ -19,12 +19,16 @@
 version: 1
 id: aquabest-best
 created_at: 2026-09-27
-updated_at: 2026-09-27
+updated_at: 2026-09-28
 history:
   - date: 2026-09-27
     description: initial, from cableparkaquabest.nl
   - date: 2026-09-27
     description: add water_temperature (nearest still-reporting RWS station)
+  - date: 2026-09-28
+    description: >-
+      water_temperature: poeldonk.dungensebrug had stopped reporting (stale since 2026-08-11) -
+      switch to lith.boven, the nearest still-reporting station
 
 author: Rppl
 name: Cablepark Aquabest
@@ -36,10 +40,11 @@ location:
   lat: 51.500230
   lon: 5.438156
 
-# Nearest official RWS surface-water temperature station still reporting (~21 km away, on the
-# Zuid-Willemsvaart). Estimate only - not measured at the park itself, and this station reports
-# infrequently (last reading 2026-08-11 as of this writing).
-water_temperature: { provider: rws_nl, station_id: poeldonk.dungensebrug }
+# Nearest official RWS surface-water temperature station still reporting (~34.5 km away, Lith
+# boven on the Maas). Re-checked 2026-09-28 via scripts/find-water-temperature-station.py:
+# poeldonk.dungensebrug (~21 km) had stopped reporting (stale since 2026-08-11); all closer
+# candidates out to ~34 km were stale too. Estimate only - not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: lith.boven }
 
 phone: +31 (0)499 392 121
 email: info@cableparkaquabest.nl
