@@ -48,14 +48,7 @@ struct WatchDebugPage: View {
 
                 Divider()
 
-                Text("On stop")
-                    .font(.headline)
-                Button(session.debugDiscardOnStop ? "Discard on stop: ON" : "Discard on stop: OFF") {
-                    session.debugDiscardOnStop.toggle()
-                }
-                .buttonStyle(.bordered)
-                .tint(session.debugDiscardOnStop ? .red : .gray)
-                Text("No HealthKit save, no on-disk package, no phone transfer.")
+                Text("Stop from the Controls tab now offers \"Stop and discard data\".")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

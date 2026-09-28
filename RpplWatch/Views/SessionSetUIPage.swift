@@ -3,7 +3,8 @@ import RpplCore
 
 /// Product session UI: Riding and Inactive share one fixed status block (`statusBlock`) — only
 /// color/icon/label and a couple of source values differ. Riding shows it alone, not scrollable.
-/// Inactive pins it as a sticky header above a scroll-snap session summary.
+/// Inactive pages vertically (`.verticalPage`, same pattern as `IdleSessionView`) between the
+/// status block and a session summary page.
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -36,7 +37,7 @@ struct SessionSetUIPage: View {
                     .monospacedDigit()
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.yellow)
 
                 Text("Timers paused")
                     .font(.caption2)
@@ -76,7 +77,7 @@ struct SessionSetUIPage: View {
         }
     }
 
-    // MARK: - Riding (no scroll — fitted for AWU) / Inactive (sticky header + scroll-snap summary)
+    // MARK: - Riding (no scroll — fitted for AWU) / Inactive (vertical pages: status, then summary)
 
     private var ridingView: some View {
         statusBlock(isRiding: true)
@@ -84,22 +85,13 @@ struct SessionSetUIPage: View {
     }
 
     private var inactiveView: some View {
-        ScrollView {
-            // Only this block registers as a scroll-snap target (`.scrollTargetLayout()`).
-            // First use of view-aligned scroll-snap in RpplWatch — verify feel on-device and
-            // retune if the snap threshold feels off.
-            LazyVStack {
-                sessionSummarySnapBlock
-            }
-            .scrollTargetLayout()
-        }
-        .scrollTargetBehavior(.viewAligned)
-        .safeAreaInset(edge: .top) {
+        // Same vertical-page pattern as `IdleSessionView` — proven on-device, unlike the earlier
+        // `.scrollTargetBehavior(.viewAligned)` attempt, which left the summary unreachable.
+        TabView {
             statusBlock(isRiding: false)
-                // Opaque backing — without it, content scrolling up behind this pinned header
-                // shows through instead of being hidden by it.
-                .background(.black)
+            sessionSummaryPage
         }
+        .tabViewStyle(.verticalPage)
     }
 
     /// Shared Riding/Inactive block: wall clock, status line, hero segment/total time, then
@@ -110,19 +102,15 @@ struct SessionSetUIPage: View {
         let lapCount = session.isSetOngoing ? session.currentSetLapCount : session.lastSetLapCount
 
         return VStack(alignment: .leading, spacing: 8) {
-            Text(Date(), style: .time)
-                .font(.caption2.weight(.semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-
+            // No wall-clock row — watchOS already shows the real time natively.
             statusLine(
                 primary: isRiding ? "Riding" : "Inactive",
                 color: isRiding ? .blue : .gray,
-                icon: isRiding ? "play.fill" : "pause.circle.fill"
+                icon: isRiding ? "play.circle.fill" : "pause.circle.fill"
             )
 
             heroTimeRow(isRiding: isRiding)
+                .frame(maxWidth: .infinity, alignment: .center)
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 metricTile(
@@ -140,6 +128,16 @@ struct SessionSetUIPage: View {
                     label: "LAPS",
                     metric: .laps
                 )
+            }
+
+            if !isRiding {
+                // Riding shows your own actual speed; inactive shows the live GPS reading
+                // (a stand-in for the cable's speed while you wait at the dock).
+                Text("Cable speed — live GPS reading")
+                    .font(.system(size: 8))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
 
             if session.waterTemperatureAvailable {
@@ -178,36 +176,24 @@ struct SessionSetUIPage: View {
 
     private func heroTimeRow(isRiding: Bool) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            HStack(spacing: 4) {
-                Text(
-                    SessionFormatters.segmentDuration(
-                        isRiding ? session.currentSetDuration : session.currentInactiveDuration
-                    )
+            Text(
+                SessionFormatters.segmentDuration(
+                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
                 )
-                .font(.system(.title, design: .rounded).bold())
-                .monospacedDigit()
-                .foregroundStyle(isRiding ? .blue : .gray)
-
-                if isRiding {
-                    // `.variableColor` no-ops if "water.waves" doesn't declare that capability —
-                    // verify on-device it actually animates; drop the modifier if it doesn't.
-                    Image(systemName: "water.waves")
-                        .font(.caption)
-                        .foregroundStyle(.blue)
-                        .symbolEffect(.variableColor.iterative, options: .repeating)
-                        .accessibilityHidden(true)
-                }
-            }
+            )
+            .foregroundStyle(isRiding ? .blue : .gray)
 
             Text("/")
-                .font(.title3)
+                .font(.title2)
                 .foregroundStyle(.secondary)
 
+            // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
+            // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
             Text(SessionFormatters.elapsed(session.elapsed))
-                .font(.system(.title, design: .rounded).bold())
-                .monospacedDigit()
-                .foregroundStyle(.primary)
+                .foregroundStyle(.yellow)
         }
+        .font(.system(.largeTitle, design: .rounded).bold())
+        .monospacedDigit()
         .minimumScaleFactor(0.5)
         .lineLimit(1)
         .alwaysOnSupportingMetric(isLuminanceReduced)
@@ -230,7 +216,7 @@ struct SessionSetUIPage: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Session summary (Inactive only; scroll-snaps in below the sticky status block)
+    // MARK: - Session summary (Inactive only; second vertical page)
 
     private var totalRidingDuration: TimeInterval {
         session.cumulativeRidingDuration + (session.lastConfidentCode == DetectionCodes.riding ? session.currentSetDuration : 0)
@@ -241,7 +227,15 @@ struct SessionSetUIPage: View {
             + (session.lastConfidentCode == DetectionCodes.inactive ? session.currentInactiveDuration : 0)
     }
 
-    private var sessionSummarySnapBlock: some View {
+    private var sessionSummaryPage: some View {
+        ScrollView {
+            sessionSummaryContent
+                .padding(.horizontal, 6)
+                .padding(.top, 14)
+        }
+    }
+
+    private var sessionSummaryContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             WatchMetricCaption(label: "Session summary", metric: .sets)
                 .font(.headline.weight(.semibold))
@@ -288,9 +282,6 @@ struct SessionSetUIPage: View {
             )
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .padding(.horizontal, 6)
-        .padding(.top, 14)
-        .containerRelativeFrame(.vertical)
     }
 
     @ViewBuilder
@@ -298,10 +289,10 @@ struct SessionSetUIPage: View {
         VStack(spacing: 2) {
             HStack(spacing: 4) {
                 Text(primary)
-                    .font(.headline.bold())
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(color)
                 Image(systemName: icon)
-                    .font(.headline)
+                    .font(.subheadline)
                     .foregroundStyle(color)
                     .accessibilityHidden(true)
             }

@@ -58,6 +58,12 @@ struct SessionControlsPage: View {
                 WakeLog.debug(.ui, "confirm Stop session")
                 Task { await session.stopSession() }
             }
+            if AppReleaseChannel.allowsDebugTools {
+                Button("Stop and discard data", role: .destructive) {
+                    WakeLog.debug(.ui, "debug: confirm Stop and discard data")
+                    Task { await session.discardSession() }
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Stops recording and queues transfer to iPhone.")
@@ -121,11 +127,6 @@ struct SessionControlsPage: View {
     }
 
     private func presentStopFlow() {
-        if session.debugDiscardOnStop {
-            WakeLog.debug(.ui, "debug discard-on-stop — skip confirmation, discarding")
-            Task { await session.discardSession() }
-            return
-        }
         let duration = session.computeElapsed(at: Date())
         if TinySessionPolicy.shouldOfferDiscard(duration: duration, setCount: session.setCount) {
             WakeLog.debug(.ui, "tiny session — offer discard duration=\(Int(duration))s sets=\(session.setCount)")
