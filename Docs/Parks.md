@@ -6,6 +6,7 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 
 - Park data is collected **by hand** by the developer or community from the park's own site or by visiting. Do not import or bulk-copy data from other cable-park apps or directories.
 - When an AI agent does this collection, follow the [`park-data-collection`](../.claude/skills/park-data-collection/SKILL.md) skill: official domain only (never aggregators or other wakeboard apps), never guess a vague/uncertain field (omit instead), and record the source URL(s) + fetch date in the file so a reviewer can verify before merging.
+- Free-text `description` fields (park, cable, `opening.note`) follow [Docs/ParkDescriptions.md](ParkDescriptions.md): no em-dash, direct language, no hype words.
 - Bundled parks live in `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`.
 - User files in `<App Group>/Parks/*.yaml` (fallback `Documents/Parks/`) override bundled parks with the same `id`. Invalid files are skipped and logged.
 - YAML stays the source of truth. The in-app editor writes the same format.
