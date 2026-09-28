@@ -5,12 +5,14 @@
 version: 1
 id: dearne-arnemuiden
 created_at: 2026-09-27
-updated_at: 2026-09-27
+updated_at: 2026-09-28
 history:
   - date: 2026-09-27
     description: initial
   - date: 2026-09-27
     description: add water_temperature (Arnemuiden Oranjeplaat, nearest reporting RWS station)
+  - date: 2026-09-28
+    description: rewrite cable description per Docs/ParkDescriptions.md tone of voice
 
 author: Rppl
 name: Watersportverhuurbedrijf De Arne
@@ -40,7 +42,7 @@ cables:
     # cable, not a full-size loop. No source map/satellite view to trace points from.
     direction: 2d
     description: >-
-      Two-mast cable - you're the only rider on the water for your session, no queue and no
+      Two-mast cable. You're the only rider on the water for your session, no queue and no
       swimming back after a fall.
 
 opening:

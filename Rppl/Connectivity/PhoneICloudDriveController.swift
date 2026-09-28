@@ -25,6 +25,9 @@ final class PhoneICloudDriveController: NSObject {
     private(set) var isApplyingSyncChange = false
     /// Blocks auto-presenting import sheet during manual JSON import / root churn.
     private(set) var suppressImportOffer = false
+    /// True right after the user turns iCloud Drive sync on — the only moment the
+    /// import picker should auto-present. Consumed once observed.
+    private(set) var justEnabledSync = false
     /// Logbook shows only these session ids while Drive sync is on (Ask-before-import).
     private(set) var acceptedSessionIDs: Set<String> = []
     /// Hidden on this phone while the package may remain in iCloud Drive.
@@ -114,6 +117,7 @@ final class PhoneICloudDriveController: NSObject {
 
             pendingImportSummaries = []
             shouldOfferImport = false
+            justEnabledSync = false
             await stopMetadataQuery()
             await migrateLiveRoot(
                 to: AppConstants.localPhoneSessionsRoot,
@@ -127,6 +131,7 @@ final class PhoneICloudDriveController: NSObject {
         } else {
             isSyncEnabled = true
             defaults.set(true, forKey: AppSettingsKey.iCloudDriveSyncEnabled)
+            justEnabledSync = true
 
             await refreshAvailability()
             let preferred = preferredSessionsRoot()
@@ -145,6 +150,11 @@ final class PhoneICloudDriveController: NSObject {
             await uploadLocalOnlyPackagesIfNeeded(reason: "enable")
             await restartMetadataQueryIfNeeded()
         }
+    }
+
+    /// Consumed by the auto-present `onChange` once the offer has been shown (or skipped).
+    func consumeJustEnabledSync() {
+        justEnabledSync = false
     }
 
     func beginImportOfferSuppression() {

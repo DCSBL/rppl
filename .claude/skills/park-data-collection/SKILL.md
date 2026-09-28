@@ -32,7 +32,10 @@ non-negotiable:
    `name`, `address`, `location` (dock coordinate), `phone`, `email`, `website`, `cables` (name/direction/
    description; only add `points` if the site's own map/satellite view is clear enough to trace —
    otherwise leave `points` out), `opening` (`rules`/`slots`), `prices`, `links`, `facilities`,
-   `description`. Leave out anything not directly confirmed by the fetched pages.
+   `description`. Leave out anything not directly confirmed by the fetched pages. Write any free-text
+   `description` (park, cable, `opening.note`) per
+   [Docs/ParkDescriptions.md](../../../Docs/ParkDescriptions.md): no em-dash/hyphen-as-dash, direct
+   language, no hype words.
 4. **Do not fill `water_temperature`** unless you have confirmed an appropriate official station for
    that park's water body — this is a separate, deliberate lookup, not something to infer from location.
    Use `scripts/find-water-temperature-station.py <lat> <lon>` (the park's `location`) to query the

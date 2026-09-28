@@ -150,17 +150,21 @@ struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
     }
 }
 
-/// MOW-HIC ("Hydrologisch Informatiecentrum") KiWIS web service — Flemish government open data
-/// for Belgium's navigable waterways (canals, tidal rivers), the water bodies Belgian cable parks
-/// sit on. Freely accessible without a token for occasional queries (Vlaamse open data; see
-/// https://hicws.vlaanderen.be and https://waterinfo.vlaanderen.be). Looks up the latest surface
+/// KiWIS (Kisters) web service client shared by Belgium's two open-data water agencies, which
+/// expose the identical REST API on different hosts/databases: MOW-HIC ("Hydrologisch
+/// Informatiecentrum", navigable waterways — canals, tidal rivers) at hicws.vlaanderen.be, and
+/// VMM (Vlaamse Milieumaatschappij, non-navigable waterways — smaller rivers/canals/watergangs)
+/// at download.waterinfo.be. Both are free Flemish government open data, no token needed for
+/// occasional queries (see https://waterinfo.vlaanderen.be). Looks up the latest surface
 /// water-temperature reading for a station by its opaque `ts_id` (a KiWIS time-series id, not a
-/// station code — HIC stations can report several water-temperature series each).
-struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
-    private static let endpoint = URL(string: "https://hicws.vlaanderen.be/KiWIS/KiWIS")!
+/// station code — a station can report several water-temperature series each).
+struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
+    let endpoint: URL
+    let logPrefix: String
+    let providerName: String
 
     func fetch(_ source: ParkWaterTemperatureSource) async -> ParkWaterTemperature? {
-        var components = URLComponents(url: Self.endpoint, resolvingAgainstBaseURL: false)!
+        var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "service", value: "kisters"),
             URLQueryItem(name: "type", value: "queryServices"),
@@ -172,35 +176,35 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
             URLQueryItem(name: "ts_id", value: source.stationId),
         ]
         guard let url = components.url else {
-            WakeLog.error(.water, "HIC: failed to build request URL for ts_id \(source.stationId)")
+            WakeLog.error(.water, "\(logPrefix): failed to build request URL for ts_id \(source.stationId)")
             return nil
         }
 
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
             guard let http = response as? HTTPURLResponse else {
-                WakeLog.warning(.water, "HIC: response for ts_id \(source.stationId) was not HTTP")
+                WakeLog.warning(.water, "\(logPrefix): response for ts_id \(source.stationId) was not HTTP")
                 return nil
             }
             guard (200...299).contains(http.statusCode) else {
                 let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
                 WakeLog.error(
                     .water,
-                    "HIC: ts_id \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
+                    "\(logPrefix): ts_id \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
                 )
                 return nil
             }
-            guard let reading = Self.parse(data) else {
+            guard let reading = parse(data) else {
                 let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
                 WakeLog.warning(
                     .water,
-                    "HIC: ts_id \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
+                    "\(logPrefix): ts_id \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
                 )
                 return nil
             }
             return reading
         } catch {
-            let message = "HIC: request for ts_id \(source.stationId) failed: \(describeWaterTemperatureError(error))"
+            let message = "\(logPrefix): request for ts_id \(source.stationId) failed: \(describeWaterTemperatureError(error))"
             if (error as? URLError)?.code == .cancelled {
                 WakeLog.warning(.water, message)
             } else {
@@ -210,18 +214,18 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
         }
     }
 
-    private static func parse(_ data: Data) -> ParkWaterTemperature? {
+    private func parse(_ data: Data) -> ParkWaterTemperature? {
         guard
             let decoded = try? JSONDecoder().decode([KiWISTimeseries].self, from: data),
             let series = decoded.first,
             let latest = series.data.max(by: { $0.timestamp < $1.timestamp }),
-            let observedAt = timestampFormatter.date(from: latest.timestamp)
+            let observedAt = Self.timestampFormatter.date(from: latest.timestamp)
         else { return nil }
         return ParkWaterTemperature(
             celsius: latest.value,
             observedAt: observedAt,
             stationName: series.stationName ?? series.tsId,
-            providerName: "Vlaamse Waterweg"
+            providerName: providerName
         )
     }
 
@@ -256,8 +260,8 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
     }
 }
 
-/// Estimated ambient water temperature per park, opt-in and provider-generic (today `"rws_nl"`
-/// and `"hic_be"` exist; a future country adds another entry to `fetchers`, not a new
+/// Estimated ambient water temperature per park, opt-in and provider-generic (today `"rws_nl"`,
+/// `"hic_be"` and `"vmm_be"` exist; a future country adds another entry to `fetchers`, not a new
 /// abstraction).
 ///
 /// Shared (`.shared`) rather than per-view so the cache and failure backoff apply across
@@ -269,7 +273,16 @@ final class ParkWaterTemperatureProvider {
 
     private static let fetchers: [String: any ParkWaterTemperatureFetching] = [
         "rws_nl": RWSWaterTemperatureClient(),
-        "hic_be": HICWaterTemperatureClient(),
+        "hic_be": KiWISWaterTemperatureClient(
+            endpoint: URL(string: "https://hicws.vlaanderen.be/KiWIS/KiWIS")!,
+            logPrefix: "HIC",
+            providerName: "Vlaamse Waterweg"
+        ),
+        "vmm_be": KiWISWaterTemperatureClient(
+            endpoint: URL(string: "https://download.waterinfo.be/tsmdownload/KiWIS/KiWIS")!,
+            logPrefix: "VMM",
+            providerName: "VMM"
+        ),
     ]
 
     private var cache: [String: (date: Date, reading: ParkWaterTemperature)] = [:]

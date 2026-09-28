@@ -6,6 +6,7 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 
 - Park data is collected **by hand** by the developer or community from the park's own site or by visiting. Do not import or bulk-copy data from other cable-park apps or directories.
 - When an AI agent does this collection, follow the [`park-data-collection`](../.claude/skills/park-data-collection/SKILL.md) skill: official domain only (never aggregators or other wakeboard apps), never guess a vague/uncertain field (omit instead), and record the source URL(s) + fetch date in the file so a reviewer can verify before merging.
+- Free-text `description` fields (park, cable, `opening.note`) follow [Docs/ParkDescriptions.md](ParkDescriptions.md): no em-dash, direct language, no hype words.
 - Bundled parks live in `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`.
 - User files in `<App Group>/Parks/*.yaml` (fallback `Documents/Parks/`) override bundled parks with the same `id`. Invalid files are skipped and logged.
 - YAML stays the source of truth. The in-app editor writes the same format.
@@ -64,6 +65,7 @@ prices:  [{ name: Day pass, price: "€25", note: optional }]
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
+wakesys: true                     # optional, default false — this park's booking system is Wakesys (shared by several parks)
 
 # Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
@@ -96,10 +98,15 @@ Rules and slots share optional selectors, all of which must match a date:
 ### Water temperature (opt-in)
 
 - Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row, and the arrival notification includes it.
-- `water_temperature.provider` is an opaque provider id: `rws_nl` (Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data, `station_id` is a location code) or `hic_be` (MOW-HIC KiWIS service — Flemish government open data for Belgium's navigable waterways, `station_id` is a KiWIS `ts_id`). A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
+- `water_temperature.provider` is an opaque provider id: `rws_nl` (Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data, `station_id` is a location code), `hic_be` (MOW-HIC KiWIS service — Flemish government open data for Belgium's navigable waterways), or `vmm_be` (VMM KiWIS service — Flemish government open data for Belgium's non-navigable waterways). Both Belgian providers share the same KiWIS REST API shape, just different hosts/databases; `station_id` for either is a KiWIS `ts_id`, not a station code. A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
 - Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
 - `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`.
 - A reading older than 48 hours is treated as unavailable (`ParkWaterTemperatureProvider.maxReadingAge`) — a station that stopped reporting doesn't show a stale number. Unlike park weather's fail-open convention, the park screen shows an explicit "Not available" row whenever the setting is on and no fresh reading came back, whether the park has no `water_temperature` source at all, the fetch failed/timed out, or the latest reading is too old.
+
+### Wakesys badge
+
+- `wakesys: true` marks a park whose booking system is Wakesys (several parks share the same booking platform, under their own accounts/subdomain). Optional, defaults to `false`/absent.
+- Shown today only as a "Wakesys" chip on the park card and on the detail page's booking button — not used to filter or group parks yet.
 
 ### Cable length
 

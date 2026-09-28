@@ -10,12 +10,17 @@
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
-updated_at: 2026-09-27
+updated_at: 2026-09-28
 history:
   - date: 2026-09-27
     description: initial (3 cables, Belgium)
   - date: 2026-09-27
     description: mark opening hours unknown (reservation-only, no published weekly pattern)
+  - date: 2026-09-28
+    description: >-
+        rewrite cable and park descriptions per Docs/ParkDescriptions.md tone of voice.
+        Add water_temperature (nearest reporting VMM station, ~2.7 km away),
+        set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
 
 author: Rppl
 name: Lakeside Paradise
@@ -28,6 +33,13 @@ location:
   lat: 51.3377928
   lon: 3.2731542
 
+# Nearest official VMM surface-water temperature station that's still reporting: "Knokke/
+# Heistlaan/Isabellavaart" on the Isabellavaart canal, ~2.7 km from the dock (verified against
+# the live API on 2026-09-28: 15-min readings up to the same day). Duinenwater itself is a
+# private former sand-quarry lake with no station of its own - estimate only, not measured at
+# the park.
+water_temperature: { provider: vmm_be, station_id: "01265376042" }
+
 phone: "+32 (0)50 60 60 35"
 email: info@lakesideparadise.be
 website: https://www.lakesideparadise.be/cable-park/cablepark/
@@ -35,6 +47,8 @@ links:
   - { kind: booking, url: "https://www.lakesideparadise.be/cable-park/reserveren/" }
   - { kind: instagram, url: "https://www.instagram.com/lakeside.paradise/" }
   - { kind: facebook, url: "https://www.facebook.com/lakesideparadise" }
+
+wakesys: true
 
 # Three separate cable systems. Source (reserveren page) states Pro Cable is
 # "linksdraaiend" (left-turning) and Rookie Cable "rechtsdraaiend" (right-turning); mapped to
@@ -45,34 +59,20 @@ cables:
     direction: ccw
     description: >-
       15 obstacle/jump combinations. From age 12 (younger needs the cable operators'
-      permission). Booking required (Wakesys), 1h or 2h blocks, reservations start on the
-      hour.
+      permission). Booking required, 1h or 2h blocks, reservations start on the hour.
   - name: Rookie Cable
     direction: cw
     description: >-
       Newest cable at the park; runs at a slower speed than Pro Cable, 6 obstacles. From
       about age 6-7 (must be able to swim to shore independently with their board).
-      Booking required (Wakesys), 1h or 2h blocks, reservations start on the half hour.
+      Booking required, 1h or 2h blocks, reservations start on the half hour.
   - name: Small Cable 2.0
     direction: 2d
     description: >-
-      Staff-operated, gradual/instructor-paced start with one-on-one guidance - the
+      Staff-operated, gradual/instructor-paced start with one-on-one guidance. The
       recommended first introduction before booking the full-size cables. Reservations
       start on the hour.
 
-# Seasonal, reservation-based schedule (Wakesys) rather than fixed weekly hours, so this is
-# left as free text instead of forced into rules/slots. Wristband ("polsbandje") system per
-# reserveren page: every rider needs their own personal Wakesys account (parents/guardians can
-# add family members under theirs); no phone bookings, online payment required at time of
-# booking, free cancellation up to 24h before (refunded to the account's prepaid balance, not
-# to a bank card); a confirmation email is the only proof a booking went through. On your
-# first visit under the current system, arrive 30+ min early to register and buy a €6
-# wristband per person (people who need rental gear register at the rental desk instead). The
-# wristband is then linked to your account: scan it before each session (no more front-desk
-# queue) - it's reusable across visits and even at other Wakesys-based cable parks, but may
-# not be shared/passed to someone else (operators can see a photo of the registered owner when
-# it's scanned). Season/year/winter pass holders get blacklisted from booking after 3 no-shows
-# until Lakeside Paradise unblocks the account.
 opening:
   booking: required
   hours_unknown: true
@@ -110,7 +110,7 @@ facilities:
 
 description: >-
   Waterskiing, wakeboarding and wakeskating cable park on the Duinenwater lake in
-  Knokke-Heist, Belgium - three separate cables (Pro, Rookie, Small 2.0). The park cites a
+  Knokke-Heist, Belgium, with three separate cables (Pro, Rookie, Small 2.0). The park cites a
   720 m cable length among the longest in Europe, five pylons around the lake, up to 8
   riders per round / 25 participants per hour, a 45 kW electric motor on green power, and
   under 50 dB measured at 30 m.
