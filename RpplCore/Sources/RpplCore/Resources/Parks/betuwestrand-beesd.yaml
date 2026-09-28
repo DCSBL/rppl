@@ -1,0 +1,90 @@
+# Sources: https://www.betuwestrand.nl/ (home), https://www.betuwestrand.nl/waterski,
+# https://www.betuwestrand.nl/waterski/waterskien, https://www.betuwestrand.nl/waterski/wakeboarden,
+# https://www.betuwestrand.nl/waterski/funpark, https://www.betuwestrand.nl/waterski/tarieven-waterskibaan,
+# https://www.betuwestrand.nl/contact, https://www.betuwestrand.nl/contact/routebeschrijving
+# (all fetched 2026-09-28).
+version: 1
+id: betuwestrand-beesd
+created_at: 2026-09-28
+updated_at: 2026-09-28
+history:
+  - date: 2026-09-28
+    description: initial
+
+author: Rppl
+name: BetuweStrand
+address: A. Kraalweg 40, 4153 XC Beesd
+timezone: Europe/Amsterdam
+# Google Maps business pin embedded on the official routebeschrijving page - the site itself
+# publishes no separate coordinates for the waterskibaan/dock.
+location: { lat: 51.898413, lon: 5.184057 }
+
+phone: 0345 681503
+email: info@betuwestrand.nl
+website: https://www.betuwestrand.nl
+
+facilities:
+  - Instructie inbegrepen
+  - Wetsuit verhuur
+  - Wakeboard verhuur
+  - Funpark (Kicker en Rail)
+  - Horeca (cafetaria en Beach House)
+  - Strandbad
+
+cables:
+  - name: Waterskibaan
+    # Site describes it as a rectangular course ("rechthoekig traject") over the recreatiemeer,
+    # towed at ca. 30 km/u - a full-size loop, not a 2-point cable. Exact travel direction
+    # (cw/ccw) isn't stated and no source map/satellite view was clear enough to trace points.
+    description: >-
+      Rectangular waterski/wakeboard cable course over the recreatiemeer, towed at roughly
+      30 km/u. Includes a funpark with a kicker and a rail. Beginners welcome; ages 8-14 only
+      with adult supervision.
+
+# Source: betuwestrand.nl/waterski/tarieven-waterskibaan
+prices:
+  - { name: 1 uur, price: "€17,50", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 1 uur, price: "€23,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 2 uur, price: "€23,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 2 uur, price: "€29,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 1 dag, price: "€38,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 1 dag, price: "€51,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 2 dagen, price: "€63,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 2 dagen, price: "€84,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - { name: 1 uur, price: "€20,50", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+  - { name: 1 uur, price: "€27,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - { name: 2 uur, price: "€27,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+  - { name: 2 uur, price: "€35,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - { name: 1 dag, price: "€45,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+  - { name: 1 dag, price: "€58,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - { name: 2 dagen, price: "€75,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+  - { name: 2 dagen, price: "€96,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - { name: 1 week, price: "€130,00", note: "t/m 12 jaar" }
+  - { name: 1 week, price: "€181,00", note: "vanaf 13 jaar" }
+  - { name: 2 weken, price: "€195,00", note: "t/m 12 jaar" }
+  - { name: 2 weken, price: "€270,00", note: "vanaf 13 jaar" }
+  - { name: 3 weken, price: "€294,00", note: "t/m 12 jaar" }
+  - { name: 3 weken, price: "€407,00", note: "vanaf 13 jaar" }
+  - { name: 4 weken, price: "€390,00", note: "t/m 12 jaar" }
+  - { name: 4 weken, price: "€545,00", note: "vanaf 13 jaar" }
+  - { name: Geheel seizoen 2026, price: "€650,00", note: "t/m 12 jaar" }
+  - { name: Geheel seizoen 2026, price: "€810,00", note: "vanaf 13 jaar" }
+  - { name: Wetsuit huur, price: "€6,00", note: "per uur" }
+  - { name: Wetsuit huur, price: "€8,00", note: "per 2 uur" }
+  - { name: Wetsuit huur, price: "€12,00", note: "per dag" }
+  - { name: Wetsuit huur, price: "€18,00", note: "per 2 dagen" }
+  - { name: Wakeboard huur, price: "€10,00", note: "per uur" }
+  - { name: Wakeboard huur, price: "€15,00", note: "per 2 uur" }
+  - { name: Wakeboard huur, price: "€25,00", note: "per dag" }
+  - { name: Wakeboard huur, price: "€37,50", note: "per 2 dagen" }
+
+links:
+  - { kind: booking, url: "https://www.betuwestrand.nl/waterski/reserveren" }
+  - { kind: instagram, url: "https://www.instagram.com/betuwestrand/" }
+  - { kind: facebook, url: "https://www.facebook.com/Betuwestrand/" }
+
+description: >-
+  Waterskibaan en wakeboardbaan onderdeel van BetuweStrand Recreatie, een familiecamping met
+  strandbad en waterpark in de Betuwe. Instructeurs begeleiden beginners; het funpark heeft een
+  kicker en een rail voor gevorderde wakeboarders. Personen van 8 t/m 14 jaar mogen alleen onder
+  toezicht van een volwassene de baan gebruiken. Honden zijn niet toegestaan rondom de baan.
