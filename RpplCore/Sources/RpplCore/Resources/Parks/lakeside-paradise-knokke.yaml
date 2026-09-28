@@ -10,12 +10,14 @@
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
-updated_at: 2026-09-27
+updated_at: 2026-09-28
 history:
   - date: 2026-09-27
     description: initial (3 cables, Belgium)
   - date: 2026-09-27
     description: mark opening hours unknown (reservation-only, no published weekly pattern)
+  - date: 2026-09-28
+    description: add water_temperature (nearest reporting VMM station, ~2.7 km away)
 
 author: Rppl
 name: Lakeside Paradise
@@ -27,6 +29,13 @@ timezone: Europe/Brussels
 location:
   lat: 51.3377928
   lon: 3.2731542
+
+# Nearest official VMM surface-water temperature station that's still reporting: "Knokke/
+# Heistlaan/Isabellavaart" on the Isabellavaart canal, ~2.7 km from the dock (verified against
+# the live API on 2026-09-28: 15-min readings up to the same day). Duinenwater itself is a
+# private former sand-quarry lake with no station of its own — estimate only, not measured at
+# the park.
+water_temperature: { provider: vmm_be, station_id: "01265376042" }
 
 phone: "+32 (0)50 60 60 35"
 email: info@lakesideparadise.be
