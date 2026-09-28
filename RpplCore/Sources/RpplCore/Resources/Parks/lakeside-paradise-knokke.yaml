@@ -1,4 +1,4 @@
-# Sources (official domain only, fetched 2026-09-27):
+# Sources (official domain only, fetched 2026-09-27, re-checked 2026-09-28):
 #   https://www.lakesideparadise.be/cable-park/cablepark/
 #   https://www.lakesideparadise.be/cable-park/pro-cable/
 #   https://www.lakesideparadise.be/cable-park/rookie-cable/
@@ -7,6 +7,10 @@
 #   https://www.lakesideparadise.be/cable-park/tarieven-verhuur/
 #   https://www.lakesideparadise.be/info/openingsuren/
 #   https://www.lakesideparadise.be/info/ligging/
+# Flemish school-holiday dates (2026-09-28, not the park's own site, only used to resolve the
+# park's own "herfstvakantie" / "Vlaamse schoolvakantie" wording into concrete 2026 dates):
+# herfstvakantie 2 t.e.m. 8 november 2026, kerstvakantie 21 december 2026 t.e.m. 3 januari 2027
+# (official Flemish school calendar, cross-checked across multiple calendar sites).
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
@@ -18,6 +22,11 @@ history:
     description: mark opening hours unknown (reservation-only, no published weekly pattern)
   - date: 2026-09-28
     description: set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
+  - date: 2026-09-28
+    description: >-
+      resolve "herfstvakantie" / "Vlaamse schoolvakantie" in the opening note to concrete
+      2026 dates (herfstvakantie 2-8 Nov 2026, kerstvakantie 21 Dec 2026-3 Jan 2027) using the
+      official Flemish school-holiday calendar
 
 author: Rppl
 name: Lakeside Paradise
@@ -80,11 +89,13 @@ opening:
   booking: required
   hours_unknown: true
   note: >-
-    Pro Cable: open daily (by reservation) from 30 March through the autumn school break;
-    in winter, weekends and Flemish school holidays only, 12:00-16:00. Small Cable 2.0: from
-    May, weekends only (by reservation), daily in July and August. Rookie Cable: Wednesdays,
-    Saturdays and Sundays afternoons (by reservation), daily in July and August; same reduced
-    weekend/school-holiday winter schedule as Pro Cable.
+    Pro Cable: open daily (by reservation) from 30 March 2026 through the herfstvakantie
+    (2-8 November 2026); in winter (9 November 2026 - 29 March 2027), weekends and every
+    Flemish school holiday only, 12:00-16:00 - within 2026 that means weekends plus the
+    kerstvakantie (21 December 2026 - 3 January 2027, partly falling in 2027). Small Cable
+    2.0: from May, weekends only (by reservation), daily in July and August. Rookie Cable:
+    Wednesdays, Saturdays and Sundays afternoons (by reservation), daily in July and August;
+    same reduced weekend/school-holiday winter schedule as Pro Cable.
 
 # Source: tarieven-verhuur (September 2026). Non-member session rates and passes; "member"
 # (discounted) rates and private full-cable rentals are noted but not itemized here.
