@@ -455,7 +455,7 @@ private struct ParksOpenDatePicker: View {
             }
         }
         .padding()
-        .fixedSize()
+        .frame(width: 320)
         .presentationCompactAdaptation(.popover)
     }
 }
