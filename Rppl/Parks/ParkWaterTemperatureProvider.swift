@@ -363,8 +363,7 @@ final class ParkWaterTemperatureProvider {
             let staleSuffix = Self.isFresh(hit.reading)
                 ? ""
                 : " " + String(
-                    localized: "Reading is from \(hit.reading.observedAt.formatted(date: .abbreviated, time: .standard)), "
-                        + "older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                    localized: "Reading is from \(hit.reading.observedAt.formatted(date: .abbreviated, time: .standard)), older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
                 )
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: hit.reading,
@@ -408,8 +407,7 @@ final class ParkWaterTemperatureProvider {
             let staleSuffix = Self.isFresh(reading)
                 ? ""
                 : " " + String(
-                    localized: "Reading is from \(reading.observedAt.formatted(date: .abbreviated, time: .standard)), "
-                        + "older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                    localized: "Reading is from \(reading.observedAt.formatted(date: .abbreviated, time: .standard)), older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
                 )
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: reading, statusText: String(localized: "Fetched just now.") + staleSuffix
