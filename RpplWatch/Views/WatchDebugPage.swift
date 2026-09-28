@@ -45,6 +45,19 @@ struct WatchDebugPage: View {
                 let bounds = WKInterfaceDevice.current().screenBounds
                 Text("actual=\(Int(bounds.width))x\(Int(bounds.height))pt")
                     .font(.caption2)
+
+                Divider()
+
+                Text("On stop")
+                    .font(.headline)
+                Button(session.debugDiscardOnStop ? "Discard on stop: ON" : "Discard on stop: OFF") {
+                    session.debugDiscardOnStop.toggle()
+                }
+                .buttonStyle(.bordered)
+                .tint(session.debugDiscardOnStop ? .red : .gray)
+                Text("No HealthKit save, no on-disk package, no phone transfer.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 4)
         }

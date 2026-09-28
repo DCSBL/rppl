@@ -119,6 +119,10 @@ final class WatchSessionController: NSObject {
     var detectionSimulationMode: DetectionSimulationMode = .detected
     /// Debug-only: shrink the app's root view to a smaller watch's point size for layout checks.
     var debugScreenSize: DebugScreenSize = .actual
+    /// Debug-only: Stop discards instead of saving — no HealthKit save, no on-disk package, no
+    /// phone transfer. Lets you start/stop repeatedly while iterating on UI without leaving
+    /// test data behind.
+    var debugDiscardOnStop = false
 
     var liveSetTracker = LiveSetTracker()
     let healthStore = HKHealthStore()
