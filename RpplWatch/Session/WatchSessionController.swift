@@ -106,6 +106,8 @@ final class WatchSessionController: NSObject {
 
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     var detectionSimulationMode: DetectionSimulationMode = .detected
+    /// Debug-only: shrink the app's root view to a smaller watch's point size for layout checks.
+    var debugScreenSize: DebugScreenSize = .actual
 
     var liveSetTracker = LiveSetTracker()
     let healthStore = HKHealthStore()

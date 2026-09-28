@@ -1,7 +1,7 @@
 import Foundation
 
 /// Debug-page set simulation cycle on Watch.
-enum DetectionSimulationMode: String, Sendable {
+enum DetectionSimulationMode: String, CaseIterable, Sendable {
     /// Live `DetectionEngine` output.
     case detected
     /// Force confident `inactive`.
