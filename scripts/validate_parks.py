@@ -4,14 +4,16 @@
 Usage:
     python3 scripts/validate_parks.py [park.yaml ...]
 
-With no arguments, validates every file under parks/*.yaml. Exits non-zero
-(and prints one line per problem) if any file fails.
+With no arguments, validates every file under
+RpplCore/Sources/RpplCore/Resources/Parks/*.yaml. Exits non-zero (and prints
+one line per problem) if any file fails.
 
 Checks, per the CI-validation issue:
   - YAML syntax (YAML lint)
   - JSON-schema validation against schema/park.schema.json
   - Sanity: duplicate `id` across files, lat/lon out of range, a cable with
     fewer than 2 points, obvious placeholder/TODO values
+  - No em dash (—) anywhere in the file, including comments; use a hyphen
 """
 
 from __future__ import annotations
@@ -36,7 +38,7 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "schema" / "park.schema.json"
-PARKS_DIR = REPO_ROOT / "parks"
+PARKS_DIR = REPO_ROOT / "RpplCore" / "Sources" / "RpplCore" / "Resources" / "Parks"
 
 # Obvious placeholder/junk markers a real park submission should never contain.
 PLACEHOLDER_PATTERNS = [
@@ -97,6 +99,15 @@ def check_placeholders(data) -> list[str]:
     return problems
 
 
+def check_no_em_dash(raw: str) -> list[str]:
+    """Em dashes read as AI-generated filler in park copy; use a hyphen instead."""
+    problems = []
+    for line_number, line in enumerate(raw.splitlines(), start=1):
+        if "—" in line:
+            problems.append(f"em dash (—) on line {line_number}: {line.strip()!r}")
+    return problems
+
+
 def check_coordinate_range(lat, lon, path: str) -> list[str]:
     problems = []
     if not isinstance(lat, (int, float)) or not -90 <= lat <= 90:
@@ -138,6 +149,8 @@ def validate_file(path: Path, schema: dict) -> tuple[dict | None, list[str]]:
         raw = path.read_text(encoding="utf-8")
     except OSError as exc:
         return None, [f"could not read file: {exc}"]
+
+    problems += check_no_em_dash(raw)
 
     try:
         data = yaml.safe_load(raw)

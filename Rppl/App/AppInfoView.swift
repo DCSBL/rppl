@@ -74,6 +74,18 @@ struct AppInfoView: View {
 
                 if AppReleaseChannel.allowsDebugTools {
                     Section {
+                        NavigationLink {
+                            DebugLogView()
+                        } label: {
+                            Label("Debug log", systemImage: "list.bullet.rectangle")
+                        }
+                    } header: {
+                        Text("Debug")
+                    } footer: {
+                        Text("Recent warnings and failures logged across the app (sync, transfer, water temperature, …).")
+                    }
+
+                    Section {
                         Button(action: onImportSessionTapped) {
                             if isImporting {
                                 ProgressView()

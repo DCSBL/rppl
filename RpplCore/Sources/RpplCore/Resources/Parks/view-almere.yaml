@@ -1,0 +1,106 @@
+# Sources fetched 2026-09-27 (all from the park's own official domain):
+#   https://www.cableparkviewalmere.nl/               (intro, obstacles, Alta Twin small cable)
+#   https://www.cableparkviewalmere.nl/contact/        (address, phone, email, opening-hours table)
+#   https://www.cableparkviewalmere.nl/tarieven/       (prices)
+#   https://www.cableparkviewalmere.nl/faqs/           (booking policy, parking, changing rooms/showers)
+#   https://www.cableparkviewalmere.nl/wakeboarden/    (Alta Twin clinic cable description)
+# Main-cable direction (ccw) confirmed by the user, not stated on the site. Length/points left out
+# (not confirmed). `location` is the Google Maps business pin for the confirmed official address
+# (Bergsmapad 1, 1324 ZK Almere) - the site itself publishes no coordinates.
+version: 1
+id: view-almere
+created_at: 2026-09-27
+updated_at: 2026-09-28
+history:
+  - date: 2026-09-27
+    description: initial
+  - date: 2026-09-27
+    description: add water_temperature (nearest reporting Rijkswaterstaat station, Pampus oost)
+  - date: 2026-09-28
+    description: >-
+      water_temperature: pampus.oost had stopped reporting (stale since 2026-08-17) - switch to
+      diemen.muidenbrug, the nearest still-reporting station
+
+author: Rppl
+name: Cablepark VIEW Almere
+address: Bergsmapad 1, 1324 ZK Almere
+timezone: Europe/Amsterdam
+location:
+  lat: 52.3581295
+  lon: 5.2152087
+
+# Nearest official Rijkswaterstaat surface-water temperature station that actually reports
+# (Diemen Muiden brug, ~13.9 km away). Re-checked 2026-09-28 via
+# scripts/find-water-temperature-station.py: pampus.oost (~8.7 km, previously used) had stopped
+# reporting (stale since 2026-08-17); all closer Almere/Gooimeer "zwemwater" stations (pampus.oost,
+# surfstrandalmere, almerehaven.zwemstrand, …) are stale too, several since 2010. Estimate only -
+# not measured at the park itself.
+water_temperature: { provider: rws_nl, station_id: diemen.muidenbrug }
+
+phone: 085 - 402 12 28
+email: info@cableparkviewalmere.nl
+website: https://www.cableparkviewalmere.nl
+links:
+  - { kind: booking, url: "https://cablepark-almere.recras.nl/bookprocess/?id=74" }
+  - { kind: instagram, url: "https://www.instagram.com/cableparkviewalmere/" }
+  - { kind: facebook, url: "https://www.facebook.com/cableparkviewalmere" }
+
+cables:
+  - name: Grote baan
+    direction: ccw
+  - name: Alta Twin
+    description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
+    length_m: 200 # site says "zo'n 200 meter" (approximate)
+
+# Source: cableparkviewalmere.nl/contact/ opening-hours table (September 2026). Booking policy
+# and rental/clinic pricing suggest no numbered/fixed blocks - riders just show up within a window.
+opening:
+  booking: optional
+  numbered: false
+  note: >-
+    Booking ahead is recommended, especially on weekends, holidays and sunny days when sessions
+    can fill up.
+  rules:
+    - { label: Pre-season Sundays, dates: [2026-03-15, 2026-03-22, 2026-03-29], open: "13:00", close: "17:00" }
+    - { label: April, months: [4], days: [fri], open: "17:00", close: "19:00" }
+    - { label: April, months: [4], days: [sat, sun], open: "12:00", close: "18:00" }
+    - { label: May, months: [5], days: [thu, fri], open: "16:00", close: "20:00" }
+    - { label: May, months: [5], days: [sat, sun], open: "12:00", close: "18:00" }
+    - { label: June, months: [6], days: [wed, thu, fri], open: "15:00", close: "20:00" }
+    - { label: June, months: [6], days: [sat, sun], open: "12:00", close: "20:00" }
+    - { label: July-August, months: [7, 8], days: [tue, wed, thu, fri, sat, sun], open: "12:00", close: "20:00" }
+    - { label: September, months: [9], days: [wed, thu, fri], open: "16:00", close: "20:00" }
+    - { label: September, months: [9], days: [sat, sun], open: "12:00", close: "18:00" }
+    - { label: Post-season Sundays, dates: [2026-10-04, 2026-10-11], open: "13:00", close: "17:00" }
+
+# Source: cableparkviewalmere.nl/tarieven/ (September 2026).
+prices:
+  - { name: 1 hour, price: "€ 27,50", note: Adults }
+  - { name: 1 hour, price: "€ 22,50", note: "Kids up to 12 years" }
+  - { name: 2 hours, price: "€ 37,50", note: Adults }
+  - { name: 2 hours, price: "€ 30,00", note: "Kids up to 12 years" }
+  - { name: 3 hours, price: "€ 45,00", note: Adults }
+  - { name: 3 hours, price: "€ 37,50", note: "Kids up to 12 years" }
+  - { name: 4 hours, price: "€ 50,00", note: Adults }
+  - { name: 4 hours, price: "€ 42,50", note: "Kids up to 12 years" }
+  - { name: Day pass, price: "€ 55,00", note: Adults }
+  - { name: Day pass, price: "€ 47,50", note: "Kids up to 12 years" }
+  - { name: Wakeboard set, price: "€ 25,00", note: "Board, helmet, life vest and wetsuit" }
+  - { name: Waterski set, price: "€ 17,50", note: "Skis, helmet, life vest and wetsuit" }
+  - { name: "Clinic (1 person)", price: "€ 85,00", note: "On the Alta Twin, 15-20 min effective lesson time" }
+  - { name: "Clinic (2 people)", price: "€ 100,00" }
+  - { name: "Clinic (3 people)", price: "€ 120,00" }
+  - { name: "Clinic (4 people)", price: "€ 130,00" }
+
+facilities:
+  - Rental (skis, boards, wetsuits, helmets, life vests)
+  - Changing rooms
+  - Showers
+  - Parking
+  - Terrace next to the start dock
+
+description: >-
+  Cable wakeboard and waterski park on Almere's Weerwater lake. The main cable (ccw) runs past
+  13 Shape obstacles; a small clinic cable, the Alta Twin (~200 m, adjustable speed), is used for
+  beginner lessons. Floating docks ring the lake so a fallen rider can reach a boat-taxi pickup
+  without a long swim.

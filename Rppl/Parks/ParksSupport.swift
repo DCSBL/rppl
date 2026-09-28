@@ -430,6 +430,51 @@ extension ParkOpenStatus {
     }
 }
 
+/// Park-list open/closed chip: no date filter shows today's status against the current time
+/// ("open until 20:00" / "opens 15:00–20:00"); an active date filter shows that date's own
+/// schedule instead, regardless of what time it is right now — a park closed *right now* still
+/// reads green when the filtered date is open. "Opens tomorrow" and "Closed" never gain a time,
+/// they're plain status, not a window.
+enum ParkStatusBadge {
+    static func text(for park: Park, filterDate: Date?, now: Date = Date()) -> (text: String, color: Color)? {
+        guard park.opening != nil else { return nil }
+
+        if let filterDate {
+            let day = ParkSchedule.day(for: park.opening, on: filterDate, timeZone: park.resolvedTimeZone)
+            guard day.isScheduleKnown else {
+                return (String(localized: "Opening hours unknown"), .gray)
+            }
+            let starts = day.windows.map(\.startMinute)
+            let ends = day.windows.map(\.endMinute)
+            guard let start = starts.min(), let end = ends.max() else {
+                return (String(localized: "Closed"), .red)
+            }
+            let dateText = filterDate.formatted(.dateTime.month(.abbreviated).day())
+            let from = ParkFormatting.time(start)
+            let to = ParkFormatting.time(end)
+            return (String(localized: "Open \(dateText) · \(from)–\(to)"), .green)
+        }
+
+        let detail = park.openStatusDetail(at: now)
+        switch detail.status {
+        case .openToday:
+            guard let window = detail.window else { return (String(localized: "Open today"), .green) }
+            let to = ParkFormatting.time(window.endMinute)
+            if detail.windowHasStarted == true {
+                return (String(localized: "Open until \(to)"), .green)
+            }
+            let from = ParkFormatting.time(window.startMinute)
+            return (String(localized: "Opens \(from)–\(to)"), .green)
+        case .opensTomorrow:
+            return (String(localized: "Opens tomorrow"), .yellow)
+        case .closed:
+            return (String(localized: "Closed"), .red)
+        case .unknown:
+            return (String(localized: "Opening hours unknown"), .gray)
+        }
+    }
+}
+
 enum ParkOriginBadge {
     static func text(for entry: ParkEntry?) -> String? {
         guard let entry else { return nil }

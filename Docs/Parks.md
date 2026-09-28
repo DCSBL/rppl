@@ -14,7 +14,7 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 
 - Parks tab `+` creates a park; park detail `…` menu → Edit changes one. Cables are traced by tapping a satellite or standard map. `AppSettingsKey.parkEditorEnabled` (default on) hides the editor entry points.
 - Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
-- An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from. When the app later ships a newer `updated_at`, the park shows **Update available** and asks: keep my version (bumps `based_on_updated_at`) or use the app version (deletes the override).
+- An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
 - `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer).
 - Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl with the YAML attached (falls back to the share sheet when Mail is not set up).
 
@@ -27,6 +27,7 @@ version: 1
 id: project7-rotterdam            # stable slug, unique
 author: Rppl                      # optional credit
 based_on_updated_at: 2026-09-24   # optional, set on user overrides of bundled parks
+based_on_revision: 1              # optional, set alongside based_on_updated_at (bundled history.count)
 created_at: 2026-09-24
 updated_at: 2026-09-24
 history:
@@ -97,7 +98,8 @@ Rules and slots share optional selectors, all of which must match a date:
 - Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row, and the arrival notification includes it.
 - `water_temperature.provider` is an opaque provider id: `rws_nl` (Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data, `station_id` is a location code) or `hic_be` (MOW-HIC KiWIS service — Flemish government open data for Belgium's navigable waterways, `station_id` is a KiWIS `ts_id`). A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
 - Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
-- `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`. Any failure or timeout just hides the row/segment — same fail-open convention as weather.
+- `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`.
+- A reading older than 48 hours is treated as unavailable (`ParkWaterTemperatureProvider.maxReadingAge`) — a station that stopped reporting doesn't show a stale number. Unlike park weather's fail-open convention, the park screen shows an explicit "Not available" row whenever the setting is on and no fresh reading came back, whether the park has no `water_temperature` source at all, the fetch failed/timed out, or the latest reading is too old.
 
 ### Cable length
 

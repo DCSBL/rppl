@@ -3999,6 +3999,54 @@
         }
       }
     },
+    "Open until %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open until %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open tot %@"
+          }
+        }
+      }
+    },
+    "Opens %@–%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens %1$@–%2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open vanaf %1$@–%2$@"
+          }
+        }
+      }
+    },
+    "Open %@ · %@–%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %1$@ · %2$@–%3$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %1$@ · %2$@–%3$@"
+          }
+        }
+      }
+    },
     "Book online" : {
       "localizations" : {
         "en" : {
@@ -6031,22 +6079,6 @@
         }
       }
     },
-    "Estimate near %@, via %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estimate near %@, via %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schatting nabij %@, via %@"
-          }
-        }
-      }
-    },
     "water ~%lld°C" : {
       "localizations" : {
         "en" : {
@@ -6219,6 +6251,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl haalt dit op via een externe, officiële dienst (Rijkswaterstaat). De waarde is een schatting. Je kan dit later aanpassen in Instellingen."
+          }
+        }
+      }
+    },
+    "Estimate near %@, via %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimate near %@, via %@ · %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schatting nabij %@, via %@ · %@"
+          }
+        }
+      }
+    },
+    "Not available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet beschikbaar"
+          }
+        }
+      }
+    },
+    "Today at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today at %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vandaag om %@"
+          }
+        }
+      }
+    },
+    "%@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ at %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ om %@"
           }
         }
       }

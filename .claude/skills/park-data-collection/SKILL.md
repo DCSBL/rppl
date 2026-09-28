@@ -35,6 +35,11 @@ non-negotiable:
    `description`. Leave out anything not directly confirmed by the fetched pages.
 4. **Do not fill `water_temperature`** unless you have confirmed an appropriate official station for
    that park's water body — this is a separate, deliberate lookup, not something to infer from location.
+   Use `scripts/find-water-temperature-station.py <lat> <lon>` (the park's `location`) to query the
+   Rijkswaterstaat WaterWebServices catalog and find the nearest station that still reports — many
+   geographically-nearest "zwemwater" stations stopped reporting years ago, so don't just pick the
+   closest one by distance. The script prints the `water_temperature:` YAML line to use; still add the
+   provenance comment (station, distance, why closer ones were skipped) by hand.
 5. **Write or update** `RpplCore/Sources/RpplCore/Resources/Parks/<id>.yaml`, following the existing file
    layout (see any current file as a formatting example).
 6. **Record provenance directly in the file**: add or update a leading comment listing each source URL

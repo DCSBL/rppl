@@ -197,7 +197,7 @@ struct LogbookSessionDetailView: View {
                 .padding(10)
 
                 setSelectionMenu
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     .padding(10)
             }
             .frame(height: 300)

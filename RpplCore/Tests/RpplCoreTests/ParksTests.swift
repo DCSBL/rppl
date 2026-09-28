@@ -71,6 +71,26 @@ struct ParksTests {
         #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .closed)
     }
 
+    @Test func openStatusDetailCarriesTheRelevantWindow() throws {
+        let park = try project7()
+        // Before the 14:00-20:00 window: window is set but hasn't started yet.
+        let notYetOpen = park.openStatusDetail(at: date("2026-09-24", hour: 10))
+        #expect(notYetOpen.status == .openToday)
+        #expect(notYetOpen.window?.startMinute == 14 * 60)
+        #expect(notYetOpen.window?.endMinute == 20 * 60)
+        #expect(notYetOpen.windowHasStarted == false)
+
+        // Inside the window: same window, but already started.
+        let alreadyOpen = park.openStatusDetail(at: date("2026-09-24", hour: 15))
+        #expect(alreadyOpen.status == .openToday)
+        #expect(alreadyOpen.window?.endMinute == 20 * 60)
+        #expect(alreadyOpen.windowHasStarted == true)
+
+        // Opens tomorrow / closed: no window to show, it's not "today"'s.
+        #expect(park.openStatusDetail(at: date("2026-09-24", hour: 21)).window == nil)
+        #expect(park.openStatusDetail(at: date("2026-10-05", hour: 12)).window == nil)
+    }
+
     @Test func monthsCollapseToOneEntryPerMonth() throws {
         let months = ParkSchedule.months(for: try project7().opening)
         #expect(months.map(\.month) == [4, 5, 6, 7, 8, 9, 10])
@@ -122,7 +142,7 @@ struct ParksTests {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = amsterdam
         let parts = calendar.dateComponents([.year, .month, .day], from: updated)
-        #expect(parts.year == 2026 && parts.month == 9 && parts.day == 24)
+        #expect(parts.year == 2026 && parts.month == 9 && parts.day == 26)
         #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).lastUpdated == nil)
     }
 
@@ -302,8 +322,8 @@ struct ParksTests {
         let open = try #require(cable.points).adjacentMeters
         let length = try #require(cable.computedLengthM)
         #expect(length > open)
-        #expect(abs(open - 666.3) < 1)
-        #expect(abs(length - 763.5) < 1)
+        #expect(abs(open - 660.3) < 1)
+        #expect(abs(length - 744.5) < 1)
         var twoD = cable
         twoD.direction = .twoD
         #expect(twoD.computedLengthM == open)
@@ -487,6 +507,29 @@ struct ParksTests {
         #expect(entry.origin == .bundled && entry.park.name != "My Project 7")
     }
 
+    /// A bundled content fix made the same day as the override, with no `updated_at` bump, still
+    /// needs to surface as "Update available" — `based_on_revision` (bundled `history.count`)
+    /// catches what the day-granularity `updated_at`/`based_on_updated_at` comparison alone would
+    /// miss, since both read the same day string.
+    @Test func sameDayBundledFixSurfacesViaRevisionNotJustDate() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let bundled = try project7()
+        // Override was based on the current bundled updated_at (no date lag) but one history
+        // entry behind — simulating a same-day bundled fix that only appended to `history`.
+        var stale = bundled
+        stale.name = "My Project 7"
+        stale.basedOnUpdatedAt = bundled.updatedAt
+        stale.basedOnRevision = (bundled.history?.count ?? 0) - 1
+        try ParkCatalog.encode(stale).write(to: dir.appendingPathComponent("\(stale.id).yaml"), atomically: true, encoding: .utf8)
+
+        let sameDay = (bundled.updatedAt ?? "") > (stale.basedOnUpdatedAt ?? "")
+        #expect(!sameDay, "sanity: the date comparison alone can't see a same-day change")
+
+        let entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == stale.id })
+        #expect(entry.origin == .edited && entry.hasNewerBundled)
+    }
+
     @Test func slugIsAsciiAndUnique() {
         #expect(ParkCatalog.slug(from: "Wet 'n Wild Alphen!") == "wet-n-wild-alphen")
         #expect(ParkCatalog.slug(from: "Café Ünï", existing: ["cafe-uni"]) == "cafe-uni-2")
@@ -553,6 +596,26 @@ struct ParksTests {
         let yaml = try ParkCatalog.encode(park)
         let decoded = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
         #expect(decoded.waterTemperature == nil)
+    }
+
+    @Test func staleOverridePredatingWaterTemperatureInheritsBundledSource() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var base = try project7()
+        // Simulate an in-app edit (e.g. re-traced cable) saved before `water_temperature` existed
+        // on the bundled park.
+        base.waterTemperature = nil
+        var edit = base
+        edit.name = "My Project 7"
+        try ParkCatalog.save(edit, to: dir, bundledBase: base)
+
+        let bundledSource = try #require(try project7().waterTemperature)
+        let entry = try #require(ParkCatalog.loadWithOrigin(userRoot: dir).first { $0.id == "project7-rotterdam" })
+        #expect(entry.origin == .edited && entry.park.name == "My Project 7")
+        #expect(entry.park.waterTemperature == bundledSource)
+
+        let loaded = try #require(ParkCatalog.load(userRoot: dir).first { $0.id == "project7-rotterdam" })
+        #expect(loaded.waterTemperature == bundledSource)
     }
 }
 

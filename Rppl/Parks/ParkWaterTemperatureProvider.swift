@@ -2,6 +2,36 @@ import Foundation
 import Observation
 import RpplCore
 
+/// Locale-independent, engineer-readable description of a network failure. `error.localizedDescription`
+/// renders in the *device's* language (e.g. "geannuleerd" on a Dutch device for a cancelled request),
+/// which makes debug logs cryptic and inconsistent across devices. This always reads in English and
+/// names the likely cause instead of a bare status word.
+private func describeWaterTemperatureError(_ error: Error) -> String {
+    guard let urlError = error as? URLError else {
+        return "\(type(of: error)): \(error)"
+    }
+    switch urlError.code {
+    case .cancelled:
+        return "request was cancelled before completing — almost always means the fetch timeout budget "
+            + "elapsed while waiting on the server, or a newer fetch superseded this one"
+    case .timedOut:
+        return "timed out at the network layer (slow or unresponsive connection)"
+    case .notConnectedToInternet:
+        return "device has no internet connection"
+    case .networkConnectionLost:
+        return "network connection was lost mid-request"
+    case .cannotFindHost:
+        return "DNS lookup failed (cannot find host)"
+    case .cannotConnectToHost:
+        return "cannot connect to host (server unreachable or refusing connections)"
+    case .secureConnectionFailed, .serverCertificateUntrusted, .serverCertificateHasBadDate,
+        .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid, .clientCertificateRejected:
+        return "TLS/certificate failure"
+    default:
+        return "URLError \(urlError.code.rawValue) (\(urlError.code))"
+    }
+}
+
 /// Rijkswaterstaat WaterWebServices ("OphalenLaatsteWaarnemingen") — CC0-licensed Dutch government
 /// open data. Looks up the latest surface-water temperature at a station by its opaque code.
 /// https://rijkswaterstaatdata.nl/waterdata/
@@ -20,14 +50,42 @@ struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
             ],
             "LocatieLijst": [["Code": source.stationId]],
         ]
-        guard let payload = try? JSONSerialization.data(withJSONObject: body) else { return nil }
+        guard let payload = try? JSONSerialization.data(withJSONObject: body) else {
+            WakeLog.error(.water, "RWS: failed to encode request body for station \(source.stationId)")
+            return nil
+        }
         request.httpBody = payload
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
-            return Self.parse(data)
+            guard let http = response as? HTTPURLResponse else {
+                WakeLog.warning(.water, "RWS: response for station \(source.stationId) was not HTTP")
+                return nil
+            }
+            guard (200...299).contains(http.statusCode) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.error(
+                    .water,
+                    "RWS: station \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
+                )
+                return nil
+            }
+            guard let reading = Self.parse(data) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.warning(
+                    .water,
+                    "RWS: station \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
+                )
+                return nil
+            }
+            return reading
         } catch {
+            let message = "RWS: request for station \(source.stationId) failed: \(describeWaterTemperatureError(error))"
+            if (error as? URLError)?.code == .cancelled {
+                WakeLog.warning(.water, message)
+            } else {
+                WakeLog.error(.water, message)
+            }
             return nil
         }
     }
@@ -113,13 +171,41 @@ struct HICWaterTemperatureClient: ParkWaterTemperatureFetching {
             URLQueryItem(name: "returnfields", value: "Timestamp,Value,Quality Code"),
             URLQueryItem(name: "ts_id", value: source.stationId),
         ]
-        guard let url = components.url else { return nil }
+        guard let url = components.url else {
+            WakeLog.error(.water, "HIC: failed to build request URL for ts_id \(source.stationId)")
+            return nil
+        }
 
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
-            return Self.parse(data)
+            guard let http = response as? HTTPURLResponse else {
+                WakeLog.warning(.water, "HIC: response for ts_id \(source.stationId) was not HTTP")
+                return nil
+            }
+            guard (200...299).contains(http.statusCode) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.error(
+                    .water,
+                    "HIC: ts_id \(source.stationId) returned HTTP \(http.statusCode): \(responseBody)"
+                )
+                return nil
+            }
+            guard let reading = Self.parse(data) else {
+                let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
+                WakeLog.warning(
+                    .water,
+                    "HIC: ts_id \(source.stationId) returned 200 but no parseable reading: \(responseBody)"
+                )
+                return nil
+            }
+            return reading
         } catch {
+            let message = "HIC: request for ts_id \(source.stationId) failed: \(describeWaterTemperatureError(error))"
+            if (error as? URLError)?.code == .cancelled {
+                WakeLog.warning(.water, message)
+            } else {
+                WakeLog.error(.water, message)
+            }
             return nil
         }
     }
@@ -190,20 +276,32 @@ final class ParkWaterTemperatureProvider {
     private var lastFailure: [String: Date] = [:]
     /// User-specified ceiling: never fetch the same station more than once per 4 hours.
     private static let maxAge: TimeInterval = 4 * 60 * 60
+    /// A reading older than this is stale (some stations, e.g. wetnwild-alphen's, report
+    /// infrequently or have stopped reporting) — never shown, even if the fetch itself succeeded.
+    private static let maxReadingAge: TimeInterval = 48 * 60 * 60
     /// Skip re-hitting a station that just failed, so a screen revisit or geofence arrival
     /// doesn't retry an already-failing request.
     private static let failureBackoff: TimeInterval = 5 * 60
     private static let fetchTimeout: TimeInterval = 8
 
-    /// `nil` whenever the feature is off, the park has no configured source, or the fetch/timeout
-    /// failed — callers simply don't show a row, no error surfaced (fail-open, like park weather).
+    private static func isFresh(_ reading: ParkWaterTemperature) -> Bool {
+        Date().timeIntervalSince(reading.observedAt) <= maxReadingAge
+    }
+
+    /// `nil` whenever the feature is off, the park has no configured source, the fetch/timeout
+    /// failed, or the latest reading is older than `maxReadingAge` — callers show "Not available"
+    /// rather than a stale or missing reading.
     func temperature(for park: Park) async -> ParkWaterTemperature? {
         guard UserDefaults.standard.bool(forKey: AppSettingsKey.parkWaterTemperatureEnabled) else { return nil }
-        guard let source = park.waterTemperature, let fetcher = Self.fetchers[source.provider] else { return nil }
+        guard let source = park.waterTemperature else { return nil }
+        guard let fetcher = Self.fetchers[source.provider] else {
+            WakeLog.warning(.water, "\(park.name): unknown provider \"\(source.provider)\"")
+            return nil
+        }
 
         let key = Self.cacheKey(source)
         if let hit = cache[key], Date().timeIntervalSince(hit.date) < Self.maxAge {
-            return hit.reading
+            return Self.isFresh(hit.reading) ? hit.reading : nil
         }
         if let failedAt = lastFailure[key], Date().timeIntervalSince(failedAt) < Self.failureBackoff {
             return nil
@@ -216,9 +314,20 @@ final class ParkWaterTemperatureProvider {
             }
             cache[key] = (Date(), reading)
             lastFailure[key] = nil
+            guard Self.isFresh(reading) else {
+                WakeLog.warning(
+                    .water,
+                    "\(park.name): latest reading from \(source.provider)/\(source.stationId) is from "
+                        + "\(reading.observedAt), older than \(Int(Self.maxReadingAge / 3600))h — treating as unavailable"
+                )
+                return nil
+            }
             return reading
         } catch {
-            WakeLog.debug(.ui, "park water temperature: timed out")
+            WakeLog.warning(
+                .water,
+                "\(park.name): fetch timed out after \(Int(Self.fetchTimeout))s (\(source.provider)/\(source.stationId))"
+            )
             lastFailure[key] = Date()
             return nil
         }
@@ -251,11 +360,16 @@ final class ParkWaterTemperatureProvider {
         }
         if let hit = cache[key] {
             let validUntil = hit.date.addingTimeInterval(Self.maxAge)
+            let staleSuffix = Self.isFresh(hit.reading)
+                ? ""
+                : " " + String(
+                    localized: "Reading is from \(hit.reading.observedAt.formatted(date: .abbreviated, time: .standard)), older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                )
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: hit.reading,
                 statusText: enabledPrefix + String(
                     localized: "Cached from \(hit.date.formatted(date: .omitted, time: .standard)), valid until \(validUntil.formatted(date: .omitted, time: .standard))."
-                )
+                ) + staleSuffix
             )
         }
         return ParkWaterTemperatureDebugStatus(
@@ -290,10 +404,21 @@ final class ParkWaterTemperatureProvider {
             }
             cache[key] = (Date(), reading)
             lastFailure[key] = nil
+            let staleSuffix = Self.isFresh(reading)
+                ? ""
+                : " " + String(
+                    localized: "Reading is from \(reading.observedAt.formatted(date: .abbreviated, time: .standard)), older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                )
             return ParkWaterTemperatureDebugStatus(
-                source: source, reading: reading, statusText: String(localized: "Fetched just now.")
+                source: source, reading: reading, statusText: String(localized: "Fetched just now.") + staleSuffix
             )
         } catch {
+            WakeLog.warning(
+                .water,
+                "\(park.name): manual \"Fetch now\" timed out after \(Int(Self.fetchTimeout))s "
+                    + "(\(source.provider)/\(source.stationId)) — see the other \(source.provider) log line "
+                    + "at nearly the same timestamp for the underlying network error"
+            )
             lastFailure[key] = Date()
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: nil,

@@ -187,6 +187,24 @@ public enum ParkOpenStatus: Equatable, Sendable {
     case unknown
 }
 
+/// `status(for:at:timeZone:)` plus the window that status is actually about, so callers can show
+/// "open until 20:00" / "opens 15:00–20:00" instead of just a category.
+public struct ParkOpenStatusDetail: Equatable, Sendable {
+    public var status: ParkOpenStatus
+    /// Set only when `status == .openToday`: the window covering now, or (if none has started yet)
+    /// the next one opening today.
+    public var window: ParkTimeWindow?
+    /// Set only alongside `window`: `true` when `window` has already started (now falls inside it),
+    /// `false` when it opens later today.
+    public var windowHasStarted: Bool?
+
+    public init(status: ParkOpenStatus, window: ParkTimeWindow? = nil, windowHasStarted: Bool? = nil) {
+        self.status = status
+        self.window = window
+        self.windowHasStarted = windowHasStarted
+    }
+}
+
 public enum ParkSchedule {
     /// Collapses opening rules into one entry per month, ordered January to December.
     public static func months(for opening: ParkOpening?) -> [ParkMonthSchedule] {
@@ -268,7 +286,12 @@ public enum ParkSchedule {
     /// at 18:00 still has windows "today" at 20:00. This checks whether now still falls inside
     /// (or before) one of today's windows before falling back to tomorrow's schedule.
     public static func status(for opening: ParkOpening?, at date: Date, timeZone: TimeZone) -> ParkOpenStatus {
-        guard let opening else { return .closed }
+        statusDetail(for: opening, at: date, timeZone: timeZone).status
+    }
+
+    /// Same as `status(for:at:timeZone:)`, plus the window that status is about (for `.openToday`).
+    public static func statusDetail(for opening: ParkOpening?, at date: Date, timeZone: TimeZone) -> ParkOpenStatusDetail {
+        guard let opening else { return ParkOpenStatusDetail(status: .closed) }
 
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
@@ -276,15 +299,17 @@ public enum ParkSchedule {
         let nowMinute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
 
         let today = day(for: opening, on: date, timeZone: timeZone)
-        guard today.isScheduleKnown else { return .unknown }
-        if today.windows.contains(where: { nowMinute < $0.endMinute }) {
-            return .openToday
+        guard today.isScheduleKnown else { return ParkOpenStatusDetail(status: .unknown) }
+        if let window = today.windows.first(where: { nowMinute < $0.endMinute }) {
+            return ParkOpenStatusDetail(status: .openToday, window: window, windowHasStarted: nowMinute >= window.startMinute)
         }
 
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else { return .closed }
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else {
+            return ParkOpenStatusDetail(status: .closed)
+        }
         let tomorrowDay = day(for: opening, on: tomorrow, timeZone: timeZone)
-        guard tomorrowDay.isScheduleKnown else { return .unknown }
-        return tomorrowDay.isOpen ? .opensTomorrow : .closed
+        guard tomorrowDay.isScheduleKnown else { return ParkOpenStatusDetail(status: .unknown) }
+        return ParkOpenStatusDetail(status: tomorrowDay.isOpen ? .opensTomorrow : .closed)
     }
 
     public static func minutes(_ time: String) -> Int? {

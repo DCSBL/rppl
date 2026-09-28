@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-09-25
+updated_at: 2026-09-26
 history:
   - date: 2026-09-24
     description: initial
@@ -11,6 +11,8 @@ history:
     description: add block schedule and prices
   - date: 2026-09-25
     description: add seasonal opening hours
+  - date: 2026-09-26
+    description: refine cable trace (in-app edit)
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
@@ -21,7 +23,7 @@ location:
   lon: 4.239882979511977
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Hoek van Holland, ~8 km
-# away). Estimate only — a tidal estuary station, not measured at the park itself.
+# away). Estimate only - a tidal estuary station, not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: hoekvanholland }
 
 phone: 0174 - 64 11 44
@@ -38,11 +40,11 @@ cables:
     description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
     # Points are listed in travel order, first point is the start.
     points:
-      - { lat: 51.99260583846942, lon: 4.239754339256239 }
-      - { lat: 51.9916676524598, lon: 4.242258597378462 }
-      - { lat: 51.99110265802685, lon: 4.242111288077519 }
-      - { lat: 51.99171948645172, lon: 4.238748427146507 }
-      - { lat: 51.99231557307252, lon: 4.238651623891362 }
+      - { lat: 51.9926590017478, lon: 4.23977079667694 }
+      - { lat: 51.9916976885167, lon: 4.24224285279007 }
+      - { lat: 51.9912370381953, lon: 4.24201052724854 }
+      - { lat: 51.9916478479643, lon: 4.2387817137021 }
+      - { lat: 51.9922605492233, lon: 4.23868536788128 }
 
 # Seasonal drop-in windows (rules) plus fixed-start 80-minute blocks (slots).
 # Monday and Tuesday, and Thursday in September, are booking-only ("op aanvraag") and

@@ -1,7 +1,7 @@
 version: 1
 id: project7-rotterdam
 created_at: 2026-09-24
-updated_at: 2026-09-24
+updated_at: 2026-09-26
 history:
   - date: 2026-09-24
     description: initial
@@ -13,6 +13,8 @@ history:
     description: add gift voucher/group price, beachclub link, age rule from FAQ
   - date: 2026-09-24
     description: rename restaurant to Nossa Nesselande (was Storm)
+  - date: 2026-09-26
+    description: refine cable trace and simplify restaurant facility label (in-app edit)
 
 author: Rppl
 name: Project 7 Cablepark Rotterdam
@@ -23,7 +25,7 @@ location:
   lon: 4.573426
 
 # Nearest official Rijkswaterstaat surface-water temperature station (Hollandsche IJssel at
-# Krimpen a/d IJssel, ~7 km away). Estimate only — not measured at the park itself.
+# Krimpen a/d IJssel, ~7 km away). Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: krimpenaandeijssel.hollandscheijssel }
 
 phone: 010 - 2600 110
@@ -39,7 +41,7 @@ facilities:
   - Free parking
   - Skis included
   - Board rental
-  - Nossa Nesselande (next door, formerly Storm Beachclub)
+  - Restaurant Nossa Nesselande
   - Changing rooms
   - Coin shower (€0,50)
   - Toilet
@@ -63,11 +65,11 @@ cables:
     direction: cw               # full size (loop); 2d is a 2-point "2.0" cable
     # First point is the start.
     points:
-      - { lat: 51.9793329062201, lon: 4.574032424368503 }
-      - { lat: 51.98027154180474, lon: 4.577629454117891 }
-      - { lat: 51.98005965351376, lon: 4.578447235195577 }
-      - { lat: 51.97955932699905, lon: 4.578422725733926 }
-      - { lat: 51.97854472025907, lon: 4.574643325299373 }
+      - { lat: 51.9792871834595, lon: 4.57415297727128 }
+      - { lat: 51.9802715418047, lon: 4.57762945411789 }
+      - { lat: 51.9799491057186, lon: 4.57845020518399 }
+      - { lat: 51.9793930743687, lon: 4.57832199054877 }
+      - { lat: 51.9785861824904, lon: 4.57461757152632 }
 
 # Drop-in windows (rules) and fixed-start blocks (slots). A block is available
 # when it fits inside an open window. Source: project7cablepark.nl/openingstijden

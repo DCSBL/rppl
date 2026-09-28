@@ -193,6 +193,10 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var author: String?
     /// On a user override of a bundled park: the bundled `updated_at` this edit was based on.
     public var basedOnUpdatedAt: String?
+    /// On a user override of a bundled park: the bundled `history.count` this edit was based on.
+    /// Catches same-day bundled content changes that `updated_at`/`basedOnUpdatedAt` (day
+    /// granularity) can't tell apart from the version the override was made from.
+    public var basedOnRevision: Int?
 
     public var name: String
     public var location: ParkCoordinate
@@ -218,6 +222,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case basedOnUpdatedAt = "based_on_updated_at"
+        case basedOnRevision = "based_on_revision"
         case waterTemperature = "water_temperature"
     }
 
@@ -242,7 +247,8 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         updatedAt: String? = nil,
         history: [ParkHistoryEntry]? = nil,
         author: String? = nil,
-        basedOnUpdatedAt: String? = nil
+        basedOnUpdatedAt: String? = nil,
+        basedOnRevision: Int? = nil
     ) {
         self.version = version
         self.id = id
@@ -265,6 +271,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.history = history
         self.author = author
         self.basedOnUpdatedAt = basedOnUpdatedAt
+        self.basedOnRevision = basedOnRevision
     }
 
     /// `id` alone: cheaper than hashing `cables`/`history`, and still consistent with `==`.
@@ -295,6 +302,11 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     /// beyond that — accounting for the current time, not just today's date.
     public func openStatus(at date: Date = Date()) -> ParkOpenStatus {
         ParkSchedule.status(for: opening, at: date, timeZone: resolvedTimeZone)
+    }
+
+    /// Same as `openStatus(at:)`, plus the window that status is about (for `.openToday`).
+    public func openStatusDetail(at date: Date = Date()) -> ParkOpenStatusDetail {
+        ParkSchedule.statusDetail(for: opening, at: date, timeZone: resolvedTimeZone)
     }
 }
 

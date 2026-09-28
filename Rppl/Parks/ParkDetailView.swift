@@ -15,6 +15,9 @@ struct ParkDetailView: View {
     @State private var weather: ParkWeather?
     @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
     @State private var waterTemperature: ParkWaterTemperature?
+    /// Set once a water-temperature fetch attempt (successful or not) has completed, so "Not
+    /// available" doesn't flash before the initial `.task` fetch resolves.
+    @State private var waterTemperatureChecked = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
     @AppStorage(AppSettingsKey.didDeclineParkWaterTemperaturePrompt) private var didDeclineWaterTemperaturePrompt = false
     @State private var showWaterTemperaturePrompt = false
@@ -37,6 +40,13 @@ struct ParkDetailView: View {
     /// dismissed the inline offer — so there's something to invite them to turn on.
     private var showsWaterTemperaturePromptRow: Bool {
         park.waterTemperature != nil && !waterTemperatureEnabled && !didDeclineWaterTemperaturePrompt
+    }
+
+    /// The feature is on and a fetch attempt finished without a usable reading — no config, a
+    /// failed/timed-out fetch, or a reading older than the provider's freshness cutoff all land
+    /// here alike, shown as "Not available" instead of silently hiding the row.
+    private var showsWaterTemperatureUnavailable: Bool {
+        waterTemperatureEnabled && waterTemperatureChecked && waterTemperature == nil
     }
 
     var body: some View {
@@ -91,10 +101,14 @@ struct ParkDetailView: View {
             async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
             weather = await weatherResult
             waterTemperature = await waterTemperatureResult
+            waterTemperatureChecked = true
         }
         .onChange(of: waterTemperatureEnabled) { _, isEnabled in
             guard isEnabled else { return }
-            Task { waterTemperature = await waterTemperatureProvider.temperature(for: park) }
+            Task {
+                waterTemperature = await waterTemperatureProvider.temperature(for: park)
+                waterTemperatureChecked = true
+            }
         }
         .alert(
             String(localized: "Show water temperature?"),
@@ -240,31 +254,13 @@ struct ParkDetailView: View {
                     .foregroundStyle(.red)
             }
 
-            if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow {
+            if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow || showsWaterTemperatureUnavailable {
                 Divider().overlay(Color.rpplFill)
-                if let weather {
-                    weatherRow(weather)
-                }
-                if let waterTemperature {
-                    waterTemperatureRow(waterTemperature)
-                } else if showsWaterTemperaturePromptRow {
-                    waterTemperaturePromptRow
-                }
+                conditionsSection(weather: weather, waterTemperature: waterTemperature)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
-    }
-
-    private func waterTemperatureRow(_ reading: ParkWaterTemperature) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Label(String(localized: "Water \(TemperatureFormat.celsius(reading.celsius))"), systemImage: "water.waves")
-                .font(.subheadline)
-                .foregroundStyle(Color.rpplText)
-            Text(String(localized: "Estimate near \(reading.stationName), via \(reading.providerName)"))
-                .font(.caption2)
-                .foregroundStyle(Color.rpplMuted)
-        }
     }
 
     private var waterTemperaturePromptRow: some View {
@@ -278,21 +274,41 @@ struct ParkDetailView: View {
         .foregroundStyle(Color.rpplAccent)
     }
 
-    private func weatherRow(_ weather: ParkWeather) -> some View {
+    private func conditionsSection(weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             FlowLayout(spacing: 16) {
-                Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
-                Label(windSummary(weather), systemImage: "wind")
-                Label(weather.rainForecast.label, systemImage: "cloud.rain")
-                if weather.isHighUV {
-                    Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
-                        .foregroundStyle(.orange)
+                if let weather {
+                    Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
+                    Label(windSummary(weather), systemImage: "wind")
+                    Label(weather.rainForecast.label, systemImage: "cloud.rain")
+                    if weather.isHighUV {
+                        Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
+                            .foregroundStyle(.orange)
+                    }
+                }
+                if let waterTemperature {
+                    Label(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
+                } else if showsWaterTemperatureUnavailable {
+                    Label(String(localized: "Not available"), systemImage: "water.waves")
+                        .foregroundStyle(Color.rpplMuted)
                 }
             }
             .font(.subheadline)
             .foregroundStyle(Color.rpplText)
 
-            if let legal = weather.legalURL {
+            if waterTemperature == nil, showsWaterTemperaturePromptRow {
+                waterTemperaturePromptRow
+            }
+
+            if let waterTemperature {
+                Text(String(
+                    localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
+                ))
+                .font(.caption2)
+                .foregroundStyle(Color.rpplMuted)
+            }
+
+            if let weather, let legal = weather.legalURL {
                 Link(destination: legal) {
                     HStack(spacing: 4) {
                         if let mark = colorScheme == .dark ? weather.markDarkURL : weather.markLightURL {
@@ -318,6 +334,16 @@ struct ParkDetailView: View {
         let speed = DistanceFormat.kilometersPerHour(weather.windKmh)
         let beaufort = BeaufortScale.label(forKmh: weather.windKmh)
         return "\(direction.name) · \(speed) · \(beaufort)"
+    }
+
+    /// When the station reading was taken, not when the app fetched it.
+    private func observedAtText(_ date: Date) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        if Calendar.current.isDateInToday(date) {
+            return String(localized: "Today at \(time)")
+        }
+        let day = date.formatted(date: .numeric, time: .omitted)
+        return String(localized: "\(day) at \(time)")
     }
 
     private var openingTimesCard: some View {
