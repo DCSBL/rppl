@@ -276,13 +276,21 @@ final class ParkWaterTemperatureProvider {
     private var lastFailure: [String: Date] = [:]
     /// User-specified ceiling: never fetch the same station more than once per 4 hours.
     private static let maxAge: TimeInterval = 4 * 60 * 60
+    /// A reading older than this is stale (some stations, e.g. wetnwild-alphen's, report
+    /// infrequently or have stopped reporting) — never shown, even if the fetch itself succeeded.
+    private static let maxReadingAge: TimeInterval = 48 * 60 * 60
     /// Skip re-hitting a station that just failed, so a screen revisit or geofence arrival
     /// doesn't retry an already-failing request.
     private static let failureBackoff: TimeInterval = 5 * 60
     private static let fetchTimeout: TimeInterval = 8
 
-    /// `nil` whenever the feature is off, the park has no configured source, or the fetch/timeout
-    /// failed — callers simply don't show a row, no error surfaced (fail-open, like park weather).
+    private static func isFresh(_ reading: ParkWaterTemperature) -> Bool {
+        Date().timeIntervalSince(reading.observedAt) <= maxReadingAge
+    }
+
+    /// `nil` whenever the feature is off, the park has no configured source, the fetch/timeout
+    /// failed, or the latest reading is older than `maxReadingAge` — callers show "Not available"
+    /// rather than a stale or missing reading.
     func temperature(for park: Park) async -> ParkWaterTemperature? {
         guard UserDefaults.standard.bool(forKey: AppSettingsKey.parkWaterTemperatureEnabled) else { return nil }
         guard let source = park.waterTemperature else { return nil }
@@ -293,7 +301,7 @@ final class ParkWaterTemperatureProvider {
 
         let key = Self.cacheKey(source)
         if let hit = cache[key], Date().timeIntervalSince(hit.date) < Self.maxAge {
-            return hit.reading
+            return Self.isFresh(hit.reading) ? hit.reading : nil
         }
         if let failedAt = lastFailure[key], Date().timeIntervalSince(failedAt) < Self.failureBackoff {
             return nil
@@ -306,6 +314,14 @@ final class ParkWaterTemperatureProvider {
             }
             cache[key] = (Date(), reading)
             lastFailure[key] = nil
+            guard Self.isFresh(reading) else {
+                WakeLog.warning(
+                    .water,
+                    "\(park.name): latest reading from \(source.provider)/\(source.stationId) is from "
+                        + "\(reading.observedAt), older than \(Int(Self.maxReadingAge / 3600))h — treating as unavailable"
+                )
+                return nil
+            }
             return reading
         } catch {
             WakeLog.warning(
@@ -344,11 +360,17 @@ final class ParkWaterTemperatureProvider {
         }
         if let hit = cache[key] {
             let validUntil = hit.date.addingTimeInterval(Self.maxAge)
+            let staleSuffix = Self.isFresh(hit.reading)
+                ? ""
+                : " " + String(
+                    localized: "Reading is from \(hit.reading.observedAt.formatted(date: .abbreviated, time: .standard)), "
+                        + "older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                )
             return ParkWaterTemperatureDebugStatus(
                 source: source, reading: hit.reading,
                 statusText: enabledPrefix + String(
                     localized: "Cached from \(hit.date.formatted(date: .omitted, time: .standard)), valid until \(validUntil.formatted(date: .omitted, time: .standard))."
-                )
+                ) + staleSuffix
             )
         }
         return ParkWaterTemperatureDebugStatus(
@@ -383,8 +405,14 @@ final class ParkWaterTemperatureProvider {
             }
             cache[key] = (Date(), reading)
             lastFailure[key] = nil
+            let staleSuffix = Self.isFresh(reading)
+                ? ""
+                : " " + String(
+                    localized: "Reading is from \(reading.observedAt.formatted(date: .abbreviated, time: .standard)), "
+                        + "older than \(Int(Self.maxReadingAge / 3600))h — shown as \"Not available\" in the app."
+                )
             return ParkWaterTemperatureDebugStatus(
-                source: source, reading: reading, statusText: String(localized: "Fetched just now.")
+                source: source, reading: reading, statusText: String(localized: "Fetched just now.") + staleSuffix
             )
         } catch {
             WakeLog.warning(
