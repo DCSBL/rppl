@@ -33,7 +33,7 @@ location:
 # Nearest official VMM surface-water temperature station that's still reporting: "Knokke/
 # Heistlaan/Isabellavaart" on the Isabellavaart canal, ~2.7 km from the dock (verified against
 # the live API on 2026-09-28: 15-min readings up to the same day). Duinenwater itself is a
-# private former sand-quarry lake with no station of its own — estimate only, not measured at
+# private former sand-quarry lake with no station of its own - estimate only, not measured at
 # the park.
 water_temperature: { provider: vmm_be, station_id: "01265376042" }
 
