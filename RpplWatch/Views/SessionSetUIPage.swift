@@ -1,8 +1,9 @@
 import SwiftUI
 import RpplCore
 
-/// Product session UI: one-screen set view; Inactive overview has a sticky current-block header,
-/// flowing metrics below it, then a last-set block that scroll-snaps fully into view.
+/// Product session UI: Riding and Inactive share one fixed status block (`statusBlock`) — only
+/// color/icon/label and a couple of source values differ. Riding shows it alone, not scrollable.
+/// Inactive pins it as a sticky header above a scroll-snap session summary.
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -75,247 +76,216 @@ struct SessionSetUIPage: View {
         }
     }
 
-    // MARK: - Riding (no scroll — fitted for AWU)
+    // MARK: - Riding (no scroll — fitted for AWU) / Inactive (sticky header + scroll-snap summary)
 
     private var ridingView: some View {
-        VStack(spacing: 4) {
-            Text(SessionFormatters.segmentDuration(session.currentSetDuration))
-                .font(.system(.largeTitle, design: .rounded).bold())
-                .monospacedDigit()
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-
-            Text("RIDE")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .alwaysOnSecondaryChrome(isLuminanceReduced)
-
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                VStack(spacing: 2) {
-                    Text(SessionFormatters.distance(session.displaySetMeters))
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("DIST")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.distance.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(spacing: 2) {
-                    Text(session.currentSetSpeedKmh.map { DistanceFormat.speedValue($0) } ?? "--")
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text(DistanceFormat.speedUnitSymbol().uppercased())
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.speed.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(spacing: 2) {
-                    Text("\(session.currentSetLapCount)")
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("LAPS")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.laps.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-            }
-
-            heartRateRow
-
-            statusLine(primary: "Riding", color: .blue)
-
-            if session.didCompleteSet {
-                lastSetCompactLine
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 4)
-    }
-
-    private var lastSetCompactLine: some View {
-        HStack(spacing: 4) {
-            Text("Last")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Text(
-                "\(SessionFormatters.segmentDuration(session.lastSetDuration)) · "
-                    + "\(SessionFormatters.distance(session.lastSetMeters)) · "
-                    + "\(session.lastSetLapCount)"
-            )
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .monospacedDigit()
-            .minimumScaleFactor(0.7)
-            .lineLimit(1)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 2)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(lastSetAccessibilityLabel)
-        .alwaysOnSecondaryChrome(isLuminanceReduced)
-    }
-
-    private var lastSetAccessibilityLabel: String {
-        String(
-            localized: "Last set \(SessionFormatters.segmentDuration(session.lastSetDuration)), \(SessionFormatters.distance(session.lastSetMeters)), \(session.lastSetLapCount) laps"
-        )
-    }
-
-    // MARK: - Inactive (sticky current block on top; flowing metrics below; last-set block snaps in)
-
-    /// Live GPS speed regardless of detection state — distinct from `sessionAverageSpeedKmh`.
-    private var currentSpeedKmh: Double? {
-        session.lastSpeedMps.map { $0 * 3.6 }
+        statusBlock(isRiding: true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var inactiveView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if let calories = session.activeEnergyKilocalories {
-                    SessionMetricRow(
-                        label: "Calories",
-                        metric: .energy,
-                        value: SessionFormatters.calories(calories),
-                        isLarge: true
-                    )
-                }
-                if let averageSpeed = session.sessionAverageSpeedKmh {
-                    SessionMetricRow(
-                        label: "Avg speed",
-                        metric: .speed,
-                        value: SessionFormatters.averageSpeed(averageSpeed),
-                        isLarge: true
-                    )
-                }
-
-                // Only this block registers as a scroll-snap target (`.scrollTargetLayout()`),
-                // so calories/avg speed above scroll freely; this snaps fully into view once
-                // reached. First use of view-aligned scroll-snap in RpplWatch — verify feel
-                // on-device and retune if the snap threshold feels off.
-                LazyVStack {
-                    lastSetSnapBlock
-                }
-                .scrollTargetLayout()
+            // Only this block registers as a scroll-snap target (`.scrollTargetLayout()`).
+            // First use of view-aligned scroll-snap in RpplWatch — verify feel on-device and
+            // retune if the snap threshold feels off.
+            LazyVStack {
+                sessionSummarySnapBlock
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 6)
-            .padding(.top, 10)
+            .scrollTargetLayout()
         }
         .scrollTargetBehavior(.viewAligned)
         .safeAreaInset(edge: .top) {
-            inactiveStickyHeader
+            statusBlock(isRiding: false)
+                // Opaque backing — without it, content scrolling up behind this pinned header
+                // shows through instead of being hidden by it.
+                .background(.black)
         }
     }
 
-    private var inactiveStickyHeader: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            statusLine(primary: "Inactive", color: .gray)
+    /// Shared Riding/Inactive block: wall clock, status line, hero segment/total time, then
+    /// distance/speed/laps, water temp, heart rate and total calories. Identical layout for both
+    /// states — only color/icon/label and the segment-time/speed source differ.
+    private func statusBlock(isRiding: Bool) -> some View {
+        let speedKmh = isRiding ? session.currentSetSpeedKmh : session.lastSpeedMps.map { $0 * 3.6 }
+        let lapCount = session.isSetOngoing ? session.currentSetLapCount : session.lastSetLapCount
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(SessionFormatters.elapsed(session.elapsed))
-                    .font(.system(.largeTitle, design: .rounded).bold())
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(1)
-                    .foregroundStyle(.yellow)
-                WatchMetricCaption(label: "Session", metric: .duration)
-                    .font(.system(size: 9, weight: .semibold))
+        return VStack(alignment: .leading, spacing: 8) {
+            Text(Date(), style: .time)
+                .font(.caption2.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+
+            statusLine(
+                primary: isRiding ? "Riding" : "Inactive",
+                color: isRiding ? .blue : .gray,
+                icon: isRiding ? "play.fill" : "pause.circle.fill"
+            )
+
+            heroTimeRow(isRiding: isRiding)
+
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                metricTile(
+                    value: SessionFormatters.distance(session.displaySetMeters),
+                    label: "DIST",
+                    metric: .distance
+                )
+                metricTile(
+                    value: speedKmh.map { DistanceFormat.speedValue($0) } ?? "--",
+                    label: DistanceFormat.speedUnitSymbol(),
+                    metric: .speed
+                )
+                metricTile(
+                    value: "\(lapCount)",
+                    label: "LAPS",
+                    metric: .laps
+                )
+            }
+
+            if session.waterTemperatureAvailable {
+                metricTile(
+                    value: session.averageWaterTemperatureCelsius.map { SessionFormatters.waterTemp($0) }
+                        ?? TemperatureFormat.placeholder,
+                    label: "WATER",
+                    metric: .water
+                )
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+
+            if !isRiding {
+                Text("Last session")
+                    .font(.caption2)
+                    .italic()
                     .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            LazyVGrid(
-                columns: [GridItem(.flexible(), alignment: .leading), GridItem(.flexible(), alignment: .leading)],
-                alignment: .leading,
-                spacing: 10
-            ) {
-                SessionMetricRow(
-                    label: "Inactive for",
-                    metric: .inactive,
-                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration),
-                    isLarge: true
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                heartRateRow
+                    .frame(maxWidth: .infinity)
+                metricTile(
+                    value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                    label: "CAL",
+                    metric: .energy
                 )
-                SessionMetricRow(
-                    label: "Sets",
-                    metric: .sets,
-                    value: "\(session.setCount)",
-                    isLarge: true
-                )
-                if let currentSpeedKmh {
-                    SessionMetricRow(
-                        label: "Speed",
-                        metric: .speed,
-                        value: SessionFormatters.averageSpeed(currentSpeedKmh),
-                        isLarge: true
-                    )
-                }
-                if session.waterTemperatureAvailable {
-                    SessionMetricRow(
-                        label: "Water",
-                        metric: .water,
-                        value: session.averageWaterTemperatureCelsius.map { SessionFormatters.waterTemp($0) }
-                            ?? TemperatureFormat.placeholder,
-                        isLarge: true
-                    )
-                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 6)
-        .padding(.vertical, 8)
-        // Opaque backing — without it, content scrolling up behind this pinned header shows
-        // through instead of being hidden by it.
-        .background(.black)
+        .padding(.vertical, isRiding ? 4 : 8)
     }
 
-    private var lastSetSnapBlock: some View {
+    private func heroTimeRow(isRiding: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            HStack(spacing: 4) {
+                Text(
+                    SessionFormatters.segmentDuration(
+                        isRiding ? session.currentSetDuration : session.currentInactiveDuration
+                    )
+                )
+                .font(.system(.title, design: .rounded).bold())
+                .monospacedDigit()
+                .foregroundStyle(isRiding ? .blue : .gray)
+
+                if isRiding {
+                    // `.variableColor` no-ops if "water.waves" doesn't declare that capability —
+                    // verify on-device it actually animates; drop the modifier if it doesn't.
+                    Image(systemName: "water.waves")
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                        .symbolEffect(.variableColor.iterative, options: .repeating)
+                        .accessibilityHidden(true)
+                }
+            }
+
+            Text("/")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+
+            Text(SessionFormatters.elapsed(session.elapsed))
+                .font(.system(.title, design: .rounded).bold())
+                .monospacedDigit()
+                .foregroundStyle(.primary)
+        }
+        .minimumScaleFactor(0.5)
+        .lineLimit(1)
+        .alwaysOnSupportingMetric(isLuminanceReduced)
+    }
+
+    private func metricTile(value: String, label: String, metric: WatchMetric) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(.title2, design: .rounded).bold())
+                .monospacedDigit()
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .alwaysOnSupportingMetric(isLuminanceReduced)
+            Text(label)
+                .font(.caption2.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(metric.tint)
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Session summary (Inactive only; scroll-snaps in below the sticky status block)
+
+    private var totalRidingDuration: TimeInterval {
+        session.cumulativeRidingDuration + (session.lastConfidentCode == DetectionCodes.riding ? session.currentSetDuration : 0)
+    }
+
+    private var totalInactiveDuration: TimeInterval {
+        session.cumulativeInactiveDuration
+            + (session.lastConfidentCode == DetectionCodes.inactive ? session.currentInactiveDuration : 0)
+    }
+
+    private var sessionSummarySnapBlock: some View {
         VStack(alignment: .leading, spacing: 14) {
-            WatchMetricCaption(label: "Last set", metric: .sets)
+            WatchMetricCaption(label: "Session summary", metric: .sets)
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
                 .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-            if session.didCompleteSet {
-                SessionMetricRow(
-                    label: "Duration",
-                    metric: .duration,
-                    value: SessionFormatters.segmentDuration(session.lastSetDuration),
-                    isLarge: true
-                )
-                SessionMetricRow(
-                    label: "Distance",
-                    metric: .distance,
-                    value: SessionFormatters.distance(session.lastSetMeters),
-                    isLarge: true
-                )
-                SessionMetricRow(
-                    label: "Laps",
-                    metric: .laps,
-                    value: "\(session.lastSetLapCount)",
-                    isLarge: true
-                )
-            } else {
-                Text("No sets yet")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-            }
+            SessionMetricRow(label: "Sets", metric: .sets, value: "\(session.setCount)", isLarge: true)
+            SessionMetricRow(
+                label: "Distance",
+                metric: .distance,
+                value: SessionFormatters.distance(session.totalDistanceM),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Duration",
+                metric: .duration,
+                value: SessionFormatters.elapsed(session.elapsed),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Riding time",
+                metric: .duration,
+                value: SessionFormatters.segmentDuration(totalRidingDuration),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Inactive time",
+                metric: .inactive,
+                value: SessionFormatters.segmentDuration(totalInactiveDuration),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Calories",
+                metric: .energy,
+                value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Active calories",
+                metric: .energy,
+                value: session.activeEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                isLarge: true
+            )
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(.horizontal, 6)
@@ -324,11 +294,17 @@ struct SessionSetUIPage: View {
     }
 
     @ViewBuilder
-    private func statusLine(primary: LocalizedStringKey, color: Color) -> some View {
+    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String) -> some View {
         VStack(spacing: 2) {
-            Text(primary)
-                .font(.headline.bold())
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Text(primary)
+                    .font(.headline.bold())
+                    .foregroundStyle(color)
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundStyle(color)
+                    .accessibilityHidden(true)
+            }
             if session.isUnsure {
                 Text("Unsure")
                     .font(.caption2.weight(.semibold))
