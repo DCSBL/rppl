@@ -206,6 +206,10 @@ struct ParkDetailView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.large)
             }
+
+            if park.wakesys == true {
+                ParkChip(text: "Wakesys", systemImage: "ticket")
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
