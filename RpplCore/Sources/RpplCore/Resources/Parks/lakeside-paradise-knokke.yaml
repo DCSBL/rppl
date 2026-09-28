@@ -17,7 +17,7 @@ history:
   - date: 2026-09-27
     description: mark opening hours unknown (reservation-only, no published weekly pattern)
   - date: 2026-09-28
-    description: add water_temperature (nearest reporting VMM station, ~2.7 km away)
+    description: add water_temperature (nearest reporting VMM station, ~2.7 km away), set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
 
 author: Rppl
 name: Lakeside Paradise
@@ -45,6 +45,8 @@ links:
   - { kind: instagram, url: "https://www.instagram.com/lakeside.paradise/" }
   - { kind: facebook, url: "https://www.facebook.com/lakesideparadise" }
 
+wakesys: true
+
 # Three separate cable systems. Source (reserveren page) states Pro Cable is
 # "linksdraaiend" (left-turning) and Rookie Cable "rechtsdraaiend" (right-turning); mapped to
 # cw/ccw by plain geometry (turning left throughout a loop = counter-clockwise), not a park
@@ -54,14 +56,13 @@ cables:
     direction: ccw
     description: >-
       15 obstacle/jump combinations. From age 12 (younger needs the cable operators'
-      permission). Booking required (Wakesys), 1h or 2h blocks, reservations start on the
-      hour.
+      permission). Booking required, 1h or 2h blocks, reservations start on the hour.
   - name: Rookie Cable
     direction: cw
     description: >-
       Newest cable at the park; runs at a slower speed than Pro Cable, 6 obstacles. From
       about age 6-7 (must be able to swim to shore independently with their board).
-      Booking required (Wakesys), 1h or 2h blocks, reservations start on the half hour.
+      Booking required, 1h or 2h blocks, reservations start on the half hour.
   - name: Small Cable 2.0
     direction: 2d
     description: >-

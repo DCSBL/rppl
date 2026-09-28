@@ -14,3 +14,4 @@ cables:
       - { lat: 52.001, lon: 5.001 }
 facilities:
   - Changing rooms
+wakesys: true

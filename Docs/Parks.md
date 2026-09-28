@@ -64,6 +64,7 @@ prices:  [{ name: Day pass, price: "€25", note: optional }]
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
+wakesys: true                     # optional, default false — this park's booking system is Wakesys (shared by several parks)
 
 # Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
@@ -100,6 +101,11 @@ Rules and slots share optional selectors, all of which must match a date:
 - Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
 - `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`.
 - A reading older than 48 hours is treated as unavailable (`ParkWaterTemperatureProvider.maxReadingAge`) — a station that stopped reporting doesn't show a stale number. Unlike park weather's fail-open convention, the park screen shows an explicit "Not available" row whenever the setting is on and no fresh reading came back, whether the park has no `water_temperature` source at all, the fetch failed/timed out, or the latest reading is too old.
+
+### Wakesys badge
+
+- `wakesys: true` marks a park whose booking system is Wakesys (several parks share the same booking platform, under their own accounts/subdomain). Optional, defaults to `false`/absent.
+- Shown today only as a "Wakesys" chip on the park card and on the detail page's booking button — not used to filter or group parks yet.
 
 ### Cable length
 
