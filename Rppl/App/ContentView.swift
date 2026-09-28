@@ -105,10 +105,13 @@ struct ContentView: View {
             )
         }
         .onChange(of: iCloud.shouldOfferImport) { _, offer in
-            if offer, !iCloud.suppressImportOffer {
-                isManualICloudImport = false
-                showICloudImport = true
-            }
+            // Auto-present only right after the user turns iCloud Drive sync on.
+            // Any other trigger (e.g. deleting a workout) must stay silent —
+            // the user reaches the picker via the manual Import button instead.
+            guard offer, !iCloud.suppressImportOffer, iCloud.justEnabledSync else { return }
+            iCloud.consumeJustEnabledSync()
+            isManualICloudImport = false
+            showICloudImport = true
         }
         .fileImporter(
             isPresented: $showFileImporter,
