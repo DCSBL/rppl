@@ -3999,6 +3999,54 @@
         }
       }
     },
+    "Open until %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open until %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open tot %@"
+          }
+        }
+      }
+    },
+    "Opens %@–%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens %1$@–%2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open vanaf %1$@–%2$@"
+          }
+        }
+      }
+    },
+    "Open %@ · %@–%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %1$@ · %2$@–%3$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %1$@ · %2$@–%3$@"
+          }
+        }
+      }
+    },
     "Book online" : {
       "localizations" : {
         "en" : {

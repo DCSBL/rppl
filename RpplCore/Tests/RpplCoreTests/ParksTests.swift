@@ -71,6 +71,26 @@ struct ParksTests {
         #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .closed)
     }
 
+    @Test func openStatusDetailCarriesTheRelevantWindow() throws {
+        let park = try project7()
+        // Before the 14:00-20:00 window: window is set but hasn't started yet.
+        let notYetOpen = park.openStatusDetail(at: date("2026-09-24", hour: 10))
+        #expect(notYetOpen.status == .openToday)
+        #expect(notYetOpen.window?.startMinute == 14 * 60)
+        #expect(notYetOpen.window?.endMinute == 20 * 60)
+        #expect(notYetOpen.windowHasStarted == false)
+
+        // Inside the window: same window, but already started.
+        let alreadyOpen = park.openStatusDetail(at: date("2026-09-24", hour: 15))
+        #expect(alreadyOpen.status == .openToday)
+        #expect(alreadyOpen.window?.endMinute == 20 * 60)
+        #expect(alreadyOpen.windowHasStarted == true)
+
+        // Opens tomorrow / closed: no window to show, it's not "today"'s.
+        #expect(park.openStatusDetail(at: date("2026-09-24", hour: 21)).window == nil)
+        #expect(park.openStatusDetail(at: date("2026-10-05", hour: 12)).window == nil)
+    }
+
     @Test func monthsCollapseToOneEntryPerMonth() throws {
         let months = ParkSchedule.months(for: try project7().opening)
         #expect(months.map(\.month) == [4, 5, 6, 7, 8, 9, 10])

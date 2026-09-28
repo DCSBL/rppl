@@ -168,7 +168,8 @@ struct ParksView: View {
                                     visitCount: visitCounts[park.id] ?? 0,
                                     distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
                                     isFavorite: favorites.contains(park.id),
-                                    entry: store.entry(id: park.id)
+                                    entry: store.entry(id: park.id),
+                                    filterDate: openFilterDate
                                 )
                                 .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                                 .listRowBackground(Color.clear)
@@ -514,9 +515,10 @@ private struct ParkCard: View {
     let distanceMeters: Double?
     let isFavorite: Bool
     let entry: ParkEntry?
+    let filterDate: Date?
 
-    private var openStatus: ParkOpenStatus? {
-        park.opening == nil ? nil : park.openStatus()
+    private var statusBadge: (text: String, color: Color)? {
+        ParkStatusBadge.text(for: park, filterDate: filterDate)
     }
 
     var body: some View {
@@ -549,11 +551,11 @@ private struct ParkCard: View {
                             .multilineTextAlignment(.leading)
                     }
                     FlowLayout(spacing: 6) {
-                        if let openStatus {
+                        if let statusBadge {
                             ParkChip(
-                                text: openStatus.badgeText,
-                                tint: openStatus.badgeColor,
-                                fill: openStatus.badgeColor.opacity(0.14)
+                                text: statusBadge.text,
+                                tint: statusBadge.color,
+                                fill: statusBadge.color.opacity(0.14)
                             )
                         }
                         if let distanceMeters {
