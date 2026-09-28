@@ -564,6 +564,9 @@ private struct ParkCard: View {
                         if visitCount > 0 {
                             ParkChip(text: ParkFormatting.visits(visitCount))
                         }
+                        if park.wakesys == true {
+                            ParkChip(text: "Wakesys")
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
