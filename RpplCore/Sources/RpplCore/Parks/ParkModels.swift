@@ -303,6 +303,11 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public func openStatus(at date: Date = Date()) -> ParkOpenStatus {
         ParkSchedule.status(for: opening, at: date, timeZone: resolvedTimeZone)
     }
+
+    /// Same as `openStatus(at:)`, plus the window that status is about (for `.openToday`).
+    public func openStatusDetail(at date: Date = Date()) -> ParkOpenStatusDetail {
+        ParkSchedule.statusDetail(for: opening, at: date, timeZone: resolvedTimeZone)
+    }
 }
 
 /// Opaque-string values for `SessionManifest.parkIdSource`.
