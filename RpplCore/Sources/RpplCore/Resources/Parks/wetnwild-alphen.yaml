@@ -1,7 +1,7 @@
 version: 1
 id: wetnwild-alphen
 created_at: 2026-09-24
-updated_at: 2026-09-28
+updated_at: 2026-09-29
 history:
   - date: 2026-09-24
     description: initial
@@ -11,6 +11,8 @@ history:
     description: >-
       water_temperature: gouda.voorhaven had stopped reporting (stale since 2026-08-13) - switch
       to maarssen.kanaal, the nearest still-reporting station
+  - date: 2026-09-29
+    description: add October opening hours from the park's Instagram post
 
 author: Rppl
 name: Wet 'n Wild
@@ -46,19 +48,20 @@ cables:
       - { lat: 52.13640600413686, lon: 4.679423784843997 }
 
 # Opening windows plus hourly, unnumbered blocks bookable per 1 or 2 hours.
-# Source: wetnwild.nl/wakepark (September 2026).
-# The site announces new hours from 5 October 2026 without listing them yet.
+# Source: wetnwild.nl/wakepark (September 2026); October hours from the park's own Instagram
+# post @wetnwildwakepark (seen 2026-09-29).
 opening:
   booking: optional
   numbered: false
   booking_minutes: [60, 120]
   note: >-
-    Booking ahead is recommended. New opening hours apply from 5 October 2026.
+    Booking ahead is recommended.
   rules:
     - { label: September, months: [9], days: [wed], open: "16:00", close: "20:00" }
     - { label: September, months: [9], days: [thu, fri], open: "17:00", close: "20:00" }
     - { label: September, months: [9], days: [sat], open: "12:00", close: "18:00" }
     - { label: September, months: [9], days: [sun], open: "13:00", close: "18:00" }
+    - { label: October, months: [10], days: [sat, sun], open: "13:00", close: "16:00" }
     - label: Beginner hour
       months: [9]
       days: [sat]
