@@ -13,6 +13,8 @@ history:
       to maarssen.kanaal, the nearest still-reporting station
   - date: 2026-09-29
     description: add October opening hours from the park's Instagram post
+  - date: 2026-09-29
+    description: add good-weather opening exceptions for 2026-09-29 to 2026-10-04
 
 author: Rppl
 name: Wet 'n Wild
@@ -68,6 +70,14 @@ opening:
       open: "12:00"
       close: "13:00"
       note: Cable runs at 27 km/h
+  # One-off changes; each stops applying after its dates. Source: the park's Instagram story
+  # "Deze week" @wetnwildwakepark (seen 2026-09-29), extra evenings because of the good weather.
+  # The same story lists Friday 2026-10-02 closed and Sat/Sun 2026-10-03/04 13:00-16:00, which
+  # the regular October rules already give, so those need no exception.
+  exceptions:
+    - { kind: hours, label: Good weather, dates: ["2026-09-29"], open: "17:00", close: sunset }
+    - { kind: hours, label: Good weather, dates: ["2026-09-30"], open: "16:00", close: sunset }
+    - { kind: hours, label: Good weather, dates: ["2026-10-01"], open: "17:30", close: sunset }
   slots:
     - { id: "12:00", start: "12:00", end: "13:00" }
     - { id: "13:00", start: "13:00", end: "14:00" }
