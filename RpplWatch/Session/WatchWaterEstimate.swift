@@ -3,12 +3,12 @@ import Foundation
 import RpplCore
 
 extension WatchSessionController {
-    private static let waterEstimateTimeout: TimeInterval = 8
+    private nonisolated static let waterEstimateTimeout: TimeInterval = 8
     /// Max distance from a park pin or traced cable. Not every park is catalogued, so a session
     /// elsewhere must get no estimate rather than a far-away park's water.
-    private static let waterEstimateMaxParkMeters = 1_000.0
+    private nonisolated static let waterEstimateMaxParkMeters = 1_000.0
     /// A fix vaguer than this can't tell which park (if any) we're at; wait for a better one.
-    private static let waterEstimateMaxAccuracyMeters = 250.0
+    private nonisolated static let waterEstimateMaxAccuracyMeters = 250.0
 
     func resetWaterEstimate() {
         waterEstimateFetchTask?.cancel()
