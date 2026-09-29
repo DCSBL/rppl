@@ -1,11 +1,13 @@
 import RpplCore
 import SwiftUI
 
-/// Debug-tools-only screen: the last warnings/failures logged via `WakeLog`, across every category
+/// Debug-tools-only screen: the last 100 warnings/failures logged (kept across restarts) via `WakeLog`, across every category
 /// (sync, transfer, water, …), newest first. Cheap throwaway list — this exists so a developer can
 /// see *why* something silently failed (e.g. a water-temperature fetch) without attaching Console.app.
 struct DebugLogView: View {
+    @Environment(\.openURL) private var openURL
     @State private var entries: [WakeLog.Entry] = WakeLog.recentEntries()
+    @State private var showMail = false
 
     var body: some View {
         List {
@@ -21,15 +23,36 @@ struct DebugLogView: View {
         .navigationTitle("Debug Log")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Clear") {
-                    WakeLog.clearHistory()
-                    entries = []
+                Menu {
+                    Button("Export", systemImage: "square.and.arrow.up") { DebugLogShare.share() }
+                    Button("Send to Rppl", systemImage: "envelope") { sendToRppl() }
+                    Button("Clear", systemImage: "trash", role: .destructive) {
+                        WakeLog.clearHistory()
+                        entries = []
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
                 .disabled(entries.isEmpty)
+                .accessibilityLabel(Text("Debug log actions"))
             }
+        }
+        .sheet(isPresented: $showMail) {
+            DebugLogMailComposer { showMail = false }
+                .ignoresSafeArea()
         }
         .refreshable { entries = WakeLog.recentEntries() }
         .task { entries = WakeLog.recentEntries() }
+    }
+
+    private func sendToRppl() {
+        if MailAvailability.canSend {
+            showMail = true
+        } else if let url = DebugLogShare.mailtoURL() {
+            openURL(url)
+        } else {
+            DebugLogShare.share()
+        }
     }
 
     @ViewBuilder

@@ -4447,6 +4447,22 @@
         }
       }
     },
+    "Debug log actions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug log actions"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug-logacties"
+          }
+        }
+      }
+    },
     "Send to Rppl" : {
       "localizations" : {
         "en" : {
