@@ -427,6 +427,208 @@ struct ParksTests {
         #expect(ParkListing.filtered(parks, favorites: [], filters: ParkFilters()).map(\.id) == parks.map(\.id))
     }
 
+    // MARK: - Opening exceptions
+
+    private func wetNWild() throws -> Park {
+        try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+    }
+
+    private func clock(_ minute: Int) -> String { ParkSchedule.timeText(minutes: minute) }
+
+    @Test func wetNWildGoodWeatherWeekOpensExtraEvenings() throws {
+        let park = try wetNWild()
+
+        // Monday 2026-09-28: not announced, stays closed.
+        let monday = park.schedule(on: date("2026-09-28"))
+        #expect(monday.isOpen == false)
+        #expect(monday.notices.isEmpty)
+
+        // Tuesday 2026-09-29: normally closed, now 17:00 until sunset (around 19:25).
+        let tuesday = park.schedule(on: date("2026-09-29"))
+        #expect(tuesday.isOpen)
+        #expect(tuesday.windows.map(\.startMinute) == [17 * 60])
+        let tuesdayEnd = try #require(tuesday.windows.first?.endMinute)
+        #expect((19 * 60 + 15...19 * 60 + 35).contains(tuesdayEnd))
+        #expect(tuesday.notices.map(\.kind) == [ParkExceptionKind.hours])
+        #expect(tuesday.notices.first?.label == "Good weather")
+        #expect(tuesday.availableSlots.map(\.start) == ["17:00", "18:00"])
+
+        // Wednesday 2026-09-30: 16:00 until sunset replaces the regular 16:00-20:00.
+        let wednesday = park.schedule(on: date("2026-09-30"))
+        #expect(wednesday.windows.map(\.startMinute) == [16 * 60])
+        #expect(try #require(wednesday.windows.first?.endMinute) < 20 * 60)
+        #expect(wednesday.availableSlots.map(\.start) == ["16:00", "17:00", "18:00"])
+
+        // Thursday 2026-10-01: October, normally closed, now 17:30 until sunset.
+        let thursday = park.schedule(on: date("2026-10-01"))
+        #expect(thursday.windows.map(\.startMinute) == [17 * 60 + 30])
+        #expect(thursday.availableSlots.map(\.start) == ["18:00"])
+
+        // Friday closed, weekend 13:00-16:00 (regular October rules).
+        #expect(park.schedule(on: date("2026-10-02")).isOpen == false)
+        #expect(park.schedule(on: date("2026-10-03")).windows.map(\.startMinute) == [13 * 60])
+        #expect(park.schedule(on: date("2026-10-04")).windows.map(\.endMinute) == [16 * 60])
+
+        // The exceptions expire: the next Tuesday is closed again, without notices.
+        let nextTuesday = park.schedule(on: date("2026-10-06"))
+        #expect(nextTuesday.isOpen == false)
+        #expect(nextTuesday.notices.isEmpty)
+    }
+
+    @Test func wetNWildGoodWeatherWeekDrivesOpenFilterAndStatus() throws {
+        let park = try wetNWild()
+
+        func shown(_ iso: String) -> Bool {
+            !ParkListing.filtered([park], favorites: [], filters: ParkFilters(openOnDate: date(iso))).isEmpty
+        }
+        #expect(shown("2026-09-28") == false)
+        #expect(shown("2026-09-29"))
+        #expect(shown("2026-09-30"))
+        #expect(shown("2026-10-01"))
+        #expect(shown("2026-10-02") == false)
+        #expect(shown("2026-10-03"))
+        #expect(shown("2026-10-06") == false)
+
+        #expect(park.openStatus(at: date("2026-09-28", hour: 12)) == .opensTomorrow)
+        #expect(park.openStatus(at: date("2026-09-29", hour: 12)) == .openToday)
+        let evening = park.openStatusDetail(at: date("2026-09-29", hour: 18))
+        #expect(evening.status == .openToday)
+        #expect(evening.windowHasStarted == true)
+        // After sunset it is over for the day; Wednesday is also open.
+        #expect(park.openStatus(at: date("2026-09-29", hour: 21)) == .opensTomorrow)
+        // After Thursday's session Friday is closed.
+        #expect(park.openStatus(at: date("2026-10-01", hour: 21)) == .closed)
+
+        let upcoming = park.upcomingExceptions(from: date("2026-09-28"))
+        #expect(upcoming.map(\.date) == ["2026-09-29", "2026-09-30", "2026-10-01"])
+        #expect(upcoming.allSatisfy { $0.kind == ParkExceptionKind.hours && $0.windows.count == 1 })
+        #expect(park.upcomingExceptions(from: date("2026-10-02")).isEmpty)
+    }
+
+    private func exceptionPark(_ exceptions: String) throws -> Park {
+        try ParkCatalog.parse(yaml: """
+        version: 1
+        id: exceptions
+        name: Exceptions
+        location: { lat: 52.136, lon: 4.678 }
+        opening:
+          rules:
+            - { months: [6], days: [wed], open: "16:00", close: "20:00" }
+          exceptions:
+        \(exceptions)
+        """, fallbackId: "x")
+    }
+
+    @Test func closedExceptionBeatsRulesAndExtraAndCarriesItsLabel() throws {
+        // 2026-06-10 is a Wednesday, normally open 16:00-20:00.
+        let park = try exceptionPark("""
+            - { kind: extra, dates: ["2026-06-10"], open: "10:00", close: "12:00" }
+            - { kind: closed, label: Wind, dates: ["2026-06-10"], note: Too windy }
+        """)
+        let day = park.schedule(on: date("2026-06-10"))
+        #expect(day.isOpen == false)
+        #expect(day.isClosedByException)
+        #expect(day.notices.compactMap(\.label) == ["Wind"])
+        #expect(ParkListing.filtered([park], favorites: [], filters: ParkFilters(openOnDate: date("2026-06-10"))).isEmpty)
+        // The next Wednesday is regular again.
+        let next = park.schedule(on: date("2026-06-17"))
+        #expect(next.isOpen)
+        #expect(next.isClosedByException == false)
+    }
+
+    @Test func extraExceptionAddsAWindowNextToTheRegularOne() throws {
+        let park = try exceptionPark("""
+            - { kind: extra, label: Early start, dates: ["2026-06-10"], open: "10:00", close: "12:00" }
+        """)
+        let day = park.schedule(on: date("2026-06-10"))
+        #expect(day.windows.map(\.startMinute) == [10 * 60, 16 * 60])
+        // Opens on a normally closed day too.
+        let thursday = try exceptionPark("""
+            - { kind: extra, dates: ["2026-06-11"], open: "10:00", close: "12:00" }
+        """).schedule(on: date("2026-06-11"))
+        #expect(thursday.windows.map(\.startMinute) == [10 * 60])
+    }
+
+    @Test func eventAndUnknownKindsOnlyAddNotices() throws {
+        let park = try exceptionPark("""
+            - { kind: event, label: Wake Battle, dates: ["2026-06-10"] }
+            - { kind: something-new, label: Future kind, dates: ["2026-06-10"] }
+        """)
+        let day = park.schedule(on: date("2026-06-10"))
+        #expect(day.windows.map(\.startMinute) == [16 * 60])
+        #expect(day.notices.map(\.kind) == ["event", "something-new"])
+    }
+
+    @Test func exceptionWithoutDateBoundIsIgnored() throws {
+        let park = try exceptionPark("""
+            - { kind: closed, label: Oops }
+        """)
+        #expect(park.schedule(on: date("2026-06-10")).isOpen)
+        #expect(park.upcomingExceptions(from: date("2026-06-01")).isEmpty)
+    }
+
+    @Test func exceptionDateRangeWithDaysSelector() throws {
+        // Only Thursday and Friday inside the range; Wednesday keeps its regular hours.
+        let park = try exceptionPark("""
+            - { kind: hours, from: "2026-06-08", until: "2026-06-14", days: [thu, fri], open: "09:00", close: "10:00" }
+        """)
+        #expect(park.schedule(on: date("2026-06-10")).windows.map(\.startMinute) == [16 * 60])
+        #expect(park.schedule(on: date("2026-06-11")).windows.map(\.startMinute) == [9 * 60])
+        #expect(park.schedule(on: date("2026-06-12")).windows.map(\.startMinute) == [9 * 60])
+        #expect(park.schedule(on: date("2026-06-18")).isOpen == false)
+    }
+
+    @Test func hoursExceptionMakesAnUnknownScheduleKnownForThatDayOnly() throws {
+        let park = try ParkCatalog.parse(yaml: """
+        version: 1
+        id: unknown
+        name: Unknown
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          hours_unknown: true
+          slots:
+            - { id: "1", start: "10:00", end: "11:00" }
+          exceptions:
+            - { kind: hours, dates: ["2026-06-10"], open: "09:00", close: "12:00" }
+            - { kind: closed, dates: ["2026-06-11"] }
+        """, fallbackId: "x")
+        let announced = park.schedule(on: date("2026-06-10"))
+        #expect(announced.isScheduleKnown)
+        #expect(announced.availableSlots.map(\.id) == ["1"])
+        let closed = park.schedule(on: date("2026-06-11"))
+        #expect(closed.isScheduleKnown)
+        #expect(closed.isOpen == false)
+        #expect(park.schedule(on: date("2026-06-12")).isScheduleKnown == false)
+    }
+
+    @Test func sunsetWindowThatCannotExistIsDropped() throws {
+        let park = try exceptionPark("""
+            - { kind: hours, dates: ["2026-06-10"], open: "23:30", close: sunset }
+        """)
+        // June sunset is around 22:05, so a 23:30 opening leaves no window; the regular hours stay.
+        #expect(park.schedule(on: date("2026-06-10")).windows.map(\.startMinute) == [16 * 60])
+    }
+
+    @Test func sunsetTimeIsPlausibleForTheSeason() throws {
+        let alphen = ParkCoordinate(lat: 52.136, lon: 4.678)
+        let summer = try #require(ParkSun.sunsetMinute(at: alphen, on: date("2026-06-21"), timeZone: amsterdam))
+        let winter = try #require(ParkSun.sunsetMinute(at: alphen, on: date("2026-12-21"), timeZone: amsterdam))
+        #expect((22 * 60...22 * 60 + 15).contains(summer))
+        #expect((16 * 60 + 20...16 * 60 + 40).contains(winter))
+        // No sunset in the polar summer.
+        #expect(ParkSun.sunsetMinute(at: ParkCoordinate(lat: 78.0, lon: 15.0), on: date("2026-06-21"), timeZone: amsterdam) == nil)
+    }
+
+    @Test func exceptionsRoundTripThroughYAML() throws {
+        let park = try exceptionPark("""
+            - { kind: closed, label: Wind, dates: ["2026-06-10"], note: Too windy }
+            - { kind: something-new, from: "2026-06-01", until: "2026-06-02" }
+        """)
+        let decoded = try ParkCatalog.parse(yaml: try ParkCatalog.encode(park), fallbackId: "x")
+        #expect(decoded.opening?.exceptions == park.opening?.exceptions)
+        #expect(decoded.opening?.exceptions?.last?.kind == "something-new")
+    }
+
     // MARK: - Editing
 
     private func tempDir() throws -> URL {

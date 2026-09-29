@@ -65,6 +65,7 @@ struct ParkDetailView: View {
                 mapCard
                 if let daySchedule {
                     todayCard(daySchedule)
+                    upcomingChangesCard
                     openingTimesCard
                     blocksCard(daySchedule)
                 }
@@ -266,6 +267,10 @@ struct ParkDetailView: View {
                     .foregroundStyle(.red)
             }
 
+            ForEach(Array(day.notices.enumerated()), id: \.offset) { _, notice in
+                noticeRow(kind: notice.kind, label: notice.label, note: notice.note)
+            }
+
             if weather != nil || waterTemperature != nil || showsWaterTemperaturePromptRow || showsWaterTemperatureUnavailable {
                 Divider().overlay(Color.rpplFill)
                 conditionsSection(weather: weather, waterTemperature: waterTemperature)
@@ -370,6 +375,57 @@ struct ParkDetailView: View {
         }
         let day = date.formatted(date: .numeric, time: .omitted)
         return String(localized: "\(day) at \(time)")
+    }
+
+    private func noticeRow(kind: String, label: String?, note: String?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text([ParkFormatting.exceptionKind(kind), label].compactMap { $0 }.joined(separator: " · "))
+                .font(.subheadline.bold())
+                .foregroundStyle(kind == ParkExceptionKind.closed ? Color.red : Color.rpplAccent)
+            if let note {
+                Text(note)
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+        }
+    }
+
+    /// Announced one-offs (good-weather openings, closures, events) still ahead. Hidden when there are none.
+    private var upcomingChangesCard: some View {
+        let occurrences = park.upcomingExceptions()
+        return Group {
+            if !occurrences.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionTitle("Upcoming changes")
+                    ForEach(occurrences) { occurrence in
+                        HStack(alignment: .firstTextBaseline) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(ParkFormatting.exceptionDate(occurrence.date, in: park))
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.rpplText)
+                                Text([ParkFormatting.exceptionKind(occurrence.kind), occurrence.label].compactMap { $0 }.joined(separator: " · "))
+                                    .font(.caption)
+                                    .foregroundStyle(occurrence.kind == ParkExceptionKind.closed ? Color.red : Color.rpplMuted)
+                                if let note = occurrence.note {
+                                    Text(note)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.rpplMuted)
+                                }
+                            }
+                            Spacer(minLength: 8)
+                            if !occurrence.windows.isEmpty {
+                                Text(occurrence.windows.map(ParkFormatting.window).joined(separator: ", "))
+                                    .font(.subheadline)
+                                    .monospacedDigit()
+                                    .foregroundStyle(Color.rpplText)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .logbookCardChrome()
+            }
+        }
     }
 
     private var openingTimesCard: some View {

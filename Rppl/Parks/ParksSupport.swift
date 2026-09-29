@@ -223,6 +223,35 @@ enum ParkFormatting {
         return Calendar.current.standaloneMonthSymbols[month - 1].capitalized
     }
 
+    /// "Closed", or "Closed · Wind" when a `closed` exception with a label caused it.
+    static func closedText(_ day: ParkDaySchedule) -> String {
+        guard let label = day.notices.first(where: { $0.kind == ParkExceptionKind.closed })?.label, !label.isEmpty else {
+            return String(localized: "Closed")
+        }
+        return String(localized: "Closed · \(label)")
+    }
+
+    static func exceptionKind(_ kind: String) -> String {
+        switch kind {
+        case ParkExceptionKind.hours: String(localized: "Changed hours")
+        case ParkExceptionKind.extra: String(localized: "Extra opening")
+        case ParkExceptionKind.closed: String(localized: "Closed")
+        case ParkExceptionKind.event: String(localized: "Event")
+        default: kind
+        }
+    }
+
+    /// "Tue, Sep 29" for a `yyyy-MM-dd` exception date in the park's time zone.
+    static func exceptionDate(_ iso: String, in park: Park) -> String {
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = park.resolvedTimeZone
+        guard parts.count == 3,
+              let date = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))
+        else { return iso }
+        return date.formatted(Date.FormatStyle(timeZone: park.resolvedTimeZone).weekday(.abbreviated).month(.abbreviated).day())
+    }
+
     static func openFromTo(_ window: ParkTimeWindow) -> String {
         let from = time(window.startMinute)
         let to = time(window.endMinute)
@@ -440,14 +469,14 @@ enum ParkStatusBadge {
         guard park.opening != nil else { return nil }
 
         if let filterDate {
-            let day = ParkSchedule.day(for: park.opening, on: filterDate, timeZone: park.resolvedTimeZone)
+            let day = park.schedule(on: filterDate)
             guard day.isScheduleKnown else {
                 return (String(localized: "Opening hours unknown"), .gray)
             }
             let starts = day.windows.map(\.startMinute)
             let ends = day.windows.map(\.endMinute)
             guard let start = starts.min(), let end = ends.max() else {
-                return (String(localized: "Closed"), .red)
+                return (ParkFormatting.closedText(day), .red)
             }
             let dateText = filterDate.formatted(.dateTime.month(.abbreviated).day())
             let from = ParkFormatting.time(start)
@@ -468,7 +497,7 @@ enum ParkStatusBadge {
         case .opensTomorrow:
             return (String(localized: "Opens tomorrow"), .yellow)
         case .closed:
-            return (String(localized: "Closed"), .red)
+            return (ParkFormatting.closedText(park.schedule(on: now)), .red)
         case .unknown:
             return (String(localized: "Opening hours unknown"), .gray)
         }
