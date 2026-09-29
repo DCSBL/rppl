@@ -60,6 +60,8 @@ opening:
     - { label: September, months: [9], days: [weekdays], open: "14:00", close: "20:00" }
   slots:                          # fixed-start blocks
     - { id: "3", start: "14:00", end: "15:30" }
+  exceptions:                     # optional one-offs on top of `rules`, see "Exceptions" below
+    - { kind: closed, label: Wind, dates: ["2026-09-25"] }
 
 prices:  [{ name: Day pass, price: "€25", note: optional }]
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
@@ -82,6 +84,8 @@ Rules and slots share optional selectors, all of which must match a date:
 | `from` / `until` | Inclusive `yyyy-MM-dd`, for a change of hours from or until a date |
 | `dates` | Explicit `yyyy-MM-dd` dates (holidays, special days); listed under their month |
 
+`open` / `close` also accept `sunset` (see Exceptions).
+
 - A park with **rules only** is drop-in: the Today section shows the open windows.
 - A park with **slots only** offers each slot on the days it matches.
 - A park with **both** offers a slot only when it fits completely inside an open window. Example: Project 7 in September on a weekday is open 14:00–20:00, so blocks 3–6 are available; on weekends 12:30–20:00 adds block 2.
@@ -92,8 +96,36 @@ Rules and slots share optional selectors, all of which must match a date:
 
 - The opening-times card collapses rules into one entry per month, listing the specialities (weekend hours, beginner hour, …) as lines under it. The current month is highlighted.
 - Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
-- Special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. There is no closed-day rule or UI for them yet.
+- Recurring special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. Unplanned openings, closures and events use `exceptions` instead.
+- Today shows notices for the day's exceptions under the hours; a park detail with announced exceptions still ahead gets an "Upcoming changes" card. The list chip reads "Closed · <label>" when a labelled `closed` exception is the reason.
 - Cables are called "full size" (`cw`/`ccw`) or "2.0" (`2d`). The map shows an arrow on each start point, pointing towards the next traced point.
+
+### Exceptions
+
+`opening.exceptions` holds announced changes that are not part of the regular schedule: an extra evening because of good weather, a closure for wind or maintenance, an event. The regular `rules` stay untouched; an exception sits on top of them for its dates only, and stops having any effect after them. Old entries can stay in the file until someone tidies them.
+
+```yaml
+opening:
+  exceptions:
+    - { kind: hours, label: Good weather, dates: ["2026-09-29"], open: "17:00", close: sunset }
+    - { kind: closed, label: Wind, dates: ["2026-10-02"], note: Reopens on Saturday }
+    - { kind: extra, label: Early start, from: "2026-10-05", until: "2026-10-09", days: [weekdays], open: "10:00", close: "12:00" }
+    - { kind: event, label: Wake Battle, dates: ["2026-10-10"] }
+```
+
+| Field | Meaning |
+|-------|---------|
+| `kind` | Opaque string. `hours`: these are the hours on the matching dates, replacing the regular ones. `closed`: closed all day. `extra`: added next to the regular hours. `event`: notice only, open/closed does not change. Unknown kinds behave like `event`. |
+| `label` | Short reason or name ("Good weather", "Wind"), shown in the notice and the list chip. |
+| `note` | Longer text. |
+| `months`, `days`, `from`, `until`, `dates` | Same selectors as rules. **At least one of `from`, `until` or `dates` is required**; an exception without a date bound is ignored so a forgotten entry can never change every day. |
+| `open`, `close` | `HH:mm` or `sunset`. Used by `hours` and `extra`. |
+
+- Precedence per day: `closed` beats `hours` beats the regular rules. `extra` is added on top of either.
+- `close: sunset` (also allowed in normal rules) is computed from the park location and the date (`ParkSun`, within a couple of minutes). A window whose opening time falls after sunset does not exist that day. Blocks only count when they end before the resolved close, so a sunset window ending at 19:26 offers the 18:00 block, not 19:00.
+- The Open date filter, the list chip, the Today card and the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
+- The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
+- Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 
 ### Water temperature (opt-in)
 

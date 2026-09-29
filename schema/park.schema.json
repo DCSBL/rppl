@@ -106,6 +106,10 @@
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
     },
+    "timeOrSunset": {
+      "type": "string",
+      "pattern": "^(([01]\\d|2[0-3]):[0-5]\\d|sunset)$"
+    },
     "time": {
       "type": "string",
       "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
@@ -185,8 +189,39 @@
             "from": true,
             "until": true,
             "dates": true,
-            "open": { "$ref": "#/$defs/time" },
-            "close": { "$ref": "#/$defs/time" },
+            "open": { "$ref": "#/$defs/timeOrSunset" },
+            "close": { "$ref": "#/$defs/timeOrSunset" },
+            "note": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "openingException": {
+      "allOf": [
+        { "$ref": "#/$defs/dateSelector" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "anyOf": [
+            { "required": ["from"] },
+            { "required": ["until"] },
+            { "required": ["dates"] }
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "minLength": 1,
+              "description": "hours (replaces the regular hours), closed, extra (added to the regular hours) or event (notice only). Unknown values are notices."
+            },
+            "label": { "type": "string" },
+            "months": true,
+            "days": true,
+            "from": true,
+            "until": true,
+            "dates": true,
+            "open": { "$ref": "#/$defs/timeOrSunset" },
+            "close": { "$ref": "#/$defs/timeOrSunset" },
             "note": { "type": "string" }
           }
         }
@@ -225,6 +260,10 @@
         "slots": {
           "type": "array",
           "items": { "$ref": "#/$defs/openingSlot" }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/openingException" }
         },
         "numbered": { "type": "boolean" },
         "booking_minutes": {
