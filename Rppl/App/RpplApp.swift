@@ -24,6 +24,7 @@ struct RpplApp: App {
     }
 
     init() {
+        WakeLog.enablePersistence(at: WakeLog.defaultHistoryURL)
         WakeLog.debug(.lifecycle, "RpplApp init")
         _ = TesterIdentity.resolve()
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
