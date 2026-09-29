@@ -281,8 +281,7 @@ public enum ParkListing {
                 let schedule = ParkSchedule.day(
                     for: park.opening,
                     on: openOnDate,
-                    timeZone: park.resolvedTimeZone,
-                    coordinate: park.location
+                    timeZone: park.resolvedTimeZone
                 )
                 // Unknown-hours parks (e.g. reservation-only, no published weekly pattern) never get
                 // filtered out by the Open-date filter — we can't confirm they're closed, so always show.
