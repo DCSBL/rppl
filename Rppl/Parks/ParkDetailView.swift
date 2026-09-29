@@ -287,26 +287,27 @@ struct ParkDetailView: View {
     }
 
     private func conditionsSection(weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            FlowLayout(spacing: 16) {
+        VStack(alignment: .leading, spacing: 10) {
+            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
                 if let weather {
-                    Label(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
-                    Label(windSummary(weather), systemImage: "wind")
-                    Label(weather.rainForecast.label, systemImage: "cloud.rain")
+                    conditionRow(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
+                    conditionRow(windSummary(weather), systemImage: "wind")
+                    conditionRow(weather.rainForecast.label, systemImage: "cloud.rain")
                     if weather.isHighUV {
-                        Label(String(localized: "High UV"), systemImage: "sun.max.trianglebadge.exclamationmark")
-                            .foregroundStyle(.orange)
+                        conditionRow(
+                            String(localized: "High UV"),
+                            systemImage: "sun.max.trianglebadge.exclamationmark",
+                            tint: .orange
+                        )
                     }
                 }
                 if let waterTemperature {
-                    Label(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
+                    conditionRow(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
                 } else if showsWaterTemperatureUnavailable {
-                    Label(String(localized: "Not available"), systemImage: "water.waves")
-                        .foregroundStyle(Color.rpplMuted)
+                    conditionRow(String(localized: "Not available"), systemImage: "water.waves", tint: Color.rpplMuted)
                 }
             }
             .font(.subheadline)
-            .foregroundStyle(Color.rpplText)
 
             if waterTemperature == nil, showsWaterTemperaturePromptRow {
                 waterTemperaturePromptRow
@@ -318,6 +319,7 @@ struct ParkDetailView: View {
                 ))
                 .font(.caption2)
                 .foregroundStyle(Color.rpplMuted)
+                .fixedSize(horizontal: false, vertical: true)
             }
 
             if let weather, let legal = weather.legalURL {
@@ -339,6 +341,18 @@ struct ParkDetailView: View {
                 }
             }
         }
+    }
+
+    private func conditionRow(_ text: String, systemImage: String, tint: Color = Color.rpplText) -> some View {
+        GridRow {
+            Image(systemName: systemImage)
+                .frame(width: 22, alignment: .center)
+                .accessibilityHidden(true)
+            Text(text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(tint)
     }
 
     private func windSummary(_ weather: ParkWeather) -> String {
