@@ -123,6 +123,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
                let statistics = workoutBuilder.statistics(for: basalType),
                let value = statistics.sumQuantity()?.doubleValue(for: .kilocalorie()) {
                 basal = value
+                basalEnergyKilocalories = value
             }
             if hr != nil || energy != nil || basal != nil {
                 healthBuffer.append(

@@ -40,6 +40,13 @@ final class WatchSessionController: NSObject {
     var lastSpeedMps: Double?
     /// Cumulative active energy this session (mirrors `HKLiveWorkoutBuilder` statistics).
     var activeEnergyKilocalories: Double?
+    /// Cumulative basal/resting energy this session (mirrors `HKLiveWorkoutBuilder` statistics).
+    var basalEnergyKilocalories: Double?
+    /// Active + basal, when active energy has started reporting.
+    var totalEnergyKilocalories: Double? {
+        guard let activeEnergyKilocalories else { return nil }
+        return activeEnergyKilocalories + (basalEnergyKilocalories ?? 0)
+    }
     /// Set-gated session distance (sum of set meters). Not dock/pause walking.
     var totalDistanceM: Double { liveSetTracker.sessionSetMeters }
     /// Session-wide average speed (total set distance over elapsed time), nil before any movement.
@@ -49,6 +56,10 @@ final class WatchSessionController: NSObject {
     }
     var currentSetDuration: TimeInterval = 0
     var currentInactiveDuration: TimeInterval = 0
+    /// Sum of completed `riding` segments this session (current ongoing segment added separately).
+    var cumulativeRidingDuration: TimeInterval = 0
+    /// Sum of completed `inactive` segments this session (current ongoing segment added separately).
+    var cumulativeInactiveDuration: TimeInterval = 0
     var filterRejectionReason: String?
     var statusText = String(localized: "Idle")
     var errorText: String?
@@ -110,6 +121,8 @@ final class WatchSessionController: NSObject {
 
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     var detectionSimulationMode: DetectionSimulationMode = .detected
+    /// Debug-only: shrink the app's root view to a smaller watch's point size for layout checks.
+    var debugScreenSize: DebugScreenSize = .actual
 
     var liveSetTracker = LiveSetTracker()
     let healthStore = HKHealthStore()

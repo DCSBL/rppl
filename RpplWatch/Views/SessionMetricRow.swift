@@ -7,18 +7,20 @@ struct SessionMetricRow: View {
     var valueColor: Color = .primary
     /// When true, value stays full brightness under Always On (primary hero metric).
     var isPrimaryMetric: Bool = false
+    /// Bigger value / smaller caption, for screens with extra vertical room to spare (e.g. Inactive).
+    var isLarge: Bool = false
 
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.title3.bold())
+                .font(isLarge ? .title2.bold() : .title3.bold())
                 .monospacedDigit()
                 .foregroundStyle(valueColor)
                 .opacity(primaryValueOpacity)
             WatchMetricCaption(label: label, metric: metric)
-                .font(.caption2.weight(.semibold))
+                .font(isLarge ? .system(size: 9, weight: .semibold) : .caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
                 .alwaysOnSecondaryChrome(isLuminanceReduced)

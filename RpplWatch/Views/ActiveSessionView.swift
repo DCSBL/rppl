@@ -1,8 +1,10 @@
 import SwiftUI
+import RpplCore
 
 private enum SessionTab: Hashable {
     case controls
     case activity
+    case debug
 }
 
 struct ActiveSessionView: View {
@@ -15,6 +17,10 @@ struct ActiveSessionView: View {
                 .tag(SessionTab.controls)
             SessionSetUIPage(session: session)
                 .tag(SessionTab.activity)
+            if AppReleaseChannel.allowsDebugTools {
+                WatchDebugPage(session: session)
+                    .tag(SessionTab.debug)
+            }
         }
     }
 }

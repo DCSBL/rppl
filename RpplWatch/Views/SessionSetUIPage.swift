@@ -1,7 +1,10 @@
 import SwiftUI
 import RpplCore
 
-/// Product session UI: one-screen set view; fitted inactive overview (extra metrics scroll below a sticky header).
+/// Product session UI: Riding and Inactive share one fixed status block (`statusBlock`) — only
+/// color/icon/label and a couple of source values differ. Riding shows it alone, not scrollable.
+/// Inactive pages vertically (`.verticalPage`, same pattern as `IdleSessionView`) between the
+/// status block and a session summary page.
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -34,7 +37,7 @@ struct SessionSetUIPage: View {
                     .monospacedDigit()
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.yellow)
 
                 Text("Timers paused")
                     .font(.caption2)
@@ -74,172 +77,226 @@ struct SessionSetUIPage: View {
         }
     }
 
-    // MARK: - Riding (no scroll — fitted for AWU)
+    // MARK: - Riding (no scroll — fitted for AWU) / Inactive (vertical pages: status, then summary)
 
     private var ridingView: some View {
-        VStack(spacing: 4) {
-            Text(SessionFormatters.segmentDuration(session.currentSetDuration))
-                .font(.system(.largeTitle, design: .rounded).bold())
-                .monospacedDigit()
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-
-            Text("RIDE")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .alwaysOnSecondaryChrome(isLuminanceReduced)
-
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                VStack(spacing: 2) {
-                    Text(SessionFormatters.distance(session.displaySetMeters))
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("DIST")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.distance.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(spacing: 2) {
-                    Text(session.currentSetSpeedKmh.map { DistanceFormat.speedValue($0) } ?? "--")
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text(DistanceFormat.speedUnitSymbol().uppercased())
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.speed.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(spacing: 2) {
-                    Text("\(session.currentSetLapCount)")
-                        .font(.system(.title2, design: .rounded).bold())
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                        .alwaysOnSupportingMetric(isLuminanceReduced)
-                    Text("LAPS")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(WatchMetric.laps.tint)
-                        .alwaysOnSecondaryChrome(isLuminanceReduced)
-                }
-                .frame(maxWidth: .infinity)
-            }
-
-            heartRateRow
-
-            statusLine(primary: "Riding", color: .blue)
-
-            if session.didCompleteSet {
-                lastSetCompactLine
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 4)
+        statusBlock(isRiding: true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
-    private var lastSetCompactLine: some View {
-        HStack(spacing: 4) {
-            Text("Last")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Text(
-                "\(SessionFormatters.segmentDuration(session.lastSetDuration)) · "
-                    + "\(SessionFormatters.distance(session.lastSetMeters)) · "
-                    + "\(session.lastSetLapCount)"
-            )
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .monospacedDigit()
-            .minimumScaleFactor(0.7)
-            .lineLimit(1)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 2)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(lastSetAccessibilityLabel)
-        .alwaysOnSecondaryChrome(isLuminanceReduced)
-    }
-
-    private var lastSetAccessibilityLabel: String {
-        String(
-            localized: "Last set \(SessionFormatters.segmentDuration(session.lastSetDuration)), \(SessionFormatters.distance(session.lastSetMeters)), \(session.lastSetLapCount) laps"
-        )
-    }
-
-    // MARK: - Inactive (fitted; extra metrics scroll in below a sticky header)
 
     private var inactiveView: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                if let calories = session.activeEnergyKilocalories {
-                    SessionMetricRow(
-                        label: "Calories",
-                        metric: .energy,
-                        value: SessionFormatters.calories(calories)
-                    )
-                }
-                if let averageSpeed = session.sessionAverageSpeedKmh {
-                    SessionMetricRow(
-                        label: "Avg speed",
-                        metric: .speed,
-                        value: SessionFormatters.averageSpeed(averageSpeed)
-                    )
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 4)
-            .padding(.top, 6)
+        // Same vertical-page pattern as `IdleSessionView` — proven on-device, unlike the earlier
+        // `.scrollTargetBehavior(.viewAligned)` attempt, which left the summary unreachable.
+        TabView {
+            statusBlock(isRiding: false)
+            sessionSummaryPage
         }
-        .safeAreaInset(edge: .top) {
-            VStack(alignment: .leading, spacing: 8) {
-                statusLine(primary: "Inactive", color: .gray)
+        .tabViewStyle(.verticalPage)
+    }
 
-                SessionMetricRow(
-                    label: "Session",
-                    metric: .duration,
-                    value: SessionFormatters.elapsed(session.elapsed),
-                    valueColor: .yellow,
-                    isPrimaryMetric: true
+    /// Shared Riding/Inactive block: wall clock, status line, hero segment/total time, then
+    /// distance/speed/laps, water temp, heart rate and total calories. Identical layout for both
+    /// states — only color/icon/label and the segment-time/speed source differ.
+    private func statusBlock(isRiding: Bool) -> some View {
+        let speedKmh = isRiding ? session.currentSetSpeedKmh : session.lastSpeedMps.map { $0 * 3.6 }
+        let lapCount = session.isSetOngoing ? session.currentSetLapCount : session.lastSetLapCount
+
+        return VStack(alignment: .leading, spacing: 8) {
+            // No wall-clock row — watchOS already shows the real time natively.
+            statusLine(
+                primary: isRiding ? "Riding" : "Inactive",
+                color: isRiding ? .blue : .gray,
+                icon: isRiding ? "play.circle.fill" : "pause.circle.fill"
+            )
+
+            heroTimeRow(isRiding: isRiding)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                metricTile(
+                    value: SessionFormatters.distance(session.displaySetMeters),
+                    label: "DIST",
+                    metric: .distance
                 )
-                SessionMetricRow(
-                    label: "Inactive for",
-                    metric: .inactive,
-                    value: SessionFormatters.segmentDuration(session.currentInactiveDuration)
+                metricTile(
+                    value: speedKmh.map { DistanceFormat.speedValue($0) } ?? "--",
+                    label: DistanceFormat.speedUnitSymbol(),
+                    metric: .speed
                 )
-                SessionMetricRow(
-                    label: "Sets",
-                    metric: .sets,
-                    value: "\(session.setCount)"
+                metricTile(
+                    value: "\(lapCount)",
+                    label: "LAPS",
+                    metric: .laps
                 )
-                if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
-                    SessionMetricRow(
-                        label: "Water",
-                        metric: .water,
-                        value: session.waterTemperatureDisplay.map {
-                            SessionFormatters.waterTemp($0.celsius, isEstimate: $0.isEstimate)
-                        } ?? TemperatureFormat.placeholder
-                    )
-                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 4)
+
+            if !isRiding {
+                // Riding shows your own actual speed; inactive shows the live GPS reading
+                // (a stand-in for the cable's speed while you wait at the dock).
+                Text("Cable speed — live GPS reading")
+                    .font(.system(size: 8))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
+            }
+
+            if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
+                metricTile(
+                    value: session.waterTemperatureDisplay.map {
+                        SessionFormatters.waterTemp($0.celsius, isEstimate: $0.isEstimate)
+                    } ?? TemperatureFormat.placeholder,
+                    label: "WATER",
+                    metric: .water
+                )
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+
+            if !isRiding {
+                Text("Last session")
+                    .font(.caption2)
+                    .italic()
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                heartRateRow
+                    .frame(maxWidth: .infinity)
+                metricTile(
+                    value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                    label: "CAL",
+                    metric: .energy
+                )
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 6)
+        .padding(.vertical, isRiding ? 4 : 8)
+    }
+
+    private func heroTimeRow(isRiding: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(
+                SessionFormatters.segmentDuration(
+                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
+                )
+            )
+            .foregroundStyle(isRiding ? .blue : .gray)
+
+            Text("/")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+
+            // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
+            // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
+            Text(SessionFormatters.elapsed(session.elapsed))
+                .foregroundStyle(.yellow)
+        }
+        .font(.system(.largeTitle, design: .rounded).bold())
+        .monospacedDigit()
+        .minimumScaleFactor(0.5)
+        .lineLimit(1)
+        .alwaysOnSupportingMetric(isLuminanceReduced)
+    }
+
+    private func metricTile(value: String, label: String, metric: WatchMetric) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(.title2, design: .rounded).bold())
+                .monospacedDigit()
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .alwaysOnSupportingMetric(isLuminanceReduced)
+            Text(label)
+                .font(.caption2.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(metric.tint)
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Session summary (Inactive only; second vertical page)
+
+    private var totalRidingDuration: TimeInterval {
+        session.cumulativeRidingDuration + (session.lastConfidentCode == DetectionCodes.riding ? session.currentSetDuration : 0)
+    }
+
+    private var totalInactiveDuration: TimeInterval {
+        session.cumulativeInactiveDuration
+            + (session.lastConfidentCode == DetectionCodes.inactive ? session.currentInactiveDuration : 0)
+    }
+
+    private var sessionSummaryPage: some View {
+        ScrollView {
+            sessionSummaryContent
+                .padding(.horizontal, 6)
+                .padding(.top, 14)
+        }
+    }
+
+    private var sessionSummaryContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            WatchMetricCaption(label: "Session summary", metric: .sets)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .alwaysOnSecondaryChrome(isLuminanceReduced)
+
+            SessionMetricRow(label: "Sets", metric: .sets, value: "\(session.setCount)", isLarge: true)
+            SessionMetricRow(
+                label: "Distance",
+                metric: .distance,
+                value: SessionFormatters.distance(session.totalDistanceM),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Duration",
+                metric: .duration,
+                value: SessionFormatters.elapsed(session.elapsed),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Riding time",
+                metric: .duration,
+                value: SessionFormatters.segmentDuration(totalRidingDuration),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Inactive time",
+                metric: .inactive,
+                value: SessionFormatters.segmentDuration(totalInactiveDuration),
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Calories",
+                metric: .energy,
+                value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                isLarge: true
+            )
+            SessionMetricRow(
+                label: "Active calories",
+                metric: .energy,
+                value: session.activeEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                isLarge: true
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     @ViewBuilder
-    private func statusLine(primary: LocalizedStringKey, color: Color) -> some View {
+    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String) -> some View {
         VStack(spacing: 2) {
-            Text(primary)
-                .font(.headline.bold())
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Text(primary)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(color)
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(color)
+                    .accessibilityHidden(true)
+            }
             if session.isUnsure {
                 Text("Unsure")
                     .font(.caption2.weight(.semibold))

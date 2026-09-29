@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import RpplCore
 
@@ -28,12 +29,12 @@ struct WakeLogTests {
 
     @Test
     func historyIsCappedAtCapacity() {
-        for index in 0..<250 {
+        for index in 0..<150 {
             WakeLog.warning(.water, "entry \(index)")
         }
         let entries = WakeLog.recentEntries()
-        #expect(entries.count == 200)
-        #expect(entries.first?.message == "entry 249")
+        #expect(entries.count == 100)
+        #expect(entries.first?.message == "entry 149")
         #expect(entries.last?.message == "entry 50")
     }
 
@@ -51,5 +52,34 @@ struct WakeLogTests {
         #expect(entry?.formatted.contains("water") == true)
         #expect(entry?.formatted.contains("FAIL") == true)
         #expect(entry?.formatted.contains("station unreachable") == true)
+    }
+
+    @Test
+    func exportTextIsOldestFirstPlainLines() {
+        WakeLog.warning(.sync, "first")
+        WakeLog.error(.sync, "second")
+        let lines = WakeLog.exportText().split(separator: "\n")
+        #expect(lines.count == 2)
+        #expect(lines[0].hasSuffix("first"))
+        #expect(lines[1].hasSuffix("second"))
+    }
+
+    @Test
+    func persistedHistorySurvivesReload() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wakelog-\(UUID().uuidString).json")
+        defer {
+            WakeLog.disablePersistenceForTesting()
+            try? FileManager.default.removeItem(at: url)
+        }
+        WakeLog.enablePersistence(at: url)
+        WakeLog.error(.store, "kept")
+
+        let stored = try JSONDecoder().decode([WakeLog.Entry].self, from: Data(contentsOf: url))
+        #expect(stored.map(\.message) == ["kept"])
+
+        WakeLog.clearHistory()
+        WakeLog.enablePersistence(at: url)
+        #expect(WakeLog.recentEntries().isEmpty)
     }
 }
