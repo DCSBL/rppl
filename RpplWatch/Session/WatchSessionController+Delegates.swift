@@ -35,6 +35,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
             processLocationSample(sample)
             processDetectionFix(loc)
             requestAirWeatherIfNeeded(from: loc)
+            requestWaterEstimateIfNeeded(from: loc)
         }
     }
 

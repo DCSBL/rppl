@@ -707,6 +707,15 @@ if !migrated.isEmpty {
         try writeManifest(manifest)
     }
 
+    public func updateWaterTemperatureEstimate(_ estimate: ParkWaterTemperature, sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        manifest.waterTemperatureEstimate = estimate
+        try writeManifest(manifest)
+    }
+
     public func markTransferring(sessionId: String) throws {
         lock.lock()
         defer { lock.unlock() }

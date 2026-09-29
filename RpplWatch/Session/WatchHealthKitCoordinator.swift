@@ -292,6 +292,12 @@ extension WatchSessionController {
                     doubleValue: hkPeakSpeedMps
                 )
             }
+            if sessionWaterSamples.isEmpty, let estimate = waterEstimate {
+                closingMetadata[WorkoutMetadataKeys.waterTemperatureEstimate] = HKQuantity(
+                    unit: .degreeCelsius(),
+                    doubleValue: estimate.celsius
+                )
+            }
             try await builder.addMetadata(closingMetadata)
             await attachAirWeatherMetadata(to: builder)
             try await builder.endCollection(at: stoppedDate)

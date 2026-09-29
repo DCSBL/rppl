@@ -69,6 +69,8 @@ Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples ar
 
 Air weather: Watch fetches WeatherKit current conditions from the first usable GPS fix (retry at stop, ~8 s timeout). On save it attaches `HKMetadataKeyWeatherTemperature`, `HKMetadataKeyWeatherHumidity`, and `HKMetadataKeyWeatherCondition`. Fail open — missing weather never blocks `finishWorkout()`. Distinct from Ultra water-temperature samples. Requires the Watch WeatherKit entitlement (and App ID capability).
 
+Water estimate: from the first usable GPS fix the Watch resolves the nearest bundled park (`ParkListing.nearest`) and, if it has a `water_temperature` source, fetches the station reading (~8 s timeout, readings older than 48 h dropped). Stored in the manifest as `waterTemperatureEstimate` and shown on the inactive page as `~17°`, so watches without a submersion sensor (and Ultras before first submersion) still show a value. Once the Watch measures real samples, the display switches to the measured average and the estimate is no longer attached to the workout; otherwise it is saved as workout metadata `nl.dcsbl.rppl.waterTemperatureEstimate` (not as a Health water-temperature sample). Fail open — no park, source or network means no estimate.
+
 ## Action Button (Ultra)
 
 Optional start only:

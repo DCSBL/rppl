@@ -9,4 +9,6 @@ public enum WorkoutMetadataKeys {
     public static let legacyRideCount = "nl.dcsbl.rppl.rideCount"
     public static let totalDistanceMeters = "nl.dcsbl.rppl.totalDistanceMeters"
     public static let setDistanceMeters = "nl.dcsbl.rppl.distanceMeters"
+    /// Estimated park water temperature (°C `HKQuantity`), only when the Watch measured none.
+    public static let waterTemperatureEstimate = "nl.dcsbl.rppl.waterTemperatureEstimate"
 }

@@ -219,12 +219,13 @@ struct SessionSetUIPage: View {
                     metric: .sets,
                     value: "\(session.setCount)"
                 )
-                if session.waterTemperatureAvailable {
+                if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
                     SessionMetricRow(
                         label: "Water",
                         metric: .water,
-                        value: session.averageWaterTemperatureCelsius.map { SessionFormatters.waterTemp($0) }
-                            ?? TemperatureFormat.placeholder
+                        value: session.waterTemperatureDisplay.map {
+                            SessionFormatters.waterTemp($0.celsius, isEstimate: $0.isEstimate)
+                        } ?? TemperatureFormat.placeholder
                     )
                 }
             }

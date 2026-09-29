@@ -9,5 +9,6 @@ public enum SessionSchema {
     /// v7: optional manifest `imported` (phone file-import timestamp; nil for Watch/WC sessions).
     /// v8: optional manifest `weather` (WeatherKit temperature + humidity at start).
     /// v9: optional manifest `weather` wind speed/direction + precipitation.
-    public static let currentVersion = 9
+    /// v10: optional manifest `waterTemperatureEstimate` (park water estimate at session start).
+    public static let currentVersion = 10
 }
