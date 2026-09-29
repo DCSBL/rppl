@@ -36,6 +36,14 @@ struct ParkDetailView: View {
         return ParkDiff.changedSections(from: base, to: park)
     }
 
+    /// Removed/added YAML lines against the bundled version; nil for a brand-new custom park.
+    private var lineDiff: ParkLineDiff? {
+        guard let base = entry?.bundledPark,
+              let old = try? ParkCatalog.encode(base),
+              let new = try? ParkCatalog.encode(park) else { return nil }
+        return ParkDiff.lineDiff(from: old, to: new)
+    }
+
     /// The park has a configured source but the (global) feature is off and the user hasn't already
     /// dismissed the inline offer — so there's something to invite them to turn on.
     private var showsWaterTemperaturePromptRow: Bool {
@@ -90,7 +98,7 @@ struct ParkDetailView: View {
             ParkEditorView(original: park, onSaved: {})
         }
         .sheet(isPresented: $showMail) {
-            ParkMailComposer(park: park, changedSections: changedSections) { showMail = false }
+            ParkMailComposer(park: park, changedSections: changedSections, lineDiff: lineDiff) { showMail = false }
                 .ignoresSafeArea()
         }
         .confirmationDialog(removeTitle, isPresented: $confirmRemove, titleVisibility: .visible) {
@@ -141,7 +149,7 @@ struct ParkDetailView: View {
                 Button("Send to Rppl", systemImage: "envelope") {
                     if MailAvailability.canSend {
                         showMail = true
-                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
+                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections, lineDiff: lineDiff) {
                         openURL(url)
                     } else {
                         ParkShare.share(park)

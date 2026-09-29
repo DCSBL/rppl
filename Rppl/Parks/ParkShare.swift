@@ -27,13 +27,24 @@ enum ParkShare {
         ActivitySharePresenter.present(items: [url])
     }
 
-    /// `changedSections` is a "these sections are changed" summary, not a field-by-field diff.
+    /// `changedSections` is a "these sections are changed" summary; `lineDiff` lists removed/added YAML lines.
     /// `yamlNote` describes where the recipient finds the YAML (attached vs. inlined below).
-    static func mailBody(changedSections: [ParkSection] = [], yamlNote: String) -> String {
+    static func mailBody(
+        changedSections: [ParkSection] = [],
+        lineDiff: ParkLineDiff? = nil,
+        yamlNote: String
+    ) -> String {
         var body = String(localized: "Hi Rppl,\n\nHere is a park I added or updated. \(yamlNote)\n")
         if !changedSections.isEmpty {
             let list = changedSections.map { "- \($0.label)" }.joined(separator: "\n")
             body += "\n" + String(localized: "Changed sections:") + "\n" + list + "\n"
+        }
+        if let lineDiff, !lineDiff.isEmpty {
+            let summary = lineDiff.summary(
+                removedHeading: String(localized: "Removed"),
+                addedHeading: String(localized: "Added")
+            )
+            body += "\n" + String(localized: "Changes (YAML lines):") + "\n" + summary + "\n"
         }
         body += "\n" + String(localized: "Notes:") + "\n"
         return body
@@ -47,13 +58,19 @@ enum ParkShare {
     /// A `mailto:` URL can't carry an attachment, so the YAML goes in the body instead. Third-party mail apps (e.g.
     /// Proton Mail) tend to flatten leading whitespace in a `mailto:` body, which breaks YAML indentation, so it's
     /// base64-encoded rather than inlined as plain text.
-    static func mailtoURL(for park: Park, changedSections: [ParkSection] = []) -> URL? {
+    static func mailtoURL(for park: Park, changedSections: [ParkSection] = [], lineDiff: ParkLineDiff? = nil) -> URL? {
         guard let yaml = try? ParkCatalog.encode(park) else { return nil }
         let encoded = Data(yaml.utf8).base64EncodedString()
-        let body = mailBody(
+        var body = mailBody(
             changedSections: changedSections,
+            lineDiff: lineDiff,
             yamlNote: String(localized: "The YAML is base64-encoded below.")
-        ) + "\n" + String(localized: "YAML (base64-encoded, decode before reading):") + "\n" + encoded + "\n"
+        )
+        if let lineDiff, !lineDiff.isEmpty {
+            body += "\n" + String(localized: "Diff (base64-encoded, decode before reading):") + "\n"
+                + Data(lineDiff.patchText.utf8).base64EncodedString() + "\n"
+        }
+        body += "\n" + String(localized: "YAML (base64-encoded, decode before reading):") + "\n" + encoded + "\n"
         var components = URLComponents()
         components.scheme = "mailto"
         components.path = feedbackAddress
@@ -83,6 +100,7 @@ extension ParkSection {
 struct ParkMailComposer: UIViewControllerRepresentable {
     let park: Park
     let changedSections: [ParkSection]
+    let lineDiff: ParkLineDiff?
     let onFinish: () -> Void
 
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
@@ -92,6 +110,7 @@ struct ParkMailComposer: UIViewControllerRepresentable {
         controller.setSubject(ParkShare.subject(for: park))
         let body = ParkShare.mailBody(
             changedSections: changedSections,
+            lineDiff: lineDiff,
             yamlNote: String(localized: "The YAML file is attached.")
         )
         controller.setMessageBody(body, isHTML: false)
