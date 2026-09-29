@@ -283,6 +283,7 @@ extension WatchSessionController {
         resetWaterTemperatureTracking()
         resetBatteryTracking()
         resetAirWeather()
+        resetWaterEstimate()
         sensorSamplingDense = false
 
         startLocation()
@@ -431,6 +432,7 @@ extension WatchSessionController {
         resetWaterTemperatureTracking()
         resetBatteryTracking()
         resetAirWeather()
+        resetWaterEstimate()
         hkRideDistanceMeters = 0
         hkRideDistanceAnchorMeters = 0
         hkRides = []

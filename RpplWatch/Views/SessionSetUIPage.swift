@@ -140,10 +140,11 @@ struct SessionSetUIPage: View {
                     .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
 
-            if session.waterTemperatureAvailable {
+            if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
                 metricTile(
-                    value: session.averageWaterTemperatureCelsius.map { SessionFormatters.waterTemp($0) }
-                        ?? TemperatureFormat.placeholder,
+                    value: session.waterTemperatureDisplay.map {
+                        SessionFormatters.waterTemp($0.celsius, isEstimate: $0.isEstimate)
+                    } ?? TemperatureFormat.placeholder,
                     label: "WATER",
                     metric: .water
                 )

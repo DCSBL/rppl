@@ -23,6 +23,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var imported: Date?
     /// WeatherKit current conditions near the start of the session. Nil when unavailable.
     public var weather: SessionWeather?
+    /// Estimated water temperature from the nearest park's monitoring station, fetched at session
+    /// start. A stand-in until (or instead of) real Watch measurements. Nil when unavailable.
+    public var waterTemperatureEstimate: ParkWaterTemperature?
     /// `Park.id` this session belongs to. Written by the phone after import; nil when unlinked.
     public var parkId: String?
     /// How `parkId` was set (`auto` / `manual`). `manual` is never overwritten by auto-matching,
@@ -53,6 +56,7 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         crownOrientation: String? = nil,
         imported: Date? = nil,
         weather: SessionWeather? = nil,
+        waterTemperatureEstimate: ParkWaterTemperature? = nil,
         parkId: String? = nil,
         parkIdSource: String? = nil
     ) {
@@ -72,6 +76,7 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.crownOrientation = crownOrientation
         self.imported = imported
         self.weather = weather
+        self.waterTemperatureEstimate = waterTemperatureEstimate
         self.parkId = parkId
         self.parkIdSource = parkIdSource
     }

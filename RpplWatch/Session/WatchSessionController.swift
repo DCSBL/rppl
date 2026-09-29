@@ -114,6 +114,10 @@ final class WatchSessionController: NSObject {
     var waterTemperatureAvailable = false
     /// Running mean of persisted submerged samples this session.
     var averageWaterTemperatureCelsius: Double?
+    /// Measured average when available, else the park-station estimate (flagged `isEstimate`).
+    var waterTemperatureDisplay: WaterTemperatureDisplay? {
+        WaterTemperatureDisplay.resolve(measuredAverage: averageWaterTemperatureCelsius, estimate: waterEstimate)
+    }
 
     /// Debug-only: force pause/ride UI, or leave live detection (`detected`).
     var detectionSimulationMode: DetectionSimulationMode = .detected
@@ -190,6 +194,10 @@ final class WatchSessionController: NSObject {
     var airWeatherSnapshot: AirWeatherSnapshot?
     var airWeatherFetchTask: Task<Void, Never>?
     var airWeatherAttempted = false
+    /// Park-station water estimate for this session; shown until the Watch measures real water temp.
+    var waterEstimate: ParkWaterTemperature?
+    var waterEstimateFetchTask: Task<Void, Never>?
+    var waterEstimateAttempted = false
 
     let workoutType = HKObjectType.workoutType()
     let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!

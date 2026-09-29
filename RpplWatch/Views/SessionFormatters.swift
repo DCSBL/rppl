@@ -49,8 +49,10 @@ enum SessionFormatters {
         return DistanceFormat.meters(meters)
     }
 
-    static func waterTemp(_ celsius: Double) -> String {
-        TemperatureFormat.celsius(celsius)
+    /// Estimates get a leading `~` so they read as a guess, not a sensor reading.
+    static func waterTemp(_ celsius: Double, isEstimate: Bool = false) -> String {
+        let text = TemperatureFormat.celsius(celsius)
+        return isEstimate ? "~" + text : text
     }
 
     static func calories(_ kilocalories: Double) -> String {
