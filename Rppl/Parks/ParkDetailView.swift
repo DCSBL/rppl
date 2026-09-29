@@ -390,7 +390,7 @@ struct ParkDetailView: View {
         }
     }
 
-    /// Announced one-offs (good-weather openings, closures, events) still ahead. Hidden when there are none.
+    /// Announced one-offs (extra opening hours, closures, events) still ahead. Hidden when there are none.
     private var upcomingChangesCard: some View {
         let occurrences = park.upcomingExceptions()
         return Group {

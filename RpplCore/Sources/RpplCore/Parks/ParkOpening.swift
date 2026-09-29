@@ -95,7 +95,7 @@ public enum ParkExceptionKind {
     public static let event = "event"
 }
 
-/// A one-off or temporary change on top of the regular `rules`: good-weather openings, a closure
+/// A one-off or temporary change on top of the regular `rules`: extra opening hours, a closure
 /// for wind or maintenance, an event. Needs at least one of `from`, `until` or `dates`, so a
 /// forgotten exception can never apply to every day. Once its dates are past it has no effect.
 ///
@@ -159,7 +159,7 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// schedule on their site) — `slots`/`rules` may still list block times, but we can't say which
     /// days they're actually open. Overrides any day/week computation with "unknown" for every day.
     public var hoursUnknown: Bool?
-    /// Temporary or one-off changes (good-weather openings, closures, events) on top of `rules`.
+    /// Temporary or one-off changes (extra opening hours, closures, events) on top of `rules`.
     public var exceptions: [ParkOpeningException]?
 
     enum CodingKeys: String, CodingKey {
@@ -340,8 +340,7 @@ public enum ParkSchedule {
     public static func day(
         for opening: ParkOpening?,
         on date: Date,
-        timeZone: TimeZone,
-        coordinate: ParkCoordinate? = nil
+        timeZone: TimeZone
     ) -> ParkDaySchedule {
         let closed = ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: true)
         guard let opening else { return closed }
@@ -349,7 +348,6 @@ public enum ParkSchedule {
 
         let active = activeExceptions(in: opening, on: context)
         let notices = active.map { ParkDayNotice(kind: $0.normalizedKind, label: $0.label, note: $0.note) }
-        let sunset = coordinate.flatMap { ParkSun.sunsetMinute(at: $0, on: date, timeZone: timeZone) }
 
         // An unannounced weekly pattern stays unknown, unless an exception states what happens that day.
         let hoursUnknown = opening.hoursUnknown == true
@@ -363,10 +361,10 @@ public enum ParkSchedule {
 
         let rules: [ParkOpeningRule] = hoursUnknown ? [] : (opening.rules ?? [])
         let regular: [ParkTimeWindow] = rules.filter { context.matches($0) }.compactMap { rule in
-            makeWindow(open: rule.open, close: rule.close, label: rule.label, note: rule.note, sunset: sunset)
+            makeWindow(open: rule.open, close: rule.close, label: rule.label, note: rule.note)
         }
-        let replacing = windows(of: active, kind: ParkExceptionKind.hours, sunset: sunset)
-        let extra = windows(of: active, kind: ParkExceptionKind.extra, sunset: sunset)
+        let replacing = windows(of: active, kind: ParkExceptionKind.hours)
+        let extra = windows(of: active, kind: ParkExceptionKind.extra)
         let windows = ((replacing.isEmpty ? regular : replacing) + extra).sorted { $0.startMinute < $1.startMinute }
 
         let slots = (opening.slots ?? []).filter { context.matches($0) }
@@ -389,8 +387,7 @@ public enum ParkSchedule {
         for opening: ParkOpening?,
         from date: Date,
         days horizon: Int = 90,
-        timeZone: TimeZone,
-        coordinate: ParkCoordinate? = nil
+        timeZone: TimeZone
     ) -> [ParkExceptionOccurrence] {
         guard let opening, !(opening.exceptions ?? []).isEmpty, horizon > 0 else { return [] }
         var calendar = Calendar(identifier: .gregorian)
@@ -400,12 +397,11 @@ public enum ParkSchedule {
             guard let day = calendar.date(byAdding: .day, value: offset, to: date),
                   let context = DayContext(date: day, timeZone: timeZone)
             else { continue }
-            let sunset = coordinate.flatMap { ParkSun.sunsetMinute(at: $0, on: day, timeZone: timeZone) }
             for exception in activeExceptions(in: opening, on: context) {
                 let kind = exception.normalizedKind
                 let resolved: [ParkTimeWindow]
                 if kind == ParkExceptionKind.hours || kind == ParkExceptionKind.extra {
-                    resolved = windows(of: [exception], kind: kind, sunset: sunset)
+                    resolved = windows(of: [exception], kind: kind)
                 } else {
                     resolved = []
                 }
@@ -427,18 +423,16 @@ public enum ParkSchedule {
     public static func status(
         for opening: ParkOpening?,
         at date: Date,
-        timeZone: TimeZone,
-        coordinate: ParkCoordinate? = nil
+        timeZone: TimeZone
     ) -> ParkOpenStatus {
-        statusDetail(for: opening, at: date, timeZone: timeZone, coordinate: coordinate).status
+        statusDetail(for: opening, at: date, timeZone: timeZone).status
     }
 
     /// Same as `status(for:at:timeZone:)`, plus the window that status is about (for `.openToday`).
     public static func statusDetail(
         for opening: ParkOpening?,
         at date: Date,
-        timeZone: TimeZone,
-        coordinate: ParkCoordinate? = nil
+        timeZone: TimeZone
     ) -> ParkOpenStatusDetail {
         guard let opening else { return ParkOpenStatusDetail(status: .closed) }
 
@@ -447,7 +441,7 @@ public enum ParkSchedule {
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         let nowMinute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
 
-        let today = day(for: opening, on: date, timeZone: timeZone, coordinate: coordinate)
+        let today = day(for: opening, on: date, timeZone: timeZone)
         guard today.isScheduleKnown else { return ParkOpenStatusDetail(status: .unknown) }
         if let window = today.windows.first(where: { nowMinute < $0.endMinute }) {
             return ParkOpenStatusDetail(status: .openToday, window: window, windowHasStarted: nowMinute >= window.startMinute)
@@ -456,7 +450,7 @@ public enum ParkSchedule {
         guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else {
             return ParkOpenStatusDetail(status: .closed)
         }
-        let tomorrowDay = day(for: opening, on: tomorrow, timeZone: timeZone, coordinate: coordinate)
+        let tomorrowDay = day(for: opening, on: tomorrow, timeZone: timeZone)
         guard tomorrowDay.isScheduleKnown else { return ParkOpenStatusDetail(status: .unknown) }
         return ParkOpenStatusDetail(status: tomorrowDay.isOpen ? .opensTomorrow : .closed)
     }
@@ -507,23 +501,24 @@ public enum ParkSchedule {
         (opening.exceptions ?? []).filter { $0.isDateBound && context.matches($0) }
     }
 
-    private static func windows(of exceptions: [ParkOpeningException], kind: String, sunset: Int?) -> [ParkTimeWindow] {
+    private static func windows(of exceptions: [ParkOpeningException], kind: String) -> [ParkTimeWindow] {
         exceptions.filter { $0.normalizedKind == kind }.compactMap { exception in
             guard let open = exception.open, let close = exception.close else { return nil }
-            return makeWindow(open: open, close: close, label: exception.label, note: exception.note, sunset: sunset)
+            return makeWindow(open: open, close: close, label: exception.label, note: exception.note)
         }
     }
 
-    /// `HH:mm` or `sunset`. `isSolar` marks sunset-based times.
-    private static func resolveTime(_ text: String, sunset: Int?) -> (minute: Int, isSolar: Bool)? {
-        if text.lowercased() == "sunset" { return sunset.map { ($0, true) } }
+    /// `HH:mm` or `sunset`. `sunset` is not calculated: it is a label for "until the end of the day",
+    /// so the park counts as closed from 00:00.
+    private static func resolveTime(_ text: String) -> (minute: Int, isSolar: Bool)? {
+        if text.lowercased() == "sunset" { return (24 * 60, true) }
         return minutes(text).map { ($0, false) }
     }
 
     /// A window that ends at or before its start wraps past midnight, except when it involves
-    /// sunset: an opening time after sunset is a window that doesn't exist that day, not an overnight one.
-    private static func makeWindow(open: String, close: String, label: String?, note: String?, sunset: Int?) -> ParkTimeWindow? {
-        guard let start = resolveTime(open, sunset: sunset), let endTime = resolveTime(close, sunset: sunset) else { return nil }
+    /// `sunset` (00:00): that never wraps into the next day.
+    private static func makeWindow(open: String, close: String, label: String?, note: String?) -> ParkTimeWindow? {
+        guard let start = resolveTime(open), let endTime = resolveTime(close) else { return nil }
         var end = endTime.minute
         if end <= start.minute {
             if start.isSolar || endTime.isSolar { return nil }

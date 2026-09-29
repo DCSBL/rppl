@@ -102,12 +102,12 @@ Rules and slots share optional selectors, all of which must match a date:
 
 ### Exceptions
 
-`opening.exceptions` holds announced changes that are not part of the regular schedule: an extra evening because of good weather, a closure for wind or maintenance, an event. The regular `rules` stay untouched; an exception sits on top of them for its dates only, and stops having any effect after them. Old entries can stay in the file until someone tidies them.
+`opening.exceptions` holds announced changes that are not part of the regular schedule: extra opening hours, a closure for wind or maintenance, an event. The regular `rules` stay untouched; an exception sits on top of them for its dates only, and stops having any effect after them. Old entries can stay in the file until someone tidies them.
 
 ```yaml
 opening:
   exceptions:
-    - { kind: hours, label: Good weather, dates: ["2026-09-29"], open: "17:00", close: sunset }
+    - { kind: hours, label: Extra opening hours, dates: ["2026-09-29"], open: "17:00", close: sunset }
     - { kind: closed, label: Wind, dates: ["2026-10-02"], note: Reopens on Saturday }
     - { kind: extra, label: Early start, from: "2026-10-05", until: "2026-10-09", days: [weekdays], open: "10:00", close: "12:00" }
     - { kind: event, label: Wake Battle, dates: ["2026-10-10"] }
@@ -116,13 +116,13 @@ opening:
 | Field | Meaning |
 |-------|---------|
 | `kind` | Opaque string. `hours`: these are the hours on the matching dates, replacing the regular ones. `closed`: closed all day. `extra`: added next to the regular hours. `event`: notice only, open/closed does not change. Unknown kinds behave like `event`. |
-| `label` | Short reason or name ("Good weather", "Wind"), shown in the notice and the list chip. |
+| `label` | Short reason or name ("Extra opening hours", "Wind"), shown in the notice and the list chip. |
 | `note` | Longer text. |
 | `months`, `days`, `from`, `until`, `dates` | Same selectors as rules. **At least one of `from`, `until` or `dates` is required**; an exception without a date bound is ignored so a forgotten entry can never change every day. |
 | `open`, `close` | `HH:mm` or `sunset`. Used by `hours` and `extra`. |
 
 - Precedence per day: `closed` beats `hours` beats the regular rules. `extra` is added on top of either.
-- `close: sunset` (also allowed in normal rules) is computed from the park location and the date (`ParkSun`, within a couple of minutes). A window whose opening time falls after sunset does not exist that day. Blocks only count when they end before the resolved close, so a sunset window ending at 19:26 offers the 18:00 block, not 19:00.
+- `sunset` (also allowed in normal rules) is not calculated: it is just a name for 00:00, so the park counts as open until the end of that day and closed after 00:00. Blocks only count when they end before the close, so a `sunset` window offers every block up to 23:00.
 - The Open date filter, the list chip, the Today card and the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
 - Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.

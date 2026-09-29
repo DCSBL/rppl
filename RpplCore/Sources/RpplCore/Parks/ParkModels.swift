@@ -300,18 +300,18 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
 
     /// Today's opening windows and available slots in the park's own time zone.
     public func schedule(on date: Date = Date()) -> ParkDaySchedule {
-        ParkSchedule.day(for: opening, on: date, timeZone: resolvedTimeZone, coordinate: location)
+        ParkSchedule.day(for: opening, on: date, timeZone: resolvedTimeZone)
     }
 
     /// Whether the park is open right now (or opens later today), opens tomorrow, or is closed
     /// beyond that — accounting for the current time, not just today's date.
     public func openStatus(at date: Date = Date()) -> ParkOpenStatus {
-        ParkSchedule.status(for: opening, at: date, timeZone: resolvedTimeZone, coordinate: location)
+        ParkSchedule.status(for: opening, at: date, timeZone: resolvedTimeZone)
     }
 
     /// Same as `openStatus(at:)`, plus the window that status is about (for `.openToday`).
     public func openStatusDetail(at date: Date = Date()) -> ParkOpenStatusDetail {
-        ParkSchedule.statusDetail(for: opening, at: date, timeZone: resolvedTimeZone, coordinate: location)
+        ParkSchedule.statusDetail(for: opening, at: date, timeZone: resolvedTimeZone)
     }
 
     /// Exceptions (extra openings, closures, events) still ahead, one entry per day.
@@ -320,8 +320,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
             for: opening,
             from: date,
             days: days,
-            timeZone: resolvedTimeZone,
-            coordinate: location
+            timeZone: resolvedTimeZone
         )
     }
 }
