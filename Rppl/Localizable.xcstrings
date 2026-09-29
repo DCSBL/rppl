@@ -470,22 +470,6 @@
         }
       }
     },
-    "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies een session-export-JSON via Bestanden. Geïmporteerde sessions verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
-          }
-        }
-      }
-    },
     "Computing stats…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -746,23 +730,6 @@
         }
       }
     },
-    "Export session JSON" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export session JSON"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Session-JSON exporteren"
-          }
-        }
-      }
-    },
     "Exports the full session file: raw sensor data, nothing filtered or anonymized." : {
       "localizations" : {
         "en" : {
@@ -872,22 +839,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import mislukt: %@"
-          }
-        }
-      }
-    },
-    "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importeer via iCloud Drive of een session-export-JSON. Geïmporteerde sessions verschijnen in het logboek. Gezondheid wordt niet bijgewerkt."
           }
         }
       }
@@ -1624,22 +1575,6 @@
         }
       }
     },
-    "On your devices" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On your devices"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Op je apparaten"
-          }
-        }
-      }
-    },
     "Open Health" : {
       "localizations" : {
         "en" : {
@@ -2066,22 +2001,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl verzamelt kabelpark-wakeboard sessions van Apple Watch voor analyse op iPhone en Mac."
-          }
-        }
-      }
-    },
-    "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl verwerkt je session op je Watch en iPhone. We uploaden geen sets naar een Rppl-cloud en delen je gegevens niet met anderen."
           }
         }
       }
@@ -3081,16 +3000,6 @@
         }
       }
     },
-    "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud." : {
-      "localizations" : {
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bewaart je logboek als back-up in je iCloud Drive, zodat je het kunt terugzetten. Gebruikt je Apple-account, geen Rppl-cloud."
-          }
-        }
-      }
-    },
     "No sessions to import" : {
       "localizations" : {
         "en" : {
@@ -3161,16 +3070,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schakel iCloud Drive in om park days uit de cloud te importeren."
-          }
-        }
-      }
-    },
-    "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore." : {
-      "localizations" : {
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Met iCloud Drive aan staat je logboek in je iCloud-documenten. iCloud-reservekopie van je toestel staat daar los van en helpt alleen na een volledig herstel van je toestel."
           }
         }
       }
@@ -3251,22 +3150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deze export lijkt beschadigd bij %@. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
-          }
-        }
-      }
-    },
-    "This file is not a Rppl session export JSON." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This file is not a Rppl session export JSON."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dit bestand is geen Rppl-session-export (JSON)."
           }
         }
       }
@@ -6207,22 +6090,6 @@
         }
       }
     },
-    "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebruikt een externe, officiële overheidsdienst (Rijkswaterstaat) bij parken met een nabije bron, voor het parkscherm en de aankomstmelding. De waarde is een schatting."
-          }
-        }
-      }
-    },
     "Show water temperature" : {
       "localizations" : {
         "en" : {
@@ -6251,22 +6118,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Watertemperatuur tonen?"
-          }
-        }
-      }
-    },
-    "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl haalt dit op via een externe, officiële dienst (Rijkswaterstaat). De waarde is een schatting. Je kan dit later aanpassen in Instellingen."
           }
         }
       }
@@ -6411,6 +6262,278 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aankomende wijzigingen"
+          }
+        }
+      }
+    },
+    "Park arrival notifications" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park arrival notifications"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aankomstmeldingen"
+          }
+        }
+      }
+    },
+    "When on, Rppl watches for you crossing into your favorite and nearby parks on your device and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When on, Rppl watches for you crossing into your favorite and nearby parks on your device and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als dit aanstaat, houdt Rppl op je apparaat bij wanneer je een favoriet of nabij park binnenkomt, en stuurt per bezoek één lokale ‘Welkom bij…’-melding. Gebruikt ‘Tijdens gebruik’-locatie, dus dit werkt alleen zolang Rppl op de achtergrond actief is. Heb je de app een tijd niet geopend, of geforceerd gestopt? Open Rppl dan even opnieuw om het monitoren te hervatten."
+          }
+        }
+      }
+    },
+    "Notify on arrival" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notify on arrival"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melden bij aankomst"
+          }
+        }
+      }
+    },
+    "Updating" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updating"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bezig met bijwerken"
+          }
+        }
+      }
+    },
+    "Location or notification access was denied, so this stayed off. Allow both location and notifications in Settings, then try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location or notification access was denied, so this stayed off. Allow both location and notifications in Settings, then try again."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie- of meldingentoegang is geweigerd, dus dit bleef uit. Sta beide toe in Instellingen en probeer het opnieuw."
+          }
+        }
+      }
+    },
+    "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen and the arrival notification. The reading is an estimate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen and the arrival notification. The reading is an estimate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruikt een externe, officiële waterdienst — bijvoorbeeld Rijkswaterstaat — bij parken met een nabije bron, voor het parkscherm en de aankomstmelding. De waarde is een schatting."
+          }
+        }
+      }
+    },
+    "Rppl fetches this from an external, official water-monitoring service. The reading is an estimate. You can change this later in Settings." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl fetches this from an external, official water-monitoring service. The reading is an estimate. You can change this later in Settings."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl haalt dit op bij een externe, officiële waterdienst — bijvoorbeeld Rijkswaterstaat. De waarde is een schatting. Je kan dit later aanpassen in Instellingen."
+          }
+        }
+      }
+    },
+    "Import from iCloud Drive or a session export of raw data. Imported sessions appear in the logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from iCloud Drive or a session export of raw data. Imported sessions appear in the logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeer via iCloud Drive of een session-export met ruwe data. Geïmporteerde sessions verschijnen in het logboek."
+          }
+        }
+      }
+    },
+    "Choose a session export of raw data from Files. Imported sessions appear in the logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a session export of raw data from Files. Imported sessions appear in the logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies een session-export met ruwe data uit Bestanden. Geïmporteerde sessions verschijnen in het logboek."
+          }
+        }
+      }
+    },
+    "Keeps your phone logbook in your iCloud Drive as backup, which can be restored." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeps your phone logbook in your iCloud Drive as backup, which can be restored."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewaart je logboek als back-up in je iCloud Drive, zodat je het kunt terugzetten."
+          }
+        }
+      }
+    },
+    "Your iPhone keeps a small on-device list of park locations and quietly watches for you crossing into one." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone keeps a small on-device list of park locations and quietly watches for you crossing into one."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je iPhone houdt op het toestel een korte lijst met parklocaties bij, en houdt stil in de gaten of je er een binnenkomt."
+          }
+        }
+      }
+    },
+    "Once you're clearly at a park (not just passing by), Rppl sends this one local notification, then stays quiet about that park for the rest of the day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once you're clearly at a park (not just passing by), Rppl sends this one local notification, then stays quiet about that park for the rest of the day."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zodra je duidelijk bij een park bent (niet alleen passeert), stuurt Rppl deze ene lokale melding, en blijft daarna de rest van de dag stil over dat park."
+          }
+        }
+      }
+    },
+    "This needs Rppl to still be running in the background, so if you haven't opened it in a while, reopen it once to keep the notifications coming." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This needs Rppl to still be running in the background, so if you haven't opened it in a while, reopen it once to keep the notifications coming."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit werkt alleen als Rppl nog op de achtergrond draait. Heb je de app een tijd niet geopend? Open hem dan even opnieuw om meldingen te blijven krijgen."
+          }
+        }
+      }
+    },
+    "Turn this off anytime in Rppl settings." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn this off anytime in Rppl settings."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet dit op elk moment uit in de Rppl-instellingen."
+          }
+        }
+      }
+    },
+    "Why did I get this?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why did I get this?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waarom kreeg ik dit?"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrepen"
+          }
+        }
+      }
+    },
+    "Needed for park arrival notifications, if you turn that on in Park arrival notifications above." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed for park arrival notifications, if you turn that on in Park arrival notifications above."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nodig voor aankomstmeldingen, als je dat hierboven bij Aankomstmeldingen aanzet."
           }
         }
       }

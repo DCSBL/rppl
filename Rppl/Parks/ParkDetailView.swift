@@ -131,7 +131,7 @@ struct ParkDetailView: View {
             }
         } message: {
             Text(
-                "Rppl fetches this from an external, official service (Rijkswaterstaat). The reading is an estimate. You can change this later in Settings."
+                "Rppl fetches this from an external, official water-monitoring service. The reading is an estimate. You can change this later in Settings."
             )
         }
     }
