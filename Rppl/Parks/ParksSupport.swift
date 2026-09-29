@@ -178,8 +178,13 @@ enum ParkFormatting {
         ParkSchedule.timeText(minutes: minutes)
     }
 
+    /// The closing time of a window; `sunset` stays English in every locale and is not calculated.
+    static func end(_ window: ParkTimeWindow) -> String {
+        window.endsAtSunset ? "sunset" : time(window.endMinute)
+    }
+
     static func window(_ window: ParkTimeWindow) -> String {
-        "\(time(window.startMinute)) – \(time(window.endMinute))"
+        "\(time(window.startMinute)) – \(end(window))"
     }
 
     static func slot(_ slot: ParkSlot) -> String {
@@ -254,7 +259,7 @@ enum ParkFormatting {
 
     static func openFromTo(_ window: ParkTimeWindow) -> String {
         let from = time(window.startMinute)
-        let to = time(window.endMinute)
+        let to = end(window)
         return String(localized: "Open from \(from) to \(to)")
     }
 
@@ -473,14 +478,14 @@ enum ParkStatusBadge {
             guard day.isScheduleKnown else {
                 return (String(localized: "Opening hours unknown"), .gray)
             }
-            let starts = day.windows.map(\.startMinute)
-            let ends = day.windows.map(\.endMinute)
-            guard let start = starts.min(), let end = ends.max() else {
+            guard let start = day.windows.map(\.startMinute).min(),
+                  let last = day.windows.max(by: { $0.endMinute < $1.endMinute })
+            else {
                 return (ParkFormatting.closedText(day), .red)
             }
             let dateText = filterDate.formatted(.dateTime.month(.abbreviated).day())
             let from = ParkFormatting.time(start)
-            let to = ParkFormatting.time(end)
+            let to = ParkFormatting.end(last)
             return (String(localized: "Open \(dateText) · \(from)–\(to)"), .green)
         }
 
@@ -488,7 +493,7 @@ enum ParkStatusBadge {
         switch detail.status {
         case .openToday:
             guard let window = detail.window else { return (String(localized: "Open today"), .green) }
-            let to = ParkFormatting.time(window.endMinute)
+            let to = ParkFormatting.end(window)
             if detail.windowHasStarted == true {
                 return (String(localized: "Open until \(to)"), .green)
             }
