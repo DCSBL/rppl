@@ -72,6 +72,7 @@ opening:
       note: Cable runs at 27 km/h
   # One-off changes; each stops applying after its dates. Source: the park's Instagram story
   # "Deze week" @wetnwildwakepark (seen 2026-09-29), extra evenings because of the good weather.
+  # `sunset` is not calculated; it counts as 00:00, so the park is closed after midnight.
   # The same story lists Friday 2026-10-02 closed and Sat/Sun 2026-10-03/04 13:00-16:00, which
   # the regular October rules already give, so those need no exception.
   exceptions:

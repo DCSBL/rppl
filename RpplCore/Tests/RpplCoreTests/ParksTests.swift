@@ -443,26 +443,25 @@ struct ParksTests {
         #expect(monday.isOpen == false)
         #expect(monday.notices.isEmpty)
 
-        // Tuesday 2026-09-29: normally closed, now 17:00 until sunset (around 19:25).
+        // Tuesday 2026-09-29: normally closed, now 17:00 until sunset (00:00, not calculated).
         let tuesday = park.schedule(on: date("2026-09-29"))
         #expect(tuesday.isOpen)
         #expect(tuesday.windows.map(\.startMinute) == [17 * 60])
-        let tuesdayEnd = try #require(tuesday.windows.first?.endMinute)
-        #expect((19 * 60 + 15...19 * 60 + 35).contains(tuesdayEnd))
+        #expect(tuesday.windows.map(\.endMinute) == [24 * 60])
         #expect(tuesday.notices.map(\.kind) == [ParkExceptionKind.hours])
         #expect(tuesday.notices.first?.label == "Good weather")
-        #expect(tuesday.availableSlots.map(\.start) == ["17:00", "18:00"])
+        #expect(tuesday.availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
 
         // Wednesday 2026-09-30: 16:00 until sunset replaces the regular 16:00-20:00.
         let wednesday = park.schedule(on: date("2026-09-30"))
         #expect(wednesday.windows.map(\.startMinute) == [16 * 60])
-        #expect(try #require(wednesday.windows.first?.endMinute) < 20 * 60)
-        #expect(wednesday.availableSlots.map(\.start) == ["16:00", "17:00", "18:00"])
+        #expect(wednesday.windows.map(\.endMinute) == [24 * 60])
+        #expect(wednesday.availableSlots.map(\.start) == ["16:00", "17:00", "18:00", "19:00"])
 
         // Thursday 2026-10-01: October, normally closed, now 17:30 until sunset.
         let thursday = park.schedule(on: date("2026-10-01"))
         #expect(thursday.windows.map(\.startMinute) == [17 * 60 + 30])
-        #expect(thursday.availableSlots.map(\.start) == ["18:00"])
+        #expect(thursday.availableSlots.map(\.start) == ["18:00", "19:00"])
 
         // Friday closed, weekend 13:00-16:00 (regular October rules).
         #expect(park.schedule(on: date("2026-10-02")).isOpen == false)
@@ -494,10 +493,10 @@ struct ParksTests {
         let evening = park.openStatusDetail(at: date("2026-09-29", hour: 18))
         #expect(evening.status == .openToday)
         #expect(evening.windowHasStarted == true)
-        // After sunset it is over for the day; Wednesday is also open.
-        #expect(park.openStatus(at: date("2026-09-29", hour: 21)) == .opensTomorrow)
-        // After Thursday's session Friday is closed.
-        #expect(park.openStatus(at: date("2026-10-01", hour: 21)) == .closed)
+        // Sunset means closed after 00:00, so still open at 23:00.
+        #expect(park.openStatus(at: date("2026-09-29", hour: 23)) == .openToday)
+        // Closed after 00:00: Friday is closed, Saturday opens.
+        #expect(park.openStatus(at: date("2026-10-02", hour: 1)) == .opensTomorrow)
 
         let upcoming = park.upcomingExceptions(from: date("2026-09-28"))
         #expect(upcoming.map(\.date) == ["2026-09-29", "2026-09-30", "2026-10-01"])
@@ -601,22 +600,11 @@ struct ParksTests {
         #expect(park.schedule(on: date("2026-06-12")).isScheduleKnown == false)
     }
 
-    @Test func sunsetWindowThatCannotExistIsDropped() throws {
+    @Test func sunsetIsTreatedAsMidnight() throws {
         let park = try exceptionPark("""
             - { kind: hours, dates: ["2026-06-10"], open: "23:30", close: sunset }
         """)
-        // June sunset is around 22:05, so a 23:30 opening leaves no window; the regular hours stay.
-        #expect(park.schedule(on: date("2026-06-10")).windows.map(\.startMinute) == [16 * 60])
-    }
-
-    @Test func sunsetTimeIsPlausibleForTheSeason() throws {
-        let alphen = ParkCoordinate(lat: 52.136, lon: 4.678)
-        let summer = try #require(ParkSun.sunsetMinute(at: alphen, on: date("2026-06-21"), timeZone: amsterdam))
-        let winter = try #require(ParkSun.sunsetMinute(at: alphen, on: date("2026-12-21"), timeZone: amsterdam))
-        #expect((22 * 60...22 * 60 + 15).contains(summer))
-        #expect((16 * 60 + 20...16 * 60 + 40).contains(winter))
-        // No sunset in the polar summer.
-        #expect(ParkSun.sunsetMinute(at: ParkCoordinate(lat: 78.0, lon: 15.0), on: date("2026-06-21"), timeZone: amsterdam) == nil)
+        #expect(park.schedule(on: date("2026-06-10")).windows.map(\.endMinute) == [24 * 60])
     }
 
     @Test func exceptionsRoundTripThroughYAML() throws {
