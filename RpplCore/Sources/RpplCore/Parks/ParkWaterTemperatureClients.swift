@@ -96,7 +96,7 @@ public struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
             let observation = decoded.waarnemingenLijst?.first,
             let latest = observation.metingenLijst.max(by: { $0.tijdstip < $1.tijdstip }),
             let celsius = latest.meetwaarde.waardeNumeriek,
-            let observedAt = timestampFormatter.date(from: latest.tijdstip)
+            let observedAt = makeTimestampFormatter().date(from: latest.tijdstip)
         else { return nil }
         return ParkWaterTemperature(
             celsius: celsius,
@@ -106,11 +106,11 @@ public struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
         )
     }
 
-    private static let timestampFormatter: ISO8601DateFormatter = {
+    private static func makeTimestampFormatter() -> ISO8601DateFormatter {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
-    }()
+    }
 
     private struct ObservationResponse: Decodable {
         let waarnemingenLijst: [Observation]?
@@ -225,7 +225,7 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
             let decoded = try? JSONDecoder().decode([KiWISTimeseries].self, from: data),
             let series = decoded.first,
             let latest = series.data.max(by: { $0.timestamp < $1.timestamp }),
-            let observedAt = Self.timestampFormatter.date(from: latest.timestamp)
+            let observedAt = Self.makeTimestampFormatter().date(from: latest.timestamp)
         else { return nil }
         return ParkWaterTemperature(
             celsius: latest.value,
@@ -235,11 +235,11 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
         )
     }
 
-    private static let timestampFormatter: ISO8601DateFormatter = {
+    private static func makeTimestampFormatter() -> ISO8601DateFormatter {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
-    }()
+    }
 
     private struct KiWISTimeseries: Decodable {
         let tsId: String
