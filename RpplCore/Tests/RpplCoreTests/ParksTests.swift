@@ -435,7 +435,7 @@ struct ParksTests {
 
     private func clock(_ minute: Int) -> String { ParkSchedule.timeText(minutes: minute) }
 
-    @Test func wetNWildGoodWeatherWeekOpensExtraEvenings() throws {
+    @Test func wetNWildExtraOpeningHoursWeekOpensExtraEvenings() throws {
         let park = try wetNWild()
 
         // Monday 2026-09-28: not announced, stays closed.
@@ -449,7 +449,7 @@ struct ParksTests {
         #expect(tuesday.windows.map(\.startMinute) == [17 * 60])
         #expect(tuesday.windows.map(\.endMinute) == [24 * 60])
         #expect(tuesday.notices.map(\.kind) == [ParkExceptionKind.hours])
-        #expect(tuesday.notices.first?.label == "Good weather")
+        #expect(tuesday.notices.first?.label == "Extra opening hours")
         #expect(tuesday.availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
 
         // Wednesday 2026-09-30: 16:00 until sunset replaces the regular 16:00-20:00.
@@ -474,7 +474,7 @@ struct ParksTests {
         #expect(nextTuesday.notices.isEmpty)
     }
 
-    @Test func wetNWildGoodWeatherWeekDrivesOpenFilterAndStatus() throws {
+    @Test func wetNWildExtraOpeningHoursWeekDrivesOpenFilterAndStatus() throws {
         let park = try wetNWild()
 
         func shown(_ iso: String) -> Bool {

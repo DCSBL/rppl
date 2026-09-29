@@ -95,7 +95,7 @@ public enum ParkExceptionKind {
     public static let event = "event"
 }
 
-/// A one-off or temporary change on top of the regular `rules`: good-weather openings, a closure
+/// A one-off or temporary change on top of the regular `rules`: extra opening hours, a closure
 /// for wind or maintenance, an event. Needs at least one of `from`, `until` or `dates`, so a
 /// forgotten exception can never apply to every day. Once its dates are past it has no effect.
 ///
@@ -159,7 +159,7 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// schedule on their site) — `slots`/`rules` may still list block times, but we can't say which
     /// days they're actually open. Overrides any day/week computation with "unknown" for every day.
     public var hoursUnknown: Bool?
-    /// Temporary or one-off changes (good-weather openings, closures, events) on top of `rules`.
+    /// Temporary or one-off changes (extra opening hours, closures, events) on top of `rules`.
     public var exceptions: [ParkOpeningException]?
 
     enum CodingKeys: String, CodingKey {
