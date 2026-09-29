@@ -58,6 +58,12 @@ struct SessionControlsPage: View {
                 WakeLog.debug(.ui, "confirm Stop session")
                 Task { await session.stopSession() }
             }
+            if AppReleaseChannel.allowsDebugTools {
+                Button("Stop and discard data", role: .destructive) {
+                    WakeLog.debug(.ui, "debug: confirm Stop and discard data")
+                    Task { await session.discardSession() }
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Stops recording and queues transfer to iPhone.")

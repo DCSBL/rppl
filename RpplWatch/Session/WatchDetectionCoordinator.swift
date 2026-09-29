@@ -202,6 +202,14 @@ extension WatchSessionController {
                 hkPreviousUsableAt = nil
                 hkPendingJumpSpeedMps = nil
             }
+            if let previousSegmentStart = currentSegmentStartedAt {
+                let completedSegmentDuration = event.timestamp.timeIntervalSince(previousSegmentStart)
+                if lastPersistedConfidentCode == DetectionCodes.riding {
+                    cumulativeRidingDuration += completedSegmentDuration
+                } else if lastPersistedConfidentCode == DetectionCodes.inactive {
+                    cumulativeInactiveDuration += completedSegmentDuration
+                }
+            }
             currentSegmentStartedAt = event.timestamp
             lastPersistedConfidentCode = event.code
             syncWorkoutForDetection(code: event.code, at: event.timestamp)

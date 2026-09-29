@@ -6,6 +6,11 @@ struct ContentView: View {
     @State private var session = WatchSessionController.shared
     @State private var transfer = WatchTransferService.shared
 
+    private var debugOverrideSize: CGSize? {
+        guard AppReleaseChannel.allowsDebugTools else { return nil }
+        return session.debugScreenSize.size
+    }
+
     var body: some View {
         Group {
             if let summary = session.endedSessionSummary {
@@ -25,6 +30,7 @@ struct ContentView: View {
                 PermissionsOnboardingView(session: session)
             }
         }
+        .modifier(DebugScreenSizeOverride(size: debugOverrideSize))
         .onAppear {
             WakeLog.debug(.lifecycle, "Watch ContentView onAppear")
             // WatchTransferService.shared already activated at app launch (RpplWatchApp.init());
