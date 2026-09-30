@@ -10,4 +10,12 @@ public enum TinySessionPolicy: Sendable {
     public static func shouldOfferDiscard(duration: TimeInterval, setCount: Int) -> Bool {
         duration < maxDurationSeconds && setCount == 0
     }
+
+    /// Debug/TestFlight builds add "Stop and discard data" to the end dialog. Past this, a
+    /// session is real riding and one mis-tap would lose it, so the option is hidden (10 min).
+    public static let debugDiscardMaxDurationSeconds: TimeInterval = 600
+
+    public static func shouldOfferDebugDiscard(duration: TimeInterval) -> Bool {
+        duration < debugDiscardMaxDurationSeconds
+    }
 }

@@ -5,6 +5,8 @@ struct SessionControlsPage: View {
     @Bindable var session: WatchSessionController
     @State private var showStopConfirmation = false
     @State private var showDiscardConfirmation = false
+    /// Frozen when Stop is tapped so the dialog does not change while it is open.
+    @State private var offersDebugDiscard = false
 
     var body: some View {
         // Always On: keep every control visible and full-brightness (stable layout; don’t remove).
@@ -58,7 +60,7 @@ struct SessionControlsPage: View {
                 WakeLog.debug(.ui, "confirm Stop session")
                 Task { await session.stopSession() }
             }
-            if AppReleaseChannel.allowsDebugTools {
+            if AppReleaseChannel.allowsDebugTools, offersDebugDiscard {
                 Button("Stop and discard data", role: .destructive) {
                     WakeLog.debug(.ui, "debug: confirm Stop and discard data")
                     Task { await session.discardSession() }
@@ -128,6 +130,7 @@ struct SessionControlsPage: View {
 
     private func presentStopFlow() {
         let duration = session.computeElapsed(at: Date())
+        offersDebugDiscard = TinySessionPolicy.shouldOfferDebugDiscard(duration: duration)
         if TinySessionPolicy.shouldOfferDiscard(duration: duration, setCount: session.setCount) {
             WakeLog.debug(.ui, "tiny session — offer discard duration=\(Int(duration))s sets=\(session.setCount)")
             showDiscardConfirmation = true
