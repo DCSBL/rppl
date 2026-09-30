@@ -755,6 +755,42 @@ if !migrated.isEmpty {
         try writeManifest(manifest)
     }
 
+    /// Back to `readyToTransfer` after a failed attempt. Unlike `markReadyToTransfer` it leaves
+    /// `endedAt` alone — a retry hours later must not stretch the session.
+    public func requeueForTransfer(sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        guard manifest.transferState != .acknowledged else { return }
+        manifest.transferState = .readyToTransfer
+        try writeManifest(manifest)
+    }
+
+    /// Count a queued package and schedule the earliest next attempt.
+    public func recordTransferAttempt(sessionId: String, at date: Date = Date()) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        let attempts = (manifest.transferAttempts ?? 0) + 1
+        manifest.transferAttempts = attempts
+        manifest.nextTransferAttemptAt = date.addingTimeInterval(TransferRetryPolicy.delay(afterAttempt: attempts))
+        try writeManifest(manifest)
+    }
+
+    /// The phone could not import this package. Keep it (never delete before ack) and back off.
+    public func recordTransferFailure(sessionId: String, reason: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        guard manifest.transferState != .acknowledged else { return }
+        manifest.lastTransferError = reason
+        manifest.transferState = .readyToTransfer
+        try writeManifest(manifest)
+    }
+
     public func markTransferring(sessionId: String) throws {
         lock.lock()
         defer { lock.unlock() }
@@ -793,10 +829,9 @@ if !migrated.isEmpty {
         }
     }
 
+    /// Reads the streams under the store lock, then encodes and writes without it: encoding a
+    /// long session takes seconds, and recording writes on the same store must not wait on it.
     public func zipSessionForTransfer(sessionId: String, to destinationURL: URL) throws -> URL {
-        lock.lock()
-        defer { lock.unlock() }
-
         let dir = try sessionDirectory(for: sessionId)
         guard fileManager.fileExists(atPath: dir.path) else {
             throw SessionStoreError.sessionNotFound(sessionId)

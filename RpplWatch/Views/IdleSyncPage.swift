@@ -45,7 +45,7 @@ struct IdleSyncPage: View {
                     label: String(localized: "Retry transfers")
                 ) {
                     WakeLog.debug(.ui, "tap Retry transfers")
-                    transfer.transferPending()
+                    transfer.transferPending(force: true)
                 }
             }
 
