@@ -97,6 +97,10 @@ final class WatchSessionController: NSObject {
     /// Mirrors `WKInterfaceDevice.current().isWaterLockEnabled` (refreshed by controls UI).
     var isWaterLockEnabled = false
     var motionRecordingEnabled = false
+    /// Set when `MotionRecordingPolicy` stopped motion for the rest of this session.
+    var motionStoppedReason: String?
+    /// Last motion frame write; motion is flushed once per `MotionRecordingPolicy.frameInterval`.
+    var lastMotionFlushAt: Date?
 
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     var setCount: Int { liveSetTracker.setCount }
