@@ -194,12 +194,16 @@ public struct ParkTimeWindow: Equatable, Sendable {
     public var startMinute: Int
     public var endMinute: Int
     public var note: String?
+    /// `true` when the window was written as `close: sunset`. `endMinute` is then 00:00 (1440);
+    /// show "sunset" instead of a clock time.
+    public var endsAtSunset: Bool
 
-    public init(label: String?, startMinute: Int, endMinute: Int, note: String?) {
+    public init(label: String?, startMinute: Int, endMinute: Int, note: String?, endsAtSunset: Bool = false) {
         self.label = label
         self.startMinute = startMinute
         self.endMinute = endMinute
         self.note = note
+        self.endsAtSunset = endsAtSunset
     }
 }
 
@@ -524,7 +528,7 @@ public enum ParkSchedule {
             if start.isSolar || endTime.isSolar { return nil }
             end += 24 * 60
         }
-        return ParkTimeWindow(label: label, startMinute: start.minute, endMinute: end, note: note)
+        return ParkTimeWindow(label: label, startMinute: start.minute, endMinute: end, note: note, endsAtSunset: endTime.isSolar)
     }
 
     /// `weekday`: Gregorian, 1 = Sunday.

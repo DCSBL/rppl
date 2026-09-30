@@ -448,6 +448,7 @@ struct ParksTests {
         #expect(tuesday.isOpen)
         #expect(tuesday.windows.map(\.startMinute) == [17 * 60])
         #expect(tuesday.windows.map(\.endMinute) == [24 * 60])
+        #expect(tuesday.windows.map(\.endsAtSunset) == [true])
         #expect(tuesday.notices.map(\.kind) == [ParkExceptionKind.hours])
         #expect(tuesday.notices.first?.label == "Extra opening hours")
         #expect(tuesday.availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
@@ -604,7 +605,13 @@ struct ParksTests {
         let park = try exceptionPark("""
             - { kind: hours, dates: ["2026-06-10"], open: "23:30", close: sunset }
         """)
-        #expect(park.schedule(on: date("2026-06-10")).windows.map(\.endMinute) == [24 * 60])
+        let sunsetDay = park.schedule(on: date("2026-06-10"))
+        #expect(sunsetDay.windows.map(\.endMinute) == [24 * 60])
+        #expect(sunsetDay.windows.map(\.endsAtSunset) == [true])
+        // A plain clock time never counts as sunset (regular Wednesday rule, 16:00-20:00).
+        let regular = park.schedule(on: date("2026-06-17"))
+        #expect(regular.windows.map(\.endMinute) == [20 * 60])
+        #expect(regular.windows.map(\.endsAtSunset) == [false])
     }
 
     @Test func exceptionsRoundTripThroughYAML() throws {
