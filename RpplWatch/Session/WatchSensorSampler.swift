@@ -22,6 +22,17 @@ extension WatchSessionController {
     func startMotionIfAvailable() {
         motionRecordingEnabled = false
         motionUpdatesStarted = false
+        guard motionStoppedReason == nil else {
+            motionAvailability = "stopped (\(motionStoppedReason ?? "?"))"
+            return
+        }
+        if let freeBytes = store?.availableCapacityBytes() {
+            let decision = MotionRecordingPolicy.decide(elapsed: 0, motionBytes: 0, freeBytes: freeBytes)
+            if decision != .record {
+                applyMotionDecision(decision)
+                return
+            }
+        }
         guard motionManager.isDeviceMotionAvailable else {
             motionAvailability = "unavailable (skipped)"
             WakeLog.debug(.session, "device motion unavailable — skipped")
@@ -39,7 +50,9 @@ extension WatchSessionController {
     private func startDeviceMotionUpdates(interval: TimeInterval) {
         motionManager.deviceMotionUpdateInterval = interval
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
-            guard let self, let motion, self.isRunning, !self.isProductPaused else { return }
+            guard let self, let motion, self.isRunning, !self.isProductPaused, self.motionRecordingEnabled else {
+                return
+            }
             let sample = MotionSample(
                 timestamp: Date(),
                 userAccelX: motion.userAcceleration.x,
@@ -68,7 +81,7 @@ extension WatchSessionController {
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.distanceFilter = 8
         }
-        if isRunning, !isProductPaused {
+        if isRunning, !isProductPaused, motionStoppedReason == nil {
             if motionUpdatesStarted {
                 motionManager.stopDeviceMotionUpdates()
                 motionUpdatesStarted = false
@@ -138,17 +151,27 @@ extension WatchSessionController {
 
     /// Persist buffered samples. File work runs off the main actor so encoding and disk I/O never
     /// stall the UI or sensor callbacks; flushes are chained so batches land in order.
-    func flushBuffers() async {
+    ///
+    /// Motion is written once per `MotionRecordingPolicy.frameInterval` (or when `force`), after
+    /// every other stream, and its failure never costs the others.
+    func flushBuffers(force: Bool = false) async {
         drainRouteLocations()
         guard let store, let manifest else { return }
         considerPersistingBattery()
+        let now = Date()
+        let motionDue = force || lastMotionFlushAt.map {
+            now.timeIntervalSince($0) >= MotionRecordingPolicy.frameInterval
+        } ?? true
         let locations = locationBuffer
-        let motions = motionBuffer
+        let motions = motionDue ? motionBuffer : []
         let health = healthBuffer
         let water = waterBuffer
         let battery = batteryBuffer
         locationBuffer.removeAll(keepingCapacity: true)
-        motionBuffer.removeAll(keepingCapacity: true)
+        if motionDue {
+            motionBuffer.removeAll(keepingCapacity: true)
+            lastMotionFlushAt = now
+        }
         healthBuffer.removeAll(keepingCapacity: true)
         waterBuffer.removeAll(keepingCapacity: true)
         batteryBuffer.removeAll(keepingCapacity: true)
@@ -160,6 +183,8 @@ extension WatchSessionController {
         }
 
         let sessionId = manifest.sessionId
+        let elapsedNow = computeElapsed(at: now)
+        let checkMotionBudget = !motions.isEmpty && motionStoppedReason == nil
         let previous = flushChain
         let flush = Task { [weak self] in
             await previous?.value
@@ -167,9 +192,6 @@ extension WatchSessionController {
                 let byteSize = try await StoreIO.runOffMain {
                     if !locations.isEmpty {
                         try store.appendLocationSamples(locations, sessionId: sessionId)
-                    }
-                    if !motions.isEmpty {
-                        try store.appendMotionSamples(motions, sessionId: sessionId)
                     }
                     if !health.isEmpty {
                         try store.appendHealthSamples(health, sessionId: sessionId)
@@ -188,13 +210,64 @@ extension WatchSessionController {
                 self?.errorText = String(localized: "Flush: \(error.localizedDescription)")
                 WakeLog.error(
                     .store,
-                    "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
+                    "flush loc=\(locations.count) health=\(health.count) "
                         + "water=\(water.count) battery=\(battery.count): \(error.localizedDescription)"
                 )
+            }
+            guard !motions.isEmpty else { return }
+            let decision: MotionRecordingPolicy.Decision
+            do {
+                decision = try await StoreIO.runOffMain { () throws -> MotionRecordingPolicy.Decision in
+                    try store.appendMotionSamples(motions, sessionId: sessionId)
+                    guard checkMotionBudget else { return .record }
+                    return MotionRecordingPolicy.decide(
+                        elapsed: elapsedNow,
+                        motionBytes: try store.motionByteSize(sessionId: sessionId),
+                        freeBytes: store.availableCapacityBytes()
+                    )
+                }
+            } catch {
+                // Motion is expendable: a failed write stops it instead of retrying.
+                WakeLog.error(.store, "motion flush n=\(motions.count): \(error.localizedDescription)")
+                decision = .stop(reason: MotionRecordingPolicy.Reason.lowStorage)
+            }
+            if decision != .record {
+                self?.applyMotionDecision(decision)
             }
         }
         flushChain = flush
         await flush.value
+    }
+
+    /// Stop motion for the rest of the session (and delete it when storage is critical). Motion
+    /// gives way first so GPS, detection and health keep recording.
+    func applyMotionDecision(_ decision: MotionRecordingPolicy.Decision) {
+        guard let reason = decision.reason, motionStoppedReason == nil else { return }
+        motionStoppedReason = reason
+        motionRecordingEnabled = false
+        if motionUpdatesStarted {
+            motionManager.stopDeviceMotionUpdates()
+            motionUpdatesStarted = false
+        }
+        motionBuffer.removeAll()
+        motionAvailability = "stopped (\(reason))"
+        WakeLog.debug(.session, "motion stopped reason=\(reason)")
+        guard let store, let sessionId = manifest?.sessionId else { return }
+        let dropRecorded: Bool
+        if case .dropRecorded = decision { dropRecorded = true } else { dropRecorded = false }
+        let stoppedAt = Date()
+        Task {
+            do {
+                try await StoreIO.runOffMain {
+                    if dropRecorded {
+                        try store.deleteMotion(sessionId: sessionId)
+                    }
+                    try store.markMotionStopped(reason: reason, at: stoppedAt, sessionId: sessionId)
+                }
+            } catch {
+                WakeLog.error(.store, "motion stop bookkeeping: \(error.localizedDescription)")
+            }
+        }
     }
 
     func resetWaterTemperatureTracking() {

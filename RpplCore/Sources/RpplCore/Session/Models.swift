@@ -31,6 +31,10 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     /// How `parkId` was set (`auto` / `manual`). `manual` is never overwritten by auto-matching,
     /// including a manual "no park" (`parkId` nil).
     public var parkIdSource: String?
+    /// When the Watch stopped recording device motion early, and why
+    /// (`MotionRecordingPolicy.Reason`). Nil when motion ran for the whole session.
+    public var motionStoppedAt: Date?
+    public var motionStoppedReason: String?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -58,7 +62,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         weather: SessionWeather? = nil,
         waterTemperatureEstimate: ParkWaterTemperature? = nil,
         parkId: String? = nil,
-        parkIdSource: String? = nil
+        parkIdSource: String? = nil,
+        motionStoppedAt: Date? = nil,
+        motionStoppedReason: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -79,6 +85,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.waterTemperatureEstimate = waterTemperatureEstimate
         self.parkId = parkId
         self.parkIdSource = parkIdSource
+        self.motionStoppedAt = motionStoppedAt
+        self.motionStoppedReason = motionStoppedReason
     }
 }
 
