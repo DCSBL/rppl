@@ -2674,6 +2674,22 @@
           }
         }
       }
+    },
+    "Screen-on only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen-on only"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen scherm aan"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -22,5 +22,17 @@ struct ActiveSessionView: View {
                     .tag(SessionTab.debug)
             }
         }
+        .overlay(alignment: .top) {
+            // No workout session = no background runtime: recording only while the screen is on.
+            if session.recordingMode == "sensorsOnly" {
+                Text("Screen-on only")
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.orange, in: Capsule())
+                    .foregroundStyle(.black)
+                    .allowsHitTesting(false)
+            }
+        }
     }
 }

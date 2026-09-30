@@ -275,6 +275,7 @@ extension WatchSessionController {
         } else {
             recordingMode = "sensorsOnly"
             statusText = String(localized: "Sensors-only (no HK workout)")
+            startHealthKitRestartLoop()
         }
         WakeLog.debug(.session, "recordingMode=\(recordingMode)")
 
@@ -471,6 +472,8 @@ extension WatchSessionController {
     }
 
     private func clearSessionRuntimeState() {
+        healthKitRestartTask?.cancel()
+        healthKitRestartTask = nil
         // Callbacks that land after the final flush must not linger into the next session.
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)

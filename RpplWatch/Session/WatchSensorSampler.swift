@@ -8,10 +8,12 @@ import RpplCore
 // MARK: - Sensors
 extension WatchSessionController {
     func startLocation() {
-        // Background updates need Always auth; avoid enabling them when not allowed.
-        if locationManager.authorizationStatus == .authorizedAlways {
+        // The `location` background mode is declared; When-In-Use is enough to keep updates
+        // flowing while a session runs (sensors-only has no workout session to keep us alive).
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
             locationManager.allowsBackgroundLocationUpdates = true
-        } else {
+        default:
             locationManager.allowsBackgroundLocationUpdates = false
         }
         applySensorSamplingMode(dense: SensorSamplingMode.isDense(currentCode: detectionCode))
