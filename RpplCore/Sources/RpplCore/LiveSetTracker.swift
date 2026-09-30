@@ -17,6 +17,9 @@ public struct LiveSetTracker: Sendable {
     /// Sum of finished set durations (includes a set closed at session stop).
     public private(set) var sessionRidingDuration: TimeInterval = 0
     public private(set) var currentSpeedKmh: Double?
+    /// Cable (line) speed estimated from every finished set so far, km/h rounded to 0.5. What the
+    /// Watch shows while inactive; the rider's live GPS speed at the dock says nothing about it.
+    public private(set) var cableSpeedKmh: Double?
     /// Crossing-based laps for the current set (0 while inactive after finish until next enter).
     public var currentSetLapCount: Int { lapTracker.lapCount }
 
@@ -30,6 +33,8 @@ public struct LiveSetTracker: Sendable {
     private var unsureEventId: String?
     private let maxHorizontalAccuracyM: Double
     private var lapTracker: LapSetTracker
+    /// Usable riding speeds (km/h) feeding `cableSpeedKmh`.
+    private var ridingSpeedsKmh: [Double] = []
 
     public init(
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
@@ -55,6 +60,8 @@ public struct LiveSetTracker: Sendable {
         sessionRidingDuration = 0
         finishedSetMeters = 0
         currentSpeedKmh = nil
+        cableSpeedKmh = nil
+        ridingSpeedsKmh.removeAll()
         trackedCode = DetectionCodes.inactive
         trackedLastConfident = DetectionCodes.inactive
         previousLocation = nil
@@ -146,6 +153,9 @@ public struct LiveSetTracker: Sendable {
         let accrue = trackedCode == DetectionCodes.riding
         if accrue, let speed = sample.speed, speed >= 0 {
             currentSpeedKmh = SpeedUnits.kilometersPerHour(fromMetersPerSecond: speed)
+            if sample.horizontalAccuracy >= 0, sample.horizontalAccuracy <= maxHorizontalAccuracyM {
+                ridingSpeedsKmh.append(SpeedUnits.kilometersPerHour(fromMetersPerSecond: speed))
+            }
         }
 
         guard accrue else {
@@ -216,7 +226,14 @@ public struct LiveSetTracker: Sendable {
         isSetOngoing = false
         currentSpeedKmh = nil
         setStartedAt = nil
+        refreshCableSpeed()
         refreshSessionMeters()
+    }
+
+    /// Mode of riding speeds, same estimator as the logbook. Runs once per finished set.
+    private mutating func refreshCableSpeed() {
+        guard let estimate = CableSpeedEstimator.estimates(speedsKmh: ridingSpeedsKmh).first else { return }
+        cableSpeedKmh = CableSpeedEstimator.roundedToHalfKmh(estimate.speedKmh)
     }
 
     private mutating func refreshSessionMeters() {

@@ -22,4 +22,11 @@ struct TinySessionPolicyTests {
     @Test func thresholdIsThirtySeconds() {
         #expect(TinySessionPolicy.maxDurationSeconds == 30)
     }
+
+    @Test func debugDiscardOnlyInFirstTenMinutes() {
+        #expect(TinySessionPolicy.shouldOfferDebugDiscard(duration: 0))
+        #expect(TinySessionPolicy.shouldOfferDebugDiscard(duration: 599))
+        #expect(!TinySessionPolicy.shouldOfferDebugDiscard(duration: 600))
+        #expect(!TinySessionPolicy.shouldOfferDebugDiscard(duration: 7_050))
+    }
 }
