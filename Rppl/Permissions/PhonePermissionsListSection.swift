@@ -5,6 +5,8 @@ import RpplCore
 /// Always-visible companion permission rows (About). Fixed Location → Health → Motion →
 /// Notifications order. Notifications isn't a `WatchPermissionKind` (that enum backs the Watch
 /// recording gate, where a notifications row wouldn't belong), so it's appended separately here.
+/// The Notifications row only exists with `PARK_ARRIVAL_NOTIFICATIONS`: park arrival is the only
+/// notification Rppl sends.
 struct PhonePermissionsListSection: View {
     @Bindable var permissions: PhonePermissionsController
 
@@ -21,6 +23,7 @@ struct PhonePermissionsListSection: View {
                     )
                 }
             }
+            #if PARK_ARRIVAL_NOTIFICATIONS
             NavigationLink {
                 PhoneNotificationPermissionDetailView(permissions: permissions)
             } label: {
@@ -30,6 +33,7 @@ struct PhonePermissionsListSection: View {
                     state: permissions.notificationPermission
                 )
             }
+            #endif
         } header: {
             Text("Permissions")
         } footer: {
@@ -166,6 +170,7 @@ struct PhonePermissionDetailView: View {
     }
 }
 
+#if PARK_ARRIVAL_NOTIFICATIONS
 /// Same shape as `PhonePermissionDetailView`, standalone because notifications aren't a
 /// `WatchPermissionKind`. Used for the Settings permissions list row, and by the park-arrival
 /// feature (its own denial message points back here).
@@ -244,6 +249,7 @@ struct PhoneNotificationPermissionDetailView: View {
         await permissions.requestNotifications()
     }
 }
+#endif
 
 extension WatchPermissionKind {
     var phoneTitle: String {

@@ -76,8 +76,6 @@ Some features request data from outside services. None of them receive your sess
 - **Apple Maps:** route maps, park maps, and directions to a park.
 - **Rijkswaterstaat** (opt-in, off by default): for Dutch parks, the app asks the public Rijkswaterstaat water data service for the latest temperature at the measuring station nearest to the park. Only that station's code is sent, never your location. Turn it on or off in Rppl → Settings (Park water temperature).
 
-**Park arrival notifications** (opt-in, off by default): your iPhone watches a few park locations (your favorites plus the nearest others) with Apple's on-device region monitoring, and shows a local "Welcome to…" notification when you arrive. Requires Location access. Turn it off anytime in Rppl → Settings.
-
 Before adding any new third-party service that handles your data, we will ask your permission.
 
 ## Export & sharing

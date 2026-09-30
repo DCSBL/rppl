@@ -4,7 +4,9 @@ import CoreMotion
 import HealthKit
 import RpplCore
 import Observation
+#if PARK_ARRIVAL_NOTIFICATIONS
 import UserNotifications
+#endif
 
 /// Reads / requests iPhone companion permissions. Never gates WatchConnectivity sync.
 @Observable
@@ -17,6 +19,8 @@ final class PhonePermissionsController: NSObject {
     var motionPermission: WatchPermissionState = .notDetermined
     /// Not a `WatchPermissionKind` case — notifications aren't part of the Watch recording gate
     /// this enum was built for, so this row is added separately in `PhonePermissionsListSection`.
+    /// Stays outside `#if PARK_ARRIVAL_NOTIFICATIONS`: `@Observable` skips members inside `#if`
+    /// blocks, which would silently stop tracking it in the builds that show the row.
     var notificationPermission: WatchPermissionState = .notDetermined
 
     var permissionStates: [WatchPermissionKind: WatchPermissionState] {
@@ -40,7 +44,9 @@ final class PhonePermissionsController: NSObject {
 
     func refresh() {
         locationPermission = Self.locationState(locationManager.authorizationStatus)
+        #if PARK_ARRIVAL_NOTIFICATIONS
         Task { await refreshNotifications() }
+        #endif
 
         if HKHealthStore.isHealthDataAvailable() {
             refreshHealth()
@@ -167,6 +173,7 @@ final class PhonePermissionsController: NSObject {
         }
     }
 
+    #if PARK_ARRIVAL_NOTIFICATIONS
     private func refreshNotifications() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         notificationPermission = Self.notificationState(settings.authorizationStatus)
@@ -191,6 +198,7 @@ final class PhonePermissionsController: NSObject {
         @unknown default: return .notDetermined
         }
     }
+    #endif
 }
 
 extension PhonePermissionsController: CLLocationManagerDelegate {

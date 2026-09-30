@@ -1,3 +1,4 @@
+#if PARK_ARRIVAL_NOTIFICATIONS
 import CoreLocation
 import RpplCore
 import SwiftUI
@@ -161,3 +162,4 @@ struct ParkArrivalDebugView: View {
         ParkArrivalDebugView()
     }
 }
+#endif
