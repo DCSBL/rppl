@@ -49,7 +49,7 @@ The source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncom
 
 It doesn't. Rppl exists because the alternatives I found all cost money. There are no ads, no subscription, and no selling of data.
 
-We might add ways to earn a little in the future, for example to cover Apple fees, but only if the app stays free and awesome for riders.
+We might add paid features or donations in the future, but only to cover costs (like Apple fees) and keep the app awesome for riders. Existing features stay free.
 
 ## What the app collects
 
