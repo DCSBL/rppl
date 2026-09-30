@@ -2594,6 +2594,38 @@
           }
         }
       }
+    },
+    "Saving…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opslaan…"
+          }
+        }
+      }
+    },
+    "Saving session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session opslaan"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

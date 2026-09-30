@@ -97,6 +97,39 @@ struct SessionFileStoreTests {
         #expect(phoneManifest.schemaVersion == SessionSchema.currentVersion)
     }
 
+    @Test func batchedAppendsKeepEveryLineInOrder() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("batch-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = SessionFileStore(rootURL: root)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0",
+            waterTemperatureAvailable: false
+        )
+        try store.createSession(manifest: manifest)
+        let t0 = Date(timeIntervalSince1970: 1_700_000_000)
+        func batch(_ range: Range<Int>) -> [LocationSample] {
+            range.map {
+                LocationSample(
+                    timestamp: t0.addingTimeInterval(TimeInterval($0)),
+                    latitude: 52,
+                    longitude: 5,
+                    horizontalAccuracy: 5
+                )
+            }
+        }
+        try store.appendLocationSamples(batch(0..<50), sessionId: manifest.sessionId)
+        try store.appendLocationSamples([], sessionId: manifest.sessionId)
+        try store.appendLocationSamples(batch(50..<120), sessionId: manifest.sessionId)
+        let read = try store.readLocationSamples(sessionId: manifest.sessionId)
+        #expect(read.count == 120)
+        #expect(read.map(\.timestamp) == batch(0..<120).map(\.timestamp))
+    }
+
     @Test func transferPackageRoundTripPreservesSamples() throws {
         let watchRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("watch-\(UUID().uuidString)", isDirectory: true)

@@ -136,6 +136,8 @@ extension WatchSessionController {
         }
     }
 
+    /// Persist buffered samples. File work runs off the main actor so encoding and disk I/O never
+    /// stall the UI or sensor callbacks; flushes are chained so batches land in order.
     func flushBuffers() async {
         guard let store, let manifest else { return }
         considerPersistingBattery()
@@ -151,34 +153,47 @@ extension WatchSessionController {
         batteryBuffer.removeAll(keepingCapacity: true)
 
         guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty || !battery.isEmpty
-        else { return }
-
-        do {
-            if !locations.isEmpty {
-                try store.appendLocationSamples(locations, sessionId: manifest.sessionId)
-            }
-            if !motions.isEmpty {
-                try store.appendMotionSamples(motions, sessionId: manifest.sessionId)
-            }
-            if !health.isEmpty {
-                try store.appendHealthSamples(health, sessionId: manifest.sessionId)
-            }
-            if !water.isEmpty {
-                try store.appendWaterTemperatureSamples(water, sessionId: manifest.sessionId)
-            }
-            if !battery.isEmpty {
-                try store.appendBatterySamples(battery, sessionId: manifest.sessionId)
-            }
-            refreshStoredByteSize()
-            // Success path silent — every ~2s while recording would drown action logs.
-        } catch {
-            errorText = String(localized: "Flush: \(error.localizedDescription)")
-            WakeLog.error(
-                .store,
-                "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
-                    + "water=\(water.count) battery=\(battery.count): \(error.localizedDescription)"
-            )
+        else {
+            await flushChain?.value
+            return
         }
+
+        let sessionId = manifest.sessionId
+        let previous = flushChain
+        let flush = Task { [weak self] in
+            await previous?.value
+            do {
+                let byteSize = try await StoreIO.runOffMain {
+                    if !locations.isEmpty {
+                        try store.appendLocationSamples(locations, sessionId: sessionId)
+                    }
+                    if !motions.isEmpty {
+                        try store.appendMotionSamples(motions, sessionId: sessionId)
+                    }
+                    if !health.isEmpty {
+                        try store.appendHealthSamples(health, sessionId: sessionId)
+                    }
+                    if !water.isEmpty {
+                        try store.appendWaterTemperatureSamples(water, sessionId: sessionId)
+                    }
+                    if !battery.isEmpty {
+                        try store.appendBatterySamples(battery, sessionId: sessionId)
+                    }
+                    return try store.sessionByteSize(sessionId: sessionId)
+                }
+                self?.storedByteSize = byteSize
+                // Success path silent — every ~2s while recording would drown action logs.
+            } catch {
+                self?.errorText = String(localized: "Flush: \(error.localizedDescription)")
+                WakeLog.error(
+                    .store,
+                    "flush loc=\(locations.count) mot=\(motions.count) health=\(health.count) "
+                        + "water=\(water.count) battery=\(battery.count): \(error.localizedDescription)"
+                )
+            }
+        }
+        flushChain = flush
+        await flush.value
     }
 
     func resetWaterTemperatureTracking() {

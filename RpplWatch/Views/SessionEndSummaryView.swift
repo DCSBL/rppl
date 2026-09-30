@@ -55,14 +55,23 @@ struct SessionEndSummaryView: View {
                     didCompleteSet: summary.didCompleteSet
                 )
 
-                syncLine
-                    .padding(.top, 4)
+                Group {
+                    if session.isFinalizing {
+                        savingLine
+                    } else {
+                        syncLine
+                    }
+                }
+                .padding(.top, 4)
 
                 Button("Done") {
                     session.dismissSessionSummary()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.rpplIdleAccent)
+                // Health save and transfer package are still being written; Done returns to idle,
+                // which cannot start a new session until they are.
+                .disabled(session.isFinalizing)
                 .padding(.top, 6)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -74,7 +83,10 @@ struct SessionEndSummaryView: View {
         .onAppear {
             transfer.refreshPendingCount()
         }
-        .task {
+        // The derived view (map tracks) is written in the background after Stop; load once it
+        // exists instead of rebuilding it from raw streams in parallel.
+        .task(id: session.isFinalizing) {
+            guard !session.isFinalizing else { return }
             await loadMapTracks()
         }
     }
@@ -125,6 +137,18 @@ struct SessionEndSummaryView: View {
             mapTracks = built.0
             mapFrame = built.1
         }
+    }
+
+    private var savingLine: some View {
+        HStack(spacing: 6) {
+            ProgressView()
+                .frame(width: 14, height: 14)
+            Text("Saving…")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "Saving session"))
     }
 
     private var syncLine: some View {

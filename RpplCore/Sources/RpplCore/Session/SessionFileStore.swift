@@ -352,9 +352,7 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func appendLocationSamples(_ samples: [LocationSample], sessionId: String, chunkIndex: Int = 0) throws {
         let name = String(format: "location-%03d.jsonl", chunkIndex)
-        for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
-        }
+        try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
     public func appendMotionSamples(_ samples: [MotionSample], sessionId: String, chunkIndex: Int = 0) throws {
@@ -377,9 +375,7 @@ public final class SessionFileStore: @unchecked Sendable {
 
     public func appendHealthSamples(_ samples: [HealthMetricSample], sessionId: String, chunkIndex: Int = 0) throws {
         let name = String(format: "health-%03d.jsonl", chunkIndex)
-        for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
-        }
+        try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
     public func appendWaterTemperatureSamples(
@@ -388,9 +384,7 @@ public final class SessionFileStore: @unchecked Sendable {
         chunkIndex: Int = 0
     ) throws {
         let name = String(format: "water-%03d.jsonl", chunkIndex)
-        for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
-        }
+        try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
     public func appendBatterySamples(
@@ -399,9 +393,7 @@ public final class SessionFileStore: @unchecked Sendable {
         chunkIndex: Int = 0
     ) throws {
         let name = String(format: "battery-%03d.jsonl", chunkIndex)
-        for sample in samples {
-            try appendJSONLine(sample, to: name, sessionId: sessionId)
-        }
+        try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
     public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
@@ -911,6 +903,13 @@ if !migrated.isEmpty {
     }
 
     private func appendJSONLine<T: Encodable>(_ value: T, to fileName: String, sessionId: String) throws {
+        try appendJSONLines([value], to: fileName, sessionId: sessionId)
+    }
+
+    /// One open/seek/write for a whole batch — a flush used to reopen the file per sample, and a
+    /// phone import did that thousands of times.
+    private func appendJSONLines<T: Encodable>(_ values: [T], to fileName: String, sessionId: String) throws {
+        guard !values.isEmpty else { return }
         lock.lock()
         defer { lock.unlock() }
 
@@ -920,8 +919,11 @@ if !migrated.isEmpty {
         if !fileManager.fileExists(atPath: url.path) {
             fileManager.createFile(atPath: url.path, contents: nil)
         }
-        var data = try encoder.encode(value)
-        data.append(contentsOf: "\n".utf8)
+        var data = Data()
+        for value in values {
+            data.append(try encoder.encode(value))
+            data.append(contentsOf: "\n".utf8)
+        }
         let handle = try FileHandle(forWritingTo: url)
         defer { try? handle.close() }
         try handle.seekToEnd()
