@@ -343,8 +343,8 @@ public final class SessionFileStore: @unchecked Sendable {
     }
 
     public func appendDetection(_ event: DetectionEvent, sessionId: String) throws {
-        try migrateAssumptionsIfNeeded(sessionId: sessionId)
-        try migratePausedToInactiveIfNeeded(sessionId: sessionId)
+        // Legacy migrations run on read (`readDetections`); re-reading the file on every append is
+        // O(N) per write and made one bad line block all later writes.
         var event = event
         event.code = DetectionCodes.normalize(event.code)
         try appendJSONLine(event, to: "detections.jsonl", sessionId: sessionId)
@@ -1009,7 +1009,18 @@ if !migrated.isEmpty {
         }
         let handle = try FileHandle(forWritingTo: url)
         defer { try? handle.close() }
-        try handle.seekToEnd()
+        let end = try handle.seekToEnd()
+        if end > 0 {
+            // Heal a torn tail so the next record is not glued onto the broken line.
+            try handle.seek(toOffset: end - 1)
+            let last = try handle.read(upToCount: 1)
+            if last != Data([0x0A]) {
+                try handle.seekToEnd()
+                data.insert(0x0A, at: 0)
+            } else {
+                try handle.seekToEnd()
+            }
+        }
         try handle.write(contentsOf: data)
     }
 
@@ -1028,23 +1039,26 @@ if !migrated.isEmpty {
         return try decodeJSONL(type, from: data, limit: limit)
     }
 
+    /// Tolerant reader: a torn or garbage line (crash, disk full, jetsam) costs only that line.
+    /// Splits raw bytes so one invalid UTF-8 byte cannot drop the whole file.
     private func decodeJSONL<T: Decodable>(_ type: T.Type, from data: Data, limit: Int? = nil) throws -> [T] {
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL")
-        }
-        let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
         var result: [T] = []
-        let cap = limit.map { min($0, lines.count) } ?? lines.count
-        result.reserveCapacity(cap)
-        for (index, line) in lines.enumerated() {
+        var skipped = 0
+        var lineIndex = 0
+        for lineData in data.split(separator: 0x0A, omittingEmptySubsequences: true) {
             if let limit, result.count >= limit { break }
-            if index.isMultiple(of: 256), Task.isCancelled {
+            if lineIndex.isMultiple(of: 256), Task.isCancelled {
                 throw CancellationError()
             }
-            guard let lineData = line.data(using: .utf8) else {
-                throw SessionStoreError.ioFailure("Invalid UTF-8 in JSONL line")
+            lineIndex += 1
+            if let value = try? decoder.decode(T.self, from: Data(lineData)) {
+                result.append(value)
+            } else {
+                skipped += 1
             }
-            result.append(try decoder.decode(T.self, from: lineData))
+        }
+        if skipped > 0 {
+            WakeLog.error(.store, "skipped \(skipped) bad JSONL line(s) reading \(String(describing: T.self))")
         }
         return result
     }
