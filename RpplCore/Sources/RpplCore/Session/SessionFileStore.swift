@@ -780,6 +780,12 @@ if !migrated.isEmpty {
         try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
 
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
+        // Watch Connectivity retries a transfer whose ack got lost; appending the same streams
+        // again doubled every sample on the phone (field session 2026-09-30). Replace instead.
+        let existing = try phoneStore.sessionDirectory(for: package.manifest.sessionId)
+        if fileManager.fileExists(atPath: existing.path) {
+            try phoneStore.deleteSession(sessionId: package.manifest.sessionId)
+        }
         _ = try phoneStore.createSession(manifest: package.manifest)
         for detection in package.detections {
             try phoneStore.appendDetection(detection, sessionId: package.manifest.sessionId)
@@ -809,18 +815,13 @@ if !migrated.isEmpty {
         }
     }
 
-    /// Phone-only import of a Share export JSON. Stamps `manifest.imported`, replaces same `sessionId`
-    /// if already on disk. Does not touch HealthKit or Watch Connectivity.
+    /// Phone-only import of a Share export JSON. Stamps `manifest.imported`; like every import it
+    /// replaces the same `sessionId` if already on disk. Does not touch HealthKit or Watch Connectivity.
     public func importExportedPackage(
         _ package: SessionTransferPackage,
         intoPhoneStore phoneRoot: URL,
         importedAt: Date = Date()
     ) throws {
-        let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
-        let sessionId = package.manifest.sessionId
-        if fileManager.fileExists(atPath: try phoneStore.sessionDirectory(for: sessionId).path) {
-            try phoneStore.deleteSession(sessionId: sessionId)
-        }
         var stamped = package
         stamped.manifest.imported = importedAt
         try importTransferPackage(stamped, intoPhoneStore: phoneRoot)
