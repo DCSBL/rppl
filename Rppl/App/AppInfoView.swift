@@ -7,9 +7,7 @@ struct AppInfoView: View {
 
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
-    @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
-    @State private var isTogglingParkArrival = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private var versionFooter: String {
@@ -36,23 +34,7 @@ struct AppInfoView: View {
 
                 PhonePermissionsListSection(permissions: permissions)
 
-                Section {
-                    parkArrivalRow
-
-                    if AppReleaseChannel.allowsDebugTools {
-                        NavigationLink {
-                            ParkArrivalDebugView()
-                        } label: {
-                            Label("Debug park arrival", systemImage: "ladybug")
-                        }
-                    }
-                } header: {
-                    Text("Park arrival notifications")
-                } footer: {
-                    Text(
-                        "When on, Rppl watches for you crossing into your favorite and nearby parks on your device and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up."
-                    )
-                }
+                ParkArrivalNotificationsSection()
 
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
@@ -172,46 +154,6 @@ struct AppInfoView: View {
                 Text(
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var parkArrivalRow: some View {
-        if isTogglingParkArrival {
-            HStack {
-                Text("Notify on arrival")
-                Spacer()
-                ProgressView()
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Notify on arrival")
-            .accessibilityValue("Updating")
-        } else {
-            Toggle(
-                "Notify on arrival",
-                isOn: Binding(
-                    get: { parkArrival.isEnabled },
-                    set: { newValue in
-                        isTogglingParkArrival = true
-                        Task {
-                            if newValue {
-                                await parkArrival.enable()
-                            } else {
-                                parkArrival.disable()
-                            }
-                            isTogglingParkArrival = false
-                        }
-                    }
-                )
-            )
-            .tint(Color.rpplAccent)
-            if parkArrival.permissionDenied {
-                Text(
-                    "Location or notification access was denied, so this stayed off. Allow both location and notifications in Settings, then try again."
-                )
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
             }
         }
     }

@@ -372,22 +372,6 @@
         }
       }
     },
-    "Asked after your first session arrives from Watch. City names come from Watch GPS stored with each session, not from live iPhone location." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asked after your first session arrives from Watch. City names come from Watch GPS stored with each session, not from live iPhone location."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wordt gevraagd nadat je eerste session vanaf de Watch binnenkomt. Stadsnamen komen uit Watch-GPS bij elke session, niet uit de live locatie van de iPhone."
-          }
-        }
-      }
-    },
     "Avg speed" : {
       "localizations" : {
         "en" : {
@@ -3198,22 +3182,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calorieën"
-          }
-        }
-      }
-    },
-    "No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen hartslag of calorieën opgeslagen. De watch zat waarschijnlijk over kleding of een wetsuit."
           }
         }
       }
@@ -6522,18 +6490,50 @@
         }
       }
     },
-    "Needed for park arrival notifications, if you turn that on in Park arrival notifications above." : {
+    "Asked after your first session arrives from Watch." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Needed for park arrival notifications, if you turn that on in Park arrival notifications above."
+            "value" : "Asked after your first session arrives from Watch."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig voor aankomstmeldingen, als je dat hierboven bij Aankomstmeldingen aanzet."
+            "value" : "Wordt gevraagd nadat je eerste session vanaf de Watch binnenkomt."
+          }
+        }
+      }
+    },
+    "Notification permission is needed for the park arrival notifications feature." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notification permission is needed for the park arrival notifications feature."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissie voor notificaties is nodig voor de 'aankomstmeldingen'-functie."
+          }
+        }
+      }
+    },
+    "No heart rate or calories recorded. The watch was likely worn over clothing and was unable to measure your heart rate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No heart rate or calories recorded. The watch was likely worn over clothing and was unable to measure your heart rate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen hartslag of calorieën opgeslagen. De watch zat waarschijnlijk over kleding en kon je hartslag niet meten."
           }
         }
       }
