@@ -110,12 +110,13 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 ### Workflows
 
-Keep two workflows in App Store Connect / Xcode:
+Keep three workflows in App Store Connect / Xcode:
 
 | Workflow | Start condition | Actions |
 |----------|-----------------|---------|
 | **PR / Core tests** | Pull Request Changes | Test (workspace `RpplCore`, scheme **RpplCore**, iOS Simulator) |
 | **Nightly TestFlight** | On a Schedule for a Branch (`main`) | Test → Archive (scheme **Rppl**) → Deploy to TestFlight |
+| **Release** | Tag Changes, tags beginning with `v` | Test → Archive (scheme **Rppl**, TestFlight and App Store) → TestFlight internal + external. Setup and release steps: [Release.md](Release.md) |
 
 Optional: add **Manual Start** on `main` to the nightly workflow for on-demand TestFlight builds.
 
@@ -144,6 +145,7 @@ Do **not** add Branch Changes to the nightly workflow unless you also want push-
 | `schedule` | Skip unless any commit in the last 24 hours touched build-related paths |
 | `push` | Skip unless `HEAD` vs `HEAD~1` includes build-related paths |
 | `manual`, `manual_rebuild`, `pr_open`, `pr_update` | Always continue |
+| any, with `CI_TAG` set (release tag build) | Always continue; runs `scripts/ci/prepare_release.py` first ([Release.md](Release.md)) |
 
 Build-related paths match the local pre-push **xcode-gate** hook (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, tooling, and most scripts do **not** count.
 
