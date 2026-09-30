@@ -2658,6 +2658,22 @@
           }
         }
       }
+    },
+    "Watch storage almost full - free up space" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch storage almost full - free up space"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch-opslag bijna vol - maak ruimte vrij"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

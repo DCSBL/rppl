@@ -57,7 +57,17 @@ extension WatchSessionController {
             isHealthPermissionResolved = true
             return
         }
-        let status = await workoutAuthorizationStatus()
+        let status: HKAuthorizationStatus
+        do {
+            status = try await Deadline.run(Self.healthStatusTimeout, label: "healthAuthorizationStatus") {
+                await self.workoutAuthorizationStatus()
+            }
+        } catch {
+            // healthd not answering: keep the last known state instead of spinning forever.
+            WakeLog.error(.permissions, "Health status lookup timed out — keeping \(healthPermission.rawValue)")
+            isHealthPermissionResolved = true
+            return
+        }
         isHealthPermissionResolved = true
         switch status {
         case .notDetermined:
@@ -74,6 +84,8 @@ extension WatchSessionController {
             healthPermission = .notDetermined
         }
     }
+
+    static let healthStatusTimeout: TimeInterval = 5
 
     /// Coalesces concurrent lookups so a stalled `healthd` never piles up blocked threads.
     private func workoutAuthorizationStatus() async -> HKAuthorizationStatus {
@@ -241,6 +253,12 @@ extension WatchSessionController {
             _ = try fileStore.createSession(manifest: manifest)
             refreshStoredByteSize()
             WakeLog.debug(.store, "createSession OK \(manifest.sessionId.prefix(8))…")
+            if let free = fileStore.availableCapacityBytes(), free < SampleRequeue.lowStorageWarningBytes {
+                // Recording still starts: motion stays off (MotionRecordingPolicy) and failed
+                // batches are retried, but the rider should free space.
+                errorText = String(localized: "Watch storage almost full - free up space")
+                WakeLog.error(.store, "low storage at start free=\(free)")
+            }
         } catch {
             errorText = String(localized: "Store: \(error.localizedDescription)")
             statusText = String(localized: "Failed")

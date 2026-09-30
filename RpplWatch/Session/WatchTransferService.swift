@@ -295,6 +295,12 @@ extension WatchTransferService: WCSessionDelegate {
     ) {
         Task { @MainActor in
             let sessionId = fileTransfer.file.metadata?[AppConstants.wcSessionFileMetaSessionID] as? String
+            // WC is done with our copy either way; a retry builds a fresh one. Left behind, every
+            // package (tens of MB for a day pass) stayed in tmp until the system purged it.
+            let packageURL = fileTransfer.file.fileURL
+            if packageURL.path.hasPrefix(tempDir.path) {
+                try? FileManager.default.removeItem(at: packageURL)
+            }
             if let error {
                 lastMessage = String(localized: "Transfer failed (kept on Watch): \(error.localizedDescription)")
                 WakeLog.error(
