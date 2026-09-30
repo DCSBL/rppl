@@ -24,6 +24,9 @@ public struct DetectionEngine: Sendable {
     private var unsureEventId: String?
     private var openSet: DetectionSetContext?
     private var lastEvidenceAt: Date?
+    /// Latest tick of any kind, and latest fresh fix — the stale-fix guard compares against both.
+    private var lastTickAt: Date?
+    private var lastFixAt: Date?
     private let failedStartRule = FailedStartRule()
 
     public init(
@@ -69,6 +72,8 @@ public struct DetectionEngine: Sendable {
         unsureEventId = nil
         openSet = nil
         lastEvidenceAt = nil
+        lastTickAt = nil
+        lastFixAt = nil
         holds.clear()
         return DetectionEvent(
             code: DetectionCodes.inactive,
@@ -80,6 +85,15 @@ public struct DetectionEngine: Sendable {
 
     /// Process one sensor tick. Returns zero or more events (transition and/or lookback revision).
     public mutating func process(_ tick: DetectionTick) -> [DetectionEvent] {
+        if let rejection = staleFixRejection(tick) {
+            lastFilterRejection = rejection
+            return []
+        }
+        if tick.hasFreshFix {
+            lastFixAt = tick.timestamp
+        }
+        lastTickAt = max(lastTickAt ?? tick.timestamp, tick.timestamp)
+
         let outcome = filter.evaluate(
             tick,
             previousUsableSpeedMps: previousUsableSpeedMps,
@@ -191,6 +205,21 @@ public struct DetectionEngine: Sendable {
             out.append(fix)
         }
         return out
+    }
+
+    /// A fix that arrives after the clock has moved past it says nothing about now: replaying it
+    /// would rewind the hold clocks and backdate transitions into a window that heartbeats already
+    /// judged (a GPS batch delivered late once re-opened a set a minute after it timed out).
+    /// Heartbeats are never stale; they are the clock.
+    private func staleFixRejection(_ tick: DetectionTick) -> String? {
+        guard tick.hasFreshFix else { return nil }
+        if let lastFixAt, tick.timestamp < lastFixAt {
+            return "fix_out_of_order"
+        }
+        if let lastTickAt, lastTickAt.timeIntervalSince(tick.timestamp) > thresholds.maxFixLag {
+            return "fix_stale>\(fmt(thresholds.maxFixLag))s"
+        }
+        return nil
     }
 
     /// Count seconds spent at cable speed inside the open set. Silence is not credited: a gap

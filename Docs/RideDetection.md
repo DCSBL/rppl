@@ -74,6 +74,7 @@ Watch builds a `DetectionTick` (timestamp, speed m/s, horizontal accuracy, optio
 
 ```text
 DetectionTick
+    → stale-fix guard     (fix older than the last fix, or > 10 s behind the clock? drop it)
     → GpsSignalFilter     (is this speed usable for rules?)
     → DetectionHoldClock  (how long have we been fast / slow / unusable?)
     → lookback (if currently unsure)
@@ -82,6 +83,8 @@ DetectionTick
 ```
 
 Core never imports CoreLocation / CoreMotion. Watch owns sensors; Core owns decisions.
+
+Fixes must reach the engine in time order and without delay. The Watch drops repeated / out-of-order CoreLocation deliveries (`LocationFixSequencer`) and never awaits HealthKit in the location callback — route points are queued and inserted in batches. A fix that still arrives more than `maxFixLag` (**10 s**) behind the heartbeat clock is ignored (`fix_stale`): the gap / timeout rules already judged that moment. Before this, a stalled route insert held good fixes back for minutes while poor ones went straight through, so a set timed out mid-ride and the late batch re-opened it in the past.
 
 ### 1. GPS filter (`GpsSignalFilter`)
 
@@ -149,6 +152,7 @@ Authoritative defaults: `DetectionThresholds` in RpplCore.
 | Same-ride / timeout window | **60** s | lookback merge vs force `inactive` |
 | Accuracy gate | **25** m | worse → unusable for speed rules |
 | Implausible / jump | **80** / **30** km/h | filter spikes |
+| Max fix lag | **10** s | older fixes are stale and ignored |
 
 Internal comparisons use m/s; `reason` strings on events print **km/h** so exports are human-readable.
 

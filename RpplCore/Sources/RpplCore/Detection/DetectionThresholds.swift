@@ -33,6 +33,9 @@ public struct DetectionThresholds: Equatable, Sendable {
     /// Two consecutive samples agreeing within this (km/h) make a jump a real step, not a
     /// spike: accept the second one instead of latching on a stale comparison.
     public var speedJumpCorroborationKmh: Double
+    /// A fresh fix older than the latest tick by more than this is stale and ignored: the
+    /// heartbeat clock already judged that moment. Wider than normal CoreLocation delivery lag.
+    public var maxFixLag: TimeInterval
 
     public init(
         rideEnterSpeedKmh: Double = 20,
@@ -51,7 +54,8 @@ public struct DetectionThresholds: Equatable, Sendable {
         maxPlausibleSpeedKmh: Double = 80,
         maxSpeedJumpKmh: Double = 30,
         maxSpeedJumpWindow: TimeInterval = 10.0,
-        speedJumpCorroborationKmh: Double = 10
+        speedJumpCorroborationKmh: Double = 10,
+        maxFixLag: TimeInterval = 10.0
     ) {
         self.rideEnterSpeedKmh = rideEnterSpeedKmh
         self.rideEnterHold = rideEnterHold
@@ -70,6 +74,7 @@ public struct DetectionThresholds: Equatable, Sendable {
         self.maxSpeedJumpKmh = maxSpeedJumpKmh
         self.maxSpeedJumpWindow = maxSpeedJumpWindow
         self.speedJumpCorroborationKmh = speedJumpCorroborationKmh
+        self.maxFixLag = maxFixLag
     }
 
     public static let `default` = DetectionThresholds()

@@ -280,6 +280,13 @@ extension WatchSessionController {
         sessionStartLatitude = nil
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
+        // Nothing from a previous session may reach this one's files: a callback that finished
+        // after the last flush of the previous session once left its samples here.
+        locationBuffer.removeAll(keepingCapacity: true)
+        motionBuffer.removeAll(keepingCapacity: true)
+        healthBuffer.removeAll(keepingCapacity: true)
+        pendingRouteLocations.removeAll(keepingCapacity: true)
+        locationSequencer.reset(notBefore: Date())
         resetWaterTemperatureTracking()
         resetBatteryTracking()
         resetAirWeather()
@@ -419,6 +426,10 @@ extension WatchSessionController {
     }
 
     private func clearSessionRuntimeState() {
+        // Callbacks that land after the final flush must not linger into the next session.
+        locationBuffer.removeAll(keepingCapacity: true)
+        motionBuffer.removeAll(keepingCapacity: true)
+        healthBuffer.removeAll(keepingCapacity: true)
         liveSetTracker.reset()
         storedByteSize = 0
         currentSetDuration = 0
