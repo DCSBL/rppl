@@ -39,7 +39,7 @@ public enum SessionSetTrackBuilder {
 
         var tracks: [SessionSetTrack] = []
         for (offset, set) in sets.enumerated() {
-            let samples = SetLocationFilter.samples(in: sorted, from: set.startedAt, to: set.endedAt)
+            let samples = SetLocationFilter.trackSamples(in: sorted, from: set.startedAt, to: set.endedAt)
             guard samples.count >= 2 else { continue }
             tracks.append(
                 SessionSetTrack(
