@@ -142,6 +142,8 @@ final class WatchSessionController: NSObject {
     var workoutRouteBuilder: HKWorkoutRouteBuilder?
     /// True while an HK set activity is open (ended on detection `inactive`).
     var hkRideActivityOpen = false
+    /// True while `handleWorkoutSessionLost` runs, so `.ended` + `.stopped` callbacks act once.
+    var isHandlingWorkoutLoss = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
     var workoutRunningContinuation: CheckedContinuation<Void, Never>?
     var hkRideDistanceMeters = 0.0

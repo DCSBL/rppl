@@ -26,6 +26,10 @@ extension WatchSessionController {
 
     func beginDetectionActivity(code: String, at date: Date) {
         guard let session = workoutSession, let config = workoutConfiguration else { return }
+        guard session.state == .running || session.state == .paused else {
+            WakeLog.debug(.workout, "beginNewActivity skipped — session state \(session.state.rawValue)")
+            return
+        }
         session.beginNewActivity(
             configuration: config,
             date: date,
@@ -146,7 +150,7 @@ extension WatchSessionController {
     /// Wait for the HK session to reach `.stopped` after `stopActivity`, bounded. On timeout the
     /// waiter is released and `date` is used as the stop date.
     func stopWorkoutActivity(_ session: HKWorkoutSession, at date: Date) async -> Date {
-        if session.state == .stopped { return date }
+        if session.state == .stopped || session.state == .ended { return date }
         let stopped = Task { @MainActor in
             await withCheckedContinuation { (continuation: CheckedContinuation<Date, Never>) in
                 self.workoutStoppedContinuation = continuation
@@ -378,6 +382,88 @@ extension WatchSessionController {
         clearWorkoutSessionRefs()
     }
 
+    /// The HK session ended or failed while recording (another app started a workout, `healthd`
+    /// error). Without it the app loses background runtime, so: flush, mark it in the detections,
+    /// warn the rider, start a fresh session first (restores protection), then save what the old
+    /// builder holds in the background. If no new session can start, keep recording sensors-only.
+    func handleWorkoutSessionLost(reason: String) async {
+        guard !isHandlingWorkoutLoss else { return }
+        isHandlingWorkoutLoss = true
+        defer { isHandlingWorkoutLoss = false }
+        WakeLog.error(.workout, "HK session lost — \(reason)")
+
+        await flushBuffers(force: true)
+        persistWorkoutLossMarker(reason: reason)
+        WKInterfaceDevice.current().play(.failure)
+        errorText = String(localized: "Workout session ended unexpectedly - restarting")
+
+        let oldSession = workoutSession
+        let oldBuilder = workoutBuilder
+        oldBuilder?.delegate = nil
+        clearWorkoutSessionRefs()
+        if let oldBuilder {
+            // Best effort, off the critical path: endCollection + finishWorkout keep what was collected.
+            Task { [weak self] in
+                await self?.saveLostWorkout(builder: oldBuilder, session: oldSession)
+            }
+        } else {
+            oldSession?.end()
+        }
+
+        guard isRunning, !isStopping else { return }
+        do {
+            try await startWorkout()
+            if isStopping || !isRunning {
+                await discardWorkoutWithoutSaving()
+                return
+            }
+            recordingMode = "workout"
+            beginDetectionActivity(code: lastPersistedConfidentCode, at: Date())
+            if lastPersistedConfidentCode == DetectionCodes.riding {
+                setRideMetricsCollection(enabled: true)
+            }
+            errorText = nil
+            WakeLog.debug(.workout, "HK session restarted after loss")
+        } catch {
+            workoutSession?.end()
+            clearWorkoutSessionRefs()
+            recordingMode = "sensorsOnly"
+            statusText = String(localized: "Sensors-only (no HK workout)")
+            errorText = String(localized: "Workout ended and could not restart. Recording only while the screen is on.")
+            WakeLog.error(.workout, "HK restart failed: \(error.localizedDescription) — sensors-only")
+        }
+    }
+
+    private func persistWorkoutLossMarker(reason: String) {
+        guard let store, let manifest else { return }
+        // Same code as the current state, so the marker never opens or closes a set.
+        let event = DetectionEvent(
+            code: detectionCode,
+            reason: reason,
+            detectorId: WorkoutSessionLossPolicy.detectorId
+        )
+        do {
+            try store.appendDetection(event, sessionId: manifest.sessionId)
+            detectionCount += 1
+        } catch {
+            WakeLog.error(.detection, "hk_session_lost marker: \(error.localizedDescription)")
+        }
+    }
+
+    private func saveLostWorkout(builder: HKLiveWorkoutBuilder, session: HKWorkoutSession?) async {
+        let end = Date()
+        do {
+            try await healthKitStep("lost endCollection") { try await builder.endCollection(at: end) }
+            _ = try await healthKitStep("lost finishWorkout") {
+                UncheckedSendable(value: try await builder.finishWorkout())
+            }
+            WakeLog.debug(.workout, "lost workout saved")
+        } catch {
+            WakeLog.error(.workout, "lost workout save: \(error.localizedDescription)")
+        }
+        session?.end()
+    }
+
     /// User-confirmed tiny-session discard: no Health save, no phone transfer.
     func discardWorkoutWithoutSaving() async {
         guard let session = workoutSession else {
@@ -394,7 +480,7 @@ extension WatchSessionController {
         WakeLog.debug(.workout, "discardWorkout OK — no Health save")
     }
 
-    private func clearWorkoutSessionRefs() {
+    func clearWorkoutSessionRefs() {
         workoutSession = nil
         workoutBuilder = nil
         workoutDataSource = nil
