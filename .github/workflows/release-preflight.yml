@@ -1,0 +1,60 @@
+# Release preflight. Xcode Cloud builds the tag (Docs/Release.md); this only checks it.
+#
+# - release published: tag format, tag on main, release description present, and a
+#   preview of the TestFlight "What to Test" text (job summary). Does not gate the
+#   Xcode Cloud build; a red run means "fix the release, then Rebuild in Xcode Cloud".
+# - pull request: unit tests for the release scripts (Python 3.9 = Xcode command line tools).
+#
+# The tag name is user input: it reaches the shell only through env, never interpolated.
+
+name: Release preflight
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/ci/**"
+      - "ci_scripts/**"
+      - "Rppl.xcodeproj/project.pbxproj"
+      - "Rppl/Info.plist"
+      - ".github/workflows/release-preflight.yml"
+
+concurrency:
+  group: release-preflight-${{ github.event.release.tag_name || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: release scripts
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
+
+  preflight:
+    name: release preflight
+    if: github.event_name == 'release'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/ci/prepare_release.py --check-only --tag "$RELEASE_TAG"
