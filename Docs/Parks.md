@@ -123,17 +123,24 @@ opening:
 
 - Precedence per day: `closed` beats `hours` beats the regular rules. `extra` is added on top of either.
 - `sunset` (also allowed in normal rules) is not calculated: it is just a name for 00:00 internally, so the park counts as open until the end of that day and closed after 00:00. The UI still says "sunset" ("Open from 17:00 to sunset"), never a clock time; `ParkTimeWindow.endsAtSunset` carries that. Blocks only count when they end before the close, so a `sunset` window offers every block up to 23:00.
-- The Open date filter, the list chip, the Today card and the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
+- The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
 - Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 
 ### Water temperature (opt-in)
 
-- Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row, and the arrival notification includes it.
+- Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row, and, in dev builds with park arrival notifications, the arrival notification includes it.
 - `water_temperature.provider` is an opaque provider id: `rws_nl` (Rijkswaterstaat WaterWebServices — CC0-licensed Dutch government open data, `station_id` is a location code), `hic_be` (MOW-HIC KiWIS service — Flemish government open data for Belgium's navigable waterways), or `vmm_be` (VMM KiWIS service — Flemish government open data for Belgium's non-navigable waterways). Both Belgian providers share the same KiWIS REST API shape, just different hosts/databases; `station_id` for either is a KiWIS `ts_id`, not a station code. A new provider (another country's open-data API) is a new entry in `ParkWaterTemperatureProvider`'s fetcher registry (`Rppl/Parks/ParkWaterTemperatureProvider.swift`), not a schema or architecture change.
 - Always the nearest official station's reading, not a sensor at the park — shown with an "Estimate near <station>, via <source>" caption. Some stations report infrequently (see `wetnwild-alphen`'s comment), so the reading can be from earlier in the season, not necessarily "now".
 - `RpplCore` only defines the shape (`ParkWaterTemperatureSource`, `ParkWaterTemperature`, `ParkWaterTemperatureFetching`); the actual HTTP fetch, caching (max once per 4 hours per station) and failure backoff live in the `Rppl` app layer, mirroring `ParksWeatherProvider`.
 - A reading older than 48 hours is treated as unavailable (`ParkWaterTemperatureProvider.maxReadingAge`) — a station that stopped reporting doesn't show a stale number. Unlike park weather's fail-open convention, the park screen shows an explicit "Not available" row whenever the setting is on and no fresh reading came back, whether the park has no `water_temperature` source at all, the fetch failed/timed out, or the latest reading is too old.
+
+### Park arrival notifications (dev builds only)
+
+- Not shipped. All of it — Settings toggle, Notifications permission row, explainer sheet, debug screen, region monitoring and the `Rppl/Notifications/` sources — is compiled only with the Swift compilation condition `PARK_ARRIVAL_NOTIFICATIONS`. It is set for the Debug configuration only (`SWIFT_ACTIVE_COMPILATION_CONDITIONS` in `Rppl.xcodeproj`), so Release, TestFlight and App Store builds do not contain it.
+- The location usage description and `LEGAL.md` do not mention the feature while it is off. Re-add both before shipping it.
+- `ParkArrivalPlanner` (which parks to monitor, cooldown) lives in `RpplCore` and is not flagged, so `ParkArrivalPlannerTests` keep running in every configuration.
+- To try it on a device, run a Debug build and turn on Settings → "Notify on arrival".
 
 ### Wakesys badge
 
