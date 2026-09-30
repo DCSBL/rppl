@@ -188,32 +188,17 @@ extension WatchSessionController {
         let previous = flushChain
         let flush = Task { [weak self] in
             await previous?.value
-            do {
-                let byteSize = try await StoreIO.runOffMain {
-                    if !locations.isEmpty {
-                        try store.appendLocationSamples(locations, sessionId: sessionId)
-                    }
-                    if !health.isEmpty {
-                        try store.appendHealthSamples(health, sessionId: sessionId)
-                    }
-                    if !water.isEmpty {
-                        try store.appendWaterTemperatureSamples(water, sessionId: sessionId)
-                    }
-                    if !battery.isEmpty {
-                        try store.appendBatterySamples(battery, sessionId: sessionId)
-                    }
-                    return try store.sessionByteSize(sessionId: sessionId)
-                }
-                self?.storedByteSize = byteSize
-                // Success path silent — every ~2s while recording would drown action logs.
-            } catch {
-                self?.errorText = String(localized: "Flush: \(error.localizedDescription)")
-                WakeLog.error(
-                    .store,
-                    "flush loc=\(locations.count) health=\(health.count) "
-                        + "water=\(water.count) battery=\(battery.count): \(error.localizedDescription)"
-                )
-            }
+            // Each stream is written on its own: one failing (full disk) must not cost the
+            // others, and only what failed goes back in the buffer for the next flush.
+            let outcome = await StoreIO.runOffMainCollectingFailures(
+                locations: locations,
+                health: health,
+                water: water,
+                battery: battery,
+                store: store,
+                sessionId: sessionId
+            )
+            self?.handleFlushOutcome(outcome, locations: locations, health: health, water: water, battery: battery)
             guard !motions.isEmpty else { return }
             let decision: MotionRecordingPolicy.Decision
             do {
@@ -237,6 +222,39 @@ extension WatchSessionController {
         }
         flushChain = flush
         await flush.value
+    }
+
+    /// Put batches that failed to write back in front of the buffers (bounded) and surface the
+    /// problem once; the next flush retries them.
+    func handleFlushOutcome(
+        _ outcome: FlushOutcome,
+        locations: [LocationSample],
+        health: [HealthMetricSample],
+        water: [WaterTemperatureSample],
+        battery: [BatterySample]
+    ) {
+        if let byteSize = outcome.byteSize {
+            storedByteSize = byteSize
+        }
+        guard let error = outcome.error else { return }
+        if outcome.failed.contains(.locations) {
+            locationBuffer = SampleRequeue.merge(failed: locations, before: locationBuffer, cap: SampleRequeue.locationCap)
+        }
+        if outcome.failed.contains(.health) {
+            healthBuffer = SampleRequeue.merge(failed: health, before: healthBuffer, cap: SampleRequeue.healthCap)
+        }
+        if outcome.failed.contains(.water) {
+            waterBuffer = SampleRequeue.merge(failed: water, before: waterBuffer, cap: SampleRequeue.waterCap)
+        }
+        if outcome.failed.contains(.battery) {
+            batteryBuffer = SampleRequeue.merge(failed: battery, before: batteryBuffer, cap: SampleRequeue.batteryCap)
+        }
+        errorText = String(localized: "Flush: \(error)")
+        WakeLog.error(
+            .store,
+            "flush failed \(outcome.failed.map(\.rawValue).sorted()) loc=\(locations.count) health=\(health.count) "
+                + "water=\(water.count) battery=\(battery.count): \(error) — kept for retry"
+        )
     }
 
     /// Stop motion for the rest of the session (and delete it when storage is critical). Motion
@@ -429,4 +447,53 @@ extension WatchSessionController {
     static let waterTempLogDeltaC = 2.0
     static let batteryPersistInterval: TimeInterval = 60
     static let locationRingMaxAge: TimeInterval = 5
+}
+
+enum FlushStream: String, Sendable {
+    case locations, health, water, battery
+}
+
+struct FlushOutcome: Sendable {
+    var failed: Set<FlushStream> = []
+    var error: String?
+    var byteSize: Int64?
+}
+
+extension StoreIO {
+    /// Write each stream separately off the main actor and report which ones failed.
+    static func runOffMainCollectingFailures(
+        locations: [LocationSample],
+        health: [HealthMetricSample],
+        water: [WaterTemperatureSample],
+        battery: [BatterySample],
+        store: SessionFileStore,
+        sessionId: String
+    ) async -> FlushOutcome {
+        let result = try? await StoreIO.runOffMain { () -> FlushOutcome in
+            var outcome = FlushOutcome()
+            func attempt(_ stream: FlushStream, _ write: () throws -> Void) {
+                do {
+                    try write()
+                } catch {
+                    outcome.failed.insert(stream)
+                    outcome.error = error.localizedDescription
+                }
+            }
+            if !locations.isEmpty {
+                attempt(.locations) { try store.appendLocationSamples(locations, sessionId: sessionId) }
+            }
+            if !health.isEmpty {
+                attempt(.health) { try store.appendHealthSamples(health, sessionId: sessionId) }
+            }
+            if !water.isEmpty {
+                attempt(.water) { try store.appendWaterTemperatureSamples(water, sessionId: sessionId) }
+            }
+            if !battery.isEmpty {
+                attempt(.battery) { try store.appendBatterySamples(battery, sessionId: sessionId) }
+            }
+            outcome.byteSize = try? store.sessionByteSize(sessionId: sessionId)
+            return outcome
+        }
+        return result ?? FlushOutcome(failed: [.locations, .health, .water, .battery], error: "flush task failed")
+    }
 }
