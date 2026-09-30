@@ -6330,6 +6330,22 @@
         }
       }
     },
+    "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruikt een externe, officiële waterdienst — bijvoorbeeld Rijkswaterstaat — bij parken met een nabije bron, voor het parkscherm. De waarde is een schatting."
+          }
+        }
+      }
+    },
     "Rppl fetches this from an external, official water-monitoring service. The reading is an estimate. You can change this later in Settings." : {
       "localizations" : {
         "en" : {

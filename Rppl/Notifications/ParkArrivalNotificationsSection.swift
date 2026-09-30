@@ -1,3 +1,4 @@
+#if PARK_ARRIVAL_NOTIFICATIONS
 import SwiftUI
 import RpplCore
 
@@ -68,3 +69,4 @@ struct ParkArrivalNotificationsSection: View {
         }
     }
 }
+#endif

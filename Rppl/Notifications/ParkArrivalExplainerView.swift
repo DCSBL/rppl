@@ -1,3 +1,4 @@
+#if PARK_ARRIVAL_NOTIFICATIONS
 import SwiftUI
 
 /// Shown once, the first time a park-arrival notification is tapped: what just happened and why.
@@ -47,3 +48,4 @@ struct ParkArrivalExplainerView: View {
 #Preview {
     ParkArrivalExplainerView(onDismiss: {})
 }
+#endif

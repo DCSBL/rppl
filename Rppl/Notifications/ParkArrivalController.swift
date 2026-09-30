@@ -1,3 +1,4 @@
+#if PARK_ARRIVAL_NOTIFICATIONS
 import CoreLocation
 import Foundation
 import Observation
@@ -374,3 +375,4 @@ extension ParkArrivalController: UNUserNotificationCenterDelegate {
         pendingArrival = PendingParkArrival(parkID: parkID, isFirstTime: isFirstTime)
     }
 }
+#endif
