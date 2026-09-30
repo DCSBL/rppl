@@ -137,6 +137,7 @@ extension WatchSessionController {
     }
 
     func flushBuffers() async {
+        drainRouteLocations()
         guard let store, let manifest else { return }
         considerPersistingBattery()
         let locations = locationBuffer

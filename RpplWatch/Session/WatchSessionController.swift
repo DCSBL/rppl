@@ -179,6 +179,11 @@ final class WatchSessionController: NSObject {
     var healthBuffer: [HealthMetricSample] = []
     /// Recent GPS fixes for backdating live set meters on `ride_enter`.
     var recentLocationRing: [LocationSample] = []
+    /// Drops repeated / out-of-order CoreLocation deliveries before detection sees them.
+    var locationSequencer = LocationFixSequencer()
+    /// Route points waiting for the next batched `insertRouteData` (never awaited by detection).
+    var pendingRouteLocations: [CLLocation] = []
+    var routeInsertTask: Task<Void, Never>?
     var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?
     var timerTask: Task<Void, Never>?

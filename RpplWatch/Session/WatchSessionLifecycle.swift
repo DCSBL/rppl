@@ -280,6 +280,7 @@ extension WatchSessionController {
         sessionStartLatitude = nil
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
+        locationSequencer.reset()
         resetWaterTemperatureTracking()
         resetBatteryTracking()
         resetAirWeather()

@@ -7,36 +7,53 @@ import RpplCore
 extension WatchSessionController: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
-            guard isRunning, !isProductPaused, let loc = locations.last else { return }
-            await insertRouteLocations(locations)
-            if loc.speed >= 0 {
-                lastSpeedMps = loc.speed
+            guard isRunning, !isProductPaused else { return }
+            // Never await here: a route insert that stalls in healthd once held good fixes back
+            // for minutes while poor ones went straight to detection (field session 2026-09-30).
+            enqueueRouteLocations(locations)
+            let dropped = locationSequencer.droppedCount
+            let fresh = locationSequencer.accepted(locations) { $0.timestamp }
+            if locationSequencer.droppedCount > dropped {
+                WakeLog.debug(
+                    .session,
+                    "dropped \(locationSequencer.droppedCount - dropped) repeated/out-of-order fix(es)"
+                )
             }
-            if loc.horizontalAccuracy >= 0 {
-                lastHorizontalAccuracy = loc.horizontalAccuracy
+            for loc in fresh {
+                handleLocationFix(loc)
             }
-            latestLocation = loc
-            lastLatitude = loc.coordinate.latitude
-            lastLongitude = loc.coordinate.longitude
-            let sample = LocationSample(
-                timestamp: loc.timestamp,
-                latitude: loc.coordinate.latitude,
-                longitude: loc.coordinate.longitude,
-                altitude: loc.altitude,
-                horizontalAccuracy: loc.horizontalAccuracy,
-                verticalAccuracy: loc.verticalAccuracy,
-                speed: loc.speed >= 0 ? loc.speed : nil,
-                course: loc.course >= 0 ? loc.course : nil
-            )
-            locationBuffer.append(sample)
-            locationCount += 1
-            captureSessionStartCoordinate(from: sample)
-            appendToLocationRing(sample)
-            processLocationSample(sample)
-            processDetectionFix(loc)
-            requestAirWeatherIfNeeded(from: loc)
-            requestWaterEstimateIfNeeded(from: loc)
         }
+    }
+
+    /// One new fix, in time order: record, live set meters, detection.
+    private func handleLocationFix(_ loc: CLLocation) {
+        if loc.speed >= 0 {
+            lastSpeedMps = loc.speed
+        }
+        if loc.horizontalAccuracy >= 0 {
+            lastHorizontalAccuracy = loc.horizontalAccuracy
+        }
+        latestLocation = loc
+        lastLatitude = loc.coordinate.latitude
+        lastLongitude = loc.coordinate.longitude
+        let sample = LocationSample(
+            timestamp: loc.timestamp,
+            latitude: loc.coordinate.latitude,
+            longitude: loc.coordinate.longitude,
+            altitude: loc.altitude,
+            horizontalAccuracy: loc.horizontalAccuracy,
+            verticalAccuracy: loc.verticalAccuracy,
+            speed: loc.speed >= 0 ? loc.speed : nil,
+            course: loc.course >= 0 ? loc.course : nil
+        )
+        locationBuffer.append(sample)
+        locationCount += 1
+        captureSessionStartCoordinate(from: sample)
+        appendToLocationRing(sample)
+        processLocationSample(sample)
+        processDetectionFix(loc)
+        requestAirWeatherIfNeeded(from: loc)
+        requestWaterEstimateIfNeeded(from: loc)
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
