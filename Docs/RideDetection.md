@@ -234,3 +234,4 @@ Offline experiments: `DetectionEngine.replay(ticks:)` or `replay(locations:)`.
 1. Read `DetectionEngineTests` — names describe park loops.
 2. Sketch one timeline (enter → gap → lookback) on paper with timestamps.
 3. Change only `unsureSameRideWindow` in a local test thresholds struct and replay; do not change defaults until you understand lookback vs timeout.
+4. Before and after any threshold change, run `SessionFixtureTests`: real sessions with annotated good and bad sets (`RpplCore/Tests/RpplCoreTests/Fixtures/Sessions/`). Turn every field report into one with `scripts/make-session-fixture.py`.
