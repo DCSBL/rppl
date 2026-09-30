@@ -7,6 +7,7 @@ import Foundation
 /// v4: distilled `mapTracks` for session heatmap maps (phone + Watch).
 /// v5: medoid most-common-path selection replaces mean-coordinate averaging.
 /// v6: session map heatmap only; drop averaged track and speed coloring.
+/// v7: map tracks drop low-accuracy fixes and implausible jumps (`SetLocationFilter.trackSamples`).
 public enum SessionAnalyzer {
-    public static let version = 6
+    public static let version = 7
 }

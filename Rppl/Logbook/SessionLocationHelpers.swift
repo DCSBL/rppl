@@ -30,7 +30,7 @@ enum SessionLocationHelpers {
         for set: SetSegmentStats,
         in all: [LocationSample]
     ) -> [LocationSample] {
-        SetLocationFilter.samples(in: all, from: set.startedAt, to: set.endedAt)
+        SetLocationFilter.trackSamples(in: all, from: set.startedAt, to: set.endedAt)
     }
 
     static func downsample(_ locations: [LocationSample], maxCount: Int) -> [LocationSample] {
