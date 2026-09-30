@@ -202,15 +202,12 @@ extension WatchSessionController {
     }
 
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
-        endedSessionSummary = nil
-
-        guard !isRunning, !isStopping, !isStarting else {
-            WakeLog.debug(
-                .session,
-                "startSession ignored — running=\(isRunning) stopping=\(isStopping) starting=\(isStarting)"
-            )
+        // A busy request must not wipe the summary of a session that is still saving.
+        guard startGateDecision() == .start else {
+            WakeLog.debug(.session, "startSession ignored — \(busyStateDescription)")
             return
         }
+        endedSessionSummary = nil
         let code = activityCode.isEmpty ? ActivityCodes.wakeboard : activityCode
         WakeLog.debug(.session, "startSession begin activity=\(code)")
         errorText = nil
