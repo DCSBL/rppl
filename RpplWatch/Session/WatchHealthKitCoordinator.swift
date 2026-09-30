@@ -120,44 +120,77 @@ extension WatchSessionController {
         guard let session = workoutSession else { return false }
         if session.state == .running { return true }
 
-        return await withTaskGroup(of: Bool.self) { group in
-            group.addTask { @MainActor in
-                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    self.workoutRunningContinuation = continuation
-                    if session.state == .running {
-                        self.workoutRunningContinuation = nil
-                        continuation.resume()
-                    }
+        let running = Task { @MainActor in
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                self.workoutRunningContinuation = continuation
+                if session.state == .running {
+                    self.workoutRunningContinuation = nil
+                    continuation.resume()
                 }
-                return true
             }
-            group.addTask {
-                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
-                return false
-            }
-            guard let first = await group.next() else { return false }
-            group.cancelAll()
-            if !first {
+        }
+        do {
+            try await Deadline.run(timeoutSeconds, label: "workoutRunning") { await running.value }
+            return true
+        } catch {
+            // Release the waiter; the old task-group version waited on it forever and kept
+            // `startSession` from ever starting the flush / heartbeat loops.
+            if let continuation = workoutRunningContinuation {
                 workoutRunningContinuation = nil
+                continuation.resume()
             }
-            return first
+            return false
         }
     }
+
+    /// Wait for the HK session to reach `.stopped` after `stopActivity`, bounded. On timeout the
+    /// waiter is released and `date` is used as the stop date.
+    func stopWorkoutActivity(_ session: HKWorkoutSession, at date: Date) async -> Date {
+        if session.state == .stopped { return date }
+        let stopped = Task { @MainActor in
+            await withCheckedContinuation { (continuation: CheckedContinuation<Date, Never>) in
+                self.workoutStoppedContinuation = continuation
+                session.stopActivity(with: date)
+            }
+        }
+        do {
+            return try await Deadline.run(Self.healthKitStepTimeout, label: "stopActivity") { await stopped.value }
+        } catch {
+            WakeLog.error(.workout, "stopActivity: no .stopped within \(Int(Self.healthKitStepTimeout))s — continuing")
+            if let continuation = workoutStoppedContinuation {
+                workoutStoppedContinuation = nil
+                continuation.resume(returning: date)
+            }
+            return date
+        }
+    }
+
+    /// One HealthKit call with a deadline. A hung `healthd` (field session 2026-09-30) must not
+    /// hold Stop or Start forever: the step fails and the caller moves on.
+    func healthKitStep<T: Sendable>(
+        _ label: String,
+        seconds: TimeInterval = WatchSessionController.healthKitStepTimeout,
+        _ operation: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        do {
+            return try await Deadline.run(seconds, label: label, operation)
+        } catch let expired as Deadline.Expired {
+            WakeLog.error(.workout, "\(expired.label) timed out after \(Int(expired.seconds))s")
+            throw expired
+        }
+    }
+
+    static let healthKitStepTimeout: TimeInterval = 20
+    /// Start is interactive: fall back to sensors-only sooner.
+    static let healthKitStartTimeout: TimeInterval = 10
 
     /// Ends a workout session left dangling by a crash so watchOS stops handing it back
     /// on every relaunch. Runs off the launch path; each step is time-bounded.
     func recoverDanglingWorkoutSession() async {
         let store = healthStore
-        let recovered: HKWorkoutSession? = await withTaskGroup(of: HKWorkoutSession?.self) { group in
-            group.addTask { try? await store.recoverActiveWorkoutSession() }
-            group.addTask {
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
-                return nil
-            }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
-        }
+        let recovered: HKWorkoutSession? = (try? await Deadline.run(3, label: "recoverActiveWorkoutSession") {
+            UncheckedSendable(value: try await store.recoverActiveWorkoutSession())
+        })?.value ?? nil
         guard let session = recovered, workoutSession == nil else { return }
         WakeLog.debug(.workout, "recovered dangling HKWorkoutSession state=\(session.state.rawValue)")
         let builder = session.associatedWorkoutBuilder()
@@ -168,8 +201,11 @@ extension WatchSessionController {
             }
         }
         do {
-            try await builder.endCollection(at: Date())
-            _ = try await builder.finishWorkout()
+            let end = Date()
+            try await healthKitStep("dangling endCollection") { try await builder.endCollection(at: end) }
+            _ = try await healthKitStep("dangling finishWorkout") {
+                UncheckedSendable(value: try await builder.finishWorkout())
+            }
         } catch {
             WakeLog.error(.workout, "dangling finishWorkout: \(error.localizedDescription)")
         }
@@ -194,6 +230,8 @@ extension WatchSessionController {
             // Simulator / denied / notDetermined often surfaces here as "Not authorized".
             errorText = String(localized: "Workout: \(error.localizedDescription). Continuing sensors-only.")
             WakeLog.error(.workout, "start failed: \(error.localizedDescription) — sensors-only")
+            // A half-started HK session (e.g. beginCollection timed out) must not dangle.
+            workoutSession?.end()
             workoutSession = nil
             workoutBuilder = nil
             workoutDataSource = nil
@@ -230,7 +268,10 @@ extension WatchSessionController {
         if let activityCode = manifest?.activityCode, !activityCode.isEmpty {
             metadata[AppConstants.hkMetadataActivityCode] = activityCode
         }
-        try await builder.addMetadata(metadata)
+        let startMetadata = metadata
+        try await healthKitStep("start addMetadata", seconds: Self.healthKitStartTimeout) {
+            try await builder.addMetadata(startMetadata)
+        }
 
         workoutSession = session
         workoutBuilder = builder
@@ -248,7 +289,10 @@ extension WatchSessionController {
         hkPeakSpeedMps = 0
 
         session.startActivity(with: Date())
-        try await builder.beginCollection(at: Date())
+        let collectionStart = Date()
+        try await healthKitStep("beginCollection", seconds: Self.healthKitStartTimeout) {
+            try await builder.beginCollection(at: collectionStart)
+        }
         // Session starts inactive: keep HR/basal streaming; set-scoped metrics off until riding.
         setRideMetricsCollection(enabled: false)
         WakeLog.debug(.workout, "HK collection began (inactive — set metrics gated)")
@@ -262,15 +306,7 @@ extension WatchSessionController {
         let requestEnd = Date()
         recordFinishedHkRide(endedAt: requestEnd)
         endRideActivity(at: requestEnd)
-        let stoppedDate: Date
-        if session.state == .stopped {
-            stoppedDate = requestEnd
-        } else {
-            stoppedDate = await withCheckedContinuation { continuation in
-                workoutStoppedContinuation = continuation
-                session.stopActivity(with: requestEnd)
-            }
-        }
+        let stoppedDate = await stopWorkoutActivity(session, at: requestEnd)
 
         do {
             var closingMetadata: [String: Any] = [
@@ -298,25 +334,35 @@ extension WatchSessionController {
                     doubleValue: estimate.celsius
                 )
             }
-            try await builder.addMetadata(closingMetadata)
-            await attachAirWeatherMetadata(to: builder)
-            try await builder.endCollection(at: stoppedDate)
+            let metadata = closingMetadata
             do {
-                try await addRideDistanceSamples(to: builder)
-                try await attachRideMetricsToActivities(builder)
+                try await healthKitStep("closing addMetadata") { try await builder.addMetadata(metadata) }
+            } catch {
+                // Metadata is nice-to-have; the workout itself still gets saved.
+                WakeLog.error(.workout, "closing metadata: \(error.localizedDescription)")
+            }
+            await attachAirWeatherMetadata(to: builder)
+            try await healthKitStep("endCollection") { try await builder.endCollection(at: stoppedDate) }
+            do {
+                try await healthKitStep("ride distance samples") { try await self.addRideDistanceSamples(to: builder) }
+                try await healthKitStep("ride interval metadata") { try await self.attachRideMetricsToActivities(builder) }
             } catch {
                 WakeLog.error(.workout, "ride distance/interval samples: \(error.localizedDescription)")
             }
             do {
-                try await addWaterTemperatureSamples(to: builder)
+                try await healthKitStep("water samples") { try await self.addWaterTemperatureSamples(to: builder) }
             } catch {
                 WakeLog.error(.workout, "waterTemperature samples: \(error.localizedDescription)")
             }
-            let workout = try await builder.finishWorkout()
+            let workout = try await healthKitStep("finishWorkout", seconds: 30) {
+                UncheckedSendable(value: try await builder.finishWorkout())
+            }.value
             await finishPendingRouteInserts()
             if let workout, let routeBuilder = workoutRouteBuilder {
                 do {
-                    _ = try await routeBuilder.finishRoute(with: workout, metadata: nil)
+                    _ = try await healthKitStep("finishRoute") {
+                        UncheckedSendable(value: try await routeBuilder.finishRoute(with: workout, metadata: nil))
+                    }
                     WakeLog.debug(.workout, "workout route saved")
                 } catch {
                     WakeLog.error(.workout, "finishRoute: \(error.localizedDescription)")
@@ -341,12 +387,7 @@ extension WatchSessionController {
         WakeLog.debug(.workout, "discardWorkout begin")
         let requestEnd = Date()
         endRideActivity(at: requestEnd)
-        if session.state != .stopped {
-            _ = await withCheckedContinuation { continuation in
-                workoutStoppedContinuation = continuation
-                session.stopActivity(with: requestEnd)
-            }
-        }
+        _ = await stopWorkoutActivity(session, at: requestEnd)
         workoutBuilder?.discardWorkout()
         session.end()
         clearWorkoutSessionRefs()
@@ -421,7 +462,8 @@ extension WatchSessionController {
             return
         }
         do {
-            try await builder.addMetadata(snapshot.healthKitMetadata)
+            let weatherMetadata = snapshot.healthKitMetadata
+            try await healthKitStep("weather metadata") { try await builder.addMetadata(weatherMetadata) }
             WakeLog.debug(.workout, "air weather metadata attached")
         } catch {
             WakeLog.error(.workout, "air weather metadata: \(error.localizedDescription)")
@@ -585,4 +627,10 @@ extension WatchSessionController {
     static let routeMaxHorizontalAccuracyM = 50.0
     /// About an hour of 1 Hz fixes.
     static let routePendingLimit = 3_600
+}
+
+/// Carries a HealthKit object (not declared `Sendable`) out of a `Deadline` task. The object is
+/// handed back once and only used on the main actor.
+struct UncheckedSendable<Value>: @unchecked Sendable {
+    let value: Value
 }

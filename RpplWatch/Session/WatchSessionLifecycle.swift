@@ -57,7 +57,17 @@ extension WatchSessionController {
             isHealthPermissionResolved = true
             return
         }
-        let status = await workoutAuthorizationStatus()
+        let status: HKAuthorizationStatus
+        do {
+            status = try await Deadline.run(Self.healthStatusTimeout, label: "healthAuthorizationStatus") {
+                await self.workoutAuthorizationStatus()
+            }
+        } catch {
+            // healthd not answering: keep the last known state instead of spinning forever.
+            WakeLog.error(.permissions, "Health status lookup timed out — keeping \(healthPermission.rawValue)")
+            isHealthPermissionResolved = true
+            return
+        }
         isHealthPermissionResolved = true
         switch status {
         case .notDetermined:
@@ -74,6 +84,8 @@ extension WatchSessionController {
             healthPermission = .notDetermined
         }
     }
+
+    static let healthStatusTimeout: TimeInterval = 5
 
     /// Coalesces concurrent lookups so a stalled `healthd` never piles up blocked threads.
     private func workoutAuthorizationStatus() async -> HKAuthorizationStatus {
