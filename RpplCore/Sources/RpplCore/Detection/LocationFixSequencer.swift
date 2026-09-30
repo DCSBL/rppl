@@ -14,10 +14,16 @@ public struct LocationFixSequencer: Sendable, Equatable {
 
     public init() {}
 
-    public mutating func reset() {
-        lastAcceptedAt = nil
+    /// - Parameter notBefore: session start. A fix older than this belongs to an earlier session:
+    ///   a fix held back behind a stalled HealthKit call once surfaced minutes after Stop and was
+    ///   recorded into the next session (field sessions 2026-09-30).
+    public mutating func reset(notBefore: Date? = nil) {
+        lastAcceptedAt = notBefore.map { $0.addingTimeInterval(-Self.startGrace) }
         droppedCount = 0
     }
+
+    /// CoreLocation's first delivery after start can carry a fix taken just before it.
+    public static let startGrace: TimeInterval = 30
 
     /// Accept one fix timestamp. `false` means the fix is a duplicate or older than one already
     /// accepted and must not be processed.

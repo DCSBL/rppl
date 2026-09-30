@@ -40,6 +40,20 @@ struct LocationFixSequencerTests {
         #expect(accepted == [3, 4, 5].map { t0.addingTimeInterval($0) })
     }
 
+    /// Field sessions 2026-09-30: 60 fixes from 14:45-14:58Z, held back in the first session,
+    /// were recorded into a second session started at 15:03Z.
+    @Test func fixesFromBeforeSessionStartAreDropped() {
+        var sequencer = LocationFixSequencer()
+        let start = t0.addingTimeInterval(1_000)
+        sequencer.reset(notBefore: start)
+        #expect(!sequencer.accept(t0))
+        #expect(!sequencer.accept(start.addingTimeInterval(-LocationFixSequencer.startGrace - 1)))
+        // CoreLocation's first fix may predate Start by a few seconds.
+        #expect(sequencer.accept(start.addingTimeInterval(-5)))
+        #expect(sequencer.accept(start.addingTimeInterval(1)))
+        #expect(sequencer.droppedCount == 2)
+    }
+
     @Test func resetForgetsHistory() {
         var sequencer = LocationFixSequencer()
         _ = sequencer.accept(t0)
