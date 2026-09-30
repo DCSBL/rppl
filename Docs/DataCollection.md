@@ -21,7 +21,7 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 | Stream | Approx rate | File |
 |--------|-------------|------|
 | GPS | Core Location; sparse while `inactive` (~10 m, 8 m filter), dense while riding/unsure | `location-000.jsonl` |
-| deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL | `motion-000.jsonl.zlib` |
+| deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL, one frame per **30 s**. Expendable: see *Motion gives way first* below | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
 | Battery | sparse; raw `WKInterfaceDevice.batteryLevel` (0…1 Float) + state; on change / 60 s / start·stop·pause·resume | `battery-000.jsonl` |
@@ -110,3 +110,16 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 | `derived` | Fast view stats / map frame when present |
 
 User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.
+
+## Motion gives way first
+
+Nothing analyses device motion yet; it is kept for future event / trick analysis. It is the first stream to stop so GPS, detection, health and water keep recording (`MotionRecordingPolicy` in Core, checked after each motion frame and at start):
+
+| Condition | Effect | `manifest.motionStoppedReason` |
+|-----------|--------|-------------------------------|
+| Session ≥ **4 h** | stop motion for the rest of the session | `long_session` |
+| Compressed motion ≥ **15 MB** | stop | `file_budget` |
+| Free space < **300 MB** (or a motion write fails) | stop | `low_storage` |
+| Free space < **100 MB** | stop and delete this session's motion | `storage_critical` |
+
+`manifest.motionStoppedAt` records when. Motion is written after every other stream, so a failed motion write never costs GPS or health samples.

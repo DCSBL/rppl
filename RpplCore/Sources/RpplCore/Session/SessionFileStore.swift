@@ -410,6 +410,53 @@ public final class SessionFileStore: @unchecked Sendable {
         try data.write(to: url, options: [.atomic])
     }
 
+    /// Compressed motion bytes on disk for the session (0 when none).
+    public func motionByteSize(sessionId: String, chunkIndex: Int = 0) throws -> Int64 {
+        lock.lock()
+        defer { lock.unlock() }
+
+        let url = try sessionDirectory(for: sessionId)
+            .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
+        guard let attrs = try? fileManager.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? NSNumber else { return 0 }
+        return size.int64Value
+    }
+
+    /// Delete the session's motion (compressed and legacy). Motion is the first stream to go when
+    /// the Watch runs out of space; see `MotionRecordingPolicy`.
+    public func deleteMotion(sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        let dir = try sessionDirectory(for: sessionId)
+        for name in [Self.motionCompressedFileName(chunkIndex: 0), Self.motionLegacyFileName(chunkIndex: 0)] {
+            let url = dir.appendingPathComponent(name)
+            if fileManager.fileExists(atPath: url.path) {
+                try fileManager.removeItem(at: url)
+            }
+        }
+    }
+
+    /// Record that motion stopped early. First reason wins.
+    public func markMotionStopped(reason: String, at date: Date, sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        guard manifest.motionStoppedReason == nil else { return }
+        manifest.motionStoppedAt = date
+        manifest.motionStoppedReason = reason
+        try writeManifest(manifest)
+    }
+
+    /// Free space on the store's volume; nil when the system cannot say. (The "important usage"
+    /// resource key is unavailable on watchOS.)
+    public func availableCapacityBytes() -> Int64? {
+        guard let attrs = try? fileManager.attributesOfFileSystem(forPath: rootURL.path),
+              let free = attrs[.systemFreeSize] as? NSNumber else { return nil }
+        return free.int64Value
+    }
+
     public func readMotionFrameData(sessionId: String, chunkIndex: Int = 0) throws -> Data? {
         lock.lock()
         defer { lock.unlock() }

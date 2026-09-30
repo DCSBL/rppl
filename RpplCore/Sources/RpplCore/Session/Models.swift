@@ -31,6 +31,10 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     /// How `parkId` was set (`auto` / `manual`). `manual` is never overwritten by auto-matching,
     /// including a manual "no park" (`parkId` nil).
     public var parkIdSource: String?
+    /// When the Watch stopped recording device motion early, and why
+    /// (`MotionRecordingPolicy.Reason`). Nil when motion ran for the whole session.
+    public var motionStoppedAt: Date?
+    public var motionStoppedReason: String?
     /// Watch-side transfer bookkeeping: packages queued so far, earliest next attempt
     /// (`TransferRetryPolicy`), and the phone's last import error.
     public var transferAttempts: Int?
@@ -64,6 +68,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         waterTemperatureEstimate: ParkWaterTemperature? = nil,
         parkId: String? = nil,
         parkIdSource: String? = nil,
+        motionStoppedAt: Date? = nil,
+        motionStoppedReason: String? = nil,
         transferAttempts: Int? = nil,
         nextTransferAttemptAt: Date? = nil,
         lastTransferError: String? = nil
@@ -87,6 +93,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.waterTemperatureEstimate = waterTemperatureEstimate
         self.parkId = parkId
         self.parkIdSource = parkIdSource
+        self.motionStoppedAt = motionStoppedAt
+        self.motionStoppedReason = motionStoppedReason
         self.transferAttempts = transferAttempts
         self.nextTransferAttemptAt = nextTransferAttemptAt
         self.lastTransferError = lastTransferError

@@ -291,6 +291,8 @@ extension WatchSessionController {
         sensorSamplingDense = false
 
         startLocation()
+        motionStoppedReason = nil
+        lastMotionFlushAt = nil
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
 
@@ -332,7 +334,7 @@ extension WatchSessionController {
         considerPersistingBattery(force: true)
         stopSensors()
         liveSetTracker.closeOpenSet()
-        await flushBuffers()
+        await flushBuffers(force: true)
         disableBatteryMonitoring()
 
         let stoppedSessionId = manifest.sessionId
@@ -498,7 +500,7 @@ extension WatchSessionController {
         WakeLog.debug(.session, "pauseSession begin")
         applyForcedInactive(reason: "product_pause", detectorId: "product_pause")
         considerPersistingBattery(force: true)
-        await flushBuffers()
+        await flushBuffers(force: true)
         flushTask?.cancel()
         timerTask?.cancel()
         flushTask = nil

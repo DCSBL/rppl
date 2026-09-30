@@ -18,7 +18,9 @@ public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
 ///
 /// Concatenated frames decompress to UTF-8 JSONL (newline-delimited objects).
 public enum CompressedJSONLFrames {
-    public static let maxFrameCount = 8_192
+    /// Builds before `MotionRecordingPolicy.frameInterval` wrote one frame per 2 s flush (~1,500 an
+    /// hour): 8,192 frames rejected every session over ~5.4 h on import. 32,768 covers a day.
+    public static let maxFrameCount = 32_768
     public static let maxCompressedBytesPerFrame = 1 * 1024 * 1024
     public static let maxDecompressedBytesPerFrame = 8 * 1024 * 1024
     public static let maxTotalDecodedBytes = 64 * 1024 * 1024
