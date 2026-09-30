@@ -64,6 +64,10 @@ final class WatchViewSyncService {
     }
 
     func pruneAfterAck(sessionId: String) {
+        guard !WatchTransferService.shared.isPackaging(sessionId: sessionId) else {
+            WakeLog.debug(.store, "prune deferred — packaging \(sessionId.prefix(8))…")
+            return
+        }
         do {
             if try store.readDerivedView(sessionId: sessionId) != nil {
                 try store.pruneRawStreams(sessionId: sessionId)
