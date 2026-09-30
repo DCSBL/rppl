@@ -253,6 +253,12 @@ extension WatchSessionController {
             _ = try fileStore.createSession(manifest: manifest)
             refreshStoredByteSize()
             WakeLog.debug(.store, "createSession OK \(manifest.sessionId.prefix(8))…")
+            if let free = fileStore.availableCapacityBytes(), free < SampleRequeue.lowStorageWarningBytes {
+                // Recording still starts: motion stays off (MotionRecordingPolicy) and failed
+                // batches are retried, but the rider should free space.
+                errorText = String(localized: "Watch storage almost full - free up space")
+                WakeLog.error(.store, "low storage at start free=\(free)")
+            }
         } catch {
             errorText = String(localized: "Store: \(error.localizedDescription)")
             statusText = String(localized: "Failed")
