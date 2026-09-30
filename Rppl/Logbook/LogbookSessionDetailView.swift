@@ -587,7 +587,7 @@ struct LogbookSessionDetailView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("About missing calories")
             .popover(isPresented: $showsMissingCaloriesInfo) {
-                Text("No heart rate or calories recorded. The watch was likely worn over clothing or a wetsuit.")
+                Text("No heart rate or calories recorded. The watch was likely worn over clothing and was unable to measure your heart rate.")
                     .font(.footnote)
                     .padding()
                     .frame(maxWidth: 260)

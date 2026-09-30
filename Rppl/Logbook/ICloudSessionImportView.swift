@@ -92,7 +92,7 @@ struct ICloudSessionImportView: View {
                     .tint(Color.rpplAccent)
                 } footer: {
                     Text(
-                        "Choose a session export JSON from Files. Imported sessions appear in the logbook. Health is not updated."
+                        "Choose a session export of raw data from Files. Imported sessions appear in the logbook."
                     )
                 }
             }

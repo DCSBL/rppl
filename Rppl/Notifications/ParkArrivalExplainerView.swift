@@ -16,7 +16,7 @@ struct ParkArrivalExplainerView: View {
                     .foregroundStyle(Color.rpplText)
 
                 Text(
-                    "Your iPhone keeps a small on-device list of park locations and quietly watches for you crossing into one, with no Rppl server and no tracking in between."
+                    "Your iPhone keeps a small on-device list of park locations and quietly watches for you crossing into one."
                 )
                 Text(
                     "Once you're clearly at a park (not just passing by), Rppl sends this one local notification, then stays quiet about that park for the rest of the day."

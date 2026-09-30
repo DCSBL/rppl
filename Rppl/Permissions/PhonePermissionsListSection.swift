@@ -33,9 +33,7 @@ struct PhonePermissionsListSection: View {
         } header: {
             Text("Permissions")
         } footer: {
-            Text(
-                "Asked after your first session arrives from Watch. City names come from Watch GPS stored with each session, not from live iPhone location."
-            )
+            Text("Asked after your first session arrives from Watch.")
         }
         .onAppear { permissions.refresh() }
     }
@@ -183,10 +181,12 @@ struct PhoneNotificationPermissionDetailView: View {
             Section {
                 Label("Notifications", systemImage: "bell.fill")
                 statusLine
-                Text("Needed for park arrival notifications, if you turn that on in Park arrival notifications above.")
+                Text("Notification permission is needed for the park arrival notifications feature.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+
+            ParkArrivalNotificationsSection()
 
             if state == .denied {
                 Section {

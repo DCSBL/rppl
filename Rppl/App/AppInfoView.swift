@@ -7,9 +7,7 @@ struct AppInfoView: View {
 
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
-    @State private var parkArrival = ParkArrivalController.shared
     @State private var showDisableDeleteConfirm = false
-    @State private var isTogglingParkArrival = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private var versionFooter: String {
@@ -36,23 +34,7 @@ struct AppInfoView: View {
 
                 PhonePermissionsListSection(permissions: permissions)
 
-                Section {
-                    parkArrivalRow
-
-                    if AppReleaseChannel.allowsDebugTools {
-                        NavigationLink {
-                            ParkArrivalDebugView()
-                        } label: {
-                            Label("Debug park arrival", systemImage: "ladybug")
-                        }
-                    }
-                } header: {
-                    Text("Park arrival notifications")
-                } footer: {
-                    Text(
-                        "When on, Rppl watches for you crossing into your favorite and nearby parks on your device (no server, no continuous tracking) and sends one local \"Welcome to…\" notification per visit. Uses When In Use location, so this only fires while Rppl is still running in the background; if you haven't opened it in a while, or force-quit it, reopen Rppl once to pick monitoring back up."
-                    )
-                }
+                ParkArrivalNotificationsSection()
 
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
@@ -68,7 +50,7 @@ struct AppInfoView: View {
                     Text("Park water temperature")
                 } footer: {
                     Text(
-                        "Uses an external, official government service (Rijkswaterstaat) on parks that have a nearby source, for the park screen and the arrival notification. The reading is an estimate."
+                        "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen and the arrival notification. The reading is an estimate."
                     )
                 }
 
@@ -98,7 +80,7 @@ struct AppInfoView: View {
                         Text("Import")
                     } footer: {
                         Text(
-                            "Import from iCloud Drive or a session export JSON file. Imported sessions appear in the logbook. Health is not updated."
+                            "Import from iCloud Drive or a session export of raw data. Imported sessions appear in the logbook."
                         )
                     }
                 }
@@ -115,28 +97,11 @@ struct AppInfoView: View {
                     Text("Data")
                 } footer: {
                     Text(
-                        "Keeps your phone logbook in your iCloud Drive as backup, which can be restored. Uses your Apple account, not a Rppl cloud."
+                        "Keeps your phone logbook in your iCloud Drive as backup, which can be restored."
                     )
                 }
 
                 Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("On your devices")
-                            .font(.body.weight(.semibold))
-                        Text(
-                            "Rppl processes your session on your Watch and iPhone. We do not upload sets to a Rppl cloud or share your data with others."
-                        )
-                        .font(.subheadline)
-                        .foregroundStyle(Color.rpplMuted)
-                        Text(
-                            "With iCloud Drive on, the phone logbook lives in your iCloud Documents. Device iCloud Backup is separate and only helps after a full device restore."
-                        )
-                        .font(.subheadline)
-                        .foregroundStyle(Color.rpplMuted)
-                    }
-                    .padding(.vertical, 4)
-                    .accessibilityElement(children: .combine)
-
                     NavigationLink {
                         LegalTermsPrivacyView()
                     } label: {
@@ -189,46 +154,6 @@ struct AppInfoView: View {
                 Text(
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var parkArrivalRow: some View {
-        if isTogglingParkArrival {
-            HStack {
-                Text("Notify on arrival")
-                Spacer()
-                ProgressView()
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Notify on arrival")
-            .accessibilityValue("Updating")
-        } else {
-            Toggle(
-                "Notify on arrival",
-                isOn: Binding(
-                    get: { parkArrival.isEnabled },
-                    set: { newValue in
-                        isTogglingParkArrival = true
-                        Task {
-                            if newValue {
-                                await parkArrival.enable()
-                            } else {
-                                parkArrival.disable()
-                            }
-                            isTogglingParkArrival = false
-                        }
-                    }
-                )
-            )
-            .tint(Color.rpplAccent)
-            if parkArrival.permissionDenied {
-                Text(
-                    "Location or notification access was denied, so this stayed off. Allow both location and notifications in Settings, then try again."
-                )
-                .font(.caption)
-                .foregroundStyle(Color.rpplMuted)
             }
         }
     }
