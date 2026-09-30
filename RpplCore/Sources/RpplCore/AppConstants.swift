@@ -9,6 +9,9 @@ public enum AppConstants {
     public static let parksDirectoryName = "Parks"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
+    /// Phone → Watch: import of this session failed; the Watch keeps it and backs off.
+    public static let wcNackMessageKey = "nackSessionId"
+    public static let wcNackReasonKey = "nackReason"
     /// Discriminator for iPhone ↔ Watch logbook view sync (`viewUpdate`, `viewDelete`, …).
     public static let wcMessageTypeKey = "rpplMessageType"
     public static let wcViewUpdateSessionIdKey = "sessionId"

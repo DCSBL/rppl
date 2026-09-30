@@ -118,6 +118,16 @@ final class PhoneConnectivityService: NSObject {
         refreshSyncState()
     }
 
+    /// Tell the Watch this package could not be imported, so it keeps the session and backs off
+    /// instead of re-sending it on every wake. Queued: reaches the Watch after relaunches too.
+    private func rejectTransfer(sessionId: String, reason: String) {
+        WCSession.default.transferUserInfo([
+            AppConstants.wcNackMessageKey: sessionId,
+            AppConstants.wcNackReasonKey: reason
+        ])
+        WakeLog.debug(.transfer, "queued nack \(sessionId.prefix(8))… reason=\(reason)")
+    }
+
     func flushPendingAcks() {
         guard WCSession.default.isReachable else { return }
         let ids = Array(pendingAcks)
@@ -150,13 +160,20 @@ final class PhoneConnectivityService: NSObject {
         }
     }
 
-    func importPackage(from url: URL, sessionIdHint: String?) throws {
+    /// Decode and write off the main actor: a day-pass package is tens of MB, and a UI freeze
+    /// while iOS woke the app in the background for the transfer could get it killed before the
+    /// ack went out.
+    func importPackage(from url: URL, sessionIdHint: String?) async throws {
         WakeLog.debug(.transfer, "import begin hint=\(sessionIdHint.map { String($0.prefix(8)) } ?? "nil")…")
-        let data = try SessionImportLimits.readBoundedFile(at: url)
-        let package = try SessionImportLimits.decodeTransferPackage(from: data)
-        try store.importTransferPackage(package, intoPhoneStore: store.rootURL)
+        let store = self.store
+        let importedId = try await StoreIO.runOffMain {
+            let data = try SessionImportLimits.readBoundedFile(at: url)
+            let package = try SessionImportLimits.decodeTransferPackage(from: data)
+            try store.importTransferPackage(package, intoPhoneStore: store.rootURL)
+            return package.manifest.sessionId
+        }
         sessionsRevision += 1
-        let sessionId = sessionIdHint ?? package.manifest.sessionId
+        let sessionId = sessionIdHint ?? importedId
         PhoneICloudDriveController.shared.acceptSession(sessionId)
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
@@ -302,12 +319,16 @@ extension PhoneConnectivityService: WCSessionDelegate {
         try? FileManager.default.copyItem(at: url, to: dest)
 
         Task { @MainActor in
+            defer { try? FileManager.default.removeItem(at: dest) }
             do {
-                try importPackage(from: dest, sessionIdHint: hint)
+                try await importPackage(from: dest, sessionIdHint: hint)
                 status = String(localized: "Imported session")
             } catch {
                 status = String(localized: "Import failed: \(error.localizedDescription)")
                 WakeLog.error(.transfer, "import failed: \(error.localizedDescription)")
+                if let hint {
+                    rejectTransfer(sessionId: hint, reason: SessionImportFailure.reason(for: error))
+                }
             }
             refreshSyncState()
         }

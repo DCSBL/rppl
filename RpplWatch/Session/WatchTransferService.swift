@@ -66,26 +66,39 @@ final class WatchTransferService: NSObject {
 
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {
         WakeLog.debug(.transfer, "enqueue \(sessionId.prefix(8))…")
-        self.store = store
+        // Own store instance: packaging must not share a lock with the recording's writes.
+        if self.store?.rootURL != store.rootURL {
+            self.store = SessionFileStore(rootURL: store.rootURL)
+        }
         Task {
             await WatchSyncNotifier.requestAuthorizationIfNeeded()
         }
-        transferPending()
+        transferPending(force: true)
     }
 
-    func transferPending() {
+    /// - Parameter force: ignore the retry backoff and the recording guard (Stop, "Retry
+    ///   transfers"). Automatic calls (app active, reachability) never package during a
+    ///   recording and respect `TransferRetryPolicy`.
+    func transferPending(force: Bool = false) {
         if store == nil {
             store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         }
         guard let store else { return }
         refreshSyncState()
 
+        let controller = WatchSessionController.shared
+        if !force, controller.isRunning, !controller.isStopping {
+            WakeLog.debug(.transfer, "transferPending skipped — recording")
+            return
+        }
+
         do {
             let pending = try store.sessionsNeedingTransfer()
             pendingTransferCount = pending.count
+            let due = force ? pending : TransferRetryPolicy.due(pending, now: Date())
             lastMessage = String(localized: "Pending transfers: \(pending.count)")
-            WakeLog.debug(.transfer, "transferPending count=\(pending.count)")
-            for manifest in pending {
+            WakeLog.debug(.transfer, "transferPending count=\(pending.count) due=\(due.count) force=\(force)")
+            for manifest in due {
                 transfer(sessionId: manifest.sessionId, store: store)
             }
             refreshPendingCount()
@@ -124,6 +137,7 @@ final class WatchTransferService: NSObject {
             do {
                 let packageURL = try await StoreIO.runOffMain {
                     try store.markTransferring(sessionId: sessionId)
+                    try store.recordTransferAttempt(sessionId: sessionId)
                     return try store.zipSessionForTransfer(sessionId: sessionId, to: directory)
                 }
                 WCSession.default.transferFile(packageURL, metadata: [
@@ -134,7 +148,7 @@ final class WatchTransferService: NSObject {
             } catch {
                 lastMessage = String(localized: "Transfer error: \(error.localizedDescription)")
                 WakeLog.error(.transfer, "transfer \(sessionId.prefix(8))…: \(error.localizedDescription)")
-                try? store.markReadyToTransfer(sessionId: sessionId)
+                try? store.requeueForTransfer(sessionId: sessionId)
             }
             refreshPendingCount()
         }
@@ -222,8 +236,29 @@ extension WatchTransferService: WCSessionDelegate {
                 applyAckMessage(userInfo)
                 return
             }
+            if userInfo[AppConstants.wcNackMessageKey] != nil {
+                applyNackMessage(userInfo)
+                return
+            }
             WatchViewSyncService.shared.handleIncomingMessage(userInfo)
         }
+    }
+
+    /// Phone could not import a package. Keep the session (never delete before ack), note why,
+    /// and let `TransferRetryPolicy` space out the next attempt.
+    @MainActor
+    private func applyNackMessage(_ message: [String: Any]) {
+        guard let sessionId = message[AppConstants.wcNackMessageKey] as? String else { return }
+        let reason = message[AppConstants.wcNackReasonKey] as? String ?? "unknown"
+        WakeLog.error(.transfer, "phone import failed \(sessionId.prefix(8))…: \(reason)")
+        lastMessage = String(localized: "Phone could not import \(sessionId.prefix(8)) — kept on Watch")
+        let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        do {
+            try store.recordTransferFailure(sessionId: sessionId, reason: reason)
+        } catch {
+            WakeLog.error(.transfer, "record nack: \(error.localizedDescription)")
+        }
+        refreshPendingCount()
     }
 
     @MainActor
@@ -268,7 +303,7 @@ extension WatchTransferService: WCSessionDelegate {
                 )
                 if let sessionId {
                     let store = self.store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
-                    try? store.markReadyToTransfer(sessionId: sessionId)
+                    try? store.requeueForTransfer(sessionId: sessionId)
                     WakeLog.debug(.store, "re-queued readyToTransfer \(sessionId.prefix(8))…")
                 }
             } else {

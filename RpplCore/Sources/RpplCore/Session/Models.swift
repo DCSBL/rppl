@@ -31,6 +31,11 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     /// How `parkId` was set (`auto` / `manual`). `manual` is never overwritten by auto-matching,
     /// including a manual "no park" (`parkId` nil).
     public var parkIdSource: String?
+    /// Watch-side transfer bookkeeping: packages queued so far, earliest next attempt
+    /// (`TransferRetryPolicy`), and the phone's last import error.
+    public var transferAttempts: Int?
+    public var nextTransferAttemptAt: Date?
+    public var lastTransferError: String?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -58,7 +63,10 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         weather: SessionWeather? = nil,
         waterTemperatureEstimate: ParkWaterTemperature? = nil,
         parkId: String? = nil,
-        parkIdSource: String? = nil
+        parkIdSource: String? = nil,
+        transferAttempts: Int? = nil,
+        nextTransferAttemptAt: Date? = nil,
+        lastTransferError: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -79,6 +87,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.waterTemperatureEstimate = waterTemperatureEstimate
         self.parkId = parkId
         self.parkIdSource = parkIdSource
+        self.transferAttempts = transferAttempts
+        self.nextTransferAttemptAt = nextTransferAttemptAt
+        self.lastTransferError = lastTransferError
     }
 }
 
