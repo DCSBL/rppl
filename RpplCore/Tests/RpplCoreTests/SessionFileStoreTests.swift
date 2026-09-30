@@ -203,6 +203,49 @@ struct SessionFileStoreTests {
         #expect(phoneDerived?.stats == package.derived?.stats)
     }
 
+    /// Watch retries a transfer when the ack is lost. Field session 2026-09-30 arrived twice and
+    /// every stream on the phone was doubled.
+    @Test func reimportingSameTransferPackageDoesNotDuplicate() throws {
+        let watchRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("watch-\(UUID().uuidString)", isDirectory: true)
+        let phoneRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("phone-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+
+        let watchStore = SessionFileStore(rootURL: watchRoot)
+        let manifest = SessionManifest(
+            testerId: "t",
+            appVersion: "1.0",
+            buildNumber: "1",
+            watchModel: "Ultra2",
+            systemVersion: "26.0",
+            waterTemperatureAvailable: false
+        )
+        try watchStore.createSession(manifest: manifest)
+        try watchStore.appendDetection(
+            DetectionEvent(code: DetectionCodes.inactive, reason: "session_start", detectorId: "session_start"),
+            sessionId: manifest.sessionId
+        )
+        try watchStore.appendLocationSamples(
+            [
+                LocationSample(timestamp: Date(), latitude: 52, longitude: 5, horizontalAccuracy: 5, speed: 1),
+            ],
+            sessionId: manifest.sessionId
+        )
+        let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
+
+        try watchStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+        try watchStore.importTransferPackage(package, intoPhoneStore: phoneRoot)
+
+        let phoneStore = SessionFileStore(rootURL: phoneRoot)
+        #expect(try phoneStore.readDetections(sessionId: manifest.sessionId).count == 1)
+        #expect(try phoneStore.readLocationSamples(sessionId: manifest.sessionId).count == 1)
+        #expect(try phoneStore.listSessionIDs() == [manifest.sessionId])
+    }
+
     @Test func importExportedPackageStampsImportedAndReplaces() throws {
         let sourceRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("export-src-\(UUID().uuidString)", isDirectory: true)

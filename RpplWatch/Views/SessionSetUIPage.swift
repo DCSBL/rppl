@@ -2,8 +2,8 @@ import SwiftUI
 import RpplCore
 
 /// Product session UI: Riding and Inactive share one fixed status block (`statusBlock`) — only
-/// color/icon/label and a couple of source values differ. Riding shows it alone, not scrollable.
-/// Inactive pages vertically (`.verticalPage`, same pattern as `IdleSessionView`) between the
+/// color/icon/label and a couple of source values differ. Both sit in the same vertical-page
+/// container so fonts and spacing match; Riding has only the status page. Inactive pages vertically (`.verticalPage`, same pattern as `IdleSessionView`) between the
 /// status block and a session summary page.
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
@@ -77,11 +77,14 @@ struct SessionSetUIPage: View {
         }
     }
 
-    // MARK: - Riding (no scroll — fitted for AWU) / Inactive (vertical pages: status, then summary)
+    // MARK: - Riding (status page only) / Inactive (vertical pages: status, then summary)
 
     private var ridingView: some View {
-        statusBlock(isRiding: true)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Same container as Inactive so both states lay out, size and space every element alike.
+        TabView {
+            statusBlock(isRiding: true)
+        }
+        .tabViewStyle(.verticalPage)
     }
 
     private var inactiveView: some View {
@@ -98,7 +101,9 @@ struct SessionSetUIPage: View {
     /// distance/speed/laps, water temp, heart rate and total calories. Identical layout for both
     /// states — only color/icon/label and the segment-time/speed source differ.
     private func statusBlock(isRiding: Bool) -> some View {
-        let speedKmh = isRiding ? session.currentSetSpeedKmh : session.lastSpeedMps.map { $0 * 3.6 }
+        // Riding: your own live speed. Inactive: the cable's speed from finished sets — the live
+        // GPS reading at the dock is walking pace or noise.
+        let speedKmh = isRiding ? session.currentSetSpeedKmh : session.cableSpeedKmh
         let lapCount = session.isSetOngoing ? session.currentSetLapCount : session.lastSetLapCount
 
         return VStack(alignment: .leading, spacing: 8) {
@@ -121,23 +126,14 @@ struct SessionSetUIPage: View {
                 metricTile(
                     value: speedKmh.map { DistanceFormat.speedValue($0) } ?? "--",
                     label: DistanceFormat.speedUnitSymbol(),
-                    metric: .speed
+                    metric: .speed,
+                    caption: isRiding ? LocalizedStringKey("Current") : LocalizedStringKey("Cable")
                 )
                 metricTile(
                     value: "\(lapCount)",
                     label: "LAPS",
                     metric: .laps
                 )
-            }
-
-            if !isRiding {
-                // Riding shows your own actual speed; inactive shows the live GPS reading
-                // (a stand-in for the cable's speed while you wait at the dock).
-                Text("Cable speed — live GPS reading")
-                    .font(.system(size: 8))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
 
             if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
@@ -149,15 +145,6 @@ struct SessionSetUIPage: View {
                     metric: .water
                 )
                 .frame(maxWidth: .infinity, alignment: .center)
-            }
-
-            if !isRiding {
-                Text("Last session")
-                    .font(.caption2)
-                    .italic()
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .alwaysOnSecondaryChrome(isLuminanceReduced)
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -172,7 +159,7 @@ struct SessionSetUIPage: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 6)
-        .padding(.vertical, isRiding ? 4 : 8)
+        .padding(.vertical, 8)
     }
 
     private func heroTimeRow(isRiding: Bool) -> some View {
@@ -200,7 +187,12 @@ struct SessionSetUIPage: View {
         .alwaysOnSupportingMetric(isLuminanceReduced)
     }
 
-    private func metricTile(value: String, label: String, metric: WatchMetric) -> some View {
+    private func metricTile(
+        value: String,
+        label: String,
+        metric: WatchMetric,
+        caption: LocalizedStringKey? = nil
+    ) -> some View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.system(.title2, design: .rounded).bold())
@@ -213,6 +205,15 @@ struct SessionSetUIPage: View {
                 .textCase(.uppercase)
                 .foregroundStyle(metric.tint)
                 .alwaysOnSecondaryChrome(isLuminanceReduced)
+            if let caption {
+                // Says which speed this is, right under the value it describes.
+                Text(caption)
+                    .font(.system(size: 9, weight: .semibold))
+                    .textCase(.uppercase)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .alwaysOnSecondaryChrome(isLuminanceReduced)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -232,7 +233,10 @@ struct SessionSetUIPage: View {
         ScrollView {
             sessionSummaryContent
                 .padding(.horizontal, 6)
-                .padding(.top, 14)
+                // Clear the rounded screen corners: the title clipped at the top and the last
+                // value at the bottom.
+                .padding(.top, 24)
+                .padding(.bottom, 32)
         }
     }
 

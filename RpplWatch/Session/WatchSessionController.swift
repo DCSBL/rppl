@@ -101,6 +101,8 @@ final class WatchSessionController: NSObject {
     var isUnsure: Bool { detectionCode == DetectionCodes.unsure }
     var setCount: Int { liveSetTracker.setCount }
     var currentSetSpeedKmh: Double? { liveSetTracker.currentSpeedKmh }
+    /// Cable speed estimated from finished sets; nil until enough riding GPS.
+    var cableSpeedKmh: Double? { liveSetTracker.cableSpeedKmh }
     var currentSetLapCount: Int { liveSetTracker.currentSetLapCount }
     var lastSetLapCount: Int { liveSetTracker.lastSetLapCount }
     /// Live meters while riding; frozen last-set meters when inactive (`0 m` before first set).

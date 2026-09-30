@@ -2595,6 +2595,38 @@
         }
       }
     },
+    "Cable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable"
+          }
+        }
+      }
+    },
+    "Current" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huidig"
+          }
+        }
+      }
+    },
     "Saving…" : {
       "localizations" : {
         "en" : {
