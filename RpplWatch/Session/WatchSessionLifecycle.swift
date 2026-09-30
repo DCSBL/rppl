@@ -202,15 +202,12 @@ extension WatchSessionController {
     }
 
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
-        endedSessionSummary = nil
-
-        guard !isRunning, !isStopping, !isStarting else {
-            WakeLog.debug(
-                .session,
-                "startSession ignored — running=\(isRunning) stopping=\(isStopping) starting=\(isStarting)"
-            )
+        // A busy request must not wipe the summary of a session that is still saving.
+        guard startGateDecision() == .start else {
+            WakeLog.debug(.session, "startSession ignored — \(busyStateDescription)")
             return
         }
+        endedSessionSummary = nil
         let code = activityCode.isEmpty ? ActivityCodes.wakeboard : activityCode
         WakeLog.debug(.session, "startSession begin activity=\(code)")
         errorText = nil
@@ -320,12 +317,16 @@ extension WatchSessionController {
         WakeLog.debug(.session, "startSession running sessionId=\(manifest.sessionId.prefix(8))…")
     }
 
+    /// Stop recording, then show the summary at once while the Health save, derived view and
+    /// transfer package finish behind it. Only the sensor stop and the last flush run before the
+    /// summary appears; everything else used to hold the rider on a spinner for minutes.
     func stopSession() async {
         guard isRunning, !isStopping, let manifest, let store else {
             WakeLog.debug(.session, "stopSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
+        let stopBegan = Date()
         beginSessionTeardown(status: String(localized: "Stopping…"))
 
         considerPersistingBattery(force: true)
@@ -334,33 +335,10 @@ extension WatchSessionController {
         await flushBuffers()
         disableBatteryMonitoring()
 
-        do {
-            try store.markReadyToTransfer(sessionId: manifest.sessionId)
-            WakeLog.debug(.store, "markReadyToTransfer \(manifest.sessionId.prefix(8))…")
-            do {
-                _ = try store.ensureDerivedView(sessionId: manifest.sessionId)
-                WakeLog.debug(.store, "derived view written \(manifest.sessionId.prefix(8))…")
-            } catch {
-                WakeLog.error(.store, "ensureDerivedView: \(error.localizedDescription)")
-            }
-        } catch {
-            errorText = String(localized: "Mark transfer: \(error.localizedDescription)")
-            WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
-        }
-
-        await finishAndSaveWorkout()
-        recordingMode = "none"
-        motionRecordingEnabled = false
-
-        statusText = String(localized: "Transferring…")
         let stoppedSessionId = manifest.sessionId
-        WatchTransferService.shared.enqueueTransfer(sessionId: stoppedSessionId, store: store)
-        statusText = String(localized: "Stopped - waiting for phone ack")
-
-        let finalDuration = computeElapsed(at: Date())
         endedSessionSummary = EndedSessionSummary(
             sessionId: stoppedSessionId,
-            duration: finalDuration,
+            duration: computeElapsed(at: Date()),
             setCount: liveSetTracker.setCount,
             distanceMeters: liveSetTracker.sessionSetMeters,
             lastSetDuration: liveSetTracker.lastSetDuration,
@@ -370,10 +348,55 @@ extension WatchSessionController {
             startLatitude: sessionStartLatitude,
             startLongitude: sessionStartLongitude
         )
-
+        isFinalizing = true
+        statusText = String(localized: "Saving…")
         WKInterfaceDevice.current().play(.stop)
-        WakeLog.debug(.session, "stopSession done — summary shown sessionId=\(stoppedSessionId.prefix(8))…")
+        WakeLog.debug(.session, "stopSession summary shown after \(Self.seconds(since: stopBegan))s")
+
+        // Session files and Health are independent: build the derived view off the main actor
+        // while HealthKit saves.
+        async let packagePrepared: Void = prepareStoppedPackage(store: store, sessionId: stoppedSessionId)
+        await finishAndSaveWorkout()
+        await packagePrepared
+        recordingMode = "none"
+        motionRecordingEnabled = false
+
+        statusText = String(localized: "Transferring…")
+        WatchTransferService.shared.enqueueTransfer(sessionId: stoppedSessionId, store: store)
+        statusText = String(localized: "Stopped - waiting for phone ack")
+
+        WakeLog.debug(
+            .session,
+            "stopSession done after \(Self.seconds(since: stopBegan))s sessionId=\(stoppedSessionId.prefix(8))…"
+        )
+        isFinalizing = false
         clearSessionRuntimeState()
+    }
+
+    /// Mark ready for transfer and write the derived view, off the main actor.
+    private func prepareStoppedPackage(store: SessionFileStore, sessionId: String) async {
+        do {
+            try await StoreIO.runOffMain {
+                try store.markReadyToTransfer(sessionId: sessionId)
+            }
+            WakeLog.debug(.store, "markReadyToTransfer \(sessionId.prefix(8))…")
+        } catch {
+            errorText = String(localized: "Mark transfer: \(error.localizedDescription)")
+            WakeLog.error(.store, "markReadyToTransfer: \(error.localizedDescription)")
+            return
+        }
+        do {
+            _ = try await StoreIO.runOffMain {
+                try store.ensureDerivedView(sessionId: sessionId)
+            }
+            WakeLog.debug(.store, "derived view written \(sessionId.prefix(8))…")
+        } catch {
+            WakeLog.error(.store, "ensureDerivedView: \(error.localizedDescription)")
+        }
+    }
+
+    private static func seconds(since date: Date) -> String {
+        String(format: "%.1f", Date().timeIntervalSince(date))
     }
 
     /// Confirmed tiny-session discard: delete local package, no transfer, no Health save.
@@ -389,7 +412,9 @@ extension WatchSessionController {
 
         stopSensors()
         liveSetTracker.closeOpenSet()
-        // No flush — package will be deleted; never queue transfer for discard.
+        // No flush — package will be deleted; never queue transfer for discard. A background
+        // flush still writing would recreate the folder after the delete, so let it land first.
+        await flushChain?.value
         disableBatteryMonitoring()
 
         await discardWorkoutWithoutSaving()
@@ -567,7 +592,7 @@ extension WatchSessionController {
     }
 
     func dismissSessionSummary() {
-        guard endedSessionSummary != nil else { return }
+        guard endedSessionSummary != nil, !isFinalizing else { return }
         WakeLog.debug(.ui, "dismiss session summary")
         endedSessionSummary = nil
         statusText = String(localized: "Idle")

@@ -65,18 +65,32 @@ extension WatchSessionController {
         WakeLog.debug(.ui, "sim detection=\(code)")
     }
 
-    /// Start-workout Action Button entry: start session, or no-op if already recording.
+    /// Start-workout Action Button entry. Busy (recording, starting, or still saving the last
+    /// session) → ignored. Otherwise a fresh session starts, also from the end summary.
     func handleStartWorkoutIntent() async {
-        if isRunning || isStopping || isStarting {
-            WakeLog.debug(
-                .intent,
-                "StartCableParkSessionIntent: busy running=\(isRunning) stopping=\(isStopping) starting=\(isStarting) — no-op"
-            )
+        guard startGateDecision() == .start else {
+            WakeLog.debug(.intent, "StartCableParkSessionIntent: busy \(busyStateDescription) — ignored")
             return
         }
         let code = ActivityCodes.resolvedStartCode()
-        WakeLog.debug(.intent, "StartCableParkSessionIntent: starting session activity=\(code)")
+        WakeLog.debug(
+            .intent,
+            "StartCableParkSessionIntent: starting session activity=\(code) fromSummary=\(endedSessionSummary != nil)"
+        )
         await startSession(activityCode: code)
+    }
+
+    func startGateDecision() -> SessionStartGate.Decision {
+        SessionStartGate.decide(
+            isRunning: isRunning,
+            isStarting: isStarting,
+            isStopping: isStopping,
+            isFinalizing: isFinalizing
+        )
+    }
+
+    var busyStateDescription: String {
+        "running=\(isRunning) starting=\(isStarting) stopping=\(isStopping) finalizing=\(isFinalizing)"
     }
 
     func logSessionStartDetection() {

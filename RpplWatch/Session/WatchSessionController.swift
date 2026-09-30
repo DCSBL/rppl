@@ -17,8 +17,11 @@ final class WatchSessionController: NSObject {
     /// First usable GPS fix this session — start pin on end summary map.
     var sessionStartLatitude: Double?
     var sessionStartLongitude: Double?
-    /// True while stop teardown / Health save runs — keep active UI with spinner; block Start.
+    /// True while stop teardown / Health save runs — block Start.
     var isStopping = false
+    /// True after Stop while the summary is already on screen and the Health save, derived view
+    /// and transfer package are still being written in the background.
+    var isFinalizing = false
     /// True while permissions / HK start run — stay on the tapped picker card.
     var isStarting = false
     /// Opaque code of the activity card currently starting.
@@ -188,6 +191,8 @@ final class WatchSessionController: NSObject {
     var routeInsertTask: Task<Void, Never>?
     var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?
+    /// Last off-main flush; the next one waits on it so batches append in order.
+    var flushChain: Task<Void, Never>?
     var timerTask: Task<Void, Never>?
     var startedAt: Date?
     /// Wall time excluded from `elapsed` while product-paused (completed pauses).

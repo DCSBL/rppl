@@ -16,6 +16,8 @@ final class WatchTransferService: NSObject {
 
     private var store: SessionFileStore?
     private let tempDir: URL
+    /// Sessions whose package is being built off-main — not yet in WC's outstanding list.
+    private var packagingSessionIds: Set<String> = []
 
     override init() {
         tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("wc-out", isDirectory: true)
@@ -84,16 +86,7 @@ final class WatchTransferService: NSObject {
             lastMessage = String(localized: "Pending transfers: \(pending.count)")
             WakeLog.debug(.transfer, "transferPending count=\(pending.count)")
             for manifest in pending {
-                do {
-                    try transfer(sessionId: manifest.sessionId, store: store)
-                } catch {
-                    lastMessage = String(localized: "Transfer error: \(error.localizedDescription)")
-                    WakeLog.error(
-                        .transfer,
-                        "transfer \(manifest.sessionId.prefix(8))…: \(error.localizedDescription)"
-                    )
-                    try? store.markReadyToTransfer(sessionId: manifest.sessionId)
-                }
+                transfer(sessionId: manifest.sessionId, store: store)
             }
             refreshPendingCount()
         } catch {
@@ -102,7 +95,9 @@ final class WatchTransferService: NSObject {
         }
     }
 
-    private func transfer(sessionId: String, store: SessionFileStore) throws {
+    /// Checks run on the main actor; building and encoding the package (every stream of a
+    /// multi-hour session) runs off it so the stop summary and idle UI stay responsive.
+    private func transfer(sessionId: String, store: SessionFileStore) {
         guard WCSession.default.activationState == .activated else {
             lastMessage = String(localized: "WC not activated - will retry")
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — WC not activated")
@@ -117,15 +112,32 @@ final class WatchTransferService: NSObject {
             WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — already in WC queue")
             return
         }
+        guard !packagingSessionIds.contains(sessionId) else {
+            WakeLog.debug(.transfer, "skip \(sessionId.prefix(8))… — package being built")
+            return
+        }
+        packagingSessionIds.insert(sessionId)
 
-        try store.markTransferring(sessionId: sessionId)
-        let packageURL = try store.zipSessionForTransfer(sessionId: sessionId, to: tempDir)
-        WCSession.default.transferFile(packageURL, metadata: [
-            AppConstants.wcSessionFileMetaSessionID: sessionId
-        ])
-        lastMessage = String(localized: "Queued \(sessionId.prefix(8))…")
-        WakeLog.debug(.transfer, "queued file \(sessionId.prefix(8))…")
-        refreshPendingCount()
+        let directory = tempDir
+        Task {
+            defer { packagingSessionIds.remove(sessionId) }
+            do {
+                let packageURL = try await StoreIO.runOffMain {
+                    try store.markTransferring(sessionId: sessionId)
+                    return try store.zipSessionForTransfer(sessionId: sessionId, to: directory)
+                }
+                WCSession.default.transferFile(packageURL, metadata: [
+                    AppConstants.wcSessionFileMetaSessionID: sessionId
+                ])
+                lastMessage = String(localized: "Queued \(sessionId.prefix(8))…")
+                WakeLog.debug(.transfer, "queued file \(sessionId.prefix(8))…")
+            } catch {
+                lastMessage = String(localized: "Transfer error: \(error.localizedDescription)")
+                WakeLog.error(.transfer, "transfer \(sessionId.prefix(8))…: \(error.localizedDescription)")
+                try? store.markReadyToTransfer(sessionId: sessionId)
+            }
+            refreshPendingCount()
+        }
     }
 }
 

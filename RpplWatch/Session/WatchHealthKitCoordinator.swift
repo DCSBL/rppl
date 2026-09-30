@@ -402,22 +402,19 @@ extension WatchSessionController {
         }
     }
 
+    /// Stop path. Weather is fetched once at the first usable fix; here we only give a fetch that
+    /// is still in flight a short grace period. No new network fetch at stop — it could hold the
+    /// Health save for another `fetchTimeout` on a flaky park connection.
     func attachAirWeatherMetadata(to builder: HKLiveWorkoutBuilder) async {
         if airWeatherSnapshot == nil, let task = airWeatherFetchTask {
             await withTaskGroup(of: Void.self) { group in
                 group.addTask { await task.value }
                 group.addTask {
-                    try? await Task.sleep(for: .seconds(AirWeatherKit.fetchTimeout))
+                    try? await Task.sleep(for: .seconds(Self.stopWeatherGrace))
                 }
                 await group.next()
                 group.cancelAll()
             }
-        }
-        if airWeatherSnapshot == nil, let loc = latestLocation, AirWeatherKit.isUsable(loc) {
-            airWeatherFetchTask?.cancel()
-            airWeatherFetchTask = nil
-            airWeatherSnapshot = await AirWeatherKit.fetch(location: loc)
-            if let late = airWeatherSnapshot { persistAirWeather(late) }
         }
         guard let snapshot = airWeatherSnapshot else {
             WakeLog.debug(.workout, "air weather skipped — none cached")
@@ -430,6 +427,8 @@ extension WatchSessionController {
             WakeLog.error(.workout, "air weather metadata: \(error.localizedDescription)")
         }
     }
+
+    static let stopWeatherGrace: TimeInterval = 2
 
     func recordFinishedHkRide(endedAt: Date) {
         guard let start = hkRideStartedAt else { return }
