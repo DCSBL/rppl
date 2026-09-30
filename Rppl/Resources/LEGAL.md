@@ -45,6 +45,12 @@ Rppl is a hobby project by Duco Sebel (the Netherlands). It earns no money today
 
 The source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: noncommercial use only).
 
+## How does Rppl earn money?
+
+It doesn't. Rppl exists because the alternatives I found all cost money. There are no ads, no subscription, and no selling of data.
+
+We might add ways to earn a little in the future, for example to cover Apple fees, but only if the app stays free and awesome for riders.
+
 ## What the app collects
 
 Only to record and show your cable-park sessions:
