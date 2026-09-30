@@ -448,14 +448,7 @@ extension WatchSessionController {
     /// Health save for another `fetchTimeout` on a flaky park connection.
     func attachAirWeatherMetadata(to builder: HKLiveWorkoutBuilder) async {
         if airWeatherSnapshot == nil, let task = airWeatherFetchTask {
-            await withTaskGroup(of: Void.self) { group in
-                group.addTask { await task.value }
-                group.addTask {
-                    try? await Task.sleep(for: .seconds(Self.stopWeatherGrace))
-                }
-                await group.next()
-                group.cancelAll()
-            }
+            try? await Deadline.run(Self.stopWeatherGrace, label: "airWeatherGrace") { await task.value }
         }
         guard let snapshot = airWeatherSnapshot else {
             WakeLog.debug(.workout, "air weather skipped — none cached")
@@ -601,20 +594,9 @@ extension WatchSessionController {
     func finishPendingRouteInserts(timeoutSeconds: TimeInterval = 5) async {
         for _ in 0..<2 {
             if let inFlight = routeInsertTask {
-                let finished = await withTaskGroup(of: Bool.self) { group in
-                    group.addTask {
-                        await inFlight.value
-                        return true
-                    }
-                    group.addTask {
-                        try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
-                        return false
-                    }
-                    let first = await group.next() ?? false
-                    group.cancelAll()
-                    return first
-                }
-                guard finished else {
+                do {
+                    try await Deadline.run(timeoutSeconds, label: "routeInsert") { await inFlight.value }
+                } catch {
                     WakeLog.error(.workout, "route insert still pending after \(Int(timeoutSeconds))s — finishing without it")
                     return
                 }

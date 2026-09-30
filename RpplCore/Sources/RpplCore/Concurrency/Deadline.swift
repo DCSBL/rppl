@@ -6,6 +6,9 @@ import Foundation
 /// stuck on a callback that never comes (a hung `healthd`) holds the caller forever. Here the work
 /// runs in an unstructured task; whichever of work or timer finishes first resumes the caller,
 /// and the work is cancelled (it may keep running if it ignores cancellation).
+///
+/// Rule: never implement a timeout with a task group around unstructured work or callback-based
+/// APIs; use `Deadline.run`.
 public enum Deadline {
     public struct Expired: Error, Equatable, Sendable {
         public let label: String
