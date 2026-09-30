@@ -12,22 +12,11 @@ struct SessionStartGateTests {
     }
 
     @Test func anyBusyStateIgnores() {
-        let busy: [(Bool, Bool, Bool, Bool)] = [
-            (true, false, false, false),
-            (false, true, false, false),
-            (false, false, true, false),
-            (false, false, false, true),
-            (true, false, true, true),
-        ]
-        for (running, starting, stopping, finalizing) in busy {
-            #expect(
-                SessionStartGate.decide(
-                    isRunning: running,
-                    isStarting: starting,
-                    isStopping: stopping,
-                    isFinalizing: finalizing
-                ) == .ignoreBusy
-            )
-        }
+        #expect(SessionStartGate.decide(isRunning: true, isStarting: false, isStopping: false, isFinalizing: false) == .ignoreBusy)
+        #expect(SessionStartGate.decide(isRunning: false, isStarting: true, isStopping: false, isFinalizing: false) == .ignoreBusy)
+        #expect(SessionStartGate.decide(isRunning: false, isStarting: false, isStopping: true, isFinalizing: false) == .ignoreBusy)
+        // Summary on screen while the previous session still saves.
+        #expect(SessionStartGate.decide(isRunning: true, isStarting: false, isStopping: true, isFinalizing: true) == .ignoreBusy)
+        #expect(SessionStartGate.decide(isRunning: false, isStarting: false, isStopping: false, isFinalizing: true) == .ignoreBusy)
     }
 }
