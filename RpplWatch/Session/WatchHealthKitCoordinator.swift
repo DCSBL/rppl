@@ -313,6 +313,7 @@ extension WatchSessionController {
                 WakeLog.error(.workout, "waterTemperature samples: \(error.localizedDescription)")
             }
             let workout = try await builder.finishWorkout()
+            await finishPendingRouteInserts()
             if let workout, let routeBuilder = workoutRouteBuilder {
                 do {
                     _ = try await routeBuilder.finishRoute(with: workout, metadata: nil)
@@ -358,6 +359,8 @@ extension WatchSessionController {
         workoutDataSource = nil
         workoutConfiguration = nil
         workoutRouteBuilder = nil
+        pendingRouteLocations.removeAll()
+        routeInsertTask = nil
         workoutStoppedContinuation = nil
         workoutRunningContinuation = nil
         hkRideActivityOpen = false
@@ -513,17 +516,73 @@ extension WatchSessionController {
         }
     }
 
-    func insertRouteLocations(_ locations: [CLLocation]) async {
-        guard let routeBuilder = workoutRouteBuilder else { return }
+    /// Queue route points for the next batched insert. Cheap and synchronous so the location
+    /// callback never waits on healthd.
+    func enqueueRouteLocations(_ locations: [CLLocation]) {
+        guard workoutRouteBuilder != nil else { return }
         let usable = locations.filter { loc in
-            loc.horizontalAccuracy >= 0 && loc.horizontalAccuracy <= 50
+            loc.horizontalAccuracy >= 0 && loc.horizontalAccuracy <= Self.routeMaxHorizontalAccuracyM
         }
         guard !usable.isEmpty else { return }
-        do {
-            try await routeBuilder.insertRouteData(usable)
-        } catch {
-            WakeLog.error(.workout, "insertRouteData: \(error.localizedDescription)")
+        pendingRouteLocations.append(contentsOf: usable)
+        let overflow = pendingRouteLocations.count - Self.routePendingLimit
+        if overflow > 0 {
+            // healthd is not keeping up. Raw fixes are already in the session files; the Health
+            // route is a copy, so shed its oldest points instead of growing without bound.
+            pendingRouteLocations.removeFirst(overflow)
+            WakeLog.error(.workout, "route backlog over \(Self.routePendingLimit) — dropped \(overflow) point(s)")
         }
     }
 
+    /// Hand queued route points to HealthKit in one call, at most one call in flight. Called from
+    /// the flush loop; never awaited there, so a stalled insert cannot hold up recording.
+    func drainRouteLocations() {
+        guard routeInsertTask == nil, !pendingRouteLocations.isEmpty,
+              let routeBuilder = workoutRouteBuilder else { return }
+        let batch = pendingRouteLocations
+        pendingRouteLocations.removeAll(keepingCapacity: true)
+        routeInsertTask = Task { [weak self] in
+            do {
+                try await routeBuilder.insertRouteData(batch)
+            } catch {
+                WakeLog.error(.workout, "insertRouteData n=\(batch.count): \(error.localizedDescription)")
+            }
+            // A later session has its own builder and task; leave those alone.
+            if let self, self.workoutRouteBuilder === routeBuilder {
+                self.routeInsertTask = nil
+            }
+        }
+    }
+
+    /// Stop path: push the remaining route points before `finishRoute`, bounded so a stalled
+    /// healthd cannot hold the save hostage.
+    func finishPendingRouteInserts(timeoutSeconds: TimeInterval = 5) async {
+        for _ in 0..<2 {
+            if let inFlight = routeInsertTask {
+                let finished = await withTaskGroup(of: Bool.self) { group in
+                    group.addTask {
+                        await inFlight.value
+                        return true
+                    }
+                    group.addTask {
+                        try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                        return false
+                    }
+                    let first = await group.next() ?? false
+                    group.cancelAll()
+                    return first
+                }
+                guard finished else {
+                    WakeLog.error(.workout, "route insert still pending after \(Int(timeoutSeconds))s — finishing without it")
+                    return
+                }
+                routeInsertTask = nil
+            }
+            drainRouteLocations()
+        }
+    }
+
+    static let routeMaxHorizontalAccuracyM = 50.0
+    /// About an hour of 1 Hz fixes.
+    static let routePendingLimit = 3_600
 }

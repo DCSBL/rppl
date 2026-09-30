@@ -139,6 +139,7 @@ extension WatchSessionController {
     /// Persist buffered samples. File work runs off the main actor so encoding and disk I/O never
     /// stall the UI or sensor callbacks; flushes are chained so batches land in order.
     func flushBuffers() async {
+        drainRouteLocations()
         guard let store, let manifest else { return }
         considerPersistingBattery()
         let locations = locationBuffer
