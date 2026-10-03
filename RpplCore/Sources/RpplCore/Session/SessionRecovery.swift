@@ -18,16 +18,33 @@ public enum SessionRecovery {
 }
 
 extension SessionFileStore {
+    /// Latest timestamp across the streams recorded before a crash: detections, GPS, health,
+    /// water and battery. Motion is left out (large, and never later than GPS in practice).
+    /// Unreadable streams count as empty. `nil` when nothing was recorded.
+    public func lastRecordedTimestamp(sessionId: String) -> Date? {
+        let detections = ((try? readDetections(sessionId: sessionId)) ?? []).map(\.timestamp)
+        let locations = ((try? readLocationSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
+        let health = ((try? readHealthSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
+        let water = ((try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
+        let battery = ((try? readBatterySamples(sessionId: sessionId)) ?? []).map(\.timestamp)
+        return [detections.max(), locations.max(), health.max(), water.max(), battery.max()]
+            .compactMap { $0 }
+            .max()
+    }
+
     /// Closes an orphaned recording: appends a terminal `inactive` marker, marks it ready to transfer
     /// and builds the derived view. Idempotent — non-recording sessions are left untouched.
+    ///
+    /// The session ends at the last recorded sample, not at the last detection event: events are
+    /// sparse, so a `riding` enter minutes before the crash would otherwise get zero length and
+    /// the final set (and everything recorded after it) would be clipped away.
     /// - Returns: `true` when the session was finalized by this call.
     @discardableResult
     public func finalizeOrphanedRecording(sessionId: String) throws -> Bool {
         let manifest = try readManifest(sessionId: sessionId)
         guard manifest.transferState == .recording else { return false }
 
-        let lastEventAt = try readDetections(sessionId: sessionId).map(\.timestamp).max()
-        let endedAt = max(lastEventAt ?? manifest.startedAt, manifest.startedAt)
+        let endedAt = max(lastRecordedTimestamp(sessionId: sessionId) ?? manifest.startedAt, manifest.startedAt)
 
         try appendDetection(
             DetectionEvent(
