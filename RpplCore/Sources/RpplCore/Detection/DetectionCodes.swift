@@ -6,16 +6,7 @@ public enum DetectionCodes {
     public static let inactive = "inactive"
     public static let unsure = "unsure"
 
-    /// Legacy on-disk / transfer alias before schema v4.
-    public static let legacyPaused = "paused"
-
     public static func isConfident(_ code: String) -> Bool {
-        let normalized = normalize(code)
-        return normalized == riding || normalized == inactive
-    }
-
-    /// Map legacy `paused` to `inactive` before compare / attribution.
-    public static func normalize(_ code: String) -> String {
-        code == legacyPaused ? inactive : code
+        code == riding || code == inactive
     }
 }

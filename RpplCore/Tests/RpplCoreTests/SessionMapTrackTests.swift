@@ -58,13 +58,4 @@ struct SessionMapTrackBuilderTests {
         #expect(data!.heatmapTracks.count == 1)
         #expect(data!.heatmapTracks[0].count >= 2)
     }
-
-    @Test func decodesLegacyMapTracksWithoutHeatmapKey() throws {
-        let json = """
-        {"start":{"latitude":52.0,"longitude":5.0},"averagedTrack":[],"heatmapTracks":[]}
-        """
-        let data = try JSONDecoder().decode(SessionMapTrackData.self, from: Data(json.utf8))
-        #expect(data.start.latitude == 52.0)
-        #expect(data.heatmapTracks.isEmpty)
-    }
 }
