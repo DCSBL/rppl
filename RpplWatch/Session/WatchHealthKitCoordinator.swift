@@ -220,6 +220,7 @@ extension WatchSessionController {
     func startWorkoutIfAuthorized() async -> Bool {
         refreshPermissionStatus()
         await refreshHealthPermissionStatus()
+        lastHealthKitStartWasDenied = healthPermission == .denied
         if healthPermission == .denied {
             errorText = String(localized: "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout.")
             WakeLog.debug(.workout, "sharingDenied — sensors-only")
@@ -242,6 +243,54 @@ extension WatchSessionController {
             workoutConfiguration = nil
             workoutRouteBuilder = nil
             hkRideActivityOpen = false
+            return false
+        }
+    }
+
+    /// Sensors-only because HK start timed out or failed: try again every 30 s (bounded) so the
+    /// session gets a workout session — and with it background runtime — as soon as `healthd`
+    /// answers. A denial is never retried.
+    func startHealthKitRestartLoop() {
+        healthKitRestartTask?.cancel()
+        guard HealthKitRestartPolicy.shouldRetry(attempt: 1, healthDenied: lastHealthKitStartWasDenied) else { return }
+        healthKitRestartTask = Task { [weak self] in
+            var attempt = 1
+            while HealthKitRestartPolicy.shouldRetry(attempt: attempt, healthDenied: false) {
+                try? await Task.sleep(nanoseconds: UInt64(HealthKitRestartPolicy.retryInterval * 1_000_000_000))
+                guard let self, !Task.isCancelled, self.isRunning, !self.isStopping else { return }
+                guard self.recordingMode == "sensorsOnly", !self.isProductPaused, self.workoutSession == nil else {
+                    if self.recordingMode != "sensorsOnly" { return }
+                    continue
+                }
+                if await self.retryWorkoutStart(attempt: attempt) { return }
+                attempt += 1
+            }
+            WakeLog.error(.workout, "HK restart: giving up after \(HealthKitRestartPolicy.maxAttempts) tries")
+        }
+    }
+
+    private func retryWorkoutStart(attempt: Int) async -> Bool {
+        do {
+            try await startWorkout()
+            guard isRunning, !isStopping, recordingMode == "sensorsOnly" else {
+                await discardWorkoutWithoutSaving()
+                return true
+            }
+            recordingMode = "workout"
+            statusText = String(localized: "Recording")
+            errorText = nil
+            beginDetectionActivity(code: lastPersistedConfidentCode, at: Date())
+            if lastPersistedConfidentCode == DetectionCodes.riding {
+                setRideMetricsCollection(enabled: true)
+            }
+            await enableWaterLockWhenWorkoutActive()
+            WKInterfaceDevice.current().play(.success)
+            WakeLog.debug(.workout, "HK workout started on retry \(attempt)")
+            return true
+        } catch {
+            WakeLog.error(.workout, "HK restart try \(attempt): \(error.localizedDescription)")
+            workoutSession?.end()
+            clearWorkoutSessionRefs()
             return false
         }
     }

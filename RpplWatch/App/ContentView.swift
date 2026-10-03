@@ -24,10 +24,12 @@ struct ContentView: View {
             } else if !session.isHealthPermissionResolved {
                 // Health status loads off-main; avoid flashing onboarding for returning users.
                 ProgressView()
-            } else if session.areRecordingPermissionsReady {
-                IdleSessionView(session: session, transfer: transfer)
-            } else {
+            } else if session.needsFirstRunPermissionPrompt {
                 PermissionsOnboardingView(session: session)
+            } else {
+                // Browsable even when a permission is denied: logbook and sessions stay viewable,
+                // Start explains what to allow.
+                IdleSessionView(session: session, transfer: transfer)
             }
         }
         .modifier(DebugScreenSizeOverride(size: debugOverrideSize))

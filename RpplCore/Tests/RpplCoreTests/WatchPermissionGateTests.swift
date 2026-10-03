@@ -35,15 +35,16 @@ struct WatchPermissionGateTests {
         #expect(!WatchPermissionKind.motion.blocksRecording(when: .denied))
     }
 
-    @Test func healthDeniedAllowsSensorsOnlyGate() {
+    @Test func healthDeniedBlocksGate() {
         let states: [WatchPermissionKind: WatchPermissionState] = [
             .location: .authorized,
             .health: .denied,
             .motion: .notDetermined
         ]
-        #expect(WatchPermissionOrder.areAllReady(states))
+        #expect(!WatchPermissionOrder.areAllReady(states))
         #expect(WatchPermissionKind.health.blocksRecording(when: .notDetermined))
-        #expect(!WatchPermissionKind.health.blocksRecording(when: .denied))
+        #expect(WatchPermissionKind.health.blocksRecording(when: .denied))
+        #expect(WatchPermissionKind.health.blocksRecording(when: .unavailable))
     }
 
     @Test func locationDeniedBlocksGate() {
@@ -96,5 +97,31 @@ struct WatchPermissionGateTests {
                 next: next
             ) == [.health, .location, .motion]
         )
+    }
+}
+
+struct WatchStartBlockerTests {
+    private typealias States = [WatchPermissionKind: WatchPermissionState]
+
+    @Test func healthBlocksBeforeLocation() {
+        let states: States = [.health: .denied, .location: .denied, .motion: .authorized]
+        #expect(WatchPermissionOrder.startBlocker(states: states) == .health)
+    }
+
+    @Test func simulatorStyleUnavailableHealthStillBlocks() {
+        let states: States = [.health: .unavailable, .location: .authorized, .motion: .authorized]
+        #expect(WatchPermissionOrder.startBlocker(states: states) == .health)
+    }
+
+    @Test func noBlockerWhenAllAuthorized() {
+        let states: States = [.health: .authorized, .location: .authorized, .motion: .denied]
+        #expect(WatchPermissionOrder.startBlocker(states: states) == nil)
+    }
+
+    @Test func firstRunPromptOnlyWhileUndecided() {
+        let undecided: States = [.health: .notDetermined, .location: .authorized, .motion: .authorized]
+        let denied: States = [.health: .denied, .location: .authorized, .motion: .authorized]
+        #expect(WatchPermissionOrder.needsFirstRunPrompt(states: undecided))
+        #expect(!WatchPermissionOrder.needsFirstRunPrompt(states: denied))
     }
 }

@@ -68,7 +68,7 @@ extension WatchSessionController {
     /// Start-workout Action Button entry. Busy (recording, starting, or still saving the last
     /// session) → ignored. Otherwise a fresh session starts, also from the end summary.
     func handleStartWorkoutIntent() async {
-        guard startGateDecision() == .start else {
+        if startGateDecision() == .ignoreBusy {
             WakeLog.debug(.intent, "StartCableParkSessionIntent: busy \(busyStateDescription) — ignored")
             return
         }
@@ -81,11 +81,17 @@ extension WatchSessionController {
     }
 
     func startGateDecision() -> SessionStartGate.Decision {
-        SessionStartGate.decide(
+        // An undecided permission can still show its system sheet; `startSession` prompts for it
+        // and re-checks, so only decided (denied/unavailable) blockers stop the start here.
+        let states = permissionStates
+        let blocker = WatchPermissionOrder.startBlocker(states: states)
+            .flatMap { states[$0] == .notDetermined ? nil : $0 }
+        return SessionStartGate.decide(
             isRunning: isRunning,
             isStarting: isStarting,
             isStopping: isStopping,
-            isFinalizing: isFinalizing
+            isFinalizing: isFinalizing,
+            permissionBlocker: blocker
         )
     }
 

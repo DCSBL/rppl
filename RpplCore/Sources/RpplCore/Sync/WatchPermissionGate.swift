@@ -40,14 +40,16 @@ extension WatchPermissionKind {
     /// Whether this permission can keep the Watch recording onboarding gate closed.
     ///
     /// - Location: required (GPS).
-    /// - Health: prompt while undetermined; after deny, sensors-only recording is allowed.
+    /// - Health: required, and must be `.authorized` (not merely "unavailable"). The HK workout
+    ///   session keeps the app running with the wrist down; without it sensors and detection
+    ///   stop. The Watch stays browsable (logbook, sessions); only Start is blocked.
     /// - Motion: never blocks (helps dock/ride hints; device motion still records).
     public func blocksRecording(when state: WatchPermissionState) -> Bool {
         switch self {
         case .location:
             return !state.isReady
         case .health:
-            return state == .notDetermined
+            return state != .authorized
         case .motion:
             return false
         }
@@ -83,6 +85,24 @@ public enum WatchPermissionOrder {
 
         let remaining = ensureComplete(current).filter { !revoked.contains($0) }
         return revoked + remaining
+    }
+
+    /// Permissions checked in this order when explaining why Start is blocked.
+    private static let startBlockerOrder: [WatchPermissionKind] = [.health, .location]
+
+    /// First required permission that keeps Start blocked, or nil when recording may start.
+    public static func startBlocker(
+        states: [WatchPermissionKind: WatchPermissionState]
+    ) -> WatchPermissionKind? {
+        startBlockerOrder.first { $0.blocksRecording(when: states[$0] ?? .notDetermined) }
+    }
+
+    /// First run: a required permission can still show its system sheet, so onboarding prompts.
+    /// Once every required permission is decided, the Watch is browsable and Start explains the block.
+    public static func needsFirstRunPrompt(
+        states: [WatchPermissionKind: WatchPermissionState]
+    ) -> Bool {
+        startBlockerOrder.contains { (states[$0] ?? .notDetermined) == .notDetermined }
     }
 
     public static func areAllReady(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
