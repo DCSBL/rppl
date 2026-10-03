@@ -159,6 +159,7 @@ extension WatchSessionController {
     func flushBuffers(force: Bool = false) async {
         drainRouteLocations()
         guard let store, let manifest else { return }
+        flushPendingDetections()
         considerPersistingBattery()
         let now = Date()
         let motionDue = force || lastMotionFlushAt.map {

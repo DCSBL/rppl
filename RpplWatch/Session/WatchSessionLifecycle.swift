@@ -306,6 +306,7 @@ extension WatchSessionController {
         lastPersistedConfidentCode = DetectionCodes.inactive
         detectionSimulationMode = .detected
         detectionCount = 0
+        pendingDetections.removeAll()
         locationCount = 0
         motionCount = 0
         currentSetDuration = 0
@@ -501,6 +502,10 @@ extension WatchSessionController {
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
+        if !pendingDetections.isEmpty {
+            WakeLog.error(.detection, "session ended with \(pendingDetections.count) detection event(s) unwritten")
+            pendingDetections.removeAll()
+        }
         liveSetTracker.reset()
         storedByteSize = 0
         currentSetDuration = 0
