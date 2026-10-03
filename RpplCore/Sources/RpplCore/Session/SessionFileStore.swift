@@ -944,17 +944,20 @@ if !migrated.isEmpty {
 
         let manifest = try readManifest(sessionId: sessionId)
         let detections = try readDetections(sessionId: sessionId)
-        let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
+        // A raw stream that cannot be read must fail the transfer, not ship empty: the phone acks
+        // whatever arrives and the Watch then prunes. A stream that was never written reads as [].
+        let locations = try readLocationSamples(sessionId: sessionId)
         let motionFrames = try readMotionFrameData(sessionId: sessionId)
         let motion: [MotionSample]
         if motionFrames == nil {
-            motion = (try? readMotionSamples(sessionId: sessionId)) ?? []
+            motion = try readMotionSamples(sessionId: sessionId)
         } else {
             motion = []
         }
-        let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
-        let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
-        let battery = (try? readBatterySamples(sessionId: sessionId)) ?? []
+        let health = try readHealthSamples(sessionId: sessionId)
+        let water = try readWaterTemperatureSamples(sessionId: sessionId)
+        let battery = try readBatterySamples(sessionId: sessionId)
+        // Rebuildable from the raw streams, so a failure here costs nothing.
         let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
