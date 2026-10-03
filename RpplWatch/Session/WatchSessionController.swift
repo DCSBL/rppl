@@ -19,6 +19,8 @@ final class WatchSessionController: NSObject {
     var sessionStartLongitude: Double?
     /// True while stop teardown / Health save runs — block Start.
     var isStopping = false
+    /// Crash recovery started at launch (dangling Health workout, orphaned session files).
+    var launchRecoveryTask: Task<Void, Never>?
     /// True after Stop while the summary is already on screen and the Health save, derived view
     /// and transfer package are still being written in the background.
     var isFinalizing = false

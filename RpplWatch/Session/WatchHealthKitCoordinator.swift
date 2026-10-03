@@ -190,22 +190,30 @@ extension WatchSessionController {
 
     /// Ends a workout session left dangling by a crash so watchOS stops handing it back
     /// on every relaunch. Runs off the launch path; each step is time-bounded.
-    func recoverDanglingWorkoutSession() async {
+    /// The workout ends at `orphanLastSample` (where the Rppl data ends), not when the app was
+    /// reopened, so a late relaunch does not stretch the Fitness workout over a gap.
+    /// - Returns: the end date when a dangling session was closed, nil when there was none.
+    @discardableResult
+    func recoverDanglingWorkoutSession(orphanLastSample: Date? = nil) async -> Date? {
         let store = healthStore
         let recovered: HKWorkoutSession? = (try? await Deadline.run(3, label: "recoverActiveWorkoutSession") {
             UncheckedSendable(value: try await store.recoverActiveWorkoutSession())
         })?.value ?? nil
-        guard let session = recovered, workoutSession == nil else { return }
+        guard let session = recovered, workoutSession == nil else { return nil }
         WakeLog.debug(.workout, "recovered dangling HKWorkoutSession state=\(session.state.rawValue)")
         let builder = session.associatedWorkoutBuilder()
+        let end = DanglingWorkoutEnd.date(
+            orphanLastSample: orphanLastSample,
+            hkStart: session.startDate,
+            now: Date()
+        )
         if session.state == .running || session.state == .paused {
-            session.stopActivity(with: Date())
+            session.stopActivity(with: end)
             for _ in 0..<20 where session.state != .stopped {
                 try? await Task.sleep(nanoseconds: 250_000_000)
             }
         }
         do {
-            let end = Date()
             try await healthKitStep("dangling endCollection") { try await builder.endCollection(at: end) }
             _ = try await healthKitStep("dangling finishWorkout") {
                 UncheckedSendable(value: try await builder.finishWorkout())
@@ -214,6 +222,7 @@ extension WatchSessionController {
             WakeLog.error(.workout, "dangling finishWorkout: \(error.localizedDescription)")
         }
         session.end()
+        return end
     }
 
     /// Returns true if an HK workout session is running.

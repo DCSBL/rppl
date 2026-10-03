@@ -24,8 +24,7 @@ struct RpplWatchApp: App {
         _ = TesterIdentity.resolve()
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
         _ = WatchTransferService.shared
-        Task.detached(priority: .utility) {
-            await WatchSessionController.shared.recoverDanglingWorkoutSession()
-        }
+        // Stored on the controller so a Start in this same launch can wait for it.
+        WatchSessionController.shared.startLaunchRecovery()
     }
 }
