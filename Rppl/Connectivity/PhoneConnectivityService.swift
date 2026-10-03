@@ -210,9 +210,8 @@ final class PhoneConnectivityService: NSObject {
                 let data = try SessionImportLimits.readBoundedFile(at: url)
                 let package = try SessionImportLimits.decodeTransferPackage(from: data)
                 let id = package.manifest.sessionId
-                if FileManager.default.fileExists(
-                    atPath: try store.sessionDirectory(for: id).path
-                ) {
+                if let existing = try? store.sessionDirectory(for: id),
+                   FileManager.default.fileExists(atPath: existing.path) {
                     throw SessionExportImportError.alreadyImported(sessionId: id)
                 }
                 try store.importExportedPackage(package, intoPhoneStore: store.rootURL)
