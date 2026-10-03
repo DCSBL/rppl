@@ -78,6 +78,37 @@ struct SessionRecoveryTests {
         #expect(session.store.lastRecordedTimestamp(sessionId: id) == Samples.time(50))
     }
 
+    @Test func unreadableStreamsCountAsEmptyWhenFindingTheEnd() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        let id = session.sessionId
+        try session.store.appendDetection(Samples.detection(DetectionCodes.riding, second: 10), sessionId: id)
+        try session.store.appendLocationSamples([Samples.location(20)], sessionId: id)
+        try session.store.appendHealthSamples([Samples.health(30)], sessionId: id)
+        try session.store.appendWaterTemperatureSamples([Samples.water(40)], sessionId: id)
+        try session.store.appendBatterySamples([Samples.battery(50)], sessionId: id)
+        let streams = [
+            "detections.jsonl", "location-000.jsonl", "health-000.jsonl", "water-000.jsonl", "battery-000.jsonl"
+        ]
+        for name in streams {
+            try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: session.file(name).path)
+        }
+        defer {
+            for name in streams { try? session.makeWritable(name) }
+        }
+
+        #expect(session.store.lastRecordedTimestamp(sessionId: id) == nil)
+    }
+
+    @Test func recoveringAnUnreadableStoreFinalizesNothing() throws {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RpplCoreTests-notadir-\(UUID().uuidString)")
+        try Data().write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+
+        #expect(SessionFileStore(rootURL: file).recoverOrphanedRecordings(activeSessionId: nil).isEmpty)
+    }
+
     @Test func aSessionWithNothingRecordedEndsAtItsStart() throws {
         let session = try TempSession.make()
         defer { session.cleanup() }
