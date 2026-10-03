@@ -308,6 +308,7 @@ extension WatchSessionController {
         detectionCount = 0
         locationCount = 0
         motionCount = 0
+        resetLiveSessionTotals()
         currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
@@ -364,6 +365,13 @@ extension WatchSessionController {
     /// transfer package finish behind it. Only the sensor stop and the last flush run before the
     /// summary appears; everything else used to hold the rider on a spinner for minutes.
     func stopSession() async {
+        // A Pause that is still flushing finishes first (it is quick), so it never pauses the HK
+        // session that this Stop is about to finalize.
+        var waits = 0
+        while isPausing, waits < 100 {
+            try? await Task.sleep(for: .milliseconds(50))
+            waits += 1
+        }
         guard isRunning, !isStopping, let manifest, let store else {
             WakeLog.debug(.session, "stopSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
@@ -494,6 +502,16 @@ extension WatchSessionController {
         timerTask?.cancel()
     }
 
+    /// The Watch process usually outlives a park day, so every live total must start from zero:
+    /// the second session of the day used to show the first one's riding time and energy.
+    private func resetLiveSessionTotals() {
+        cumulativeRidingDuration = 0
+        cumulativeInactiveDuration = 0
+        activeEnergyKilocalories = nil
+        basalEnergyKilocalories = nil
+        elapsed = 0
+    }
+
     private func clearSessionRuntimeState() {
         healthKitRestartTask?.cancel()
         healthKitRestartTask = nil
@@ -503,6 +521,7 @@ extension WatchSessionController {
         healthBuffer.removeAll(keepingCapacity: true)
         liveSetTracker.reset()
         storedByteSize = 0
+        resetLiveSessionTotals()
         currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
@@ -537,14 +556,24 @@ extension WatchSessionController {
     }
 
     func pauseSession() async {
-        guard isRunning, !isStopping, !isProductPaused else {
+        guard isRunning, !isStopping, !isProductPaused, !isPausing else {
             WakeLog.debug(.session, "pauseSession ignored")
             return
         }
+        // Set before the first await: a second tap during the flush would write a second
+        // `product_pause` marker, and Stop waits for this pause to finish.
+        isPausing = true
+        defer { isPausing = false }
         WakeLog.debug(.session, "pauseSession begin")
         applyForcedInactive(reason: "product_pause", detectorId: "product_pause")
         considerPersistingBattery(force: true)
         await flushBuffers(force: true)
+        // The session can end while the flush runs; pausing a torn-down session would pause the
+        // HK session in the middle of its finalize.
+        guard isRunning, !isStopping else {
+            WakeLog.debug(.session, "pauseSession aborted — session ended during the flush")
+            return
+        }
         flushTask?.cancel()
         timerTask?.cancel()
         flushTask = nil

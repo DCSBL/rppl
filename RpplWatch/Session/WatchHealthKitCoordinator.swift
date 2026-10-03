@@ -124,12 +124,15 @@ extension WatchSessionController {
         guard let session = workoutSession else { return false }
         if session.state == .running { return true }
 
+        // One slot per caller: Water Lock at start and the controls page can wait at the same
+        // time, and a single shared slot let the second overwrite (and leak) the first.
+        let waiterId = UUID()
         let running = Task { @MainActor in
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                self.workoutRunningContinuation = continuation
                 if session.state == .running {
-                    self.workoutRunningContinuation = nil
                     continuation.resume()
+                } else {
+                    self.workoutRunningWaiters[waiterId] = continuation
                 }
             }
         }
@@ -137,13 +140,22 @@ extension WatchSessionController {
             try await Deadline.run(timeoutSeconds, label: "workoutRunning") { await running.value }
             return true
         } catch {
-            // Release the waiter; the old task-group version waited on it forever and kept
+            // Release this waiter; the old task-group version waited on it forever and kept
             // `startSession` from ever starting the flush / heartbeat loops.
-            if let continuation = workoutRunningContinuation {
-                workoutRunningContinuation = nil
-                continuation.resume()
-            }
+            workoutRunningWaiters.removeValue(forKey: waiterId)?.resume()
             return false
+        }
+    }
+
+    /// Resumes everything still waiting on the HK session. Called when the session refs are
+    /// cleared: a continuation that is dropped without a resume leaks its task.
+    func releaseWorkoutWaiters(stoppedAt date: Date = Date()) {
+        let waiters = workoutRunningWaiters
+        workoutRunningWaiters = [:]
+        waiters.values.forEach { $0.resume() }
+        if let continuation = workoutStoppedContinuation {
+            workoutStoppedContinuation = nil
+            continuation.resume(returning: date)
         }
     }
 
@@ -537,8 +549,7 @@ extension WatchSessionController {
         workoutRouteBuilder = nil
         pendingRouteLocations.removeAll()
         routeInsertTask = nil
-        workoutStoppedContinuation = nil
-        workoutRunningContinuation = nil
+        releaseWorkoutWaiters()
         hkRideActivityOpen = false
     }
 
