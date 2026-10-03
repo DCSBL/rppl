@@ -46,7 +46,9 @@ private func enterUnsureFromRide(
     _ engine: inout DetectionEngine,
     gapStart: TimeInterval = 3
 ) -> DetectionEvent {
-    _ = engine.process(tick(at: gapStart, speedKmh: nil))
+    // A fix older than the last one is dropped as out of order, and riding is entered on a fix at
+    // t=3.1, so the first gap tick is a heartbeat (the clock) rather than a fix.
+    _ = engine.process(.heartbeat(at: t0.addingTimeInterval(gapStart)))
     let events = engine.process(tick(at: gapStart + 3.1, speedKmh: nil))
     #expect(events.first?.code == DetectionCodes.unsure)
     return events[0]
@@ -248,8 +250,9 @@ struct DetectionEngineTests {
     @Test func rideExitRequiresUsableSlowSpeed() {
         var engine = DetectionEngine()
         enterRiding(&engine)
-        // Unusable GPS while riding goes to unsure path, not ride_exit.
-        #expect(engine.process(tick(at: 3, speedKmh: nil)).isEmpty)
+        // Unusable GPS while riding goes to unsure path, not ride_exit. The gap starts on a
+        // heartbeat: a fix at t=3 would predate the t=3.1 fix riding was entered on.
+        #expect(engine.process(.heartbeat(at: t0.addingTimeInterval(3))).isEmpty)
         let events = engine.process(tick(at: 6.1, speedKmh: nil))
         #expect(events.first?.code == DetectionCodes.unsure)
         #expect(events.first?.detectorId == "gps_gap")
@@ -258,7 +261,7 @@ struct DetectionEngineTests {
     @Test func gpsGapIgnoresSingleBadTick() {
         var engine = DetectionEngine()
         enterRiding(&engine)
-        #expect(engine.process(tick(at: 3, speedKmh: nil)).isEmpty)
+        #expect(engine.process(tick(at: 3.5, speedKmh: nil)).isEmpty)
         #expect(engine.currentCode == DetectionCodes.riding)
         // Usable again before gap hold → stay riding
         #expect(engine.process(tick(at: 4, speedKmh: 22)).isEmpty)
