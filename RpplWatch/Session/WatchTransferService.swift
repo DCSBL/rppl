@@ -64,6 +64,10 @@ final class WatchTransferService: NSObject {
         return manifest.transferState == .acknowledged
     }
 
+    func isPackaging(sessionId: String) -> Bool {
+        packagingSessionIds.contains(sessionId)
+    }
+
     func enqueueTransfer(sessionId: String, store: SessionFileStore) {
         WakeLog.debug(.transfer, "enqueue \(sessionId.prefix(8))…")
         // Own store instance: packaging must not share a lock with the recording's writes.
@@ -133,7 +137,13 @@ final class WatchTransferService: NSObject {
 
         let directory = tempDir
         Task {
-            defer { packagingSessionIds.remove(sessionId) }
+            defer {
+                packagingSessionIds.remove(sessionId)
+                // An ack that arrived while packaging deferred its prune; do it now.
+                if (try? store.readManifest(sessionId: sessionId))?.transferState == .acknowledged {
+                    WatchViewSyncService.shared.pruneAfterAck(sessionId: sessionId)
+                }
+            }
             do {
                 let packageURL = try await StoreIO.runOffMain {
                     try store.markTransferring(sessionId: sessionId)
