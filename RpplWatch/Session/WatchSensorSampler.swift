@@ -451,16 +451,6 @@ extension WatchSessionController {
     static let locationRingMaxAge: TimeInterval = 5
 }
 
-enum FlushStream: String, Sendable {
-    case locations, health, water, battery
-}
-
-struct FlushOutcome: Sendable {
-    var failed: Set<FlushStream> = []
-    var error: String?
-    var byteSize: Int64?
-}
-
 extension StoreIO {
     /// Write each stream separately off the main actor and report which ones failed.
     static func runOffMainCollectingFailures(
@@ -471,31 +461,16 @@ extension StoreIO {
         store: SessionFileStore,
         sessionId: String
     ) async -> FlushOutcome {
-        let result = try? await StoreIO.runOffMain { () -> FlushOutcome in
-            var outcome = FlushOutcome()
-            func attempt(_ stream: FlushStream, _ write: () throws -> Void) {
-                do {
-                    try write()
-                } catch {
-                    outcome.failed.insert(stream)
-                    outcome.error = error.localizedDescription
-                }
-            }
-            if !locations.isEmpty {
-                attempt(.locations) { try store.appendLocationSamples(locations, sessionId: sessionId) }
-            }
-            if !health.isEmpty {
-                attempt(.health) { try store.appendHealthSamples(health, sessionId: sessionId) }
-            }
-            if !water.isEmpty {
-                attempt(.water) { try store.appendWaterTemperatureSamples(water, sessionId: sessionId) }
-            }
-            if !battery.isEmpty {
-                attempt(.battery) { try store.appendBatterySamples(battery, sessionId: sessionId) }
-            }
-            outcome.byteSize = try? store.sessionByteSize(sessionId: sessionId)
-            return outcome
+        let result = try? await StoreIO.runOffMain {
+            SessionFlushWriter.write(
+                locations: locations,
+                health: health,
+                water: water,
+                battery: battery,
+                store: store,
+                sessionId: sessionId
+            )
         }
-        return result ?? FlushOutcome(failed: [.locations, .health, .water, .battery], error: "flush task failed")
+        return result ?? FlushOutcome(failed: Set(FlushStream.allCases), error: "flush task failed")
     }
 }
