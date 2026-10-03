@@ -1035,7 +1035,9 @@ if !migrated.isEmpty {
             data.append(try encoder.encode(value))
             data.append(contentsOf: "\n".utf8)
         }
-        let handle = try FileHandle(forWritingTo: url)
+        // Read-write: the torn-tail check below reads the last byte, which fails with EBADF
+        // ("The file couldn't be opened") on a write-only handle.
+        let handle = try FileHandle(forUpdating: url)
         defer { try? handle.close() }
         let end = try handle.seekToEnd()
         if end > 0 {
