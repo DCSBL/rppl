@@ -170,7 +170,14 @@ extension WatchSessionController {
         do {
             // Kick the request off the tightest MainActor turn so WatchKit can show the sheet
             // without the UI sitting on a ProgressView for several seconds first.
-            try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
+            // Bounded: a stalled `healthd` never answers and used to hang Start until force-quit.
+            // Long enough for a rider to read and answer the system sheet.
+            let store = healthStore
+            let toShare = typesToShare
+            let toRead = typesToRead
+            try await healthKitStep("requestAuthorization", seconds: Self.healthAuthorizationTimeout) {
+                try await store.requestAuthorization(toShare: toShare, read: toRead)
+            }
             WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {
             errorText = String(localized: "Health auth: \(error.localizedDescription)")
@@ -189,11 +196,15 @@ extension WatchSessionController {
             refreshPermissionStatus()
             return
         }
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            let manager = CMMotionActivityManager()
-            let now = Date()
-            manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
-                continuation.resume()
+        // The controller's own manager: a throwaway one is released as soon as this closure returns
+        // and may never call back. The deadline keeps Start from hanging if the answer never comes.
+        let manager = UncheckedSendable(value: activityManager)
+        let now = Date()
+        _ = try? await Deadline.run(Self.motionPermissionTimeout, label: "motion authorization") {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                manager.value.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
+                    continuation.resume()
+                }
             }
         }
         refreshPermissionStatus()
@@ -241,7 +252,9 @@ extension WatchSessionController {
         isStarting = true
         startingActivityCode = code
 
-        await requestPermissions()
+        // Undecided permissions only. Re-asking after a denial belongs to the permissions UI: a
+        // denied request shows no sheet, so a stalled `healthd` would hold every Start forever.
+        await promptUndeterminedPermissionsInOrder()
         // No Health (or Location) access = no start: without a workout session the app would be
         // suspended with the wrist down. The Watch stays browsable; the rider is told why.
         if let kind = WatchPermissionOrder.startBlocker(states: permissionStates) {
