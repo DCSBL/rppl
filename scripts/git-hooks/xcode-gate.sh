@@ -54,7 +54,9 @@ CORE_FP="$(paths_fingerprint \
   RpplCore/Package.swift \
   RpplCore/Package.resolved \
   RpplCore/Sources \
-  RpplCore/Tests)"
+  RpplCore/Tests \
+  RpplCore/coverage-baseline.json \
+  scripts/check-core-coverage.py)"
 
 # App compile inputs: Core sources + apps + project. Core *tests* omitted so
 # detection-test iteration does not rebuild iOS/Watch.
@@ -79,11 +81,9 @@ stamp_matches() {
 }
 
 run_core_tests() {
-  echo "==> RpplCore swift test"
-  (
-    cd RpplCore
-    swift test --no-parallel
-  )
+  # Tests with coverage, then refuse a drop below RpplCore/coverage-baseline.json.
+  echo "==> RpplCore swift test + coverage floor"
+  python3 scripts/check-core-coverage.py
   printf '%s\n' "$CORE_KEY" >"$CORE_STAMP"
 }
 
