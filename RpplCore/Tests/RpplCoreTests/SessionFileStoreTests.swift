@@ -759,11 +759,13 @@ struct SessionFileStoreTests {
             .appendingPathComponent("location-000.jsonl")
         #expect(FileManager.default.fileExists(atPath: locationURL.path))
 
+        // The read is synchronous and takes milliseconds: racing `cancel()` against it is flaky
+        // on a fast runner. Hold the reader until it is cancelled so the read starts cancelled.
         let reader = Task {
-            try store.readLocationSamples(sessionId: manifest.sessionId)
-        }
-        for _ in 0..<8 {
-            await Task.yield()
+            while !Task.isCancelled {
+                await Task.yield()
+            }
+            return try store.readLocationSamples(sessionId: manifest.sessionId)
         }
         reader.cancel()
         do {
