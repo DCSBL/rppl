@@ -45,7 +45,7 @@ Heavy gate — **only if the push includes build-related files** (Swift, plist, 
 
 When it runs, push is blocked if any fail. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`) then:
 
-1. **`swift test` in `RpplCore`** — skipped if Core sources/tests/`Package.swift` and the local Swift/Xcode toolchain match the last successful run (content fingerprint of tracked files, not a time TTL). Dirty working-tree edits count, so `make gate` does not skip stale.
+1. **`swift test` in `RpplCore` with the coverage floor** (`scripts/check-core-coverage.py`, see [Coverage floor](#coverage-floor)) — skipped if Core sources/tests/`Package.swift`, the coverage baseline and the local Swift/Xcode toolchain match the last successful run (content fingerprint of tracked files, not a time TTL). Dirty working-tree edits count, so `make gate` does not skip stale.
 2. **`xcodebuild build`** for `Rppl` (iOS Simulator; embeds Watch) — skipped if app/Watch/project/Core *sources* match the last successful build. Changing only `RpplCore/Tests` does not rebuild the apps.
 3. **`xcodebuild analyze` is not part of push.** It is slow and mostly overlaps `build`. Use `make check` (or `XCODE_GATE_ANALYZE=1`) when you want it.
 
@@ -57,12 +57,26 @@ Manual gates:
 make gate          # same as pre-push (cache + no analyze)
 make check         # full: ignore cache, tests + build + analyze
 make test-core     # RpplCore swift test only
+make coverage      # Core tests + coverage floor (what the gate runs)
 # or
 pre-commit run --all-files --hook-stage pre-push
 # (also: pre-commit run --all-files for commit-stage hooks)
 ```
 
 Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
+
+## Coverage floor
+
+`RpplCore` coverage may not go down. [`RpplCore/coverage-baseline.json`](../RpplCore/coverage-baseline.json) records the numbers and [`scripts/check-core-coverage.py`](../scripts/check-core-coverage.py) enforces them. It runs `swift test --enable-code-coverage` and measures `RpplCore/Sources/RpplCore` only, so well-covered tests cannot inflate the figure.
+
+| Rule | Fails when |
+|------|------------|
+| Total | line or function coverage is more than `tolerance` (0.2 points) below the baseline |
+| Critical files | a file in the baseline's `critical` list (session store, transfer, import, motion frames, detection, ...) gains more than `criticalMissedLinesAllowed` (2) uncovered lines |
+
+The baseline only ratchets up. After improving coverage, run `make coverage-update` and commit the new file. Lowering a value needs `python3 scripts/check-core-coverage.py --update --allow-lower` and a reason in the PR. New code in a critical file needs tests in the same PR.
+
+It runs locally only: in the pre-push `xcode-gate` and in `make coverage`. Nothing on GitHub enforces it (branch protection is not available on this private repo), so a PR is green or red by eye; do not merge red. Coverage shows what code runs, not what is asserted: keep tests that fail when the behavior breaks (flip the fix back and watch the test go red).
 
 ## Escape hatches (emergency only)
 
@@ -79,7 +93,7 @@ On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner runs:
 
 1. **pre-commit** — same **commit-stage** hooks (hygiene, codespell, SwiftLint, legal sync).
 
-**RpplCore `swift test`** runs via **Xcode Cloud**, not GitHub Actions. Local/push gate still runs Core tests through `xcode-gate` / `make test-core`.
+**RpplCore `swift test`** cannot run here (`Compression` is an Apple framework) and is meant to run via **Xcode Cloud** (see the note under [Xcode Cloud](#xcode-cloud): verify it is active). Until then only the local push gate runs it: `xcode-gate` / `make coverage`.
 
 It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
 
@@ -119,6 +133,8 @@ Keep three workflows in App Store Connect / Xcode:
 | **Release** | Tag Changes, tags beginning with `v` | Test → Archive (scheme **Rppl**, TestFlight and App Store) → TestFlight internal + external. Setup and release steps: [Release.md](Release.md) |
 
 Optional: add **Manual Start** on `main` to the nightly workflow for on-demand TestFlight builds.
+
+> **Check this workflow is running.** On 2026-10-03 no check from it appeared on any PR from #327 to #368; only `Rppl | Test - PR` (app targets) did, and it reported SUCCESS on #327 and #329 while Core tests were red. Running the action below on the #329 snapshot gives `TEST FAILED` (6 tests), so the workflow would have stopped that PR. Open App Store Connect → Xcode Cloud and confirm **PR / Core tests** exists, starts on Pull Request Changes and posts its status to GitHub. Until then the local push gate (`xcode-gate` / `make coverage`) is the only place these tests run, and a PR pushed by a Linux agent never runs them. To enforce the [coverage floor](#coverage-floor) there as well, a `ci_scripts` step can run `python3 scripts/check-core-coverage.py` (it runs `swift test` itself; the `xcodebuild` result bundle is not read). Not set up.
 
 The PR workflow opens the `RpplCore` package directly. Xcode's auto-generated `RpplCore` scheme only builds the library, so Xcode Cloud fails with "There are no test bundles available to test". The shared scheme in `RpplCore/.swiftpm/xcode/xcshareddata/xcschemes/RpplCore.xcscheme` (whitelisted in `.gitignore`) adds `RpplCoreTests` to its Test action. Reproduce locally:
 

@@ -1,0 +1,105 @@
+{
+  "_comment": "Written by scripts/check-core-coverage.py --update. Only ratchets up; see the script.",
+  "tolerance": 0.2,
+  "criticalMissedLinesAllowed": 2,
+  "lines": 90.7,
+  "functions": 83.94,
+  "critical": {
+    "Session/SessionFileStore.swift": {
+      "lines": 1125,
+      "missed": 59
+    },
+    "Session/SessionFlushWriter.swift": {
+      "lines": 42,
+      "missed": 0
+    },
+    "Session/CompressedJSONLFrames.swift": {
+      "lines": 222,
+      "missed": 6
+    },
+    "Session/StoreIO.swift": {
+      "lines": 25,
+      "missed": 1
+    },
+    "Session/SampleRequeue.swift": {
+      "lines": 5,
+      "missed": 0
+    },
+    "Session/SessionRecovery.swift": {
+      "lines": 37,
+      "missed": 1
+    },
+    "Session/SessionPackageLocator.swift": {
+      "lines": 91,
+      "missed": 2
+    },
+    "Session/SessionRootMigrator.swift": {
+      "lines": 81,
+      "missed": 2
+    },
+    "Session/SessionImportLimits.swift": {
+      "lines": 34,
+      "missed": 2
+    },
+    "Session/SessionIdValidator.swift": {
+      "lines": 25,
+      "missed": 2
+    },
+    "Session/MotionRecordingPolicy.swift": {
+      "lines": 21,
+      "missed": 0
+    },
+    "Session/TransferStateMachine.swift": {
+      "lines": 4,
+      "missed": 0
+    },
+    "Session/SessionStatsBuilder.swift": {
+      "lines": 293,
+      "missed": 5
+    },
+    "Session/SessionLoader.swift": {
+      "lines": 132,
+      "missed": 13
+    },
+    "Sync/SessionImportFailure.swift": {
+      "lines": 13,
+      "missed": 0
+    },
+    "Sync/TransferRetryPolicy.swift": {
+      "lines": 12,
+      "missed": 0
+    },
+    "Sync/TransferPendingFilter.swift": {
+      "lines": 18,
+      "missed": 0
+    },
+    "Sync/WatchViewDeletePolicy.swift": {
+      "lines": 3,
+      "missed": 0
+    },
+    "Sync/WatchViewSyncCodec.swift": {
+      "lines": 136,
+      "missed": 5
+    },
+    "Detection/DetectionEngine.swift": {
+      "lines": 378,
+      "missed": 9
+    },
+    "Detection/DetectionHoldClock.swift": {
+      "lines": 68,
+      "missed": 0
+    },
+    "Detection/Detectors.swift": {
+      "lines": 81,
+      "missed": 0
+    },
+    "Detection/GpsSignalFilter.swift": {
+      "lines": 58,
+      "missed": 1
+    },
+    "Detection/LocationFixSequencer.swift": {
+      "lines": 22,
+      "missed": 0
+    }
+  }
+}

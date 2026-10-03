@@ -1,4 +1,4 @@
-.PHONY: check test-core lint gate install-hooks
+.PHONY: check test-core coverage coverage-update lint gate install-hooks
 
 export PATH := $(CURDIR)/tools/bin:$(HOME)/Library/Python/3.9/bin:$(PATH)
 
@@ -8,6 +8,14 @@ check:
 
 test-core:
 	cd RpplCore && swift test
+
+# Core tests with coverage; fails when coverage drops below RpplCore/coverage-baseline.json.
+coverage:
+	python3 scripts/check-core-coverage.py
+
+# After improving coverage: raise the baseline (never lowers it; see the script for --allow-lower).
+coverage-update:
+	python3 scripts/check-core-coverage.py --update
 
 lint:
 	bash scripts/git-hooks/run-swiftlint.sh

@@ -467,7 +467,14 @@ public final class SessionFileStore: @unchecked Sendable {
         let url = try sessionDirectory(for: sessionId)
             .appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
         guard fileManager.fileExists(atPath: url.path) else { return nil }
-        return try Data(contentsOf: url)
+        let raw = try Data(contentsOf: url)
+        // Ship only frames the phone's strict check accepts: a partial tail from a kill or full
+        // disk would otherwise fail the import for good (`truncatedFrame`).
+        let intact = CompressedJSONLFrames.validPrefixLength(raw)
+        if intact < raw.count {
+            WakeLog.error(.store, "motion: dropped \(raw.count - intact) torn byte(s) of \(raw.count)")
+        }
+        return intact > 0 ? Data(raw.prefix(intact)) : nil
     }
 
     private static func motionCompressedFileName(chunkIndex: Int) -> String {
@@ -937,17 +944,20 @@ if !migrated.isEmpty {
 
         let manifest = try readManifest(sessionId: sessionId)
         let detections = try readDetections(sessionId: sessionId)
-        let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
+        // A raw stream that cannot be read must fail the transfer, not ship empty: the phone acks
+        // whatever arrives and the Watch then prunes. A stream that was never written reads as [].
+        let locations = try readLocationSamples(sessionId: sessionId)
         let motionFrames = try readMotionFrameData(sessionId: sessionId)
         let motion: [MotionSample]
         if motionFrames == nil {
-            motion = (try? readMotionSamples(sessionId: sessionId)) ?? []
+            motion = try readMotionSamples(sessionId: sessionId)
         } else {
             motion = []
         }
-        let health = (try? readJSONL(HealthMetricSample.self, from: "health-000.jsonl", sessionId: sessionId)) ?? []
-        let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
-        let battery = (try? readBatterySamples(sessionId: sessionId)) ?? []
+        let health = try readHealthSamples(sessionId: sessionId)
+        let water = try readWaterTemperatureSamples(sessionId: sessionId)
+        let battery = try readBatterySamples(sessionId: sessionId)
+        // Rebuildable from the raw streams, so a failure here costs nothing.
         let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
             manifest: manifest,
@@ -967,7 +977,8 @@ if !migrated.isEmpty {
         let zlibURL = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
         if fileManager.fileExists(atPath: zlibURL.path) {
             let framed = try Data(contentsOf: zlibURL)
-            let utf8 = try CompressedJSONLFrames.decodeFrames(framed)
+            let intact = CompressedJSONLFrames.validPrefixLength(framed)
+            let utf8 = try CompressedJSONLFrames.decodeFrames(Data(framed.prefix(intact)))
             return try decodeJSONL(MotionSample.self, from: utf8)
         }
         return try readJSONL(

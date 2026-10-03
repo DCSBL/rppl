@@ -207,6 +207,10 @@ final class WatchSessionController: NSObject {
     var flushTask: Task<Void, Never>?
     /// Last off-main flush; the next one waits on it so batches append in order.
     var flushChain: Task<Void, Never>?
+    /// Retries the HealthKit start while a session records sensors-only (`startHealthKitRestartLoop`).
+    var healthKitRestartTask: Task<Void, Never>?
+    /// The last HealthKit start was skipped because Health is denied; a denial is never retried.
+    var lastHealthKitStartWasDenied = false
     var timerTask: Task<Void, Never>?
     var startedAt: Date?
     /// Wall time excluded from `elapsed` while product-paused (completed pauses).

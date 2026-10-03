@@ -40,10 +40,61 @@ public enum CompressedJSONLFrames {
         if !fileManager.fileExists(atPath: url.path) {
             fileManager.createFile(atPath: url.path, contents: nil)
         }
-        let handle = try FileHandle(forWritingTo: url)
+        // Read-write: the tail check reads frame headers (a write-only handle fails with EBADF).
+        let handle = try FileHandle(forUpdating: url)
         defer { try? handle.close() }
-        try handle.seekToEnd()
+        let size = try handle.seekToEnd()
+        // A kill or full disk mid-append leaves a partial frame. Frames are length-prefixed, so
+        // appending after it would hide every later frame; drop the partial tail first.
+        let intact = try completeFramesLength(in: handle, fileSize: size)
+        if intact < size {
+            try handle.truncate(atOffset: intact)
+        }
+        try handle.seek(toOffset: intact)
         try handle.write(contentsOf: frame)
+    }
+
+    /// Byte length of the leading run of frames that are complete and inflate within the decode
+    /// limits. Everything after the first bad frame is unusable (length prefixes), so a torn
+    /// tail costs only itself. `decodeFrames` stays strict for untrusted input.
+    public static func validPrefixLength(_ data: Data) -> Int {
+        let data = data.startIndex == 0 ? data : Data(data)
+        var offset = 0
+        var frames = 0
+        var decodedTotal = 0
+        while offset + 4 <= data.count, frames < maxFrameCount {
+            let length = Int(readUInt32BE(data, at: offset))
+            guard length > 0, length <= maxCompressedBytesPerFrame, offset + 4 + length <= data.count else {
+                break
+            }
+            let payload = data.subdata(in: (offset + 4)..<(offset + 4 + length))
+            guard let inflated = try? decompress(payload),
+                  inflated.count <= maxDecompressedBytesPerFrame,
+                  decodedTotal + inflated.count <= maxTotalDecodedBytes else {
+                break
+            }
+            decodedTotal += inflated.count
+            offset += 4 + length
+            frames += 1
+        }
+        return offset
+    }
+
+    /// Header-only scan (no inflate) of a file on disk: cheap enough to run on every append.
+    private static func completeFramesLength(in handle: FileHandle, fileSize: UInt64) throws -> UInt64 {
+        var offset: UInt64 = 0
+        while offset + 4 <= fileSize {
+            try handle.seek(toOffset: offset)
+            guard let header = try handle.read(upToCount: 4), header.count == 4 else { break }
+            let length = UInt64(readUInt32BE(Data(header), at: 0))
+            guard length > 0,
+                  length <= UInt64(maxCompressedBytesPerFrame),
+                  offset + 4 + length <= fileSize else {
+                break
+            }
+            offset += 4 + length
+        }
+        return offset
     }
 
     /// Decompress all frames into concatenated JSONL UTF-8.
