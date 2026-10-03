@@ -72,6 +72,7 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
         from fromState: HKWorkoutSessionState,
         date: Date
     ) {
+        let sessionId = ObjectIdentifier(workoutSession)
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
             if toState == .running, let continuation = workoutRunningContinuation {
@@ -82,16 +83,33 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
                 workoutStoppedContinuation = nil
                 continuation.resume(returning: date)
             }
+            if WorkoutSessionLossPolicy.isUnexpectedLoss(
+                isRunning: isRunning,
+                isStopping: isStopping,
+                isCurrentSession: self.workoutSession.map(ObjectIdentifier.init) == sessionId,
+                toStateRaw: toState.rawValue
+            ) {
+                await handleWorkoutSessionLost(reason: "state \(Self.workoutStateName(toState))")
+            }
         }
     }
 
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+        let sessionId = ObjectIdentifier(workoutSession)
+        let nsError = error as NSError
         Task { @MainActor in
             errorText = error.localizedDescription
             WakeLog.error(.workout, "session failed: \(error.localizedDescription)")
             if let continuation = workoutStoppedContinuation {
                 workoutStoppedContinuation = nil
                 continuation.resume(returning: Date())
+            }
+            if WorkoutSessionLossPolicy.isUnexpectedFailure(
+                isRunning: isRunning,
+                isStopping: isStopping,
+                isCurrentSession: self.workoutSession.map(ObjectIdentifier.init) == sessionId
+            ) {
+                await handleWorkoutSessionLost(reason: "failed \(nsError.domain) \(nsError.code)")
             }
         }
     }
