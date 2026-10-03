@@ -36,4 +36,17 @@ struct DeadlineTests {
         }
         #expect(Date().timeIntervalSince(started) < 2)
     }
+
+    /// Awaiting an unstructured task that never finishes (the route-insert shape): `Task.value`
+    /// does not return on cancellation, so a task-group timeout would hang here.
+    @Test func expiresWhenAwaitingNeverFinishingUnstructuredTask() async {
+        let inFlight = Task<Void, Never> {
+            await withCheckedContinuation { (_: CheckedContinuation<Void, Never>) in }
+        }
+        let started = Date()
+        await #expect(throws: Deadline.Expired.self) {
+            try await Deadline.run(0.2, label: "routeInsert") { await inFlight.value }
+        }
+        #expect(Date().timeIntervalSince(started) < 2)
+    }
 }
