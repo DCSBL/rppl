@@ -93,7 +93,7 @@ On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner runs:
 
 1. **pre-commit** — same **commit-stage** hooks (hygiene, codespell, SwiftLint, legal sync).
 
-**RpplCore `swift test`** cannot run here (`Compression` is an Apple framework) and is meant to run via **Xcode Cloud** (see the note under [Xcode Cloud](#xcode-cloud): verify it is active). Until then only the local push gate runs it: `xcode-gate` / `make coverage`.
+RpplCore `swift test` runs in its own workflow, see [Core tests (Linux)](#core-tests-linux).
 
 It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
 
@@ -103,7 +103,34 @@ It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
 - SwiftLint install is a **step-level** skip when the PR has no matching paths. The job always reports a status, so you can mark **`pre-commit`** as a required check without skipped-job merge blocks.
 - Hooks with no matching files are skipped by pre-commit (exit 0).
 
-To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status check **`pre-commit`** (drop **`RpplCore tests`** if it was required).
+To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status checks **`pre-commit`** and **`RpplCore tests (Linux)`**.
+
+### Core tests (Linux)
+
+Workflow: [`.github/workflows/core-tests.yml`](../.github/workflows/core-tests.yml).
+
+On every PR targeting `main` (and on manual dispatch), a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
+
+Reproduce locally without a Linux machine (needs Docker; drop `--user` only if you accept the permission tests failing):
+
+```bash
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD":/work -w /work/RpplCore swift:6.2-noble swift test
+```
+
+What this does **not** cover: the coverage floor (`make coverage`; Linux coverage numbers differ from Xcode's), the Apple-only code paths below, `xcodebuild`, and the iOS / watchOS targets.
+
+**Keeping Core buildable on Linux.** Core must compile with `swift build` on Linux. Where an Apple-only API is unavoidable it sits behind `#if canImport(...)`, and the Apple build path stays the real implementation:
+
+| Apple API | Linux handling |
+|-----------|----------------|
+| `Compression` (`COMPRESSION_ZLIB`) | `Platform/RawDeflate.swift`: same raw DEFLATE via system zlib (`CZlib` system library target, Linux only; needs `zlib1g-dev`) |
+| `OSLog` | `Platform/LoggerShim.swift`: no-op `Logger` |
+| `String(localized:bundle:)` | `Platform/LocalizationShim.swift`: returns the English key |
+| `FormatStyle` / `MeasurementFormatter` (`DistanceFormat`, `EnergyFormat`, `TemperatureFormat`) | compiled out on Linux, and so are their tests |
+| App Group `containerURL` | `nil` on Linux |
+| `URLSession` | `import FoundationNetworking` |
+
+Tests that need those Apple-only paths run only in Xcode / `xcode-gate`.
 
 ### Validate parks (Linux)
 

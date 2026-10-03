@@ -1,0 +1,39 @@
+# RpplCore unit tests on Linux (Swift toolchain from the official swift Docker image).
+# Core is pure Swift (no UIKit/HealthKit/WCSession), so `swift test` runs without Xcode.
+# Apple-only APIs inside Core sit behind `#if canImport(...)` — see Docs/DevWorkflow.md.
+#
+# Required-check friendly: no `paths:` filter, so the job always reports a status.
+
+name: Core tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: core-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  core-tests:
+    name: RpplCore tests (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: swift:6.2-noble
+      # Non-root (the runner user): the store tests inject failures with chmod 000, which root ignores.
+      options: --user 1001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: swift test
+        working-directory: RpplCore
+        run: swift test
