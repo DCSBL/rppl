@@ -30,6 +30,14 @@ final class WatchViewSyncService {
 
     func applyViewDelete(sessionId: String) {
         do {
+            guard let manifest = try? store.readManifest(sessionId: sessionId) else {
+                WakeLog.debug(.sync, "viewDelete missing \(sessionId.prefix(8))…")
+                return
+            }
+            guard WatchViewDeletePolicy.mayDelete(manifest) else {
+                WakeLog.error(.sync, "viewDelete refused \(sessionId.prefix(8))… state=\(manifest.transferState)")
+                return
+            }
             try store.deleteSession(sessionId: sessionId)
             bumpCatalogRevision()
             WakeLog.debug(.sync, "applied viewDelete \(sessionId.prefix(8))…")
@@ -64,6 +72,10 @@ final class WatchViewSyncService {
     }
 
     func pruneAfterAck(sessionId: String) {
+        guard !WatchTransferService.shared.isPackaging(sessionId: sessionId) else {
+            WakeLog.debug(.store, "prune deferred — packaging \(sessionId.prefix(8))…")
+            return
+        }
         do {
             if try store.readDerivedView(sessionId: sessionId) != nil {
                 try store.pruneRawStreams(sessionId: sessionId)
@@ -79,7 +91,7 @@ final class WatchViewSyncService {
         return ids.compactMap { sessionId in
             guard
                 let manifest = try? store.readManifest(sessionId: sessionId),
-                manifest.transferState != .recording,
+                WatchViewDeletePolicy.mayDelete(manifest),
                 let derived = try? store.readDerivedView(sessionId: sessionId)
             else {
                 return nil

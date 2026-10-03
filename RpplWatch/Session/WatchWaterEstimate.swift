@@ -58,17 +58,10 @@ extension WatchSessionController {
             let source = park.waterTemperature,
             let fetcher = ParkWaterTemperatureFetchers.fetcher(for: source.provider)
         else { return nil }
-        let reading = await withTaskGroup(of: ParkWaterTemperature?.self) { group in
-            group.addTask { await fetcher.fetch(source) }
-            group.addTask {
-                try? await Task.sleep(for: .seconds(waterEstimateTimeout))
-                return nil
-            }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
+        let reading = try? await Deadline.run(waterEstimateTimeout, label: "waterEstimate") {
+            await fetcher.fetch(source)
         }
-        guard let reading, reading.isFresh() else { return nil }
+        guard let reading = reading ?? nil, reading.isFresh() else { return nil }
         return reading
     }
 }

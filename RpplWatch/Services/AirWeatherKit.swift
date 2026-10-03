@@ -15,13 +15,13 @@ enum AirWeatherKit {
 
     static func fetch(location: CLLocation) async -> AirWeatherSnapshot? {
         do {
-            return try await withTimeout(fetchTimeout) {
+            return try await Deadline.run(fetchTimeout, label: "weatherKit") {
                 let current = try await WeatherService.shared.weather(for: location).currentWeather
                 return AirWeatherSnapshot(current: current)
             }
         } catch is CancellationError {
             return nil
-        } catch is AirWeatherTimeoutError {
+        } catch is Deadline.Expired {
             WakeLog.debug(.workout, "WeatherKit timed out")
             return nil
         } catch {
@@ -29,27 +29,7 @@ enum AirWeatherKit {
             return nil
         }
     }
-
-    private static func withTimeout<T: Sendable>(
-        _ seconds: TimeInterval,
-        _ work: @escaping @Sendable () async throws -> T
-    ) async throws -> T {
-        try await withThrowingTaskGroup(of: T.self) { group in
-            group.addTask { try await work() }
-            group.addTask {
-                try await Task.sleep(for: .seconds(seconds))
-                throw AirWeatherTimeoutError()
-            }
-            guard let result = try await group.next() else {
-                throw AirWeatherTimeoutError()
-            }
-            group.cancelAll()
-            return result
-        }
-    }
 }
-
-struct AirWeatherTimeoutError: Error {}
 
 struct AirWeatherSnapshot: Sendable {
     var celsius: Double
