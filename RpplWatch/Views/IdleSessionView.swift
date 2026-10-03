@@ -42,6 +42,14 @@ struct IdleSessionView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .sheet(isPresented: Binding(
+            get: { session.startBlockedBy != nil },
+            set: { if !$0 { session.startBlockedBy = nil } }
+        )) {
+            if let kind = session.startBlockedBy {
+                StartBlockedView(kind: kind, session: session)
+            }
+        }
     }
 
     private var canStart: Bool {

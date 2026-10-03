@@ -10,14 +10,19 @@ public enum SessionStartGate {
     public enum Decision: Equatable, Sendable {
         case start
         case ignoreBusy
+        /// A required permission is missing: tell the rider instead of starting.
+        case blockedByPermission(WatchPermissionKind)
     }
 
     public static func decide(
         isRunning: Bool,
         isStarting: Bool,
         isStopping: Bool,
-        isFinalizing: Bool
+        isFinalizing: Bool,
+        permissionBlocker: WatchPermissionKind? = nil
     ) -> Decision {
-        isRunning || isStarting || isStopping || isFinalizing ? .ignoreBusy : .start
+        if isRunning || isStarting || isStopping || isFinalizing { return .ignoreBusy }
+        if let permissionBlocker { return .blockedByPermission(permissionBlocker) }
+        return .start
     }
 }

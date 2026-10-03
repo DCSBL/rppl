@@ -19,4 +19,22 @@ struct SessionStartGateTests {
         #expect(SessionStartGate.decide(isRunning: true, isStarting: false, isStopping: true, isFinalizing: true) == .ignoreBusy)
         #expect(SessionStartGate.decide(isRunning: false, isStarting: false, isStopping: false, isFinalizing: true) == .ignoreBusy)
     }
+
+    @Test func permissionBlockerStopsAnIdleStart() {
+        #expect(
+            SessionStartGate.decide(
+                isRunning: false, isStarting: false, isStopping: false, isFinalizing: false,
+                permissionBlocker: .health
+            ) == .blockedByPermission(.health)
+        )
+    }
+
+    @Test func busyWinsOverPermissionBlocker() {
+        #expect(
+            SessionStartGate.decide(
+                isRunning: true, isStarting: false, isStopping: false, isFinalizing: false,
+                permissionBlocker: .health
+            ) == .ignoreBusy
+        )
+    }
 }

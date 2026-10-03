@@ -213,10 +213,23 @@ extension WatchSessionController {
         }
     }
 
+    func reportStartBlocked(by kind: WatchPermissionKind) {
+        WakeLog.error(.permissions, "start blocked — \(kind.rawValue) access missing")
+        errorText = nil
+        startBlockedBy = kind
+        WKInterfaceDevice.current().play(.failure)
+    }
+
     func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
         // A busy request must not wipe the summary of a session that is still saving.
-        guard startGateDecision() == .start else {
+        switch startGateDecision() {
+        case .start:
+            break
+        case .ignoreBusy:
             WakeLog.debug(.session, "startSession ignored — \(busyStateDescription)")
+            return
+        case .blockedByPermission(let kind):
+            reportStartBlocked(by: kind)
             return
         }
         endedSessionSummary = nil
@@ -229,6 +242,15 @@ extension WatchSessionController {
         startingActivityCode = code
 
         await requestPermissions()
+        // No Health (or Location) access = no start: without a workout session the app would be
+        // suspended with the wrist down. The Watch stays browsable; the rider is told why.
+        if let kind = WatchPermissionOrder.startBlocker(states: permissionStates) {
+            isStarting = false
+            startingActivityCode = nil
+            statusText = String(localized: "Idle")
+            reportStartBlocked(by: kind)
+            return
+        }
 
         let root = AppConstants.documentsSessionsRoot
         let fileStore = SessionFileStore(rootURL: root)

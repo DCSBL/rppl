@@ -88,6 +88,14 @@ final class WatchSessionController: NSObject {
         ]
     }
 
+    /// Set when Start was refused for a missing required permission; drives the explain sheet.
+    var startBlockedBy: WatchPermissionKind?
+
+    /// First run only: a required permission can still show its system sheet.
+    var needsFirstRunPermissionPrompt: Bool {
+        WatchPermissionOrder.needsFirstRunPrompt(states: permissionStates)
+    }
+
     var areRecordingPermissionsReady: Bool {
         WatchPermissionOrder.areAllReady(permissionStates)
     }
