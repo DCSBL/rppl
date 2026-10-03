@@ -133,14 +133,19 @@ struct TransferStateMachineTests {
             sessionId: session.sessionId
         )
         try store.markAcknowledged(sessionId: session.sessionId)
-        #expect(throws: SessionStoreError.self) {
+        #expect(throws: SessionStoreError.notTransferable("already acknowledged")) {
             try store.zipSessionForTransfer(sessionId: session.sessionId, to: root)
         }
 
+        // `pruneRawStreams` itself refuses un-acked sessions, so reproduce a pruned package by
+        // removing the raw streams from a session that is still waiting to transfer.
         let pruned = manifest(state: .readyToTransfer)
-        try store.createSession(manifest: pruned)
-        try store.pruneRawStreams(sessionId: pruned.sessionId)
-        #expect(throws: SessionStoreError.self) {
+        let prunedDir = try store.createSession(manifest: pruned)
+        for name in try FileManager.default.contentsOfDirectory(atPath: prunedDir.path)
+        where name != "manifest.json" {
+            try FileManager.default.removeItem(at: prunedDir.appendingPathComponent(name))
+        }
+        #expect(throws: SessionStoreError.notTransferable("raw streams pruned")) {
             try store.zipSessionForTransfer(sessionId: pruned.sessionId, to: root)
         }
     }

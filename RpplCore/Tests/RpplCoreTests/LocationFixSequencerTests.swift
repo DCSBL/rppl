@@ -24,10 +24,15 @@ private func beat(at offset: TimeInterval) -> DetectionTick {
 struct LocationFixSequencerTests {
     @Test func dropsDuplicatesAndOlderFixes() {
         var sequencer = LocationFixSequencer()
-        #expect(sequencer.accept(t0))
-        #expect(!sequencer.accept(t0))
-        #expect(!sequencer.accept(t0.addingTimeInterval(-1)))
-        #expect(sequencer.accept(t0.addingTimeInterval(1)))
+        // `accept` is mutating: `#expect` captures its argument in a closure, so call outside it.
+        let first = sequencer.accept(t0)
+        let duplicate = sequencer.accept(t0)
+        let older = sequencer.accept(t0.addingTimeInterval(-1))
+        let newer = sequencer.accept(t0.addingTimeInterval(1))
+        #expect(first)
+        #expect(!duplicate)
+        #expect(!older)
+        #expect(newer)
         #expect(sequencer.droppedCount == 2)
         #expect(sequencer.lastAcceptedAt == t0.addingTimeInterval(1))
     }
@@ -46,11 +51,15 @@ struct LocationFixSequencerTests {
         var sequencer = LocationFixSequencer()
         let start = t0.addingTimeInterval(1_000)
         sequencer.reset(notBefore: start)
-        #expect(!sequencer.accept(t0))
-        #expect(!sequencer.accept(start.addingTimeInterval(-LocationFixSequencer.startGrace - 1)))
+        let long = sequencer.accept(t0)
+        let justTooEarly = sequencer.accept(start.addingTimeInterval(-LocationFixSequencer.startGrace - 1))
         // CoreLocation's first fix may predate Start by a few seconds.
-        #expect(sequencer.accept(start.addingTimeInterval(-5)))
-        #expect(sequencer.accept(start.addingTimeInterval(1)))
+        let withinGrace = sequencer.accept(start.addingTimeInterval(-5))
+        let afterStart = sequencer.accept(start.addingTimeInterval(1))
+        #expect(!long)
+        #expect(!justTooEarly)
+        #expect(withinGrace)
+        #expect(afterStart)
         #expect(sequencer.droppedCount == 2)
     }
 
@@ -61,7 +70,8 @@ struct LocationFixSequencerTests {
         sequencer.reset()
         #expect(sequencer.lastAcceptedAt == nil)
         #expect(sequencer.droppedCount == 0)
-        #expect(sequencer.accept(t0))
+        let afterReset = sequencer.accept(t0)
+        #expect(afterReset)
     }
 }
 

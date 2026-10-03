@@ -874,8 +874,10 @@ if !migrated.isEmpty {
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
         // Watch Connectivity retries a transfer whose ack got lost; appending the same streams
         // again doubled every sample on the phone (field session 2026-09-30). Replace instead.
-        let existing = try phoneStore.sessionDirectory(for: package.manifest.sessionId)
-        if fileManager.fileExists(atPath: existing.path) {
+        // `try?`: a session the phone has never seen throws sessionNotFound, and that is the
+        // normal first import.
+        if let existing = try? phoneStore.sessionDirectory(for: package.manifest.sessionId),
+           fileManager.fileExists(atPath: existing.path) {
             // Defense in depth: never replace a copy that has data with a package that has none
             // (a pruned Watch session re-sent by mistake). Keep the copy; the caller still acks.
             let incomingEmpty = package.detections.isEmpty && package.locations.isEmpty
@@ -1035,7 +1037,9 @@ if !migrated.isEmpty {
             data.append(try encoder.encode(value))
             data.append(contentsOf: "\n".utf8)
         }
-        let handle = try FileHandle(forWritingTo: url)
+        // Read-write: the torn-tail check below reads the last byte, which fails with EBADF
+        // ("The file couldn't be opened") on a write-only handle.
+        let handle = try FileHandle(forUpdating: url)
         defer { try? handle.close() }
         let end = try handle.seekToEnd()
         if end > 0 {
