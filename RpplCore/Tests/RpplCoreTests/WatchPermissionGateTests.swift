@@ -35,15 +35,16 @@ struct WatchPermissionGateTests {
         #expect(!WatchPermissionKind.motion.blocksRecording(when: .denied))
     }
 
-    @Test func healthDeniedAllowsSensorsOnlyGate() {
+    @Test func healthDeniedBlocksGate() {
         let states: [WatchPermissionKind: WatchPermissionState] = [
             .location: .authorized,
             .health: .denied,
             .motion: .notDetermined
         ]
-        #expect(WatchPermissionOrder.areAllReady(states))
+        #expect(!WatchPermissionOrder.areAllReady(states))
         #expect(WatchPermissionKind.health.blocksRecording(when: .notDetermined))
-        #expect(!WatchPermissionKind.health.blocksRecording(when: .denied))
+        #expect(WatchPermissionKind.health.blocksRecording(when: .denied))
+        #expect(!WatchPermissionKind.health.blocksRecording(when: .unavailable))
     }
 
     @Test func locationDeniedBlocksGate() {

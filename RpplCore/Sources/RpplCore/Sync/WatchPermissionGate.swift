@@ -40,14 +40,13 @@ extension WatchPermissionKind {
     /// Whether this permission can keep the Watch recording onboarding gate closed.
     ///
     /// - Location: required (GPS).
-    /// - Health: prompt while undetermined; after deny, sensors-only recording is allowed.
+    /// - Health: required. The HK workout session is what keeps the app running with the wrist
+    ///   down; without it sensors and detection stop. Denied sends the rider to Settings.
     /// - Motion: never blocks (helps dock/ride hints; device motion still records).
     public func blocksRecording(when state: WatchPermissionState) -> Bool {
         switch self {
-        case .location:
+        case .location, .health:
             return !state.isReady
-        case .health:
-            return state == .notDetermined
         case .motion:
             return false
         }

@@ -63,7 +63,9 @@ Do **not** dual-write walking+running or swimming distance (pollutes those Healt
 
 **Sets vs laps in Health:** Fitness intervals are detection **sets and dock waits**, not cable-park **laps** (`LapSetTracker` circuit crossings). Laps stay in-app / derived export. Never emit `HKWorkoutEvent.lap` unless Fitness can show a lap count we fill (Apple API). Product **set** = allocated turn — distinct from lap; see AGENTS Set vs lap.
 
-If Health denies workout sharing (common after tapping Don’t Allow, or flaky on Simulator), the Watch continues in **sensors-only** mode: GPS + detections still record; HR/energy from the builder are skipped.
+**Health access is required to start.** The HK workout session is what keeps the app running with the wrist down (watchOS suspends it otherwise, stopping GPS, motion and detection), and an `HKWorkoutSession` cannot start without workout sharing access. Health denied therefore blocks the start gate and sends the rider to Settings; `unavailable` (no Health data on the device) still passes.
+
+If the workout start only *times out or fails* (busy `healthd`, older watches), the session is not blocked: it records in a temporary **sensors-only** mode (GPS + detections, shown as "Screen-on only") and retries the HK start every 30 s (max 10) until a workout session protects the recording.
 
 Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as set distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not generic water sports — Rppl does not switch activity type for temperature. JSONL remains the source for in-app stats.
 
