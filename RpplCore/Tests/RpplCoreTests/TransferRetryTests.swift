@@ -97,3 +97,76 @@ struct TransferBookkeepingTests {
         #expect(SessionImportFailure.reason(for: long).count == SessionImportFailure.maxReasonLength)
     }
 }
+
+@Suite("TransferStateMachine")
+struct TransferStateMachineTests {
+    @Test func acknowledgedIsTerminal() {
+        typealias State = SessionManifest.TransferState
+        for next in [State.recording, .readyToTransfer, .transferring] {
+            #expect(!TransferStateMachine.isAllowed(from: .acknowledged, to: next))
+        }
+        #expect(TransferStateMachine.isAllowed(from: .acknowledged, to: .acknowledged))
+        #expect(TransferStateMachine.isAllowed(from: .transferring, to: .readyToTransfer))
+        #expect(TransferStateMachine.isAllowed(from: .readyToTransfer, to: .transferring))
+    }
+
+    @Test func acknowledgedSessionCannotRegress() throws {
+        let (store, root) = tempStore()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let session = manifest(state: .readyToTransfer)
+        try store.createSession(manifest: session)
+        try store.markAcknowledged(sessionId: session.sessionId)
+
+        try store.markTransferring(sessionId: session.sessionId)
+        try store.requeueForTransfer(sessionId: session.sessionId)
+        try store.markReadyToTransfer(sessionId: session.sessionId, endedAt: Date())
+        #expect(try store.readManifest(sessionId: session.sessionId).transferState == .acknowledged)
+    }
+
+    @Test func zipRefusesAcknowledgedAndPrunedSessions() throws {
+        let (store, root) = tempStore()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let session = manifest(state: .readyToTransfer)
+        try store.createSession(manifest: session)
+        try store.appendDetection(
+            DetectionEvent(code: DetectionCodes.inactive, reason: "r", detectorId: "r"),
+            sessionId: session.sessionId
+        )
+        try store.markAcknowledged(sessionId: session.sessionId)
+        #expect(throws: SessionStoreError.self) {
+            try store.zipSessionForTransfer(sessionId: session.sessionId, to: root)
+        }
+
+        let pruned = manifest(state: .readyToTransfer)
+        try store.createSession(manifest: pruned)
+        try store.pruneRawStreams(sessionId: pruned.sessionId)
+        #expect(throws: SessionStoreError.self) {
+            try store.zipSessionForTransfer(sessionId: pruned.sessionId, to: root)
+        }
+    }
+
+    @Test func emptyImportKeepsExistingPhoneCopy() throws {
+        let (watch, watchRoot) = tempStore()
+        let (_, phoneRoot) = tempStore()
+        defer {
+            try? FileManager.default.removeItem(at: watchRoot)
+            try? FileManager.default.removeItem(at: phoneRoot)
+        }
+        let session = manifest(state: .readyToTransfer)
+        try watch.createSession(manifest: session)
+        try watch.appendDetection(
+            DetectionEvent(code: DetectionCodes.inactive, reason: "r", detectorId: "r"),
+            sessionId: session.sessionId
+        )
+        let full = try watch.buildTransferPackage(sessionId: session.sessionId)
+        try watch.importTransferPackage(full, intoPhoneStore: phoneRoot)
+
+        let empty = SessionTransferPackage(
+            manifest: session, detections: [], locations: [], motion: [], motionFramesZlib: nil,
+            health: [], water: [], battery: [], derived: nil
+        )
+        try watch.importTransferPackage(empty, intoPhoneStore: phoneRoot)
+        let phone = SessionFileStore(rootURL: phoneRoot)
+        #expect(try phone.readDetections(sessionId: session.sessionId).count == 1)
+    }
+}

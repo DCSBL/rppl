@@ -133,7 +133,7 @@ struct MotionCompressionTests {
             ],
             sessionId: manifest.sessionId
         )
-        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
         #expect(package.motion.isEmpty)

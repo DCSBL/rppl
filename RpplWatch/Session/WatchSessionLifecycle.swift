@@ -397,8 +397,9 @@ extension WatchSessionController {
     /// Mark ready for transfer and write the derived view, off the main actor.
     private func prepareStoppedPackage(store: SessionFileStore, sessionId: String) async {
         do {
+            let endedAt = Date()
             try await StoreIO.runOffMain {
-                try store.markReadyToTransfer(sessionId: sessionId)
+                try store.markReadyToTransfer(sessionId: sessionId, endedAt: endedAt)
             }
             WakeLog.debug(.store, "markReadyToTransfer \(sessionId.prefix(8))…")
         } catch {

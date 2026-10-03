@@ -7,6 +7,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
     case importTooLarge(Int)
     case importLimitExceeded(String)
     case ioFailure(String)
+    case notTransferable(String)
 
     public var errorDescription: String? {
         switch self {
@@ -22,6 +23,8 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
             return "Import exceeds element limit: \(detail)"
         case .ioFailure(let message):
             return message
+        case .notTransferable(let reason):
+            return "Session not transferable: \(reason)"
         }
     }
 }
@@ -727,11 +730,15 @@ if !migrated.isEmpty {
         return try readJSONL(BatterySample.self, from: name, sessionId: sessionId)
     }
 
-    public func markReadyToTransfer(sessionId: String, endedAt: Date = Date()) throws {
+    /// Stamps the session end and queues it for transfer. Only for stop and crash recovery, so
+    /// `endedAt` is required; retry paths use `requeueForTransfer`. An acknowledged session is
+    /// left untouched.
+    public func markReadyToTransfer(sessionId: String, endedAt: Date) throws {
         lock.lock()
         defer { lock.unlock() }
 
         var manifest = try readManifest(sessionId: sessionId)
+        guard TransferStateMachine.isAllowed(from: manifest.transferState, to: .readyToTransfer) else { return }
         manifest.endedAt = endedAt
         manifest.transferState = .readyToTransfer
         try writeManifest(manifest)
@@ -762,7 +769,7 @@ if !migrated.isEmpty {
         defer { lock.unlock() }
 
         var manifest = try readManifest(sessionId: sessionId)
-        guard manifest.transferState != .acknowledged else { return }
+        guard TransferStateMachine.isAllowed(from: manifest.transferState, to: .readyToTransfer) else { return }
         manifest.transferState = .readyToTransfer
         try writeManifest(manifest)
     }
@@ -796,6 +803,7 @@ if !migrated.isEmpty {
         defer { lock.unlock() }
 
         var manifest = try readManifest(sessionId: sessionId)
+        guard TransferStateMachine.isAllowed(from: manifest.transferState, to: .transferring) else { return }
         manifest.transferState = .transferring
         try writeManifest(manifest)
     }
@@ -837,6 +845,16 @@ if !migrated.isEmpty {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
 
+        // A pruned or acknowledged session must never be re-sent: the phone replaces its full copy
+        // with whatever arrives, so an empty package would wipe the raw streams everywhere.
+        let manifest = try readManifest(sessionId: sessionId)
+        guard manifest.transferState != .acknowledged else {
+            throw SessionStoreError.notTransferable("already acknowledged")
+        }
+        guard hasRawStreams(sessionId: sessionId) else {
+            throw SessionStoreError.notTransferable("raw streams pruned")
+        }
+
         let zipURL = destinationURL.appendingPathComponent("\(sessionId).json")
         let package = try buildTransferPackage(sessionId: sessionId)
         let data = try encoder.encode(package)
@@ -858,6 +876,16 @@ if !migrated.isEmpty {
         // again doubled every sample on the phone (field session 2026-09-30). Replace instead.
         let existing = try phoneStore.sessionDirectory(for: package.manifest.sessionId)
         if fileManager.fileExists(atPath: existing.path) {
+            // Defense in depth: never replace a copy that has data with a package that has none
+            // (a pruned Watch session re-sent by mistake). Keep the copy; the caller still acks.
+            let incomingEmpty = package.detections.isEmpty && package.locations.isEmpty
+                && package.health.isEmpty && package.motion.isEmpty && package.water.isEmpty
+                && package.battery.isEmpty && (package.motionFramesZlib?.isEmpty ?? true)
+            if incomingEmpty {
+                let hasData = ((try? phoneStore.readDetections(sessionId: package.manifest.sessionId))?.isEmpty == false)
+                    || ((try? phoneStore.readLocationSamples(sessionId: package.manifest.sessionId))?.isEmpty == false)
+                if hasData { return }
+            }
             try phoneStore.deleteSession(sessionId: package.manifest.sessionId)
         }
         _ = try phoneStore.createSession(manifest: package.manifest)

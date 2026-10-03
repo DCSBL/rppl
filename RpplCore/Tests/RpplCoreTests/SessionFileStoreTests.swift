@@ -82,7 +82,7 @@ struct SessionFileStoreTests {
             crownOrientation: "right"
         )
         try watchStore.createSession(manifest: manifest)
-        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
         #expect(package.manifest.wristLocation == "left")
@@ -177,7 +177,7 @@ struct SessionFileStoreTests {
                 state: BatteryStateCodes.unplugged
             )
         ], sessionId: manifest.sessionId)
-        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        try watchStore.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
 
         let package = try watchStore.buildTransferPackage(sessionId: manifest.sessionId)
         #expect(package.derived != nil)
@@ -273,7 +273,7 @@ struct SessionFileStoreTests {
             ),
             sessionId: manifest.sessionId
         )
-        try sourceStore.markReadyToTransfer(sessionId: manifest.sessionId)
+        try sourceStore.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
         let package = try sourceStore.buildTransferPackage(sessionId: manifest.sessionId)
 
         let phoneStore = SessionFileStore(rootURL: phoneRoot)
@@ -464,7 +464,7 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         _ = try store.createSession(manifest: manifest)
-        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
         try store.markTransferring(sessionId: manifest.sessionId)
 
         let pending = try store.sessionsNeedingTransfer()
@@ -489,7 +489,7 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         _ = try store.createSession(manifest: ready)
-        try store.markReadyToTransfer(sessionId: ready.sessionId)
+        try store.markReadyToTransfer(sessionId: ready.sessionId, endedAt: Date())
 
         // Empty dormant folder (no manifest.json) — must not abort the pending list.
         let emptyDir = root.appendingPathComponent("zzz-empty-dormant", isDirectory: true)
@@ -548,7 +548,7 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         _ = try store.createSession(manifest: manifest)
-        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
         #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
         #expect(try store.sessionsNeedingTransfer().isEmpty)
     }
@@ -567,7 +567,7 @@ struct SessionFileStoreTests {
             systemVersion: "26.0"
         )
         _ = try store.createSession(manifest: manifest)
-        try store.markReadyToTransfer(sessionId: manifest.sessionId)
+        try store.markReadyToTransfer(sessionId: manifest.sessionId, endedAt: Date())
         try store.markTransferring(sessionId: manifest.sessionId)
 
         #expect(try store.markAcknowledged(sessionId: manifest.sessionId) == true)
