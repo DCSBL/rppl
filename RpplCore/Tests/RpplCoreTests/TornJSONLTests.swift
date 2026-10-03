@@ -4,7 +4,13 @@ import Testing
 
 @Suite("Tolerant JSONL", .serialized)
 struct TornJSONLTests {
-    private func makeStore() throws -> (SessionFileStore, URL, String) {
+    private struct Fixture {
+        let store: SessionFileStore
+        let root: URL
+        let sessionId: String
+    }
+
+    private func makeStore() throws -> Fixture {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)
         let store = SessionFileStore(rootURL: root)
@@ -12,7 +18,7 @@ struct TornJSONLTests {
             testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "Watch7,1", systemVersion: "26.0"
         )
         _ = try store.createSession(manifest: manifest)
-        return (store, root, manifest.sessionId)
+        return Fixture(store: store, root: root, sessionId: manifest.sessionId)
     }
 
     private func event(_ reason: String) -> DetectionEvent {
@@ -35,7 +41,10 @@ struct TornJSONLTests {
     }
 
     @Test func tornLastLineKeepsValidLines() throws {
-        let (store, root, id) = try makeStore()
+        let fixture = try makeStore()
+        let store = fixture.store
+        let root = fixture.root
+        let id = fixture.sessionId
         defer { try? FileManager.default.removeItem(at: root) }
         try store.appendDetection(event("a"), sessionId: id)
         try store.appendDetection(event("b"), sessionId: id)
@@ -46,7 +55,10 @@ struct TornJSONLTests {
     }
 
     @Test func appendAfterTornLineIsReadable() throws {
-        let (store, root, id) = try makeStore()
+        let fixture = try makeStore()
+        let store = fixture.store
+        let root = fixture.root
+        let id = fixture.sessionId
         defer { try? FileManager.default.removeItem(at: root) }
         try store.appendDetection(event("a"), sessionId: id)
         try append(Array(#"{"code":"rid"#.utf8), to: "detections.jsonl", store: store, sessionId: id)
@@ -57,7 +69,10 @@ struct TornJSONLTests {
     }
 
     @Test func invalidUTF8ByteOnlyCostsItsLine() throws {
-        let (store, root, id) = try makeStore()
+        let fixture = try makeStore()
+        let store = fixture.store
+        let root = fixture.root
+        let id = fixture.sessionId
         defer { try? FileManager.default.removeItem(at: root) }
         try store.appendDetection(event("a"), sessionId: id)
         try append([0xFF, 0xFE, 0x0A], to: "detections.jsonl", store: store, sessionId: id)
@@ -67,7 +82,10 @@ struct TornJSONLTests {
     }
 
     @Test func finalizeOrphanedRecordingSurvivesTornFiles() throws {
-        let (store, root, id) = try makeStore()
+        let fixture = try makeStore()
+        let store = fixture.store
+        let root = fixture.root
+        let id = fixture.sessionId
         defer { try? FileManager.default.removeItem(at: root) }
         try store.appendDetection(event("a"), sessionId: id)
         try store.appendLocationSamples([location(0), location(1)], sessionId: id)
