@@ -102,6 +102,7 @@ struct GeoDistanceTests {
     }
 }
 
+#if canImport(Darwin) // DistanceFormat is Apple-only (FormatStyle / MeasurementFormatter)
 @Suite("DistanceFormat")
 struct DistanceFormatTests {
     @Test func dutchLocaleUsesGrouping() {
@@ -132,6 +133,7 @@ struct DistanceFormatTests {
         #expect(formatted.contains("24"))
     }
 }
+#endif
 
 @Suite("DurationFormat")
 struct DurationFormatTests {
@@ -147,6 +149,7 @@ struct DurationFormatTests {
     }
 }
 
+#if canImport(Darwin) // Energy/TemperatureFormat are Apple-only (FormatStyle)
 @Suite("EnergyFormat")
 struct EnergyFormatTests {
     @Test func kilocaloriesIncludesUnit() {
@@ -168,6 +171,7 @@ struct TemperatureFormatTests {
         #expect(formatted.contains("68") && formatted.contains("F"))
     }
 }
+#endif
 
 @Suite("SessionStatsBuilder")
 struct SessionStatsBuilderTests {
