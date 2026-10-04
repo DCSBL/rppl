@@ -13,6 +13,8 @@ history:
     description: add water_temperature (Arnemuiden Oranjeplaat, nearest reporting RWS station)
   - date: 2026-09-28
     description: rewrite cable description per Docs/ParkDescriptions.md tone of voice
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
 
 author: Rppl
 name: Watersportverhuurbedrijf De Arne
@@ -55,13 +57,13 @@ opening:
     - { label: Season, months: [5, 6, 7, 8, 9], days: [sun, mon, tue, wed, thu, fri], open: "09:00", close: "17:30" }
 
 prices:
-  - { name: 15 min, price: "€18", note: Includes helmet and impact vest }
-  - { name: 30 min, price: "€36", note: Includes helmet and impact vest }
-  - { name: 60 min, price: "€72", note: Includes helmet and impact vest }
-  - { name: Wakeboard/waterski rental, price: "€7", note: per person }
-  - { name: Pro wakeboard rental, price: "€10", note: per person }
-  - { name: Wetsuit rental, price: "€7", note: per person }
-  - { name: 11-ride card, price: "€180" }
+  - { name: 15 min, amount: 18, currency: EUR, note: Includes helmet and impact vest }
+  - { name: 30 min, amount: 36, currency: EUR, note: Includes helmet and impact vest }
+  - { name: 60 min, amount: 72, currency: EUR, note: Includes helmet and impact vest }
+  - { name: Wakeboard/waterski rental, amount: 7, currency: EUR, per: person, note: per person }
+  - { name: Pro wakeboard rental, amount: 10, currency: EUR, per: person, note: per person }
+  - { name: Wetsuit rental, amount: 7, currency: EUR, per: person, note: per person }
+  - { name: 11-ride card, amount: 180, currency: EUR }
 
 facilities:
   - rental

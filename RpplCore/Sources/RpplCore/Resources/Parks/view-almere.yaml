@@ -20,6 +20,8 @@ history:
     description: >-
       water_temperature: pampus.oost had stopped reporting (stale since 2026-08-17) - switch to
       diemen.muidenbrug, the nearest still-reporting station
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
 
 author: Rppl
 name: Cablepark VIEW Almere
@@ -75,22 +77,22 @@ opening:
 
 # Source: cableparkviewalmere.nl/tarieven/ (September 2026).
 prices:
-  - { name: 1 hour, price: "€ 27,50", note: Adults }
-  - { name: 1 hour, price: "€ 22,50", note: "Kids up to 12 years" }
-  - { name: 2 hours, price: "€ 37,50", note: Adults }
-  - { name: 2 hours, price: "€ 30,00", note: "Kids up to 12 years" }
-  - { name: 3 hours, price: "€ 45,00", note: Adults }
-  - { name: 3 hours, price: "€ 37,50", note: "Kids up to 12 years" }
-  - { name: 4 hours, price: "€ 50,00", note: Adults }
-  - { name: 4 hours, price: "€ 42,50", note: "Kids up to 12 years" }
-  - { name: Day pass, price: "€ 55,00", note: Adults }
-  - { name: Day pass, price: "€ 47,50", note: "Kids up to 12 years" }
-  - { name: Wakeboard set, price: "€ 25,00", note: "Board, helmet, life vest and wetsuit" }
-  - { name: Waterski set, price: "€ 17,50", note: "Skis, helmet, life vest and wetsuit" }
-  - { name: "Clinic (1 person)", price: "€ 85,00", note: "On the Alta Twin, 15-20 min effective lesson time" }
-  - { name: "Clinic (2 people)", price: "€ 100,00" }
-  - { name: "Clinic (3 people)", price: "€ 120,00" }
-  - { name: "Clinic (4 people)", price: "€ 130,00" }
+  - { name: 1 hour, amount: 27.5, currency: EUR, note: Adults }
+  - { name: 1 hour, amount: 22.5, currency: EUR, note: "Kids up to 12 years" }
+  - { name: 2 hours, amount: 37.5, currency: EUR, note: Adults }
+  - { name: 2 hours, amount: 30, currency: EUR, note: "Kids up to 12 years" }
+  - { name: 3 hours, amount: 45, currency: EUR, note: Adults }
+  - { name: 3 hours, amount: 37.5, currency: EUR, note: "Kids up to 12 years" }
+  - { name: 4 hours, amount: 50, currency: EUR, note: Adults }
+  - { name: 4 hours, amount: 42.5, currency: EUR, note: "Kids up to 12 years" }
+  - { name: Day pass, amount: 55, currency: EUR, note: Adults }
+  - { name: Day pass, amount: 47.5, currency: EUR, note: "Kids up to 12 years" }
+  - { name: Wakeboard set, amount: 25, currency: EUR, note: "Board, helmet, life vest and wetsuit" }
+  - { name: Waterski set, amount: 17.5, currency: EUR, note: "Skis, helmet, life vest and wetsuit" }
+  - { name: "Clinic (1 person)", amount: 85, currency: EUR, note: "On the Alta Twin, 15-20 min effective lesson time" }
+  - { name: "Clinic (2 people)", amount: 100, currency: EUR }
+  - { name: "Clinic (3 people)", amount: 120, currency: EUR }
+  - { name: "Clinic (4 people)", amount: 130, currency: EUR }
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

@@ -162,6 +162,13 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// Temporary or one-off changes (extra opening hours, closures, events) on top of `rules`.
     public var exceptions: [ParkOpeningException]?
 
+    /// Whether any `rules` or `slots` are filled in. Without them the park has not told us when it is
+    /// open, which reads as unknown, never as closed.
+    public var hasSchedule: Bool { !(rules ?? []).isEmpty || !(slots ?? []).isEmpty }
+
+    /// `false` when the weekly pattern is not published (`hoursUnknown`) or nothing is filled in.
+    public var isScheduleKnown: Bool { hoursUnknown != true && hasSchedule }
+
     enum CodingKeys: String, CodingKey {
         case booking, rules, slots, numbered, note, exceptions
         case bookingMinutes = "booking_minutes"
@@ -346,15 +353,18 @@ public enum ParkSchedule {
         on date: Date,
         timeZone: TimeZone
     ) -> ParkDaySchedule {
-        let closed = ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: true)
-        guard let opening else { return closed }
-        guard let context = DayContext(date: date, timeZone: timeZone) else { return closed }
+        // No opening times filled in at all is "unknown", not "closed": nobody told us either way.
+        let unknown = ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: false)
+        guard let opening else { return unknown }
+        guard let context = DayContext(date: date, timeZone: timeZone) else {
+            return ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: true)
+        }
 
         let active = activeExceptions(in: opening, on: context)
         let notices = active.map { ParkDayNotice(kind: $0.normalizedKind, label: $0.label, note: $0.note) }
 
-        // An unannounced weekly pattern stays unknown, unless an exception states what happens that day.
-        let hoursUnknown = opening.hoursUnknown == true
+        // An unannounced or empty weekly pattern stays unknown, unless an exception states what happens that day.
+        let hoursUnknown = !opening.isScheduleKnown
         if hoursUnknown, !active.contains(where: { [ParkExceptionKind.hours, ParkExceptionKind.closed].contains($0.normalizedKind) }) {
             return ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: false, notices: notices)
         }
@@ -438,7 +448,7 @@ public enum ParkSchedule {
         at date: Date,
         timeZone: TimeZone
     ) -> ParkOpenStatusDetail {
-        guard let opening else { return ParkOpenStatusDetail(status: .closed) }
+        guard let opening else { return ParkOpenStatusDetail(status: .unknown) }
 
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone

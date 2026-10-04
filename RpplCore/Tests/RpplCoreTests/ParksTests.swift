@@ -68,7 +68,8 @@ struct ParksTests {
         #expect(park.openStatus(at: date("2026-10-02", hour: 12)) == .opensTomorrow)
         // 2026-10-05 is a Monday, 10-06 a Tuesday: both closed (October is weekend-only).
         #expect(park.openStatus(at: date("2026-10-05", hour: 12)) == .closed)
-        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .closed)
+        // No opening times filled in is unknown, never closed.
+        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .unknown)
     }
 
     @Test func openStatusDetailCarriesTheRelevantWindow() throws {
@@ -170,7 +171,7 @@ struct ParksTests {
         #expect(park.cables?.first?.direction == .counterClockwise)
         #expect(park.cables?.first?.effectiveLengthM == 720)
         #expect(park.cables?.first?.points?.count == 5)
-        #expect(park.prices?.count == 8)
+        #expect(park.prices?.count == 12)
         #expect(park.links?.contains { $0.kind == "booking" } == true)
         // 2026-09-24 Thursday 17-20, 09-23 Wednesday 15-20, 09-28 Monday closed, 09-26 Saturday 12-19.
         #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])

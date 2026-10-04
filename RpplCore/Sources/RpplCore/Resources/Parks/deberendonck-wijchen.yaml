@@ -10,6 +10,8 @@ history:
     description: initial
   - date: 2026-09-28
     description: add water_temperature (nearest reporting RWS station, Grave boven)
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
 
 author: Rppl
 name: De Berendonck
@@ -38,23 +40,23 @@ facilities:
 
 # Source: deberendonck.nl tarieven page
 prices:
-  - { name: "1,5 uur", price: "€18,50", note: "kids t/m 15 jr" }
-  - { name: "1,5 uur", price: "€21,50", note: student }
-  - { name: "1,5 uur", price: "€26,50", note: "volwassene 16+" }
-  - { name: 3 uur, price: "€28,50", note: "kids t/m 15 jr" }
-  - { name: 3 uur, price: "€31,50", note: student }
-  - { name: 3 uur, price: "€36,50", note: "volwassene 16+" }
-  - { name: Hele dag, price: "€38,50", note: "kids t/m 15 jr" }
-  - { name: Hele dag, price: "€39,50", note: student }
-  - { name: Hele dag, price: "€49,50", note: "volwassene 16+" }
-  - { name: Easyride, price: "€28,50", note: "kids t/m 15 jr" }
-  - { name: Easyride, price: "€34,50", note: "volwassene 16+" }
-  - { name: 12-Rittenkaart, price: "€185", note: "kids t/m 15 jr" }
-  - { name: 12-Rittenkaart, price: "€265", note: "volwassene 16+" }
-  - { name: Wetsuit huur, price: "€5", note: "per 1,5 uur" }
-  - { name: Wetsuit huur, price: "€8", note: "per 3 uur" }
-  - { name: Wakeboard huur, price: "€10", note: "per 1,5 uur" }
-  - { name: Wakeboard huur, price: "€15", note: "per 3 uur" }
+  - { name: "1,5 uur", amount: 18.5, currency: EUR, note: "kids t/m 15 jr" }
+  - { name: "1,5 uur", amount: 21.5, currency: EUR, note: student }
+  - { name: "1,5 uur", amount: 26.5, currency: EUR, note: "volwassene 16+" }
+  - { name: 3 uur, amount: 28.5, currency: EUR, note: "kids t/m 15 jr" }
+  - { name: 3 uur, amount: 31.5, currency: EUR, note: student }
+  - { name: 3 uur, amount: 36.5, currency: EUR, note: "volwassene 16+" }
+  - { name: Hele dag, amount: 38.5, currency: EUR, note: "kids t/m 15 jr" }
+  - { name: Hele dag, amount: 39.5, currency: EUR, note: student }
+  - { name: Hele dag, amount: 49.5, currency: EUR, note: "volwassene 16+" }
+  - { name: Easyride, amount: 28.5, currency: EUR, note: "kids t/m 15 jr" }
+  - { name: Easyride, amount: 34.5, currency: EUR, note: "volwassene 16+" }
+  - { name: 12-Rittenkaart, amount: 185, currency: EUR, note: "kids t/m 15 jr" }
+  - { name: 12-Rittenkaart, amount: 265, currency: EUR, note: "volwassene 16+" }
+  - { name: Wetsuit huur, amount: 5, currency: EUR, minutes: 90, note: "per 1,5 uur" }
+  - { name: Wetsuit huur, amount: 8, currency: EUR, minutes: 180, note: "per 3 uur" }
+  - { name: Wakeboard huur, amount: 10, currency: EUR, minutes: 90, note: "per 1,5 uur" }
+  - { name: Wakeboard huur, amount: 15, currency: EUR, minutes: 180, note: "per 3 uur" }
 
 cables:
   - name: Skibaan

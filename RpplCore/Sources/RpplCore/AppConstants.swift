@@ -7,6 +7,8 @@ public enum AppConstants {
     public static let sessionsDirectoryName = "Sessions"
     /// User-added or edited park YAML files (override bundled parks with the same `id`).
     public static let parksDirectoryName = "Parks"
+    /// Park editor work in progress, one JSON file per draft. Not park YAML: never read as a park.
+    public static let parkDraftsDirectoryName = "ParkDrafts"
     public static let wcSessionFileMetaSessionID = "sessionId"
     public static let wcAckMessageKey = "ackSessionId"
     /// Phone → Watch: import of this session failed; the Watch keeps it and backs off.
@@ -58,6 +60,12 @@ public enum AppConstants {
         let base = appGroupContainerURL
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent(parksDirectoryName, isDirectory: true)
+    }
+
+    public static var localPhoneParkDraftsRoot: URL {
+        let base = appGroupContainerURL
+            ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return base.appendingPathComponent(parkDraftsDirectoryName, isDirectory: true)
     }
 
     public static func sessionsRoot(in baseURL: URL) -> URL {

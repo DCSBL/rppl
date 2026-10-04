@@ -127,15 +127,33 @@ public struct ParkCable: Codable, Equatable, Sendable {
     public var effectiveLengthM: Double? { lengthM ?? computedLengthM }
 }
 
+/// One price, stored as numbers so it can be compared and calculated with (price per hour, cheapest
+/// day pass). The text people see is made from these fields in their own language and number format.
 public struct ParkPrice: Codable, Equatable, Sendable {
     public var name: String
-    /// Free text so currency and per-park formats stay untouched (`"€25"`).
-    public var price: String
+    /// Signed: negative is a discount ("-€3"). nil while a draft price has no amount yet.
+    public var amount: Double?
+    /// ISO 4217 code (`EUR`). nil reads as the currency of the other prices.
+    public var currency: String?
+    /// Opaque, see `ParkPriceUnit` (`person`, `hour`, `day`, `session`). What the amount is charged for.
+    public var per: String?
+    /// Minutes of riding or rental the amount covers (`60` = per hour, `90` = a 1.5 hour block).
+    public var minutes: Int?
     public var note: String?
 
-    public init(name: String, price: String, note: String? = nil) {
+    public init(
+        name: String,
+        amount: Double? = nil,
+        currency: String? = nil,
+        per: String? = nil,
+        minutes: Int? = nil,
+        note: String? = nil
+    ) {
         self.name = name
-        self.price = price
+        self.amount = amount
+        self.currency = currency
+        self.per = per
+        self.minutes = minutes
         self.note = note
     }
 }

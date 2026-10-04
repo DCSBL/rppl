@@ -20,7 +20,7 @@ struct ParkDiffTests {
     @Test func multipleSectionsReportInDeclarationOrder() {
         var edited = park()
         edited.phone = "+31 6 12345678"
-        edited.prices = [ParkPrice(name: "Day", price: "20")]
+        edited.prices = [ParkPrice(name: "Day", amount: 20, currency: "EUR")]
         edited.name = "New name"
         #expect(ParkDiff.changedSections(from: park(), to: edited) == [.basics, .contact, .prices])
     }

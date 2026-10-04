@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-09-25
     description: refine main cable trace and add short cable trace (in-app edit)
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
 
 author: Rppl
 name: Cable Park Down Under
@@ -89,14 +91,18 @@ opening:
     - { id: "20:00", start: "20:00", end: "21:00" }
 
 prices:
-  - { name: 1 hour, price: "€ 25", note: "From 15 years. Life vest, helmet and instruction included" }
-  - { name: 1 hour, price: "€ 20", note: "Up to 14 years. Life vest, helmet and instruction included" }
-  - { name: 2 hours, price: "€ 35", note: From 15 years }
-  - { name: 2 hours, price: "€ 30", note: Up to 14 years }
-  - { name: Day, price: "€ 55", note: From 15 years }
-  - { name: Day, price: "€ 47,50", note: Up to 14 years }
-  - { name: Wetsuit rental, price: "€ 5 / € 7,50 / € 10", note: 1 hour / 2 hours / day }
-  - { name: Water ski rental, price: "€ 5 / € 7,50 / € 10", note: 1 hour / 2 hours / day }
+  - { name: 1 hour, amount: 25, currency: EUR, note: "From 15 years. Life vest, helmet and instruction included" }
+  - { name: 1 hour, amount: 20, currency: EUR, note: "Up to 14 years. Life vest, helmet and instruction included" }
+  - { name: 2 hours, amount: 35, currency: EUR, note: From 15 years }
+  - { name: 2 hours, amount: 30, currency: EUR, note: Up to 14 years }
+  - { name: Day, amount: 55, currency: EUR, note: From 15 years }
+  - { name: Day, amount: 47.5, currency: EUR, note: Up to 14 years }
+  - { name: Wetsuit rental, amount: 5, currency: EUR, minutes: 60, note: 1 hour }
+  - { name: Wetsuit rental, amount: 7.5, currency: EUR, minutes: 120, note: 2 hours }
+  - { name: Wetsuit rental, amount: 10, currency: EUR, per: day, note: day }
+  - { name: Water ski rental, amount: 5, currency: EUR, minutes: 60, note: 1 hour }
+  - { name: Water ski rental, amount: 7.5, currency: EUR, minutes: 120, note: 2 hours }
+  - { name: Water ski rental, amount: 10, currency: EUR, per: day, note: day }
 
 facilities:
   - Changing rooms
