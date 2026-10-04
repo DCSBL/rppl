@@ -174,7 +174,7 @@ MVP detectors: `RideEnterDetector`, `RideExitDetector`, `GpsGapDetector`, `Unsur
   health-000.jsonl
 ```
 
-`SessionTransferPackage` carries `detections` (legacy `assumptions` → detections; `labels` discarded).
+`SessionTransferPackage` carries `detections`, the raw streams (motion as framed zlib) and the derived view when present. `SessionMigrations` (empty at schema v1) is where a future schema bump adds its step; `SessionFileStore.migrateIfNeeded` runs it when a session is opened.
 
 ## Tests
 

@@ -12,9 +12,7 @@ struct SessionPruneTests {
         "health-000.jsonl",
         "water-000.jsonl",
         "battery-000.jsonl",
-        "motion-000.jsonl.zlib", "motion-001.jsonl.zlib",
-        "motion-000.jsonl",
-        "assumptions.jsonl", "labels.jsonl"
+        "motion-000.jsonl.zlib", "motion-001.jsonl.zlib"
     ]
 
     private func ackedSession(withDerived: Bool = true) throws -> TempSession {
@@ -43,7 +41,10 @@ struct SessionPruneTests {
         #expect(session.store.hasRawStreams(sessionId: session.sessionId), "\(name) not treated as raw")
     }
 
-    @Test(arguments: ["manifest.json", "notes.txt", "photo.jpg", "location.jsonl", "motion-000.zlib", "derived"])
+    @Test(arguments: [
+        "manifest.json", "notes.txt", "photo.jpg", "location.jsonl", "motion-000.zlib", "derived",
+        "motion-000.jsonl", "assumptions.jsonl", "labels.jsonl"
+    ])
     func otherFilesAreNeverRaw(name: String) throws {
         let session = try TempSession.make()
         defer { session.cleanup() }

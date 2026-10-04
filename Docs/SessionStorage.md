@@ -2,14 +2,14 @@
 
 On-disk layout for Watch and iPhone session packages. Streams and HealthKit policy: [DataCollection.md](DataCollection.md). Core IO: [../RpplCore/DESIGN.md](../RpplCore/DESIGN.md).
 
-## Current layout (schema v7+)
+## Layout (schema v1)
 
 ```text
 <root>/<YYYY-MM-DD HH-mm - City>/   # display name; identity is manifest.sessionId
   manifest.json               # canonical sessionId (UUID)
   detections.jsonl
   location-000.jsonl
-  motion-000.jsonl.zlib   # or legacy motion-000.jsonl
+  motion-000.jsonl.zlib
   health-000.jsonl
   water-000.jsonl         # optional Ultra
   battery-000.jsonl       # optional Watch battery level + state
@@ -23,9 +23,12 @@ On-disk layout for Watch and iPhone session packages. Streams and HealthKit poli
 - Same-minute collisions (rare): `… (2)`, `… (3)`, …
 - Identity is always `manifest.sessionId`. Discovery scans for `manifest.json`; folder name is display-only.
 - Manual renames in Files are preserved (store will not overwrite a user-renamed folder).
-- Legacy bare-UUID folders (and short-lived date-only names) migrate to the timed human name on open / list.
 
-Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages without `derived/` rebuild on open.
+A missing or stale `derived/view.json` is rebuilt from the raw streams when it is ensured.
+
+### Schema and migrations
+
+`manifest.schemaVersion` is **1**: the format was reset once and nothing older is supported. A future breaking change bumps `SessionSchema.currentVersion` and appends a step to `SessionMigrations`; `SessionFileStore.migrateIfNeeded` runs the pending steps (in version order) when a session is opened and stamps the new version.
 
 **Roots**
 
@@ -35,7 +38,7 @@ Legacy: `assumptions.jsonl` / `labels.jsonl` (migrate or ignore). Older packages
 | Phone (iCloud Drive **on**, default) | Ubiquity container `iCloud.nl.dcsbl.rppl` → `Documents/Sessions` (Apple file sync) |
 | Phone (iCloud Drive **off** / unavailable) | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
-Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
+Same folder shape after WC import. The import builds the package in tmp and swaps it in at the end, so a failure leaves an existing phone copy untouched. Damaged or over-limit motion frames are dropped (`motionStoppedReason` `import_limit`) and never fail the import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
 
 ### Phone iCloud Drive
 
@@ -106,11 +109,11 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
 | Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (heatmap set paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
-| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = last event time, `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
+| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = the last recorded sample (detections, GPS, health, water or battery, so the final set is kept), `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
-**Forward compat:** `SessionStats` canonical keys are `setCount` and `sets`. Decode also accepts legacy `rideCount` / `rides`. Encode writes `setCount` / `sets` only. `SetSegmentStats` canonical key is `lapCount`. Decode also accepts intermediate slang mis-key `setCount` on segments (circuit crossings briefly mislabeled). Encode writes `lapCount` only. Stale `analyzerVersion` still triggers rebuild; unreadable sidecars are treated as missing so `ensureDerivedView` regenerates from raw.
+**Keys:** `SessionStats` uses `setCount` and `sets`; `SetSegmentStats` uses `lapCount`. A stale `analyzerVersion` triggers a rebuild; an unreadable sidecar is treated as missing so `ensureDerivedView` regenerates it from raw.
 
 ## Out of scope
 

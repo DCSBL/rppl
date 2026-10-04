@@ -31,10 +31,17 @@ public enum AppConstants {
         )
     }
 
+    /// App Group container; Apple platforms only (no App Groups on Linux).
+    private static var appGroupContainerURL: URL? {
+        #if canImport(Darwin)
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+        #else
+        nil
+        #endif
+    }
+
     public static var appGroupSessionsRoot: URL? {
-        FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
-            .map { sessionsRoot(in: $0) }
+        appGroupContainerURL.map { sessionsRoot(in: $0) }
     }
 
     /// App Group when available, else local Documents — phone fallback when Drive sync is off.
@@ -48,7 +55,7 @@ public enum AppConstants {
     }
 
     public static var localPhoneParksRoot: URL {
-        let base = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+        let base = appGroupContainerURL
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent(parksDirectoryName, isDirectory: true)
     }

@@ -48,7 +48,7 @@ When generating, translating, or rewriting product copy about wakeboarding / cab
 A **set** is one detected riding segment within a park-day session: from confident `riding` enter until exit to `inactive` (or session end). Stats/UI label these **Sets** (`setCount`, `sets[]` in derived JSON).
 
 - **Cable-park slang:** riders also say “set” for an allocated dock turn; in Rppl that turn may include multiple detected sets and multiple laps. Do not conflate allocated turn with `setCount`.
-- **Legacy JSON:** decode `rideCount` / `rides` as aliases; encode `setCount` / `sets` only.
+- **JSON keys:** `setCount` / `sets`. Old key names are not accepted (schema v1 reset; no compatibility code).
 
 #### 2. A lap
 
@@ -59,7 +59,7 @@ A **lap** is a distance measurement: one complete circuit around a full-size cab
 
 Crossing counter (`LapSetTracker` / `lapCount`): leave start, path, re-enter → +1. UI labels **Laps**.
 
-Never call a circuit crossing a “set”. Never call a detected riding segment a “lap”. Derived JSON key is `lapCount` (accept legacy segment mis-key `setCount` from a short-lived rename; encode `lapCount` only).
+Never call a circuit crossing a “set”. Never call a detected riding segment a “lap”. Derived JSON key is `lapCount`.
 
 **Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* as stand-ins for ride/lap/set jargon, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"lap(s)"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
 
@@ -102,7 +102,7 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 
 - **Do run:** `pre-commit run` (commit-stage hooks) and `make lint` (SwiftLint via `tools/bin/swiftlint`).
 - **Do not expect:** `xcodebuild`, Simulator, HealthKit, Watch Connectivity, or a green `make check` / `make gate`.
-- **`cd RpplCore && swift test`:** source of truth on macOS / Xcode Cloud. On Linux it currently fails (`import Compression` — Apple framework). Do not treat that failure as a Cloud Agent environment bug; keep Core pure where possible, but do not invent Linux shims unless explicitly asked.
+- **`cd RpplCore && swift test`:** runs on Linux in CI ([`core-tests.yml`](.github/workflows/core-tests.yml), `swift:6.2-noble` container) and on macOS locally / Xcode Cloud. A Cloud Agent VM usually has no Swift toolchain; if it does, run it as a non-root user. Keep Core buildable on Linux: put unavoidable Apple-only APIs behind `#if canImport(...)` as listed in [Docs/DevWorkflow.md](Docs/DevWorkflow.md#core-tests-linux). Do not add Linux shims beyond that without asking.
 - Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
 
 ### PR workflow for code-change requests

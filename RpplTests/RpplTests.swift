@@ -6,9 +6,8 @@ struct RpplTests {
         #expect(DetectionCodes.riding == "riding")
         #expect(DetectionCodes.inactive == "inactive")
         #expect(DetectionCodes.unsure == "unsure")
-        #expect(DetectionCodes.normalize("paused") == DetectionCodes.inactive)
         #expect(DetectionCodes.isConfident(DetectionCodes.riding))
-        #expect(DetectionCodes.isConfident("paused"))
+        #expect(DetectionCodes.isConfident(DetectionCodes.inactive))
         #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
     }
 }

@@ -22,9 +22,17 @@ public enum ParkCatalog {
     }
 
     public static func loadBundled() -> [Park] {
-        let urls = (Bundle.module.urls(forResourcesWithExtension: "yaml", subdirectory: "Parks") ?? [])
-            + (Bundle.module.urls(forResourcesWithExtension: "yaml", subdirectory: nil) ?? [])
+        let urls = bundledYAMLURLs(subdirectory: "Parks") + bundledYAMLURLs(subdirectory: nil)
         return loadFiles(urls)
+    }
+
+    private static func bundledYAMLURLs(subdirectory: String?) -> [URL] {
+        let urls = Bundle.module.urls(forResourcesWithExtension: "yaml", subdirectory: subdirectory) ?? []
+        #if canImport(Darwin)
+        return urls
+        #else
+        return urls.map { $0 as URL } // corelibs Foundation returns [NSURL]
+        #endif
     }
 
     public static func loadDirectory(_ directory: URL) -> [Park] {

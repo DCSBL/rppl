@@ -81,7 +81,7 @@ public struct LiveSetTracker: Sendable {
         events: [DetectionEvent]
     ) {
         for event in events {
-            let code = DetectionCodes.normalize(event.code)
+            let code = event.code
             if code == DetectionCodes.unsure {
                 if unsureStartedAt == nil {
                     unsureStartedAt = event.timestamp
@@ -114,10 +114,10 @@ public struct LiveSetTracker: Sendable {
             trackedLastConfident = code
         }
 
-        if events.isEmpty || events.allSatisfy({ DetectionCodes.normalize($0.code) == DetectionCodes.unsure }) {
-            trackedCode = DetectionCodes.normalize(currentCode)
+        if events.isEmpty || events.allSatisfy({ $0.code == DetectionCodes.unsure }) {
+            trackedCode = currentCode
         }
-        trackedLastConfident = DetectionCodes.normalize(lastConfident)
+        trackedLastConfident = lastConfident
         isSetOngoing = Self.attributesAsRiding(code: currentCode, lastConfident: lastConfident)
         lapTracker.updateRiding(isSetOngoing)
         if trackedCode != DetectionCodes.riding {
@@ -241,8 +241,6 @@ public struct LiveSetTracker: Sendable {
     }
 
     private static func attributesAsRiding(code: String, lastConfident: String) -> Bool {
-        let code = DetectionCodes.normalize(code)
-        let lastConfident = DetectionCodes.normalize(lastConfident)
         if code == DetectionCodes.riding { return true }
         if code == DetectionCodes.unsure { return lastConfident == DetectionCodes.riding }
         return false

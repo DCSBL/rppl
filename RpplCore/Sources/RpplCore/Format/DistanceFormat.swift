@@ -1,5 +1,8 @@
 import Foundation
 
+// Apple-only: `FormatStyle` / `MeasurementFormatter` are unavailable in Linux Foundation.
+#if canImport(Darwin)
+
 /// Locale-aware distance / speed display for Watch, Phone, and tests.
 ///
 /// Inputs are always ISO (meters, km/h). The device measurement system (iOS Region /
@@ -74,3 +77,4 @@ public enum DistanceFormat {
         )
     }
 }
+#endif

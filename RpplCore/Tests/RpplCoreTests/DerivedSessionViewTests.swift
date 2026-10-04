@@ -4,7 +4,7 @@ import Testing
 
 @Suite("DerivedSessionView")
 struct DerivedSessionViewTests {
-    @Test func ensureCreatesSidecarFromLegacyFolder() throws {
+    @Test func ensureCreatesSidecarWhenMissing() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("DerivedEnsure-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -12,7 +12,6 @@ struct DerivedSessionViewTests {
         let store = SessionFileStore(rootURL: root)
         let start = Date(timeIntervalSince1970: 1_700_000_000)
         let manifest = SessionManifest(
-            schemaVersion: 4,
             testerId: "t",
             appVersion: "1.0",
             buildNumber: "1",
@@ -186,159 +185,6 @@ struct DerivedSessionViewTests {
         let data = try encoder.encode(view)
         let decoded = try decoder.decode(DerivedSessionView.self, from: data)
         #expect(decoded == view)
-    }
-
-    @Test func setSegmentStatsForwardMigratesSetCountToLapCount() throws {
-        let json = """
-        {
-          "index": 0,
-          "startedAt": "2024-01-01T00:00:00Z",
-          "endedAt": "2024-01-01T00:10:00Z",
-          "duration": 600,
-          "distanceMeters": 1200,
-          "setCount": 3,
-          "highlights": []
-        }
-        """
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let set = try decoder.decode(SetSegmentStats.self, from: Data(json.utf8))
-        #expect(set.lapCount == 3)
-
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let encoded = try encoder.encode(set)
-        let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
-        #expect(object?["lapCount"] as? Int == 3)
-        #expect(object?["setCount"] == nil)
-    }
-
-    @Test func sessionStatsForwardMigratesRideCountAndRides() throws {
-        let json = """
-        {
-          "startedAt": "2024-01-01T00:00:00Z",
-          "endedAt": "2024-01-01T00:30:00Z",
-          "totalDuration": 1800,
-          "totalDistanceMeters": 500,
-          "rideCount": 2,
-          "ridingDuration": 900,
-          "inactiveDuration": 900,
-          "ridingInactiveRatio": 0.5,
-          "waterTemperatureAvailable": false,
-          "rides": [
-            {
-              "index": 1,
-              "startedAt": "2024-01-01T00:05:00Z",
-              "endedAt": "2024-01-01T00:10:00Z",
-              "duration": 300,
-              "distanceMeters": 250,
-              "lapCount": 1,
-              "highlights": []
-            }
-          ]
-        }
-        """
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let stats = try decoder.decode(SessionStats.self, from: Data(json.utf8))
-        #expect(stats.setCount == 2)
-        #expect(stats.sets.count == 1)
-        #expect(stats.sets[0].lapCount == 1)
-
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let encoded = try encoder.encode(stats)
-        let object = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
-        #expect(object?["setCount"] as? Int == 2)
-        #expect(object?["rideCount"] == nil)
-        #expect(object?["rides"] == nil)
-        #expect((object?["sets"] as? [[String: Any]])?.first?["lapCount"] as? Int == 1)
-    }
-
-    @Test func ensureRebuildsLegacySetCountSidecar() throws {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("DerivedSetMigrate-\(UUID().uuidString)", isDirectory: true)
-        defer { try? FileManager.default.removeItem(at: root) }
-
-        let store = SessionFileStore(rootURL: root)
-        let start = Date(timeIntervalSince1970: 1_700_000_200)
-        let manifest = SessionManifest(
-            testerId: "t",
-            appVersion: "1.0",
-            buildNumber: "1",
-            watchModel: "Watch7,1",
-            systemVersion: "26.0",
-            startedAt: start,
-            endedAt: start.addingTimeInterval(120)
-        )
-        _ = try store.createSession(manifest: manifest)
-        try store.appendDetection(
-            DetectionEvent(
-                code: DetectionCodes.inactive,
-                timestamp: start,
-                reason: "session_start",
-                detectorId: "session_start"
-            ),
-            sessionId: manifest.sessionId
-        )
-
-        // Intermediate slang sidecar keyed `setCount` (mis-rename of circuit crossings).
-        let legacyJSON = """
-        {
-          "analyzerVersion": 2,
-          "stats": {
-            "startedAt": "2023-11-14T22:16:40Z",
-            "endedAt": "2023-11-14T22:18:40Z",
-            "totalDuration": 120,
-            "totalDistanceMeters": 0,
-            "rideCount": 1,
-            "ridingDuration": 60,
-            "inactiveDuration": 60,
-            "ridingInactiveRatio": 0.5,
-            "waterTemperatureAvailable": false,
-            "rides": [
-              {
-                "index": 0,
-                "startedAt": "2023-11-14T22:16:50Z",
-                "endedAt": "2023-11-14T22:17:50Z",
-                "duration": 60,
-                "distanceMeters": 400,
-                "setCount": 2,
-                "highlights": []
-              }
-            ]
-          },
-          "cityName": "Almere"
-        }
-        """
-        let derivedDir = try store.sessionDirectory(for: manifest.sessionId)
-            .appendingPathComponent("derived", isDirectory: true)
-        try FileManager.default.createDirectory(at: derivedDir, withIntermediateDirectories: true)
-        try Data(legacyJSON.utf8).write(to: try store.derivedViewURL(sessionId: manifest.sessionId))
-
-        let read = try store.readDerivedView(sessionId: manifest.sessionId)
-        #expect(read?.stats.sets.first?.lapCount == 2)
-        #expect(read?.cityName == "Almere")
-        #expect(read?.isCurrentAnalyzer == false)
-
-        let ensured = try store.ensureDerivedView(sessionId: manifest.sessionId)
-        #expect(ensured.analyzerVersion == SessionAnalyzer.version)
-        #expect(ensured.cityName == "Almere")
-        let rewritten = try store.readDerivedView(sessionId: manifest.sessionId)
-        let data = try Data(contentsOf: try store.derivedViewURL(sessionId: manifest.sessionId))
-        let text = String(data: data, encoding: .utf8) ?? ""
-        // Rebuild from raw (inactive-only) may drop sets; never re-emit segment mis-key `setCount` for laps.
-        #expect(!text.contains("\"setCount\": 2"))
-        #expect(!text.contains("rideCount"))
-        #expect(!text.contains("\"rides\""))
-        if let set = rewritten?.stats.sets.first {
-            #expect(text.contains("lapCount"))
-            #expect(set.lapCount >= 0)
-        }
-        if let rewritten {
-            #expect(rewritten.stats.setCount >= 0)
-        }
-        #expect(rewritten?.isCurrentAnalyzer == true)
     }
 
     @Test func unreadableDerivedViewTreatedAsMissing() throws {
