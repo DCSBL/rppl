@@ -19,6 +19,8 @@ final class WatchSessionController: NSObject {
     var sessionStartLongitude: Double?
     /// True while stop teardown / Health save runs — block Start.
     var isStopping = false
+    /// True while a product Pause is flushing, before `isProductPaused` is set.
+    var isPausing = false
     /// True after Stop while the summary is already on screen and the Health save, derived view
     /// and transfer package are still being written in the background.
     var isFinalizing = false
@@ -155,7 +157,8 @@ final class WatchSessionController: NSObject {
     /// True while `handleWorkoutSessionLost` runs, so `.ended` + `.stopped` callbacks act once.
     var isHandlingWorkoutLoss = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
-    var workoutRunningContinuation: CheckedContinuation<Void, Never>?
+    /// Callers waiting for the HK session to reach `.running`, keyed per caller.
+    var workoutRunningWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
     var hkRideDistanceMeters = 0.0
     var hkRideDistanceAnchorMeters = 0.0
     /// Set windows for HealthKit distance samples and interval metadata.
