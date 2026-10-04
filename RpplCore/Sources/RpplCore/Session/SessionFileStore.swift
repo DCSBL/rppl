@@ -713,15 +713,15 @@ public final class SessionFileStore: @unchecked Sendable {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
 
-        // A pruned or acknowledged session must never be re-sent: the phone replaces its full copy
+        // An acknowledged (hence possibly pruned) session must never be re-sent: the phone replaces its full copy
         // with whatever arrives, so an empty package would wipe the raw streams everywhere.
         let manifest = try readManifest(sessionId: sessionId)
         guard manifest.transferState != .acknowledged else {
             throw SessionStoreError.notTransferable("already acknowledged")
         }
-        guard hasRawStreams(sessionId: sessionId) else {
-            throw SessionStoreError.notTransferable("raw streams pruned")
-        }
+        // An un-acked session with no raw streams (stopped before any sample landed) still ships
+        // its manifest: refusing it left "Pending: 1" and an error on every retry. The phone
+        // never replaces a copy that has data with an empty package (`importTransferPackage`).
 
         let zipURL = destinationURL.appendingPathComponent("\(sessionId).json")
         let package = try buildTransferPackage(sessionId: sessionId)
