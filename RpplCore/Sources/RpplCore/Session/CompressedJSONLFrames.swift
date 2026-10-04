@@ -1,4 +1,3 @@
-import Compression
 import Foundation
 
 public enum CompressedJSONLFrameError: Error, Equatable, Sendable {
@@ -142,14 +141,7 @@ public enum CompressedJSONLFrames {
                       let dst = destPtr.bindMemory(to: UInt8.self).baseAddress else {
                     return 0
                 }
-                return compression_encode_buffer(
-                    dst,
-                    dstCapacity,
-                    src,
-                    source.count,
-                    nil,
-                    COMPRESSION_ZLIB
-                )
+                return RawDeflate.encode(dst: dst, dstCapacity: dstCapacity, src: src, srcSize: source.count)
             }
         }
         guard written > 0 else { throw CompressedJSONLFrameError.compressionFailed }
@@ -166,14 +158,7 @@ public enum CompressedJSONLFrames {
                           let dst = destPtr.bindMemory(to: UInt8.self).baseAddress else {
                         return 0
                     }
-                    return compression_decode_buffer(
-                        dst,
-                        capacity,
-                        src,
-                        source.count,
-                        nil,
-                        COMPRESSION_ZLIB
-                    )
+                    return RawDeflate.decode(dst: dst, dstCapacity: capacity, src: src, srcSize: source.count)
                 }
             }
             if written > 0 {
