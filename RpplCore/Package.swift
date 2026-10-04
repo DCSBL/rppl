@@ -16,9 +16,18 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0"),
     ],
     targets: [
+        // Linux only: Apple's Compression framework has no Linux equivalent, so raw DEFLATE
+        // falls back to system zlib (see RawDeflate.swift). Unused on Apple platforms.
+        .systemLibrary(
+            name: "CZlib",
+            providers: [.apt(["zlib1g-dev"])]
+        ),
         .target(
             name: "RpplCore",
-            dependencies: [.product(name: "Yams", package: "Yams")],
+            dependencies: [
+                .product(name: "Yams", package: "Yams"),
+                .target(name: "CZlib", condition: .when(platforms: [.linux])),
+            ],
             resources: [.process("Resources")]
         ),
         .testTarget(

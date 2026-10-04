@@ -85,7 +85,6 @@ export function sliceAnalysisPackage(
 export interface RawTransferPackage {
   manifest: SessionManifest
   detections?: DetectionEvent[]
-  assumptions?: DetectionEvent[]
   locations?: unknown[]
   motion?: unknown[]
   motionFramesZlib?: string
@@ -97,7 +96,7 @@ export interface RawTransferPackage {
 }
 
 function detectionsOf(raw: RawTransferPackage): DetectionEvent[] {
-  return raw.detections ?? raw.assumptions ?? []
+  return raw.detections ?? []
 }
 
 function jsonlRecordsInWindow(jsonl: string, range: TimeRange): unknown[] {

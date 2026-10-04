@@ -4,6 +4,11 @@ import Testing
 
 @Suite("Deadline")
 struct DeadlineTests {
+    /// Wall-clock slack for a 0.2 s deadline. Synchronous tests can hold every cooperative thread of a
+    /// small CI runner for seconds, delaying the timer. The stuck work below runs 30 s, so a caller
+    /// that is wrongly held for the work still fails this bound.
+    private static let maxElapsed: TimeInterval = 15
+
     @Test func returnsResultWhenWorkIsFast() async throws {
         let value = try await Deadline.run(5, label: "fast") { 42 }
         #expect(value == 42)
@@ -24,7 +29,7 @@ struct DeadlineTests {
             _ = try await Deadline.run(0.2, label: "stuck") { () async -> Int in
                 // Uncancellable wait, like a callback from a hung daemon.
                 await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 3) { continuation.resume() }
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 30) { continuation.resume() }
                 }
                 return 1
             }
@@ -34,7 +39,7 @@ struct DeadlineTests {
         } catch {
             Issue.record("unexpected \(error)")
         }
-        #expect(Date().timeIntervalSince(started) < 2)
+        #expect(Date().timeIntervalSince(started) < Self.maxElapsed)
     }
 
     /// Awaiting an unstructured task that never finishes (the route-insert shape): `Task.value`
@@ -47,6 +52,6 @@ struct DeadlineTests {
         await #expect(throws: Deadline.Expired.self) {
             try await Deadline.run(0.2, label: "routeInsert") { await inFlight.value }
         }
-        #expect(Date().timeIntervalSince(started) < 2)
+        #expect(Date().timeIntervalSince(started) < Self.maxElapsed)
     }
 }

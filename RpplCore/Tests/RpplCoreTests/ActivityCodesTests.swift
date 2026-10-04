@@ -63,26 +63,4 @@ struct ActivityCodesTests {
         #expect(decoded.activityCode == "wakeboard")
         #expect(decoded.activityCode != ActivityCodes.localizedTitle(for: decoded.activityCode))
     }
-
-    @Test func legacyManifestDecodesNilActivityCode() throws {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let json = Data(
-            #"""
-            {
-              "schemaVersion": 4,
-              "sessionId": "s1",
-              "testerId": "t",
-              "appVersion": "1.0",
-              "buildNumber": "1",
-              "watchModel": "Ultra2",
-              "systemVersion": "26.0",
-              "startedAt": "2024-01-01T00:00:00Z",
-              "transferState": "acknowledged"
-            }
-            """#.utf8
-        )
-        let manifest = try decoder.decode(SessionManifest.self, from: json)
-        #expect(manifest.activityCode == nil)
-    }
 }

@@ -44,8 +44,6 @@ public struct SessionMapTrackData: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case start
         case heatmapTracks
-        case averagedTrack
-        case averagedSpeedKmh
     }
 
     public init(from decoder: Decoder) throws {

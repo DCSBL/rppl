@@ -1,5 +1,8 @@
 import Foundation
 
+// Apple-only: `FormatStyle` / `MeasurementFormatter` are unavailable in Linux Foundation.
+#if canImport(Darwin)
+
 /// Locale-aware energy display (HealthKit kcal mirrored into session stats).
 public enum EnergyFormat {
     public static func kilocalories(_ value: Double, locale: Locale = .current) -> String {
@@ -14,3 +17,4 @@ public enum EnergyFormat {
         )
     }
 }
+#endif

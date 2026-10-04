@@ -55,12 +55,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         endedAt = try container.decode(Date.self, forKey: .endedAt)
         duration = try container.decode(TimeInterval.self, forKey: .duration)
         distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
-        // Canonical `lapCount`. Accept short-lived slang mis-rename `setCount` on segments (forward only).
-        if let laps = try container.decodeIfPresent(Int.self, forKey: .lapCount) {
-            lapCount = laps
-        } else {
-            lapCount = try container.decodeIfPresent(Int.self, forKey: .legacyLapSetCount) ?? 0
-        }
+        lapCount = try container.decodeIfPresent(Int.self, forKey: .lapCount) ?? 0
         sustainedSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .sustainedSpeedKmh)
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
         peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
@@ -86,8 +81,6 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
     private enum CodingKeys: String, CodingKey {
         case index, startedAt, endedAt, duration, distanceMeters
         case lapCount
-        /// Intermediate slang mis-rename (circuit crossings briefly called sets).
-        case legacyLapSetCount = "setCount"
         case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, cableSpeedKmh, highlights
     }
 }
@@ -183,19 +176,11 @@ public struct SessionStats: Codable, Equatable, Sendable {
         totalDistanceMeters = try container.decode(Double.self, forKey: .totalDistanceMeters)
         activeEnergyKilocalories = try container.decodeIfPresent(Double.self, forKey: .activeEnergyKilocalories)
         totalEnergyKilocalories = try container.decodeIfPresent(Double.self, forKey: .totalEnergyKilocalories)
-        if let count = try container.decodeIfPresent(Int.self, forKey: .setCount) {
-            setCount = count
-        } else {
-            setCount = try container.decodeIfPresent(Int.self, forKey: .legacyRideCount) ?? 0
-        }
+        setCount = try container.decodeIfPresent(Int.self, forKey: .setCount) ?? 0
         ridingDuration = try container.decode(TimeInterval.self, forKey: .ridingDuration)
         inactiveDuration = try container.decode(TimeInterval.self, forKey: .inactiveDuration)
         ridingInactiveRatio = try container.decode(Double.self, forKey: .ridingInactiveRatio)
-        if let decodedSets = try container.decodeIfPresent([SetSegmentStats].self, forKey: .sets) {
-            sets = decodedSets
-        } else {
-            sets = try container.decodeIfPresent([SetSegmentStats].self, forKey: .legacyRides) ?? []
-        }
+        sets = try container.decodeIfPresent([SetSegmentStats].self, forKey: .sets) ?? []
         averageWaterTemperatureCelsius = try container.decodeIfPresent(
             Double.self,
             forKey: .averageWaterTemperatureCelsius
@@ -226,8 +211,6 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case startedAt, endedAt, totalDuration, totalDistanceMeters
         case activeEnergyKilocalories, totalEnergyKilocalories
         case setCount, sets
-        case legacyRideCount = "rideCount"
-        case legacyRides = "rides"
         case ridingDuration, inactiveDuration, ridingInactiveRatio
         case averageWaterTemperatureCelsius, waterTemperatureAvailable, cableSpeedKmh
     }
