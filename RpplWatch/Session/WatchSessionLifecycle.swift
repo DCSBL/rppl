@@ -335,6 +335,7 @@ extension WatchSessionController {
         }
         ActivityCodes.rememberLastUsed(code)
 
+        await awaitLaunchRecovery()
         let workoutStarted = await startWorkoutIfAuthorized()
         if workoutStarted {
             recordingMode = "workout"
@@ -738,12 +739,62 @@ extension WatchSessionController {
 extension WatchSessionController {
     /// Finalizes sessions left in `recording` by a crash/kill so they show up and transfer.
     /// Never resumes or prompts; failures are logged and skipped (never blocks launch).
+    /// Waits for the launch recovery first: the crashed HK session must end at the orphan's last
+    /// sample, which needs the orphan still open, and a Start must not race it.
     func recoverOrphanedSessions() {
-        guard !isStarting else { return }
+        Task { @MainActor in
+            await launchRecoveryTask?.value
+            guard !isStarting else { return }
+            let recovered = await recoverOrphanedRecordingsOffMain()
+            guard !recovered.isEmpty else { return }
+            WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s)")
+        }
+    }
+
+    /// Runs once per process, from `RpplWatchApp.init`: closes the crashed Health workout at the
+    /// last recorded sample, finalizes the orphaned Rppl session, then tells the rider.
+    func startLaunchRecovery() {
+        guard launchRecoveryTask == nil else { return }
+        launchRecoveryTask = Task { @MainActor in
+            let orphanLastSample = await orphanedRecordingsLastSample()
+            let healthEnd = await recoverDanglingWorkoutSession(orphanLastSample: orphanLastSample)
+            let recovered = await recoverOrphanedRecordingsOffMain()
+            if !recovered.isEmpty {
+                WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s) at launch")
+            }
+            if healthEnd != nil || !recovered.isEmpty {
+                await WatchRecoveryNotifier.notifyRecordingStopped(
+                    at: orphanLastSample ?? healthEnd ?? Date()
+                )
+            }
+        }
+    }
+
+    /// A Start waits (bounded) for the launch recovery: only one HKWorkoutSession can run, and a
+    /// new one created while the dangling one is still active fails.
+    func awaitLaunchRecovery() async {
+        guard let task = launchRecoveryTask else { return }
+        _ = try? await Deadline.run(Self.launchRecoveryTimeout, label: "launch recovery") { await task.value }
+    }
+
+    static let launchRecoveryTimeout: TimeInterval = 10
+
+    /// Latest recorded sample across the orphaned recordings; nil when there are none.
+    private func orphanedRecordingsLastSample() async -> Date? {
         let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         let activeId = isRunning ? manifest?.sessionId : nil
-        let recovered = fileStore.recoverOrphanedRecordings(activeSessionId: activeId)
-        guard !recovered.isEmpty else { return }
-        WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s)")
+        let value = try? await StoreIO.runOffMain { () -> Date? in
+            let manifests = (try? fileStore.listReadableManifests()) ?? []
+            return SessionRecovery.orphanedRecordingIds(manifests: manifests, activeSessionId: activeId)
+                .compactMap { fileStore.lastRecordedTimestamp(sessionId: $0) }
+                .max()
+        }
+        return value ?? nil
+    }
+
+    private func recoverOrphanedRecordingsOffMain() async -> [String] {
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        let activeId = isRunning ? manifest?.sessionId : nil
+        return (try? await StoreIO.runOffMain { fileStore.recoverOrphanedRecordings(activeSessionId: activeId) }) ?? []
     }
 }

@@ -1273,6 +1273,22 @@
         }
       }
     },
+    "Recording stopped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording stopped"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnemen gestopt"
+          }
+        }
+      }
+    },
     "Request permissions" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1417,6 +1433,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl session"
+          }
+        }
+      }
+    },
+    "Rppl stopped after a problem. Everything up to %@ is saved. Start a new session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl stopped after a problem. Everything up to %@ is saved. Start a new session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl is gestopt na een probleem. Alles tot %@ is opgeslagen. Start een nieuwe session."
           }
         }
       }
