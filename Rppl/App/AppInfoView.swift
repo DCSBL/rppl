@@ -110,6 +110,10 @@ struct AppInfoView: View {
                 }
 
                 Section {
+                    betaRow
+                }
+
+                Section {
                     NavigationLink {
                         LegalTermsPrivacyView()
                     } label: {
@@ -162,6 +166,20 @@ struct AppInfoView: View {
                 Text(
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
+            }
+        }
+    }
+
+    /// Testers already in the beta get a share sheet to invite a friend; everyone else opens the join page.
+    @ViewBuilder
+    private var betaRow: some View {
+        if AppReleaseChannel.isTestFlight {
+            ShareLink(item: AppConstants.betaJoinURL) {
+                Label("Invite someone else to the beta", systemImage: "person.badge.plus")
+            }
+        } else {
+            Link(destination: AppConstants.betaJoinURL) {
+                Label("Join the beta", systemImage: "paperplane")
             }
         }
     }
