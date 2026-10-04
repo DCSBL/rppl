@@ -9,7 +9,8 @@ Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, 
   2. Require the tagged commit to be on main (GitHub compare API, skipped when unreachable).
   3. Set every MARKETING_VERSION in Rppl.xcodeproj (iPhone and Watch must match).
   4. Write the GitHub release body as TestFlight/WhatToTest.en-US.txt (plain text, 4000 chars).
-  5. Stamp RpplBuildDate in Rppl/Info.plist.
+  5. Stamp RpplBuildDate, RpplReleaseTag (tag without the v) and RpplGitCommit (short SHA of
+     CI_COMMIT, else git HEAD) in Rppl/Info.plist. The About screen shows them.
 The build number is left alone: Xcode Cloud assigns it (CI_BUILD_NUMBER).
 
 --check-only does steps 1-2 plus a non-empty release body check, writes nothing and
@@ -42,7 +43,8 @@ NOTES_LOCALE = "en-US"
 NOTES_LIMIT = 4000
 TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
 MARKETING_VERSION_RE = re.compile(r"MARKETING_VERSION = [^;]+;")
-BUILD_DATE_RE = re.compile(r"(<key>RpplBuildDate</key>\s*<string>)[^<]*(</string>)")
+SHA_RE = re.compile(r"[0-9a-f]{7,64}")
+SHORT_SHA_LENGTH = 7
 PBXPROJ = Path("Rppl.xcodeproj/project.pbxproj")
 APP_INFO_PLIST = Path("Rppl/Info.plist")
 FALLBACK_COMMITS = 10
@@ -78,9 +80,35 @@ def bump_marketing_version(pbxproj_text: str, version: str) -> Tuple[str, int]:
     return new_text, count
 
 
-def stamp_build_date(plist_text: str, date: str) -> Tuple[str, bool]:
-    new_text, count = BUILD_DATE_RE.subn(r"\g<1>%s\g<2>" % date, plist_text)
+def stamp_plist_string(plist_text: str, key: str, value: str) -> Tuple[str, bool]:
+    """Set the <string> after <key>key</key>. Values are tag, SHA or date text: no XML escaping needed."""
+    pattern = re.compile(r"(<key>%s</key>\s*<string>)[^<]*(</string>)" % re.escape(key))
+    new_text, count = pattern.subn(lambda match: match.group(1) + value + match.group(2), plist_text)
     return new_text, count > 0
+
+
+def stamp_build_date(plist_text: str, date: str) -> Tuple[str, bool]:
+    return stamp_plist_string(plist_text, "RpplBuildDate", date)
+
+
+def release_label(tag: str) -> str:
+    """The tag as shown in the app: without the leading v."""
+    return tag[1:] if tag.startswith("v") else tag
+
+
+def short_commit(root: Path) -> Optional[str]:
+    """Short SHA of the commit being built: Xcode Cloud's CI_COMMIT, else git HEAD. None if unknown."""
+    sha = (os.environ.get("CI_COMMIT") or "").strip().lower()
+    if not sha:
+        try:
+            head = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=str(root), check=False, capture_output=True, text=True, timeout=30,
+            )
+            sha = head.stdout.strip().lower() if head.returncode == 0 else ""
+        except (OSError, subprocess.SubprocessError):
+            sha = ""
+    return sha[:SHORT_SHA_LENGTH] if SHA_RE.fullmatch(sha) else None
 
 
 def markdown_to_plain(markdown: str) -> str:
@@ -231,12 +259,24 @@ def run(args: argparse.Namespace) -> None:
     pbxproj.write_text(text, encoding="utf-8")
     print("Set MARKETING_VERSION = %s in %d build configurations." % (version, count))
 
+    stamps = {
+        "RpplBuildDate": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
+        "RpplReleaseTag": release_label(tag),
+    }
+    commit = short_commit(root)
+    if commit:
+        stamps["RpplGitCommit"] = commit
+    else:
+        annotate("warning", "Could not determine the commit SHA; About will not show it.")
     plist = root / APP_INFO_PLIST
-    date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
-    text, stamped = stamp_build_date(plist.read_text(encoding="utf-8"), date)
-    if stamped:
-        plist.write_text(text, encoding="utf-8")
-        print("Set RpplBuildDate = %s." % date)
+    text = plist.read_text(encoding="utf-8")
+    for key, value in stamps.items():
+        text, stamped = stamp_plist_string(text, key, value)
+        if stamped:
+            print("Set %s = %s." % (key, value))
+        else:
+            annotate("warning", "%s not found in Info.plist; not stamped." % key)
+    plist.write_text(text, encoding="utf-8")
 
     notes_path = root / "TestFlight" / ("WhatToTest.%s.txt" % NOTES_LOCALE)
     notes_path.parent.mkdir(parents=True, exist_ok=True)

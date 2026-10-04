@@ -37,6 +37,20 @@ Tag rules (the build fails within seconds on anything else):
 
 Build numbers are not set by the repo. Xcode Cloud assigns an integer per app and increments it for every build.
 
+## Versions, betas and Beta App Review
+
+TestFlight groups builds by version, and Beta App Review looks at the **first external build of each version**. Later builds of the same version usually skip review (Apple can still review a change it considers significant). So keep one version for all betas and make each build a new tag:
+
+| Tag | Version | Use |
+|-----|---------|-----|
+| `2026.10.1-beta.1` | `2026.10.1` | First build of the version. Goes to `internal` at once. The first one added to **Public beta** waits for Beta App Review. |
+| `2026.10.1-beta.2`, `-beta.3`, … | `2026.10.1` | More builds of the same version: new build number, normally no new review. |
+| `2026.10.1` | `2026.10.1` | The build you promote to the App Store. |
+
+Only bump the version when you start the next release cycle; a version that is on the App Store is closed for new builds. Do not use four-part tags such as `2026.10.1.2`: App Store versions have at most three integers, and the build number is Xcode Cloud's counter, not part of the tag.
+
+The About screen in the app shows the release tag with the build number (`2026.10.1-beta.2 (312)`) and the short commit SHA with the build date. TestFlight itself shows only version and build number. A local Xcode build shows the marketing version and no SHA. There is no link to GitHub because the repo is private.
+
 ## One-time setup
 
 About 15 minutes. The workflow lives in App Store Connect / Xcode, not in this repo.
@@ -84,7 +98,7 @@ Xcode Cloud never submits anything beyond internal TestFlight and this repo has 
 2. Checks the tagged commit is on `main` (GitHub compare API). Ahead or diverged fails the build.
 3. Sets every `MARKETING_VERSION` in `Rppl.xcodeproj` so iPhone and Watch match. App Store validation rejects a Watch app whose version differs from its companion.
 4. Fetches the release description (retrying for about a minute if the release is not visible yet), converts markdown to plain text, caps it at 4000 characters and writes `TestFlight/WhatToTest.en-US.txt`, which Xcode Cloud attaches to the TestFlight build.
-5. Stamps `RpplBuildDate` in `Rppl/Info.plist` (shown in About).
+5. Stamps `RpplBuildDate`, `RpplReleaseTag` (the tag without a leading `v`) and `RpplGitCommit` (short SHA from `CI_COMMIT`, else `git rev-parse HEAD`) in `Rppl/Info.plist`. The About screen shows them.
 
 After that the Post-Clone step runs the release script unit tests and `swift test` for `RpplCore` (on macOS with the pinned Xcode, so the Apple-only code paths run too). The tagged commit is tested because `main` after merging can differ from every green PR. A failure shows up in the Post-Clone log.
 
