@@ -10,12 +10,7 @@ struct AppInfoView: View {
     @State private var showDisableDeleteConfirm = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
-    private var versionFooter: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
-        let date = Bundle.main.infoDictionary?["RpplBuildDate"] as? String ?? "-"
-        return "\(version) (\(build) - \(date))"
-    }
+    private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
 
     var body: some View {
         NavigationStack {
@@ -129,10 +124,15 @@ struct AppInfoView: View {
                             .foregroundStyle(Color.rpplMuted.opacity(0.4))
                             .accessibilityHidden(true)
 
-                        Text(versionFooter)
-                            .font(.footnote)
-                            .foregroundStyle(Color.rpplMuted.opacity(0.7))
-                            .accessibilityLabel("Version \(versionFooter)")
+                        VStack(spacing: 2) {
+                            Text(versionInfo.headline)
+                            Text(versionInfo.detail)
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(Color.rpplMuted.opacity(0.7))
+                        .textSelection(.enabled)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Version \(versionInfo.summary)")
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 24)

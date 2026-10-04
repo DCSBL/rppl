@@ -18,6 +18,10 @@
 	</dict>
 	<key>RpplBuildDate</key>
 	<string>2026-08-23</string>
+	<key>RpplGitCommit</key>
+	<string></string>
+	<key>RpplReleaseTag</key>
+	<string></string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
