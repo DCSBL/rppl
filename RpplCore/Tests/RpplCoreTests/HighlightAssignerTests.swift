@@ -374,8 +374,8 @@ struct HighlightAssignerTests {
 
         let minutes = SessionHighlightInput.minutesOfDay(start: start, end: end, calendar: calendar)
 
-        #expect(minutes.start == 21 * 60 + 30)
-        #expect(minutes.end == 24 * 60 + 30)
+        #expect(minutes.start == Double(21 * 60 + 30))
+        #expect(try #require(minutes.end) == Double(24 * 60 + 30))
         #expect(SessionHighlightInput.minutesOfDay(start: start, end: nil, calendar: calendar).end == nil)
     }
 }
