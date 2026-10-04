@@ -13,12 +13,21 @@ enum AirWeatherKit {
         location.horizontalAccuracy >= 0 && location.horizontalAccuracy < maxHorizontalAccuracyMeters
     }
 
+    /// Rate-limited: one WeatherKit call per location per hour (`WeatherFetchThrottle`). A session
+    /// starting at the same spot within that hour reuses the previous snapshot instead of calling again.
     static func fetch(location: CLLocation) async -> AirWeatherSnapshot? {
+        let lat = location.coordinate.latitude
+        let lon = location.coordinate.longitude
+        guard await Gate.shared.reserve(latitude: lat, longitude: lon) else {
+            return await Gate.shared.cached(latitude: lat, longitude: lon)
+        }
         do {
-            return try await Deadline.run(fetchTimeout, label: "weatherKit") {
+            let snapshot = try await Deadline.run(fetchTimeout, label: "weatherKit") {
                 let current = try await WeatherService.shared.weather(for: location).currentWeather
                 return AirWeatherSnapshot(current: current)
             }
+            await Gate.shared.store(snapshot, latitude: lat, longitude: lon)
+            return snapshot
         } catch is CancellationError {
             return nil
         } catch is Deadline.Expired {
@@ -27,6 +36,27 @@ enum AirWeatherKit {
         } catch {
             WakeLog.error(.workout, "WeatherKit: \(error.localizedDescription)")
             return nil
+        }
+    }
+
+    private actor Gate {
+        static let shared = Gate()
+        private var throttle = WeatherFetchThrottle()
+        private var snapshots: [String: AirWeatherSnapshot] = [:]
+
+        /// True when the caller may hit the network; records the attempt up front.
+        func reserve(latitude: Double, longitude: Double) -> Bool {
+            guard throttle.canFetch(latitude: latitude, longitude: longitude) else { return false }
+            throttle.recordAttempt(latitude: latitude, longitude: longitude)
+            return true
+        }
+
+        func cached(latitude: Double, longitude: Double) -> AirWeatherSnapshot? {
+            snapshots[WeatherFetchThrottle.key(latitude: latitude, longitude: longitude)]
+        }
+
+        func store(_ snapshot: AirWeatherSnapshot, latitude: Double, longitude: Double) {
+            snapshots[WeatherFetchThrottle.key(latitude: latitude, longitude: longitude)] = snapshot
         }
     }
 }

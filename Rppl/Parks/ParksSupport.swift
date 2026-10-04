@@ -307,30 +307,39 @@ struct ParkWeather: Equatable, Sendable {
 
 /// Current air temperature and wind at a park via WeatherKit. Failures just hide the weather row.
 ///
-/// Shared (`.shared`) rather than per-view so the success cache and failure backoff below actually
-/// apply across park-detail navigations and geofence arrivals, instead of resetting every time a
-/// caller makes its own instance.
+/// Shared (`.shared`) rather than per-view so the cache and rate limit below apply across
+/// park-detail navigations and geofence arrivals. WeatherKit calls are capped per month, so each
+/// location (coarse grid, see `WeatherFetchThrottle`) hits the network at most once per hour —
+/// failed attempts included. Within that hour callers get the cached value, or nil after a failure.
 @Observable
 @MainActor
 final class ParksWeatherProvider {
     static let shared = ParksWeatherProvider()
 
-    private var cache: [String: (date: Date, weather: ParkWeather)] = [:]
-    private var lastFailure: [String: Date] = [:]
-    private static let maxAge: TimeInterval = 15 * 60
-    /// Skip re-hitting WeatherKit for a park that just failed (e.g. a provisioning/auth outage) —
-    /// without this, every screen visit or geofence arrival retried an already-failing request.
-    private static let failureBackoff: TimeInterval = 5 * 60
+    private var cache: [String: ParkWeather] = [:]
+    private var throttle = WeatherFetchThrottle()
+    private var inFlight: [String: Task<ParkWeather?, Never>] = [:]
     private static let fetchTimeout: TimeInterval = 8
 
     func weather(for park: Park) async -> ParkWeather? {
-        if let hit = cache[park.id], Date().timeIntervalSince(hit.date) < Self.maxAge {
-            return hit.weather
+        let lat = park.location.lat
+        let lon = park.location.lon
+        let key = WeatherFetchThrottle.key(latitude: lat, longitude: lon)
+        if let task = inFlight[key] {
+            return await task.value
         }
-        if let failedAt = lastFailure[park.id], Date().timeIntervalSince(failedAt) < Self.failureBackoff {
-            return nil
+        guard throttle.canFetch(latitude: lat, longitude: lon) else {
+            return cache[key]
         }
-        let location = CLLocation(latitude: park.location.lat, longitude: park.location.lon)
+        throttle.recordAttempt(latitude: lat, longitude: lon)
+        let task = Task { await self.fetch(location: CLLocation(latitude: lat, longitude: lon), key: key) }
+        inFlight[key] = task
+        let result = await task.value
+        inFlight[key] = nil
+        return result
+    }
+
+    private func fetch(location: CLLocation, key: String) async -> ParkWeather? {
         do {
             let result = try await Self.withTimeout(Self.fetchTimeout) {
                 let service = WeatherService.shared
@@ -348,16 +357,15 @@ final class ParksWeatherProvider {
                     legalURL: attribution?.legalPageURL
                 )
             }
-            cache[park.id] = (Date(), result)
-            lastFailure[park.id] = nil
+            cache[key] = result
             return result
         } catch is ParksWeatherTimeoutError {
             WakeLog.debug(.ui, "park weather: timed out")
-            lastFailure[park.id] = Date()
+            cache[key] = nil
             return nil
         } catch {
             WakeLog.error(.ui, "park weather: \(error)")
-            lastFailure[park.id] = Date()
+            cache[key] = nil
             return nil
         }
     }
