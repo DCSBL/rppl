@@ -121,7 +121,10 @@ struct ParkEditorLogicTests {
 
     @Test func validationCoversPricesLinksAndTimes() {
         var park = base()
-        park.prices = [ParkPrice(name: "", amount: 5), ParkPrice(name: "Day pass")]
+        park.prices = [
+            ParkPrice(name: "", options: [ParkPriceOption(amount: "5")]),
+            ParkPrice(name: "Day pass", options: [ParkPriceOption(per: "per day")]),
+        ]
         park.links = [ParkLink(kind: "", url: "https://a.nl"), ParkLink(kind: "x", url: ""), ParkLink(kind: "y", url: "no site")]
         park.opening = ParkOpening(
             rules: [ParkOpeningRule(open: "9am", close: "18:00")],
@@ -169,7 +172,11 @@ struct ParkEditorLogicTests {
         park.facilities = [" Showers ", "showers", "", "Bar"]
         park.cables = [ParkCable(name: "  ", description: " \n ", lengthM: 0)]
         park.prices = [
-            ParkPrice(name: "", amount: nil), ParkPrice(name: " Day  pass ", amount: 25, currency: "EUR", note: " "),
+            ParkPrice(name: "", options: [ParkPriceOption()]),
+            ParkPrice(name: " Day  pass ", options: [
+                ParkPriceOption(amount: " 25,00 ", currency: "eur", per: " per  day ", note: " "),
+                ParkPriceOption(),
+            ]),
         ]
         park.links = [
             ParkLink(kind: " ", url: " "), ParkLink(kind: "Instagram", url: "instagram.com/a"),
@@ -186,7 +193,7 @@ struct ParkEditorLogicTests {
         #expect(result.website == "https://park.nl")
         #expect(result.facilities == ["Showers", "Bar"])
         #expect(result.cables == [ParkCable()])
-        #expect(result.prices == [ParkPrice(name: "Day pass", amount: 25, currency: "EUR")])
+        #expect(result.prices == [ParkPrice(name: "Day pass", options: [ParkPriceOption(amount: "25", currency: "EUR", per: "per day")])])
         #expect(result.links == [ParkLink(kind: "instagram", url: "https://instagram.com/b")])
         #expect(result.opening?.rules?.first?.label == nil)
         #expect(result.opening?.rules?.first?.note == nil)

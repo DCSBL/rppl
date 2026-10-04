@@ -117,7 +117,7 @@ struct ParkTextTests {
             var park = Park(id: "p", name: text, location: ParkCoordinate(lat: 52, lon: 4))
             park.description = text
             park.facilities = [text]
-            park.prices = [ParkPrice(name: text, amount: 1, currency: "EUR", note: text)]
+            park.prices = [ParkPrice(name: text, options: [ParkPriceOption(amount: "1", currency: "EUR", per: text, note: text)])]
             let decoded = try ParkCatalog.parse(yaml: ParkCatalog.encode(park), fallbackId: "p")
             #expect(decoded == park, "\(text)")
         }

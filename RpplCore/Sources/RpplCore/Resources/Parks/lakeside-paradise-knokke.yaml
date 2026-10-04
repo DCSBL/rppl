@@ -24,6 +24,8 @@ history:
   - date: 2026-10-04
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
+    description: group prices of the same name into options
+  - date: 2026-10-04
     description: drop hours_unknown (no hours filled in already means unknown)
 
 author: Rppl
@@ -89,20 +91,46 @@ opening:
 # Source: tarieven-verhuur (September 2026). Non-member session rates and passes; "member"
 # (discounted) rates and private full-cable rentals are noted but not itemized here.
 prices:
-  - { name: 1 hour with gear, amount: 38, currency: EUR, note: "regular season (April-autumn break); wakeboard and/or wetsuit" }
-  - { name: 1 hour own gear, amount: 28, currency: EUR, note: "regular season (April-autumn break)" }
-  - { name: 2 hours with gear, amount: 53, currency: EUR, note: "regular season (April-autumn break)" }
-  - { name: 2 hours own gear, amount: 38, currency: EUR, note: "regular season (April-autumn break)" }
-  - { name: Daily insurance, amount: 3, currency: EUR, note: "optional, non-members only" }
-  - { name: 1 hour, amount: 35, currency: EUR, note: "winter season (post-autumn break to Easter); experienced riders only, with or own gear" }
-  - { name: Winter pass, amount: 199, currency: EUR, note: "before 1 Nov; own gear, Nov-Mar" }
-  - { name: Winter pass, amount: 259, currency: EUR, note: "from 1 Nov; own gear, Nov-Mar" }
-  - { name: Season pass, amount: 799, currency: EUR, note: "own gear" }
-  - { name: Season pass -12, amount: 699, currency: EUR, note: "own gear, under 12" }
-  - { name: Year pass, amount: 959, currency: EUR, note: "own gear" }
-  - { name: 10x 1h with gear, amount: 250, currency: EUR, note: "member pass, +1 hour free" }
-  - { name: 10x 2h with gear, amount: 350, currency: EUR, note: "member pass, +2 hours free" }
-  - { name: Wristband, amount: 6, currency: EUR, note: "one-off, first visit" }
+  - name: "1 hour with gear"
+    options:
+      - { amount: "38", currency: EUR, note: "regular season (April-autumn break); wakeboard and/or wetsuit" }
+  - name: "1 hour own gear"
+    options:
+      - { amount: "28", currency: EUR, note: regular season (April-autumn break) }
+  - name: "2 hours with gear"
+    options:
+      - { amount: "53", currency: EUR, note: regular season (April-autumn break) }
+  - name: "2 hours own gear"
+    options:
+      - { amount: "38", currency: EUR, note: regular season (April-autumn break) }
+  - name: Daily insurance
+    options:
+      - { amount: "3", currency: EUR, note: "optional, non-members only" }
+  - name: "1 hour"
+    options:
+      - { amount: "35", currency: EUR, note: "winter season (post-autumn break to Easter); experienced riders only, with or own gear" }
+  - name: Winter pass
+    options:
+      - { amount: "199", currency: EUR, note: "before 1 Nov; own gear, Nov-Mar" }
+      - { amount: "259", currency: EUR, note: "from 1 Nov; own gear, Nov-Mar" }
+  - name: Season pass
+    options:
+      - { amount: "799", currency: EUR, note: own gear }
+  - name: Season pass -12
+    options:
+      - { amount: "699", currency: EUR, note: "own gear, under 12" }
+  - name: Year pass
+    options:
+      - { amount: "959", currency: EUR, note: own gear }
+  - name: "10x 1h with gear"
+    options:
+      - { amount: "250", currency: EUR, note: "member pass, +1 hour free" }
+  - name: "10x 2h with gear"
+    options:
+      - { amount: "350", currency: EUR, note: "member pass, +2 hours free" }
+  - name: Wristband
+    options:
+      - { amount: "6", currency: EUR, note: "one-off, first visit" }
 
 facilities:
   - Pro shop

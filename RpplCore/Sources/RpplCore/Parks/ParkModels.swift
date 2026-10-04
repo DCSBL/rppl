@@ -127,34 +127,76 @@ public struct ParkCable: Codable, Equatable, Sendable {
     public var effectiveLengthM: Double? { lengthM ?? computedLengthM }
 }
 
-/// One price, stored as numbers so it can be compared and calculated with (price per hour, cheapest
-/// day pass). The text people see is made from these fields in their own language and number format.
-public struct ParkPrice: Codable, Equatable, Sendable {
-    public var name: String
-    /// Signed: negative is a discount ("-€3"). nil while a draft price has no amount yet.
-    public var amount: Double?
+/// What a price is charged for, e.g. `hour`. The four keys below are shown in the reader's language;
+/// anything else is free text and shown as written ("per season", "1,5 uur").
+public enum ParkPriceUnit {
+    public static let person = "person"
+    public static let hour = "hour"
+    public static let day = "day"
+    public static let session = "session"
+
+    public static let all = [person, hour, day, session]
+}
+
+/// One amount of a price: `€10` per hour, `€15` per 2 hours, `€38,50` for kids.
+public struct ParkPriceOption: Codable, Equatable, Sendable {
+    /// Exact decimal text, signed (`"12.5"`, `"-3"`): a discount is negative. The app formats it in the
+    /// reader's number format; it is text so nothing is lost to float rounding. nil in a draft.
+    public var amount: String?
     /// ISO 4217 code (`EUR`). nil reads as the currency of the other prices.
     public var currency: String?
-    /// Opaque, see `ParkPriceUnit` (`person`, `hour`, `day`, `session`). What the amount is charged for.
+    /// See `ParkPriceUnit`. nil is "just this amount".
     public var per: String?
-    /// Minutes of riding or rental the amount covers (`60` = per hour, `90` = a 1.5 hour block).
-    public var minutes: Int?
+    /// Who or what this amount is for ("kids up to 15", "own gear").
     public var note: String?
 
-    public init(
-        name: String,
-        amount: Double? = nil,
-        currency: String? = nil,
-        per: String? = nil,
-        minutes: Int? = nil,
-        note: String? = nil
-    ) {
-        self.name = name
+    public init(amount: String? = nil, currency: String? = nil, per: String? = nil, note: String? = nil) {
         self.amount = amount
         self.currency = currency
         self.per = per
-        self.minutes = minutes
         self.note = note
+    }
+
+    enum CodingKeys: String, CodingKey { case amount, currency, per, note }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // Written as text; a plain YAML number (`amount: 25`) reads the same.
+        if let text = try? container.decodeIfPresent(String.self, forKey: .amount) {
+            if case .amount(let parsed) = ParkPriceParser.parse(text) { amount = parsed.text } else { amount = text }
+        } else if let number = try? container.decodeIfPresent(Double.self, forKey: .amount) {
+            amount = ParkPriceParser.canonicalText(for: number)
+        } else {
+            amount = nil
+        }
+        currency = try container.decodeIfPresent(String.self, forKey: .currency)
+        per = try container.decodeIfPresent(String.self, forKey: .per)
+        note = try container.decodeIfPresent(String.self, forKey: .note)
+    }
+}
+
+/// A named price with one or more amounts: "Skis" at `€10` per hour and `€15` per 2 hours.
+public struct ParkPrice: Codable, Equatable, Sendable {
+    public var name: String
+    public var options: [ParkPriceOption]
+
+    public init(name: String, options: [ParkPriceOption] = []) {
+        self.name = name
+        self.options = options
+    }
+
+    enum CodingKeys: String, CodingKey { case name, options }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        options = try container.decodeIfPresent([ParkPriceOption].self, forKey: .options) ?? []
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        if !options.isEmpty { try container.encode(options, forKey: .options) }
     }
 }
 

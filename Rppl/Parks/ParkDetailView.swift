@@ -613,22 +613,45 @@ struct ParkDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle("Prices")
                 ForEach(Array(prices.enumerated()), id: \.offset) { _, price in
-                    HStack(alignment: .firstTextBaseline) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(price.name).foregroundStyle(Color.rpplText)
-                            if let detail = ParkFormatting.priceDetail(price) {
-                                Text(detail).font(.caption).foregroundStyle(Color.rpplMuted)
-                            }
-                        }
-                        Spacer(minLength: 8)
-                        if let amount = ParkFormatting.price(price) {
-                            Text(amount).bold().foregroundStyle(Color.rpplText).monospacedDigit()
-                        }
-                    }
+                    priceRow(price)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .logbookCardChrome()
+        }
+    }
+
+    /// One name with its amounts under it. A single plain amount sits on the name's line.
+    @ViewBuilder
+    private func priceRow(_ price: ParkPrice) -> some View {
+        let options = price.options.filter { $0.amount != nil }
+        if options.count == 1, let only = options.first, only.per == nil {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(price.name).foregroundStyle(Color.rpplText)
+                    if let note = only.note { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
+                }
+                Spacer(minLength: 8)
+                Text(ParkFormatting.amount(only) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(price.name).foregroundStyle(Color.rpplText)
+                ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(ParkFormatting.perText(option.per) ?? option.note ?? "")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.rpplMuted)
+                            if option.per != nil, let note = option.note {
+                                Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        Text(ParkFormatting.amount(option) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
+                    }
+                }
+            }
         }
     }
 

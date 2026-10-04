@@ -14,12 +14,13 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 ### In-app editor
 
 - Parks tab `+` creates a park; park detail `…` menu → Edit changes one. `AppSettingsKey.parkEditorEnabled` (default on) hides the editor entry points.
-- A **new park** is walked through page by page (welcome, basics, contact, about, cables, opening times, prices, links, review). An **existing park** opens a list of the same pages to jump between. Only name and location are needed to save; empty pages are left out.
+- A **new park** is walked through page by page (welcome, basics, contact, about, cables, opening times, prices, links, review). An **existing park** opens a list of the same pages to jump between. Only name and location are needed to save; empty pages are left out. The time zone sits under "Advanced"; `author`, `from`/`until` and `exceptions` are kept when saving but not edited in the app.
 - **Drafts:** every change is written to `<App Group>/ParkDrafts/<id>.json` (`ParkEditDraft`, `ParkDraftStore`), also when the app goes to the background. A draft may be incomplete (no name, no location, half-filled lists). Drafts show on top of the Parks list; closing with unsaved changes asks: save as draft, discard, or keep editing. Saving the park deletes the draft.
 - **Lists** (facilities, cables, hours, blocks, prices, links, dates) always end in an empty row. Typing in it makes it a real row and a new empty one appears; a real row left empty when the keyboard goes away is removed; swipe deletes (cables, hours, blocks, prices and links ask first).
 - **Text** typed in the editor is cleaned by `ParkText`: control characters, bidi overrides and private-use code points go, any script, RTL and emoji stay, each field has a length limit. Description and notes accept light markdown (italic, bold, lists); headings and HTML tags are stripped. Markdown is stored as typed and not rendered yet.
 - **Location** is set on a map with a crosshair; the time zone follows the location (MapKit) until picked by hand. Cables are traced the same way; the shape question (full size or 2.0) is only asked when the cable has none yet, and the direction of a loop follows the traced order.
 - **Opening times:** months and days are switch lists (`ParkDaySelection` stores the shortest selector). Block ids are assigned by the editor and `numbered` is not shown. **No rules or blocks filled in means unknown**, not closed (`ParkOpening.isScheduleKnown`).
+- **Prices:** a name plus amount rows (currency menu, number, a "per" menu with an "Other" free text, a note). Similar prices are one name with several amounts.
 - **Links:** preset types (`ParkLinkKinds`) or a custom name; one link per name, a repeated name replaces the first.
 - Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
 - An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
@@ -70,10 +71,18 @@ opening:
   exceptions:                     # optional one-offs on top of `rules`, see "Exceptions" below
     - { kind: closed, label: Wind, dates: ["2026-09-25"] }
 
-prices:                           # numbers, so they can be compared and calculated with
-  - { name: Day pass, amount: 25, currency: EUR, per: person, note: optional }
-  - { name: Block, amount: 29, currency: EUR, minutes: 90 }   # minutes: what the price covers (enables price per hour)
-  - { name: Group discount, amount: -3, currency: EUR, per: person }   # negative = discount
+prices:                           # a name with one or more amounts
+  - name: Skis
+    options:
+      - { amount: "10", currency: EUR, per: hour }
+      - { amount: "15", currency: EUR, per: "2 hours" }
+  - name: Day pass
+    options:
+      - { amount: "38.50", currency: EUR, note: kids up to 15 }
+      - { amount: "49.50", currency: EUR, note: adults }
+  - name: Group discount
+    options:
+      - { amount: "-3", currency: EUR, per: person }   # negative = discount
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
@@ -85,7 +94,7 @@ water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 
 ### Prices
 
-`amount` is signed (negative is a discount) and `currency` an ISO 4217 code. `per` is an opaque unit (`person`, `hour`, `day`, `session`, …) and `minutes` the duration the price covers; `ParkPrice.amountPerHour` uses them. The detail screen formats the number in the reader's own language (`€12,34` or `$12.34`); the editor reads what people type (`12,34`, `1.234,56`, `12,-`, `-€3`, `€7 pp`, `€10 per hour`) with `ParkPriceParser`. Times are stored as 24 hour `HH:mm` (or `sunset`), dates as `yyyy-MM-dd`.
+A price is a `name` with `options`: one entry per amount ("skis": €10 for 1 hour, €15 for 2 hours; "day pass": one amount per audience). `amount` is exact decimal text, signed (negative is a discount); a plain YAML number is read the same. `currency` is an ISO 4217 code. `per` is free text; `person`, `hour`, `day` and `session` are shown in the reader's language ("per hour"), anything else as written ("per season", "1,5 uur"). `note` says who or what the amount is for. The detail screen groups the amounts under the name and formats them in the reader's own number format (`€12,34` or `$12.34`). In the editor people type the amount (`12,34`, `1.234,56`, `12,-`, `-3`) and `ParkPriceParser` reads it. Times are stored as 24 hour `HH:mm` (or `sunset`), dates as `yyyy-MM-dd`.
 
 ### Opening rules and slots
 

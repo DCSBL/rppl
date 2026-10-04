@@ -236,8 +236,6 @@ struct ParkRuleDetailPage: View {
                 ParkAppliesToSection(
                     months: rule.months,
                     days: rule.days,
-                    from: rule.from,
-                    until: rule.until,
                     dates: rule.dates
                 )
 
@@ -330,8 +328,6 @@ struct ParkBlockDetailPage: View {
                 ParkAppliesToSection(
                     months: slot.months,
                     days: slot.days,
-                    from: slot.from,
-                    until: slot.until,
                     dates: slot.dates
                 )
 
@@ -363,8 +359,6 @@ struct ParkBlockDetailPage: View {
 struct ParkAppliesToSection: View {
     @Binding var months: [Int]?
     @Binding var days: [String]?
-    @Binding var from: String?
-    @Binding var until: String?
     @Binding var dates: [String]?
 
     var body: some View {
@@ -405,8 +399,6 @@ struct ParkAppliesToSection: View {
             } label: {
                 LabeledContent("Days", value: ParkFormatting.days(days) ?? String(localized: "Every day"))
             }
-            optionalDate("Starting from a date", $from)
-            optionalDate("Until a date", $until)
             NavigationLink {
                 ParkDatesPage(dates: $dates)
             } label: {
@@ -422,20 +414,6 @@ struct ParkAppliesToSection: View {
     private var datesSummary: String {
         guard let dates, !dates.isEmpty else { return String(localized: "None") }
         return String(localized: "\(dates.count) dates")
-    }
-
-    @ViewBuilder
-    private func optionalDate(_ title: LocalizedStringKey, _ binding: Binding<String?>) -> some View {
-        Toggle(title, isOn: Binding(
-            get: { binding.wrappedValue != nil },
-            set: { binding.wrappedValue = $0 ? ParkEditorDates.todayISO : nil }
-        ))
-        if binding.wrappedValue != nil {
-            ParkDatePicker(title: "Date", iso: Binding(
-                get: { binding.wrappedValue ?? ParkEditorDates.todayISO },
-                set: { binding.wrappedValue = $0 }
-            ))
-        }
     }
 }
 

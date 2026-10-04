@@ -93,17 +93,10 @@ struct ParkBasicsPage: View {
                 } label: {
                     LabeledContent("Time zone", value: session.park.resolvedTimeZone.identifier)
                 }
+            } header: {
+                Text("Advanced")
             } footer: {
                 Text("Set from the location. It decides what \"today\" means at the park and when it opens.")
-            }
-
-            Section {
-                ParkTextInput(title: "Your name or source", text: $session.park.author.orEmpty, field: .author)
-                    .textInputAutocapitalization(.words)
-            } header: {
-                Text("Credits")
-            } footer: {
-                Text("Shown as \"Credits\" at the bottom of the park. Optional.")
             }
         }
         .navigationTitle("Basics")
@@ -324,13 +317,6 @@ struct ParkContactPage: View {
 struct ParkAboutPage: View {
     @Environment(ParkEditorSession.self) private var session
 
-    private static let suggestions: [String] = [
-        String(localized: "Rental"), String(localized: "Showers"), String(localized: "Lockers"),
-        String(localized: "Changing rooms"), String(localized: "Restaurant"), String(localized: "Bar"),
-        String(localized: "Shop"), String(localized: "Parking"), String(localized: "Camping"),
-        String(localized: "Lessons"),
-    ]
-
     var body: some View {
         @Bindable var session = session
         Form {
@@ -371,34 +357,6 @@ struct ParkAboutPage: View {
                 Text("Facilities")
             } footer: {
                 Text("What riders find on site. Type one per row; a new row appears as you go. Swipe a row to remove it.")
-            }
-
-            let missing = Self.suggestions.filter { suggestion in
-                !(session.park.facilities ?? []).contains { $0.caseInsensitiveCompare(suggestion) == .orderedSame }
-            }
-            if !missing.isEmpty {
-                Section("Quick add") {
-                    FlowLayout(spacing: 8) {
-                        ForEach(missing, id: \.self) { suggestion in
-                            Button {
-                                session.park.facilities = (session.park.facilities ?? []) + [suggestion]
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "plus").font(.caption.weight(.bold))
-                                    Text(suggestion)
-                                }
-                                .font(.subheadline)
-                                .foregroundStyle(Color.rpplAccent)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(Color.rpplAccent.opacity(0.14), in: Capsule())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4))
-                }
             }
         }
         .navigationTitle("About")

@@ -9,6 +9,8 @@ history:
     description: refine main cable trace and add short cable trace (in-app edit)
   - date: 2026-10-04
     description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: group prices of the same name into options
 
 author: Rppl
 name: Cable Park Down Under
@@ -91,18 +93,28 @@ opening:
     - { id: "20:00", start: "20:00", end: "21:00" }
 
 prices:
-  - { name: 1 hour, amount: 25, currency: EUR, note: "From 15 years. Life vest, helmet and instruction included" }
-  - { name: 1 hour, amount: 20, currency: EUR, note: "Up to 14 years. Life vest, helmet and instruction included" }
-  - { name: 2 hours, amount: 35, currency: EUR, note: From 15 years }
-  - { name: 2 hours, amount: 30, currency: EUR, note: Up to 14 years }
-  - { name: Day, amount: 55, currency: EUR, note: From 15 years }
-  - { name: Day, amount: 47.5, currency: EUR, note: Up to 14 years }
-  - { name: Wetsuit rental, amount: 5, currency: EUR, minutes: 60, note: 1 hour }
-  - { name: Wetsuit rental, amount: 7.5, currency: EUR, minutes: 120, note: 2 hours }
-  - { name: Wetsuit rental, amount: 10, currency: EUR, per: day, note: day }
-  - { name: Water ski rental, amount: 5, currency: EUR, minutes: 60, note: 1 hour }
-  - { name: Water ski rental, amount: 7.5, currency: EUR, minutes: 120, note: 2 hours }
-  - { name: Water ski rental, amount: 10, currency: EUR, per: day, note: day }
+  - name: "1 hour"
+    options:
+      - { amount: "25", currency: EUR, note: "From 15 years. Life vest, helmet and instruction included" }
+      - { amount: "20", currency: EUR, note: "Up to 14 years. Life vest, helmet and instruction included" }
+  - name: "2 hours"
+    options:
+      - { amount: "35", currency: EUR, note: From 15 years }
+      - { amount: "30", currency: EUR, note: Up to 14 years }
+  - name: Day
+    options:
+      - { amount: "55", currency: EUR, note: From 15 years }
+      - { amount: "47.50", currency: EUR, note: Up to 14 years }
+  - name: Wetsuit rental
+    options:
+      - { amount: "5", currency: EUR, per: "1 hour" }
+      - { amount: "7.50", currency: EUR, per: "2 hours" }
+      - { amount: "10", currency: EUR, per: day }
+  - name: Water ski rental
+    options:
+      - { amount: "5", currency: EUR, per: "1 hour" }
+      - { amount: "7.50", currency: EUR, per: "2 hours" }
+      - { amount: "10", currency: EUR, per: day }
 
 facilities:
   - Changing rooms

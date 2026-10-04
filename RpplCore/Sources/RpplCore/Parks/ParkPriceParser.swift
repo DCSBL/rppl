@@ -1,36 +1,22 @@
 import Foundation
 
-/// Opaque values for `ParkPrice.per`: what an amount is charged for. Unknown values round-trip.
-public enum ParkPriceUnit {
-    public static let person = "person"
-    public static let hour = "hour"
-    public static let day = "day"
-    public static let session = "session"
+public struct ParsedAmount: Equatable, Sendable {
+    /// Canonical exact text: `"25"`, `"12.50"`, `"-3"`.
+    public var text: String
+    public var value: Double
 
-    public static let all = [person, hour, day, session]
-}
-
-public struct ParsedPrice: Equatable, Sendable {
-    /// Negative for a discount.
-    public var amount: Double
-    /// ISO 4217 code when the text named one (`€`, `EUR`, `$`); nil when the person left it out.
-    public var currency: String?
-    /// A `ParkPriceUnit` when the text said "pp", "per hour", "/h", …
-    public var per: String?
-
-    public init(amount: Double, currency: String? = nil, per: String? = nil) {
-        self.amount = amount
-        self.currency = currency
-        self.per = per
+    public init(text: String, value: Double) {
+        self.text = text
+        self.value = value
     }
 }
 
-/// Reads a price the way people write it: `€12,34`, `12.50`, `€ 1.234,56`, `EUR 25`, `12,-`,
-/// `-€3` (a discount), `€7 pp`, `€10 per hour`. Comma or dot as decimal mark, spaces and dots as
-/// thousands marks. One price per text: `€5 / €7,50 / €10` is rejected so each gets its own row.
+/// Reads an amount the way people type it: `12,34`, `12.34`, `1.234,56`, `1 234,50`, `12,-`, `-3`.
+/// Comma or dot is the decimal mark, spaces and dots group thousands. A currency sign is ignored (the
+/// currency has its own menu). One amount per text: `5 / 7,50` is rejected.
 public enum ParkPriceParser {
     public enum Problem: Error, Equatable, Sendable {
-        /// No digits, or something in between that is not part of a price.
+        /// No digits, or something in between that is not part of an amount.
         case unreadable
         /// More than one amount in one text.
         case severalAmounts
@@ -40,7 +26,7 @@ public enum ParkPriceParser {
 
     public enum Result: Equatable, Sendable {
         case empty
-        case price(ParsedPrice)
+        case amount(ParsedAmount)
         case invalid(Problem)
     }
 
@@ -48,19 +34,16 @@ public enum ParkPriceParser {
 
     public static func parse(_ text: String) -> Result {
         var rest = normalize(text)
+        for sign in ["€", "$", "£", "¥"] { rest = rest.replacingOccurrences(of: sign, with: "") }
+        rest = rest.trimmingCharacters(in: .whitespaces)
         if rest.isEmpty { return .empty }
 
-        let unit = takeUnit(&rest)
-        let currency = takeCurrency(&rest)
-        rest = rest.trimmingCharacters(in: .whitespaces)
-
-        // "12,-" and "12,=" are Dutch for twelve euros exactly.
-        for suffix in [",-", ".-", ",--", ".--", ",=", ".="] where rest.hasSuffix(suffix) {
+        // "12,-" and "12,=" are Dutch for twelve exactly.
+        for suffix in [",--", ".--", ",-", ".-", ",=", ".="] where rest.hasSuffix(suffix) {
             rest = String(rest.dropLast(suffix.count)) + ".00"
             break
         }
         var negative = false
-        rest = rest.trimmingCharacters(in: .whitespaces)
         while let sign = rest.first, sign == "-" || sign == "+" {
             if sign == "-" { negative.toggle() }
             rest.removeFirst()
@@ -68,22 +51,45 @@ public enum ParkPriceParser {
         }
         if rest.isEmpty { return .invalid(.unreadable) }
         if rest.contains("/") || rest.contains(";") || rest.contains("&") { return .invalid(.severalAmounts) }
-        guard let magnitude = number(from: rest) else {
-            let hasSecondNumber = rest.split(separator: " ").filter { $0.first?.isNumber == true }.count > 1
-            return .invalid(hasSecondNumber ? .severalAmounts : .unreadable)
+        guard let digits = number(from: rest) else {
+            let second = rest.split(separator: " ").filter { $0.first?.isNumber == true }.count > 1
+            return .invalid(second ? .severalAmounts : .unreadable)
         }
-        switch magnitude {
-        case .success(let value):
-            if value > maxAmount { return .invalid(.tooLarge) }
-            return .price(ParsedPrice(amount: negative ? -value : value, currency: currency, per: unit))
+        switch digits {
         case .failure(let problem):
             return .invalid(problem)
+        case .success(let parts):
+            let canonical = canonicalText(integer: parts.integer, fraction: parts.fraction, negative: negative)
+            guard let value = Double(canonical) else { return .invalid(.unreadable) }
+            if abs(value) > maxAmount { return .invalid(.tooLarge) }
+            return .amount(ParsedAmount(text: canonical, value: value))
         }
+    }
+
+    /// `25` → `"25"`, `12.5` → `"12.50"`.
+    public static func canonicalText(for value: Double) -> String {
+        let negative = value < 0
+        let cents = Int((abs(value) * 100).rounded())
+        return canonicalText(
+            integer: String(cents / 100),
+            fraction: String(format: "%02d", cents % 100),
+            negative: negative
+        )
+    }
+
+    private static func canonicalText(integer: String, fraction: String, negative: Bool) -> String {
+        let whole = String(integer.drop { $0 == "0" })
+        let trimmedFraction = fraction.padding(toLength: max(fraction.count, 2), withPad: "0", startingAt: 0)
+        let isZeroFraction = trimmedFraction.allSatisfy { $0 == "0" }
+        var text = whole.isEmpty ? "0" : whole
+        if !isZeroFraction { text += "." + trimmedFraction.prefix(2) }
+        let isZero = whole.isEmpty && isZeroFraction
+        return negative && !isZero ? "-" + text : text
     }
 
     // MARK: Number
 
-    private static func number(from text: String) -> Swift.Result<Double, Problem>? {
+    private static func number(from text: String) -> Swift.Result<(integer: String, fraction: String), Problem>? {
         guard text.first?.isNumber == true, text.last?.isNumber == true else { return nil }
         let allowed = Set("0123456789.,' ")
         guard text.allSatisfy({ allowed.contains($0) }) else { return nil }
@@ -129,67 +135,13 @@ public enum ParkPriceParser {
         }
         guard !integer.isEmpty, integer.allSatisfy(\.isNumber), fraction.allSatisfy(\.isNumber) else { return nil }
         if fraction.count > 2 { return .failure(.tooManyDecimals) }
-        guard let value = Double(fraction.isEmpty ? integer : "\(integer).\(fraction)") else { return nil }
-        return .success(value)
+        return .success((integer, fraction))
     }
 
     private static func thousandsGroupsAreValid(_ text: Substring, mark: Character) -> Bool {
         let groups = text.split(separator: mark, omittingEmptySubsequences: false)
         guard let first = groups.first, (1...3).contains(first.count) else { return false }
         return groups.dropFirst().allSatisfy { $0.count == 3 }
-    }
-
-    // MARK: Currency and unit
-
-    private static let symbols: [(token: String, code: String?)] = [
-        ("€", "EUR"), ("$", "USD"), ("£", "GBP"), ("¥", "JPY"), ("zł", "PLN"), ("kč", "CZK"), ("kr.", nil), ("kr", nil),
-    ]
-
-    private static let isoCodes = Set(Locale.commonISOCurrencyCodes)
-
-    /// "US$", "A$": a letter or two in front of the dollar sign.
-    private static let dollarPrefixes: [String: String] = [
-        "us": "USD", "ca": "CAD", "c": "CAD", "au": "AUD", "a": "AUD", "nz": "NZD", "hk": "HKD",
-    ]
-
-    private static func takeCurrency(_ text: inout String) -> String? {
-        if let range = text.range(of: #"(?i)\b([a-z]{1,2})\$"#, options: .regularExpression),
-           let code = dollarPrefixes[text[range].dropLast().lowercased()] {
-            text.removeSubrange(range)
-            return code
-        }
-        for (token, code) in symbols {
-            if let range = text.range(of: token, options: .caseInsensitive) {
-                text.removeSubrange(range)
-                return code
-            }
-        }
-        // Three letters, next to the number: "EUR 25", "25 chf".
-        let words = text.split(separator: " ", omittingEmptySubsequences: true)
-        for word in words where word.count == 3 && word.allSatisfy(\.isLetter) && isoCodes.contains(word.uppercased()) {
-            if let range = text.range(of: word) {
-                text.removeSubrange(range)
-                return word.uppercased()
-            }
-        }
-        return nil
-    }
-
-    private static let unitPatterns: [(unit: String, pattern: String)] = [
-        (ParkPriceUnit.person, #"(?i)(\bp\.?\s?p\.?(?=\s|$)|\bper\s+(person|persoon|pers\.?|head)\b|/\s?(person|persoon|pp|p)\b)"#),
-        (ParkPriceUnit.hour, #"(?i)(\bper\s+(hour|hr|uur|h)\b|/\s?(hour|hr|uur|h|u)\b)"#),
-        (ParkPriceUnit.day, #"(?i)(\bper\s+(day|dag)\b|/\s?(day|dag|d)\b)"#),
-        (ParkPriceUnit.session, #"(?i)(\bper\s+(session|sessie|keer|visit|bezoek)\b|/\s?(session|sessie|keer)\b)"#),
-    ]
-
-    private static func takeUnit(_ text: inout String) -> String? {
-        for (unit, pattern) in unitPatterns {
-            if let range = text.range(of: pattern, options: .regularExpression) {
-                text.removeSubrange(range)
-                return unit
-            }
-        }
-        return nil
     }
 
     private static func normalize(_ text: String) -> String {
@@ -204,23 +156,19 @@ public enum ParkPriceParser {
     }
 }
 
-extension ParkPrice {
-    /// The amount as an exact decimal, rounded to cents, for sums and averages.
-    public var decimalAmount: Decimal? {
-        guard let amount else { return nil }
-        let cents = (amount * 100).rounded() / 100
-        return Decimal(string: String(cents), locale: Locale(identifier: "en_US_POSIX"))
+extension ParkPriceOption {
+    /// The amount as an exact decimal, for sums and averages.
+    public var decimal: Decimal? {
+        amount.flatMap { Decimal(string: $0, locale: Locale(identifier: "en_US_POSIX")) }
     }
 
-    /// True for a discount (a negative amount, "-€3").
-    public var isDiscount: Bool { (amount ?? 0) < 0 }
+    public var value: Double? { amount.flatMap(Double.init) }
 
-    /// What this price comes to per hour, when it says how long it covers (`minutes`) or is charged
-    /// per hour. nil for prices that do not cover a duration (a day pass, a wristband).
-    public var amountPerHour: Double? {
-        guard let amount else { return nil }
-        if let minutes, minutes > 0 { return amount * 60 / Double(minutes) }
-        if per == ParkPriceUnit.hour { return amount }
-        return nil
+    /// True for a discount (a negative amount, "-3").
+    public var isDiscount: Bool { (value ?? 0) < 0 }
+
+    /// Nothing filled in yet.
+    public var isBlank: Bool {
+        (amount ?? "").isEmpty && (per ?? "").isEmpty && (note ?? "").isEmpty
     }
 }

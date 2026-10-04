@@ -6914,22 +6914,6 @@
         }
       }
     },
-    "Add details" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add details"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details toevoegen"
-          }
-        }
-      }
-    },
     "Add every cable the park has. Trace it on the satellite map if the imagery is clear enough; a cable without a trace is fine too." : {
       "localizations" : {
         "en" : {
@@ -6990,22 +6974,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terug"
-          }
-        }
-      }
-    },
-    "Bar" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bar"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bar"
           }
         }
       }
@@ -7090,22 +7058,6 @@
         }
       }
     },
-    "Camping" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camping"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camping"
-          }
-        }
-      }
-    },
     "Certain dates" : {
       "localizations" : {
         "en" : {
@@ -7118,54 +7070,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bepaalde data"
-          }
-        }
-      }
-    },
-    "Change the amount on the list. A discount is a negative amount, like -€3." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change the amount on the list. A discount is a negative amount, like -€3."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas het bedrag aan in de lijst. Een korting is een negatief bedrag, zoals -€3."
-          }
-        }
-      }
-    },
-    "Changing rooms" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changing rooms"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kleedkamers"
-          }
-        }
-      }
-    },
-    "Charged per" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Charged per"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Berekend per"
           }
         }
       }
@@ -7346,54 +7250,6 @@
         }
       }
     },
-    "Covers" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Covers"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dekt"
-          }
-        }
-      }
-    },
-    "Credits" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Credits"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Credits"
-          }
-        }
-      }
-    },
-    "Currency" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Currency"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valuta"
-          }
-        }
-      }
-    },
     "Current pin" : {
       "localizations" : {
         "en" : {
@@ -7406,22 +7262,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Huidige pin"
-          }
-        }
-      }
-    },
-    "Day" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Day"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dag"
           }
         }
       }
@@ -7698,22 +7538,6 @@
         }
       }
     },
-    "Examples: `€12,50`, `12.50`, `€7 pp` for per person, `€10 per hour`, `-€3` for a discount. One price per row; a new row appears as you go." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Examples: `€12,50`, `12.50`, `€7 pp` for per person, `€10 per hour`, `-€3` for a discount. One price per row; a new row appears as you go."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voorbeelden: `€12,50`, `12.50`, `€7 pp` per persoon, `€10 per uur`, `-€3` voor een korting. Eén prijs per rij; er verschijnt vanzelf een nieuwe rij."
-          }
-        }
-      }
-    },
     "Filled in" : {
       "localizations" : {
         "en" : {
@@ -7758,22 +7582,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bijvoorbeeld Zomer"
-          }
-        }
-      }
-    },
-    "For example adults, or own gear" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For example adults, or own gear"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bijvoorbeeld volwassenen, of eigen spullen"
           }
         }
       }
@@ -7838,22 +7646,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geef het park een naam."
-          }
-        }
-      }
-    },
-    "Hour" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hour"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uur"
           }
         }
       }
@@ -7986,22 +7778,6 @@
         }
       }
     },
-    "Lessons" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lessons"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lessen"
-          }
-        }
-      }
-    },
     "Light formatting works: `_italic_`, `**bold**` and lists that start with `-`. Headings are left out." : {
       "localizations" : {
         "en" : {
@@ -8046,22 +7822,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Locatietoegang staat uit voor Rppl. Zet de pin op de kaart."
-          }
-        }
-      }
-    },
-    "Lockers" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lockers"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kluisjes"
           }
         }
       }
@@ -8162,22 +7922,6 @@
         }
       }
     },
-    "No amount yet" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No amount yet"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nog geen bedrag"
-          }
-        }
-      }
-    },
     "No location yet" : {
       "localizations" : {
         "en" : {
@@ -8226,22 +7970,6 @@
         }
       }
     },
-    "Not specified" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not specified"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Niet opgegeven"
-          }
-        }
-      }
-    },
     "Not traced yet" : {
       "localizations" : {
         "en" : {
@@ -8286,22 +8014,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eén link per type: een tweede met dezelfde naam vervangt de eerste. Kies \"Anders\" voor een eigen naam, zoals Webshop."
-          }
-        }
-      }
-    },
-    "One price per row. Add the others as their own rows." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One price per row. Add the others as their own rows."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eén prijs per rij. Voeg de andere toe als eigen rij."
           }
         }
       }
@@ -8450,22 +8162,6 @@
         }
       }
     },
-    "Optional. Fill in how long the price covers (for example 90 minutes for a block) and the app can work out the price per hour." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional. Fill in how long the price covers (for example 90 minutes for a block) and the app can work out the price per hour."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optioneel. Vul in hoe lang de prijs dekt (bijvoorbeeld 90 minuten voor een blok) en de app rekent de prijs per uur voor je uit."
-          }
-        }
-      }
-    },
     "Optional. Fill it in when the park publishes the length; it wins over the trace." : {
       "localizations" : {
         "en" : {
@@ -8542,22 +8238,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Optioneel. Kort en feitelijk: voor wie het is en wat erop ligt."
-          }
-        }
-      }
-    },
-    "Optional. Who the price is for or what is included. Shown under the name." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional. Who the price is for or what is included. Shown under the name."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optioneel. Voor wie de prijs is of wat erbij zit. Staat onder de naam."
           }
         }
       }
@@ -8658,22 +8338,6 @@
         }
       }
     },
-    "Parking" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parking"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parkeren"
-          }
-        }
-      }
-    },
     "Paste the address" : {
       "localizations" : {
         "en" : {
@@ -8690,22 +8354,6 @@
         }
       }
     },
-    "Person" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Person"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Persoon"
-          }
-        }
-      }
-    },
     "Price %lld has no amount yet. Fill it in or remove the price." : {
       "localizations" : {
         "en" : {
@@ -8718,54 +8366,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prijs %lld heeft nog geen bedrag. Vul het in of verwijder de prijs."
-          }
-        }
-      }
-    },
-    "Prices have at most two decimals." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prices have at most two decimals."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prijzen hebben maximaal twee decimalen."
-          }
-        }
-      }
-    },
-    "Quick add" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quick add"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snel toevoegen"
-          }
-        }
-      }
-    },
-    "Rental" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rental"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verhuur"
           }
         }
       }
@@ -8798,22 +8398,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verplicht. De naam waaronder het park bekend is, zoals op de eigen website."
-          }
-        }
-      }
-    },
-    "Restaurant" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurant"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurant"
           }
         }
       }
@@ -8930,54 +8514,6 @@
         }
       }
     },
-    "Shop" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shop"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Winkel"
-          }
-        }
-      }
-    },
-    "Showers" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Showers"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Douches"
-          }
-        }
-      }
-    },
-    "Shown as \"Credits\" at the bottom of the park. Optional." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shown as \"Credits\" at the bottom of the park. Optional."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Staat als \"Credits\" onderaan het park. Optioneel."
-          }
-        }
-      }
-    },
     "Shown under the map. Optional." : {
       "localizations" : {
         "en" : {
@@ -9038,22 +8574,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Begin met de naam en waar het park ligt. Zet de kaart op de dock en plaats de pin. De rest van deze pagina is optioneel."
-          }
-        }
-      }
-    },
-    "Starting from a date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starting from a date"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vanaf een datum"
           }
         }
       }
@@ -9166,22 +8686,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tik punten langs de cable, in de richting waarin riders gaan. Het eerste punt is de start; je kunt meer starts aanwijzen."
-          }
-        }
-      }
-    },
-    "That comes to %@ per hour." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "That comes to %@ per hour."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dat komt neer op %@ per uur."
           }
         }
       }
@@ -9458,22 +8962,6 @@
         }
       }
     },
-    "Try something like €12,50 or 12.50." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try something like €12,50 or 12.50."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Probeer iets als €12,50 of 12.50."
-          }
-        }
-      }
-    },
     "Two links share a name. Saving keeps the last one." : {
       "localizations" : {
         "en" : {
@@ -9534,22 +9022,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niet-bewaarde wijzigingen · bewerkt %@"
-          }
-        }
-      }
-    },
-    "Until a date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Until a date"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tot een datum"
           }
         }
       }
@@ -9650,22 +9122,6 @@
         }
       }
     },
-    "What it covers" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What it covers"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wat het dekt"
-          }
-        }
-      }
-    },
     "What kind of park is it?" : {
       "localizations" : {
         "en" : {
@@ -9710,22 +9166,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wat riders op locatie vinden. Typ er één per rij; er verschijnt vanzelf een nieuwe rij. Veeg een rij weg om hem te verwijderen."
-          }
-        }
-      }
-    },
-    "What riders pay. Type each price like the park's own site does and we read the currency and the format for you." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What riders pay. Type each price like the park's own site does and we read the currency and the format for you."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wat riders betalen. Typ elke prijs zoals de website van het park dat doet en wij lezen de valuta en het formaat voor je."
           }
         }
       }
@@ -9874,38 +9314,6 @@
         }
       }
     },
-    "Your name or source" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your name or source"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jouw naam of bron"
-          }
-        }
-      }
-    },
-    "per %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "per %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "per %@"
-          }
-        }
-      }
-    },
     "per day" : {
       "localizations" : {
         "en" : {
@@ -10014,6 +9422,246 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "deze prijs"
+          }
+        }
+      }
+    },
+    "What riders pay. Add a name, then one or more amounts: skis at €10 for 1 hour and €15 for 2 hours are one price with two amounts." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What riders pay. Add a name, then one or more amounts: skis at €10 for 1 hour and €15 for 2 hours are one price with two amounts."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat riders betalen. Geef een naam en een of meer bedragen: skis voor €10 per uur en €15 voor 2 uur zijn één prijs met twee bedragen."
+          }
+        }
+      }
+    },
+    "Type a name to add a price, for example Day pass or Wetsuit rental. Tap the line under a name to fill in its amounts." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a name to add a price, for example Day pass or Wetsuit rental. Tap the line under a name to fill in its amounts."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typ een naam om een prijs toe te voegen, bijvoorbeeld Dagkaart of Wetsuit huur. Tik op de regel onder een naam om de bedragen in te vullen."
+          }
+        }
+      }
+    },
+    "Add amounts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add amounts"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedragen toevoegen"
+          }
+        }
+      }
+    },
+    "For example Skis" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example Skis"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijvoorbeeld Skis"
+          }
+        }
+      }
+    },
+    "Amounts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amounts"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedragen"
+          }
+        }
+      }
+    },
+    "One row per amount: €10 per hour, €15 per 2 hours. A discount is a negative amount, like -3. Swipe a row to remove it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One row per amount: €10 per hour, €15 per 2 hours. A discount is a negative amount, like -3. Swipe a row to remove it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén rij per bedrag: €10 per uur, €15 per 2 uur. Een korting is een negatief bedrag, zoals -3. Veeg een rij weg om hem te verwijderen."
+          }
+        }
+      }
+    },
+    "For whom or what (optional)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For whom or what (optional)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor wie of wat (optioneel)"
+          }
+        }
+      }
+    },
+    "Amount" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amount"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedrag"
+          }
+        }
+      }
+    },
+    "One amount per row. Add the others as their own rows." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One amount per row. Add the others as their own rows."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén bedrag per rij. Voeg de andere toe als eigen rij."
+          }
+        }
+      }
+    },
+    "Amounts have at most two decimals." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amounts have at most two decimals."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedragen hebben maximaal twee decimalen."
+          }
+        }
+      }
+    },
+    "Try something like 12,50 or 12.50." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try something like 12,50 or 12.50."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probeer iets als 12,50 of 12.50."
+          }
+        }
+      }
+    },
+    "For example per season" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example per season"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijvoorbeeld per seizoen"
+          }
+        }
+      }
+    },
+    "Just this amount" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just this amount"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen dit bedrag"
+          }
+        }
+      }
+    },
+    "Per…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per…"
+          }
+        }
+      }
+    },
+    "Advanced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geavanceerd"
           }
         }
       }

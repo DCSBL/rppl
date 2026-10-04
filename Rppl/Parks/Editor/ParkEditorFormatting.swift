@@ -22,44 +22,47 @@ extension ParkFormatting {
 
     // MARK: Prices
 
-    /// "€12.50" or "12,50 €", per the device's region. nil while the price has no amount.
-    static func price(_ price: ParkPrice) -> String? {
-        guard let amount = price.amount else { return nil }
-        return amount.formatted(.currency(code: price.currency ?? defaultCurrencyCode))
-    }
-
     static var defaultCurrencyCode: String { Locale.current.currency?.identifier ?? "EUR" }
 
-    /// What goes back into the price field when an existing price is opened.
-    static func priceInputText(_ price: ParkPrice) -> String {
-        guard let amount = price.amount else { return "" }
-        return amount.formatted(.currency(code: price.currency ?? defaultCurrencyCode).presentation(.narrow))
+    /// "€12.50" or "12,50 €", per the device's region. nil while the option has no amount.
+    static func amount(_ option: ParkPriceOption, fallbackCurrency: String? = nil) -> String? {
+        guard let decimal = option.decimal else { return nil }
+        return decimal.formatted(.currency(code: option.currency ?? fallbackCurrency ?? defaultCurrencyCode))
     }
 
-    /// "per person", "90 minutes", or both, from the structured fields.
-    static func priceQualifier(_ price: ParkPrice) -> String? {
-        var parts: [String] = []
-        if let per = price.per {
-            switch per {
-            case ParkPriceUnit.person: parts.append(String(localized: "per person"))
-            case ParkPriceUnit.hour: parts.append(String(localized: "per hour"))
-            case ParkPriceUnit.day: parts.append(String(localized: "per day"))
-            case ParkPriceUnit.session: parts.append(String(localized: "per session"))
-            default: parts.append(String(localized: "per \(per)"))
-            }
+    /// What goes back into the amount field when an existing option is opened.
+    static func amountInputText(_ option: ParkPriceOption) -> String {
+        option.decimal?.formatted(.number.precision(.fractionLength(0...2)).grouping(.never)) ?? ""
+    }
+
+    /// "per hour" for the known units, the text as written for anything else.
+    static func perText(_ per: String?) -> String? {
+        guard let per, !per.isEmpty else { return nil }
+        switch per {
+        case ParkPriceUnit.person: return String(localized: "per person")
+        case ParkPriceUnit.hour: return String(localized: "per hour")
+        case ParkPriceUnit.day: return String(localized: "per day")
+        case ParkPriceUnit.session: return String(localized: "per session")
+        default: return per
         }
-        if let minutes = price.minutes, minutes > 0 { parts.append(Self.minutes(minutes)) }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
-    /// The line under a price name: the note the park wrote, else what the structured fields say.
-    static func priceDetail(_ price: ParkPrice) -> String? {
-        price.note ?? priceQualifier(price)
+    /// "€10 per hour", "€38,50 · kids up to 15".
+    static func optionLine(_ option: ParkPriceOption, fallbackCurrency: String? = nil) -> String {
+        [amount(option, fallbackCurrency: fallbackCurrency), perText(option.per), option.note]
+            .compactMap { $0 }
+            .joined(separator: " · ")
     }
 
-    /// "1 hour, 30 minutes", "45 minutes".
-    static func minutes(_ minutes: Int) -> String {
-        Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .wide))
+    /// The currency of the first option that names one: new options follow it.
+    static func currency(of price: ParkPrice) -> String? {
+        price.options.compactMap(\.currency).first
+    }
+
+    /// One line under a price name in the editor.
+    static func priceSummary(_ price: ParkPrice) -> String? {
+        let lines = price.options.filter { !$0.isBlank }.map { optionLine($0) }
+        return lines.isEmpty ? nil : lines.joined(separator: "  |  ")
     }
 
     static func currencyName(_ code: String) -> String {

@@ -63,6 +63,7 @@ public enum ParkLimits {
     public static let rules = 40
     public static let slots = 60
     public static let prices = 60
+    public static let priceOptions = 12
     public static let links = 20
     public static let dates = 60
 }

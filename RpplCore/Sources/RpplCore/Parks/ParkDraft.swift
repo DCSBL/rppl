@@ -51,7 +51,9 @@ public enum ParkDraft {
         }
         for (index, price) in (park.prices ?? []).enumerated() {
             if price.name.trimmingCharacters(in: .whitespaces).isEmpty { issues.append(.priceNeedsName(index: index)) }
-            if price.amount == nil { issues.append(.priceNeedsAmount(index: index)) }
+            if price.options.isEmpty || price.options.contains(where: { ($0.amount ?? "").isEmpty }) {
+                issues.append(.priceNeedsAmount(index: index))
+            }
         }
         for (index, link) in (park.links ?? []).enumerated() {
             if link.kind.trimmingCharacters(in: .whitespaces).isEmpty { issues.append(.linkNeedsKind(index: index)) }
@@ -114,13 +116,22 @@ public enum ParkDraft {
         }
         park.cables = cables.isEmpty ? nil : Array(cables.prefix(ParkLimits.cables))
 
-        let prices = (park.prices ?? []).filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty || $0.amount != nil }
-            .map { price -> ParkPrice in
-                var price = price
-                price.name = ParkText.finalize(price.name, field: .label) ?? ""
-                price.note = ParkText.finalize(price.note, field: .note)
-                return price
-            }
+        let prices = (park.prices ?? []).map { price -> ParkPrice in
+            var price = price
+            price.name = ParkText.finalize(price.name, field: .label) ?? ""
+            price.options = price.options.prefix(ParkLimits.priceOptions).map { option in
+                var option = option
+                option.per = ParkText.finalize(option.per, field: .label)
+                option.note = ParkText.finalize(option.note, field: .note)
+                option.currency = option.currency.flatMap { $0.isEmpty ? nil : $0.uppercased() }
+                option.amount = option.amount.flatMap { text in
+                    if case .amount(let parsed) = ParkPriceParser.parse(text) { return parsed.text }
+                    return text.isEmpty ? nil : text
+                }
+                return option
+            }.filter { !$0.isBlank }
+            return price
+        }.filter { !$0.name.isEmpty || !$0.options.isEmpty }
         park.prices = prices.isEmpty ? nil : Array(prices.prefix(ParkLimits.prices))
 
         var links: [ParkLink] = []
