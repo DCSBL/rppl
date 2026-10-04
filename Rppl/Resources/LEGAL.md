@@ -17,7 +17,7 @@ Because we never receive your data, we **cannot** process, sell, or share it, us
 - Crash reports, including device model and iOS / watchOS version
 - Feedback and screenshots you send through TestFlight, with device details (model, OS version, battery level, free storage, network type, time zone)
 
-## A note from Duco
+## A note from the developer
 
 Hi! Mijn naam is Duco. Sinds dit jaar ben ik vaak bij een kabelpark te vinden om te wakeboarden. De gewone Apple Workout app is helaas te basis, waardoor ik op zoek gegaan ben naar een betere tracker. Het huidige aanbod voldeed helaas niet aan mijn verwachtingen; te complex of juist te gelimiteerd, verplichte abonnementen en de lust van het opvragen van data. Dat moest anders.
 
@@ -41,13 +41,13 @@ I hope that, like me, you enjoy tracking your sessions!
 
 ## About Rppl
 
-Rppl is a hobby project by Duco Sebel (the Netherlands). It earns no money today, and using it is entirely your choice. This document covers both the terms of use and privacy.
+Rppl is a hobby project by Duco Sebel (the Netherlands). Using it is entirely your choice. This document covers both the terms of use and privacy.
 
 The source code is licensed separately under [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0: noncommercial use only).
 
 ## How does Rppl earn money?
 
-It doesn't. Rppl exists because the alternatives I found all cost money. There are no ads, no subscription, and no selling of data.
+It doesn't. Rppl exists because the alternatives I found all cost money or are hungry for data. There are no ads, no subscription, and no selling of data.
 
 We might add paid features or donations in the future, but only to cover costs (like Apple fees) and keep the app awesome for riders. Existing features stay free for as long as that is feasible.
 
