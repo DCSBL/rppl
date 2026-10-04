@@ -479,8 +479,6 @@ extension ParkOpenStatus {
 /// they're plain status, not a window.
 enum ParkStatusBadge {
     static func text(for park: Park, filterDate: Date?, now: Date = Date()) -> (text: String, color: Color)? {
-        guard park.opening != nil else { return nil }
-
         if let filterDate {
             let day = park.schedule(on: filterDate)
             guard day.isScheduleKnown else {

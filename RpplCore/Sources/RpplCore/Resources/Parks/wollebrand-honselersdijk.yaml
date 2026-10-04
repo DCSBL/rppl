@@ -13,6 +13,10 @@ history:
     description: add seasonal opening hours
   - date: 2026-09-26
     description: refine cable trace (in-app edit)
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: group prices of the same name into options
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
@@ -78,11 +82,21 @@ opening:
     - { id: "6", start: "20:00", end: "21:20" }
 
 prices:
-  - { name: Block (80 min), price: "€ 25,00", note: p.p. }
-  - { name: Wetsuit rental, price: "€ 5,00", note: per 80 min }
-  - { name: Wakeboard rental, price: "€ 10,00", note: per 80 min }
-  - { name: Obstacle board rental, price: "€ 20,00", note: per 80 min }
-  - { name: 10x block (80 min), price: "€ 220,00", note: "€ 30,00 discount" }
+  - name: Block (80 min)
+    options:
+      - { amount: "25", currency: EUR, per: person }
+  - name: Wetsuit rental
+    options:
+      - { amount: "5", currency: EUR, per: per 80 min }
+  - name: Wakeboard rental
+    options:
+      - { amount: "10", currency: EUR, per: per 80 min }
+  - name: Obstacle board rental
+    options:
+      - { amount: "20", currency: EUR, per: per 80 min }
+  - name: "10x block (80 min)"
+    options:
+      - { amount: "220", currency: EUR, note: "€ 30,00 discount" }
 
 facilities:
   - Rental (skis, wakeboard, wetsuit)

@@ -13,7 +13,15 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 
 ### In-app editor
 
-- Parks tab `+` creates a park; park detail `…` menu → Edit changes one. Cables are traced by tapping a satellite or standard map. `AppSettingsKey.parkEditorEnabled` (default on) hides the editor entry points.
+- Parks tab `+` creates a park; park detail `…` menu → Edit changes one. `AppSettingsKey.parkEditorEnabled` (default on) hides the editor entry points.
+- A **new park** is walked through page by page (welcome, basics, contact and links, about, cables, opening times, prices, review). An **existing park** opens a list of the same pages to jump between. Only name and location are needed to save; empty pages are left out. The time zone sits under "Advanced"; `author`, `from`/`until` and `exceptions` are kept when saving but not edited in the app.
+- **Drafts:** every change is written to `<App Group>/ParkDrafts/<id>.json` (`ParkEditDraft`, `ParkDraftStore`), also when the app goes to the background. A draft may be incomplete (no name, no location, half-filled lists). Drafts show on top of the Parks list; closing with unsaved changes asks: save as draft, discard, or keep editing. Saving the park deletes the draft.
+- **Lists** (facilities, cables, hours, blocks, prices, links, dates) always end in an empty row. Typing in it makes it a real row and a new empty one appears; a real row left empty when the keyboard goes away is removed; swipe deletes (cables, hours, blocks, prices and links ask first).
+- **Text** typed in the editor is cleaned by `ParkText`: control characters, bidi overrides and private-use code points go, any script, RTL and emoji stay, each field has a length limit. Description and notes accept light markdown (italic, bold, lists); headings and HTML tags are stripped. Markdown is stored as typed and not rendered yet.
+- **Location** is set on a map with a crosshair; the time zone follows the location (MapKit) until picked by hand. Cables are traced the same way; the shape question (full size or 2.0) is only asked when the cable has none yet, and the direction of a loop follows the traced order.
+- **Opening times:** months and days are switch lists (`ParkDaySelection` stores the shortest selector). Block ids are assigned by the editor and `numbered` is not shown. **No rules or blocks filled in means unknown**, not closed (`ParkOpening.isScheduleKnown`).
+- **Prices:** a name plus amount rows (currency menu, number, a "per" menu with an "Other" free text, a note). Similar prices are one name with several amounts.
+- **Links:** Booking, Instagram, Facebook, YouTube (picked from the address) or a custom name; one link per name, a repeated name replaces the first. Shown on the contact page.
 - Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
 - An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
 - `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer).
@@ -53,7 +61,7 @@ cables:
 
 opening:
   booking: required               # required | optional | none
-  numbered: true                  # false = blocks are plain start times (hourly), not "Block 3"
+  numbered: true                  # false = blocks are plain start times (hourly), not "Block 3" (not shown in the editor)
   booking_minutes: [60, 120]      # optional: bookable per 1 or 2 hours
   note: free text
   rules:                          # drop-in / open windows
@@ -63,7 +71,18 @@ opening:
   exceptions:                     # optional one-offs on top of `rules`, see "Exceptions" below
     - { kind: closed, label: Wind, dates: ["2026-09-25"] }
 
-prices:  [{ name: Day pass, price: "€25", note: optional }]
+prices:                           # a name with one or more amounts
+  - name: Skis
+    options:
+      - { amount: "10", currency: EUR, per: hour }
+      - { amount: "15", currency: EUR, per: "2 hours" }
+  - name: Day pass
+    options:
+      - { amount: "38.50", currency: EUR, note: kids up to 15 }
+      - { amount: "49.50", currency: EUR, note: adults }
+  - name: Group discount
+    options:
+      - { amount: "-3", currency: EUR, per: person }   # negative = discount
 links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
 facilities: [rental, bar]
 description: optional text
@@ -72,6 +91,10 @@ wakesys: true                     # optional, default false — this park's book
 # Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 ```
+
+### Prices
+
+A price is a `name` with `options`: one entry per amount ("skis": €10 for 1 hour, €15 for 2 hours; "day pass": one amount per audience). `amount` is exact decimal text, signed (negative is a discount); a plain YAML number is read the same. `currency` is an ISO 4217 code. `per` is free text; `person`, `hour`, `day` and `session` are shown in the reader's language ("per hour"), anything else as written ("per season", "1,5 uur"). `note` says who or what the amount is for. The detail screen groups the amounts under the name and formats them in the reader's own number format (`€12,34` or `$12.34`). In the editor people type the amount (`12,34`, `1.234,56`, `12,-`, `-3`) and `ParkPriceParser` reads it. Times are stored as 24 hour `HH:mm` (or `sunset`), dates as `yyyy-MM-dd`.
 
 ### Opening rules and slots
 
@@ -90,7 +113,7 @@ Rules and slots share optional selectors, all of which must match a date:
 - A park with **slots only** offers each slot on the days it matches.
 - A park with **both** offers a slot only when it fits completely inside an open window. Example: Project 7 in September on a weekday is open 14:00–20:00, so blocks 3–6 are available; on weekends 12:30–20:00 adds block 2.
 - Several rules may match one day (for example a beginner hour inside the opening window); all are shown.
-- No matching rule means closed.
+- No matching rule means closed. **No rules and no slots at all** means the hours are unknown: "Opening hours unknown", never filtered out by the Open filter.
 
 ### Display
 
@@ -123,7 +146,7 @@ opening:
 
 - Precedence per day: `closed` beats `hours` beats the regular rules. `extra` is added on top of either.
 - `sunset` (also allowed in normal rules) is not calculated: it is just a name for 00:00 internally, so the park counts as open until the end of that day and closed after 00:00. The UI still says "sunset" ("Open from 17:00 to sunset"), never a clock time; `ParkTimeWindow.endsAtSunset` carries that. Blocks only count when they end before the close, so a `sunset` window offers every block up to 23:00.
-- The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
+- The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park without rules or slots, an `hours` or `closed` exception makes just that day known.
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
 - Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 

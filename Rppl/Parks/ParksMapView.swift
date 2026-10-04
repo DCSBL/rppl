@@ -102,7 +102,6 @@ struct ParksMapView: View {
     /// palette as the detail badge, so the map and the card agree. A favorite keeps its star glyph
     /// but is colored the same way, rather than always yellow, so status doesn't disappear on tap.
     private static func pinColor(for park: Park) -> Color {
-        guard park.opening != nil else { return ParkOpenStatus.unknown.badgeColor }
         return park.openStatus().badgeColor
     }
 

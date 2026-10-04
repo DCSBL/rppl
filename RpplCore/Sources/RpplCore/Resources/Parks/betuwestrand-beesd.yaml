@@ -10,6 +10,10 @@ updated_at: 2026-09-28
 history:
   - date: 2026-09-28
     description: initial
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: group prices of the same name into options
 
 author: Rppl
 name: BetuweStrand
@@ -43,40 +47,70 @@ cables:
 
 # Source: betuwestrand.nl/waterski/tarieven-waterskibaan
 prices:
-  - { name: 1 uur, price: "€17,50", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 1 uur, price: "€23,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 2 uur, price: "€23,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 2 uur, price: "€29,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 1 dag, price: "€38,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 1 dag, price: "€51,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 2 dagen, price: "€63,00", note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 2 dagen, price: "€84,00", note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - { name: 1 uur, price: "€20,50", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-  - { name: 1 uur, price: "€27,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
-  - { name: 2 uur, price: "€27,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-  - { name: 2 uur, price: "€35,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
-  - { name: 1 dag, price: "€45,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-  - { name: 1 dag, price: "€58,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
-  - { name: 2 dagen, price: "€75,00", note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-  - { name: 2 dagen, price: "€96,00", note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
-  - { name: 1 week, price: "€130,00", note: "t/m 12 jaar" }
-  - { name: 1 week, price: "€181,00", note: "vanaf 13 jaar" }
-  - { name: 2 weken, price: "€195,00", note: "t/m 12 jaar" }
-  - { name: 2 weken, price: "€270,00", note: "vanaf 13 jaar" }
-  - { name: 3 weken, price: "€294,00", note: "t/m 12 jaar" }
-  - { name: 3 weken, price: "€407,00", note: "vanaf 13 jaar" }
-  - { name: 4 weken, price: "€390,00", note: "t/m 12 jaar" }
-  - { name: 4 weken, price: "€545,00", note: "vanaf 13 jaar" }
-  - { name: Geheel seizoen 2026, price: "€650,00", note: "t/m 12 jaar" }
-  - { name: Geheel seizoen 2026, price: "€810,00", note: "vanaf 13 jaar" }
-  - { name: Wetsuit huur, price: "€6,00", note: "per uur" }
-  - { name: Wetsuit huur, price: "€8,00", note: "per 2 uur" }
-  - { name: Wetsuit huur, price: "€12,00", note: "per dag" }
-  - { name: Wetsuit huur, price: "€18,00", note: "per 2 dagen" }
-  - { name: Wakeboard huur, price: "€10,00", note: "per uur" }
-  - { name: Wakeboard huur, price: "€15,00", note: "per 2 uur" }
-  - { name: Wakeboard huur, price: "€25,00", note: "per dag" }
-  - { name: Wakeboard huur, price: "€37,50", note: "per 2 dagen" }
+  - name: "1 uur"
+    options:
+      - { amount: "17.50", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "23", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - name: "2 uur"
+    options:
+      - { amount: "23", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "29", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - name: "1 dag"
+    options:
+      - { amount: "38", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "51", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - name: "2 dagen"
+    options:
+      - { amount: "63", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "84", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+  - name: "1 uur"
+    options:
+      - { amount: "20.50", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+      - { amount: "27", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - name: "2 uur"
+    options:
+      - { amount: "27", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+      - { amount: "35", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - name: "1 dag"
+    options:
+      - { amount: "45", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+      - { amount: "58", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - name: "2 dagen"
+    options:
+      - { amount: "75", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
+      - { amount: "96", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+  - name: "1 week"
+    options:
+      - { amount: "130", currency: EUR, note: t/m 12 jaar }
+      - { amount: "181", currency: EUR, note: vanaf 13 jaar }
+  - name: "2 weken"
+    options:
+      - { amount: "195", currency: EUR, note: t/m 12 jaar }
+      - { amount: "270", currency: EUR, note: vanaf 13 jaar }
+  - name: "3 weken"
+    options:
+      - { amount: "294", currency: EUR, note: t/m 12 jaar }
+      - { amount: "407", currency: EUR, note: vanaf 13 jaar }
+  - name: "4 weken"
+    options:
+      - { amount: "390", currency: EUR, note: t/m 12 jaar }
+      - { amount: "545", currency: EUR, note: vanaf 13 jaar }
+  - name: Geheel seizoen 2026
+    options:
+      - { amount: "650", currency: EUR, note: t/m 12 jaar }
+      - { amount: "810", currency: EUR, note: vanaf 13 jaar }
+  - name: Wetsuit huur
+    options:
+      - { amount: "6", currency: EUR, per: per uur }
+      - { amount: "8", currency: EUR, per: per 2 uur }
+      - { amount: "12", currency: EUR, per: day }
+      - { amount: "18", currency: EUR, per: per 2 dagen }
+  - name: Wakeboard huur
+    options:
+      - { amount: "10", currency: EUR, per: per uur }
+      - { amount: "15", currency: EUR, per: per 2 uur }
+      - { amount: "25", currency: EUR, per: day }
+      - { amount: "37.50", currency: EUR, per: per 2 dagen }
 
 links:
   - { kind: booking, url: "https://www.betuwestrand.nl/waterski/reserveren" }

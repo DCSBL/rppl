@@ -23,6 +23,9 @@ struct ParkDetailView: View {
     @State private var showWaterTemperaturePrompt = false
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var showEditor = false
+    @State private var resumeDraft: ParkEditDraft?
+    @State private var askAboutDraft = false
+    @State private var drafts = ParkDraftsController.shared
     @State private var showMail = false
     @State private var confirmRemove = false
 
@@ -58,17 +61,16 @@ struct ParkDetailView: View {
     }
 
     var body: some View {
-        let daySchedule = park.opening != nil ? park.schedule() : nil
+        // Without opening times the Today card says so ("Opening hours unknown"); nothing to switch on.
+        let daySchedule = park.schedule()
         ScrollView {
             VStack(spacing: 12) {
                 updateCard
                 mapCard
-                if let daySchedule {
-                    todayCard(daySchedule)
-                    upcomingChangesCard
-                    openingTimesCard
-                    blocksCard(daySchedule)
-                }
+                todayCard(daySchedule)
+                upcomingChangesCard
+                openingTimesCard
+                blocksCard(daySchedule)
                 ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
                     cableCard(cable)
                 }
@@ -96,7 +98,20 @@ struct ParkDetailView: View {
             }
         }
         .sheet(isPresented: $showEditor) {
-            ParkEditorView(original: park, onSaved: {})
+            ParkEditorView(original: park, resuming: resumeDraft)
+        }
+        .confirmationDialog("Continue your unsaved changes?", isPresented: $askAboutDraft, titleVisibility: .visible) {
+            Button("Continue editing") {
+                resumeDraft = drafts.draft(editing: park.id)
+                showEditor = true
+            }
+            Button("Start over", role: .destructive) {
+                if let draft = drafts.draft(editing: park.id) { drafts.delete(draft) }
+                resumeDraft = nil
+                showEditor = true
+            }
+        } message: {
+            Text("You have changes to this park that were not saved.")
         }
         .sheet(isPresented: $showMail) {
             ParkMailComposer(park: park, changedSections: changedSections, lineDiff: lineDiff) { showMail = false }
@@ -106,6 +121,7 @@ struct ParkDetailView: View {
             Button(removeTitle, role: .destructive) { ParkStore.shared.removeUserVersion(id: park.id) }
         }
         .task {
+            drafts.reload()
             async let weatherResult = weatherProvider.weather(for: park)
             async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
             weather = await weatherResult
@@ -142,9 +158,19 @@ struct ParkDetailView: View {
         entry?.origin == .custom ? String(localized: "Delete park") : String(localized: "Revert to app version")
     }
 
+    private func startEditing() {
+        drafts.reload()
+        if drafts.draft(editing: park.id) != nil {
+            askAboutDraft = true
+        } else {
+            resumeDraft = nil
+            showEditor = true
+        }
+    }
+
     private var editMenu: some View {
         Menu {
-            Button("Edit", systemImage: "pencil") { showEditor = true }
+            Button("Edit", systemImage: "pencil") { startEditing() }
             Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
             if let origin = entry?.origin, origin != .bundled {
                 Button("Send to Rppl", systemImage: "envelope") {
@@ -587,20 +613,45 @@ struct ParkDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle("Prices")
                 ForEach(Array(prices.enumerated()), id: \.offset) { _, price in
-                    HStack(alignment: .firstTextBaseline) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(price.name).foregroundStyle(Color.rpplText)
-                            if let note = price.note {
-                                Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
-                            }
-                        }
-                        Spacer(minLength: 8)
-                        Text(price.price).bold().foregroundStyle(Color.rpplText)
-                    }
+                    priceRow(price)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .logbookCardChrome()
+        }
+    }
+
+    /// One name with its amounts under it. A single plain amount sits on the name's line.
+    @ViewBuilder
+    private func priceRow(_ price: ParkPrice) -> some View {
+        let options = price.options.filter { $0.amount != nil }
+        if options.count == 1, let only = options.first, only.per == nil {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(price.name).foregroundStyle(Color.rpplText)
+                    if let note = only.note { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
+                }
+                Spacer(minLength: 8)
+                Text(ParkFormatting.amount(only) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(price.name).foregroundStyle(Color.rpplText)
+                ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(ParkFormatting.perText(option.per) ?? option.note ?? "")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.rpplMuted)
+                            if option.per != nil, let note = option.note {
+                                Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        Text(ParkFormatting.amount(option) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
+                    }
+                }
+            }
         }
     }
 
@@ -637,7 +688,7 @@ struct ParkDetailView: View {
                 ForEach(Array(links.enumerated()), id: \.offset) { _, link in
                     if let url = URL(string: link.url) {
                         Link(destination: url) {
-                            Label(link.kind.capitalized, systemImage: "link")
+                            Label(ParkFormatting.linkKind(link.kind), systemImage: "link")
                         }
                     }
                 }
@@ -649,7 +700,7 @@ struct ParkDetailView: View {
 
     private var footer: some View {
         VStack(spacing: 6) {
-            if park.opening != nil {
+            if park.opening?.isScheduleKnown == true {
                 Text("Opening times may change and can be outdated. Verify with the park before booking.")
             }
             if let author = park.author, author.caseInsensitiveCompare("rppl") != .orderedSame {

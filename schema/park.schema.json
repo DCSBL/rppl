@@ -62,11 +62,30 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "price"],
+        "required": ["name", "options"],
         "properties": {
           "name": { "type": "string", "minLength": 1 },
-          "price": { "type": "string", "minLength": 1 },
-          "note": { "type": "string" }
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount", "currency"],
+              "properties": {
+                "amount": {
+                  "description": "Exact decimal, negative for a discount.",
+                  "oneOf": [
+                    { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]{1,2})?$" },
+                    { "type": "number" }
+                  ]
+                },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                "per": { "type": "string", "minLength": 1 },
+                "note": { "type": "string" }
+              }
+            }
+          }
         }
       }
     },
@@ -271,7 +290,7 @@
           "items": { "type": "integer", "exclusiveMinimum": 0 }
         },
         "note": { "type": "string" },
-        "hours_unknown": { "type": "boolean" }
+        "hours_unknown": { "type": "boolean", "description": "Deprecated and ignored: a park without rules or slots has unknown hours." }
       }
     }
   }

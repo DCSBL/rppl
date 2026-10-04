@@ -68,7 +68,8 @@ struct ParksTests {
         #expect(park.openStatus(at: date("2026-10-02", hour: 12)) == .opensTomorrow)
         // 2026-10-05 is a Monday, 10-06 a Tuesday: both closed (October is weekend-only).
         #expect(park.openStatus(at: date("2026-10-05", hour: 12)) == .closed)
-        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .closed)
+        // No opening times filled in is unknown, never closed.
+        #expect(Park(id: "x", name: "X", location: ParkCoordinate(lat: 0, lon: 0)).openStatus() == .unknown)
     }
 
     @Test func openStatusDetailCarriesTheRelevantWindow() throws {
@@ -170,7 +171,7 @@ struct ParksTests {
         #expect(park.cables?.first?.direction == .counterClockwise)
         #expect(park.cables?.first?.effectiveLengthM == 720)
         #expect(park.cables?.first?.points?.count == 5)
-        #expect(park.prices?.count == 8)
+        #expect(park.prices?.count == 5)
         #expect(park.links?.contains { $0.kind == "booking" } == true)
         // 2026-09-24 Thursday 17-20, 09-23 Wednesday 15-20, 09-28 Monday closed, 09-26 Saturday 12-19.
         #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.start) == ["17:00", "18:00", "19:00"])
@@ -250,7 +251,7 @@ struct ParksTests {
         #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.id) == ["b"])
     }
 
-    @Test func hoursUnknownOverridesRulesAndSlots() throws {
+    @Test func noRulesOrSlotsMeansUnknownAndTheOldHoursUnknownKeyIsIgnored() throws {
         let yaml = """
         version: 1
         id: unknown-hours
@@ -258,10 +259,8 @@ struct ParksTests {
         location: { lat: 52.0, lon: 4.0 }
         opening:
           hours_unknown: true
-          slots:
-            - { id: a, start: "10:00", end: "11:00" }
-          rules:
-            - { days: [mon], open: "10:00", close: "11:00" }
+          booking: required
+          note: Call first
         """
         let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
         let day = park.schedule(on: date("2026-09-24"))
@@ -269,6 +268,23 @@ struct ParksTests {
         #expect(day.isOpen == false)
         #expect(day.availableSlots.isEmpty)
         #expect(park.openStatus(at: date("2026-09-24", hour: 10)) == .unknown)
+        #expect(try !ParkCatalog.encode(park).contains("hours_unknown"))
+    }
+
+    @Test func blocksAloneMakeTheScheduleKnown() throws {
+        let yaml = """
+        version: 1
+        id: blocks-only
+        name: Blocks
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          slots:
+            - { id: a, days: [thu], start: "10:00", end: "11:00" }
+        """
+        let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
+        #expect(park.schedule(on: date("2026-09-24")).availableSlots.map(\.id) == ["a"]) // Thursday
+        #expect(park.schedule(on: date("2026-09-25")).isScheduleKnown)
+        #expect(park.schedule(on: date("2026-09-25")).isOpen == false)
     }
 
     @Test func bundledWollebrandHasSeasonalHours() throws {
@@ -585,16 +601,14 @@ struct ParksTests {
         name: Unknown
         location: { lat: 52.0, lon: 4.0 }
         opening:
-          hours_unknown: true
-          slots:
-            - { id: "1", start: "10:00", end: "11:00" }
+          note: Only announced days are known
           exceptions:
             - { kind: hours, dates: ["2026-06-10"], open: "09:00", close: "12:00" }
             - { kind: closed, dates: ["2026-06-11"] }
         """, fallbackId: "x")
         let announced = park.schedule(on: date("2026-06-10"))
         #expect(announced.isScheduleKnown)
-        #expect(announced.availableSlots.map(\.id) == ["1"])
+        #expect(announced.windows.map(\.startMinute) == [9 * 60])
         let closed = park.schedule(on: date("2026-06-11"))
         #expect(closed.isScheduleKnown)
         #expect(closed.isOpen == false)

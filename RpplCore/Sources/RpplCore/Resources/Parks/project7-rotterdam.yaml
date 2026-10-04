@@ -15,6 +15,10 @@ history:
     description: rename restaurant to Nossa Nesselande (was Storm)
   - date: 2026-09-26
     description: refine cable trace and simplify restaurant facility label (in-app edit)
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: group prices of the same name into options
 
 author: Rppl
 name: Project 7 Cablepark Rotterdam
@@ -48,17 +52,37 @@ facilities:
 
 # Source: project7cablepark.nl/tarieven + FAQ
 prices:
-  - { name: Online ticket, price: "€29", note: "1.5h block" }
-  - { name: Counter ticket, price: "€31", note: "1.5h block" }
-  - { name: 10x block card, price: "€260", note: "voordeelkaart, 1.5h blocks" }
-  - { name: Wetsuit rental, price: "€7,50", note: "per 1.5h" }
-  - { name: Wakeboard rental, price: "€12,50", note: "per 1.5h" }
-  - { name: Obstacle board rental, price: "€20", note: "per 1.5h" }
-  - { name: Monthly pass, price: "€345", note: "May, June or September" }
-  - { name: Monthly pass, price: "€395", note: "July or August" }
-  - { name: Season pass, price: "€995" }
-  - { name: Gift voucher, price: "€29", note: "belevenisbon, redeem for one online ticket" }
-  - { name: Group discount, price: "-€3 pp", note: "11+ people, paid as one group" }
+  - name: Online ticket
+    options:
+      - { amount: "29", currency: EUR, per: "1.5h block" }
+  - name: Counter ticket
+    options:
+      - { amount: "31", currency: EUR, per: "1.5h block" }
+  - name: "10x block card"
+    options:
+      - { amount: "260", currency: EUR, note: "voordeelkaart, 1.5h blocks" }
+  - name: Wetsuit rental
+    options:
+      - { amount: "7.50", currency: EUR, per: per 1.5h }
+  - name: Wakeboard rental
+    options:
+      - { amount: "12.50", currency: EUR, per: per 1.5h }
+  - name: Obstacle board rental
+    options:
+      - { amount: "20", currency: EUR, per: per 1.5h }
+  - name: Monthly pass
+    options:
+      - { amount: "345", currency: EUR, note: "May, June or September" }
+      - { amount: "395", currency: EUR, note: July or August }
+  - name: Season pass
+    options:
+      - { amount: "995", currency: EUR }
+  - name: Gift voucher
+    options:
+      - { amount: "29", currency: EUR, note: "belevenisbon, redeem for one online ticket" }
+  - name: Group discount
+    options:
+      - { amount: "-3", currency: EUR, per: person, note: "11+ people, paid as one group" }
 
 cables:
   - name: Cable
