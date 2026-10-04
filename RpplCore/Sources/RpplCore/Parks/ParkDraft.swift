@@ -155,7 +155,6 @@ public enum ParkDraft {
             opening.slots = slots.isEmpty ? nil : slots
             let isEmpty = opening.booking == nil && opening.rules == nil && opening.slots == nil
                 && opening.note == nil && opening.bookingMinutes == nil && opening.exceptions == nil
-                && opening.hoursUnknown != true
             park.opening = isEmpty ? nil : opening
         }
         return park

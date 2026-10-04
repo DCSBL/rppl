@@ -25,9 +25,7 @@ struct ParkOpeningPage: View {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Opening hours unknown").font(.subheadline.weight(.semibold))
-                            Text(opening.hoursUnknown == true
-                                ? "Days are marked as not published, so the park shows as unknown."
-                                : "Nothing is filled in yet, so the park shows as unknown. That is fine when you do not know the hours.")
+                            Text("Nothing is filled in yet, so the park shows as unknown. That is fine when you do not know the hours.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -125,14 +123,6 @@ struct ParkOpeningPage: View {
                 )
             }
 
-            if opening.hasSchedule {
-                Section {
-                    Toggle("Days are not published", isOn: daysNotPublished)
-                } footer: {
-                    Text("Switch on when the park lists its hours or blocks but not which days they apply to. The park then shows as unknown instead of guessing.")
-                }
-            }
-
             if let count = opening.exceptions?.count, count > 0 {
                 Section {
                     Label("\(count) announced changes are kept as they are", systemImage: "calendar.badge.exclamationmark")
@@ -171,13 +161,6 @@ struct ParkOpeningPage: View {
         Binding(
             get: { session.park.opening?.note ?? "" },
             set: { new in session.updateOpening { $0.note = new.isEmpty ? nil : new } }
-        )
-    }
-
-    private var daysNotPublished: Binding<Bool> {
-        Binding(
-            get: { session.park.opening?.hoursUnknown == true },
-            set: { new in session.updateOpening { $0.hoursUnknown = new ? true : nil } }
         )
     }
 

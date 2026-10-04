@@ -155,10 +155,6 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// Durations a booking can span, in minutes (`[60, 120]` = per 1 or 2 hours).
     public var bookingMinutes: [Int]?
     public var note: String?
-    /// `true` when the park doesn't publish which days its blocks/windows apply to (e.g. no weekly
-    /// schedule on their site) — `slots`/`rules` may still list block times, but we can't say which
-    /// days they're actually open. Overrides any day/week computation with "unknown" for every day.
-    public var hoursUnknown: Bool?
     /// Temporary or one-off changes (extra opening hours, closures, events) on top of `rules`.
     public var exceptions: [ParkOpeningException]?
 
@@ -166,13 +162,12 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     /// open, which reads as unknown, never as closed.
     public var hasSchedule: Bool { !(rules ?? []).isEmpty || !(slots ?? []).isEmpty }
 
-    /// `false` when the weekly pattern is not published (`hoursUnknown`) or nothing is filled in.
-    public var isScheduleKnown: Bool { hoursUnknown != true && hasSchedule }
+    /// `false` when no rules or slots are filled in: the park has not told us when it is open.
+    public var isScheduleKnown: Bool { hasSchedule }
 
     enum CodingKeys: String, CodingKey {
         case booking, rules, slots, numbered, note, exceptions
         case bookingMinutes = "booking_minutes"
-        case hoursUnknown = "hours_unknown"
     }
 
     public init(
@@ -182,7 +177,6 @@ public struct ParkOpening: Codable, Equatable, Sendable {
         numbered: Bool? = nil,
         bookingMinutes: [Int]? = nil,
         note: String? = nil,
-        hoursUnknown: Bool? = nil,
         exceptions: [ParkOpeningException]? = nil
     ) {
         self.booking = booking
@@ -191,7 +185,6 @@ public struct ParkOpening: Codable, Equatable, Sendable {
         self.numbered = numbered
         self.bookingMinutes = bookingMinutes
         self.note = note
-        self.hoursUnknown = hoursUnknown
         self.exceptions = exceptions
     }
 }
@@ -231,8 +224,7 @@ public struct ParkDaySchedule: Equatable, Sendable {
     public var windows: [ParkTimeWindow]
     /// Slots that fit inside an open window (or are fixed for the day when the park has no drop-in rules).
     public var availableSlots: [ParkSlot]
-    /// `false` when `opening.hoursUnknown` is set — the park's weekly day pattern isn't published, so
-    /// we can't tell which days its blocks/windows actually apply to.
+    /// `false` when the park has no rules or slots filled in, so we can't tell when it is open.
     public var isScheduleKnown: Bool
     /// Exceptions (closures, changed or extra hours, events) that apply to this day.
     public var notices: [ParkDayNotice]
@@ -363,9 +355,9 @@ public enum ParkSchedule {
         let active = activeExceptions(in: opening, on: context)
         let notices = active.map { ParkDayNotice(kind: $0.normalizedKind, label: $0.label, note: $0.note) }
 
-        // An unannounced or empty weekly pattern stays unknown, unless an exception states what happens that day.
-        let hoursUnknown = !opening.isScheduleKnown
-        if hoursUnknown, !active.contains(where: { [ParkExceptionKind.hours, ParkExceptionKind.closed].contains($0.normalizedKind) }) {
+        // An empty weekly pattern stays unknown, unless an exception states what happens that day.
+        let noPattern = !opening.hasSchedule
+        if noPattern, !active.contains(where: { [ParkExceptionKind.hours, ParkExceptionKind.closed].contains($0.normalizedKind) }) {
             return ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: false, notices: notices)
         }
 
@@ -373,7 +365,7 @@ public enum ParkSchedule {
             return ParkDaySchedule(windows: [], availableSlots: [], isScheduleKnown: true, notices: notices)
         }
 
-        let rules: [ParkOpeningRule] = hoursUnknown ? [] : (opening.rules ?? [])
+        let rules: [ParkOpeningRule] = opening.rules ?? []
         let regular: [ParkTimeWindow] = rules.filter { context.matches($0) }.compactMap { rule in
             makeWindow(open: rule.open, close: rule.close, label: rule.label, note: rule.note)
         }
@@ -384,7 +376,7 @@ public enum ParkSchedule {
         let slots = (opening.slots ?? []).filter { context.matches($0) }
         let available: [ParkSlot]
         if rules.isEmpty, replacing.isEmpty, extra.isEmpty {
-            available = hoursUnknown ? [] : slots
+            available = slots
         } else {
             available = slots.filter { slot in
                 guard let start = minutes(slot.start), var end = minutes(slot.end) else { return false }

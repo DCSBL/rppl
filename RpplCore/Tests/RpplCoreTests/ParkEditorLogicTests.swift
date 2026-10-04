@@ -216,8 +216,8 @@ struct ParkEditorLogicTests {
         var park = base()
         park.opening = ParkOpening(booking: nil, rules: [], slots: [])
         #expect(ParkDraft.finalized(park).opening == nil)
-        park.opening = ParkOpening(hoursUnknown: true)
-        #expect(ParkDraft.finalized(park).opening?.hoursUnknown == true)
+        park.opening = ParkOpening(booking: "required")
+        #expect(ParkDraft.finalized(park).opening?.booking == "required")
         park.opening = ParkOpening(exceptions: [ParkOpeningException(kind: "closed", dates: ["2026-10-10"])])
         #expect(ParkDraft.finalized(park).opening?.exceptions?.count == 1)
     }

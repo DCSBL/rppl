@@ -23,6 +23,8 @@ history:
         set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
   - date: 2026-10-04
     description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: drop hours_unknown (no hours filled in already means unknown)
 
 author: Rppl
 name: Lakeside Paradise
@@ -77,7 +79,6 @@ cables:
 
 opening:
   booking: required
-  hours_unknown: true
   note: >-
     Pro Cable: open daily (by reservation) from 30 March through the autumn school break;
     in winter, weekends and Flemish school holidays only, 12:00-16:00. Small Cable 2.0: from

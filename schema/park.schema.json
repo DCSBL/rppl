@@ -274,7 +274,7 @@
           "items": { "type": "integer", "exclusiveMinimum": 0 }
         },
         "note": { "type": "string" },
-        "hours_unknown": { "type": "boolean" }
+        "hours_unknown": { "type": "boolean", "description": "Deprecated and ignored: a park without rules or slots has unknown hours." }
       }
     }
   }

@@ -104,7 +104,7 @@ Rules and slots share optional selectors, all of which must match a date:
 - A park with **slots only** offers each slot on the days it matches.
 - A park with **both** offers a slot only when it fits completely inside an open window. Example: Project 7 in September on a weekday is open 14:00–20:00, so blocks 3–6 are available; on weekends 12:30–20:00 adds block 2.
 - Several rules may match one day (for example a beginner hour inside the opening window); all are shown.
-- No matching rule means closed. **No rules and no slots at all** (or `hours_unknown: true`) means the hours are unknown: "Opening hours unknown", never filtered out by the Open filter.
+- No matching rule means closed. **No rules and no slots at all** means the hours are unknown: "Opening hours unknown", never filtered out by the Open filter.
 
 ### Display
 
@@ -137,7 +137,7 @@ opening:
 
 - Precedence per day: `closed` beats `hours` beats the regular rules. `extra` is added on top of either.
 - `sunset` (also allowed in normal rules) is not calculated: it is just a name for 00:00 internally, so the park counts as open until the end of that day and closed after 00:00. The UI still says "sunset" ("Open from 17:00 to sunset"), never a clock time; `ParkTimeWindow.endsAtSunset` carries that. Blocks only count when they end before the close, so a `sunset` window offers every block up to 23:00.
-- The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park with `hours_unknown`, an `hours` or `closed` exception makes just that day known.
+- The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park without rules or slots, an `hours` or `closed` exception makes just that day known.
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
 - Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 

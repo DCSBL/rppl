@@ -7426,38 +7426,6 @@
         }
       }
     },
-    "Days are marked as not published, so the park shows as unknown." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Days are marked as not published, so the park shows as unknown."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De dagen staan als niet gepubliceerd, dus het park staat als onbekend."
-          }
-        }
-      }
-    },
-    "Days are not published" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Days are not published"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dagen zijn niet gepubliceerd"
-          }
-        }
-      }
-    },
     "Delete %@?" : {
       "localizations" : {
         "en" : {
@@ -9182,22 +9150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zet de maanden aan waarin deze tijden gelden. Zonder maanden of met alle maanden aan gelden ze het hele jaar."
-          }
-        }
-      }
-    },
-    "Switch on when the park lists its hours or blocks but not which days they apply to. The park then shows as unknown instead of guessing." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Switch on when the park lists its hours or blocks but not which days they apply to. The park then shows as unknown instead of guessing."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zet aan als het park tijden of blokken vermeldt maar niet op welke dagen ze gelden. Het park staat dan als onbekend in plaats van te gokken."
           }
         }
       }
