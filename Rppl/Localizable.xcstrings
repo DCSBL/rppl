@@ -5546,38 +5546,6 @@
         }
       }
     },
-    "Park: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park: %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park: %@"
-          }
-        }
-      }
-    },
-    "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n\nNotes:\n" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n\nNotes:\n"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoi Rppl,\n\nHierbij een park dat ik heb toegevoegd of bijgewerkt. Het YAML-bestand zit in de bijlage.\n\nOpmerkingen:\n"
-          }
-        }
-      }
-    },
     "Add point" : {
       "localizations" : {
         "en" : {
@@ -9598,6 +9566,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Full size gaat rond het water, langs elke hoek. Een 2.0 cable gaat heen en weer tussen twee torens. De richting volgt de volgorde waarin je de punten tracet."
+          }
+        }
+      }
+    },
+    "Hi Rppl,\n\nHere is a suggested change to a park.\n\nNotes:\n" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi Rppl,\n\nHere is a suggested change to a park.\n\nNotes:\n"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoi Rppl,\n\nHierbij een voorgestelde wijziging voor een park.\n\nOpmerkingen:\n"
+          }
+        }
+      }
+    },
+    "A suggested change to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A suggested change to %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een voorgestelde wijziging voor %@"
+          }
+        }
+      }
+    },
+    "Diff (base64-encoded, decode before reading):" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff (base64-encoded, decode before reading):"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff (base64-gecodeerd, eerst decoderen):"
+          }
+        }
+      }
+    },
+    "YAML (base64-encoded, decode before reading):" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YAML (base64-encoded, decode before reading):"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YAML (base64-gecodeerd, eerst decoderen):"
           }
         }
       }

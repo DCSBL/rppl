@@ -25,7 +25,7 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 - Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
 - An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
 - `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer).
-- Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl with the YAML attached (falls back to the share sheet when Mail is not set up).
+- Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl ("A suggested change to <park>") with the YAML attached and a base64 diff against the app version (falls back to the share sheet when Mail is not set up).
 
 ## Schema (version 1)
 
