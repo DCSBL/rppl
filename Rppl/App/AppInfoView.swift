@@ -154,6 +154,7 @@ struct AppInfoView: View {
             .scrollContentBackground(.hidden)
             .background(RpplBackdrop())
             .navigationTitle("Rppl")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
