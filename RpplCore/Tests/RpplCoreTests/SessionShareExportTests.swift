@@ -25,6 +25,14 @@ struct SessionShareExportTests {
         )
     }
 
+    @Test func anonymizedFileNameHasNoPlaceName() {
+        let started = Date(timeIntervalSince1970: 1_704_067_200)
+        #expect(
+            SessionShareExport.anonymizedFileName(startedAt: started)
+                == "rppl_2024-01-01T00-00-00Z_anonymized.json"
+        )
+    }
+
     @Test func sanitizeLocationCollapsesSeparators() {
         #expect(SessionShareExport.sanitizeLocation("A  /  B") == "A-B")
         #expect(SessionShareExport.sanitizeLocation("@@@") == "unknown")

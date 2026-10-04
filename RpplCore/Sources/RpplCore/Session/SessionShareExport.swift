@@ -19,6 +19,11 @@ public enum SessionShareExport {
         return "rppl_\(timestamp)_\(location).json"
     }
 
+    /// Share with Rppl filename: `rppl_<timestamp>_anonymized.json`. The place name stays out of it.
+    public static func anonymizedFileName(startedAt: Date) -> String {
+        fileName(startedAt: startedAt, locationName: "anonymized")
+    }
+
     /// Pretty-printed package bytes; top-level `manifest` is always the first key.
     ///
     /// `JSONEncoder` does not preserve `encode(_:forKey:)` order unless `.sortedKeys` is set,
