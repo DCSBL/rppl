@@ -9,6 +9,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -153,6 +154,15 @@ class RunTests(unittest.TestCase):
         (self.tmp / "Rppl").mkdir()
         shutil.copy(REPO_ROOT / pr.PBXPROJ, self.tmp / pr.PBXPROJ)
         shutil.copy(REPO_ROOT / pr.APP_INFO_PLIST, self.tmp / pr.APP_INFO_PLIST)
+        # CI stamps the real plist before these tests run; start from unstamped values.
+        plist = self.tmp / pr.APP_INFO_PLIST
+        plist.write_text(
+            re.sub(
+                r"(<key>Rppl(?:GitCommit|ReleaseTag)</key>\s*<string>)[^<]*",
+                r"\1",
+                plist.read_text(),
+            )
+        )
         self.fixture = self.tmp / "release.json"
         self.fixture.write_text(json.dumps({"body": "## Notes\n* Faster **sets**\n"}))
         self.env = {"RPPL_RELEASE_JSON": str(self.fixture)}
