@@ -812,7 +812,19 @@ public final class SessionFileStore: @unchecked Sendable {
 
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
         if let existing {
-            _ = try fileManager.replaceItemAt(existing, withItemAt: stagedDirectory)
+            // Two renames instead of `replaceItemAt` (which cannot replace a non-empty directory
+            // on Linux): the old copy steps aside, the new one takes its name, and a failure puts
+            // the old copy back, so an existing copy is never lost.
+            let backup = existing.deletingLastPathComponent()
+                .appendingPathComponent(".replaced-\(UUID().uuidString)", isDirectory: true)
+            try fileManager.moveItem(at: existing, to: backup)
+            do {
+                try fileManager.moveItem(at: stagedDirectory, to: existing)
+            } catch {
+                try? fileManager.moveItem(at: backup, to: existing)
+                throw error
+            }
+            try? fileManager.removeItem(at: backup)
             rememberDirectory(existing, for: sessionId)
             return
         }
