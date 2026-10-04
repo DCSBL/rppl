@@ -81,12 +81,7 @@ async function jsonlFromMotionFiles(files: File[]): Promise<string> {
     }
     return chunks.join('')
   }
-  const plain = files
-    .filter((f) => /^motion-\d+\.jsonl$/i.test(basename(f.name)))
-    .sort((a, b) => basename(a.name).localeCompare(basename(b.name)))
-  const parts: string[] = []
-  for (const file of plain) parts.push(await file.text())
-  return parts.join('')
+  return ''
 }
 
 async function loadRawFromFolder(files: File[], sessionId: string): Promise<RawTransferPackage> {
@@ -94,9 +89,7 @@ async function loadRawFromFolder(files: File[], sessionId: string): Promise<RawT
   const manifestFile = sessionFiles.find((f) => basename(f.name) === 'manifest.json')
   if (!manifestFile) throw new Error('folder missing manifest.json')
   const manifest = JSON.parse(await manifestFile.text()) as SessionManifest
-  const detectionsFile =
-    sessionFiles.find((f) => basename(f.name) === 'detections.jsonl') ??
-    sessionFiles.find((f) => basename(f.name) === 'assumptions.jsonl')
+  const detectionsFile = sessionFiles.find((f) => basename(f.name) === 'detections.jsonl')
   const detections = (await parseJsonl(detectionsFile)) as DetectionEvent[]
   const locations: unknown[] = []
   const locationFiles = sessionFiles

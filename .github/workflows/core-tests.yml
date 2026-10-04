@@ -1,0 +1,100 @@
+# RpplCore unit tests on Linux (Swift toolchain from the official swift Docker image).
+# Core is pure Swift (no UIKit/HealthKit/WCSession), so `swift test` runs without Xcode.
+# Apple-only APIs inside Core sit behind `#if canImport(...)` — see Docs/DevWorkflow.md.
+#
+# Two jobs: `core-tests` runs the tests with read-only permissions and keeps the raw log;
+# `report` turns the log into a job summary and one sticky PR comment (test count, failed tests).
+#
+# Required-check friendly: no `paths:` filter, so the job always reports a status.
+
+name: Core tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: core-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  core-tests:
+    name: RpplCore tests (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: swift:6.2-noble
+      # Non-root (the runner user): the store tests inject failures with chmod 000, which root ignores.
+      options: --user 1001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: swift test
+        working-directory: RpplCore
+        shell: bash # pipefail: keep swift's exit code through tee
+        run: swift test 2>&1 | tee swift-test.log
+
+      - name: Upload test log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-test-log
+          path: RpplCore/swift-test.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  report:
+    name: Test summary
+    needs: core-tests
+    # Also after a failed test run; not when the run was cancelled by a newer push.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download test log
+        uses: actions/download-artifact@v4
+        continue-on-error: true # missing when the test job died before `swift test`
+        with:
+          name: swift-test-log
+          path: logs
+
+      - name: Summarize
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/summarize_swift_test.py logs/swift-test.log \
+            --sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            | tee summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      # Same-repo PRs only: fork PRs get a read-only token. Best effort: a comment failure must not
+      # turn the PR red (the job summary above still has the result).
+      - name: Post PR comment
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          ids="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- core-tests-summary -->")) | .id')"
+          id="${ids%%$'\n'*}"
+          if [ -n "${id}" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${id}" -F body=@summary.md >/dev/null
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" -F body=@summary.md >/dev/null
+          fi

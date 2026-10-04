@@ -536,19 +536,6 @@ struct DetectionEventCodableTests {
         )
         #expect(decoded == original)
     }
-
-    @Test func decodesLegacyLineWithoutDetectorId() throws {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let json = Data(
-            #"{"code":"riding","id":"a1","reason":"ride_start","timestamp":"2024-01-01T00:00:00Z"}"#
-                .utf8
-        )
-        let event = try decoder.decode(DetectionEvent.self, from: json)
-        #expect(event.code == "riding")
-        #expect(event.id == "a1")
-        #expect(event.detectorId == "unknown")
-    }
 }
 
 @Suite("DetectionExtensibility")

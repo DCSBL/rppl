@@ -30,6 +30,7 @@ struct MetricDisplayTests {
         #expect(MetricDisplay.split("") == .init(value: "", unit: nil))
     }
 
+    #if canImport(Darwin) // DistanceFormat is Apple-only
     @Test func splitsRealFormatterOutput() {
         let nl = Locale(identifier: "nl_NL")
         let speed = MetricDisplay.split(DistanceFormat.kilometersPerHour(42.2, locale: nl))
@@ -40,6 +41,7 @@ struct MetricDisplayTests {
         #expect(distance.value == "14")
         #expect(distance.unit != nil)
     }
+    #endif
 
     @Test func fractionClampsToUnitRange() {
         #expect(abs(MetricDisplay.fraction(28.5, of: 42.2) - 0.6754) < 0.001)
