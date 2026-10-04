@@ -12,7 +12,9 @@ struct RpplWatchApp: App {
         .onChange(of: scenePhase) { _, phase in
             WakeLog.debug(.lifecycle, "scenePhase → \(String(describing: phase))")
             if phase == .active {
-                WatchSessionController.shared.recoverOrphanedSessions()
+                if !WatchSessionController.shared.isRecordingActive {
+                    WatchSessionController.shared.recoverOrphanedSessions()
+                }
                 WatchTransferService.shared.refreshSyncState()
                 WatchTransferService.shared.transferPending()
             }
