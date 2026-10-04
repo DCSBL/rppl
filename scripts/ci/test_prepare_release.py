@@ -84,6 +84,28 @@ class VersionTests(unittest.TestCase):
         _, stamped = pr.stamp_build_date("<dict/>", "2026-10-01")
         self.assertFalse(stamped)
 
+    def test_stamp_plist_string_fills_empty_and_replaces_values(self):
+        plist = "<key>RpplGitCommit</key>\n\t<string></string>\n<key>RpplReleaseTag</key>\n\t<string>old</string>\n"
+        text, stamped = pr.stamp_plist_string(plist, "RpplGitCommit", "abc1234")
+        self.assertTrue(stamped)
+        text, stamped = pr.stamp_plist_string(text, "RpplReleaseTag", "2026.10.1-beta.2")
+        self.assertTrue(stamped)
+        self.assertIn("<string>abc1234</string>", text)
+        self.assertIn("<string>2026.10.1-beta.2</string>", text)
+        _, stamped = pr.stamp_plist_string(plist, "Missing", "x")
+        self.assertFalse(stamped)
+
+    def test_release_label_drops_leading_v(self):
+        self.assertEqual(pr.release_label("v2026.10.1-beta.2"), "2026.10.1-beta.2")
+        self.assertEqual(pr.release_label("2026.10.1"), "2026.10.1")
+
+    def test_real_info_plist_has_all_stamp_keys(self):
+        text = (REPO_ROOT / pr.APP_INFO_PLIST).read_text(encoding="utf-8")
+        for key in ("RpplBuildDate", "RpplReleaseTag", "RpplGitCommit"):
+            with self.subTest(key=key):
+                _, stamped = pr.stamp_plist_string(text, key, "x")
+                self.assertTrue(stamped)
+
     def test_real_info_plist_has_build_date(self):
         text = (REPO_ROOT / pr.APP_INFO_PLIST).read_text(encoding="utf-8")
         _, stamped = pr.stamp_build_date(text, "2026-10-01")
@@ -150,6 +172,21 @@ class RunTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("MARKETING_VERSION = 2026.9.1;", (self.tmp / pr.PBXPROJ).read_text())
 
+    def test_build_mode_stamps_tag_and_commit(self):
+        env = dict(self.env, CI_COMMIT="ABCDEF0123456789ABCDEF0123456789ABCDEF01")
+        code, _, _ = run_main(["--tag", "v1.2.3-beta.2", "--root", str(self.tmp)], env)
+        self.assertEqual(code, 0)
+        plist = (self.tmp / pr.APP_INFO_PLIST).read_text()
+        self.assertRegex(plist, r"<key>RpplReleaseTag</key>\s*<string>1\.2\.3-beta\.2</string>")
+        self.assertRegex(plist, r"<key>RpplGitCommit</key>\s*<string>abcdef0</string>")
+
+    def test_build_mode_without_a_commit_leaves_it_empty_and_warns(self):
+        with mock.patch.object(pr, "short_commit", return_value=None):
+            code, _, err = run_main(["--tag", "v1.2.3", "--root", str(self.tmp)], self.env)
+        self.assertEqual(code, 0)
+        self.assertRegex((self.tmp / pr.APP_INFO_PLIST).read_text(), r"<key>RpplGitCommit</key>\s*<string></string>")
+        self.assertIn("commit SHA", err)
+
     def test_build_mode_reads_tag_from_env(self):
         code, _, _ = run_main(["--root", str(self.tmp)], dict(self.env, CI_TAG="v3.0.0"))
         self.assertEqual(code, 0)
@@ -194,6 +231,25 @@ class RunTests(unittest.TestCase):
             code, _, _ = run_main(["--tag", "v1.2.3", "--root", str(self.tmp)], env)
         self.assertEqual(code, 0)
         self.assertEqual(self.notes.read_text(), "Late notes\n")
+
+
+class ShortCommitTests(unittest.TestCase):
+    def commit(self, env, git_stdout=None, git_code=0):
+        """short_commit with a controlled environment and a fake `git rev-parse HEAD`."""
+        fake = mock.Mock(stdout=git_stdout or "", returncode=git_code)
+        with mock.patch.dict(os.environ, env, clear=True), mock.patch.object(pr.subprocess, "run", return_value=fake):
+            return pr.short_commit(Path("."))
+
+    def test_ci_commit_is_shortened_and_lowercased(self):
+        self.assertEqual(self.commit({"CI_COMMIT": "ABCDEF0123456789ABCDEF0123456789ABCDEF01"}), "abcdef0")
+
+    def test_falls_back_to_git_head(self):
+        self.assertEqual(self.commit({}, git_stdout="1234567890abcdef\n"), "1234567")
+
+    def test_garbage_is_ignored(self):
+        self.assertIsNone(self.commit({"CI_COMMIT": "not-a-sha"}))
+        self.assertIsNone(self.commit({}, git_stdout="fatal: not a git repository\n", git_code=128))
+        self.assertIsNone(self.commit({}, git_stdout=""))
 
 
 class OnMainTests(unittest.TestCase):
