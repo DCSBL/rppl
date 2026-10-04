@@ -395,12 +395,24 @@ extension WatchSessionController {
                 WakeLog.error(.workout, "closing metadata: \(error.localizedDescription)")
             }
             await attachAirWeatherMetadata(to: builder)
-            try await healthKitStep("endCollection") { try await builder.endCollection(at: stoppedDate) }
+            // A failing or timed-out endCollection must not skip finishWorkout: that was the whole
+            // park day missing from Fitness. Try to finish anyway; the workout may still save.
+            do {
+                try await healthKitStep("endCollection") { try await builder.endCollection(at: stoppedDate) }
+            } catch {
+                errorText = String(localized: "Save workout: \(error.localizedDescription)")
+                WakeLog.error(.workout, "endCollection: \(error.localizedDescription) — finishing the workout anyway")
+            }
+            // Separate steps: denied Distance sharing fails the samples but not the interval metadata.
             do {
                 try await healthKitStep("ride distance samples") { try await self.addRideDistanceSamples(to: builder) }
+            } catch {
+                WakeLog.error(.workout, "ride distance samples: \(error.localizedDescription)")
+            }
+            do {
                 try await healthKitStep("ride interval metadata") { try await self.attachRideMetricsToActivities(builder) }
             } catch {
-                WakeLog.error(.workout, "ride distance/interval samples: \(error.localizedDescription)")
+                WakeLog.error(.workout, "ride interval metadata: \(error.localizedDescription)")
             }
             do {
                 try await healthKitStep("water samples") { try await self.addWaterTemperatureSamples(to: builder) }

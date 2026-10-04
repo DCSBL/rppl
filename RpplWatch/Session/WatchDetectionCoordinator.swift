@@ -189,22 +189,32 @@ extension WatchSessionController {
     }
 
     func persistDetection(_ event: DetectionEvent) {
+        // Live behavior (HealthKit interval, haptic, set timers) must not depend on the disk: a
+        // failed write used to skip all of it. The event is queued and written as soon as it can be.
+        handleDetectionTransition(event)
+        pendingDetections.enqueue(event)
+        flushPendingDetections()
+    }
+
+    /// Writes queued detection events oldest first. Called per event and from every buffer flush,
+    /// so an event that failed once lands in `detections.jsonl` as soon as writing works again.
+    func flushPendingDetections() {
+        guard !pendingDetections.isEmpty else { return }
         guard let store, let manifest else {
             WakeLog.error(.detection, "appendDetection skipped — no store/manifest")
             return
         }
-        do {
+        let result = pendingDetections.drain { event in
             try store.appendDetection(event, sessionId: manifest.sessionId)
-            detectionCount += 1
-            refreshStoredByteSize()
-            WakeLog.debug(
-                .detection,
-                "appended code=\(event.code) reason=\(event.reason) count=\(detectionCount)"
-            )
-            handleDetectionTransition(event)
-        } catch {
+            WakeLog.debug(.detection, "appended code=\(event.code) reason=\(event.reason)")
+        }
+        detectionCount += result.written
+        if let error = result.error {
             errorText = String(localized: "Detection: \(error.localizedDescription)")
-            WakeLog.error(.detection, "appendDetection: \(error.localizedDescription)")
+            WakeLog.error(
+                .detection,
+                "appendDetection: \(error.localizedDescription) — \(pendingDetections.count) kept for retry"
+            )
         }
     }
 

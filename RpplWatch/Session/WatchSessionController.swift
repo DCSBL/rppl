@@ -34,6 +34,8 @@ final class WatchSessionController: NSObject {
     var locationCount = 0
     var motionCount = 0
     var detectionCount = 0
+    /// Detection events whose write failed; retried on the next event and on every flush.
+    var pendingDetections = PendingDetectionQueue()
     /// On-disk size of the active session package (updated after flushes / detection writes).
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
