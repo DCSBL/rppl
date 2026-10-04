@@ -37,7 +37,13 @@ struct LogbookSessionDetailView: View {
     @State private var isExporting = false
     @State private var exportTask: Task<Void, Never>?
     @State private var showExportExplainer = false
+    @State private var exportErrorTitle: LocalizedStringKey = "Could not export"
+    @State private var showRpplShareExplainer = false
+    @State private var rpplMailFile: URL?
+    @State private var showRpplMail = false
+    @Environment(\.openURL) private var openURL
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
+    @AppStorage(AppSettingsKey.didUnderstandRpplShare) private var didUnderstandRpplShare = false
 
     private enum LoadPhase: Equatable {
         case loading
@@ -100,12 +106,17 @@ struct LogbookSessionDetailView: View {
                     if isExporting {
                         ProgressView()
                     } else {
-                        Button {
-                            requestExport()
+                        Menu {
+                            Button("Share with Rppl", systemImage: "envelope") {
+                                requestRpplShare()
+                            }
+                            Button("Export", systemImage: "square.and.arrow.up") {
+                                requestExport()
+                            }
                         } label: {
                             Image(systemName: "square.and.arrow.up")
                         }
-                        .accessibilityLabel(Text("Export"))
+                        .accessibilityLabel(Text("Share"))
                     }
                 }
             }
@@ -123,7 +134,25 @@ struct LogbookSessionDetailView: View {
             Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
         }
         .alert(
-            "Could not export",
+            "Share with Rppl?",
+            isPresented: $showRpplShareExplainer
+        ) {
+            Button("Share") {
+                didUnderstandRpplShare = true
+                startRpplShare()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Sends this session to the Rppl developers.\n\n• Your GPS track is moved to 0°, 0° as one piece, so distances, speeds and laps stay the same.\n• Your tester ID and other personal details are replaced with REDACTEDREDACTEDREDACTED.\n• Times, heart rate, motion and the shape of your GPS track stay in, so the data stays useful.\n\nNothing is sent until you send it.")
+        }
+        .sheet(isPresented: $showRpplMail) {
+            if let rpplMailFile {
+                SessionMailComposer(fileURL: rpplMailFile) { showRpplMail = false }
+                    .ignoresSafeArea()
+            }
+        }
+        .alert(
+            exportErrorTitle,
             isPresented: $showExportError,
             presenting: exportErrorText
         ) { _ in
@@ -784,6 +813,84 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    private func requestRpplShare() {
+        guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        if didUnderstandRpplShare {
+            startRpplShare()
+        } else {
+            showRpplShareExplainer = true
+        }
+    }
+
+    private func startRpplShare() {
+        guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        showExportError = false
+        exportErrorText = nil
+        isExporting = true
+        exportTask = Task(priority: .utility) {
+            await prepareRpplShare()
+        }
+    }
+
+    /// Builds the anonymized copy (never touches the stored session) and hands it to mail.
+    private func prepareRpplShare() async {
+        guard case .store(let sessionId) = source, let store else {
+            presentExportFailure(
+                String(localized: "Session store missing. Try again from the logbook."),
+                title: "Could not share"
+            )
+            return
+        }
+        WakeLog.debug(.ui, "share with Rppl \(sessionId.prefix(8))…")
+
+        do {
+            let url = try await StoreIO.runOffMain {
+                let original = try store.buildTransferPackage(sessionId: sessionId)
+                try Task.checkCancellation()
+                let package = SessionAnonymizer.anonymized(original)
+                let fileURL = FileManager.default.temporaryDirectory
+                    .appendingPathComponent(SessionShareExport.anonymizedFileName(startedAt: package.manifest.startedAt))
+                try SessionShareExport.encode(package).write(to: fileURL, options: [.atomic])
+                return fileURL
+            }
+            try Task.checkCancellation()
+            finishExportTask()
+            deliverToRppl(fileURL: url)
+            WakeLog.debug(.ui, "share with Rppl OK \(sessionId.prefix(8))…")
+        } catch is CancellationError {
+            finishExportTask()
+        } catch {
+            presentExportFailure(Self.userFacingMessage(for: error), title: "Could not share")
+            WakeLog.error(.store, "share with Rppl: \(error.localizedDescription)")
+        }
+    }
+
+    /// Route comes from Core: native mail with the file attached, else a `mailto:` link with the
+    /// file as base64, else the system share sheet.
+    private func deliverToRppl(fileURL: URL) {
+        let byteCount = (try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+        let route = SessionShareMail.route(canSendMail: MailAvailability.canSend, fileByteCount: byteCount)
+        // Present after toolbar ProgressView → icon swap so the sheet is not dropped.
+        Task { @MainActor in
+            switch route {
+            case .attachment:
+                rpplMailFile = fileURL
+                showRpplMail = true
+            case .base64Body:
+                if let data = try? Data(contentsOf: fileURL),
+                   let mailURL = SessionRpplShare.mailtoURL(fileData: data) {
+                    openURL(mailURL) { accepted in
+                        if !accepted { ActivitySharePresenter.present(items: [fileURL]) }
+                    }
+                } else {
+                    ActivitySharePresenter.present(items: [fileURL])
+                }
+            case .shareSheet:
+                ActivitySharePresenter.present(items: [fileURL])
+            }
+        }
+    }
+
     private func cancelExport() {
         exportTask?.cancel()
         exportTask = nil
@@ -838,8 +945,9 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    private func presentExportFailure(_ message: String) {
+    private func presentExportFailure(_ message: String, title: LocalizedStringKey = "Could not export") {
         finishExportTask()
+        exportErrorTitle = title
         exportErrorText = message
         // Present after toolbar ProgressView → icon swap so SwiftUI does not drop the alert.
         Task { @MainActor in

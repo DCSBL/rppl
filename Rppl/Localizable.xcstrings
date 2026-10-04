@@ -9601,6 +9601,134 @@
           }
         }
       }
+    },
+    "Share with Rppl" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share with Rppl"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delen met Rppl"
+          }
+        }
+      }
+    },
+    "Share with Rppl?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share with Rppl?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delen met Rppl?"
+          }
+        }
+      }
+    },
+    "Sends this session to the Rppl developers.\n\n• Your GPS track is moved to 0°, 0° as one piece, so distances, speeds and laps stay the same.\n• Your tester ID and other personal details are replaced with REDACTEDREDACTEDREDACTED.\n• Times, heart rate, motion and the shape of your GPS track stay in, so the data stays useful.\n\nNothing is sent until you send it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sends this session to the Rppl developers.\n\n• Your GPS track is moved to 0°, 0° as one piece, so distances, speeds and laps stay the same.\n• Your tester ID and other personal details are replaced with REDACTEDREDACTEDREDACTED.\n• Times, heart rate, motion and the shape of your GPS track stay in, so the data stays useful.\n\nNothing is sent until you send it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stuurt deze session naar de Rppl-ontwikkelaars.\n\n• Je GPS-spoor wordt als geheel naar 0°, 0° verplaatst, dus afstanden, snelheden en laps blijven gelijk.\n• Je tester-ID en andere persoonlijke gegevens worden vervangen door REDACTEDREDACTEDREDACTED.\n• Tijden, hartslag, beweging en de vorm van je GPS-spoor blijven staan, zodat de data bruikbaar blijft.\n\nEr wordt niets verstuurd voordat je het zelf verstuurt."
+          }
+        }
+      }
+    },
+    "Could not share" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not share"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delen mislukt"
+          }
+        }
+      }
+    },
+    "Session for Rppl" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session for Rppl"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session voor Rppl"
+          }
+        }
+      }
+    },
+    "Hi Rppl,\n\nHere is a session from my logbook. Its location and personal details are anonymized. The session file is attached.\n\nNotes:\n" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi Rppl,\n\nHere is a session from my logbook. Its location and personal details are anonymized. The session file is attached.\n\nNotes:\n"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoi Rppl,\n\nHierbij een session uit mijn logboek. De locatie en persoonlijke gegevens zijn geanonimiseerd. Het session-bestand zit in de bijlage.\n\nOpmerkingen:\n"
+          }
+        }
+      }
+    },
+    "Hi Rppl,\n\nHere is a session from my logbook. Its location and personal details are anonymized. The session file is base64-encoded below.\n\nNotes:\n" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi Rppl,\n\nHere is a session from my logbook. Its location and personal details are anonymized. The session file is base64-encoded below.\n\nNotes:\n"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoi Rppl,\n\nHierbij een session uit mijn logboek. De locatie en persoonlijke gegevens zijn geanonimiseerd. Het session-bestand staat hieronder als base64.\n\nOpmerkingen:\n"
+          }
+        }
+      }
+    },
+    "Session file (base64-encoded, decode before reading):" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session file (base64-encoded, decode before reading):"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session-bestand (base64, eerst decoderen voor gebruik):"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
