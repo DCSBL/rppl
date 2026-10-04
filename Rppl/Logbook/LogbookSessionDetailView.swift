@@ -934,6 +934,7 @@ private struct SetDetailCard: View {
             FlowLayout(spacing: 16) {
                 StatChip(metric: .duration, value: LogbookFormatting.compactDuration(set.duration), caption: "Duration")
                 StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(set.distanceMeters), caption: "Distance")
+                StatChip(metric: .laps, value: "\(set.lapCount)", caption: "Laps")
                 StatChip(
                     metric: .speed,
                     value: maxSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
