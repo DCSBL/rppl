@@ -38,7 +38,7 @@ A missing or stale `derived/view.json` is rebuilt from the raw streams when it i
 | Phone (iCloud Drive **on**, default) | Ubiquity container `iCloud.nl.dcsbl.rppl` → `Documents/Sessions` (Apple file sync) |
 | Phone (iCloud Drive **off** / unavailable) | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
-Same folder shape after WC import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
+Same folder shape after WC import. The import builds the package in tmp and swaps it in at the end, so a failure leaves an existing phone copy untouched. Damaged or over-limit motion frames are dropped (`motionStoppedReason` `import_limit`) and never fail the import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
 
 ### Phone iCloud Drive
 
@@ -109,7 +109,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
 | Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (heatmap set paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
-| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = last event time, `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
+| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = the last recorded sample (detections, GPS, health, water or battery, so the final set is kept), `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 

@@ -165,7 +165,7 @@ struct SecurityRegressionTests {
         }
     }
 
-    @Test func writeMotionFrameDataRejectsMaliciousZlib() throws {
+    @Test func writeMotionFrameDataDropsMaliciousZlibWithoutThrowing() throws {
         let root = tempRoot(label: "zlib-store")
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -180,13 +180,12 @@ struct SecurityRegressionTests {
         _ = try store.createSession(manifest: manifest)
 
         let bomb = maliciousZlibFrame(claimedCompressedBytes: UInt32(CompressedJSONLFrames.maxCompressedBytesPerFrame + 1))
-        #expect(throws: CompressedJSONLFrameError.frameTooLarge) {
-            try store.writeMotionFrameData(bomb, sessionId: manifest.sessionId)
-        }
+        let dropped = try store.writeMotionFrameData(bomb, sessionId: manifest.sessionId)
+        #expect(dropped == bomb.count)
         #expect(try store.readMotionFrameData(sessionId: manifest.sessionId) == nil)
     }
 
-    @Test func importRejectsMaliciousMotionFramesZlib() throws {
+    @Test func importDropsMaliciousMotionFramesZlibButKeepsTheSession() throws {
         let watchRoot = tempRoot(label: "zlib-import-watch")
         let phoneRoot = tempRoot(label: "zlib-import-phone")
         defer {
@@ -211,8 +210,12 @@ struct SecurityRegressionTests {
             health: []
         )
 
-        #expect(throws: CompressedJSONLFrameError.frameTooLarge) {
-            try store.importTransferPackage(package, intoPhoneStore: phoneRoot)
-        }
+        try store.importTransferPackage(package, intoPhoneStore: phoneRoot)
+
+        let phone = SessionFileStore(rootURL: phoneRoot)
+        #expect(try phone.readMotionFrameData(sessionId: manifest.sessionId) == nil)
+        let imported = try phone.readManifest(sessionId: manifest.sessionId)
+        #expect(imported.motionStoppedReason == MotionRecordingPolicy.Reason.importLimit)
+        #expect(imported.transferState == .acknowledged)
     }
 }

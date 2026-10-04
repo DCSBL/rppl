@@ -124,12 +124,15 @@ extension WatchSessionController {
         guard let session = workoutSession else { return false }
         if session.state == .running { return true }
 
+        // One slot per caller: Water Lock at start and the controls page can wait at the same
+        // time, and a single shared slot let the second overwrite (and leak) the first.
+        let waiterId = UUID()
         let running = Task { @MainActor in
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                self.workoutRunningContinuation = continuation
                 if session.state == .running {
-                    self.workoutRunningContinuation = nil
                     continuation.resume()
+                } else {
+                    self.workoutRunningWaiters[waiterId] = continuation
                 }
             }
         }
@@ -137,13 +140,22 @@ extension WatchSessionController {
             try await Deadline.run(timeoutSeconds, label: "workoutRunning") { await running.value }
             return true
         } catch {
-            // Release the waiter; the old task-group version waited on it forever and kept
+            // Release this waiter; the old task-group version waited on it forever and kept
             // `startSession` from ever starting the flush / heartbeat loops.
-            if let continuation = workoutRunningContinuation {
-                workoutRunningContinuation = nil
-                continuation.resume()
-            }
+            workoutRunningWaiters.removeValue(forKey: waiterId)?.resume()
             return false
+        }
+    }
+
+    /// Resumes everything still waiting on the HK session. Called when the session refs are
+    /// cleared: a continuation that is dropped without a resume leaks its task.
+    func releaseWorkoutWaiters(stoppedAt date: Date = Date()) {
+        let waiters = workoutRunningWaiters
+        workoutRunningWaiters = [:]
+        waiters.values.forEach { $0.resume() }
+        if let continuation = workoutStoppedContinuation {
+            workoutStoppedContinuation = nil
+            continuation.resume(returning: date)
         }
     }
 
@@ -187,25 +199,38 @@ extension WatchSessionController {
     static let healthKitStepTimeout: TimeInterval = 20
     /// Start is interactive: fall back to sensors-only sooner.
     static let healthKitStartTimeout: TimeInterval = 10
+    /// The rider answers the Health sheet inside this window: longer than any normal answer,
+    /// shorter than forever when `healthd` stalls.
+    static let healthAuthorizationTimeout: TimeInterval = 60
+    /// The motion permission query shows no sheet: it answers quickly or not at all.
+    static let motionPermissionTimeout: TimeInterval = 5
 
     /// Ends a workout session left dangling by a crash so watchOS stops handing it back
     /// on every relaunch. Runs off the launch path; each step is time-bounded.
-    func recoverDanglingWorkoutSession() async {
+    /// The workout ends at `orphanLastSample` (where the Rppl data ends), not when the app was
+    /// reopened, so a late relaunch does not stretch the Fitness workout over a gap.
+    /// - Returns: the end date when a dangling session was closed, nil when there was none.
+    @discardableResult
+    func recoverDanglingWorkoutSession(orphanLastSample: Date? = nil) async -> Date? {
         let store = healthStore
         let recovered: HKWorkoutSession? = (try? await Deadline.run(3, label: "recoverActiveWorkoutSession") {
             UncheckedSendable(value: try await store.recoverActiveWorkoutSession())
         })?.value ?? nil
-        guard let session = recovered, workoutSession == nil else { return }
+        guard let session = recovered, workoutSession == nil else { return nil }
         WakeLog.debug(.workout, "recovered dangling HKWorkoutSession state=\(session.state.rawValue)")
         let builder = session.associatedWorkoutBuilder()
+        let end = DanglingWorkoutEnd.date(
+            orphanLastSample: orphanLastSample,
+            hkStart: session.startDate,
+            now: Date()
+        )
         if session.state == .running || session.state == .paused {
-            session.stopActivity(with: Date())
+            session.stopActivity(with: end)
             for _ in 0..<20 where session.state != .stopped {
                 try? await Task.sleep(nanoseconds: 250_000_000)
             }
         }
         do {
-            let end = Date()
             try await healthKitStep("dangling endCollection") { try await builder.endCollection(at: end) }
             _ = try await healthKitStep("dangling finishWorkout") {
                 UncheckedSendable(value: try await builder.finishWorkout())
@@ -214,6 +239,7 @@ extension WatchSessionController {
             WakeLog.error(.workout, "dangling finishWorkout: \(error.localizedDescription)")
         }
         session.end()
+        return end
     }
 
     /// Returns true if an HK workout session is running.
@@ -395,12 +421,24 @@ extension WatchSessionController {
                 WakeLog.error(.workout, "closing metadata: \(error.localizedDescription)")
             }
             await attachAirWeatherMetadata(to: builder)
-            try await healthKitStep("endCollection") { try await builder.endCollection(at: stoppedDate) }
+            // A failing or timed-out endCollection must not skip finishWorkout: that was the whole
+            // park day missing from Fitness. Try to finish anyway; the workout may still save.
+            do {
+                try await healthKitStep("endCollection") { try await builder.endCollection(at: stoppedDate) }
+            } catch {
+                errorText = String(localized: "Save workout: \(error.localizedDescription)")
+                WakeLog.error(.workout, "endCollection: \(error.localizedDescription) — finishing the workout anyway")
+            }
+            // Separate steps: denied Distance sharing fails the samples but not the interval metadata.
             do {
                 try await healthKitStep("ride distance samples") { try await self.addRideDistanceSamples(to: builder) }
+            } catch {
+                WakeLog.error(.workout, "ride distance samples: \(error.localizedDescription)")
+            }
+            do {
                 try await healthKitStep("ride interval metadata") { try await self.attachRideMetricsToActivities(builder) }
             } catch {
-                WakeLog.error(.workout, "ride distance/interval samples: \(error.localizedDescription)")
+                WakeLog.error(.workout, "ride interval metadata: \(error.localizedDescription)")
             }
             do {
                 try await healthKitStep("water samples") { try await self.addWaterTemperatureSamples(to: builder) }
@@ -537,8 +575,7 @@ extension WatchSessionController {
         workoutRouteBuilder = nil
         pendingRouteLocations.removeAll()
         routeInsertTask = nil
-        workoutStoppedContinuation = nil
-        workoutRunningContinuation = nil
+        releaseWorkoutWaiters()
         hkRideActivityOpen = false
     }
 

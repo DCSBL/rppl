@@ -24,6 +24,26 @@ struct WatchPermissionGateTests {
         #expect(WatchPermissionState.unavailable.isReady)
     }
 
+    @Test func reducedAccuracyMakesGrantedLocationNotReady() {
+        #expect(WatchPermissionState.authorized.accountingForReducedAccuracy(true) == .denied)
+        #expect(!WatchPermissionState.authorized.accountingForReducedAccuracy(true).isReady)
+        #expect(WatchPermissionKind.location.blocksRecording(
+            when: WatchPermissionState.authorized.accountingForReducedAccuracy(true)
+        ))
+    }
+
+    @Test func fullAccuracyLeavesEveryStateAlone() {
+        for state in [WatchPermissionState.authorized, .notDetermined, .denied, .unavailable] {
+            #expect(state.accountingForReducedAccuracy(false) == state)
+        }
+    }
+
+    @Test func reducedAccuracyDoesNotChangeStatesThatAreNotGranted() {
+        #expect(WatchPermissionState.notDetermined.accountingForReducedAccuracy(true) == .notDetermined)
+        #expect(WatchPermissionState.denied.accountingForReducedAccuracy(true) == .denied)
+        #expect(WatchPermissionState.unavailable.accountingForReducedAccuracy(true) == .unavailable)
+    }
+
     @Test func motionNeverBlocksRecordingGate() {
         let states: [WatchPermissionKind: WatchPermissionState] = [
             .location: .authorized,

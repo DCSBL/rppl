@@ -132,12 +132,26 @@ struct TornMotionFrameTests {
         #expect(try phone.readLocationSamples(sessionId: id).count == 1)
     }
 
-    @Test func theImportStaysStrictAboutMalformedFrames() throws {
+    @Test func theImportKeepsTheIntactFramesOfADamagedFile() throws {
         let session = try TempSession.make()
         defer { session.cleanup() }
-        let torn = try frame(seconds: 0..<5) + frame(seconds: 5..<10).prefix(9)
-        #expect(throws: CompressedJSONLFrameError.self) {
-            try session.store.writeMotionFrameData(torn, sessionId: session.sessionId)
-        }
+        let good = try frame(seconds: 0..<5)
+        let torn = try frame(seconds: 5..<10).prefix(9)
+
+        let dropped = try session.store.writeMotionFrameData(good + torn, sessionId: session.sessionId)
+
+        #expect(dropped == 9)
+        #expect(try motionSeconds(session) == (0..<5).map { Samples.time($0) })
+    }
+
+    @Test func theImportStoresNothingWhenNoFrameIsUsable() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        let torn = try frame(seconds: 0..<5).prefix(9)
+
+        let dropped = try session.store.writeMotionFrameData(torn, sessionId: session.sessionId)
+
+        #expect(dropped == 9)
+        #expect(try session.store.readMotionFrameData(sessionId: session.sessionId) == nil)
     }
 }

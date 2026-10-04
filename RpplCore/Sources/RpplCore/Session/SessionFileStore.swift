@@ -370,18 +370,25 @@ public final class SessionFileStore: @unchecked Sendable {
         try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
-    public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws {
+    /// Stores framed motion bytes, keeping only the leading frames that are complete and inside the
+    /// decode limits. Motion is expendable, so damaged or oversized input costs motion only: the
+    /// dropped byte count is returned, never thrown. Nothing is written when no frame is usable.
+    /// Only a failing disk throws.
+    /// - Returns: number of input bytes that were not stored (0 when everything was kept).
+    @discardableResult
+    public func writeMotionFrameData(_ data: Data, sessionId: String, chunkIndex: Int = 0) throws -> Int {
         lock.lock()
         defer { lock.unlock() }
 
-        guard data.count <= SessionImportLimits.maxMotionFramesZlibBytes else {
-            throw SessionStoreError.importTooLarge(data.count)
-        }
-        _ = try CompressedJSONLFrames.decodeFrames(data)
+        let intact = data.count <= SessionImportLimits.maxMotionFramesZlibBytes
+            ? CompressedJSONLFrames.validPrefixLength(data)
+            : 0
+        guard intact > 0 else { return data.count }
         let dir = try sessionDirectory(for: sessionId)
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(Self.motionCompressedFileName(chunkIndex: chunkIndex))
-        try data.write(to: url, options: [.atomic])
+        try Data(data.prefix(intact)).write(to: url, options: [.atomic])
+        return data.count - intact
     }
 
     /// Compressed motion bytes on disk for the session (0 when none).
@@ -706,15 +713,15 @@ public final class SessionFileStore: @unchecked Sendable {
             throw SessionStoreError.sessionNotFound(sessionId)
         }
 
-        // A pruned or acknowledged session must never be re-sent: the phone replaces its full copy
+        // An acknowledged (hence possibly pruned) session must never be re-sent: the phone replaces its full copy
         // with whatever arrives, so an empty package would wipe the raw streams everywhere.
         let manifest = try readManifest(sessionId: sessionId)
         guard manifest.transferState != .acknowledged else {
             throw SessionStoreError.notTransferable("already acknowledged")
         }
-        guard hasRawStreams(sessionId: sessionId) else {
-            throw SessionStoreError.notTransferable("raw streams pruned")
-        }
+        // An un-acked session with no raw streams (stopped before any sample landed) still ships
+        // its manifest: refusing it left "Pending: 1" and an error on every retry. The phone
+        // never replaces a copy that has data with an empty package (`importTransferPackage`).
 
         let zipURL = destinationURL.appendingPathComponent("\(sessionId).json")
         let package = try buildTransferPackage(sessionId: sessionId)
@@ -732,52 +739,103 @@ public final class SessionFileStore: @unchecked Sendable {
         try SessionImportLimits.validateArrayCount(package.water, limit: SessionImportLimits.maxWaterSamples, label: "water")
         try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
 
+        let sessionId = package.manifest.sessionId
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
         // Watch Connectivity retries a transfer whose ack got lost; appending the same streams
         // again doubled every sample on the phone (field session 2026-09-30). Replace instead.
         // `try?`: a session the phone has never seen throws sessionNotFound, and that is the
         // normal first import.
-        if let existing = try? phoneStore.sessionDirectory(for: package.manifest.sessionId),
-           fileManager.fileExists(atPath: existing.path) {
+        let existing = (try? phoneStore.sessionDirectory(for: sessionId))
+            .flatMap { fileManager.fileExists(atPath: $0.path) ? $0 : nil }
+        if existing != nil {
             // Defense in depth: never replace a copy that has data with a package that has none
             // (a pruned Watch session re-sent by mistake). Keep the copy; the caller still acks.
             let incomingEmpty = package.detections.isEmpty && package.locations.isEmpty
                 && package.health.isEmpty && package.motion.isEmpty && package.water.isEmpty
                 && package.battery.isEmpty && (package.motionFramesZlib?.isEmpty ?? true)
             if incomingEmpty {
-                let hasData = ((try? phoneStore.readDetections(sessionId: package.manifest.sessionId))?.isEmpty == false)
-                    || ((try? phoneStore.readLocationSamples(sessionId: package.manifest.sessionId))?.isEmpty == false)
+                let hasData = ((try? phoneStore.readDetections(sessionId: sessionId))?.isEmpty == false)
+                    || ((try? phoneStore.readLocationSamples(sessionId: sessionId))?.isEmpty == false)
                 if hasData { return }
             }
-            try phoneStore.deleteSession(sessionId: package.manifest.sessionId)
         }
-        _ = try phoneStore.createSession(manifest: package.manifest)
-        for detection in package.detections {
-            try phoneStore.appendDetection(detection, sessionId: package.manifest.sessionId)
-        }
-        try phoneStore.appendLocationSamples(package.locations, sessionId: package.manifest.sessionId)
-        if let frames = package.motionFramesZlib, !frames.isEmpty {
-            try phoneStore.writeMotionFrameData(frames, sessionId: package.manifest.sessionId)
-        } else if !package.motion.isEmpty {
-            try phoneStore.appendMotionSamples(package.motion, sessionId: package.manifest.sessionId)
-        }
-        try phoneStore.appendHealthSamples(package.health, sessionId: package.manifest.sessionId)
-        if !package.water.isEmpty {
-            try phoneStore.appendWaterTemperatureSamples(package.water, sessionId: package.manifest.sessionId)
-        }
-        if !package.battery.isEmpty {
-            try phoneStore.appendBatterySamples(package.battery, sessionId: package.manifest.sessionId)
-        }
+
+        // Build the whole package in tmp (outside iCloud Drive, so a half-written import is never
+        // synced) and swap it in at the end: a failure part-way leaves an existing copy untouched.
+        let stagingRoot = fileManager.temporaryDirectory
+            .appendingPathComponent("rppl-import-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: stagingRoot, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: stagingRoot) }
+        let staging = SessionFileStore(rootURL: stagingRoot, fileManager: fileManager)
+
         var imported = package.manifest
         imported.transferState = .acknowledged
-        try phoneStore.writeManifest(imported)
-
-        let sessionId = package.manifest.sessionId
-        if let derived = package.derived, derived.isCurrentAnalyzer {
-            try phoneStore.writeDerivedView(derived, sessionId: sessionId)
-        } else {
-            try phoneStore.ensureDerivedView(sessionId: sessionId)
+        _ = try staging.createSession(manifest: imported)
+        for detection in package.detections {
+            try staging.appendDetection(detection, sessionId: sessionId)
         }
+        try staging.appendLocationSamples(package.locations, sessionId: sessionId)
+        if let frames = package.motionFramesZlib, !frames.isEmpty {
+            // Motion can never fail an import: keep the frames that are usable, note the loss.
+            let dropped = try staging.writeMotionFrameData(frames, sessionId: sessionId)
+            if dropped > 0, imported.motionStoppedReason == nil {
+                imported.motionStoppedReason = MotionRecordingPolicy.Reason.importLimit
+            }
+        } else if !package.motion.isEmpty {
+            try staging.appendMotionSamples(package.motion, sessionId: sessionId)
+        }
+        try staging.appendHealthSamples(package.health, sessionId: sessionId)
+        if !package.water.isEmpty {
+            try staging.appendWaterTemperatureSamples(package.water, sessionId: sessionId)
+        }
+        if !package.battery.isEmpty {
+            try staging.appendBatterySamples(package.battery, sessionId: sessionId)
+        }
+        try staging.writeManifest(imported)
+        if let derived = package.derived, derived.isCurrentAnalyzer {
+            try staging.writeDerivedView(derived, sessionId: sessionId)
+        } else {
+            try staging.ensureDerivedView(sessionId: sessionId)
+        }
+
+        try phoneStore.installPackage(
+            at: try staging.sessionDirectory(for: sessionId),
+            sessionId: sessionId,
+            replacing: existing
+        )
+    }
+
+    /// Moves a fully written package into this store. Replacing keeps the existing folder name.
+    private func installPackage(at stagedDirectory: URL, sessionId: String, replacing existing: URL?) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        if let existing {
+            // Two renames instead of `replaceItemAt` (which cannot replace a non-empty directory
+            // on Linux): the old copy steps aside, the new one takes its name, and a failure puts
+            // the old copy back, so an existing copy is never lost.
+            let backup = existing.deletingLastPathComponent()
+                .appendingPathComponent(".replaced-\(UUID().uuidString)", isDirectory: true)
+            try fileManager.moveItem(at: existing, to: backup)
+            do {
+                try fileManager.moveItem(at: stagedDirectory, to: existing)
+            } catch {
+                try? fileManager.moveItem(at: backup, to: existing)
+                throw error
+            }
+            try? fileManager.removeItem(at: backup)
+            rememberDirectory(existing, for: sessionId)
+            return
+        }
+        let names = try SessionPackageLocator.existingFolderNames(in: rootURL, fileManager: fileManager)
+        let folderName = SessionPackageNaming.uniqueFolderName(
+            base: stagedDirectory.lastPathComponent,
+            existingNames: names
+        )
+        let destination = try SessionPackageNaming.packageDirectory(folderName: folderName, rootURL: rootURL)
+        try fileManager.moveItem(at: stagedDirectory, to: destination)
+        rememberDirectory(destination, for: sessionId)
     }
 
     /// Phone-only import of a Share export JSON. Stamps `manifest.imported`; like every import it

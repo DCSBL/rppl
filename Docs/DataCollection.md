@@ -67,7 +67,7 @@ If the workout start only *times out or fails* (busy `healthd`, older watches), 
 
 Water temperature: sparse `HKQuantityTypeIdentifier.waterTemperature` samples are added to the finished workout after `endCollection` (same window as set distance), when Ultra recorded any. They appear in Health as samples on that workout. Fitness / Workout summary tiles are Apple-controlled and typically show water temp for swimming/dive, not generic water sports — Rppl does not switch activity type for temperature. JSONL remains the source for in-app stats.
 
-Air weather: Watch fetches WeatherKit current conditions from the first usable GPS fix (retry at stop, ~8 s timeout). On save it attaches `HKMetadataKeyWeatherTemperature`, `HKMetadataKeyWeatherHumidity`, and `HKMetadataKeyWeatherCondition`. Fail open — missing weather never blocks `finishWorkout()`. Distinct from Ultra water-temperature samples. Requires the Watch WeatherKit entitlement (and App ID capability).
+Air weather: Watch fetches WeatherKit current conditions from the first usable GPS fix (retry at stop, ~8 s timeout). On save it attaches `HKMetadataKeyWeatherTemperature`, `HKMetadataKeyWeatherHumidity`, and `HKMetadataKeyWeatherCondition`. Fail open — missing weather never blocks `finishWorkout()`. Distinct from Ultra water-temperature samples. WeatherKit calls are capped per month, so every call site (Watch + phone park weather) goes through `WeatherFetchThrottle`: max one network attempt per location (~5 km grid) per hour, failures included; a Watch session starting at the same spot within the hour reuses the previous snapshot. No fetch time is shown in the UI. Requires the Watch WeatherKit entitlement (and App ID capability).
 
 Water estimate: from the first usable GPS fix the Watch resolves the nearest bundled park within 1 km of the pin or a traced cable (`ParkListing.nearest`; fixes worse than 250 m accuracy are skipped until a better one arrives) and, if it has a `water_temperature` source, fetches the station reading (~8 s timeout, readings older than 48 h dropped). Stored in the manifest as `waterTemperatureEstimate` and shown on the inactive page as `~17°`, so watches without a submersion sensor (and Ultras before first submersion) still show a value. Once the Watch measures real samples, the display switches to the measured average and the estimate is no longer attached to the workout; otherwise it is saved as workout metadata `nl.dcsbl.rppl.waterTemperatureEstimate` (not as a Health water-temperature sample). Fail open — no park, source or network means no estimate.
 
@@ -81,9 +81,22 @@ Optional start only:
 
 Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
+## Battery guard
+
+The Health workout and the phone transfer only happen at Stop, and a park day can outlast an older Watch's battery (roughly 6–7 h with GPS and heart rate). `BatteryGuardPolicy` (Core) decides what the Watch does while it runs down, checked on every flush:
+
+- **Unplugged** (an unknown state counts as unplugged): a notification haptic and a flush once at **15 %** and once at **10 %**, then an automatic Stop at **5 %** or lower. A jump past both thresholds warns once.
+- The automatic Stop writes an `inactive` marker with `detectorId` `battery_critical`, then runs the normal Stop, so the Health save and the transfer happen while there is power.
+- **Charging** or **full** never acts. Product Pause is not checked (sensors are off while paused).
+- Battery samples (`battery-000.jsonl`) carry `lowPowerMode` (optional), so GPS gaps under Low Power Mode can be explained.
+
+The thresholds are product defaults in one place (`BatteryGuardPolicy`).
+
 ## Transfer
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections`.
+
+**While a session records**, the Watch does no work that is not part of the recording: no packaging of older sessions (acks are still processed), no view sync with the phone, no scan for orphaned recordings and no pending-transfer count. They run after Stop. Each of them reads every stored manifest, and on an older Watch a wrist raise would stall the main thread of a running workout. The view-sync service keeps one `SessionFileStore`, so its package path cache survives and listing N sessions is linear.
 
 **Tiny-session discard** (duration < ~30s and zero sets): Stop asks Discard / Keep / Cancel. Confirmed Discard deletes the Watch package and skips transfer + Health save. Keep uses the normal transfer path (ack still required before delete).
 

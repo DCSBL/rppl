@@ -10,12 +10,7 @@ struct AppInfoView: View {
     @State private var showDisableDeleteConfirm = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
-    private var versionFooter: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
-        let date = Bundle.main.infoDictionary?["RpplBuildDate"] as? String ?? "-"
-        return "\(version) (\(build) - \(date))"
-    }
+    private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
 
     var body: some View {
         NavigationStack {
@@ -110,6 +105,10 @@ struct AppInfoView: View {
                 }
 
                 Section {
+                    betaRow
+                }
+
+                Section {
                     NavigationLink {
                         LegalTermsPrivacyView()
                     } label: {
@@ -129,10 +128,21 @@ struct AppInfoView: View {
                             .foregroundStyle(Color.rpplMuted.opacity(0.4))
                             .accessibilityHidden(true)
 
-                        Text(versionFooter)
-                            .font(.footnote)
-                            .foregroundStyle(Color.rpplMuted.opacity(0.7))
-                            .accessibilityLabel("Version \(versionFooter)")
+                        VStack(spacing: 2) {
+                            Text(versionInfo.headline)
+                                .textSelection(.enabled)
+                                .accessibilityLabel("Version \(versionInfo.headline)")
+                            Link(destination: versionInfo.sourceURL) {
+                                HStack(spacing: 4) {
+                                    Text(versionInfo.detail)
+                                    Image(systemName: "arrow.up.right")
+                                        .imageScale(.small)
+                                        .accessibilityHidden(true)
+                                }
+                            }
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(Color.rpplMuted.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 24)
@@ -144,6 +154,7 @@ struct AppInfoView: View {
             .scrollContentBackground(.hidden)
             .background(RpplBackdrop())
             .navigationTitle("Rppl")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
@@ -162,6 +173,20 @@ struct AppInfoView: View {
                 Text(
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
+            }
+        }
+    }
+
+    /// Testers already in the beta get a share sheet to invite a friend; everyone else opens the join page.
+    @ViewBuilder
+    private var betaRow: some View {
+        if AppReleaseChannel.isTestFlight {
+            ShareLink(item: AppConstants.betaJoinURL) {
+                Label("Invite someone else to the beta", systemImage: "person.badge.plus")
+            }
+        } else {
+            Link(destination: AppConstants.betaJoinURL) {
+                Label("Join the beta", systemImage: "paperplane")
             }
         }
     }

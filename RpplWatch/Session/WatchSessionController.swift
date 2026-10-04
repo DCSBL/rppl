@@ -19,6 +19,10 @@ final class WatchSessionController: NSObject {
     var sessionStartLongitude: Double?
     /// True while stop teardown / Health save runs — block Start.
     var isStopping = false
+    /// Crash recovery started at launch (dangling Health workout, orphaned session files).
+    var launchRecoveryTask: Task<Void, Never>?
+    /// True while a product Pause is flushing, before `isProductPaused` is set.
+    var isPausing = false
     /// True after Stop while the summary is already on screen and the Health save, derived view
     /// and transfer package are still being written in the background.
     var isFinalizing = false
@@ -34,6 +38,8 @@ final class WatchSessionController: NSObject {
     var locationCount = 0
     var motionCount = 0
     var detectionCount = 0
+    /// Detection events whose write failed; retried on the next event and on every flush.
+    var pendingDetections = PendingDetectionQueue()
     /// On-disk size of the active session package (updated after flushes / detection writes).
     var storedByteSize: Int64 = 0
     var lastLatitude: Double?
@@ -153,7 +159,8 @@ final class WatchSessionController: NSObject {
     /// True while `handleWorkoutSessionLost` runs, so `.ended` + `.stopped` callbacks act once.
     var isHandlingWorkoutLoss = false
     var workoutStoppedContinuation: CheckedContinuation<Date, Never>?
-    var workoutRunningContinuation: CheckedContinuation<Void, Never>?
+    /// Callers waiting for the HK session to reach `.running`, keyed per caller.
+    var workoutRunningWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
     var hkRideDistanceMeters = 0.0
     var hkRideDistanceAnchorMeters = 0.0
     /// Set windows for HealthKit distance samples and interval metadata.
@@ -187,6 +194,11 @@ final class WatchSessionController: NSObject {
     var lastPersistedBatteryAt: Date?
     var lastPersistedBatteryLevel: Double?
     var lastPersistedBatteryState: String?
+    var lastPersistedLowPowerMode: Bool?
+    /// Battery warnings already shown this session (`BatteryGuardPolicy`).
+    var batteryWarnedCodes: Set<String> = []
+    /// A battery-critical stop is under way; never started twice.
+    var isBatteryAutoStopping = false
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false

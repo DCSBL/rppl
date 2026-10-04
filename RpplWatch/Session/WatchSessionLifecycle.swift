@@ -20,7 +20,9 @@ extension WatchSessionController {
     private func refreshLocalPermissionStatus() {
         let loc = locationManager.authorizationStatus
         locationAuthStatus = Self.locationLabel(loc)
+        // Approximate location is granted but unusable: the whole session would record no sets.
         locationPermission = Self.locationPermissionState(loc)
+            .accountingForReducedAccuracy(locationManager.accuracyAuthorization == .reducedAccuracy)
 
         if CMMotionActivityManager.isActivityAvailable() {
             switch CMMotionActivityManager.authorizationStatus() {
@@ -145,6 +147,33 @@ extension WatchSessionController {
         }
     }
 
+    /// Precise Location off = fixes with kilometers of error, so detection rejects all of them and
+    /// the session records no sets. Ask for full accuracy for this session (system sheet, purpose
+    /// key `RideTracking` in the Info.plist). If the rider declines, Start is blocked by the
+    /// permission gate (reduced accuracy counts as not ready) and explains how to turn it on.
+    func requestFullAccuracyIfReduced() async {
+        guard locationManager.accuracyAuthorization == .reducedAccuracy else { return }
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            break
+        default:
+            return
+        }
+        let manager = UncheckedSendable(value: locationManager)
+        _ = try? await Deadline.run(Self.fullAccuracyPromptTimeout, label: "temporary full accuracy") {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                manager.value.requestTemporaryFullAccuracyAuthorization(withPurposeKey: "RideTracking") { _ in
+                    continuation.resume()
+                }
+            }
+        }
+        refreshPermissionStatus()
+        WakeLog.debug(.permissions, "temporary full accuracy asked, now \(locationManager.accuracyAuthorization.rawValue)")
+    }
+
+    /// Long enough for the rider to read and answer the system sheet, bounded if it never answers.
+    static let fullAccuracyPromptTimeout: TimeInterval = 60
+
     func requestLocationPermission() async {
         errorText = nil
         locationManager.requestWhenInUseAuthorization()
@@ -170,7 +199,14 @@ extension WatchSessionController {
         do {
             // Kick the request off the tightest MainActor turn so WatchKit can show the sheet
             // without the UI sitting on a ProgressView for several seconds first.
-            try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
+            // Bounded: a stalled `healthd` never answers and used to hang Start until force-quit.
+            // Long enough for a rider to read and answer the system sheet.
+            let store = healthStore
+            let toShare = typesToShare
+            let toRead = typesToRead
+            try await healthKitStep("requestAuthorization", seconds: Self.healthAuthorizationTimeout) {
+                try await store.requestAuthorization(toShare: toShare, read: toRead)
+            }
             WakeLog.debug(.permissions, "Health authorization requested OK")
         } catch {
             errorText = String(localized: "Health auth: \(error.localizedDescription)")
@@ -189,11 +225,15 @@ extension WatchSessionController {
             refreshPermissionStatus()
             return
         }
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            let manager = CMMotionActivityManager()
-            let now = Date()
-            manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
-                continuation.resume()
+        // The controller's own manager: a throwaway one is released as soon as this closure returns
+        // and may never call back. The deadline keeps Start from hanging if the answer never comes.
+        let manager = UncheckedSendable(value: activityManager)
+        let now = Date()
+        _ = try? await Deadline.run(Self.motionPermissionTimeout, label: "motion authorization") {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                manager.value.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { _, _ in
+                    continuation.resume()
+                }
             }
         }
         refreshPermissionStatus()
@@ -241,9 +281,13 @@ extension WatchSessionController {
         isStarting = true
         startingActivityCode = code
 
-        await requestPermissions()
+        // Undecided permissions only. Re-asking after a denial belongs to the permissions UI: a
+        // denied request shows no sheet, so a stalled `healthd` would hold every Start forever.
+        await promptUndeterminedPermissionsInOrder()
         // No Health (or Location) access = no start: without a workout session the app would be
         // suspended with the wrist down. The Watch stays browsable; the rider is told why.
+        // (With Precise Location off the rider is asked for it once first: see below.)
+        await requestFullAccuracyIfReduced()
         if let kind = WatchPermissionOrder.startBlocker(states: permissionStates) {
             isStarting = false
             startingActivityCode = nil
@@ -291,6 +335,7 @@ extension WatchSessionController {
         }
         ActivityCodes.rememberLastUsed(code)
 
+        await awaitLaunchRecovery()
         let workoutStarted = await startWorkoutIfAuthorized()
         if workoutStarted {
             recordingMode = "workout"
@@ -306,8 +351,10 @@ extension WatchSessionController {
         lastPersistedConfidentCode = DetectionCodes.inactive
         detectionSimulationMode = .detected
         detectionCount = 0
+        pendingDetections.removeAll()
         locationCount = 0
         motionCount = 0
+        resetLiveSessionTotals()
         currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
@@ -364,6 +411,13 @@ extension WatchSessionController {
     /// transfer package finish behind it. Only the sensor stop and the last flush run before the
     /// summary appears; everything else used to hold the rider on a spinner for minutes.
     func stopSession() async {
+        // A Pause that is still flushing finishes first (it is quick), so it never pauses the HK
+        // session that this Stop is about to finalize.
+        var waits = 0
+        while isPausing, waits < 100 {
+            try? await Task.sleep(for: .milliseconds(50))
+            waits += 1
+        }
         guard isRunning, !isStopping, let manifest, let store else {
             WakeLog.debug(.session, "stopSession ignored — running=\(isRunning) stopping=\(isStopping)")
             return
@@ -494,6 +548,16 @@ extension WatchSessionController {
         timerTask?.cancel()
     }
 
+    /// The Watch process usually outlives a park day, so every live total must start from zero:
+    /// the second session of the day used to show the first one's riding time and energy.
+    private func resetLiveSessionTotals() {
+        cumulativeRidingDuration = 0
+        cumulativeInactiveDuration = 0
+        activeEnergyKilocalories = nil
+        basalEnergyKilocalories = nil
+        elapsed = 0
+    }
+
     private func clearSessionRuntimeState() {
         healthKitRestartTask?.cancel()
         healthKitRestartTask = nil
@@ -501,8 +565,13 @@ extension WatchSessionController {
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
+        if !pendingDetections.isEmpty {
+            WakeLog.error(.detection, "session ended with \(pendingDetections.count) detection event(s) unwritten")
+            pendingDetections.removeAll()
+        }
         liveSetTracker.reset()
         storedByteSize = 0
+        resetLiveSessionTotals()
         currentSetDuration = 0
         currentInactiveDuration = 0
         lastSpeedMps = nil
@@ -537,14 +606,24 @@ extension WatchSessionController {
     }
 
     func pauseSession() async {
-        guard isRunning, !isStopping, !isProductPaused else {
+        guard isRunning, !isStopping, !isProductPaused, !isPausing else {
             WakeLog.debug(.session, "pauseSession ignored")
             return
         }
+        // Set before the first await: a second tap during the flush would write a second
+        // `product_pause` marker, and Stop waits for this pause to finish.
+        isPausing = true
+        defer { isPausing = false }
         WakeLog.debug(.session, "pauseSession begin")
         applyForcedInactive(reason: "product_pause", detectorId: "product_pause")
         considerPersistingBattery(force: true)
         await flushBuffers(force: true)
+        // The session can end while the flush runs; pausing a torn-down session would pause the
+        // HK session in the middle of its finalize.
+        guard isRunning, !isStopping else {
+            WakeLog.debug(.session, "pauseSession aborted — session ended during the flush")
+            return
+        }
         flushTask?.cancel()
         timerTask?.cancel()
         flushTask = nil
@@ -660,12 +739,62 @@ extension WatchSessionController {
 extension WatchSessionController {
     /// Finalizes sessions left in `recording` by a crash/kill so they show up and transfer.
     /// Never resumes or prompts; failures are logged and skipped (never blocks launch).
+    /// Waits for the launch recovery first: the crashed HK session must end at the orphan's last
+    /// sample, which needs the orphan still open, and a Start must not race it.
     func recoverOrphanedSessions() {
-        guard !isStarting else { return }
+        Task { @MainActor in
+            await launchRecoveryTask?.value
+            guard !isStarting else { return }
+            let recovered = await recoverOrphanedRecordingsOffMain()
+            guard !recovered.isEmpty else { return }
+            WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s)")
+        }
+    }
+
+    /// Runs once per process, from `RpplWatchApp.init`: closes the crashed Health workout at the
+    /// last recorded sample, finalizes the orphaned Rppl session, then tells the rider.
+    func startLaunchRecovery() {
+        guard launchRecoveryTask == nil else { return }
+        launchRecoveryTask = Task { @MainActor in
+            let orphanLastSample = await orphanedRecordingsLastSample()
+            let healthEnd = await recoverDanglingWorkoutSession(orphanLastSample: orphanLastSample)
+            let recovered = await recoverOrphanedRecordingsOffMain()
+            if !recovered.isEmpty {
+                WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s) at launch")
+            }
+            if healthEnd != nil || !recovered.isEmpty {
+                await WatchRecoveryNotifier.notifyRecordingStopped(
+                    at: orphanLastSample ?? healthEnd ?? Date()
+                )
+            }
+        }
+    }
+
+    /// A Start waits (bounded) for the launch recovery: only one HKWorkoutSession can run, and a
+    /// new one created while the dangling one is still active fails.
+    func awaitLaunchRecovery() async {
+        guard let task = launchRecoveryTask else { return }
+        _ = try? await Deadline.run(Self.launchRecoveryTimeout, label: "launch recovery") { await task.value }
+    }
+
+    static let launchRecoveryTimeout: TimeInterval = 10
+
+    /// Latest recorded sample across the orphaned recordings; nil when there are none.
+    private func orphanedRecordingsLastSample() async -> Date? {
         let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         let activeId = isRunning ? manifest?.sessionId : nil
-        let recovered = fileStore.recoverOrphanedRecordings(activeSessionId: activeId)
-        guard !recovered.isEmpty else { return }
-        WakeLog.debug(.session, "recovered \(recovered.count) orphaned recording(s)")
+        let value = try? await StoreIO.runOffMain { () -> Date? in
+            let manifests = (try? fileStore.listReadableManifests()) ?? []
+            return SessionRecovery.orphanedRecordingIds(manifests: manifests, activeSessionId: activeId)
+                .compactMap { fileStore.lastRecordedTimestamp(sessionId: $0) }
+                .max()
+        }
+        return value ?? nil
+    }
+
+    private func recoverOrphanedRecordingsOffMain() async -> [String] {
+        let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
+        let activeId = isRunning ? manifest?.sessionId : nil
+        return (try? await StoreIO.runOffMain { fileStore.recoverOrphanedRecordings(activeSessionId: activeId) }) ?? []
     }
 }

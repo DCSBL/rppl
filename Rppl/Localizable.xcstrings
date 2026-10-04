@@ -891,6 +891,22 @@
         }
       }
     },
+    "Invite someone else to the beta" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite someone else to the beta"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iemand anders uitnodigen voor de beta"
+          }
+        }
+      }
+    },
     "iPhone" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -904,6 +920,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone"
+          }
+        }
+      }
+    },
+    "Join the beta" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join the beta"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meedoen met de beta"
           }
         }
       }

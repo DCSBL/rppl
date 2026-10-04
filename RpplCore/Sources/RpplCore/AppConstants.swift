@@ -4,6 +4,8 @@ public enum AppConstants {
     public static let appGroupID = "group.nl.dcsbl.rppl"
     /// iCloud Documents container (iPhone logbook when Drive sync is enabled).
     public static let iCloudContainerIdentifier = "iCloud.nl.dcsbl.rppl"
+    /// Public TestFlight invite link. Opens the TestFlight join page for the Rppl beta.
+    public static let betaJoinURL = URL(string: "https://testflight.apple.com/join/R2BymVaX")!
     public static let sessionsDirectoryName = "Sessions"
     /// User-added or edited park YAML files (override bundled parks with the same `id`).
     public static let parksDirectoryName = "Parks"
