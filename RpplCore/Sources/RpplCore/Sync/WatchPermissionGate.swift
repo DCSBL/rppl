@@ -34,6 +34,14 @@ extension WatchPermissionState {
     public var needsAttention: Bool {
         !isReady
     }
+
+    /// Location only. With Precise Location off, CoreLocation grants access but delivers fixes with
+    /// kilometers of error and no usable speed: detection rejects every fix and the whole session
+    /// records without sets or a track, while everything looks fine. A granted permission with
+    /// reduced accuracy therefore counts as not ready (fixed in Settings > Precise Location).
+    public func accountingForReducedAccuracy(_ isReduced: Bool) -> WatchPermissionState {
+        self == .authorized && isReduced ? .denied : self
+    }
 }
 
 extension WatchPermissionKind {
