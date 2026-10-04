@@ -62,10 +62,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "price"],
+        "required": ["name", "amount", "currency"],
         "properties": {
           "name": { "type": "string", "minLength": 1 },
-          "price": { "type": "string", "minLength": 1 },
+          "amount": { "type": "number", "maximum": 100000 },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "per": { "type": "string", "minLength": 1 },
+          "minutes": { "type": "integer", "minimum": 1 },
           "note": { "type": "string" }
         }
       }
