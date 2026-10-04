@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Locale-independent, engineer-readable description of a network failure. `error.localizedDescription`
 /// renders in the *device's* language (e.g. "geannuleerd" on a Dutch device for a cancelled request),

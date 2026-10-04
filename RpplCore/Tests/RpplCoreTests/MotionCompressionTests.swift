@@ -14,6 +14,14 @@ struct CompressedJSONLFramesTests {
         #expect(frame.count < payload.count)
     }
 
+    /// Frames are raw DEFLATE (RFC 1951, no zlib header): what Apple's `COMPRESSION_ZLIB` writes and
+    /// what the Linux zlib fallback must read. A fixed vector keeps both platforms byte-compatible.
+    @Test func decodesKnownRawDeflateFrame() throws {
+        let rawDeflateHello: [UInt8] = [0xCB, 0x48, 0xCD, 0xC9, 0xC9, 0x07, 0x00]
+        let frame = Data([0x00, 0x00, 0x00, UInt8(rawDeflateHello.count)] + rawDeflateHello)
+        #expect(String(data: try CompressedJSONLFrames.decodeFrames(frame), encoding: .utf8) == "hello")
+    }
+
     @Test func concatenatesMultipleFrames() throws {
         let first = try CompressedJSONLFrames.makeFrame(jsonlUTF8: Data("line1\n".utf8))
         let second = try CompressedJSONLFrames.makeFrame(jsonlUTF8: Data("line2\n".utf8))
@@ -152,11 +160,12 @@ struct MotionCompressionTests {
     }
 
     @Test func compressedMotionMuchSmallerThanNaiveJSONL() throws {
-        let samples = (0..<500).map { i in
-            MotionSample(
-                timestamp: Date(timeIntervalSince1970: Double(i) / 25.0),
-                userAccelX: sin(Double(i) / 10),
-                userAccelY: cos(Double(i) / 10),
+        let samples = (0..<500).map { i -> MotionSample in
+            let t = Double(i)
+            return MotionSample(
+                timestamp: Date(timeIntervalSince1970: t / 25.0),
+                userAccelX: sin(t / 10),
+                userAccelY: cos(t / 10),
                 userAccelZ: 0.01 * Double(i % 7),
                 rotationX: 0.1,
                 rotationY: -0.2,
