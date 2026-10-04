@@ -50,6 +50,9 @@ final class WatchTransferService: NSObject {
     }
 
     func refreshPendingCount() {
+        // Counting pending transfers reads every stored manifest: not while recording. The count
+        // is refreshed at Stop and by the next call after it.
+        guard !WatchSessionController.shared.isRecordingActive else { return }
         let fileStore = store ?? SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         pendingTransferCount = (try? fileStore.sessionsNeedingTransfer().count) ?? 0
         syncStatusRevision &+= 1

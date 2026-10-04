@@ -85,6 +85,8 @@ Requires an active HealthKit workout path for Workout intent registration. Cycle
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections`.
 
+**While a session records**, the Watch does no work that is not part of the recording: no packaging of older sessions (acks are still processed), no view sync with the phone, no scan for orphaned recordings and no pending-transfer count. They run after Stop. Each of them reads every stored manifest, and on an older Watch a wrist raise would stall the main thread of a running workout. The view-sync service keeps one `SessionFileStore`, so its package path cache survives and listing N sessions is linear.
+
 **Tiny-session discard** (duration < ~30s and zero sets): Stop asks Discard / Keep / Cancel. Confirmed Discard deletes the Watch package and skips transfer + Health save. Keep uses the normal transfer path (ack still required before delete).
 
 ## Export

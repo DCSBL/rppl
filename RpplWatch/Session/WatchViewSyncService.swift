@@ -10,9 +10,10 @@ final class WatchViewSyncService {
 
     private(set) var catalogRevision = 0
 
-    private var store: SessionFileStore {
-        SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
-    }
+    /// One instance for the whole service: its package path cache survives between calls. A new
+    /// store per access started cold every time, so listing N sessions rescanned every manifest
+    /// ~4N times (O(N²)). Its lock is separate from the recording store's on purpose.
+    private let store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
 
     func bumpCatalogRevision() {
         catalogRevision &+= 1
@@ -104,6 +105,12 @@ final class WatchViewSyncService {
     func requestViewSyncIfReachable() {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated else { return }
         guard WCSession.default.isReachable else { return }
+        // Listing every stored session reads each manifest: not while a session is recording
+        // (a wrist raise on an older Watch would stall the main thread). It runs after Stop.
+        guard !WatchSessionController.shared.isRecordingActive else {
+            WakeLog.debug(.sync, "view sync skipped — recording")
+            return
+        }
 
         let known = knownSessionsOnWatch()
         guard let payload = try? WatchViewSyncCodec.encodeSyncRequest(known: known) else { return }
