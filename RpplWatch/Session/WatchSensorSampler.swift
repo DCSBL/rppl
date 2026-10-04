@@ -315,6 +315,34 @@ extension WatchSessionController {
         lastPersistedBatteryAt = nil
         lastPersistedBatteryLevel = nil
         lastPersistedBatteryState = nil
+        lastPersistedLowPowerMode = nil
+        batteryWarnedCodes = []
+        isBatteryAutoStopping = false
+    }
+
+    /// Warn the rider while the battery runs down and stop in time to save the workout (see
+    /// `BatteryGuardPolicy`). The stop runs the normal `stopSession()`, so the Health save and the
+    /// transfer happen while there is still power.
+    private func evaluateBatteryGuard(level: Double, state: String) {
+        switch BatteryGuardPolicy.decide(level: level, state: state, alreadyWarned: batteryWarnedCodes) {
+        case .none:
+            break
+        case .warn(let code):
+            batteryWarnedCodes.formUnion(BatteryGuardPolicy.coveredCodes(by: code))
+            WKInterfaceDevice.current().play(.notification)
+            WakeLog.error(.session, String(format: "battery low (%@) level=%.2f — flushing", code, level))
+            Task { await flushBuffers(force: true) }
+        case .autoStop:
+            guard !isBatteryAutoStopping, !isStopping else { return }
+            isBatteryAutoStopping = true
+            WakeLog.error(.session, String(format: "battery critical level=%.2f — stopping the session", level))
+            WKInterfaceDevice.current().play(.failure)
+            applyForcedInactive(
+                reason: "battery_critical level=\(String(format: "%.2f", level))",
+                detectorId: BatteryGuardPolicy.autoStopDetectorId
+            )
+            Task { await stopSession() }
+        }
     }
 
     func enableBatteryMonitoring() {
@@ -336,19 +364,23 @@ extension WatchSessionController {
         guard rawLevel >= 0 else { return }
 
         let state = Self.batteryStateCode(device.batteryState)
+        evaluateBatteryGuard(level: rawLevel, state: state)
+        let lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
         let now = Date()
         let intervalElapsed = lastPersistedBatteryAt.map {
             now.timeIntervalSince($0) >= Self.batteryPersistInterval
         } ?? true
         let levelChanged = lastPersistedBatteryLevel.map { abs($0 - rawLevel) > 0 } ?? true
         let stateChanged = lastPersistedBatteryState.map { $0 != state } ?? true
-        guard force || intervalElapsed || levelChanged || stateChanged else { return }
+        let lowPowerChanged = lastPersistedLowPowerMode.map { $0 != lowPower } ?? true
+        guard force || intervalElapsed || levelChanged || stateChanged || lowPowerChanged else { return }
 
-        let sample = BatterySample(timestamp: now, level: rawLevel, state: state)
+        let sample = BatterySample(timestamp: now, level: rawLevel, state: state, lowPowerMode: lowPower)
         batteryBuffer.append(sample)
         lastPersistedBatteryAt = now
         lastPersistedBatteryLevel = rawLevel
         lastPersistedBatteryState = state
+        lastPersistedLowPowerMode = lowPower
         WakeLog.debug(
             .session,
             String(format: "battery level=%.4f state=%@", rawLevel, state)
