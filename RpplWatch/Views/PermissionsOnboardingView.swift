@@ -249,7 +249,7 @@ extension WatchPermissionKind {
         switch self {
         case .location:
             return String(
-                localized: "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App."
+                localized: "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, allow While Using the App and turn on Precise Location."
             )
         case .health:
             return String(

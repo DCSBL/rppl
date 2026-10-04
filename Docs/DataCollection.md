@@ -81,9 +81,22 @@ Optional start only:
 
 Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
+## Battery guard
+
+The Health workout and the phone transfer only happen at Stop, and a park day can outlast an older Watch's battery (roughly 6–7 h with GPS and heart rate). `BatteryGuardPolicy` (Core) decides what the Watch does while it runs down, checked on every flush:
+
+- **Unplugged** (an unknown state counts as unplugged): a notification haptic and a flush once at **15 %** and once at **10 %**, then an automatic Stop at **5 %** or lower. A jump past both thresholds warns once.
+- The automatic Stop writes an `inactive` marker with `detectorId` `battery_critical`, then runs the normal Stop, so the Health save and the transfer happen while there is power.
+- **Charging** or **full** never acts. Product Pause is not checked (sensors are off while paused).
+- Battery samples (`battery-000.jsonl`) carry `lowPowerMode` (optional), so GPS gaps under Low Power Mode can be explained.
+
+The thresholds are product defaults in one place (`BatteryGuardPolicy`).
+
 ## Transfer
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections`.
+
+**While a session records**, the Watch does no work that is not part of the recording: no packaging of older sessions (acks are still processed), no view sync with the phone, no scan for orphaned recordings and no pending-transfer count. They run after Stop. Each of them reads every stored manifest, and on an older Watch a wrist raise would stall the main thread of a running workout. The view-sync service keeps one `SessionFileStore`, so its package path cache survives and listing N sessions is linear.
 
 **Tiny-session discard** (duration < ~30s and zero sets): Stop asks Discard / Keep / Cancel. Confirmed Discard deletes the Watch package and skips transfer + Health save. Keep uses the normal transfer path (ack still required before delete).
 

@@ -1048,18 +1048,18 @@
         }
       }
     },
-    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App." : {
+    "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, allow While Using the App and turn on Precise Location." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On iPhone, open Settings > Privacy & Security > Location Services > Rppl and allow While Using the App."
+            "value" : "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, allow While Using the App and turn on Precise Location."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl en sta Bij gebruik van de app toe."
+            "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl, sta Bij gebruik van de app toe en zet Exacte locatie aan."
           }
         }
       }

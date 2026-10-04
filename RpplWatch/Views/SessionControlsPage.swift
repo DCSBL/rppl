@@ -37,7 +37,7 @@ struct SessionControlsPage: View {
                     Task { await session.pauseSession() }
                 }
                 .buttonStyle(.bordered)
-                .disabled(session.isStopping)
+                .disabled(session.isStopping || session.isPausing)
             }
 
             waterLockButton

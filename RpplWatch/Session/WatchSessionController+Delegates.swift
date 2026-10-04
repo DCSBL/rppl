@@ -75,9 +75,10 @@ extension WatchSessionController: HKWorkoutSessionDelegate {
         let sessionId = ObjectIdentifier(workoutSession)
         Task { @MainActor in
             WakeLog.debug(.workout, "state \(Self.workoutStateName(fromState)) → \(Self.workoutStateName(toState))")
-            if toState == .running, let continuation = workoutRunningContinuation {
-                workoutRunningContinuation = nil
-                continuation.resume()
+            if toState == .running {
+                let waiters = workoutRunningWaiters
+                workoutRunningWaiters = [:]
+                waiters.values.forEach { $0.resume() }
             }
             if toState == .stopped, let continuation = workoutStoppedContinuation {
                 workoutStoppedContinuation = nil
@@ -138,6 +139,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
             var hr: Double?
             var energy: Double?
             var basal: Double?
+            var measuredAt = now
 
             if let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate),
                collectedTypes.contains(hrType),
@@ -145,6 +147,10 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
                let value = statistics.mostRecentQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) {
                 hr = value
                 lastHeartRate = value
+                // When HR was measured, not when this callback reached the main actor.
+                if let end = statistics.mostRecentQuantityDateInterval()?.end, end <= now {
+                    measuredAt = end
+                }
             }
             if let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
                collectedTypes.contains(energyType),
@@ -163,7 +169,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
             if hr != nil || energy != nil || basal != nil {
                 healthBuffer.append(
                     HealthMetricSample(
-                        timestamp: now,
+                        timestamp: measuredAt,
                         heartRateBPM: hr,
                         activeEnergyKilocalories: energy,
                         basalEnergyKilocalories: basal

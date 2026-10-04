@@ -17,6 +17,17 @@ private final class FailingDerivedFileManager: FileManager, @unchecked Sendable 
     }
 }
 
+/// Lets the staged package move into place only after the old copy has stepped aside, then fails:
+/// the swap must put the old copy back.
+private final class FailingInstallFileManager: FileManager, @unchecked Sendable {
+    override func moveItem(at srcURL: URL, to dstURL: URL) throws {
+        if srcURL.deletingLastPathComponent().lastPathComponent.hasPrefix("rppl-import-") {
+            throw CocoaError(.fileWriteOutOfSpace)
+        }
+        try super.moveItem(at: srcURL, to: dstURL)
+    }
+}
+
 @Suite("Atomic session import", .serialized)
 struct SessionImportAtomicTests {
     private func phoneRoot() -> URL {
@@ -51,6 +62,29 @@ struct SessionImportAtomicTests {
         #expect(try phoneStore.readManifest(sessionId: session.sessionId).transferState == .acknowledged)
         let folders = try FileManager.default.contentsOfDirectory(atPath: phone.path)
         #expect(folders.count == 1)
+    }
+
+    @Test func aFailedSwapPutsTheExistingCopyBack() throws {
+        let session = try TempSession.make()
+        let phone = phoneRoot()
+        defer { session.cleanup(); try? FileManager.default.removeItem(at: phone) }
+        let first = try package(for: session, locations: 5)
+        try session.store.importTransferPackage(first, intoPhoneStore: phone)
+        let folderBefore = try SessionPackageLocator.directory(for: session.sessionId, in: phone).lastPathComponent
+
+        try session.store.appendLocationSamples((5..<20).map { Samples.location($0) }, sessionId: session.sessionId)
+        let second = try session.store.buildTransferPackage(sessionId: session.sessionId)
+        let failing = SessionFileStore(rootURL: session.root, fileManager: FailingInstallFileManager())
+        #expect(throws: CocoaError.self) {
+            try failing.importTransferPackage(second, intoPhoneStore: phone)
+        }
+
+        let restored = try SessionPackageLocator.directory(for: session.sessionId, in: phone)
+        #expect(restored.lastPathComponent == folderBefore)
+        #expect(try SessionFileStore(rootURL: phone).readLocationSamples(sessionId: session.sessionId).count == 5)
+        // No hidden leftovers next to the restored copy.
+        let names = try FileManager.default.contentsOfDirectory(atPath: phone.path)
+        #expect(names == [folderBefore])
     }
 
     @Test func aFailedFirstImportLeavesNoPackageBehind() throws {
