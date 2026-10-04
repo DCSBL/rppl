@@ -151,7 +151,7 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, and the **Release** workflow archives it and sends it to TestFlight internal. Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux)) and in the local push gate. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
 
-The older **Nightly TestFlight** and **PR / Core tests** workflows are retired (they spent the free compute hours). If they still exist in App Store Connect, delete them.
+The older **Nightly TestFlight** and **PR / Core tests** workflows are retired (they spent the free compute hours). Nightly is gone and `Test - PR` is deactivated in App Store Connect; keep it that way (or delete it).
 
 [`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires `CI_TAG`, so a start without a tag fails immediately instead of archiving, and otherwise runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py).
 
