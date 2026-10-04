@@ -126,13 +126,19 @@ struct AppInfoView: View {
 
                         VStack(spacing: 2) {
                             Text(versionInfo.headline)
-                            Text(versionInfo.detail)
+                                .textSelection(.enabled)
+                                .accessibilityLabel("Version \(versionInfo.headline)")
+                            Link(destination: versionInfo.sourceURL) {
+                                HStack(spacing: 4) {
+                                    Text(versionInfo.detail)
+                                    Image(systemName: "arrow.up.right")
+                                        .imageScale(.small)
+                                        .accessibilityHidden(true)
+                                }
+                            }
                         }
                         .font(.footnote)
                         .foregroundStyle(Color.rpplMuted.opacity(0.7))
-                        .textSelection(.enabled)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Version \(versionInfo.summary)")
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 24)

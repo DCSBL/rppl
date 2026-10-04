@@ -49,7 +49,7 @@ TestFlight groups builds by version, and Beta App Review looks at the **first ex
 
 Only bump the version when you start the next release cycle; a version that is on the App Store is closed for new builds. Do not use four-part tags such as `2026.10.1.2`: App Store versions have at most three integers, and the build number is Xcode Cloud's counter, not part of the tag.
 
-The About screen in the app shows the release tag with the build number (`2026.10.1-beta.2 (312)`) and the short commit SHA with the build date. TestFlight itself shows only version and build number. A local Xcode build shows the marketing version and no SHA. There is no link to GitHub because the repo is private.
+The About screen in the app shows the release tag with the build number (`2026.10.1-beta.2 (312)`) and the short commit SHA with the build date. TestFlight itself shows only version and build number. A local Xcode build shows the marketing version and no SHA. The commit line is a link: it opens the commit on GitHub (the repository root on a local build). The repo is private for now, so the link shows a 404 until it goes public.
 
 ## One-time setup
 

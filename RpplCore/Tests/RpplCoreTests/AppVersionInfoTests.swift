@@ -14,7 +14,6 @@ struct AppVersionInfoTests {
         let info = AppVersionInfo(infoDictionary: stamped)
         #expect(info.headline == "2026.10.1-beta.2 (312)")
         #expect(info.detail == "abc1234 · 2026-10-04")
-        #expect(info.summary == "2026.10.1-beta.2 (312), abc1234 · 2026-10-04")
     }
 
     @Test func localBuildFallsBackToMarketingVersionWithoutCommit() {
@@ -24,6 +23,19 @@ struct AppVersionInfoTests {
         let info = AppVersionInfo(infoDictionary: local)
         #expect(info.headline == "2026.10.1 (312)")
         #expect(info.detail == "2026-10-04")
+    }
+
+    @Test func stampedCommitLinksToItsCommitPage() {
+        let info = AppVersionInfo(infoDictionary: stamped)
+        #expect(info.sourceURL.absoluteString == "https://github.com/DCSBL/rppl/commit/abc1234")
+    }
+
+    @Test func localBuildLinksToRepository() {
+        var local = stamped
+        local["RpplGitCommit"] = ""
+        let info = AppVersionInfo(infoDictionary: local)
+        #expect(info.sourceURL == AppVersionInfo.repositoryURL)
+        #expect(info.sourceURL.absoluteString == "https://github.com/DCSBL/rppl")
     }
 
     @Test func missingKeysAreNotHiddenBehindEmptyText() {

@@ -8,6 +8,9 @@ import Foundation
 public struct AppVersionInfo: Equatable, Sendable {
     public static let missing = "-"
 
+    /// Source repository. Private for now; the link 404s until the repo goes public.
+    public static let repositoryURL = URL(string: "https://github.com/DCSBL/rppl")!
+
     public var marketingVersion: String
     public var build: String
     public var buildDate: String
@@ -32,9 +35,12 @@ public struct AppVersionInfo: Equatable, Sendable {
         [gitCommit, buildDate].compactMap { $0 }.joined(separator: " · ")
     }
 
-    /// One line for VoiceOver.
-    public var summary: String {
-        "\(headline), \(detail)"
+    /// The commit page on GitHub when a commit is stamped, else the repository root.
+    public var sourceURL: URL {
+        guard let gitCommit else { return Self.repositoryURL }
+        return Self.repositoryURL
+            .appendingPathComponent("commit")
+            .appendingPathComponent(gitCommit)
     }
 
     private static func value(_ dictionary: [String: Any]?, _ key: String) -> String? {
