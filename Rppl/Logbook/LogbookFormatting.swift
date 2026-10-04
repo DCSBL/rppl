@@ -97,6 +97,21 @@ enum LogbookFormatting {
         case .longestTime: return String(localized: "Longest time")
         case .shortest: return String(localized: "Shortest")
         case .fastest: return String(localized: "Fastest")
+        case .mostLaps: return String(localized: "Most laps")
+        case .comeback: return String(localized: "Comeback")
+        case .backToBack: return String(localized: "Back to back")
+        }
+    }
+
+    static func setHighlightExplanation(_ highlight: SetHighlight) -> String {
+        switch highlight {
+        case .longest: return String(localized: "Most distance of all sets this session.")
+        case .longestTime: return String(localized: "Longest time on the water of all sets this session.")
+        case .shortest: return String(localized: "Shortest set this session. Happens to everyone.")
+        case .fastest: return String(localized: "Highest sustained speed of all sets this session.")
+        case .mostLaps: return String(localized: "Most laps in one set this session.")
+        case .comeback: return String(localized: "Back on the water after the longest break this session.")
+        case .backToBack: return String(localized: "Shortest break before a set this session. Barely dried off.")
         }
     }
 
@@ -108,10 +123,39 @@ enum LogbookFormatting {
         case .highestRidePercentage: return String(localized: "Highest ride %")
         case .mostCalories: return String(localized: "Most calories")
         case .longestSetEver: return String(localized: "Longest set ever")
+        case .mostSets: return String(localized: "Most sets")
+        case .mostDistance: return String(localized: "Most distance")
+        case .topSpeed: return String(localized: "Top speed")
+        case .laziest: return String(localized: "Laziest")
+        case .coldest: return String(localized: "Coldest")
+        case .hottest: return String(localized: "Hottest")
+        case .windiest: return String(localized: "Windiest")
+        case .rainiest: return String(localized: "Rain rider")
+        case .iceBath: return String(localized: "Ice bath")
+        case .earlyBird: return String(localized: "Early bird")
+        case .nightOwl: return String(localized: "Night owl")
         }
     }
 
-    static func joinedSetHighlights(_ highlights: [SetHighlight]) -> String {
-        highlights.map { setHighlightLabel($0) }.joined(separator: " ")
+    static func sessionHighlightExplanation(_ highlight: SessionHighlight) -> String {
+        switch highlight {
+        case .longest: return String(localized: "Longest session in your logbook.")
+        case .mostWaterTime: return String(localized: "Most time riding of all your sessions.")
+        case .mostLaps: return String(localized: "Most laps of all your sessions.")
+        case .highestRidePercentage: return String(localized: "Biggest share of the session spent riding. Hardly sat on the dock.")
+        case .mostCalories: return String(localized: "Most calories burned of all your sessions.")
+        case .longestSetEver: return String(localized: "Your longest set ever, by distance.")
+        case .mostSets: return String(localized: "Most sets of all your sessions.")
+        case .mostDistance: return String(localized: "Most distance of all your sessions.")
+        case .topSpeed: return String(localized: "Highest speed of all your sessions.")
+        case .laziest: return String(localized: "Smallest share of the session spent riding. More dock than cable.")
+        case .coldest: return String(localized: "Coldest air of all your sessions.")
+        case .hottest: return String(localized: "Warmest air of all your sessions.")
+        case .windiest: return String(localized: "Most wind of all your sessions.")
+        case .rainiest: return String(localized: "Most rain of all your sessions. You were getting wet anyway.")
+        case .iceBath: return String(localized: "Coldest water of all your sessions.")
+        case .earlyBird: return String(localized: "Earliest start of all your sessions.")
+        case .nightOwl: return String(localized: "Latest finish of all your sessions.")
+        }
     }
 }

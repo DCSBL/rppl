@@ -81,14 +81,30 @@ final class SessionCatalog {
             let highlightMap = HighlightAssigner.assignSessionHighlights(
                 loaded.compactMap { entry in
                     guard let stats = entry.stats else { return nil }
+                    let manifest = entry.manifest
+                    let minutes = SessionHighlightInput.minutesOfDay(
+                        start: stats.startedAt,
+                        end: stats.endedAt,
+                        calendar: .current
+                    )
                     return SessionHighlightInput(
-                        id: entry.manifest.sessionId,
+                        id: manifest.sessionId,
                         totalDuration: stats.totalDuration,
                         ridingDuration: stats.ridingDuration,
                         lapCount: stats.totalLapCount,
                         ridingInactiveRatio: stats.ridingInactiveRatio,
                         totalEnergyKilocalories: stats.totalEnergyKilocalories ?? stats.activeEnergyKilocalories,
-                        longestSetDistanceMeters: stats.sets.map(\.distanceMeters).max()
+                        longestSetDistanceMeters: stats.sets.map(\.distanceMeters).max(),
+                        setCount: stats.setCount,
+                        totalDistanceMeters: stats.totalDistanceMeters,
+                        topSpeedKmh: entry.topSpeedKmh,
+                        airTemperatureCelsius: manifest.weather?.temperatureCelsius,
+                        windSpeedKmh: manifest.weather?.windSpeedKmh,
+                        precipitationMmPerHour: manifest.weather?.precipitationMmPerHour,
+                        waterTemperatureCelsius: stats.averageWaterTemperatureCelsius
+                            ?? manifest.waterTemperatureEstimate?.celsius,
+                        startMinuteOfDay: minutes.start,
+                        endMinuteOfDay: minutes.end
                     )
                 }
             )

@@ -401,6 +401,17 @@ extension SessionHighlight {
         case .highestRidePercentage: "chart.pie.fill"
         case .mostCalories: "flame.fill"
         case .longestSetEver: "ruler"
+        case .mostSets: "square.stack.3d.up.fill"
+        case .mostDistance: "map.fill"
+        case .topSpeed: "gauge.with.dots.needle.67percent"
+        case .laziest: "sofa.fill"
+        case .coldest: "thermometer.snowflake"
+        case .hottest: "sun.max.fill"
+        case .windiest: "wind"
+        case .rainiest: "cloud.rain.fill"
+        case .iceBath: "snowflake"
+        case .earlyBird: "sunrise.fill"
+        case .nightOwl: "moon.stars.fill"
         }
     }
 
@@ -412,6 +423,17 @@ extension SessionHighlight {
         case .highestRidePercentage: .green
         case .mostCalories: .red
         case .longestSetEver: .yellow
+        case .mostSets: .pink
+        case .mostDistance: .teal
+        case .topSpeed: .purple
+        case .laziest: .gray
+        case .coldest: .cyan
+        case .hottest: .orange
+        case .windiest: .mint
+        case .rainiest: .indigo
+        case .iceBath: .blue
+        case .earlyBird: .yellow
+        case .nightOwl: .indigo
         }
     }
 }
@@ -423,6 +445,9 @@ extension SetHighlight {
         case .longestTime: "clock.fill"
         case .shortest: "arrow.down.to.line"
         case .fastest: "bolt.fill"
+        case .mostLaps: "arrow.triangle.2.circlepath"
+        case .comeback: "arrow.counterclockwise"
+        case .backToBack: "forward.fill"
         }
     }
 
@@ -432,6 +457,9 @@ extension SetHighlight {
         case .longestTime: .blue
         case .shortest: .gray
         case .fastest: .purple
+        case .mostLaps: .pink
+        case .comeback: .green
+        case .backToBack: .teal
         }
     }
 }
@@ -476,12 +504,7 @@ private struct SessionCard: View {
                 if !entry.highlights.isEmpty {
                     FlowLayout(spacing: 6) {
                         ForEach(entry.highlights, id: \.rawValue) { highlight in
-                            ParkChip(
-                                text: LogbookFormatting.sessionHighlightLabel(highlight),
-                                systemImage: highlight.badgeIcon,
-                                tint: highlight.badgeTint,
-                                fill: highlight.badgeTint.opacity(0.14)
-                            )
+                            HighlightChip(highlight)
                         }
                     }
                 }
