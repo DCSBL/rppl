@@ -138,6 +138,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
             var hr: Double?
             var energy: Double?
             var basal: Double?
+            var measuredAt = now
 
             if let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate),
                collectedTypes.contains(hrType),
@@ -145,6 +146,10 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
                let value = statistics.mostRecentQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) {
                 hr = value
                 lastHeartRate = value
+                // When HR was measured, not when this callback reached the main actor.
+                if let end = statistics.mostRecentQuantityDateInterval()?.end, end <= now {
+                    measuredAt = end
+                }
             }
             if let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
                collectedTypes.contains(energyType),
@@ -163,7 +168,7 @@ extension WatchSessionController: HKLiveWorkoutBuilderDelegate {
             if hr != nil || energy != nil || basal != nil {
                 healthBuffer.append(
                     HealthMetricSample(
-                        timestamp: now,
+                        timestamp: measuredAt,
                         heartRateBPM: hr,
                         activeEnergyKilocalories: energy,
                         basalEnergyKilocalories: basal

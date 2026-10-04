@@ -51,12 +51,20 @@ extension WatchSessionController {
 
     private func startDeviceMotionUpdates(interval: TimeInterval) {
         motionManager.deviceMotionUpdateInterval = interval
+        // Measured at every (re)start so a clock adjustment cannot leave a stale offset behind.
+        let bootOffset = SensorClock.bootOffset(now: Date(), systemUptime: ProcessInfo.processInfo.systemUptime)
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let self, let motion, self.isRunning, !self.isProductPaused, self.motionRecordingEnabled else {
                 return
             }
+            // Sensor time, not delivery time: updates queue up behind a busy main thread and used
+            // to be stamped with nearly the same `Date()`.
             let sample = MotionSample(
-                timestamp: Date(),
+                timestamp: SensorClock.wallDate(
+                    bootOffset: bootOffset,
+                    sensorTimestamp: motion.timestamp,
+                    now: Date()
+                ),
                 userAccelX: motion.userAcceleration.x,
                 userAccelY: motion.userAcceleration.y,
                 userAccelZ: motion.userAcceleration.z,
