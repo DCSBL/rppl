@@ -123,7 +123,7 @@ struct TransferStateMachineTests {
         #expect(try store.readManifest(sessionId: session.sessionId).transferState == .acknowledged)
     }
 
-    @Test func zipRefusesAcknowledgedAndPrunedSessions() throws {
+    @Test func zipRefusesAcknowledgedSessions() throws {
         let (store, root) = tempStore()
         defer { try? FileManager.default.removeItem(at: root) }
         let session = manifest(state: .readyToTransfer)
@@ -136,18 +136,20 @@ struct TransferStateMachineTests {
         #expect(throws: SessionStoreError.notTransferable("already acknowledged")) {
             try store.zipSessionForTransfer(sessionId: session.sessionId, to: root)
         }
+    }
 
-        // `pruneRawStreams` itself refuses un-acked sessions, so reproduce a pruned package by
-        // removing the raw streams from a session that is still waiting to transfer.
-        let pruned = manifest(state: .readyToTransfer)
-        let prunedDir = try store.createSession(manifest: pruned)
-        for name in try FileManager.default.contentsOfDirectory(atPath: prunedDir.path)
+    @Test func unackedSessionWithoutRawStreamsStillZipsSoPendingClears() throws {
+        let (store, root) = tempStore()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let empty = manifest(state: .readyToTransfer)
+        let dir = try store.createSession(manifest: empty)
+        for name in try FileManager.default.contentsOfDirectory(atPath: dir.path)
         where name != "manifest.json" {
-            try FileManager.default.removeItem(at: prunedDir.appendingPathComponent(name))
+            try FileManager.default.removeItem(at: dir.appendingPathComponent(name))
         }
-        #expect(throws: SessionStoreError.notTransferable("raw streams pruned")) {
-            try store.zipSessionForTransfer(sessionId: pruned.sessionId, to: root)
-        }
+        #expect(!store.hasRawStreams(sessionId: empty.sessionId))
+        let url = try store.zipSessionForTransfer(sessionId: empty.sessionId, to: root)
+        #expect(FileManager.default.fileExists(atPath: url.path))
     }
 
     @Test func emptyImportKeepsExistingPhoneCopy() throws {

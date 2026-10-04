@@ -20,8 +20,7 @@ struct IdleSyncPage: View {
         VStack(spacing: compact ? 6 : 10) {
             SyncStatusIndicator(
                 state: transfer.syncState,
-                pendingCount: transfer.pendingTransferCount,
-                footnote: compact ? nil : transfer.lastMessage
+                pendingCount: transfer.pendingTransferCount
             )
 
             if session.statusText != String(localized: "Idle") {
