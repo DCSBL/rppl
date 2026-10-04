@@ -240,14 +240,6 @@ struct ParkRuleDetailPage: View {
                 )
 
                 Section {
-                    ParkTextInput(title: "Anything riders should know", text: rule.note.orEmpty, field: .note, axis: .vertical, lines: 1...4)
-                } header: {
-                    Text("Note")
-                } footer: {
-                    Text("Optional.")
-                }
-
-                Section {
                     Button("Delete these hours", systemImage: "trash", role: .destructive) {
                         session.askToDelete(
                             title: String(localized: "Delete these opening hours?"),
@@ -304,18 +296,7 @@ struct ParkBlockDetailPage: View {
 
     var body: some View {
         if let current = session.park.opening?.slots?[safe: index] {
-            let defaultName = session.park.opening?.numbered == false
-                ? String(localized: "For example Block 3")
-                : String(localized: "Block \(current.id)")
             Form {
-                Section {
-                    ParkTextInput(title: LocalizedStringKey(defaultName), text: slot.label.orEmpty, field: .label)
-                } header: {
-                    Text("Name")
-                } footer: {
-                    Text("Optional. Leave empty to show the times only, or use the number the park gives its blocks.")
-                }
-
                 Section {
                     ParkTimePicker(title: "Starts", time: slot.start)
                     ParkTimePicker(title: "Ends", time: slot.end)

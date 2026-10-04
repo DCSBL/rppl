@@ -7202,22 +7202,6 @@
         }
       }
     },
-    "Contact page" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contact page"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contactpagina"
-          }
-        }
-      }
-    },
     "Continue editing" : {
       "localizations" : {
         "en" : {
@@ -7554,22 +7538,6 @@
         }
       }
     },
-    "For example Block 3" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For example Block 3"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bijvoorbeeld Blok 3"
-          }
-        }
-      }
-    },
     "For example Summer" : {
       "localizations" : {
         "en" : {
@@ -7598,22 +7566,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voor parken die vaste tijdblokken verkopen, zoals 14:00 tot 15:30. Sla dit over als riders binnen de openingstijden kunnen komen en gaan."
-          }
-        }
-      }
-    },
-    "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. Direction is seen from above." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. Direction is seen from above."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full size gaat rond het water, langs elke hoek. Een 2.0 cable gaat heen en weer tussen twee torens. De richting zie je van bovenaf."
           }
         }
       }
@@ -7666,22 +7618,6 @@
         }
       }
     },
-    "How can riders reach the park? Fill in what you know and leave out the rest." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How can riders reach the park? Fill in what you know and leave out the rest."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoe bereiken riders het park? Vul in wat je weet en laat de rest weg."
-          }
-        }
-      }
-    },
     "Its traced points go with it." : {
       "localizations" : {
         "en" : {
@@ -7694,22 +7630,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "De getraceerde punten verdwijnen ook."
-          }
-        }
-      }
-    },
-    "Jump to a page" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jump to a page"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Naar een pagina springen"
           }
         }
       }
@@ -8130,22 +8050,6 @@
         }
       }
     },
-    "Optional." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optioneel."
-          }
-        }
-      }
-    },
     "Optional. A short name for this period or hour, like Summer, Weekends or Beginner hour." : {
       "localizations" : {
         "en" : {
@@ -8190,22 +8094,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Optioneel. Bijvoorbeeld \"Dicht bij veel wind\" of \"Tijden wijzigen in de schoolvakanties\"."
-          }
-        }
-      }
-    },
-    "Optional. Leave empty to show the times only, or use the number the park gives its blocks." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional. Leave empty to show the times only, or use the number the park gives its blocks."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optioneel. Laat leeg om alleen de tijden te tonen, of gebruik het nummer dat het park aan blokken geeft."
           }
         }
       }
@@ -9090,22 +8978,6 @@
         }
       }
     },
-    "Webcam" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Webcam"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Webcam"
-          }
-        }
-      }
-    },
     "Weekend" : {
       "localizations" : {
         "en" : {
@@ -9230,22 +9102,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Waar riders vragen naartoe kunnen sturen."
-          }
-        }
-      }
-    },
-    "Where riders find the park online: the booking page, Instagram, Facebook. Pick a type and paste the address." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where riders find the park online: the booking page, Instagram, Facebook. Pick a type and paste the address."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Waar riders het park online vinden: de reserveerpagina, Instagram, Facebook. Kies een type en plak het adres."
           }
         }
       }
@@ -9662,6 +9518,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geavanceerd"
+          }
+        }
+      }
+    },
+    "Contact and links" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact and links"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact en links"
+          }
+        }
+      }
+    },
+    "How can riders reach the park, and where do they find it online? Fill in what you know and leave out the rest." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How can riders reach the park, and where do they find it online? Fill in what you know and leave out the rest."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoe bereiken riders het park en waar vinden ze het online? Vul in wat je weet en laat de rest weg."
+          }
+        }
+      }
+    },
+    "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. The direction follows the order you trace the points in." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. The direction follows the order you trace the points in."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size gaat rond het water, langs elke hoek. Een 2.0 cable gaat heen en weer tussen twee torens. De richting volgt de volgorde waarin je de punten tracet."
           }
         }
       }

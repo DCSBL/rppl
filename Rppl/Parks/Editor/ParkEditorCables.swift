@@ -95,7 +95,7 @@ struct ParkCableDetailPage: View {
     @State private var location = ParksLocationProvider()
     @State private var tracing = false
 
-    private enum Kind: Hashable { case fullSize, twoD, unset }
+    private enum Kind: Hashable { case fullSize, twoD }
 
     var body: some View {
         if let cable = session.park.cables?[safe: index] {
@@ -110,13 +110,13 @@ struct ParkCableDetailPage: View {
 
                 Section {
                     Picker("Type", selection: kind) {
-                        Text("Full size").tag(Kind.fullSize)
-                        Text("2.0").tag(Kind.twoD)
-                        Text("Not set").tag(Kind.unset)
+                        Text("Full size").tag(Kind?.some(.fullSize))
+                        Text("2.0").tag(Kind?.some(.twoD))
                     }
                     .pickerStyle(.segmented)
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                    if cable.direction?.isLoop == true {
+                    // The traced order already tells the direction; only ask without a trace.
+                    if cable.direction?.isLoop == true, (cable.points ?? []).count < 3 {
                         Picker("Direction", selection: loopDirection) {
                             Text("Clockwise").tag(ParkCableDirection.clockwise)
                             Text("Counter-clockwise").tag(ParkCableDirection.counterClockwise)
@@ -125,7 +125,7 @@ struct ParkCableDetailPage: View {
                 } header: {
                     Text("Type")
                 } footer: {
-                    Text("Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. Direction is seen from above.")
+                    Text("Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. The direction follows the order you trace the points in.")
                 }
 
                 Section {
@@ -218,23 +218,23 @@ struct ParkCableDetailPage: View {
         )
     }
 
-    private var kind: Binding<Kind> {
+    private var kind: Binding<Kind?> {
         Binding(
             get: {
-                guard let direction = session.park.cables?[safe: index]?.direction else { return .unset }
+                guard let direction = session.park.cables?[safe: index]?.direction else { return nil }
                 if direction.isLoop { return .fullSize }
-                return direction == .twoD ? .twoD : .unset
+                return direction == .twoD ? .twoD : nil
             },
             set: { new in
                 guard session.park.cables?.indices.contains(index) == true else { return }
                 switch new {
-                case .fullSize:
+                case .fullSize?:
                     guard session.park.cables?[index].direction?.isLoop != true else { return }
                     // The traced order tells which way riders go; without a trace, clockwise.
                     let clockwise = session.park.cables?[index].tracedWindingIsClockwise ?? true
                     session.park.cables?[index].direction = clockwise ? .clockwise : .counterClockwise
-                case .twoD: session.park.cables?[index].direction = .twoD
-                case .unset: session.park.cables?[index].direction = nil
+                case .twoD?: session.park.cables?[index].direction = .twoD
+                case nil: session.park.cables?[index].direction = nil
                 }
             }
         )

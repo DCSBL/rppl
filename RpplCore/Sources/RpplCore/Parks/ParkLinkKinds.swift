@@ -8,13 +8,9 @@ public enum ParkLinkKinds {
     public static let instagram = "instagram"
     public static let facebook = "facebook"
     public static let youtube = "youtube"
-    public static let tiktok = "tiktok"
-    public static let contact = "contact"
-    public static let openingHours = "opening hours"
-    public static let webcam = "webcam"
 
     /// In the order the editor lists them.
-    public static let presets = [booking, instagram, facebook, youtube, tiktok, contact, openingHours, webcam]
+    public static let presets = [booking, instagram, facebook, youtube]
 
     /// Case, outer spaces and repeated spaces do not make a different link.
     public static func normalizedKey(_ kind: String) -> String {
@@ -36,7 +32,6 @@ public enum ParkLinkKinds {
         if matches(["instagram.com", "instagr.am"]) { return instagram }
         if matches(["facebook.com", "fb.com", "fb.me", "fb.watch"]) { return facebook }
         if matches(["youtube.com", "youtu.be"]) { return youtube }
-        if matches(["tiktok.com"]) { return tiktok }
         return nil
     }
 

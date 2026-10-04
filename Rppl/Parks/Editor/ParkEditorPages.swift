@@ -222,7 +222,7 @@ struct ParkContactPage: View {
         Form {
             ParkPageIntro(
                 page: .contact,
-                text: "How can riders reach the park? Fill in what you know and leave out the rest."
+                text: "How can riders reach the park, and where do they find it online? Fill in what you know and leave out the rest."
             )
             Section {
                 TextField("Phone", text: phoneBinding, prompt: Text(verbatim: "+31 10 260 0110"))
@@ -267,8 +267,9 @@ struct ParkContactPage: View {
                     problem: focused == .website ? nil : websiteProblem(park.website)
                 )
             }
+            ParkLinksSection()
         }
-        .navigationTitle("Contact")
+        .navigationTitle("Contact and links")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: focused) { old, _ in
             // Leaving the website field completes "park.nl" to "https://park.nl".
@@ -373,15 +374,12 @@ struct ParkAboutPage: View {
 
 // MARK: - Links
 
-struct ParkLinksPage: View {
+/// The booking page, Instagram and the like, as a section of the contact page.
+struct ParkLinksSection: View {
     @Environment(ParkEditorSession.self) private var session
 
     var body: some View {
-        Form {
-            ParkPageIntro(
-                page: .links,
-                text: "Where riders find the park online: the booking page, Instagram, Facebook. Pick a type and paste the address."
-            )
+        Group {
             Section {
                 GhostList(
                     items: links,
@@ -414,8 +412,6 @@ struct ParkLinksPage: View {
                 }
             }
         }
-        .navigationTitle("Links")
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var links: Binding<[ParkLink]> {

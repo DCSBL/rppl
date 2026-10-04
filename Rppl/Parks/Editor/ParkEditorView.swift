@@ -92,20 +92,7 @@ struct ParkEditorView: View {
         ToolbarItem(placement: .cancellationAction) {
             Button("Close", action: close)
         }
-        if session.isGuided {
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    ForEach(ParkEditorPage.allCases, id: \.self) { page in
-                        Button(page.title, systemImage: session.isFilled(page) ? "checkmark.circle" : page.systemImage) {
-                            session.jump(to: page)
-                        }
-                    }
-                } label: {
-                    Image(systemName: "list.bullet")
-                }
-                .accessibilityLabel(Text("Jump to a page"))
-            }
-        } else {
+        if !session.isGuided {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save", action: save).disabled(!session.issues.isEmpty || !session.isDirty)
             }
@@ -146,7 +133,6 @@ struct ParkEditorPageView: View {
         case .cables: ParkCablesPage()
         case .opening: ParkOpeningPage()
         case .prices: ParkPricesPage()
-        case .links: ParkLinksPage()
         }
     }
 }

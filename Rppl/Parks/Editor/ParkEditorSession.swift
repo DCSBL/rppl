@@ -5,17 +5,16 @@ import SwiftUI
 /// The pages of the park editor. A new park walks through them in order; an existing park opens a
 /// list of them.
 enum ParkEditorPage: Int, CaseIterable, Hashable {
-    case basics, contact, about, cables, opening, prices, links
+    case basics, contact, about, cables, opening, prices
 
     var title: LocalizedStringKey {
         switch self {
         case .basics: "Basics"
-        case .contact: "Contact"
+        case .contact: "Contact and links"
         case .about: "About"
         case .cables: "Cables"
         case .opening: "Opening times"
         case .prices: "Prices"
-        case .links: "Links"
         }
     }
 
@@ -27,7 +26,6 @@ enum ParkEditorPage: Int, CaseIterable, Hashable {
         case .cables: "scribble.variable"
         case .opening: "clock"
         case .prices: "eurosign.circle"
-        case .links: "link"
         }
     }
 
@@ -35,24 +33,22 @@ enum ParkEditorPage: Int, CaseIterable, Hashable {
     var sections: [ParkSection] {
         switch self {
         case .basics: [.basics, .location]
-        case .contact: [.contact]
+        case .contact: [.contact, .links]
         case .about: [.about]
         case .cables: [.cables]
         case .opening: [.opening]
         case .prices: [.prices]
-        case .links: [.links]
         }
     }
 
     static func page(for section: ParkSection) -> ParkEditorPage {
         switch section {
         case .basics, .location: .basics
-        case .contact: .contact
+        case .contact, .links: .contact
         case .about: .about
         case .cables: .cables
         case .opening: .opening
         case .prices: .prices
-        case .links: .links
         }
     }
 }

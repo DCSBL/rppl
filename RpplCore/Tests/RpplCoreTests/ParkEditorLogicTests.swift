@@ -20,7 +20,7 @@ struct ParkEditorLogicTests {
         #expect(ParkLinkKinds.detect(url: "instagr.am/p/x") == ParkLinkKinds.instagram)
         #expect(ParkLinkKinds.detect(url: "https://m.facebook.com/park") == ParkLinkKinds.facebook)
         #expect(ParkLinkKinds.detect(url: "https://youtu.be/abc") == ParkLinkKinds.youtube)
-        #expect(ParkLinkKinds.detect(url: "https://www.tiktok.com/@park") == ParkLinkKinds.tiktok)
+        #expect(ParkLinkKinds.detect(url: "https://www.tiktok.com/@park") == nil)
         #expect(ParkLinkKinds.detect(url: "https://notinstagram.com") == nil)
         #expect(ParkLinkKinds.detect(url: "https://park.nl") == nil)
         #expect(ParkLinkKinds.detect(url: "") == nil)

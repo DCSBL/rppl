@@ -12,10 +12,6 @@ extension ParkFormatting {
         case ParkLinkKinds.instagram: "Instagram"
         case ParkLinkKinds.facebook: "Facebook"
         case ParkLinkKinds.youtube: "YouTube"
-        case ParkLinkKinds.tiktok: "TikTok"
-        case ParkLinkKinds.contact: String(localized: "Contact page")
-        case ParkLinkKinds.openingHours: String(localized: "Opening hours")
-        case ParkLinkKinds.webcam: String(localized: "Webcam")
         default: kind.prefix(1).uppercased() + kind.dropFirst()
         }
     }
@@ -159,7 +155,8 @@ extension ParkFormatting {
             let parts = [park.name, park.address ?? ""].filter { !$0.isEmpty }
             return parts.isEmpty ? empty : parts.joined(separator: " · ")
         case .contact:
-            let parts = [park.phone, park.email, park.website].compactMap { $0 }.filter { !$0.isEmpty }
+            var parts = [park.phone, park.email, park.website].compactMap { $0 }.filter { !$0.isEmpty }
+            parts += (park.links ?? []).map { linkKind($0.kind) }
             return parts.isEmpty ? empty : parts.joined(separator: " · ")
         case .about:
             var parts: [String] = []
@@ -181,9 +178,6 @@ extension ParkFormatting {
         case .prices:
             guard let prices = park.prices, !prices.isEmpty else { return empty }
             return String(localized: "\(prices.count) prices")
-        case .links:
-            guard let links = park.links, !links.isEmpty else { return empty }
-            return links.map { linkKind($0.kind) }.joined(separator: ", ")
         }
     }
 }
