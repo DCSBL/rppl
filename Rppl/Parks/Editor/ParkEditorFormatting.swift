@@ -52,10 +52,9 @@ extension ParkFormatting {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
-    /// One line under a price in the editor.
-    static func priceSummary(_ price: ParkPrice) -> String? {
-        let parts = [Self.price(price), priceQualifier(price), price.note].compactMap { $0 }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    /// The line under a price name: the note the park wrote, else what the structured fields say.
+    static func priceDetail(_ price: ParkPrice) -> String? {
+        price.note ?? priceQualifier(price)
     }
 
     /// "1 hour, 30 minutes", "45 minutes".
@@ -129,7 +128,8 @@ extension ParkFormatting {
     static func ruleSummary(_ rule: ParkOpeningRule) -> (title: String, detail: String?) {
         let close = rule.close.lowercased() == ParkClock.sunset ? ParkClock.sunset : rule.close
         var parts: [String] = []
-        if let label = rule.label { parts.append(label) }
+        // "September" next to a month heading adds nothing, same rule as the park page.
+        if let label = rule.label, !isMonthLabel(label) { parts.append(label) }
         parts += selectorDetails(months: rule.months, days: rule.days, from: rule.from, until: rule.until, dates: rule.dates)
         if parts.isEmpty { parts.append(String(localized: "Every day, all year")) }
         return ("\(rule.open) – \(close)", parts.joined(separator: " · "))

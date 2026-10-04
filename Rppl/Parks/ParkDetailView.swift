@@ -616,7 +616,7 @@ struct ParkDetailView: View {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(price.name).foregroundStyle(Color.rpplText)
-                            if let detail = price.note ?? ParkFormatting.priceQualifier(price) {
+                            if let detail = ParkFormatting.priceDetail(price) {
                                 Text(detail).font(.caption).foregroundStyle(Color.rpplMuted)
                             }
                         }

@@ -89,7 +89,7 @@ private struct ParkPriceRow: View {
                     session.path.append(.price(index))
                 } label: {
                     HStack {
-                        Text(ParkFormatting.priceSummary(price) ?? String(localized: "Add details"))
+                        Text(ParkFormatting.priceDetail(price) ?? String(localized: "Add details"))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
