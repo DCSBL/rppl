@@ -74,9 +74,9 @@ Opaque detection **codes are strings** (`riding`, `inactive`, `unsure`). Unknown
 | Folder | Contents |
 |--------|----------|
 | `Detection/` | `DetectionEngine`, filter/holds/detectors, codes, thresholds, `SpeedUnits` |
-| `Session/` | `SessionFileStore`, models, schema, `SessionLoader`, `StoreIO`, stats, `WorkoutMetadataKeys`, `TesterIdentity` |
+| `Session/` | `SessionFileStore`, models, schema, `SessionLoader`, `StoreIO`, stats, `WorkoutMetadataKeys`, `TesterIdentity`, `SessionShareExport`, `SessionAnonymizer`, `SessionShareMail` |
 | `Sync/` | `SyncConnectionResolver`, `SyncConnectionState`, `TransferPendingFilter` |
-| `Geo/` | `GeoDistance`, downsample/centroid, map fit, location speed stats |
+| `Geo/` | `GeoDistance`, downsample/centroid, `GeoRecenter` (sphere rotation to 0°, 0°), map fit, location speed stats |
 | `Format/` | Distance, duration, energy, temperature, byte-size formatters |
 | *(root)* | `LiveSetTracker`, `LapSetTracker`, `HighlightAssigner`, `AppConstants`, `WakeLog` |
 

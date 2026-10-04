@@ -1,12 +1,12 @@
 # Terms & Privacy Policy
 
-**Last updated:** 27 September 2026
+**Last updated:** 4 October 2026
 
 ## Your data stays with you
 
-Rppl collects data **only locally**, on your Apple Watch and iPhone. There is no Rppl server and no account. Your sessions are never sent to us.
+Rppl collects data **only locally**, on your Apple Watch and iPhone. There is no Rppl server and no account. Your sessions are never sent to us, unless you choose to send one yourself (see Export & sharing).
 
-Because we never receive your data, we **cannot** process, sell, or share it, use it for advertising, or build a profile of you. And we would not want to.
+Because we do not receive your data on our own, we **cannot** process, sell, or share it, use it for advertising, or build a profile of you. And we would not want to.
 
 **Crash reports & analytics.** If "Share With App Developers" is on in iOS Settings → Privacy & Security → Analytics & Improvements, Apple sends us anonymous crash reports and usage metrics. This is an Apple setting: we have no influence over it and cannot link that data to you.
 
@@ -81,6 +81,8 @@ Before adding any new third-party service that handles your data, we will ask yo
 ## Export & sharing
 
 You can export a session's raw, unfiltered data (everything listed under What the app collects, plus derived stats) for analysis. Nothing leaves your device unless you share it yourself, through Share, AirDrop, Files, email, or another channel you choose. You decide who receives it and are responsible for that share.
+
+**Share with Rppl.** In a session, Share with Rppl prepares an anonymized copy and opens an email to rppl@dcsbl.nl for you to review and send (or the share sheet, for a session too big for an email link). In that copy your GPS track is moved as one piece to 0°, 0°, so distances, speeds and laps stay the same. Your tester ID and other personal details are replaced with REDACTEDREDACTEDREDACTED, and the session gets a new ID. Times, heart rate, energy, motion, weather, device model, OS version and the shape of your GPS track stay in. Nothing is sent until you send it.
 
 We may ask for an export when stats look wrong. Sending one is always your choice.
 

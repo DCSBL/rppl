@@ -102,7 +102,7 @@ Phone may be away during the session. After **Stop session**, Watch queues a WC 
 
 ## Export
 
-On iPhone: open a session → tap the share icon → prepare (spinner) → system Share sheet (AirDrop / Files / …). File name:
+On iPhone: open a session → tap the share icon → choose **Export** (raw file) or **Share with Rppl** (anonymized, see below). Export prepares the file (spinner) → system Share sheet (AirDrop / Files / …). File name:
 
 `rppl_<startedAt-UTC>_<location>.json`
 
@@ -121,6 +121,29 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 | `water` | Ultra water temperature when present |
 | `battery` | Watch battery level (0…1) + state when present |
 | `derived` | Fast view stats / map frame when present |
+
+### Share with Rppl
+
+Same payload, run through `SessionAnonymizer` first (`RpplCore`, pure, covered by `swift test`). The stored session is never modified. The first use shows a privacy alert (`didUnderstandRpplShare`).
+
+| Field | In the shared copy |
+|-------|--------------------|
+| `locations` lat/lon | Every fix rotated by one `GeoRecenter` so the session centre (mean of the unit vectors) lands on 0°N 0°E. Altitude, accuracy, speed, course and time untouched |
+| `manifest.testerId` | `REDACTEDREDACTEDREDACTED` |
+| `manifest.waterTemperatureEstimate` | Station and provider names `REDACTEDREDACTEDREDACTED`, reading kept |
+| `manifest.lastTransferError` | `REDACTEDREDACTEDREDACTED` when set (can hold file paths) |
+| `manifest.parkId` / `parkIdSource` | Removed |
+| `manifest.sessionId` | New random id. The phone refuses an import whose id is already in the logbook, and a copy that kept the id would be mistaken for the original |
+| `derived` | Removed (real map frame, track and city name). The importer rebuilds it from the shifted raw streams |
+| Everything else | Kept: timestamps, detections, heart rate and energy, motion, water, battery, weather, device model, OS version |
+
+**Why a rotation and not a degree offset.** Subtracting the centre's degrees stretches the track east-west by 1 / cos(latitude), about 1.6× at 52°N, because a degree of longitude is shorter away from the equator. `GeoRecenter` instead rotates the globe (unit vectors, dot products with the east / north / up axes at the centre), which keeps every great-circle distance identical, so set distance, laps and speeds are unchanged; it also needs no special case at the antimeridian or the poles. North stays north at the centre; across a few km the bearing drifts by under 0.1°. The track shape, its orientation, altitude and times still identify a park to someone who tries, which is the price of leaving the data unwarped.
+
+File name: `rppl_<startedAt-UTC>_anonymized.json` (no place name). Delivery follows `SessionShareMail.route`:
+
+1. Mail set up → `MFMailComposeViewController` to `ParkShare.feedbackAddress` with the file attached.
+2. No Mail account → `mailto:` link with the file base64-encoded in the body (76-character lines; `+ / =` percent-encoded because some mail apps read a raw `+` as a space). Only up to `SessionShareMail.maxBase64BodyLength`.
+3. Too big for a link, or the link is refused → system Share sheet with the file.
 
 User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.
 
