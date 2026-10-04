@@ -56,13 +56,14 @@ struct CableTraceView: View {
             .onMapCameraChange(frequency: .continuous) { context in
                 viewCenter = context.camera.centerCoordinate
             }
-            .overlay { crosshair.allowsHitTesting(false) }
+            .overlay { MapCrosshair() }
             .safeAreaInset(edge: .bottom) { controls }
             .navigationTitle("Trace cable")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { points.count >= 2 ? (askShape = true) : dismiss() }
+                    // Only ask what kind of cable it is when that is not known yet.
+                    Button("Done") { points.count >= 2 && cable.direction == nil ? (askShape = true) : dismiss() }
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -75,7 +76,8 @@ struct CableTraceView: View {
             }
             .confirmationDialog("Is this cable a full-size loop or 2D?", isPresented: $askShape, titleVisibility: .visible) {
                 Button("Full size (loop)") {
-                    if cable.direction?.isLoop != true { cable.direction = .clockwise }
+                    // Points are in travel order, so the winding of the trace is the direction riders go.
+                    cable.direction = cable.tracedWindingIsClockwise == false ? .counterClockwise : .clockwise
                     dismiss()
                 }
                 Button("2D (back and forth)") {
@@ -85,14 +87,6 @@ struct CableTraceView: View {
                 Button("Keep tracing", role: .cancel) {}
             }
         }
-    }
-
-    private var crosshair: some View {
-        ZStack {
-            Circle().strokeBorder(.white, lineWidth: 2).frame(width: 26, height: 26)
-            Circle().fill(Color.rpplAccent).frame(width: 8, height: 8)
-        }
-        .shadow(color: .black.opacity(0.5), radius: 2)
     }
 
     private func pointMarker(index: Int, point: ParkCablePoint) -> some View {

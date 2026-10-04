@@ -138,12 +138,18 @@ public enum ParkDraft {
                 var rule = rule
                 rule.label = ParkText.finalize(rule.label, field: .label)
                 rule.note = ParkText.finalize(rule.note, field: .note)
+                rule.months = rule.months?.isEmpty == true ? nil : rule.months
+                rule.days = rule.days?.isEmpty == true ? nil : rule.days
+                rule.dates = tidyDates(rule.dates)
                 return rule
             }
             opening.rules = rules.isEmpty ? nil : rules
             let slots: [ParkSlot] = (opening.slots ?? []).prefix(ParkLimits.slots).map { slot in
                 var slot = slot
                 slot.label = ParkText.finalize(slot.label, field: .label)
+                slot.months = slot.months?.isEmpty == true ? nil : slot.months
+                slot.days = slot.days?.isEmpty == true ? nil : slot.days
+                slot.dates = tidyDates(slot.dates)
                 return slot
             }
             opening.slots = slots.isEmpty ? nil : slots
@@ -153,6 +159,13 @@ public enum ParkDraft {
             park.opening = isEmpty ? nil : opening
         }
         return park
+    }
+
+    /// Real dates only, each once, oldest first. Nothing left is nil.
+    private static func tidyDates(_ dates: [String]?) -> [String]? {
+        guard let dates else { return nil }
+        let tidy = Array(Set(dates.filter(ParkDateText.isValid))).sorted().prefix(ParkLimits.dates)
+        return tidy.isEmpty ? nil : Array(tidy)
     }
 
     public static func isValid(_ coordinate: ParkCoordinate) -> Bool {

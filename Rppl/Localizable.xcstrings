@@ -6553,6 +6553,3518 @@
           }
         }
       }
+    },
+    "%lld announced changes are kept as they are" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld announced change is kept as it is"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld announced changes are kept as they are"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld aangekondigde wijziging blijft staan"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld aangekondigde wijzigingen blijven staan"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld blocks" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld block"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld blocks"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld blok"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld blokken"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld dates" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld date"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dates"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld datum"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld opening periods" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld opening period"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld opening periods"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld openingsperiode"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld openingsperioden"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld prices" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld price"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld prices"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld prijs"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld prijzen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "A draft stays on this iPhone, so you can continue later from the Parks tab." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A draft stays on this iPhone, so you can continue later from the Parks tab."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een concept blijft op deze iPhone staan, zodat je later verder kunt vanuit het tabblad Parks."
+          }
+        }
+      }
+    },
+    "A few short pages, one at a time. You can go back to change anything." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few short pages, one at a time. You can go back to change anything."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een paar korte pagina's, één voor één. Je kunt altijd terug om iets te wijzigen."
+          }
+        }
+      }
+    },
+    "A few words about the park and what is on site. Both are optional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few words about the park and what is on site. Both are optional."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een paar woorden over het park en wat er op locatie is. Allebei optioneel."
+          }
+        }
+      }
+    },
+    "A short, factual intro in your own words: what kind of park it is and what it is known for. Prices and opening times have their own pages." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A short, factual intro in your own words: what kind of park it is and what it is known for. Prices and opening times have their own pages."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een korte, feitelijke intro in je eigen woorden: wat voor park het is en waar het om bekendstaat. Prijzen en openingstijden hebben een eigen pagina."
+          }
+        }
+      }
+    },
+    "Add a block" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a block"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blok toevoegen"
+          }
+        }
+      }
+    },
+    "Add a cable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a cable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable toevoegen"
+          }
+        }
+      }
+    },
+    "Add a cable park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a cable park"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park toevoegen"
+          }
+        }
+      }
+    },
+    "Add a date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a date"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum toevoegen"
+          }
+        }
+      }
+    },
+    "Add a facility" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a facility"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faciliteit toevoegen"
+          }
+        }
+      }
+    },
+    "Add a price" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a price"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijs toevoegen"
+          }
+        }
+      }
+    },
+    "Add details" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add details"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details toevoegen"
+          }
+        }
+      }
+    },
+    "Add every cable the park has. Trace it on the satellite map if the imagery is clear enough; a cable without a trace is fine too." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add every cable the park has. Trace it on the satellite map if the imagery is clear enough; a cable without a trace is fine too."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voeg elke cable van het park toe. Trace hem op de satellietkaart als het beeld duidelijk genoeg is; een cable zonder trace mag ook."
+          }
+        }
+      }
+    },
+    "Anything riders should know" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anything riders should know"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles wat riders moeten weten"
+          }
+        }
+      }
+    },
+    "Applies on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applies on"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geldt op"
+          }
+        }
+      }
+    },
+    "Back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug"
+          }
+        }
+      }
+    },
+    "Bar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bar"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bar"
+          }
+        }
+      }
+    },
+    "Basics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basics"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basis"
+          }
+        }
+      }
+    },
+    "Block %lld has a time we cannot read." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block %lld has a time we cannot read."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blok %lld heeft een tijd die we niet kunnen lezen."
+          }
+        }
+      }
+    },
+    "Booking page" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Booking page"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reserveerpagina"
+          }
+        }
+      }
+    },
+    "Cable %lld has a point that is not a real place." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable %lld has a point that is not a real place."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable %lld heeft een punt dat geen echte plek is."
+          }
+        }
+      }
+    },
+    "Cable %lld needs at least 2 traced points, or none." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable %lld needs at least 2 traced points, or none."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable %lld heeft minstens 2 getraceerde punten nodig, of geen."
+          }
+        }
+      }
+    },
+    "Camping" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camping"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camping"
+          }
+        }
+      }
+    },
+    "Certain dates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Certain dates"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bepaalde data"
+          }
+        }
+      }
+    },
+    "Change the amount on the list. A discount is a negative amount, like -€3." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the amount on the list. A discount is a negative amount, like -€3."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas het bedrag aan in de lijst. Een korting is een negatief bedrag, zoals -€3."
+          }
+        }
+      }
+    },
+    "Changing rooms" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changing rooms"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleedkamers"
+          }
+        }
+      }
+    },
+    "Charged per" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charged per"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berekend per"
+          }
+        }
+      }
+    },
+    "Check the address of link %lld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the address of link %lld."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controleer het adres van link %lld."
+          }
+        }
+      }
+    },
+    "Check the email address." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the email address."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controleer het e-mailadres."
+          }
+        }
+      }
+    },
+    "Check the phone number." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the phone number."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controleer het telefoonnummer."
+          }
+        }
+      }
+    },
+    "Check the website address." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the website address."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controleer het websiteadres."
+          }
+        }
+      }
+    },
+    "Choose what link %lld is." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose what link %lld is."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies wat link %lld is."
+          }
+        }
+      }
+    },
+    "Choose what this link is." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose what this link is."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies wat deze link is."
+          }
+        }
+      }
+    },
+    "Closes before it opens, so this runs past midnight into the next day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closes before it opens, so this runs past midnight into the next day."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluit eerder dan het opent, dus dit loopt na middernacht door tot de volgende dag."
+          }
+        }
+      }
+    },
+    "Closures and extra hours cannot be edited here yet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closures and extra hours cannot be edited here yet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluitingen en extra openingstijden kun je hier nog niet bewerken."
+          }
+        }
+      }
+    },
+    "Contact page" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact page"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contactpagina"
+          }
+        }
+      }
+    },
+    "Continue editing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue editing"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verder bewerken"
+          }
+        }
+      }
+    },
+    "Continue your unsaved changes?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue your unsaved changes?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verder met je niet-bewaarde wijzigingen?"
+          }
+        }
+      }
+    },
+    "Covers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Covers"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dekt"
+          }
+        }
+      }
+    },
+    "Credits" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        }
+      }
+    },
+    "Currency" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currency"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valuta"
+          }
+        }
+      }
+    },
+    "Current pin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current pin"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huidige pin"
+          }
+        }
+      }
+    },
+    "Day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dag"
+          }
+        }
+      }
+    },
+    "Days are marked as not published, so the park shows as unknown." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days are marked as not published, so the park shows as unknown."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De dagen staan als niet gepubliceerd, dus het park staat als onbekend."
+          }
+        }
+      }
+    },
+    "Days are not published" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days are not published"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dagen zijn niet gepubliceerd"
+          }
+        }
+      }
+    },
+    "Delete %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ verwijderen?"
+          }
+        }
+      }
+    },
+    "Delete cable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete cable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable verwijderen"
+          }
+        }
+      }
+    },
+    "Delete draft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete draft"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concept verwijderen"
+          }
+        }
+      }
+    },
+    "Delete price" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete price"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijs verwijderen"
+          }
+        }
+      }
+    },
+    "Delete these hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete these hours"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze tijden verwijderen"
+          }
+        }
+      }
+    },
+    "Delete these opening hours?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete these opening hours?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze openingstijden verwijderen?"
+          }
+        }
+      }
+    },
+    "Delete this block" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this block"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit blok verwijderen"
+          }
+        }
+      }
+    },
+    "Delete this block?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this block?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit blok verwijderen?"
+          }
+        }
+      }
+    },
+    "Delete this draft?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this draft?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit concept verwijderen?"
+          }
+        }
+      }
+    },
+    "Discard changes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard changes"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wijzigingen weggooien"
+          }
+        }
+      }
+    },
+    "Do riders have to book a time in advance?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do riders have to book a time in advance?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moeten riders vooraf een tijd reserveren?"
+          }
+        }
+      }
+    },
+    "Draft · edited %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draft · edited %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concept · bewerkt %@"
+          }
+        }
+      }
+    },
+    "Edit the trace" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit the trace"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trace aanpassen"
+          }
+        }
+      }
+    },
+    "Ends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ends"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eindigt"
+          }
+        }
+      }
+    },
+    "Every day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke dag"
+          }
+        }
+      }
+    },
+    "Every day, all year" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day, all year"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke dag, het hele jaar"
+          }
+        }
+      }
+    },
+    "Everything you fill in is kept as a draft. Close the app or the editor and continue later." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything you fill in is kept as a draft. Close the app or the editor and continue later."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles wat je invult blijft bewaard als concept. Sluit de app of de editor en ga later verder."
+          }
+        }
+      }
+    },
+    "Examples: `€12,50`, `12.50`, `€7 pp` for per person, `€10 per hour`, `-€3` for a discount. One price per row; a new row appears as you go." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Examples: `€12,50`, `12.50`, `€7 pp` for per person, `€10 per hour`, `-€3` for a discount. One price per row; a new row appears as you go."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voorbeelden: `€12,50`, `12.50`, `€7 pp` per persoon, `€10 per uur`, `-€3` voor een korting. Eén prijs per rij; er verschijnt vanzelf een nieuwe rij."
+          }
+        }
+      }
+    },
+    "Filled in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filled in"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingevuld"
+          }
+        }
+      }
+    },
+    "For example Block 3" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example Block 3"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijvoorbeeld Blok 3"
+          }
+        }
+      }
+    },
+    "For example Summer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example Summer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijvoorbeeld Zomer"
+          }
+        }
+      }
+    },
+    "For example adults, or own gear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example adults, or own gear"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijvoorbeeld volwassenen, of eigen spullen"
+          }
+        }
+      }
+    },
+    "For parks that sell fixed time blocks, like 14:00 to 15:30. Skip this if riders can come and go within the opening hours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For parks that sell fixed time blocks, like 14:00 to 15:30. Skip this if riders can come and go within the opening hours."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor parken die vaste tijdblokken verkopen, zoals 14:00 tot 15:30. Sla dit over als riders binnen de openingstijden kunnen komen en gaan."
+          }
+        }
+      }
+    },
+    "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. Direction is seen from above." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size goes round the lake past every corner. A 2.0 cable runs back and forth between two towers. Direction is seen from above."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full size gaat rond het water, langs elke hoek. Een 2.0 cable gaat heen en weer tussen twee torens. De richting zie je van bovenaf."
+          }
+        }
+      }
+    },
+    "Give price %lld a name." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give price %lld a name."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef prijs %lld een naam."
+          }
+        }
+      }
+    },
+    "Give the park a name." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give the park a name."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef het park een naam."
+          }
+        }
+      }
+    },
+    "Hour" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hour"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uur"
+          }
+        }
+      }
+    },
+    "Hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hours"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijden"
+          }
+        }
+      }
+    },
+    "How can riders reach the park? Fill in what you know and leave out the rest." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How can riders reach the park? Fill in what you know and leave out the rest."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoe bereiken riders het park? Vul in wat je weet en laat de rest weg."
+          }
+        }
+      }
+    },
+    "Its traced points go with it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its traced points go with it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De getraceerde punten verdwijnen ook."
+          }
+        }
+      }
+    },
+    "Jump to a page" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jump to a page"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naar een pagina springen"
+          }
+        }
+      }
+    },
+    "Keep editing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep editing"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verder bewerken"
+          }
+        }
+      }
+    },
+    "Keep your changes?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your changes?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wijzigingen bewaren?"
+          }
+        }
+      }
+    },
+    "Leave everything as it is and these hours count every day of the year. Use \"Only on certain dates\" for a holiday or a special day with its own hours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave everything as it is and these hours count every day of the year. Use \"Only on certain dates\" for a holiday or a special day with its own hours."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laat alles staan en deze tijden gelden elke dag van het jaar. Gebruik \"Alleen op bepaalde data\" voor een feestdag of speciale dag met eigen tijden."
+          }
+        }
+      }
+    },
+    "Length in metres" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Length in metres"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lengte in meters"
+          }
+        }
+      }
+    },
+    "Lessons" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lessons"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lessen"
+          }
+        }
+      }
+    },
+    "Light formatting works: `_italic_`, `**bold**` and lists that start with `-`. Headings are left out." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light formatting works: `_italic_`, `**bold**` and lists that start with `-`. Headings are left out."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lichte opmaak werkt: `_cursief_`, `**vet**` en lijsten die beginnen met `-`. Koppen laten we weg."
+          }
+        }
+      }
+    },
+    "Link %lld has no address yet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link %lld has no address yet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link %lld heeft nog geen adres."
+          }
+        }
+      }
+    },
+    "Location access is off for Rppl. Set the pin on the map instead." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location access is off for Rppl. Set the pin on the map instead."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatietoegang staat uit voor Rppl. Zet de pin op de kaart."
+          }
+        }
+      }
+    },
+    "Lockers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lockers"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kluisjes"
+          }
+        }
+      }
+    },
+    "Monday to Friday" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monday to Friday"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maandag tot en met vrijdag"
+          }
+        }
+      }
+    },
+    "Move the pin on the map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the pin on the map"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin op de kaart verplaatsen"
+          }
+        }
+      }
+    },
+    "Name (optional)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name (optional)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naam (optioneel)"
+          }
+        }
+      }
+    },
+    "Name, for example Webshop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, for example Webshop"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naam, bijvoorbeeld Webshop"
+          }
+        }
+      }
+    },
+    "Needs attention" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs attention"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aandacht nodig"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgende"
+          }
+        }
+      }
+    },
+    "No amount yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No amount yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen bedrag"
+          }
+        }
+      }
+    },
+    "No location yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No location yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen locatie"
+          }
+        }
+      }
+    },
+    "Not filled in yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not filled in yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog niet ingevuld"
+          }
+        }
+      }
+    },
+    "Not needed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not needed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet nodig"
+          }
+        }
+      }
+    },
+    "Not specified" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not specified"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet opgegeven"
+          }
+        }
+      }
+    },
+    "Not traced yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not traced yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog niet getraceerd"
+          }
+        }
+      }
+    },
+    "Nothing is filled in yet, so the park shows as unknown. That is fine when you do not know the hours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is filled in yet, so the park shows as unknown. That is fine when you do not know the hours."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er is nog niets ingevuld, dus het park staat als onbekend. Dat is prima als je de tijden niet weet."
+          }
+        }
+      }
+    },
+    "One link per type: a second one with the same name replaces the first. Choose \"Other\" for a name of your own, like Webshop." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One link per type: a second one with the same name replaces the first. Choose \"Other\" for a name of your own, like Webshop."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén link per type: een tweede met dezelfde naam vervangt de eerste. Kies \"Anders\" voor een eigen naam, zoals Webshop."
+          }
+        }
+      }
+    },
+    "One price per row. Add the others as their own rows." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One price per row. Add the others as their own rows."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén prijs per rij. Voeg de andere toe als eigen rij."
+          }
+        }
+      }
+    },
+    "Only on certain dates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only on certain dates"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen op bepaalde data"
+          }
+        }
+      }
+    },
+    "Only the name and the location are needed. Leave out what you do not know." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the name and the location are needed. Leave out what you do not know."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen de naam en de locatie zijn nodig. Laat weg wat je niet weet."
+          }
+        }
+      }
+    },
+    "Open a page to change it. Your changes are kept as a draft until you save." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open a page to change it. Your changes are kept as a draft until you save."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open een pagina om die te wijzigen. Je wijzigingen blijven als concept bewaard tot je ze opslaat."
+          }
+        }
+      }
+    },
+    "Open until sunset" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open until sunset"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open tot zonsondergang"
+          }
+        }
+      }
+    },
+    "Opening hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openingstijden"
+          }
+        }
+      }
+    },
+    "Opening hours %lld have a time we cannot read." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours %lld have a time we cannot read."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openingstijden %lld hebben een tijd die we niet kunnen lezen."
+          }
+        }
+      }
+    },
+    "Opens and closes at the same time, which counts as open for 24 hours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens and closes at the same time, which counts as open for 24 hours."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opent en sluit op hetzelfde moment, dat telt als 24 uur open."
+          }
+        }
+      }
+    },
+    "Optional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel."
+          }
+        }
+      }
+    },
+    "Optional. A short name for this period or hour, like Summer, Weekends or Beginner hour." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. A short name for this period or hour, like Summer, Weekends or Beginner hour."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Een korte naam voor deze periode of dit uur, zoals Zomer, Weekenden of Beginner hour."
+          }
+        }
+      }
+    },
+    "Optional. Fill in how long the price covers (for example 90 minutes for a block) and the app can work out the price per hour." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Fill in how long the price covers (for example 90 minutes for a block) and the app can work out the price per hour."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Vul in hoe lang de prijs dekt (bijvoorbeeld 90 minuten voor een blok) en de app rekent de prijs per uur voor je uit."
+          }
+        }
+      }
+    },
+    "Optional. Fill it in when the park publishes the length; it wins over the trace." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Fill it in when the park publishes the length; it wins over the trace."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Vul in als het park de lengte publiceert; die gaat voor op de trace."
+          }
+        }
+      }
+    },
+    "Optional. For example \"Closed on windy days\" or \"Hours change in school holidays\"." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. For example \"Closed on windy days\" or \"Hours change in school holidays\"."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Bijvoorbeeld \"Dicht bij veel wind\" of \"Tijden wijzigen in de schoolvakanties\"."
+          }
+        }
+      }
+    },
+    "Optional. Leave empty to show the times only, or use the number the park gives its blocks." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Leave empty to show the times only, or use the number the park gives its blocks."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Laat leeg om alleen de tijden te tonen, of gebruik het nummer dat het park aan blokken geeft."
+          }
+        }
+      }
+    },
+    "Optional. Left empty, the length of the trace is used: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Left empty, the length of the trace is used: %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Leeg gelaten wordt de lengte van de trace gebruikt: %@."
+          }
+        }
+      }
+    },
+    "Optional. Short and factual: who it suits and what is on it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Short and factual: who it suits and what is on it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Kort en feitelijk: voor wie het is en wat erop ligt."
+          }
+        }
+      }
+    },
+    "Optional. Who the price is for or what is included. Shown under the name." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Who the price is for or what is included. Shown under the name."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Voor wie de prijs is of wat erbij zit. Staat onder de naam."
+          }
+        }
+      }
+    },
+    "Other" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anders"
+          }
+        }
+      }
+    },
+    "Other…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anders…"
+          }
+        }
+      }
+    },
+    "Pages you left empty are just left out." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages you left empty are just left out."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagina's die je leeg liet, worden gewoon weggelaten."
+          }
+        }
+      }
+    },
+    "Pan and zoom until the marker is on the dock, then set the location." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pan and zoom until the marker is on the dock, then set the location."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schuif en zoom tot de markering op de dock staat en zet daarna de locatie."
+          }
+        }
+      }
+    },
+    "Park location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parklocatie"
+          }
+        }
+      }
+    },
+    "Park name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park name"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parknaam"
+          }
+        }
+      }
+    },
+    "Parking" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parking"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkeren"
+          }
+        }
+      }
+    },
+    "Paste the address" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste the address"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plak het adres"
+          }
+        }
+      }
+    },
+    "Person" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Persoon"
+          }
+        }
+      }
+    },
+    "Price %lld has no amount yet. Fill it in or remove the price." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price %lld has no amount yet. Fill it in or remove the price."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijs %lld heeft nog geen bedrag. Vul het in of verwijder de prijs."
+          }
+        }
+      }
+    },
+    "Prices have at most two decimals." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices have at most two decimals."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijzen hebben maximaal twee decimalen."
+          }
+        }
+      }
+    },
+    "Quick add" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick add"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snel toevoegen"
+          }
+        }
+      }
+    },
+    "Rental" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rental"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verhuur"
+          }
+        }
+      }
+    },
+    "Required. Put the pin on the dock: riders get directions to it. The coordinates follow the pin." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required. Put the pin on the dock: riders get directions to it. The coordinates follow the pin."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verplicht. Zet de pin op de dock: riders krijgen er route naartoe. De coördinaten volgen de pin."
+          }
+        }
+      }
+    },
+    "Required. The name the park goes by, as on its own website." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required. The name the park goes by, as on its own website."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verplicht. De naam waaronder het park bekend is, zoals op de eigen website."
+          }
+        }
+      }
+    },
+    "Restaurant" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurant"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurant"
+          }
+        }
+      }
+    },
+    "Review" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controleren"
+          }
+        }
+      }
+    },
+    "Save as draft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save as draft"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewaren als concept"
+          }
+        }
+      }
+    },
+    "Save park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save park"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park bewaren"
+          }
+        }
+      }
+    },
+    "Set from the location. It decides what \"today\" means at the park and when it opens." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set from the location. It decides what \"today\" means at the park and when it opens."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgt uit de locatie. Bepaalt wat \"vandaag\" betekent bij het park en wanneer het opent."
+          }
+        }
+      }
+    },
+    "Set location here" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set location here"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie hier zetten"
+          }
+        }
+      }
+    },
+    "Set location on the map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set location on the map"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie op de kaart zetten"
+          }
+        }
+      }
+    },
+    "Set the park's location on the map." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the park's location on the map."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet de locatie van het park op de kaart."
+          }
+        }
+      }
+    },
+    "Shop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Winkel"
+          }
+        }
+      }
+    },
+    "Showers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showers"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douches"
+          }
+        }
+      }
+    },
+    "Shown as \"Credits\" at the bottom of the park. Optional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shown as \"Credits\" at the bottom of the park. Optional."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staat als \"Credits\" onderaan het park. Optioneel."
+          }
+        }
+      }
+    },
+    "Shown under the map. Optional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shown under the map. Optional."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staat onder de kaart. Optioneel."
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overslaan"
+          }
+        }
+      }
+    },
+    "Start over" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start over"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnieuw beginnen"
+          }
+        }
+      }
+    },
+    "Start with the name and where the park is. Move the map to the dock and set the pin. Everything else on this page is optional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start with the name and where the park is. Move the map to the dock and set the pin. Everything else on this page is optional."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begin met de naam en waar het park ligt. Zet de kaart op de dock en plaats de pin. De rest van deze pagina is optioneel."
+          }
+        }
+      }
+    },
+    "Starting from a date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting from a date"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vanaf een datum"
+          }
+        }
+      }
+    },
+    "Starts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begint"
+          }
+        }
+      }
+    },
+    "Street, postcode, city" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Street, postcode, city"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Straat, postcode, plaats"
+          }
+        }
+      }
+    },
+    "Suggested for this location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggested for this location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voorgesteld voor deze locatie"
+          }
+        }
+      }
+    },
+    "Summer (Apr to Sep)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summer (Apr to Sep)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zomer (apr t/m sep)"
+          }
+        }
+      }
+    },
+    "Switch on the days these hours count on. With none or all switched on they count every day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch on the days these hours count on. With none or all switched on they count every day."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet de dagen aan waarop deze tijden gelden. Zonder dagen of met alle dagen aan gelden ze elke dag."
+          }
+        }
+      }
+    },
+    "Switch on the months these hours count in. With none or all switched on they count all year." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch on the months these hours count in. With none or all switched on they count all year."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet de maanden aan waarin deze tijden gelden. Zonder maanden of met alle maanden aan gelden ze het hele jaar."
+          }
+        }
+      }
+    },
+    "Switch on when the park lists its hours or blocks but not which days they apply to. The park then shows as unknown instead of guessing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch on when the park lists its hours or blocks but not which days they apply to. The park then shows as unknown instead of guessing."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet aan als het park tijden of blokken vermeldt maar niet op welke dagen ze gelden. Het park staat dan als onbekend in plaats van te gokken."
+          }
+        }
+      }
+    },
+    "Tap points along the cable, in the direction riders travel. The first point is the start; you can flag more starts." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap points along the cable, in the direction riders travel. The first point is the start; you can flag more starts."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tik punten langs de cable, in de richting waarin riders gaan. Het eerste punt is de start; je kunt meer starts aanwijzen."
+          }
+        }
+      }
+    },
+    "That comes to %@ per hour." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That comes to %@ per hour."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat komt neer op %@ per uur."
+          }
+        }
+      }
+    },
+    "That does not look like a web address yet. Try park.nl or https://park.nl." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That does not look like a web address yet. Try park.nl or https://park.nl."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat lijkt nog niet op een webadres. Probeer park.nl of https://park.nl."
+          }
+        }
+      }
+    },
+    "That does not look like an email address yet. It should look like name@park.nl." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That does not look like an email address yet. It should look like name@park.nl."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat lijkt nog niet op een e-mailadres. Het hoort eruit te zien als naam@park.nl."
+          }
+        }
+      }
+    },
+    "That is a lot. Check the amount." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That is a lot. Check the amount."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat is veel. Controleer het bedrag."
+          }
+        }
+      }
+    },
+    "That looks too long for a phone number." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That looks too long for a phone number."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat lijkt te lang voor een telefoonnummer."
+          }
+        }
+      }
+    },
+    "That looks too short for a phone number." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That looks too short for a phone number."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dat lijkt te kort voor een telefoonnummer."
+          }
+        }
+      }
+    },
+    "The hours riders can just show up. Add a row for every period with different hours: summer, winter, weekends, a holiday." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The hours riders can just show up. Add a row for every period with different hours: summer, winter, weekends, a holiday."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De tijden waarop riders gewoon kunnen komen. Voeg een rij toe voor elke periode met andere tijden: zomer, winter, weekenden, een feestdag."
+          }
+        }
+      }
+    },
+    "The hours then count on these dates only, for example Christmas Day or Easter Monday. Swipe a date to remove it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The hours then count on these dates only, for example Christmas Day or Easter Monday. Swipe a date to remove it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De tijden gelden dan alleen op deze data, bijvoorbeeld eerste kerstdag of tweede paasdag. Veeg een datum weg om hem te verwijderen."
+          }
+        }
+      }
+    },
+    "The number riders can call about bookings and opening times. Include the country code when you can." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The number riders can call about bookings and opening times. Include the country code when you can."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het nummer waarop riders kunnen bellen over reserveringen en openingstijden. Zet er de landcode bij als je kunt."
+          }
+        }
+      }
+    },
+    "The park's own website. Booking, Instagram and other pages go under Links." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The park's own website. Booking, Instagram and other pages go under Links."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De eigen website van het park. Reserveren, Instagram en andere pagina's komen bij Links."
+          }
+        }
+      }
+    },
+    "The unsaved park and everything you filled in will be gone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The unsaved park and everything you filled in will be gone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het niet-bewaarde park en alles wat je invulde is weg."
+          }
+        }
+      }
+    },
+    "This cannot be undone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This cannot be undone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
+    "Times" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijden"
+          }
+        }
+      }
+    },
+    "Times follow the time zone of the park." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times follow the time zone of the park."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijden volgen de tijdzone van het park."
+          }
+        }
+      }
+    },
+    "To fix before saving" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To fix before saving"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eerst oplossen"
+          }
+        }
+      }
+    },
+    "Trace" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trace"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trace"
+          }
+        }
+      }
+    },
+    "Trace on the map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trace on the map"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tracen op de kaart"
+          }
+        }
+      }
+    },
+    "Traced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traced"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getraceerd"
+          }
+        }
+      }
+    },
+    "Try something like €12,50 or 12.50." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try something like €12,50 or 12.50."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probeer iets als €12,50 of 12.50."
+          }
+        }
+      }
+    },
+    "Two links share a name. Saving keeps the last one." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two links share a name. Saving keeps the last one."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twee links hebben dezelfde naam. Bij bewaren blijft de laatste."
+          }
+        }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
+    },
+    "Type a name to add a cable, for example Beginner or Main cable. Tap the line under a name for its details and the trace." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a name to add a cable, for example Beginner or Main cable. Tap the line under a name for its details and the trace."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typ een naam om een cable toe te voegen, bijvoorbeeld Beginner of Hoofdcable. Tik op de regel onder een naam voor details en de trace."
+          }
+        }
+      }
+    },
+    "Unsaved changes · edited %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsaved changes · edited %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet-bewaarde wijzigingen · bewerkt %@"
+          }
+        }
+      }
+    },
+    "Until a date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until a date"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tot een datum"
+          }
+        }
+      }
+    },
+    "Untitled park" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untitled park"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park zonder naam"
+          }
+        }
+      }
+    },
+    "Use digits, spaces and + ( ) - . only." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use digits, spaces and + ( ) - . only."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik alleen cijfers, spaties en + ( ) - ."
+          }
+        }
+      }
+    },
+    "Use my current location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use my current location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijn huidige locatie gebruiken"
+          }
+        }
+      }
+    },
+    "Use the park's own website or what you saw on site. Please do not copy from other apps." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use the park's own website or what you saw on site. Please do not copy from other apps."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik de eigen website van het park of wat je ter plekke zag. Kopieer niet uit andere apps."
+          }
+        }
+      }
+    },
+    "Webcam" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webcam"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webcam"
+          }
+        }
+      }
+    },
+    "Weekend" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekend"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekend"
+          }
+        }
+      }
+    },
+    "What it covers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What it covers"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat het dekt"
+          }
+        }
+      }
+    },
+    "What kind of park is it?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What kind of park is it?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat voor park is het?"
+          }
+        }
+      }
+    },
+    "What riders call this cable: Beginner, Main cable, Cable 2." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What riders call this cable: Beginner, Main cable, Cable 2."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoe riders deze cable noemen: Beginner, Hoofdcable, Cable 2."
+          }
+        }
+      }
+    },
+    "What riders find on site. Type one per row; a new row appears as you go. Swipe a row to remove it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What riders find on site. Type one per row; a new row appears as you go. Swipe a row to remove it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat riders op locatie vinden. Typ er één per rij; er verschijnt vanzelf een nieuwe rij. Veeg een rij weg om hem te verwijderen."
+          }
+        }
+      }
+    },
+    "What riders pay. Type each price like the park's own site does and we read the currency and the format for you." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What riders pay. Type each price like the park's own site does and we read the currency and the format for you."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat riders betalen. Typ elke prijs zoals de website van het park dat doet en wij lezen de valuta en het formaat voor je."
+          }
+        }
+      }
+    },
+    "What riders should know" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What riders should know"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wat riders moeten weten"
+          }
+        }
+      }
+    },
+    "When is the park open? You can leave this empty: the park then shows \"Opening hours unknown\" until someone fills it in." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When is the park open? You can leave this empty: the park then shows \"Opening hours unknown\" until someone fills it in."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wanneer is het park open? Je mag dit leeglaten: het park toont dan \"Openingstijden onbekend\" tot iemand het invult."
+          }
+        }
+      }
+    },
+    "When you are done you can share the park with Rppl, so everyone gets it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you are done you can share the park with Rppl, so everyone gets it."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als je klaar bent kun je het park met Rppl delen, zodat iedereen het krijgt."
+          }
+        }
+      }
+    },
+    "Where riders can send questions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where riders can send questions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waar riders vragen naartoe kunnen sturen."
+          }
+        }
+      }
+    },
+    "Where riders find the park online: the booking page, Instagram, Facebook. Pick a type and paste the address." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where riders find the park online: the booking page, Instagram, Facebook. Pick a type and paste the address."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waar riders het park online vinden: de reserveerpagina, Instagram, Facebook. Kies een type en plak het adres."
+          }
+        }
+      }
+    },
+    "Winter (Oct to Mar)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Winter (Oct to Mar)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Winter (okt t/m mrt)"
+          }
+        }
+      }
+    },
+    "Without opening times the park shows \"Opening hours unknown\"." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without opening times the park shows \"Opening hours unknown\"."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonder openingstijden toont het park \"Openingstijden onbekend\"."
+          }
+        }
+      }
+    },
+    "You can still change everything afterwards from the park's menu." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can still change everything afterwards from the park's menu."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je kunt achteraf nog alles wijzigen via het menu van het park."
+          }
+        }
+      }
+    },
+    "You have changes to this park that were not saved." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have changes to this park that were not saved."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je hebt wijzigingen aan dit park die niet zijn bewaard."
+          }
+        }
+      }
+    },
+    "Your name or source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name or source"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jouw naam of bron"
+          }
+        }
+      }
+    },
+    "per %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per %@"
+          }
+        }
+      }
+    },
+    "per day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per day"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per dag"
+          }
+        }
+      }
+    },
+    "per hour" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per hour"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per uur"
+          }
+        }
+      }
+    },
+    "per person" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per person"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per persoon"
+          }
+        }
+      }
+    },
+    "per session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per session"
+          }
+        }
+      }
+    },
+    "this cable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this cable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deze cable"
+          }
+        }
+      }
+    },
+    "this link" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this link"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deze link"
+          }
+        }
+      }
+    },
+    "this price" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this price"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deze prijs"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

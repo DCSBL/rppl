@@ -71,6 +71,17 @@ struct ParkEditorLogicTests {
         #expect(!ParkClock.wrapsPastMidnight(open: "17:00", close: "sunset"))
     }
 
+    @Test func calendarDatesAreDaysInUTC() throws {
+        let date = try #require(ParkDateText.date(from: "2026-10-04"))
+        #expect(ParkDateText.iso(from: date) == "2026-10-04")
+        #expect(ParkDateText.iso(from: date.addingTimeInterval(11 * 3600)) == "2026-10-04")
+        #expect(ParkDateText.date(from: "2026-02-31") == nil)
+        #expect(ParkDateText.date(from: "2026-2-3") == nil)
+        #expect(ParkDateText.date(from: "tomorrow") == nil)
+        #expect(ParkDateText.isValid("2028-02-29"))
+        #expect(!ParkDateText.isValid("2027-02-29"))
+    }
+
     @Test func tracedWindingFollowsTravelOrder() {
         // North-up map: east is +lon, north is +lat. A -> B (east) -> C (south-east) -> D (south): clockwise.
         let clockwise = ParkCable(points: [
@@ -180,6 +191,25 @@ struct ParkEditorLogicTests {
         #expect(result.opening?.rules?.first?.label == nil)
         #expect(result.opening?.rules?.first?.note == nil)
         #expect(result.opening?.slots == nil)
+    }
+
+    @Test func finalizedTidiesSelectorsOfHoursAndBlocks() {
+        var park = base()
+        park.opening = ParkOpening(
+            rules: [ParkOpeningRule(
+                months: [], days: [], dates: ["2026-12-25", "nope", "2026-12-24", "2026-12-25", "2026-02-31"],
+                open: "10:00", close: "18:00"
+            )],
+            slots: [ParkSlot(id: "1", months: [4], days: ["sat"], dates: ["bad"], start: "10:00", end: "11:00")]
+        )
+        let rule = ParkDraft.finalized(park).opening?.rules?.first
+        #expect(rule?.months == nil)
+        #expect(rule?.days == nil)
+        #expect(rule?.dates == ["2026-12-24", "2026-12-25"])
+        let slot = ParkDraft.finalized(park).opening?.slots?.first
+        #expect(slot?.months == [4])
+        #expect(slot?.days == ["sat"])
+        #expect(slot?.dates == nil)
     }
 
     @Test func finalizedDropsAnOpeningWithNothingInIt() {

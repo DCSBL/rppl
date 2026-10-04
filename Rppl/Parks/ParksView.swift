@@ -7,6 +7,9 @@ struct ParksView: View {
     @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
+    @State private var drafts = ParkDraftsController.shared
+    @State private var resumingDraft: ParkEditDraft?
+    @State private var draftToDelete: ParkEditDraft?
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
     @State private var sort: ParkListSort = .distance
     @State private var favorites = ParkFavorites.shared
@@ -98,6 +101,24 @@ struct ParksView: View {
         searchFieldFocused = showSearch
     }
 
+    private func reloadDrafts() { drafts.reload() }
+
+    /// Unfinished parks, on top of the list until they are saved or deleted.
+    @ViewBuilder
+    private var draftRows: some View {
+        ForEach(drafts.drafts) { draft in
+            ParkDraftCard(draft: draft) { resumingDraft = draft }
+                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) { draftToDelete = draft } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+        }
+    }
+
     private enum SortChoice: Hashable {
         case sort(ParkListSort)
         case map
@@ -137,6 +158,9 @@ struct ParksView: View {
                         .ignoresSafeArea()
                 } else {
                     List {
+                        if editorEnabled, !isSearching {
+                            draftRows
+                        }
                         if !isSearching, sort == .distance, location.availability != .available {
                             ParksLocationNeededCard(
                                 availability: location.availability,
@@ -263,10 +287,24 @@ struct ParksView: View {
             }
         }
         .tint(Color.rpplAccent)
-        .sheet(isPresented: $showEditor) {
-            ParkEditorView(original: nil, onSaved: {})
+        .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
+            ParkEditorView(original: nil)
+        }
+        .sheet(item: $resumingDraft, onDismiss: reloadDrafts) { draft in
+            ParkEditorView(original: draft.editsParkID.flatMap { store.entry(id: $0)?.park }, resuming: draft)
+        }
+        .confirmationDialog(
+            "Delete this draft?",
+            isPresented: Binding(get: { draftToDelete != nil }, set: { if !$0 { draftToDelete = nil } }),
+            titleVisibility: .visible,
+            presenting: draftToDelete
+        ) { draft in
+            Button("Delete draft", role: .destructive) { drafts.delete(draft) }
+        } message: { _ in
+            Text("The unsaved park and everything you filled in will be gone.")
         }
         .task {
+            drafts.reload()
             store.reload()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
@@ -506,6 +544,47 @@ private struct ParkSearchField: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(Color.rpplFill, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+}
+
+/// A park that was started but not saved yet.
+private struct ParkDraftCard: View {
+    let draft: ParkEditDraft
+    let onOpen: () -> Void
+
+    var body: some View {
+        Button(action: onOpen) {
+            HStack(spacing: 12) {
+                Image(systemName: "pencil.and.list.clipboard")
+                    .font(.title3)
+                    .foregroundStyle(Color.rpplAccent)
+                    .frame(width: 32)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(draft.title.isEmpty ? String(localized: "Untitled park") : draft.title)
+                        .font(.headline)
+                        .foregroundStyle(Color.rpplText)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Color.rpplMuted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.rpplMuted)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .logbookCardChrome()
+    }
+
+    private var subtitle: String {
+        let when = draft.savedAt.formatted(.relative(presentation: .named))
+        return draft.editsParkID == nil
+            ? String(localized: "Draft · edited \(when)")
+            : String(localized: "Unsaved changes · edited \(when)")
     }
 }
 

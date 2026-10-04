@@ -79,6 +79,34 @@ public enum ParkClock {
     }
 }
 
+/// Calendar dates stored as `yyyy-MM-dd`. A date here is a day, not a moment: it is read and written
+/// in UTC so the day never shifts with the device's or the park's time zone.
+public enum ParkDateText {
+    private static var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        return calendar
+    }
+
+    /// Noon UTC on that day; nil for text that is not a real date.
+    public static func date(from iso: String) -> Date? {
+        let parts = iso.split(separator: "-", omittingEmptySubsequences: false).compactMap { Int($0) }
+        guard parts.count == 3, iso.count == 10 else { return nil }
+        let components = DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12)
+        guard let date = calendar.date(from: components) else { return nil }
+        // "2026-02-31" rolls over to March: not a date.
+        let back = calendar.dateComponents([.year, .month, .day], from: date)
+        return back.year == parts[0] && back.month == parts[1] && back.day == parts[2] ? date : nil
+    }
+
+    public static func iso(from date: Date) -> String {
+        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 1970, parts.month ?? 1, parts.day ?? 1)
+    }
+
+    public static func isValid(_ iso: String) -> Bool { date(from: iso) != nil }
+}
+
 extension ParkCable {
     /// Whether the traced points go round clockwise, seen from above with north up. nil without three
     /// points or when they are on one line. Points are listed in travel order, so this is the direction

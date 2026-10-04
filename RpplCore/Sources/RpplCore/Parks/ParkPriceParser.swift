@@ -147,7 +147,17 @@ public enum ParkPriceParser {
 
     private static let isoCodes = Set(Locale.commonISOCurrencyCodes)
 
+    /// "US$", "A$": a letter or two in front of the dollar sign.
+    private static let dollarPrefixes: [String: String] = [
+        "us": "USD", "ca": "CAD", "c": "CAD", "au": "AUD", "a": "AUD", "nz": "NZD", "hk": "HKD",
+    ]
+
     private static func takeCurrency(_ text: inout String) -> String? {
+        if let range = text.range(of: #"(?i)\b([a-z]{1,2})\$"#, options: .regularExpression),
+           let code = dollarPrefixes[text[range].dropLast().lowercased()] {
+            text.removeSubrange(range)
+            return code
+        }
         for (token, code) in symbols {
             if let range = text.range(of: token, options: .caseInsensitive) {
                 text.removeSubrange(range)

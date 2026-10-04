@@ -16,6 +16,8 @@ struct ParkPriceParserTests {
         #expect(price("25 chf") == ParsedPrice(amount: 25, currency: "CHF"))
         #expect(price("$12.5") == ParsedPrice(amount: 12.5, currency: "USD"))
         #expect(price("£7") == ParsedPrice(amount: 7, currency: "GBP"))
+        #expect(price("US$ 12,34") == ParsedPrice(amount: 12.34, currency: "USD"))
+        #expect(price("A$9") == ParsedPrice(amount: 9, currency: "AUD"))
         #expect(price("7,5") == ParsedPrice(amount: 7.5))
     }
 
