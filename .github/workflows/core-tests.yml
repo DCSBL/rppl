@@ -12,6 +12,9 @@ name: Core tests
 on:
   pull_request:
     branches: [main]
+  # Also after every merge: main can differ from each green PR. Red here means fix main before tagging a release.
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:

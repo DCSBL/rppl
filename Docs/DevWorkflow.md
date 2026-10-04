@@ -109,7 +109,7 @@ To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) 
 
 Workflow: [`.github/workflows/core-tests.yml`](../.github/workflows/core-tests.yml).
 
-On every PR targeting `main` (and on manual dispatch), a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
+On every PR targeting `main`, on every push to `main` (a merge that breaks `main` shows red before you tag a release) and on manual dispatch, a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
 
 A second job, **`Test summary`**, runs after the tests (also when they fail) and feeds the raw `swift test` log to [`scripts/ci/summarize_swift_test.py`](../scripts/ci/summarize_swift_test.py). It writes the result to the job summary and keeps **one sticky comment** on same-repo PRs, updated on every push: the number of tests, and when any fail, a table of the failed tests with file:line and the issue text (or the compiler errors when the build fails). The test job itself stays read-only; only the report job has `pull-requests: write`. Do not make `Test summary` a required check: it is best-effort. Tests for the script: `python3 -m unittest discover -s scripts/ci -p 'test_*.py'`.
 
@@ -149,84 +149,25 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 ## Xcode Cloud
 
-**RpplCore `swift test`** and nightly TestFlight builds run in Xcode Cloud, not GitHub Actions. Local/push gate still runs Core tests through `xcode-gate` / `make test-core`.
+Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, and the **Release** workflow archives it and sends it to TestFlight internal. Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux), also after each merge), in the local push gate, and once more on the tagged commit before a release archive. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
 
-### Workflows
+The older **Nightly TestFlight** and **PR / Core tests** workflows are retired (they spent the free compute hours). Nightly is gone and `Test - PR` is deactivated in App Store Connect; keep it that way (or delete it).
 
-Keep three workflows in App Store Connect / Xcode:
+[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires `CI_TAG`, so a start without a tag fails immediately instead of archiving. Otherwise it runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py) and then the release script tests and `swift test` for `RpplCore`, so a failing test stops the build before the archive ([Release.md](Release.md#what-the-build-does)).
 
-| Workflow | Start condition | Actions |
-|----------|-----------------|---------|
-| **PR / Core tests** | Pull Request Changes | Test (workspace `RpplCore`, scheme **RpplCore**, iOS Simulator) |
-| **Nightly TestFlight** | On a Schedule for a Branch (`main`) | Test → Archive (scheme **Rppl**) → Deploy to TestFlight |
-| **Release** | Tag Changes, tags beginning with `v` | Test → Archive (scheme **Rppl**, TestFlight and App Store) → TestFlight internal + external. Setup and release steps: [Release.md](Release.md) |
+Dry-run the failure path locally (no tag, exit 1) or a tag against a throwaway worktree (see [Release.md](Release.md#what-the-build-does)):
 
-Optional: add **Manual Start** on `main` to the nightly workflow for on-demand TestFlight builds.
+```bash
+CI_PRIMARY_REPOSITORY_PATH=$PWD bash ci_scripts/ci_post_clone.sh; echo "exit=$?"
+```
 
-> **Check this workflow is running.** On 2026-10-03 no check from it appeared on any PR from #327 to #368; only `Rppl | Test - PR` (app targets) did, and it reported SUCCESS on #327 and #329 while Core tests were red. Running the action below on the #329 snapshot gives `TEST FAILED` (6 tests), so the workflow would have stopped that PR. Open App Store Connect → Xcode Cloud and confirm **PR / Core tests** exists, starts on Pull Request Changes and posts its status to GitHub. Until then the local push gate (`xcode-gate` / `make coverage`) is the only place these tests run, and a PR pushed by a Linux agent never runs them. To enforce the [coverage floor](#coverage-floor) there as well, a `ci_scripts` step can run `python3 scripts/check-core-coverage.py` (it runs `swift test` itself; the `xcodebuild` result bundle is not read). Not set up.
+### RpplCore scheme
 
-The PR workflow opens the `RpplCore` package directly. Xcode's auto-generated `RpplCore` scheme only builds the library, so Xcode Cloud fails with "There are no test bundles available to test". The shared scheme in `RpplCore/.swiftpm/xcode/xcshareddata/xcschemes/RpplCore.xcscheme` (whitelisted in `.gitignore`) adds `RpplCoreTests` to its Test action. Reproduce locally:
+Xcode's auto-generated `RpplCore` scheme only builds the library, so `xcodebuild test` fails with "There are no test bundles available to test". The shared scheme in `RpplCore/.swiftpm/xcode/xcshareddata/xcschemes/RpplCore.xcscheme` (whitelisted in `.gitignore`) adds `RpplCoreTests` to its Test action. Run Core tests through xcodebuild locally:
 
 ```bash
 cd RpplCore && xcodebuild test -scheme RpplCore -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
-
-### Nightly schedule
-
-Configure **On a Schedule for a Branch**:
-
-- Branch: **`main`**
-- Frequency: daily
-- Time: **3:00 AM Europe/Amsterdam** (within the 1–5 AM window; adjust in App Store Connect if you prefer another slot or timezone)
-
-Do **not** add Branch Changes to the nightly workflow unless you also want push-triggered TestFlight (see optional push gate below).
-
-### Skip when no build changes
-
-[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone and cancels the workflow when there is nothing worth archiving:
-
-| `CI_START_CONDITION` | Behavior |
-|----------------------|----------|
-| `schedule` | Skip unless any commit in the last 24 hours touched build-related paths |
-| `push` | Skip unless `HEAD` vs `HEAD~1` includes build-related paths |
-| `manual`, `manual_rebuild`, `pr_open`, `pr_update` | Always continue |
-| any, with `CI_TAG` set (release tag build) | Always continue; runs `scripts/ci/prepare_release.py` first ([Release.md](Release.md)) |
-
-Build-related paths match the local pre-push **xcode-gate** hook (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, tooling, and most scripts do **not** count.
-
-The shared filter lives in [`scripts/ci/build-related-paths.sh`](../scripts/ci/build-related-paths.sh). Keep it aligned with the `xcode-gate` `files` block in [`.pre-commit-config.yaml`](../.pre-commit-config.yaml).
-
-When the script skips, it exits non-zero — Xcode Cloud stops the run and does not archive or deploy. That cancelled state is intentional (saves compute minutes); it is not a build failure to investigate.
-
-### Optional push gate
-
-If you add **Branch Changes on `main`** to the same TestFlight workflow, also set **Custom Conditions → Don’t Start a Build** in App Store Connect for:
-
-- `Docs/`
-- `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `LEGAL.md`
-- `.github/`
-- `tools/`
-
-The post-clone script is belt-and-braces for docs-only pushes that still start a run.
-
-### Setup (App Store Connect / Xcode)
-
-1. Open **Xcode → Product → Xcode Cloud → Manage Workflows** (or App Store Connect → Xcode Cloud).
-2. Create or edit **Nightly TestFlight** on `Rppl.xcodeproj`.
-3. Add start conditions: **On a Schedule for a Branch** (`main`, daily, 3:00 AM Europe/Amsterdam); optionally **Manual Start** on `main`.
-4. Actions: Test → Archive (scheme **Rppl**, iOS) → **Deploy to TestFlight** (internal testers).
-5. After merging `ci_scripts/` to `main`, run one **Manual Start** build to confirm the hook is picked up.
-
-### Local dry-run
-
-Approximate what Xcode Cloud will do:
-
-```bash
-CI_START_CONDITION=schedule CI_PRIMARY_REPOSITORY_PATH=$PWD bash ci_scripts/ci_post_clone.sh
-echo "exit=$?"
-```
-
-Exit `0` = continue; exit `1` = skip (no build-related changes in the last 24 hours on the current branch).
 
 ## Notes
 

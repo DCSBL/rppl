@@ -4,7 +4,7 @@
 Called from ci_scripts/ci_post_clone.sh when Xcode Cloud builds a tag, and from
 .github/workflows/release-preflight.yml with --check-only when a release is published.
 
-Build mode (default), for tag vX.Y.Z or vX.Y.Z-suffix:
+Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, v2026.9.1-beta.1):
   1. Validate the tag and derive the marketing version X.Y.Z (suffix dropped).
   2. Require the tagged commit to be on main (GitHub compare API, skipped when unreachable).
   3. Set every MARKETING_VERSION in Rppl.xcodeproj (iPhone and Watch must match).
@@ -40,7 +40,7 @@ from typing import Any, Dict, Optional, Tuple
 DEFAULT_REPO = "DCSBL/rppl"
 NOTES_LOCALE = "en-US"
 NOTES_LIMIT = 4000
-TAG_RE = re.compile(r"^v(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
+TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
 MARKETING_VERSION_RE = re.compile(r"MARKETING_VERSION = [^;]+;")
 BUILD_DATE_RE = re.compile(r"(<key>RpplBuildDate</key>\s*<string>)[^<]*(</string>)")
 PBXPROJ = Path("Rppl.xcodeproj/project.pbxproj")
@@ -64,8 +64,8 @@ def parse_tag(tag: str) -> Tuple[str, Optional[str]]:
     match = TAG_RE.fullmatch(tag)
     if not match:
         raise ReleaseError(
-            "Tag %r is not a release tag. Use vX.Y.Z or vX.Y.Z-beta.N (App Store versions "
-            "are three integers)." % tag
+            "Tag %r is not a release tag. Use X.Y.Z or vX.Y.Z, optionally with a -beta.N suffix "
+            "(App Store versions are three integers)." % tag
         )
     return match.group(1), match.group(2)
 
