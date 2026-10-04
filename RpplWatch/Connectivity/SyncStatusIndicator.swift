@@ -4,7 +4,6 @@ import RpplCore
 struct SyncStatusIndicator: View {
     let state: SyncConnectionState
     var pendingCount: Int = 0
-    var footnote: String? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
@@ -25,12 +24,6 @@ struct SyncStatusIndicator: View {
                     Text("Pending: \(pendingCount)")
                         .font(.caption2)
                         .foregroundStyle(.orange)
-                }
-                if let footnote, !footnote.isEmpty {
-                    Text(footnote)
-                        .font(.caption2)
-                        .foregroundStyle(Color.rpplIdlePrimary.opacity(0.75))
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
