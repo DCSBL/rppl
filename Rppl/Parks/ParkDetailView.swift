@@ -100,7 +100,7 @@ struct ParkDetailView: View {
         .sheet(isPresented: $showEditor) {
             ParkEditorView(original: park, resuming: resumeDraft)
         }
-        .confirmationDialog("Continue your unsaved changes?", isPresented: $askAboutDraft, titleVisibility: .visible) {
+        .alert("Continue your unsaved changes?", isPresented: $askAboutDraft) {
             Button("Continue editing") {
                 resumeDraft = drafts.draft(editing: park.id)
                 showEditor = true
@@ -110,6 +110,7 @@ struct ParkDetailView: View {
                 resumeDraft = nil
                 showEditor = true
             }
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text("You have changes to this park that were not saved.")
         }
@@ -117,8 +118,9 @@ struct ParkDetailView: View {
             ParkMailComposer(park: park, changedSections: changedSections, lineDiff: lineDiff) { showMail = false }
                 .ignoresSafeArea()
         }
-        .confirmationDialog(removeTitle, isPresented: $confirmRemove, titleVisibility: .visible) {
+        .alert(removeTitle, isPresented: $confirmRemove) {
             Button(removeTitle, role: .destructive) { ParkStore.shared.removeUserVersion(id: park.id) }
+            Button("Cancel", role: .cancel) {}
         }
         .task {
             drafts.reload()

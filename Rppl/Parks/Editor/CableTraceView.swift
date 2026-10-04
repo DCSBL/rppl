@@ -74,7 +74,7 @@ struct CableTraceView: View {
                     .accessibilityLabel(Text("Map style"))
                 }
             }
-            .confirmationDialog("Is this cable a full-size loop or 2D?", isPresented: $askShape, titleVisibility: .visible) {
+            .alert("Is this cable a full-size loop or 2D?", isPresented: $askShape) {
                 Button("Full size (loop)") {
                     // Points are in travel order, so the winding of the trace is the direction riders go.
                     cable.direction = cable.tracedWindingIsClockwise == false ? .counterClockwise : .clockwise
