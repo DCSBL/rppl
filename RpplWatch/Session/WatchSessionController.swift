@@ -187,6 +187,11 @@ final class WatchSessionController: NSObject {
     var lastPersistedBatteryAt: Date?
     var lastPersistedBatteryLevel: Double?
     var lastPersistedBatteryState: String?
+    var lastPersistedLowPowerMode: Bool?
+    /// Battery warnings already shown this session (`BatteryGuardPolicy`).
+    var batteryWarnedCodes: Set<String> = []
+    /// A battery-critical stop is under way; never started twice.
+    var isBatteryAutoStopping = false
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false

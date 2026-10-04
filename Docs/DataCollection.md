@@ -81,6 +81,17 @@ Optional start only:
 
 Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
+## Battery guard
+
+The Health workout and the phone transfer only happen at Stop, and a park day can outlast an older Watch's battery (roughly 6–7 h with GPS and heart rate). `BatteryGuardPolicy` (Core) decides what the Watch does while it runs down, checked on every flush:
+
+- **Unplugged** (an unknown state counts as unplugged): a notification haptic and a flush once at **15 %** and once at **10 %**, then an automatic Stop at **5 %** or lower. A jump past both thresholds warns once.
+- The automatic Stop writes an `inactive` marker with `detectorId` `battery_critical`, then runs the normal Stop, so the Health save and the transfer happen while there is power.
+- **Charging** or **full** never acts. Product Pause is not checked (sensors are off while paused).
+- Battery samples (`battery-000.jsonl`) carry `lowPowerMode` (optional), so GPS gaps under Low Power Mode can be explained.
+
+The thresholds are product defaults in one place (`BatteryGuardPolicy`).
+
 ## Transfer
 
 Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections`.

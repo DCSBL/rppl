@@ -270,10 +270,14 @@ public struct BatterySample: Codable, Equatable, Sendable {
     public var level: Double
     /// Opaque: `unplugged` | `charging` | `full` | `unknown`.
     public var state: String
+    /// Low Power Mode makes GPS and heart rate sparse; logged so gaps in a session can be explained.
+    /// Nil when the Watch did not report it.
+    public var lowPowerMode: Bool?
 
-    public init(timestamp: Date, level: Double, state: String) {
+    public init(timestamp: Date, level: Double, state: String, lowPowerMode: Bool? = nil) {
         self.timestamp = timestamp
         self.level = level
         self.state = state
+        self.lowPowerMode = lowPowerMode
     }
 }
