@@ -1,5 +1,5 @@
 # PR checks on Linux — pre-commit only (hygiene, codespell, SwiftLint).
-# RpplCore unit tests cannot run here (Linux): they run in the local push gate and Xcode Cloud.
+# RpplCore unit tests run in core-tests.yml (Linux, swift container) and in the local push gate.
 # No xcode-gate / xcodebuild (macOS / Xcode only).
 #
 # Required-check friendly: this job always runs. Individual steps skip when the

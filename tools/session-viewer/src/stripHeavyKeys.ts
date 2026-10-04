@@ -1,4 +1,4 @@
-const HEAVY_KEYS = ['motionFramesZlib', 'motion', 'health', 'labels'] as const
+const HEAVY_KEYS = ['motionFramesZlib', 'motion', 'health'] as const
 
 /** Drop selected top-level keys by byte rewrite — never builds motion/health graphs. */
 export function stripHeavyKeys(raw: string): string {

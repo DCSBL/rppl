@@ -1,4 +1,4 @@
-import type { AnalysisPackage, DetectionEvent, TimeRange } from './types'
+import type { AnalysisPackage, TimeRange } from './types'
 
 const DB_NAME = 'rppl-session-viewer'
 const STORE = 'kv'
@@ -24,18 +24,13 @@ function openDb(): Promise<IDBDatabase> {
   })
 }
 
-/** Migrate cached packages that still store `assumptions`. */
 function normalizePackage(raw: unknown): AnalysisPackage | null {
   if (!raw || typeof raw !== 'object') return null
-  const pkg = raw as AnalysisPackage & { assumptions?: DetectionEvent[] }
+  const pkg = raw as AnalysisPackage
   if (!pkg.manifest) return null
-  const detections = (pkg.detections ?? pkg.assumptions ?? []).map((e) => ({
-    ...e,
-    detectorId: e.detectorId ?? 'legacy_assumption',
-  }))
   return {
     manifest: pkg.manifest,
-    detections,
+    detections: pkg.detections ?? [],
     locations: pkg.locations ?? [],
     battery: pkg.battery ?? [],
   }

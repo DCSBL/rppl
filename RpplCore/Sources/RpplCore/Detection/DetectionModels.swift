@@ -82,24 +82,6 @@ public struct DetectionEvent: Codable, Equatable, Sendable, Identifiable {
         self.supersedesId = supersedesId
     }
 
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
-        code = try container.decode(String.self, forKey: .code)
-        timestamp = try container.decode(Date.self, forKey: .timestamp)
-        reason = try container.decode(String.self, forKey: .reason)
-        detectorId = try container.decodeIfPresent(String.self, forKey: .detectorId) ?? "unknown"
-        speedMps = try container.decodeIfPresent(Double.self, forKey: .speedMps)
-        horizontalAccuracy = try container.decodeIfPresent(Double.self, forKey: .horizontalAccuracy)
-        waterSubmersionState = try container.decodeIfPresent(String.self, forKey: .waterSubmersionState)
-        motionActivity = try container.decodeIfPresent(String.self, forKey: .motionActivity)
-        supersedesId = try container.decodeIfPresent(String.self, forKey: .supersedesId)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, code, timestamp, reason, detectorId, speedMps, horizontalAccuracy
-        case waterSubmersionState, motionActivity, supersedesId
-    }
 }
 
 /// Signal emitted by a `Detector` for the merger to apply.

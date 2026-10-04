@@ -15,9 +15,9 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var waterTemperatureAvailable: Bool?
     /// Opaque activity code (`wakeboard`, …). Localized titles are display-only.
     public var activityCode: String?
-    /// Watch settings wrist side at session start (`left` / `right`). Nil for older sessions.
+    /// Watch settings wrist side at session start (`left` / `right`). Nil when unknown.
     public var wristLocation: String?
-    /// Watch settings Digital Crown side at session start (`left` / `right`). Nil for older sessions.
+    /// Watch settings Digital Crown side at session start (`left` / `right`). Nil when unknown.
     public var crownOrientation: String?
     /// When set, session was imported from an export JSON on phone (not Watch WC transfer). No HealthKit.
     public var imported: Date?
@@ -210,40 +210,21 @@ public struct MotionSample: Codable, Equatable, Sendable {
     }
 
     public init(from decoder: Decoder) throws {
-        if let compact = try? decoder.container(keyedBy: CompactCodingKeys.self),
-           compact.contains(.t) {
-            timestamp = try compact.decode(Date.self, forKey: .t)
-            userAccelX = try compact.decode(Double.self, forKey: .ax)
-            userAccelY = try compact.decode(Double.self, forKey: .ay)
-            userAccelZ = try compact.decode(Double.self, forKey: .az)
-            rotationX = try compact.decode(Double.self, forKey: .rx)
-            rotationY = try compact.decode(Double.self, forKey: .ry)
-            rotationZ = try compact.decode(Double.self, forKey: .rz)
-            pitch = try compact.decode(Double.self, forKey: .p)
-            roll = try compact.decode(Double.self, forKey: .r)
-            yaw = try compact.decode(Double.self, forKey: .y)
-            return
-        }
-        let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
-        timestamp = try legacy.decode(Date.self, forKey: .timestamp)
-        userAccelX = try legacy.decode(Double.self, forKey: .userAccelX)
-        userAccelY = try legacy.decode(Double.self, forKey: .userAccelY)
-        userAccelZ = try legacy.decode(Double.self, forKey: .userAccelZ)
-        rotationX = try legacy.decode(Double.self, forKey: .rotationX)
-        rotationY = try legacy.decode(Double.self, forKey: .rotationY)
-        rotationZ = try legacy.decode(Double.self, forKey: .rotationZ)
-        pitch = try legacy.decode(Double.self, forKey: .pitch)
-        roll = try legacy.decode(Double.self, forKey: .roll)
-        yaw = try legacy.decode(Double.self, forKey: .yaw)
+        let container = try decoder.container(keyedBy: CompactCodingKeys.self)
+        timestamp = try container.decode(Date.self, forKey: .t)
+        userAccelX = try container.decode(Double.self, forKey: .ax)
+        userAccelY = try container.decode(Double.self, forKey: .ay)
+        userAccelZ = try container.decode(Double.self, forKey: .az)
+        rotationX = try container.decode(Double.self, forKey: .rx)
+        rotationY = try container.decode(Double.self, forKey: .ry)
+        rotationZ = try container.decode(Double.self, forKey: .rz)
+        pitch = try container.decode(Double.self, forKey: .p)
+        roll = try container.decode(Double.self, forKey: .r)
+        yaw = try container.decode(Double.self, forKey: .y)
     }
 
     private enum CompactCodingKeys: String, CodingKey {
         case t, ax, ay, az, rx, ry, rz, p, r, y
-    }
-
-    private enum LegacyCodingKeys: String, CodingKey {
-        case timestamp, userAccelX, userAccelY, userAccelZ
-        case rotationX, rotationY, rotationZ, pitch, roll, yaw
     }
 
     private static func quantize(_ value: Double) -> Double {

@@ -40,8 +40,8 @@ struct SessionPackageNamingTests {
     @Test func appGeneratedPatterns() {
         #expect(SessionPackageNaming.isAppGenerated("2026-06-01 14-32 - Rotterdam"))
         #expect(SessionPackageNaming.isAppGenerated("2026-06-01 14-32 - Rotterdam (2)"))
-        #expect(SessionPackageNaming.isAppGenerated("2026-06-01 - Rotterdam")) // date-only legacy
-        #expect(SessionPackageNaming.isAppGenerated(UUID().uuidString))
+        #expect(!SessionPackageNaming.isAppGenerated("2026-06-01 - Rotterdam"))
+        #expect(!SessionPackageNaming.isAppGenerated(UUID().uuidString))
         #expect(!SessionPackageNaming.isAppGenerated("My park day"))
     }
 }
@@ -233,54 +233,5 @@ struct SessionPackageFolderTests {
         let dir = try store2.sessionDirectory(for: manifest.sessionId)
         #expect(dir.lastPathComponent == "My park day")
         #expect(try store2.listSessionIDs() == [manifest.sessionId])
-    }
-
-    @Test func migratesLegacyBareUUIDFolder() throws {
-        let root = tempRoot()
-        defer { try? FileManager.default.removeItem(at: root) }
-
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-        let started = calendar.date(from: DateComponents(year: 2026, month: 7, day: 4, hour: 9))!
-        let sessionId = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"
-        let legacy = root.appendingPathComponent(sessionId, isDirectory: true)
-        try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
-
-        let manifest = SessionManifest(
-            sessionId: sessionId,
-            testerId: "t",
-            appVersion: "1.0",
-            buildNumber: "1",
-            watchModel: "W",
-            systemVersion: "26.0",
-            startedAt: started
-        )
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        try encoder.encode(manifest).write(
-            to: legacy.appendingPathComponent("manifest.json"),
-            options: [.atomic]
-        )
-        let derivedDir = legacy.appendingPathComponent("derived", isDirectory: true)
-        try FileManager.default.createDirectory(at: derivedDir, withIntermediateDirectories: true)
-        let view = DerivedSessionView(
-            stats: emptyStats(startedAt: started, duration: 120),
-            cityName: "Utrecht"
-        )
-        try encoder.encode(view).write(
-            to: derivedDir.appendingPathComponent("view.json"),
-            options: [.atomic]
-        )
-
-        let store = SessionFileStore(rootURL: root)
-        let migrated = try store.migratePackageFolderNamesIfNeeded()
-        #expect(migrated == [sessionId])
-        let dir = try store.sessionDirectory(for: sessionId)
-        let expected = SessionPackageNaming.baseFolderName(
-            startedAt: started,
-            cityName: "Utrecht"
-        )
-        #expect(dir.lastPathComponent == expected)
-        #expect(!FileManager.default.fileExists(atPath: legacy.path))
     }
 }

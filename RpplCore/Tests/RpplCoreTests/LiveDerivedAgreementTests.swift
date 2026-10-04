@@ -41,7 +41,7 @@ private func liveSetDurations(_ events: [DetectionEvent], stopAt: TimeInterval) 
     var code = DetectionCodes.inactive
     var lastConfident = DetectionCodes.inactive
     for event in events {
-        code = DetectionCodes.normalize(event.code)
+        code = event.code
         if DetectionCodes.isConfident(event.code) {
             lastConfident = code
         }

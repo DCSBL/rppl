@@ -20,8 +20,7 @@ const CODE_COLORS: Record<string, string> = {
 }
 
 export function codeColor(code: string): string {
-  const normalized = code === 'paused' ? 'inactive' : code
-  return CODE_COLORS[normalized] ?? '#a855f7'
+  return CODE_COLORS[code] ?? '#a855f7'
 }
 
 function setupCanvas(canvas: HTMLCanvasElement): {

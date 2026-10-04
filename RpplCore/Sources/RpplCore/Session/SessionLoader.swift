@@ -54,6 +54,7 @@ public struct SessionSummaryBundle: Sendable {
 
 public enum SessionLoader {
     public static func load(store: SessionFileStore, sessionId: String) throws -> SessionLoadBundle {
+        try store.migrateIfNeeded(sessionId: sessionId)
         let manifest = try store.readManifest(sessionId: sessionId)
         let detections = try store.readDetections(sessionId: sessionId)
         let locations = try store.readLocationSamples(sessionId: sessionId)
@@ -83,11 +84,6 @@ public enum SessionLoader {
                 ),
                 sessionId: sessionId
             )
-            if manifest.schemaVersion < SessionSchema.currentVersion {
-                var updated = manifest
-                updated.schemaVersion = SessionSchema.currentVersion
-                try store.writeManifest(updated)
-            }
         }
         return SessionLoadBundle(
             manifest: manifest,

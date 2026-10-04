@@ -13,12 +13,11 @@ export async function loadExportJson(file: File): Promise<AnalysisPackage> {
   const parsed = JSON.parse(lean) as {
     manifest?: SessionManifest
     detections?: DetectionEvent[]
-    assumptions?: DetectionEvent[]
     locations?: LocationSample[]
     battery?: BatterySample[]
   }
   if (!parsed.manifest) throw new Error('export missing manifest')
-  const detections = normalizeDetections(parsed.detections ?? parsed.assumptions ?? [])
+  const detections = normalizeDetections(parsed.detections ?? [])
   const battery = normalizeBattery(parsed.battery ?? [])
   return {
     manifest: parsed.manifest,
@@ -48,9 +47,7 @@ async function loadFromFlatList(list: File[]): Promise<AnalysisPackage> {
   const manifestFile = list.find((f) => basename(f.name) === 'manifest.json')
   if (!manifestFile) throw new Error('folder missing manifest.json')
   const manifest = JSON.parse(await manifestFile.text()) as SessionManifest
-  const detectionsFile =
-    list.find((f) => basename(f.name) === 'detections.jsonl') ??
-    list.find((f) => basename(f.name) === 'assumptions.jsonl')
+  const detectionsFile = list.find((f) => basename(f.name) === 'detections.jsonl')
   const detections = normalizeDetections((await parseJsonl(detectionsFile)) as DetectionEvent[])
   const locationFiles = list
     .filter((f) => /^location-\d+\.jsonl$/i.test(basename(f.name)))
@@ -91,12 +88,7 @@ function groupByDir(files: File[]): Map<string, File[]> {
 }
 
 export function normalizeDetections(raw: DetectionEvent[]): DetectionEvent[] {
-  return raw
-    .map((event) => ({
-      ...event,
-      detectorId: event.detectorId ?? 'legacy_assumption',
-    }))
-    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+  return [...raw].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
 }
 
 export function normalizeBattery(raw: BatterySample[]): BatterySample[] {

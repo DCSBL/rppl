@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(OSLog)
 import OSLog
+#endif
 
 /// Shared action/debug logging for Watch + iPhone.
 ///
