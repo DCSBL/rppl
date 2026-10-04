@@ -20,7 +20,9 @@ extension WatchSessionController {
     private func refreshLocalPermissionStatus() {
         let loc = locationManager.authorizationStatus
         locationAuthStatus = Self.locationLabel(loc)
+        // Approximate location is granted but unusable: the whole session would record no sets.
         locationPermission = Self.locationPermissionState(loc)
+            .accountingForReducedAccuracy(locationManager.accuracyAuthorization == .reducedAccuracy)
 
         if CMMotionActivityManager.isActivityAvailable() {
             switch CMMotionActivityManager.authorizationStatus() {
@@ -145,6 +147,33 @@ extension WatchSessionController {
         }
     }
 
+    /// Precise Location off = fixes with kilometers of error, so detection rejects all of them and
+    /// the session records no sets. Ask for full accuracy for this session (system sheet, purpose
+    /// key `RideTracking` in the Info.plist). If the rider declines, Start is blocked by the
+    /// permission gate (reduced accuracy counts as not ready) and explains how to turn it on.
+    func requestFullAccuracyIfReduced() async {
+        guard locationManager.accuracyAuthorization == .reducedAccuracy else { return }
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            break
+        default:
+            return
+        }
+        let manager = UncheckedSendable(value: locationManager)
+        _ = try? await Deadline.run(Self.fullAccuracyPromptTimeout, label: "temporary full accuracy") {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                manager.value.requestTemporaryFullAccuracyAuthorization(withPurposeKey: "RideTracking") { _ in
+                    continuation.resume()
+                }
+            }
+        }
+        refreshPermissionStatus()
+        WakeLog.debug(.permissions, "temporary full accuracy asked, now \(locationManager.accuracyAuthorization.rawValue)")
+    }
+
+    /// Long enough for the rider to read and answer the system sheet, bounded if it never answers.
+    static let fullAccuracyPromptTimeout: TimeInterval = 60
+
     func requestLocationPermission() async {
         errorText = nil
         locationManager.requestWhenInUseAuthorization()
@@ -244,6 +273,8 @@ extension WatchSessionController {
         await requestPermissions()
         // No Health (or Location) access = no start: without a workout session the app would be
         // suspended with the wrist down. The Watch stays browsable; the rider is told why.
+        // (With Precise Location off the rider is asked for it once first: see below.)
+        await requestFullAccuracyIfReduced()
         if let kind = WatchPermissionOrder.startBlocker(states: permissionStates) {
             isStarting = false
             startingActivityCode = nil
