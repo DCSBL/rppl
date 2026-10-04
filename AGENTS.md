@@ -102,7 +102,7 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 
 - **Do run:** `pre-commit run` (commit-stage hooks) and `make lint` (SwiftLint via `tools/bin/swiftlint`).
 - **Do not expect:** `xcodebuild`, Simulator, HealthKit, Watch Connectivity, or a green `make check` / `make gate`.
-- **`cd RpplCore && swift test`:** runs on Linux in CI ([`core-tests.yml`](.github/workflows/core-tests.yml), `swift:6.2-noble` container) and on macOS locally / Xcode Cloud. A Cloud Agent VM usually has no Swift toolchain; if it does, run it as a non-root user. Keep Core buildable on Linux: put unavoidable Apple-only APIs behind `#if canImport(...)` as listed in [Docs/DevWorkflow.md](Docs/DevWorkflow.md#core-tests-linux). Do not add Linux shims beyond that without asking.
+- **`cd RpplCore && swift test`:** runs on Linux in CI ([`core-tests.yml`](.github/workflows/core-tests.yml), `swift:6.2-noble` container) and on macOS locally. A Cloud Agent VM usually has no Swift toolchain; if it does, run it as a non-root user. Keep Core buildable on Linux: put unavoidable Apple-only APIs behind `#if canImport(...)` as listed in [Docs/DevWorkflow.md](Docs/DevWorkflow.md#core-tests-linux). Do not add Linux shims beyond that without asking.
 - Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
 
 ### PR workflow for code-change requests
@@ -139,7 +139,7 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | GitHub PR checks | `.github/workflows/pr-checks.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
-| Release / TestFlight (GitHub release tag → Xcode Cloud) | [Docs/Release.md](Docs/Release.md), `ci_scripts/ci_post_clone.sh`, `scripts/ci/prepare_release.py`, `.github/workflows/release-preflight.yml` |
+| Release / TestFlight (GitHub release tag → Xcode Cloud → TestFlight internal; the only Xcode Cloud build) | [Docs/Release.md](Docs/Release.md), `ci_scripts/ci_post_clone.sh`, `scripts/ci/prepare_release.py`, `.github/workflows/release-preflight.yml` |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | UI / Info.plist copy (any locale) | `*.xcstrings` · `scripts/format-xcstrings.py` · Wakeboard slang section above · voice rules in [Docs/DesignLanguage.md](Docs/DesignLanguage.md#voice-and-tone) |
 | Tiles, gauges, metric symbols / tints | `Rppl/Design/` · [Docs/DesignLanguage.md](Docs/DesignLanguage.md) |
