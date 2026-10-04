@@ -178,9 +178,9 @@ public enum SessionStatsBuilder {
                     )
                 )
             }
-            currentCode = DetectionCodes.normalize(event.code)
+            currentCode = event.code
             if DetectionCodes.isConfident(event.code) {
-                lastConfident = DetectionCodes.normalize(event.code)
+                lastConfident = event.code
             }
             intervalStart = max(event.timestamp, sessionStart)
         }
@@ -201,7 +201,6 @@ public enum SessionStatsBuilder {
     static func attributed(_ code: String, lastConfident _: String) -> String {
         // Unsure gaps do not extend set windows — fall/GPS death ends set duration/distance.
         // Lookback supersedes restore continuous riding when speed returns inside the same-set window.
-        let code = DetectionCodes.normalize(code)
         if code == DetectionCodes.unsure { return DetectionCodes.inactive }
         return code
     }

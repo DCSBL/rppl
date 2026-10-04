@@ -28,9 +28,7 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 | Detections | on transitions / revisions | `detections.jsonl` |
 | Manifest | once | `manifest.json` |
 
-Schema **v3**: detections replace labels/assumptions. Legacy `assumptions.jsonl` migrates to detections on open; transfer packages may still carry `assumptions` / `labels` keys (decoded into detections / discarded).
-
-Schema **v4**: detection code `paused` rewritten to `inactive` on read/append (one-time per session package).
+Session packages are schema **v1** (`manifest.schemaVersion`). The format was reset once; there are no migrations or compatibility paths for anything older. Future format changes bump the version and add a step to `SessionMigrations` (see [SessionStorage.md](SessionStorage.md#schema-and-migrations)).
 
 ## Derived stats
 
@@ -85,7 +83,7 @@ Requires an active HealthKit workout path for Workout intent registration. Cycle
 
 ## Transfer
 
-Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections` (legacy `assumptions` accepted on decode).
+Phone may be away during the session. After **Stop session**, Watch queues a WC file transfer and **keeps checkpoints until the phone sends an ack**. Transfer failure must not delete Watch data. Transfer package includes `detections`.
 
 **Tiny-session discard** (duration < ~30s and zero sets): Stop asks Discard / Keep / Cancel. Confirmed Discard deletes the Watch package and skips transfer + Health save. Keep uses the normal transfer path (ack still required before delete).
 

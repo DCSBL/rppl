@@ -59,30 +59,16 @@ public enum SessionPackageNaming {
         return cleaned.isEmpty ? unknownCity : cleaned
     }
 
-    /// True when the folder looks app-owned (canonical / date-only legacy / bare UUID).
+    /// True when the folder name is app-owned (`YYYY-MM-DD HH-mm - City`), so the app may rename
+    /// it when the city changes. Anything else was renamed by the user and is left alone.
     public static func isAppGenerated(_ folderName: String) -> Bool {
-        isLegacyUUIDFolder(folderName)
-            || matchesCanonicalPattern(folderName)
-            || matchesDateOnlyPattern(folderName)
-    }
-
-    /// Legacy layout: folder name equals a UUID (historically == `sessionId`).
-    public static func isLegacyUUIDFolder(_ folderName: String) -> Bool {
-        UUID(uuidString: folderName) != nil
+        matchesCanonicalPattern(folderName)
     }
 
     /// `YYYY-MM-DD HH-mm - City` or `… (N)`.
     public static func matchesCanonicalPattern(_ folderName: String) -> Bool {
         let pattern = #"^\d{4}-\d{2}-\d{2} \d{2}-\d{2} - .+?(?: \(\d+\))?$"#
         return folderName.range(of: pattern, options: .regularExpression) != nil
-    }
-
-    /// Short-lived date-only folders: `YYYY-MM-DD - City` (before time was added).
-    public static func matchesDateOnlyPattern(_ folderName: String) -> Bool {
-        let pattern = #"^\d{4}-\d{2}-\d{2} - .+?(?: \(\d+\))?$"#
-        // Exclude the time form (already matched by canonical).
-        return folderName.range(of: pattern, options: .regularExpression) != nil
-            && !matchesCanonicalPattern(folderName)
     }
 
     /// Rejects empty names and path traversal before building a package URL.

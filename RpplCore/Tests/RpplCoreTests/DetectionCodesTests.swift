@@ -4,9 +4,15 @@ import Testing
 
 @Suite("DetectionCodes")
 struct DetectionCodesTests {
-    @Test func normalizeMapsLegacyPaused() {
-        #expect(DetectionCodes.inactive == "inactive")
-        #expect(DetectionCodes.normalize("paused") == DetectionCodes.inactive)
-        #expect(DetectionCodes.normalize(DetectionCodes.riding) == DetectionCodes.riding)
+    @Test func onlyRidingAndInactiveAreConfident() {
+        #expect(DetectionCodes.isConfident(DetectionCodes.riding))
+        #expect(DetectionCodes.isConfident(DetectionCodes.inactive))
+        #expect(!DetectionCodes.isConfident(DetectionCodes.unsure))
+    }
+
+    @Test func unknownCodesAreNotConfidentAndNotRewritten() {
+        // Codes are opaque strings: nothing maps an unknown code (even an old name) to a known one.
+        #expect(!DetectionCodes.isConfident("paused"))
+        #expect(!DetectionCodes.isConfident("swimming"))
     }
 }
