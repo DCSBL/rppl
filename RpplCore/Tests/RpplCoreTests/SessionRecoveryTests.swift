@@ -46,6 +46,78 @@ struct SessionRecoveryTests {
         #expect(try store.sessionsNeedingTransfer().map(\.sessionId) == [m.sessionId])
     }
 
+    @Test func recoveredSessionEndsAtTheLastRecordedSampleAndKeepsTheFinalSet() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        let id = session.sessionId
+        // `riding` entered at 60 s, then GPS kept coming for ten more minutes before the crash.
+        try session.store.appendDetection(Samples.detection(DetectionCodes.riding, second: 60), sessionId: id)
+        try session.store.appendLocationSamples((0...660).map { Samples.location($0) }, sessionId: id)
+
+        #expect(try session.store.finalizeOrphanedRecording(sessionId: id))
+
+        let manifest = try session.store.readManifest(sessionId: id)
+        #expect(manifest.endedAt == Samples.time(660))
+        let stats = try #require(try session.store.readDerivedView(sessionId: id)).stats
+        #expect(stats.setCount == 1)
+        #expect(abs(stats.ridingDuration - 600) < 1)
+        #expect(stats.totalDistanceMeters > 0)
+    }
+
+    @Test func lastRecordedTimestampLooksAtEveryStreamButMotion() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        let id = session.sessionId
+        try session.store.appendDetection(Samples.detection(DetectionCodes.riding, second: 10), sessionId: id)
+        try session.store.appendLocationSamples([Samples.location(20)], sessionId: id)
+        try session.store.appendHealthSamples([Samples.health(30)], sessionId: id)
+        try session.store.appendWaterTemperatureSamples([Samples.water(40)], sessionId: id)
+        try session.store.appendBatterySamples([Samples.battery(50)], sessionId: id)
+        try session.store.appendMotionSamples([Samples.motion(999)], sessionId: id)
+
+        #expect(session.store.lastRecordedTimestamp(sessionId: id) == Samples.time(50))
+    }
+
+    @Test func unreadableStreamsCountAsEmptyWhenFindingTheEnd() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        let id = session.sessionId
+        try session.store.appendDetection(Samples.detection(DetectionCodes.riding, second: 10), sessionId: id)
+        try session.store.appendLocationSamples([Samples.location(20)], sessionId: id)
+        try session.store.appendHealthSamples([Samples.health(30)], sessionId: id)
+        try session.store.appendWaterTemperatureSamples([Samples.water(40)], sessionId: id)
+        try session.store.appendBatterySamples([Samples.battery(50)], sessionId: id)
+        let streams = [
+            "detections.jsonl", "location-000.jsonl", "health-000.jsonl", "water-000.jsonl", "battery-000.jsonl"
+        ]
+        for name in streams {
+            try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: session.file(name).path)
+        }
+        defer {
+            for name in streams { try? session.makeWritable(name) }
+        }
+
+        #expect(session.store.lastRecordedTimestamp(sessionId: id) == nil)
+    }
+
+    @Test func recoveringAnUnreadableStoreFinalizesNothing() throws {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RpplCoreTests-notadir-\(UUID().uuidString)")
+        try Data().write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+
+        #expect(SessionFileStore(rootURL: file).recoverOrphanedRecordings(activeSessionId: nil).isEmpty)
+    }
+
+    @Test func aSessionWithNothingRecordedEndsAtItsStart() throws {
+        let session = try TempSession.make()
+        defer { session.cleanup() }
+        #expect(session.store.lastRecordedTimestamp(sessionId: session.sessionId) == nil)
+
+        #expect(try session.store.finalizeOrphanedRecording(sessionId: session.sessionId))
+        #expect(try session.store.readManifest(sessionId: session.sessionId).endedAt == Samples.t0)
+    }
+
     @Test func finalizeIsIdempotentAndLeavesOthersAlone() throws {
         let (store, root) = makeStore()
         defer { try? FileManager.default.removeItem(at: root) }

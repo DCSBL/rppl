@@ -26,6 +26,8 @@ public enum MotionRecordingPolicy {
         public static let fileBudget = "file_budget"
         public static let lowStorage = "low_storage"
         public static let storageCritical = "storage_critical"
+        /// The phone could not keep all motion frames on import (damaged, or over the decode limits).
+        public static let importLimit = "import_limit"
     }
 
     /// A day pass keeps its first hours of motion; the rest of the day records without it.
