@@ -1,13 +1,8 @@
 import Foundation
 
-/// Bump when `SessionStatsBuilder` / lap / speed / map-frame logic changes UI numbers.
-/// Stale `derived/view.json` regenerates from raw on ensure.
-/// v2: brief slang mis-rename wrote `setCount` (circuit crossings).
-/// v3: canonical key is `lapCount` again; decode accepts `setCount` then rewrite.
-/// v4: distilled `mapTracks` for session heatmap maps (phone + Watch).
-/// v5: medoid most-common-path selection replaces mean-coordinate averaging.
-/// v6: session map heatmap only; drop averaged track and speed coloring.
-/// v7: map tracks drop low-accuracy fixes and implausible jumps (`SetLocationFilter.trackSamples`).
+/// Version of the analysis behind `derived/view.json`. Bump it when `SessionStatsBuilder`, lap,
+/// speed, map-track or map-frame logic changes the numbers the UI shows: a stale sidecar is
+/// rebuilt from the raw streams the next time it is ensured.
 public enum SessionAnalyzer {
-    public static let version = 7
+    public static let version = 1
 }

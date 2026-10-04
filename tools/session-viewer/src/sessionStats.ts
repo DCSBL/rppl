@@ -30,14 +30,9 @@ export function effectiveEvents(events: DetectionEvent[]): DetectionEvent[] {
 }
 
 /** Unsure → inactive for set windows (mirrors SessionStatsBuilder.attributed). */
-function normalizeCode(code: string): string {
-  return code === 'paused' ? INACTIVE : code
-}
-
 function attributed(code: string): string {
-  const normalized = normalizeCode(code)
-  if (normalized === UNSURE) return INACTIVE
-  return normalized
+  if (code === UNSURE) return INACTIVE
+  return code
 }
 
 export function buildAttributedPhases(
@@ -58,7 +53,7 @@ export function buildAttributedPhases(
         endMs: end,
       })
     }
-    currentCode = normalizeCode(event.code)
+    currentCode = event.code
     intervalStart = Math.max(toMs(event.timestamp), sessionStartMs)
   }
 

@@ -37,7 +37,7 @@ struct SessionParkLinkTests {
         return Fixture(store: store, id: manifest.sessionId, root: root)
     }
 
-    @Test func legacyManifestDecodesWithoutParkFields() throws {
+    @Test func newManifestHasNoParkFields() throws {
         let manifest = SessionManifest(
             testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "W", systemVersion: "26"
         )

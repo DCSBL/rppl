@@ -15,15 +15,6 @@ public enum TesterIdentity {
             return existing
         }
 
-        // Prefer an existing standard-defaults ID when migrating into the App Group.
-        if store == nil,
-           let group = UserDefaults(suiteName: AppConstants.appGroupID),
-           let legacy = UserDefaults.standard.string(forKey: defaultsKey),
-           !legacy.isEmpty {
-            group.set(legacy, forKey: defaultsKey)
-            return legacy
-        }
-
         let id = UUID().uuidString
         defaults.set(id, forKey: defaultsKey)
         return id
