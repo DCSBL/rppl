@@ -11,8 +11,8 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
 | Event | What runs | Where |
 |-------|-----------|-------|
 | Pull request into `main` | pre-commit, `RpplCore tests (Linux)`, release script tests | GitHub Actions ([DevWorkflow.md](DevWorkflow.md#github-actions)) |
-| Merge into `main` | Nothing | n/a |
-| GitHub release published (tag created) | Release preflight check, then archive and TestFlight internal | GitHub Actions + Xcode Cloud |
+| Merge into `main` | `RpplCore tests (Linux)` again, so a merge that breaks `main` shows red before you tag | GitHub Actions |
+| GitHub release published (tag created) | Release preflight check; then, on the tagged commit, release script tests and `RpplCore` `swift test` **before** the archive; then archive and TestFlight internal | GitHub Actions + Xcode Cloud |
 | Add to external group / App Store | You press the button | App Store Connect |
 
 ## Cut a release
@@ -49,7 +49,7 @@ About 15 minutes. The workflow lives in App Store Connect / Xcode, not in this r
    - **General**: turn **Restrict Editing** on. Apple requires it for workflows that deploy to external testers; it costs nothing on a solo account and avoids a surprise when you add external later.
    - **Environment**: Xcode Version pinned to a released Xcode (currently **Xcode 27 (27A266a)**) rather than floating on "Latest Release", so a new Xcode never lands in the middle of a release. Bump it by hand when App Store Connect requires a newer SDK. Environment variable `RPPL_GITHUB_TOKEN` holds the token, marked **Secret** (redacted).
    - **Start Conditions**: exactly one, **Tag Changes → Any Tags**, with **Auto-cancel Builds** off. Xcode Cloud only offers *Any Tag* or *Tags beginning with …* (no regex), and `2026.9.1` and `v2026.9.1` share no prefix, so *Any Tag* is the only setting that covers both. The post-clone script rejects tags that are not releases in seconds. No Branch Changes, no Schedule, no Manual Start, and no Custom Conditions (a "don't start on docs-only changes" filter would silently skip a release).
-   - **Actions**: **Archive** the `Rppl` scheme for iOS. No Test action (GitHub already tested the PR; every minute here is budgeted). Set **Distribution Preparation** to **App Store Connect** (Xcode calls it "TestFlight and App Store"), not "TestFlight (Internal Testing Only)": an internal-only archive can never go to external testers or the App Store.
+   - **Actions**: **Archive** the `Rppl` scheme for iOS. No Xcode Cloud Test action: the `Rppl` scheme only runs the thin `RpplTests` and the slow `RpplUITests`, while the real suite is `RpplCore`. That runs in the Post-Clone step instead (see [What the build does](#what-the-build-does)). Set **Distribution Preparation** to **App Store Connect** (Xcode calls it "TestFlight and App Store"), not "TestFlight (Internal Testing Only)": an internal-only archive can never go to external testers or the App Store.
    - **Post-Actions**: **TestFlight Internal Testing** with the group **internal**. Do not add *TestFlight External Testing*; external stays manual.
 6. **TestFlight test information**, needed before the first external promotion (internal testers skip it). App Store Connect → Rppl → TestFlight → Test Information: Beta App Description (required), feedback email, review contact and review notes ("Needs an Apple Watch and Health permission. No login."). The external group is **Public beta**. Check the app's TestFlight language includes English (US), which is the file the script writes (`WhatToTest.en-US.txt`).
 
@@ -57,7 +57,7 @@ First run: publish a `-beta` release, confirm version, build number and "What to
 
 ### Compute hours
 
-Every Apple Developer Program membership includes 25 Xcode Cloud compute hours per month. The Release workflow is an archive of an iPhone app with a Watch app, so a release costs one short build. If the allowance is spent when you publish a release, the build does not start: wait for the next period or buy more under App Store Connect → Xcode Cloud → Usage. Then press **Rebuild** on the tag, or publish again.
+Every Apple Developer Program membership includes 25 Xcode Cloud compute hours per month. The Release workflow is an archive of an iPhone app with a Watch app, so a release costs the Core tests plus one archive. If the allowance is spent when you publish a release, the build does not start: wait for the next period or buy more under App Store Connect → Xcode Cloud → Usage. Then press **Rebuild** on the tag, or publish again.
 
 ## Promote a build (manual)
 
@@ -78,13 +78,17 @@ Xcode Cloud never submits anything beyond internal TestFlight and this repo has 
 
 ## What the build does
 
-`ci_scripts/ci_post_clone.sh` requires `CI_TAG` (an untagged start fails immediately) and runs `scripts/ci/prepare_release.py`. It:
+`ci_scripts/ci_post_clone.sh` requires `CI_TAG` (an untagged start fails immediately), runs `scripts/ci/prepare_release.py`, then tests the tagged commit before the archive starts. A failing test fails the build and nothing reaches TestFlight. `prepare_release.py`:
 
 1. Validates the tag and derives the marketing version X.Y.Z (the `v` and the suffix are dropped).
 2. Checks the tagged commit is on `main` (GitHub compare API). Ahead or diverged fails the build.
 3. Sets every `MARKETING_VERSION` in `Rppl.xcodeproj` so iPhone and Watch match. App Store validation rejects a Watch app whose version differs from its companion.
 4. Fetches the release description (retrying for about a minute if the release is not visible yet), converts markdown to plain text, caps it at 4000 characters and writes `TestFlight/WhatToTest.en-US.txt`, which Xcode Cloud attaches to the TestFlight build.
 5. Stamps `RpplBuildDate` in `Rppl/Info.plist` (shown in About).
+
+After that the Post-Clone step runs the release script unit tests and `swift test` for `RpplCore` (on macOS with the pinned Xcode, so the Apple-only code paths run too). The tagged commit is tested because `main` after merging can differ from every green PR. A failure shows up in the Post-Clone log.
+
+**Emergency skip.** If a test blocks a release you must ship, add environment variable `RPPL_SKIP_TESTS` = `1` to the Release workflow, rebuild, then remove it again. The log prints a warning. Not a normal path: fix or revert the test instead.
 
 These edits exist only in the CI checkout; nothing is committed back.
 

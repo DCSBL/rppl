@@ -102,7 +102,7 @@ Cloud Agent VMs are Linux — same scope as [`.github/workflows/pr-checks.yml`](
 
 - **Do run:** `pre-commit run` (commit-stage hooks) and `make lint` (SwiftLint via `tools/bin/swiftlint`).
 - **Do not expect:** `xcodebuild`, Simulator, HealthKit, Watch Connectivity, or a green `make check` / `make gate`.
-- **`cd RpplCore && swift test`:** runs on Linux in CI ([`core-tests.yml`](.github/workflows/core-tests.yml), `swift:6.2-noble` container) and on macOS locally. A Cloud Agent VM usually has no Swift toolchain; if it does, run it as a non-root user. Keep Core buildable on Linux: put unavoidable Apple-only APIs behind `#if canImport(...)` as listed in [Docs/DevWorkflow.md](Docs/DevWorkflow.md#core-tests-linux). Do not add Linux shims beyond that without asking.
+- **`cd RpplCore && swift test`:** runs on Linux in CI ([`core-tests.yml`](.github/workflows/core-tests.yml), `swift:6.2-noble` container) on macOS locally, and on each release tag build in Xcode Cloud (Post-Clone, before the archive). A Cloud Agent VM usually has no Swift toolchain; if it does, run it as a non-root user. Keep Core buildable on Linux: put unavoidable Apple-only APIs behind `#if canImport(...)` as listed in [Docs/DevWorkflow.md](Docs/DevWorkflow.md#core-tests-linux). Do not add Linux shims beyond that without asking.
 - Optional: Swift toolchain may be present for Package.swift / editor use; it does not unlock iOS/watchOS app builds.
 
 ### PR workflow for code-change requests

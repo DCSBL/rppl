@@ -109,7 +109,7 @@ To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) 
 
 Workflow: [`.github/workflows/core-tests.yml`](../.github/workflows/core-tests.yml).
 
-On every PR targeting `main` (and on manual dispatch), a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
+On every PR targeting `main`, on every push to `main` (a merge that breaks `main` shows red before you tag a release) and on manual dispatch, a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
 
 A second job, **`Test summary`**, runs after the tests (also when they fail) and feeds the raw `swift test` log to [`scripts/ci/summarize_swift_test.py`](../scripts/ci/summarize_swift_test.py). It writes the result to the job summary and keeps **one sticky comment** on same-repo PRs, updated on every push: the number of tests, and when any fail, a table of the failed tests with file:line and the issue text (or the compiler errors when the build fails). The test job itself stays read-only; only the report job has `pull-requests: write`. Do not make `Test summary` a required check: it is best-effort. Tests for the script: `python3 -m unittest discover -s scripts/ci -p 'test_*.py'`.
 
@@ -149,11 +149,11 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 ## Xcode Cloud
 
-Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, and the **Release** workflow archives it and sends it to TestFlight internal. Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux)) and in the local push gate. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
+Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, and the **Release** workflow archives it and sends it to TestFlight internal. Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux), also after each merge), in the local push gate, and once more on the tagged commit before a release archive. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
 
 The older **Nightly TestFlight** and **PR / Core tests** workflows are retired (they spent the free compute hours). Nightly is gone and `Test - PR` is deactivated in App Store Connect; keep it that way (or delete it).
 
-[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires `CI_TAG`, so a start without a tag fails immediately instead of archiving, and otherwise runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py).
+[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires `CI_TAG`, so a start without a tag fails immediately instead of archiving. Otherwise it runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py) and then the release script tests and `swift test` for `RpplCore`, so a failing test stops the build before the archive ([Release.md](Release.md#what-the-build-does)).
 
 Dry-run the failure path locally (no tag, exit 1) or a tag against a throwaway worktree (see [Release.md](Release.md#what-the-build-does)):
 
