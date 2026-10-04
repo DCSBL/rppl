@@ -43,9 +43,14 @@ class ParseTagTests(unittest.TestCase):
         self.assertEqual(pr.parse_tag("v1.2.3-beta.1"), ("1.2.3", "beta.1"))
         self.assertEqual(pr.parse_tag("v1.2.3-rc1"), ("1.2.3", "rc1"))
 
+    def test_valid_tags_without_v_prefix(self):
+        self.assertEqual(pr.parse_tag("2026.9.1"), ("2026.9.1", None))
+        self.assertEqual(pr.parse_tag("2026.10.0-beta.1"), ("2026.10.0", "beta.1"))
+        self.assertEqual(pr.parse_tag("1.2.3"), ("1.2.3", None))
+
     def test_invalid_tags(self):
-        for tag in ("", "1.2.3", "v1.2", "v1", "vNext", "v1.2.3.4", "v1.2.3-", "v1.2.3-$(x)",
-                    "v1.2.3 beta", "V1.2.3", "v1.2.3\n"):
+        for tag in ("", "1.2", "2026.9", "v1.2", "v1", "vNext", "latest", "v1.2.3.4", "2026.9.1.1",
+                    "v1.2.3-", "2026.9.1-", "v1.2.3-$(x)", "v1.2.3 beta", "V1.2.3", "v1.2.3\n", "vv1.2.3"):
             with self.subTest(tag=tag):
                 with self.assertRaises(pr.ReleaseError):
                     pr.parse_tag(tag)
