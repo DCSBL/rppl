@@ -111,6 +111,8 @@ Workflow: [`.github/workflows/core-tests.yml`](../.github/workflows/core-tests.y
 
 On every PR targeting `main` (and on manual dispatch), a GitHub-hosted `ubuntu-24.04` runner runs `cd RpplCore && swift test` inside the official `swift:6.2-noble` container, as the non-root runner user (the store tests inject failures with `chmod 000`, which root ignores). The toolchain comes with the image; there is no separate Swift install step. Required-check friendly: no `paths:` filter, so it always reports a status. Check name: **`RpplCore tests (Linux)`**.
 
+A second job, **`Test summary`**, runs after the tests (also when they fail) and feeds the raw `swift test` log to [`scripts/ci/summarize_swift_test.py`](../scripts/ci/summarize_swift_test.py). It writes the result to the job summary and keeps **one sticky comment** on same-repo PRs, updated on every push: the number of tests, and when any fail, a table of the failed tests with file:line and the issue text (or the compiler errors when the build fails). The test job itself stays read-only; only the report job has `pull-requests: write`. Do not make `Test summary` a required check: it is best-effort. Tests for the script: `python3 -m unittest discover -s scripts/ci -p 'test_*.py'`.
+
 Reproduce locally without a Linux machine (needs Docker; drop `--user` only if you accept the permission tests failing):
 
 ```bash
