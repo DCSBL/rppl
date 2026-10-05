@@ -10,7 +10,7 @@ struct SessionMail: Identifiable {
     let body: String
 }
 
-enum SessionMailShare {
+nonisolated enum SessionMailShare {
     /// Most mail providers reject attachments around 20–25 MB; stay below that.
     static let maxAttachmentBytes = 20_000_000
 
