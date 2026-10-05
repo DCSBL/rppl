@@ -1,0 +1,45 @@
+version: 1
+id: breakout-harkstede
+created_at: 2026-10-05
+updated_at: 2026-10-05
+history:
+  - date: 2026-10-05
+    description: initial
+
+name: Break Out Grunopark
+address: Hoofdweg 163, 9614 AD Harkstede
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 53.2128311
+  lon: 6.6633385
+
+phone: 050 - 541 17 06
+email: info@breakout-grunopark.nl
+website: https://breakout-grunopark.nl
+links:
+  - { kind: instagram, url: "https://www.instagram.com/breakoutgrunopark/" }
+  - { kind: facebook, url: "https://www.facebook.com/breakoutevenementen" }
+
+# Opening hours, cable layout and direction are not stated on the park's site.
+
+prices:
+  # The site lists these under Waterskiën; it does not say whether they also apply to wakeboarding.
+  - name: Waterskiën 1 hour
+    options:
+      - { amount: "24", currency: EUR, note: Per person }
+  - name: Waterskiën 2 hours
+    options:
+      - { amount: "36", currency: EUR, note: Per person }
+  - name: Waterskiën day pass
+    options:
+      - { amount: "58", currency: EUR, note: Per person }
+  - name: Waterskiën group hour
+    options:
+      - { amount: "300", currency: EUR, note: Per hour }
+
+facilities:
+  - Climbing park
+  - Beach pavilion
+  - Mini camping
+  - Restaurant pavilion
