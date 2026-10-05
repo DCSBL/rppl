@@ -192,6 +192,15 @@ final class WatchSessionController: NSObject {
     var batteryWarnedCodes: Set<String> = []
     /// A battery-critical stop is under way; never started twice.
     var isBatteryAutoStopping = false
+    /// Problems that put this recording at risk (`RecordingHealth`), worst first; shown live.
+    var recordingIssues: [RecordingIssue] = []
+    /// Flushes / detection writes that failed since the last good flush.
+    var consecutiveWriteFailures = 0
+    /// Last GPS fix with a valid horizontal accuracy.
+    var lastUsableFixAt: Date?
+    var recordingAlertGate = RecordingAlertGate()
+    /// Free space, refreshed every 30 s; a volume query per tick would be wasted work.
+    var cachedFreeBytes: Int64?
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false
