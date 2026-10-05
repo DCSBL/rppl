@@ -70,8 +70,8 @@ prices:
       - { amount: "25", currency: EUR, per: day }
   - name: 12-ride card
     options:
-      - { amount: "200", currency: EUR, note: up to 15, pay for 10 and get 12 }
-      - { amount: "260", currency: EUR, note: from 16, pay for 10 and get 12 }
+      - { amount: "200", currency: EUR, note: "up to 15, pay for 10 and get 12" }
+      - { amount: "260", currency: EUR, note: "from 16, pay for 10 and get 12" }
   - name: Parking
     options:
       - { amount: "7", currency: EUR, note: per vehicle on Leisurelands }
