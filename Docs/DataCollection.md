@@ -124,6 +124,8 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 
 User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.
 
+Session detail (iPhone): the toolbar Export button opens the share sheet with the raw JSON. When Mail is set up (`MFMailComposeViewController.canSendMail()`), it becomes a menu with **Send to Rppl**: the export is zipped, attached to a mail to rppl@dcsbl.nl with a "Why I'm sending this session" template, and capped at 20 MB. Larger sessions show a message pointing to Export; there is no base64 / plain-text fallback.
+
 ## Motion gives way first
 
 Nothing analyses device motion yet; it is kept for future event / trick analysis. `scripts/analyze-session.py` decodes it offline (airtime, impacts, spins next to GPS, per set); labelled examples live in the session fixtures. It is the first stream to stop so GPS, detection, health and water keep recording (`MotionRecordingPolicy` in Core, checked after each motion frame and at start):
