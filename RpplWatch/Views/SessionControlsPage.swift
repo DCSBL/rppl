@@ -41,6 +41,12 @@ struct SessionControlsPage: View {
             }
 
             waterLockButton
+
+            if let worst = session.recordingIssues.first {
+                Text(RecordingIssueText.label(for: worst.code))
+                    .font(.caption2)
+                    .foregroundStyle(worst.severity == .critical ? .red : .orange)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.horizontal, 4)

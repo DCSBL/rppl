@@ -63,8 +63,11 @@ extension WatchSessionController {
             }
         }
         timerTask = Task { [weak self] in
+            var tick = 0
             while let self, !Task.isCancelled, self.isRunning, !self.isProductPaused {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
+                tick += 1
+                self.evaluateRecordingHealth(tick: tick)
                 self.elapsed = self.computeElapsed(at: Date())
                 self.refreshSegmentDurations()
                 // Detection ticks otherwise only arrive with GPS fixes, so a blackout froze the

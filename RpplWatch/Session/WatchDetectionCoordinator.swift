@@ -210,6 +210,7 @@ extension WatchSessionController {
         }
         detectionCount += result.written
         if let error = result.error {
+            consecutiveWriteFailures += 1
             errorText = String(localized: "Detection: \(error.localizedDescription)")
             WakeLog.error(
                 .detection,
