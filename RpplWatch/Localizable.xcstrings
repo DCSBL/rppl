@@ -79,70 +79,6 @@
         }
       }
     },
-    "Allow %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allow %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sta %@ toe"
-          }
-        }
-      }
-    },
-    "Allow each permission so Rppl can record your park session on Apple Watch." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allow each permission so Rppl can record your park session on Apple Watch."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sta elke machtiging toe zodat Rppl je park session op Apple Watch kan opnemen."
-          }
-        }
-      }
-    },
-    "allowed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "allowed"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "toegestaan"
-          }
-        }
-      }
-    },
-    "Allowed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allowed"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toegestaan"
-          }
-        }
-      }
-    },
     "Avg speed" : {
       "localizations" : {
         "en" : {
@@ -253,22 +189,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "geweigerd"
-          }
-        }
-      }
-    },
-    "Denied" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Denied"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geweigerd"
           }
         }
       }
@@ -996,54 +916,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nog geen sets"
-          }
-        }
-      }
-    },
-    "Not available on this Watch" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not available on this Watch"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Niet beschikbaar op deze Watch"
-          }
-        }
-      }
-    },
-    "not decided" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "not decided"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "niet besloten"
-          }
-        }
-      }
-    },
-    "Not decided yet" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not decided yet"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nog niet besloten"
           }
         }
       }
@@ -2162,22 +2034,6 @@
         }
       }
     },
-    "unavailable, skipped" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "unavailable, skipped"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "niet beschikbaar, overgeslagen"
-          }
-        }
-      }
-    },
     "Under 30 seconds and no sets. Discard deletes it here. Keep transfers to iPhone." : {
       "localizations" : {
         "en" : {
@@ -2495,38 +2351,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Timers gepauzeerd"
-          }
-        }
-      }
-    },
-    "Waiting for system permission popups. This can take a few seconds on first launch." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Waiting for system permission popups. This can take a few seconds on first launch."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wachten op systeemmachtigingen. Dit kan bij de eerste start een paar seconden duren."
-          }
-        }
-      }
-    },
-    "Waiting for the system popup…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Waiting for the system popup…"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wachten op de systeempopup…"
           }
         }
       }

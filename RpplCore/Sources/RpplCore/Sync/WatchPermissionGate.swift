@@ -1,6 +1,6 @@
 import Foundation
 
-/// Recording permissions shown on Watch first-run / when access is missing.
+/// Recording permissions the Watch asks for when a session starts / explains when access is missing.
 public enum WatchPermissionKind: String, CaseIterable, Sendable, Codable, Hashable {
     case location
     case health
@@ -28,11 +28,6 @@ extension WatchPermissionState {
         case .notDetermined, .denied:
             return false
         }
-    }
-
-    /// Needs attention in the permissions list (sort toward top on fresh load).
-    public var needsAttention: Bool {
-        !isReady
     }
 
     /// Location only. With Precise Location off, CoreLocation grants access but delivers fixes with
@@ -64,37 +59,8 @@ extension WatchPermissionKind {
     }
 }
 
-/// Stable list ordering for the Watch permissions onboarding screen.
+/// Start-gate decisions over the Watch recording permissions.
 public enum WatchPermissionOrder {
-    /// Fresh load / app reopen: attention first, then ready. Stable within each group by
-    /// `WatchPermissionKind.allCases` order.
-    public static func initialOrder(
-        states: [WatchPermissionKind: WatchPermissionState]
-    ) -> [WatchPermissionKind] {
-        let kinds = WatchPermissionKind.allCases
-        let attention = kinds.filter { states[$0]?.needsAttention == true }
-        let ready = kinds.filter { states[$0]?.needsAttention != true }
-        return attention + ready
-    }
-
-    /// Keep `current` order unless a previously ready permission became not ready — then
-    /// move those revoked kinds to the front (stable among themselves).
-    public static func orderPreserving(
-        current: [WatchPermissionKind],
-        previous: [WatchPermissionKind: WatchPermissionState],
-        next: [WatchPermissionKind: WatchPermissionState]
-    ) -> [WatchPermissionKind] {
-        let revoked = WatchPermissionKind.allCases.filter { kind in
-            let wasReady = previous[kind]?.isReady ?? false
-            let isReady = next[kind]?.isReady ?? false
-            return wasReady && !isReady
-        }
-        guard !revoked.isEmpty else { return ensureComplete(current) }
-
-        let remaining = ensureComplete(current).filter { !revoked.contains($0) }
-        return revoked + remaining
-    }
-
     /// Permissions checked in this order when explaining why Start is blocked.
     private static let startBlockerOrder: [WatchPermissionKind] = [.health, .location]
 
@@ -105,29 +71,9 @@ public enum WatchPermissionOrder {
         startBlockerOrder.first { $0.blocksRecording(when: states[$0] ?? .notDetermined) }
     }
 
-    /// First run: a required permission can still show its system sheet, so onboarding prompts.
-    /// Once every required permission is decided, the Watch is browsable and Start explains the block.
-    public static func needsFirstRunPrompt(
-        states: [WatchPermissionKind: WatchPermissionState]
-    ) -> Bool {
-        startBlockerOrder.contains { (states[$0] ?? .notDetermined) == .notDetermined }
-    }
-
     public static func areAllReady(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
         WatchPermissionKind.allCases.allSatisfy { kind in
             !kind.blocksRecording(when: states[kind] ?? .notDetermined)
         }
-    }
-
-    private static func ensureComplete(_ current: [WatchPermissionKind]) -> [WatchPermissionKind] {
-        var seen = Set<WatchPermissionKind>()
-        var result: [WatchPermissionKind] = []
-        for kind in current where seen.insert(kind).inserted {
-            result.append(kind)
-        }
-        for kind in WatchPermissionKind.allCases where seen.insert(kind).inserted {
-            result.append(kind)
-        }
-        return result
     }
 }

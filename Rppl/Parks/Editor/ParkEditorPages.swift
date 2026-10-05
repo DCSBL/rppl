@@ -146,7 +146,7 @@ struct ParkBasicsPage: View {
                     session.park.location = here
                 } else {
                     wantsCurrentLocation = true
-                    location.refresh()
+                    location.requestAccess()
                 }
             }
             if location.availability == .denied {

@@ -86,6 +86,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 5. **iPhone = view-only** — no label editor; no manual Action Button labeling.
 6. **OS floor:** iOS 26+ / watchOS 26+.
 7. **Water Lock** on session start.
+8. **Permission sheets are just-in-time** (iOS/watchOS 27 add stricter consent, e.g. a time-window step for Health reads). Ask only when the feature needing it is used: Watch at session Start, iPhone on the Nearby list / map recenter / editor "current location" action. Never at launch, first sync, or in a batch; status reads (`authorizationStatus`, `getRequestStatusForAuthorization`) are fine anywhere. Request only the types actually used.
 
 ## Testing
 

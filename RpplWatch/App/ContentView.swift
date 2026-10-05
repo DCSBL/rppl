@@ -21,14 +21,10 @@ struct ContentView: View {
                 )
             } else if session.isRunning {
                 ActiveSessionView(session: session)
-            } else if !session.isHealthPermissionResolved {
-                // Health status loads off-main; avoid flashing onboarding for returning users.
-                ProgressView()
-            } else if session.needsFirstRunPermissionPrompt {
-                PermissionsOnboardingView(session: session)
             } else {
-                // Browsable even when a permission is denied: logbook and sessions stay viewable,
-                // Start explains what to allow.
+                // No permission screen at launch: system sheets only appear when a session starts
+                // (`startSession`). Browsable even when a permission is denied: logbook and
+                // sessions stay viewable, Start explains what to allow.
                 IdleSessionView(session: session, transfer: transfer)
             }
         }
@@ -38,7 +34,7 @@ struct ContentView: View {
             // WatchTransferService.shared already activated at app launch (RpplWatchApp.init());
             // re-activating on every appear was redundant and re-triggered WC's own console spam.
             transfer.refreshSyncState()
-            // PermissionsOnboardingView auto-presents system sheets on first boot.
+            // Reads status only; never presents a system sheet.
             session.refreshPermissionStatus()
         }
         .onReceive(NotificationCenter.default.publisher(for: WKApplication.didBecomeActiveNotification)) { _ in
