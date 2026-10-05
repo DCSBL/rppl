@@ -37,7 +37,7 @@ struct PhonePermissionsListSection: View {
         } header: {
             Text("Permissions")
         } footer: {
-            Text("Asked after your first session arrives from Watch.")
+            Text("Rppl asks only when a feature needs it.")
         }
         .onAppear { permissions.refresh() }
     }

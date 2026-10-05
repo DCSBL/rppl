@@ -1,21 +1,3 @@
-# Sources fetched 2026-09-27 (official domain only):
-#   https://www.cableparkaquabest.nl (home, /english)
-#   https://www.cableparkaquabest.nl/contact
-#   https://www.cableparkaquabest.nl/openingstijden
-#   https://www.cableparkaquabest.nl/tarieven (prices are rendered as images - not readable text,
-#     so no prices field; verify on-site or via the site's own price-list images before adding one)
-#   https://www.cableparkaquabest.nl/wakeboardenbeginners
-#   https://www.cableparkaquabest.nl/wakeboarden-gevorderden
-#   https://www.cableparkaquabest.nl/obstacles
-#   https://www.cableparkaquabest.nl/s/Plattegrond-Cablepark-Aquabest (official floor plan/map;
-#     schematic, not geo-referenced, so cable points weren't traced from it)
-#
-# Water temperature: Rijkswaterstaat waterwebservices catalog (METADATASERVICES/OphalenCatalogus)
-# queried 2026-09-27 for the nearest official surface-water temperature ("OW"/"T") station to the
-# dock above. The Ekkersweijer plas itself isn't a monitored rijkswater; several closer stations
-# in the region exist but haven't reported in years (some since the 1980s/90s) - Poeldonk, Dungense
-# Brug (~21 km, on the Zuid-Willemsvaart near Den Bosch) is the nearest one still reporting
-# (last seen 2026-08-11).
 version: 1
 id: aquabest-best
 created_at: 2026-09-27
@@ -31,21 +13,17 @@ history:
       switch to lith.boven, the nearest still-reporting station
   - date: 2026-09-28
     description: rewrite training cable description per Docs/ParkDescriptions.md tone of voice
+  - date: 2026-10-05
+    description: remove past special-day hours (2026-09-19), month-name label, unused numbered flag, author credit and source comments
 
-author: Rppl
 name: Cablepark Aquabest
 address: Ekkersweijer 2, 5681 RZ Best
 timezone: Europe/Amsterdam
-# Starting dock near the main building, located on Google's satellite imagery of the address
-# above (park's own floor plan shows the layout but isn't geo-referenced).
 location:
   lat: 51.500230
   lon: 5.438156
 
-# Nearest official RWS surface-water temperature station still reporting (~34.5 km away, Lith
-# boven on the Maas). Re-checked 2026-09-28 via scripts/find-water-temperature-station.py:
-# poeldonk.dungensebrug (~21 km) had stopped reporting (stale since 2026-08-11); all closer
-# candidates out to ~34 km were stale too. Estimate only - not measured at the park itself.
+# Nearest station that still reports (~34 km); closer ones stopped reporting.
 water_temperature: { provider: rws_nl, station_id: lith.boven }
 
 phone: +31 (0)499 392 121
@@ -58,11 +36,9 @@ links:
   - { kind: youtube, url: "https://www.youtube.com/channel/UCaFERwQH-UVJ8cVWgQnb8kg?view_as=subscriber" }
   - { kind: tripadvisor, url: "https://www.tripadvisor.nl/Attraction_Review-g811097-d4550043-Reviews-Cablepark_Aquabest-Best_North_Brabant_Province.html" }
 
-# Official floor plan labels these "4-MAST CABLESKIBAAN" and "2-MAST TRAININGSBAAN". Direction
-# (cw/ccw) for the 4-mast loop isn't stated on the site, so it's left out.
 cables:
   - name: Cable
-    length_m: 800   # site says "ca 800 meter", approximate
+    length_m: 800
     description: >-
       4-mast cable ski/wakeboard loop with 10 tow points ("meenemers") and a course of
       obstacles (kickers, rails, boxes) for jumps and tricks.
@@ -72,13 +48,8 @@ cables:
       2-mast cable trainer used for beginner instruction and the Saturday/Sunday morning
       wakeboard clinic. Opening hours depend on reservation volume. Call ahead to confirm.
 
-# Regular 2026 season hours (through 30 September); October has separate, shorter weekend hours.
-# The cable only runs with at least 1 paying customer or 3 season-pass holders present, may close
-# up to 1.5h early without that, and always closes by sunset; hours can also change for weather
-# (announced via Facebook/Instagram). Special day: Saturday 19 September 2026, 12:00-18:00.
 opening:
   booking: optional
-  numbered: false
   booking_minutes: [120]
   note: >-
     Reserve online to secure a spot; standard blocks are 2 hours, with a 4-hour or day-pass
@@ -90,8 +61,9 @@ opening:
     - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [wed, fri], open: "16:00", close: "20:00" }
     - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [sat], open: "13:00", close: "19:00" }
     - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [sun], open: "11:00", close: "19:00" }
-    - { label: Regular season, months: [9], dates: ["2026-09-19"], open: "12:00", close: "18:00", note: "Special hours" }
-    - { label: October, months: [10], days: [weekend], open: "11:00", close: "13:00" }
+    - { months: [10], days: [weekend], open: "11:00", close: "13:00" }
+
+# No prices: the park publishes them as images.
 
 facilities:
   - Changing rooms

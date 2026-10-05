@@ -17,17 +17,17 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove month-name labels and source comments; plain hyphen in the summer holiday note
 
 name: Cablepark de Wollebrand
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
 timezone: Europe/Amsterdam
-# Dock.
 location:
   lat: 51.99278189793896
   lon: 4.239882979511977
 
-# Nearest official Rijkswaterstaat surface-water temperature station (Hoek van Holland, ~8 km
-# away). Estimate only - a tidal estuary station, not measured at the park itself.
+# Hoek van Holland is a tidal estuary station.
 water_temperature: { provider: rws_nl, station_id: hoekvanholland }
 
 phone: 0174 - 64 11 44
@@ -42,7 +42,6 @@ cables:
   - name: Cable
     direction: cw
     description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
-    # Points are listed in travel order, first point is the start.
     points:
       - { lat: 51.9926590017478, lon: 4.23977079667694 }
       - { lat: 51.9916976885167, lon: 4.24224285279007 }
@@ -50,29 +49,26 @@ cables:
       - { lat: 51.9916478479643, lon: 4.2387817137021 }
       - { lat: 51.9922605492233, lon: 4.23868536788128 }
 
-# Seasonal drop-in windows (rules) plus fixed-start 80-minute blocks (slots).
-# Monday and Tuesday, and Thursday in September, are booking-only ("op aanvraag") and
-# have no listed hours. Source: kabelskibaan.nl/openingstijden.
 opening:
   booking: required
   note: >-
     Book a block online in advance. Arrive 30 minutes before your start time. Outside
     regular hours the park can be booked exclusively. Monday, Tuesday and (in September)
     Thursday are by request only. Closed on Koningsdag. Hemelvaart and Pinksteren use
-    weekend hours. During summer holiday (18 July–30 August) the park uses August hours.
+    weekend hours. During summer holiday (18 July-30 August) the park uses August hours.
   rules:
-    - { label: April, months: [4], days: [weekend], open: "14:00", close: "17:00" }
-    - { label: May, months: [5], days: [wed, thu, fri], open: "15:30", close: "20:00" }
-    - { label: May, months: [5], days: [weekend], open: "12:30", close: "18:30" }
-    - { label: June, months: [6], days: [wed, thu, fri], open: "15:30", close: "21:30" }
-    - { label: June, months: [6], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: July, months: [7], days: [wed, thu, fri], open: "15:30", close: "21:30" }
-    - { label: July, months: [7], days: [sat], open: "12:30", close: "21:30" }
-    - { label: July, months: [7], days: [sun], open: "12:30", close: "20:00" }
-    - { label: August, months: [8], days: [wed, thu, fri, sat], open: "12:30", close: "21:30" }
-    - { label: August, months: [8], days: [sun], open: "12:30", close: "20:00" }
-    - { label: September, months: [9], days: [wed, fri], open: "15:30", close: "20:00" }
-    - { label: September, months: [9], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [4], days: [weekend], open: "14:00", close: "17:00" }
+    - { months: [5], days: [wed, thu, fri], open: "15:30", close: "20:00" }
+    - { months: [5], days: [weekend], open: "12:30", close: "18:30" }
+    - { months: [6], days: [wed, thu, fri], open: "15:30", close: "21:30" }
+    - { months: [6], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [7], days: [wed, thu, fri], open: "15:30", close: "21:30" }
+    - { months: [7], days: [sat], open: "12:30", close: "21:30" }
+    - { months: [7], days: [sun], open: "12:30", close: "20:00" }
+    - { months: [8], days: [wed, thu, fri, sat], open: "12:30", close: "21:30" }
+    - { months: [8], days: [sun], open: "12:30", close: "20:00" }
+    - { months: [9], days: [wed, fri], open: "15:30", close: "20:00" }
+    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
   slots:
     - { id: "1", start: "12:30", end: "13:50" }
     - { id: "2", start: "14:00", end: "15:20" }

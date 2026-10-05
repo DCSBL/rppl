@@ -6538,18 +6538,18 @@
         }
       }
     },
-    "Asked after your first session arrives from Watch." : {
+    "Rppl asks only when a feature needs it." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asked after your first session arrives from Watch."
+            "value" : "Rppl asks only when a feature needs it."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wordt gevraagd nadat je eerste session vanaf de Watch binnenkomt."
+            "value" : "Rppl vraagt alleen toestemming als een functie het nodig heeft."
           }
         }
       }

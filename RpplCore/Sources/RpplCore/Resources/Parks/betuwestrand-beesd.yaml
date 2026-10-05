@@ -1,8 +1,3 @@
-# Sources: https://www.betuwestrand.nl/ (home), https://www.betuwestrand.nl/waterski,
-# https://www.betuwestrand.nl/waterski/waterskien, https://www.betuwestrand.nl/waterski/wakeboarden,
-# https://www.betuwestrand.nl/waterski/funpark, https://www.betuwestrand.nl/waterski/tarieven-waterskibaan,
-# https://www.betuwestrand.nl/contact, https://www.betuwestrand.nl/contact/routebeschrijving
-# (all fetched 2026-09-28).
 version: 1
 id: betuwestrand-beesd
 created_at: 2026-09-28
@@ -14,13 +9,13 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: merge prices that shared a name (1 uur, 2 uur, 1 dag, 2 dagen) into one entry each; remove author credit and source comments
 
-author: Rppl
 name: BetuweStrand
 address: A. Kraalweg 40, 4153 XC Beesd
 timezone: Europe/Amsterdam
-# Google Maps business pin embedded on the official routebeschrijving page - the site itself
-# publishes no separate coordinates for the waterskibaan/dock.
+# Business pin from the park's route page, not the dock.
 location: { lat: 51.898413, lon: 5.184057 }
 
 phone: 0345 681503
@@ -37,46 +32,34 @@ facilities:
 
 cables:
   - name: Waterskibaan
-    # Site describes it as a rectangular course ("rechthoekig traject") over the recreatiemeer,
-    # towed at ca. 30 km/u - a full-size loop, not a 2-point cable. Exact travel direction
-    # (cw/ccw) isn't stated and no source map/satellite view was clear enough to trace points.
     description: >-
       Rectangular waterski/wakeboard cable course over the recreatiemeer, towed at roughly
       30 km/u. Includes a funpark with a kicker and a rail. Beginners welcome; ages 8-14 only
       with adult supervision.
 
-# Source: betuwestrand.nl/waterski/tarieven-waterskibaan
 prices:
   - name: "1 uur"
     options:
       - { amount: "17.50", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
       - { amount: "23", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - name: "2 uur"
-    options:
-      - { amount: "23", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "29", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - name: "1 dag"
-    options:
-      - { amount: "38", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "51", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - name: "2 dagen"
-    options:
-      - { amount: "63", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "84", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-  - name: "1 uur"
-    options:
       - { amount: "20.50", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
       - { amount: "27", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
   - name: "2 uur"
     options:
+      - { amount: "23", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "29", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
       - { amount: "27", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
       - { amount: "35", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
   - name: "1 dag"
     options:
+      - { amount: "38", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "51", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
       - { amount: "45", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
       - { amount: "58", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
   - name: "2 dagen"
     options:
+      - { amount: "63", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
+      - { amount: "84", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
       - { amount: "75", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
       - { amount: "96", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
   - name: "1 week"

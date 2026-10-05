@@ -8,7 +8,8 @@ import Observation
 import UserNotifications
 #endif
 
-/// Reads / requests iPhone companion permissions. Never gates WatchConnectivity sync.
+/// Reads / requests iPhone companion permissions. Never gates WatchConnectivity sync. Requests only
+/// come from a tap on the About permissions list (or the feature that needs it): nothing asks on its own.
 @Observable
 @MainActor
 final class PhonePermissionsController: NSObject {
@@ -84,28 +85,6 @@ final class PhonePermissionsController: NSObject {
             }
             Task { @MainActor in self.healthPermission = state }
         }
-    }
-
-    /// After first successful Watch→phone import: ask only undetermined sheets once.
-    /// Denial must not affect WC import/ack or session city geocoding.
-    func requestAfterFirstSyncIfNeeded() async {
-        let defaults = UserDefaults.standard
-        guard defaults.bool(forKey: AppSettingsKey.didImportSessionFromWatch) else { return }
-        guard !defaults.bool(forKey: AppSettingsKey.didRequestPostSyncPermissions) else { return }
-        defaults.set(true, forKey: AppSettingsKey.didRequestPostSyncPermissions)
-        WakeLog.debug(.permissions, "post-sync permission asks begin")
-        refresh()
-        if locationPermission == .notDetermined {
-            await requestLocation()
-        }
-        if healthPermission == .notDetermined {
-            await requestHealth(force: true)
-        }
-        if motionPermission == .notDetermined {
-            await requestMotion(force: true)
-        }
-        refresh()
-        WakeLog.debug(.permissions, "post-sync permission asks done")
     }
 
     func request(_ kind: WatchPermissionKind, force: Bool = false) async {

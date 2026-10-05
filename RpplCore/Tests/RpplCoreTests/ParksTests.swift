@@ -445,8 +445,25 @@ struct ParksTests {
 
     // MARK: - Opening exceptions
 
+    /// Wet 'n Wild's regular hours with the extra-hours week it announced for 2026-09-29 to 2026-10-01.
+    /// The bundled file no longer carries those past exceptions, so the test adds them.
     private func wetNWild() throws -> Park {
-        try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+        var park = try #require(ParkCatalog.loadBundled().first { $0.id == "wetnwild-alphen" })
+        park.opening?.exceptions = [
+            ParkOpeningException(
+                kind: ParkExceptionKind.hours, label: "Extra opening hours", dates: ["2026-09-29"],
+                open: "17:00", close: "sunset"
+            ),
+            ParkOpeningException(
+                kind: ParkExceptionKind.hours, label: "Extra opening hours", dates: ["2026-09-30"],
+                open: "16:00", close: "sunset"
+            ),
+            ParkOpeningException(
+                kind: ParkExceptionKind.hours, label: "Extra opening hours", dates: ["2026-10-01"],
+                open: "17:30", close: "sunset"
+            ),
+        ]
+        return park
     }
 
     private func clock(_ minute: Int) -> String { ParkSchedule.timeText(minutes: minute) }

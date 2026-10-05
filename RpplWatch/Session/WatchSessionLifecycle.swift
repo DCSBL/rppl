@@ -56,7 +56,6 @@ extension WatchSessionController {
         guard HKHealthStore.isHealthDataAvailable() else {
             healthAuthStatus = String(localized: "Health unavailable")
             healthPermission = .unavailable
-            isHealthPermissionResolved = true
             return
         }
         let status: HKAuthorizationStatus
@@ -67,10 +66,8 @@ extension WatchSessionController {
         } catch {
             // healthd not answering: keep the last known state instead of spinning forever.
             WakeLog.error(.permissions, "Health status lookup timed out — keeping \(healthPermission.rawValue)")
-            isHealthPermissionResolved = true
             return
         }
-        isHealthPermissionResolved = true
         switch status {
         case .notDetermined:
             healthAuthStatus = String(localized: "workout: notDetermined")
@@ -121,8 +118,10 @@ extension WatchSessionController {
         )
     }
 
-    /// First-boot / onboarding: present system sheets without requiring a row tap.
+    /// Present the system sheets for permissions still undecided: from `startSession` (the only
+    /// automatic caller, so nothing asks before the rider starts) and the Permissions button.
     /// Health first — its sheet is slow to appear; starting it ASAP avoids a spinner freeze on tap.
+    /// Each sheet is answered before the next one shows, so the caller sees decided states.
     func promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: Bool = false) async {
         guard !isPromptingPermissions else { return }
         isPromptingPermissions = true
@@ -174,11 +173,28 @@ extension WatchSessionController {
     /// Long enough for the rider to read and answer the system sheet, bounded if it never answers.
     static let fullAccuracyPromptTimeout: TimeInterval = 60
 
+    /// Returns once the rider has answered the sheet (or the wait times out): `startSession` reads
+    /// the location state right after, and an undecided state would wrongly block Start.
     func requestLocationPermission() async {
         errorText = nil
-        locationManager.requestWhenInUseAuthorization()
-        // Authorization callback updates via delegate; refresh snapshot now too.
+        if locationManager.authorizationStatus == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+            await waitForLocationDecision()
+        }
         refreshPermissionStatus()
+    }
+
+    /// `requestWhenInUseAuthorization` returns at once; the answer arrives later. Bounded so a
+    /// sheet that never gets answered cannot hold Start forever.
+    private func waitForLocationDecision() async {
+        let deadline = Date().addingTimeInterval(Self.locationPermissionTimeout)
+        while locationManager.authorizationStatus == .notDetermined, Date() < deadline {
+            do {
+                try await Task.sleep(for: .milliseconds(200))
+            } catch {
+                return
+            }
+        }
     }
 
     /// - Parameter force: When true, call HealthKit again even if previously denied (re-request /

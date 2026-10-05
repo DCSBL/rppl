@@ -2,7 +2,7 @@ version: 1
 id: valid
 created_at: 2026-01-01
 updated_at: 2026-01-01
-author: Rppl
+author: Test Author
 name: Valid Test Park
 timezone: Europe/Amsterdam
 location: { lat: 52.0, lon: 5.0 }

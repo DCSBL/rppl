@@ -90,6 +90,7 @@ struct LogbookView: View {
                             .tint(Color.rpplAccent)
                         }
                         .foregroundStyle(Color.rpplText)
+                        .onAppear { ExampleSessionPreload.warmUp() }
                         .listRowInsets(LogbookLayout.rowInsets())
                         .listRowBackground(Color.clear)
                     }

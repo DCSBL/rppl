@@ -202,6 +202,8 @@ extension WatchSessionController {
     /// The rider answers the Health sheet inside this window: longer than any normal answer,
     /// shorter than forever when `healthd` stalls.
     static let healthAuthorizationTimeout: TimeInterval = 60
+    /// The rider answers the Location sheet inside this window.
+    static let locationPermissionTimeout: TimeInterval = 60
     /// The motion permission query shows no sheet: it answers quickly or not at all.
     static let motionPermissionTimeout: TimeInterval = 5
 
