@@ -29,7 +29,7 @@ struct ParkEditorView: View {
         .environment(session)
         .tint(Color.rpplAccent)
         .interactiveDismissDisabled(session.isDirty)
-        .confirmationDialog("Keep your changes?", isPresented: $confirmClose, titleVisibility: .visible) {
+        .alert("Keep your changes?", isPresented: $confirmClose) {
             Button("Save as draft") {
                 session.saveDraftNow()
                 dismiss()
@@ -42,13 +42,13 @@ struct ParkEditorView: View {
         } message: {
             Text("A draft stays on this iPhone, so you can continue later from the Parks tab.")
         }
-        .confirmationDialog(
+        .alert(
             session.deletion?.title ?? "",
             isPresented: Binding(get: { session.deletion != nil }, set: { if !$0 { session.deletion = nil } }),
-            titleVisibility: .visible,
             presenting: session.deletion
         ) { deletion in
             Button("Delete", role: .destructive) { deletion.perform() }
+            Button("Cancel", role: .cancel) {}
         } message: { deletion in
             Text(deletion.message)
         }

@@ -9602,6 +9602,118 @@
         }
       }
     },
+    "Session: %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session: %@, %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie: %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Session: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie: %@"
+          }
+        }
+      }
+    },
+    "Why I'm sending this session:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why I'm sending this session:"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waarom ik deze sessie stuur:"
+          }
+        }
+      }
+    },
+    "Session details:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session details:"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessiedetails:"
+          }
+        }
+      }
+    },
+    "Hi Rppl,\n\nHere is a session export. The zip file is attached.\n" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi Rppl,\n\nHere is a session export. The zip file is attached.\n"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoi Rppl,\n\nHierbij een sessie-export. Het zipbestand zit als bijlage bij deze mail.\n"
+          }
+        }
+      }
+    },
+    "Could not zip the session export." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not zip the session export."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kon de sessie-export niet zippen."
+          }
+        }
+      }
+    },
+    "This session is %@ zipped, too large to send by mail (limit %@). Use Export instead." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This session is %@ zipped, too large to send by mail (limit %@). Use Export instead."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze sessie is %1$@ als zip, te groot om te mailen (limiet %2$@). Gebruik Exporteren."
+          }
+        }
+      }
+    },
     "Comeback" : {
       "localizations" : {
         "en" : {

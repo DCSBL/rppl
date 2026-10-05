@@ -293,13 +293,13 @@ struct ParksView: View {
         .sheet(item: $resumingDraft, onDismiss: reloadDrafts) { draft in
             ParkEditorView(original: draft.editsParkID.flatMap { store.entry(id: $0)?.park }, resuming: draft)
         }
-        .confirmationDialog(
+        .alert(
             "Delete this draft?",
             isPresented: Binding(get: { draftToDelete != nil }, set: { if !$0 { draftToDelete = nil } }),
-            titleVisibility: .visible,
             presenting: draftToDelete
         ) { draft in
             Button("Delete draft", role: .destructive) { drafts.delete(draft) }
+            Button("Cancel", role: .cancel) {}
         } message: { _ in
             Text("The unsaved park and everything you filled in will be gone.")
         }
