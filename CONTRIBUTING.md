@@ -75,6 +75,8 @@ What matters for a change:
 
 Also keep pre-commit and the push gate green, and keep wakeboard slang authentic in every locale ([AGENTS.md](AGENTS.md)). Small, focused PRs are easier to review.
 
+Adding a package, icon, font or other work that someone else made? Add its copyright and license to "Open-source notices" in [LEGAL.md](LEGAL.md) in the same PR. That section ships in the app.
+
 ## Coding agents
 
 Read [AGENTS.md](AGENTS.md) before changing session, sync, or HealthKit flow. When unsure about product behavior, follow the defaults above and stop to ask if a change forks UX.
