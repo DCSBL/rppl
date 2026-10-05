@@ -17,6 +17,8 @@ Because we never receive your data, we **cannot** process, sell, or share it, us
 - Crash reports, including device model and iOS / watchOS version
 - Feedback and screenshots you send through TestFlight, with device details (model, OS version, battery level, free storage, network type, time zone)
 
+**Website.** The Rppl website sets no cookies and uses no analytics or third-party services. It is hosted on GitHub Pages, which, like any web host, may log technical request data such as your IP address. We do not receive or use it.
+
 ## A note from the developer
 
 Hi! Mijn naam is Duco. Sinds dit jaar ben ik vaak bij een kabelpark te vinden om te wakeboarden. De gewone Apple Workout app is helaas te basis, waardoor ik op zoek gegaan ben naar een betere tracker. Het huidige aanbod voldeed helaas niet aan mijn verwachtingen; te complex of juist te gelimiteerd, verplichte abonnementen en de lust van het opvragen van data. Dat moest anders.
