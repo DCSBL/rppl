@@ -14,7 +14,6 @@ struct LogbookSessionDetailView: View {
     var store: SessionFileStore?
 
     private static let setMapPointBudget = 200
-    private nonisolated static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
 
     @State private var manifest: SessionManifest?
     @State private var showsMissingCaloriesInfo = false
@@ -695,9 +694,8 @@ struct LogbookSessionDetailView: View {
                 }
 
             case .bundledExample:
-                let bundle = try await StoreIO.runOffMain {
-                    try Self.loadBundledExample()
-                }
+                WakeLog.debug(.ui, "example session load (ephemeral, timeline → now)")
+                let bundle = try await ExampleSessionPreload.shared.load()
                 try Task.checkCancellation()
                 applyFullBundle(bundle)
                 loadPhase = .ready
@@ -765,18 +763,6 @@ struct LogbookSessionDetailView: View {
         if let index = soloSetIndex, !tracks.contains(where: { $0.setIndex == index }) {
             soloSetIndex = nil
         }
-    }
-
-    private nonisolated static func loadBundledExample() throws -> SessionLoadBundle {
-        guard let url = Bundle.main.url(
-            forResource: exampleFileName,
-            withExtension: "json",
-            subdirectory: "Exports"
-        ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
-            throw SessionStoreError.ioFailure("Bundled example session missing")
-        }
-        WakeLog.debug(.ui, "example session load (ephemeral, timeline → now)")
-        return try SessionLoader.loadExample(packageURL: url, now: Date())
     }
 
     private func requestExport(_ purpose: ExportPurpose) {
