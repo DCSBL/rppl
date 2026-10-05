@@ -34,7 +34,7 @@ repos:
         exclude: ^Rppl(?:Watch)?/Resources/Exports/
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplWatch/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin,weerd"
         stages: [pre-commit]
 
   - repo: local
