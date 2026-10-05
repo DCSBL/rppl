@@ -1,0 +1,28 @@
+---
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { marked } from "marked";
+import Base from "../layouts/Base.astro";
+
+// Single source of truth: LEGAL.md at the repo root (also bundled into the iOS app).
+// Build runs from web/, so the repo root is one level up.
+const md = readFileSync(resolve(process.cwd(), "../LEGAL.md"), "utf-8");
+const html = marked.parse(md, { async: false }) as string;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+<Base title="Rppl: terms and privacy" description="How Rppl handles your data: locally on your Apple Watch and iPhone, never sent to us.">
+  <div class="wrap">
+    <p class="back"><a href={`${base}/`}>&larr; Rppl</a></p>
+    <article class="tile prose" set:html={html} />
+  </div>
+</Base>
+
+<style>
+  .back { padding-top: 24px; }
+  .prose { margin: 8px 0 48px; padding: 24px; max-width: 760px; }
+  .prose :global(h1) { font-size: 34px; margin-top: 0; }
+  .prose :global(h2) { font-size: 24px; margin-top: 32px; }
+  .prose :global(h3) { font-size: 18px; }
+  .prose :global(hr) { border: 0; border-top: 1px solid var(--hairline); margin: 32px 0; }
+  .prose :global(a) { overflow-wrap: anywhere; }
+</style>
