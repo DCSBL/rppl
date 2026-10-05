@@ -11,18 +11,16 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove month-name labels, author credit and source comments
 
-author: Rppl
 name: Cable Park Down Under
 address: Ravensewetering 1, 3439 ZZ Nieuwegein
 timezone: Europe/Amsterdam
-# Dock.
 location:
   lat: 52.048428101966046
   lon: 5.124218887481674
 
-# Nearest official Rijkswaterstaat surface-water temperature station (Lekkanaal, ~3 km away).
-# Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 
 phone: 030 287 7777
@@ -31,14 +29,12 @@ website: https://downunder.nl/sports/sport/waterskien/
 
 links:
   - { kind: booking, url: "https://bhg.smarteventmanager.com/book/?StandardReservationGroupCode=CABLE&CompanyCode=DU" }
-  # Official hours PDF (2025 season).
   - { kind: opening hours, url: "https://downunder.nl/sports/wp-content/uploads/2025/03/Cable-Park-Openingstijden-2025.pdf" }
   - { kind: instagram, url: "https://www.instagram.com/downundernieuwegein/" }
   - { kind: facebook, url: "https://www.facebook.com/downundernieuwegein" }
 
 cables:
   - name: Cable
-    # Points are listed in travel order (first point is the start): down the west side, along the south, back up the east side.
     direction: ccw
     length_m: 720
     points:
@@ -54,33 +50,29 @@ cables:
       - { lat: 52.0487455425389, lon: 5.12379010152744 }
       - { lat: 52.0471741376414, lon: 5.12284952868272 }
 
-# Regular season hours from the 2025 schedule (start times on the full hour). The park
-# publishes new hours per season, so verify. The cable closes at the latest half an hour
-# before sunset. School and group hours (15+ people) and the dated 2025 special days
-# (holidays) are not included.
 opening:
   numbered: false
   booking_minutes: [60, 120]
   note: >-
     Based on the 2025 schedule. The cable closes at the latest half an hour before sunset.
   rules:
-    - { label: April, months: [4], days: [wed, fri], open: "17:00", close: "20:00" }
-    - { label: April, months: [4], days: [weekend], open: "12:00", close: "19:00" }
-    - { label: May, months: [5], days: [wed, fri], open: "15:00", close: "21:00" }
-    - { label: May, months: [5], days: [thu], open: "17:00", close: "21:00" }
-    - { label: May, months: [5], days: [weekend], open: "12:00", close: "20:00" }
-    - { label: June, months: [6], days: [mon, tue], open: "17:00", close: "21:00" }
-    - { label: June, months: [6], days: [wed, thu, fri], open: "15:00", close: "21:00" }
-    - { label: June, months: [6], days: [weekend], open: "12:00", close: "21:00" }
-    - { label: July, months: [7], days: [weekdays], open: "13:00", close: "21:00" }
-    - { label: July, months: [7], days: [weekend], open: "12:00", close: "21:00" }
-    - { label: August, months: [8], days: [weekdays], open: "13:00", close: "21:00" }
-    - { label: August, months: [8], days: [weekend], open: "12:00", close: "21:00" }
-    - { label: September, months: [9], days: [wed, fri], open: "15:00", close: "20:00" }
-    - { label: September, months: [9], days: [thu], open: "17:00", close: "20:00" }
-    - { label: September, months: [9], days: [weekend], open: "12:00", close: "19:00" }
-    - { label: October, months: [10], days: [wed, fri], open: "15:00", close: "19:00" }
-    - { label: October, months: [10], days: [weekend], open: "12:00", close: "18:00" }
+    - { months: [4], days: [wed, fri], open: "17:00", close: "20:00" }
+    - { months: [4], days: [weekend], open: "12:00", close: "19:00" }
+    - { months: [5], days: [wed, fri], open: "15:00", close: "21:00" }
+    - { months: [5], days: [thu], open: "17:00", close: "21:00" }
+    - { months: [5], days: [weekend], open: "12:00", close: "20:00" }
+    - { months: [6], days: [mon, tue], open: "17:00", close: "21:00" }
+    - { months: [6], days: [wed, thu, fri], open: "15:00", close: "21:00" }
+    - { months: [6], days: [weekend], open: "12:00", close: "21:00" }
+    - { months: [7], days: [weekdays], open: "13:00", close: "21:00" }
+    - { months: [7], days: [weekend], open: "12:00", close: "21:00" }
+    - { months: [8], days: [weekdays], open: "13:00", close: "21:00" }
+    - { months: [8], days: [weekend], open: "12:00", close: "21:00" }
+    - { months: [9], days: [wed, fri], open: "15:00", close: "20:00" }
+    - { months: [9], days: [thu], open: "17:00", close: "20:00" }
+    - { months: [9], days: [weekend], open: "12:00", close: "19:00" }
+    - { months: [10], days: [wed, fri], open: "15:00", close: "19:00" }
+    - { months: [10], days: [weekend], open: "12:00", close: "18:00" }
   slots:
     - { id: "12:00", start: "12:00", end: "13:00" }
     - { id: "13:00", start: "13:00", end: "14:00" }

@@ -13,7 +13,15 @@ Checks, per the CI-validation issue:
   - JSON-schema validation against schema/park.schema.json
   - Sanity: duplicate `id` across files, lat/lon out of range, a cable with
     fewer than 2 points, obvious placeholder/TODO values
-  - No em dash (—) anywhere in the file, including comments; use a hyphen
+  - No em dash (—) or en dash (–) anywhere in the file, including comments, and no
+    hyphen used as a dash in description/note text (Docs/ParkDescriptions.md)
+  - Dead data the app ignores or hides: `author: Rppl`, `numbered` without slots,
+    `hours_unknown`, a rule label that only repeats its month
+  - One price per name (group amounts as options) and one link per kind
+  - Comments stay short: at most 3 lines in a row and no URLs (sources go in the PR
+    description, not in the file)
+
+Past dates in opening rules or exceptions are accepted; tidying them is cleanup work.
 """
 
 from __future__ import annotations
@@ -39,6 +47,19 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "schema" / "park.schema.json"
 PARKS_DIR = REPO_ROOT / "RpplCore" / "Sources" / "RpplCore" / "Resources" / "Parks"
+
+MONTH_NAMES = {
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december",
+}  # fmt: skip
+
+# Free-text fields written per Docs/ParkDescriptions.md. `history` entries are changelog lines, not copy.
+PROSE_KEYS = {"description", "note"}
+DASH_AS_PUNCTUATION = re.compile(r"\S\s+-\s+\S")
+
+MAX_COMMENT_LINES = 3
+URL_IN_COMMENT = re.compile(r"https?://|www\.", re.IGNORECASE)
+BLOCK_SCALAR_HEADER = re.compile(r"[:\-]\s+[|>][+\-0-9]*$")
 
 # Obvious placeholder/junk markers a real park submission should never contain.
 PLACEHOLDER_PATTERNS = [
@@ -99,12 +120,90 @@ def check_placeholders(data) -> list[str]:
     return problems
 
 
-def check_no_em_dash(raw: str) -> list[str]:
-    """Em dashes read as AI-generated filler in park copy; use a hyphen instead."""
+def check_dashes(raw: str) -> list[str]:
+    """Em and en dashes read as AI-generated filler in park copy; use a hyphen or two sentences."""
     problems = []
     for line_number, line in enumerate(raw.splitlines(), start=1):
-        if "—" in line:
-            problems.append(f"em dash (—) on line {line_number}: {line.strip()!r}")
+        for dash, name in (("—", "em dash"), ("–", "en dash")):
+            if dash in line:
+                problems.append(f"{name} ({dash}) on line {line_number}: {line.strip()!r}")
+    return problems
+
+
+def check_prose_dashes(data) -> list[str]:
+    """A spaced hyphen is a dash in disguise; split the sentence or use a comma (ranges stay unspaced)."""
+    problems = []
+    for path, text in iter_strings(data):
+        if path.startswith("$.history"):
+            continue
+        key = path.rsplit(".", 1)[-1].split("[")[0]
+        if key in PROSE_KEYS and DASH_AS_PUNCTUATION.search(text):
+            problems.append(f"hyphen used as a dash at {path}: {text!r}")
+    return problems
+
+
+def comment_start(line: str) -> int | None:
+    """Index of the `#` that starts a comment on this line, or None. Quoted `#` and `#` inside a word are text."""
+    quote = None
+    for index, char in enumerate(line):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif char == "#" and (index == 0 or line[index - 1].isspace()):
+            return index
+    return None
+
+
+def key_indent(line: str) -> int:
+    """Column of the key on this line, counting any `- ` list markers in front of it."""
+    rest = line.lstrip(" ")
+    indent = len(line) - len(rest)
+    while rest.startswith("- "):
+        stripped = rest[2:].lstrip(" ")
+        indent += len(rest) - len(stripped)
+        rest = stripped
+    return indent
+
+
+def find_comments(raw: str) -> list[tuple[int, str, bool]]:
+    """(line number, comment text, on its own line) for every real YAML comment.
+
+    A `#` inside a block scalar (`description: >-`) is text, not a comment.
+    """
+    comments: list[tuple[int, str, bool]] = []
+    scalar_indent: int | None = None
+    for number, line in enumerate(raw.splitlines(), start=1):
+        indent = len(line) - len(line.lstrip(" "))
+        if scalar_indent is not None:
+            if not line.strip() or indent > scalar_indent:
+                continue
+            scalar_indent = None
+        start = comment_start(line)
+        code = line if start is None else line[:start]
+        if start is not None:
+            comments.append((number, line[start:], not code.strip()))
+        if BLOCK_SCALAR_HEADER.search(code.rstrip()):
+            scalar_indent = key_indent(line)
+    return comments
+
+
+def check_comments(raw: str) -> list[str]:
+    """Comments only for a non-obvious data decision: short, and no source URLs."""
+    problems = []
+    run = 0
+    previous = 0
+    for number, text, own_line in find_comments(raw):
+        if URL_IN_COMMENT.search(text):
+            problems.append(f"URL in comment on line {number}: sources belong in the PR description")
+        run = run + 1 if own_line and number == previous + 1 else 1
+        previous = number if own_line else 0
+        if run == MAX_COMMENT_LINES + 1:
+            problems.append(
+                f"comment block from line {number - MAX_COMMENT_LINES} is longer than {MAX_COMMENT_LINES} lines; "
+                "keep a comment to the one thing a reader could get wrong"
+            )
     return problems
 
 
@@ -116,6 +215,53 @@ def check_coordinate_range(lat, lon, path: str) -> list[str]:
         problems.append(f"{path}.lon out of range: {lon!r}")
     if lat == 0 and lon == 0:
         problems.append(f"{path} is (0, 0) — Null Island, almost certainly a placeholder")
+    return problems
+
+
+def normalized_key(text: str) -> str:
+    """Case and repeated spaces do not make a different name (same rule as the editor's link kinds)."""
+    return " ".join(text.split()).lower()
+
+
+def check_dead_data(data: dict) -> list[str]:
+    """Keys the app ignores or hides: they only add noise to a file."""
+    problems = []
+    author = data.get("author")
+    if isinstance(author, str) and normalized_key(author) == "rppl":
+        problems.append("author 'Rppl' is the default credit and the app hides it; omit the key")
+
+    opening = data.get("opening")
+    if isinstance(opening, dict):
+        if "hours_unknown" in opening:
+            problems.append("opening.hours_unknown is ignored: no rules or slots already means unknown hours")
+        if "numbered" in opening and not opening.get("slots"):
+            problems.append("opening.numbered only changes how slots are labelled; omit it without slots")
+        for index, rule in enumerate(opening.get("rules") or []):
+            label = rule.get("label") if isinstance(rule, dict) else None
+            if isinstance(label, str) and normalized_key(label) in MONTH_NAMES:
+                problems.append(
+                    f"opening.rules[{index}].label {label!r} only repeats its month heading, "
+                    "which the app hides; drop the label"
+                )
+    return problems
+
+
+def check_duplicates(data: dict) -> list[str]:
+    """One price per name (several amounts are options of it) and one link per kind."""
+    problems = []
+    for section, key, advice in (
+        ("prices", "name", "group the amounts as options of one price"),
+        ("links", "kind", "keep one link per kind"),
+    ):
+        seen: set[str] = set()
+        for entry in data.get(section) or []:
+            value = entry.get(key) if isinstance(entry, dict) else None
+            if not isinstance(value, str):
+                continue
+            normalized = normalized_key(value)
+            if normalized in seen:
+                problems.append(f"{section} repeat {key} {value!r}: {advice}")
+            seen.add(normalized)
     return problems
 
 
@@ -140,6 +286,9 @@ def check_sanity(data: dict) -> list[str]:
                 )
 
     problems += check_placeholders(data)
+    problems += check_prose_dashes(data)
+    problems += check_dead_data(data)
+    problems += check_duplicates(data)
     return problems
 
 
@@ -150,7 +299,8 @@ def validate_file(path: Path, schema: dict) -> tuple[dict | None, list[str]]:
     except OSError as exc:
         return None, [f"could not read file: {exc}"]
 
-    problems += check_no_em_dash(raw)
+    problems += check_dashes(raw)
+    problems += check_comments(raw)
 
     try:
         data = yaml.safe_load(raw)

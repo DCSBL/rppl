@@ -1,0 +1,8 @@
+version: 1
+id: comment-block
+name: Fixture Park
+location: { lat: 52.0, lon: 5.0 }
+# One.
+# Two.
+# Three.
+# Four.

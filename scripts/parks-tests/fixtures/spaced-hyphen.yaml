@@ -1,0 +1,5 @@
+version: 1
+id: spaced-hyphen
+name: Fixture Park
+location: { lat: 52.0, lon: 5.0 }
+description: Open all season - closed on Mondays.

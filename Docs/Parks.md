@@ -5,7 +5,7 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 ## Data sources and rules
 
 - Park data is collected **by hand** by the developer or community from the park's own site or by visiting. Do not import or bulk-copy data from other cable-park apps or directories.
-- When an AI agent does this collection, follow the [`park-data-collection`](../.claude/skills/park-data-collection/SKILL.md) skill: official domain only (never aggregators or other wakeboard apps), never guess a vague/uncertain field (omit instead), and record the source URL(s) + fetch date in the file so a reviewer can verify before merging.
+- When an AI agent does this collection, follow the [`park-data-collection`](../.claude/skills/park-data-collection/SKILL.md) skill: official domain only (never aggregators or other wakeboard apps), never guess a vague/uncertain field (omit instead), and list the source URL(s) + fetch date in the PR description so a reviewer can verify before merging (not in the file, see [Keeping a park file tidy](#keeping-a-park-file-tidy)).
 - Free-text `description` fields (park, cable, `opening.note`) follow [Docs/ParkDescriptions.md](ParkDescriptions.md): no em-dash, direct language, no hype words.
 - Bundled parks live in `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`.
 - User files in `<App Group>/Parks/*.yaml` (fallback `Documents/Parks/`) override bundled parks with the same `id`. Invalid files are skipped and logged.
@@ -24,8 +24,19 @@ The Parks tab lists cable parks (favorites first, then nearby or most visited) w
 - **Links:** Booking, Instagram, Facebook, YouTube (picked from the address) or a custom name; one link per name, a repeated name replaces the first. Shown on the contact page.
 - Saved files are marked **Custom** (only a user file) or **Edited** (user file overriding a bundled park). A user file always wins over bundled data.
 - An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
-- `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer).
+- `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer). Rppl is the default credit and is not shown, so bundled files leave `author` out.
 - Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl with the YAML attached (falls back to the share sheet when Mail is not set up).
+
+### Keeping a park file tidy
+
+`scripts/validate_parks.py` enforces these in CI ([Docs/DevWorkflow.md](DevWorkflow.md#validate-parks-linux)).
+
+- **Comments** only where they stop a reader from getting something wrong: an approximate pin, a water station far away, a direction that did not come from the park's site. At most 3 lines in a row, no URLs, no restating the schema. Sources go in the PR description and the `history` entry.
+- **Leave out what the app ignores or hides:** `author: Rppl` (the default credit is not shown), `numbered` without `slots`, `hours_unknown`, and a rule `label` that only repeats its month ("September"; the month is already the heading).
+- **A price name appears once**, with one option per amount (audience, season, gear, duration). **One link per kind.**
+- **No em-dash or en-dash** anywhere, and no spaced hyphen used as a dash in `description` or `note` text. A range keeps a plain hyphen (`14:00-20:00`, `18 July-30 August`).
+- **Past opening dates** (`dates`, `from`, `until`, exceptions) are accepted by the validator. Remove them when you tidy a file.
+- **Tidying** without new information keeps `updated_at` (it is shown as "Last updated" and reads as freshness) but still adds a `history` entry, which is what makes overrides show "Update available".
 
 ## Schema (version 1)
 
@@ -34,7 +45,7 @@ Only `version`, `id`, `name` and `location` are required. Everything else may be
 ```yaml
 version: 1
 id: project7-rotterdam            # stable slug, unique
-author: Rppl                      # optional credit
+author: Jane Doe                  # optional credit; leave out for Rppl (the default, not shown)
 based_on_updated_at: 2026-09-24   # optional, set on user overrides of bundled parks
 based_on_revision: 1              # optional, set alongside based_on_updated_at (bundled history.count)
 created_at: 2026-09-24
@@ -61,11 +72,11 @@ cables:
 
 opening:
   booking: required               # required | optional | none
-  numbered: true                  # false = blocks are plain start times (hourly), not "Block 3" (not shown in the editor)
+  numbered: true                  # with slots: false = blocks are plain start times (hourly), not "Block 3" (not shown in the editor)
   booking_minutes: [60, 120]      # optional: bookable per 1 or 2 hours
   note: free text
   rules:                          # drop-in / open windows
-    - { label: September, months: [9], days: [weekdays], open: "14:00", close: "20:00" }
+    - { months: [9], days: [weekdays], open: "14:00", close: "20:00" }
   slots:                          # fixed-start blocks
     - { id: "3", start: "14:00", end: "15:30" }
   exceptions:                     # optional one-offs on top of `rules`, see "Exceptions" below
@@ -125,7 +136,7 @@ Rules and slots share optional selectors, all of which must match a date:
 
 ### Exceptions
 
-`opening.exceptions` holds announced changes that are not part of the regular schedule: extra opening hours, a closure for wind or maintenance, an event. The regular `rules` stay untouched; an exception sits on top of them for its dates only, and stops having any effect after them. Old entries can stay in the file until someone tidies them.
+`opening.exceptions` holds announced changes that are not part of the regular schedule: extra opening hours, a closure for wind or maintenance, an event. The regular `rules` stay untouched; an exception sits on top of them for its dates only, and stops having any effect after them. Past entries are accepted and can stay until someone tidies the file.
 
 ```yaml
 opening:
@@ -148,7 +159,7 @@ opening:
 - `sunset` (also allowed in normal rules) is not calculated: it is just a name for 00:00 internally, so the park counts as open until the end of that day and closed after 00:00. The UI still says "sunset" ("Open from 17:00 to sunset"), never a clock time; `ParkTimeWindow.endsAtSunset` carries that. Blocks only count when they end before the close, so a `sunset` window offers every block up to 23:00.
 - The Open date filter, the list chip, the Today card and (in dev builds) the arrival notification all read the same per-day schedule (`ParkSchedule.day`), so an exception is reflected everywhere. For a park without rules or slots, an `hours` or `closed` exception makes just that day known.
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
-- Record the source (for example the park's Instagram story and the date you saw it) in a YAML comment. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
+- Record the source (for example the park's Instagram story and the date you saw it) in the PR description. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 
 ### Water temperature (opt-in)
 
