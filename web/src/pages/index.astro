@@ -1,0 +1,73 @@
+---
+import Base from "../layouts/Base.astro";
+import SessionViz from "../components/SessionViz.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const shots = [
+  { src: "logbook", alt: "Rppl logbook: totals and a list of park-day sessions with sets and laps" },
+  { src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
+  { src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
+];
+const features = [
+  { title: "Apple Watch records", text: "Start on the dock, put your wrist to the cable. Water Lock is on, sets are detected for you." },
+  { title: "Sets and laps", text: "Every riding segment becomes a set. Every circuit around the cable counts as a lap." },
+  { title: "Yours to keep", text: "Saved to Apple Health. No account, no subscription, no Rppl server." },
+];
+---
+<Base title="Rppl: cable-park wakeboarding tracker" description="Cable-park wakeboarding, recorded on Apple Watch. Automatic set detection, saved to Apple Health. No account, no subscription.">
+  <header class="wrap hero">
+    <img class="logo" src={`${base}/favicon.svg`} alt="" width="72" height="72" />
+    <h1>Rppl</h1>
+    <p class="lead">Cable-park wakeboarding, recorded on Apple Watch.</p>
+    <p class="caption">Automatic set detection. Saved to Apple Health. No account, no subscription.</p>
+    <p class="cta"><span class="badge">Coming soon to the App Store</span></p>
+  </header>
+
+  <main class="wrap">
+    <section aria-labelledby="viz-h">
+      <h2 id="viz-h">One park day, at a glance</h2>
+      <p class="caption">A real session: 9 sets and 17 laps in 1 hr 42 min.</p>
+      <SessionViz />
+    </section>
+
+    <section aria-labelledby="shots-h">
+      <h2 id="shots-h">On iPhone and Apple Watch</h2>
+      <div class="shots">
+        {shots.map((s) => <img class="phone" src={`${base}/shots/${s.src}.webp`} alt={s.alt} width="560" height="1215" loading="lazy" />)}
+        <img class="watch" src={`${base}/shots/watch.webp`} alt="Apple Watch riding view: distance, cable speed, laps, water temperature and heart rate" width="422" height="514" loading="lazy" />
+      </div>
+    </section>
+
+    <section aria-labelledby="why-h">
+      <h2 id="why-h">Built for the dock</h2>
+      <div class="features">
+        {features.map((f) => <div class="tile"><h3>{f.title}</h3><p class="caption">{f.text}</p></div>)}
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <a href={`${base}/privacy/`}>Terms &amp; privacy</a>
+    <span>Made by Duco Sebel in the Netherlands</span>
+  </footer>
+</Base>
+
+<style>
+  .hero { text-align: center; padding: 64px 0 24px; }
+  .logo { margin: 0 auto 8px; }
+  h1 { font-size: clamp(44px, 9vw, 72px); margin: 0; letter-spacing: -0.02em; }
+  .lead { font-size: clamp(20px, 3.5vw, 28px); font-weight: 600; margin: 8px 0; }
+  .cta { margin-top: 24px; }
+  .badge { display: inline-block; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .badge { color: #02070e; } }
+  section { margin: 56px 0; }
+  h2 { font-size: 28px; margin: 0 0 4px; }
+  section > .caption { margin: 0 0 16px; }
+  .shots { display: flex; gap: 16px; overflow-x: auto; padding: 8px 4px 16px; scroll-snap-type: x proximity; align-items: center; }
+  .shots img { flex: none; scroll-snap-align: center; border-radius: 28px; border: 1px solid var(--hairline); box-shadow: 0 8px 30px rgb(3 59 79 / 0.15); }
+  .phone { width: min(260px, 70vw); }
+  .watch { width: 200px; border-radius: 40px !important; background: #000; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
+  .features h3 { text-transform: none; letter-spacing: 0; font-size: 18px; color: var(--text); }
+  .foot { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 24px 0 48px; border-top: 1px solid var(--hairline); color: var(--muted); font-size: 15px; }
+</style>
