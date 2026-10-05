@@ -141,7 +141,7 @@ Workflow: [`.github/workflows/parks-validate.yml`](../.github/workflows/parks-va
 Spam/junk filter for changes to `RpplCore/Sources/RpplCore/Resources/Parks/*.yaml`. Only runs when park data, the schema, the validator script, or the yamllint config change. Steps:
 
 1. **YAML lint** — `yamllint --config-file .yamllint.yml RpplCore/Sources/RpplCore/Resources/Parks/` (relaxed house-style config: long lines, flow mappings and no `---` document start are normal for hand-authored park files).
-2. **Schema + sanity validation** — `python3 scripts/validate_parks.py` against [`schema/park.schema.json`](../schema/park.schema.json) (hand-kept in sync with `ParkModels.swift` / `ParkOpening.swift`), plus sanity checks: duplicate `id`, out-of-range or `(0, 0)` coordinates, a cable with fewer than 2 points, obvious placeholder/TODO text.
+2. **Schema + sanity validation** — `python3 scripts/validate_parks.py` against [`schema/park.schema.json`](../schema/park.schema.json) (hand-kept in sync with `ParkModels.swift` / `ParkOpening.swift`), plus sanity checks: duplicate `id`, out-of-range or `(0, 0)` coordinates, a cable with fewer than 2 points, obvious placeholder/TODO text. It also enforces the house rules in [Parks.md](Parks.md#keeping-a-park-file-tidy): no em/en dashes or dash-like hyphens in copy, no dead data (`author: Rppl`, `numbered` without slots, `hours_unknown`, month-name rule labels), one price per name and one link per kind, and short comments without URLs. Past opening dates are accepted.
 
 This does not replace human review of park data (sourcing, accuracy) — see the `park-data-collection` skill and its no-guessing/domain-restricted rules.
 

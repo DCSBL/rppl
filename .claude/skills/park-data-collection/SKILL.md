@@ -19,7 +19,7 @@ non-negotiable:
    another park. Per the schema, only `version`, `id`, `name`, `location` are required; everything else
    is optional and safe to leave out.
 3. **Record provenance.** Every run must leave a trail a human reviewer can check before merging: which
-   URL(s) were fetched and when.
+   URL(s) were fetched and when. That trail goes in the PR description, not in the YAML file.
 
 ## Steps
 
@@ -41,13 +41,17 @@ non-negotiable:
    Use `scripts/find-water-temperature-station.py <lat> <lon>` (the park's `location`) to query the
    Rijkswaterstaat WaterWebServices catalog and find the nearest station that still reports — many
    geographically-nearest "zwemwater" stations stopped reporting years ago, so don't just pick the
-   closest one by distance. The script prints the `water_temperature:` YAML line to use; still add the
-   provenance comment (station, distance, why closer ones were skipped) by hand.
+   closest one by distance. The script prints the `water_temperature:` YAML line to use. When the station is
+   far away because closer ones stopped reporting, add a one-line comment saying so (distance, closer ones stale)
+   so nobody swaps it back for a stale one; a nearby station needs no comment.
 5. **Write or update** `RpplCore/Sources/RpplCore/Resources/Parks/<id>.yaml`, following the existing file
    layout (see any current file as a formatting example).
-6. **Record provenance directly in the file**: add or update a leading comment listing each source URL
-   fetched and today's date (`yyyy-MM-dd`), and append a `history` entry describing what changed. Set
-   `updated_at` to today's date.
+6. **Record provenance in the PR description**: list each source URL fetched and today's date
+   (`yyyy-MM-dd`). In the file, append a `history` entry describing what changed and set `updated_at` to today's
+   date. Keep YAML comments for the rare non-obvious decision (an approximate pin, a direction that did not come
+   from the site): at most 3 lines, no URLs. Leave out what the app ignores or hides, and give each price name
+   one entry with an option per amount; `scripts/validate_parks.py` checks these, see
+   [Docs/Parks.md](../../../Docs/Parks.md#keeping-a-park-file-tidy).
 7. **Stop and ask** the user before finalizing whenever a field is ambiguous (conflicting hours on
    different pages, an unclear dock location, etc.) instead of picking one silently.
 
