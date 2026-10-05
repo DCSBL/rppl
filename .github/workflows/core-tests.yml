@@ -6,6 +6,9 @@
 # `report` turns the log into a job summary and one sticky PR comment (test count, failed tests).
 #
 # Required-check friendly: no `paths:` filter, so the job always reports a status.
+# Instead, a `changes` job decides whether a PR touches anything Core tests can see; when it
+# only touches park YAML (validated by parks-validate.yml), docs, web or the like, the
+# test steps skip. Pushes to main always run everything, as the backstop.
 
 name: Core tests
 
@@ -25,8 +28,44 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed_files="$(git diff --name-only "$BASE" "$HEAD")"
+          # Anything outside these paths can change Core test results.
+          if printf '%s\n' "$changed_files" | grep -v -E \
+            '^((schema|Docs|web|assets|contributions)/|RpplCore/Sources/RpplCore/Resources/Parks/.*\.ya?ml$|(scripts/validate_parks\.py|\.yamllint\.yml|LEGAL\.md|README\.md|CONTRIBUTING\.md|AGENTS\.md|\.github/workflows/(parks-validate|web-deploy|release-preflight)\.yml)$)' \
+            >/dev/null; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Only park YAML / docs / web changed: swift test skipped"
+          fi
+
   core-tests:
     name: RpplCore tests (Linux)
+    needs: changes
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     container:
@@ -35,18 +74,21 @@ jobs:
       options: --user 1001
     steps:
       - name: Checkout
+        if: needs.changes.outputs.code == 'true'
         uses: actions/checkout@v4
 
       - name: Swift version
+        if: needs.changes.outputs.code == 'true'
         run: swift --version
 
       - name: swift test
+        if: needs.changes.outputs.code == 'true'
         working-directory: RpplCore
         shell: bash # pipefail: keep swift's exit code through tee
         run: swift test 2>&1 | tee swift-test.log
 
       - name: Upload test log
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && needs.changes.outputs.code == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: swift-test-log
@@ -56,9 +98,9 @@ jobs:
 
   report:
     name: Test summary
-    needs: core-tests
-    # Also after a failed test run; not when the run was cancelled by a newer push.
-    if: ${{ !cancelled() }}
+    needs: [changes, core-tests]
+    # Also after a failed test run; not when cancelled by a newer push or when tests were skipped.
+    if: ${{ !cancelled() && needs.changes.outputs.code == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:

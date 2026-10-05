@@ -1,0 +1,93 @@
+version: 1
+id: wakeup-antwerp
+created_at: 2026-10-05
+updated_at: 2026-10-05
+history:
+  - date: 2026-10-05
+    description: initial (full size and 2.0 cable, hours and prices from the park's own site)
+
+name: WakeUp Cable Antwerpen
+address: Neel Dofflaan 50, 2050 Antwerpen
+timezone: Europe/Brussels
+# Geocode of the street, not a confirmed dock point.
+location:
+  lat: 51.2168178
+  lon: 4.3661184
+
+phone: "+32 488 705 788"
+email: Info@wakeupcable.be
+website: https://www.wakeupcable.be/nl/
+links:
+  - { kind: booking, url: "https://www.wakeupcable.be/nl/reserveer-hier/" }
+  - { kind: instagram, url: "https://www.instagram.com/wakeupcable/" }
+  - { kind: facebook, url: "https://www.facebook.com/wakeupcable/" }
+
+cables:
+  - name: Grote Kabel (6.0)
+  - name: Kleine Kabel (2.0)
+    direction: 2d
+
+opening:
+  booking: required
+  rules:
+    - { months: [4], days: [wed], open: "13:00", close: "19:00" }
+    - { months: [4], days: [thu, fri], open: "16:00", close: "19:00" }
+    - { months: [4], days: [weekend], open: "12:00", close: "19:00" }
+    - { months: [5], days: [wed], open: "13:00", close: "19:00" }
+    - { months: [5], days: [thu], open: "17:00", close: "19:00" }
+    - { months: [5], days: [fri], open: "16:00", close: "19:00" }
+    - { months: [5], days: [weekend], open: "12:00", close: "19:00" }
+    - { months: [6], days: [mon, thu, fri], open: "16:00", close: "21:00" }
+    - { months: [6], days: [wed], open: "13:00", close: "21:00" }
+    - { months: [6], days: [weekend], open: "12:00", close: "21:00" }
+    - { months: [7, 8], days: [daily], open: "12:00", close: "21:00" }
+    - { months: [9], days: [mon, thu, fri], open: "16:00", close: "19:00" }
+    - { months: [9], days: [wed], open: "13:00", close: "19:00" }
+    - { months: [9], days: [weekend], open: "12:00", close: "19:00" }
+    - { months: [10], days: [wed], open: "13:00", close: "18:00" }
+    - { months: [10], days: [fri], open: "16:00", close: "18:00" }
+    - { months: [10], days: [weekend], open: "12:00", close: "18:00" }
+
+prices:
+  - name: Grote Kabel, 1 hour ticket
+    options:
+      - { amount: "30", currency: EUR, per: person, note: "min 2, max 4 people, includes helmet and life vest" }
+  - name: Grote Kabel, full cable with instructor
+    options:
+      - { amount: "160", currency: EUR, per: hour }
+  - name: Wetsuit
+    options:
+      - { amount: "5", currency: EUR, per: hour }
+      - { amount: "8", currency: EUR, per: "2 hours" }
+  - name: Beginner board or skis
+    options:
+      - { amount: "6", currency: EUR, per: hour }
+      - { amount: "10", currency: EUR, per: "2 hours" }
+  - name: Pro wakeboard
+    options:
+      - { amount: "14", currency: EUR, per: hour }
+      - { amount: "20", currency: EUR, per: "2 hours" }
+  - name: Kleine Kabel, 1 hour
+    options:
+      - { amount: "26", currency: EUR, note: own equipment }
+      - { amount: "37", currency: EUR, note: "full package (board, wetsuit, helmet)" }
+  - name: Kleine Kabel, 2 hours
+    options:
+      - { amount: "36", currency: EUR, note: own equipment }
+      - { amount: "53", currency: EUR, note: "full package (board, wetsuit, helmet)" }
+  - name: Kleine Kabel, pass
+    options:
+      - { amount: "250", currency: EUR, note: 12 x 1 hour }
+      - { amount: "350", currency: EUR, note: 12 x 2 hours }
+  - name: Week member
+    options:
+      - { amount: "650", currency: EUR }
+  - name: Diamond member
+    options:
+      - { amount: "795", currency: EUR }
+
+facilities:
+  - Aquapark
+  - Summer camps
+  - Kids club
+  - Team building
