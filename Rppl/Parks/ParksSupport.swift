@@ -307,6 +307,16 @@ struct ParkWeather: Equatable, Sendable {
     var markLightURL: URL?
     var markDarkURL: URL?
     var legalURL: URL?
+
+    /// Mark and legal page for this reading. When the attribution fetch failed, the weather still
+    /// shows, so this falls back to the "Apple Weather" text and Apple's legal page.
+    var attribution: WeatherAttributionInfo {
+        WeatherAttributionInfo(
+            markLightURL: markLightURL,
+            markDarkURL: markDarkURL,
+            legalURL: legalURL ?? WeatherAttributionInfo.fallbackLegalURL
+        )
+    }
 }
 
 /// Current air temperature and wind at a park via WeatherKit. Failures just hide the weather row.

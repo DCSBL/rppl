@@ -1,6 +1,6 @@
 # Terms & Privacy Policy
 
-**Last updated:** 27 September 2026
+**Last updated:** 5 October 2026
 
 ## Your data stays with you
 
@@ -109,3 +109,29 @@ You have the right to access, correct, erase, restrict, and object to processing
 ## Contact
 
 [rppl@dcsbl.nl](mailto:rppl@dcsbl.nl) · Duco Sebel, Netherlands
+
+---
+
+## Open-source notices
+
+Rppl includes the open-source work below. Thanks to the people who made it.
+
+### Yams
+
+Reads and writes the park files. Copyright (c) 2016 JP Simard. MIT License, see below.
+
+### LibYAML
+
+Comes with Yams. Copyright (c) 2017-2020 Ingy döt Net. Copyright (c) 2006-2016 Kirill Simonov. MIT License, see below.
+
+### MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+### Material Design Icons
+
+The wakeboarder symbol ("ski-water") comes from Material Design Icons by Pictogrammers and its contributors, and is used unchanged. Licensed under the Apache License, Version 2.0. You can read the license at [apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0).

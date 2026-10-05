@@ -39,6 +39,7 @@ struct LogbookSessionDetailView: View {
     @State private var showExportExplainer = false
     @State private var exportPurpose: ExportPurpose = .share
     @State private var pendingMail: SessionMail?
+    @State private var weatherAttribution = WeatherAttributionProvider.shared
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -398,6 +399,8 @@ struct LogbookSessionDetailView: View {
                                     caption: "Precipitation"
                                 )
                             }
+                            AppleWeatherAttribution(info: weatherAttribution.info)
+                                .task { await weatherAttribution.loadIfNeeded() }
                         }
                     }
                     energyTile(stats)
