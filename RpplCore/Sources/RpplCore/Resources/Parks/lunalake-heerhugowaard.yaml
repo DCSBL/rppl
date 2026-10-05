@@ -1,0 +1,64 @@
+version: 1
+id: lunalake-heerhugowaard
+created_at: 2026-10-05
+updated_at: 2026-10-05
+history:
+  - date: 2026-10-05
+    description: initial
+
+name: Luna Lake
+address: Strand van Luna 3, 1704 ZZ Heerhugowaard
+timezone: Europe/Amsterdam
+# Approximate pin from the street address, not the dock.
+location: { lat: 52.644346, lon: 4.797034 }
+
+phone: 06 16 67 67 49
+email: info@lunalake.nl
+website: https://lunalake.nl
+
+opening:
+  booking: required
+  rules:
+    - { months: [4], days: [weekend], open: "12:00", close: "17:00" }
+    - { months: [5], days: [wed, thu, fri], open: "15:00", close: "20:00" }
+    - { months: [5, 6, 7, 8, 9], days: [weekend], open: "10:00", close: "19:00" }
+    - { months: [6], days: [wed, thu, fri], open: "15:00", close: "21:00" }
+    - { months: [7, 8], days: [mon, tue, wed, thu, fri], open: "15:00", close: "21:00" }
+    - { months: [9], days: [wed, thu, fri], open: "15:00", close: "20:00" }
+    - { months: [10], days: [weekend], open: "12:00", close: "17:00" }
+
+prices:
+  - name: Cable
+    options:
+      - { amount: "24", currency: EUR, per: hour }
+      - { amount: "33", currency: EUR, per: "2 hours" }
+      - { amount: "42", currency: EUR, per: "3 hours" }
+  - name: Wetsuit
+    options:
+      - { amount: "5", currency: EUR, per: hour }
+      - { amount: "8", currency: EUR, per: "2 hours" }
+      - { amount: "11", currency: EUR, per: "3 hours" }
+  - name: Wakeboard
+    options:
+      - { amount: "8", currency: EUR, per: hour }
+      - { amount: "12.50", currency: EUR, per: "2 hours" }
+      - { amount: "17", currency: EUR, per: "3 hours" }
+  - name: Day pass
+    options:
+      - { amount: "55", currency: EUR, note: equipment not included }
+  - name: 12-ride card
+    options:
+      - { amount: "240", currency: EUR, note: twelve one-hour sessions }
+  - name: Season pass
+    options:
+      - { amount: "875", currency: EUR, note: 4 April-31 October 2026 }
+
+links:
+  - { kind: booking, url: "https://lunalake.nl/product/kabelbaan/" }
+  - { kind: instagram, url: "https://www.instagram.com/lunalakenl/" }
+  - { kind: facebook, url: "https://www.facebook.com/profile.php?id=61577415476040" }
+
+facilities: [Beach bar, Kids Club, Obstacles, Wetsuit rental, Wakeboard rental]
+
+description: >-
+  Kabelpark aan het Strand van Luna met kickers, sliders en rails in het water. Reserveren is verplicht. Onder 14 jaar alleen met een volwassene.

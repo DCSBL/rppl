@@ -1,0 +1,115 @@
+---
+import Base from "../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const showcase = [
+  { before: "Track", after: "Sessions", src: "logbook", alt: "Rppl logbook: totals and a list of park-day sessions with sets and laps" },
+  { before: "Analyse", after: "Progress", src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
+  { before: "Find", after: "Spots", src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
+];
+const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Export anytime", "No account", "No subscription", "No ads", "No tracking", "No Rppl server", "Open source"];
+---
+<Base title="Rppl: Your Cablepark Buddy" description="Your Cablepark Buddy. The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.">
+  <header class="wrap hero">
+    <img class="logo" src={`${base}/favicon.svg`} alt="" width="72" height="72" />
+    <h1>Rppl</h1>
+    <p class="lead"><em>Your</em> Cablepark Buddy</p>
+    <p class="caption">The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.</p>
+    <p class="cta"><span class="badge">Coming soon to the App Store</span></p>
+  </header>
+
+  <main class="wrap">
+    <section class="showcase" aria-label="App screenshots">
+      {showcase.map((s) => (
+        <div class="row">
+          <h2>{s.before} <em>Your</em> {s.after}</h2>
+          <div class="device phone">
+            <img src={`${base}/shots/${s.src}.webp`} alt={s.alt} width="560" height="1215" loading="lazy" />
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class="features" aria-label="More">
+      <div class="tile">
+        <div class="visual">
+          <div class="device watch">
+            <img src={`${base}/shots/watch.webp`} alt="Apple Watch riding view: distance, cable speed, laps, water temperature and heart rate" width="422" height="514" loading="lazy" />
+          </div>
+        </div>
+        <h3>Stay focussed</h3>
+        <p class="caption">Start recording your session when you are ready, the watch does the rest. The app auto-detects starts, stops and wipeouts.</p>
+      </div>
+      <div class="tile">
+        <div class="visual">
+          <img class="glance" src={`${base}/shots/glance.webp`} alt="Session cards: 9 sets and 17 laps on a timeline, max and cable speed, 31% riding share" width="458" height="502" loading="lazy" />
+        </div>
+        <h3>At a glance</h3>
+        <p class="caption">See important information about your session, like cable speed and set count.</p>
+      </div>
+      <div class="tile">
+        <div class="visual">
+          <ul class="chips">
+            {keep.map((k) => <li>{k}</li>)}
+          </ul>
+        </div>
+        <h3>Yours to keep</h3>
+        <p class="caption">Your data stays yours, you can view and export your data at any time, to do cool things or to brag about it. Your data is stored on your phone and in iCloud, not on our servers.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <a href={`${base}/privacy/`}>Terms &amp; privacy</a>
+    <span>Made by <a href="https://github.com/dcsbl">@DCSBL</a> in the Netherlands</span>
+  </footer>
+</Base>
+
+<style>
+  :root { --your: #5aaec9; }
+  .hero { text-align: center; padding: 64px 0 24px; }
+  .logo { margin: 0 auto 8px; }
+  h1 { font-size: clamp(44px, 9vw, 72px); margin: 0; letter-spacing: -0.02em; }
+  .lead { font-size: clamp(28px, 6vw, 48px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 8px 0; }
+  .lead em, .row h2 em { font-style: normal; color: var(--your); }
+  .cta { margin-top: 24px; }
+  .badge { display: inline-block; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .badge { color: #02070e; } }
+  section { margin: 56px 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .row { display: flex; flex-direction: column; align-items: center; gap: 24px; margin: 72px 0; text-align: center; }
+  .row h2 { font-size: clamp(36px, 7vw, 60px); line-height: 1.05; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 0; }
+  @media (min-width: 760px) {
+    .row { flex-direction: row; justify-content: center; gap: 72px; text-align: left; }
+    .row > h2 { flex: 1 1 0; max-width: 380px; }
+    .row > .device { flex: none; }
+    .row:nth-child(even) { flex-direction: row-reverse; }
+    .row:nth-child(even) > h2 { text-align: right; }
+  }
+
+  /* Simple CSS device frames: black bezel, side buttons as pseudo-elements. */
+  .device { position: relative; background: #000; box-shadow: 0 0 0 1px #3a3a3c, 0 12px 36px rgb(3 59 79 / 0.25); }
+  .device img { width: 100%; }
+  .device::before, .device::after { content: ""; position: absolute; background: #2a2a2c; border-radius: 2px; }
+  .phone { width: min(260px, 70vw); padding: 8px; border-radius: 44px; }
+  .phone img { border-radius: 36px; }
+  /* Left: action button + two volume buttons. Right: side button. */
+  .phone::before { left: -3px; top: 14%; width: 3px; height: 22px; box-shadow: 0 46px 0 #2a2a2c, 0 86px 0 #2a2a2c; border-radius: 2px 0 0 2px; }
+  .phone::after { right: -3px; top: 26%; width: 3px; height: 64px; border-radius: 0 2px 2px 0; }
+  .watch { width: 190px; padding: 7px; border-radius: 42px; }
+  .watch img { border-radius: 35px; }
+  /* Digital Crown + side button on the right. */
+  .watch::before { right: -5px; top: 24%; width: 5px; height: 30px; border-radius: 0 3px 3px 0; }
+  .watch::after { right: -3px; top: 52%; width: 3px; height: 20px; border-radius: 0 2px 2px 0; }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .features .tile { padding: 24px; display: flex; flex-direction: column; }
+  .visual { height: 270px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .visual .glance { width: 250px; border-radius: 20px; }
+  .features h3 { text-transform: none; letter-spacing: 0; font-size: 22px; color: var(--text); margin-bottom: 4px; }
+  .features .caption { margin: 0; font-size: 16px; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .chips li { padding: 6px 14px; border-radius: 999px; background: var(--track); font-size: 14px; font-weight: 600; color: var(--accent); }
+  .foot { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 24px 0 48px; border-top: 1px solid var(--hairline); color: var(--muted); font-size: 15px; }
+</style>

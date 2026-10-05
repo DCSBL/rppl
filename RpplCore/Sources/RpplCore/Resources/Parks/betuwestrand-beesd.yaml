@@ -1,7 +1,7 @@
 version: 1
 id: betuwestrand-beesd
 created_at: 2026-09-28
-updated_at: 2026-09-28
+updated_at: 2026-10-05
 history:
   - date: 2026-09-28
     description: initial
@@ -11,6 +11,8 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: merge prices that shared a name (1 uur, 2 uur, 1 dag, 2 dagen) into one entry each; remove author credit and source comments
+  - date: 2026-10-05
+    description: trace cable on the map, add direction
 
 name: BetuweStrand
 address: A. Kraalweg 40, 4153 XC Beesd
@@ -32,6 +34,13 @@ facilities:
 
 cables:
   - name: Waterskibaan
+    direction: ccw
+    points:
+      - { lat: 51.8979299884459, lon: 5.18508780141762 }
+      - { lat: 51.8966366279409, lon: 5.18297227201989 }
+      - { lat: 51.8962574558868, lon: 5.18306501388377 }
+      - { lat: 51.8962686821508, lon: 5.1836140527299 }
+      - { lat: 51.8975833463213, lon: 5.18568621817427 }
     description: >-
       Rectangular waterski/wakeboard cable course over the recreatiemeer, towed at roughly
       30 km/u. Includes a funpark with a kicker and a rail. Beginners welcome; ages 8-14 only
