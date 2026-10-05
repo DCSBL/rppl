@@ -3,15 +3,49 @@ import Foundation
 /// Assigns per-set and per-session record badges from derived stats.
 public enum HighlightAssigner {
     /// Fixed display order for set badges.
-    public static let setOrder: [SetHighlight] = [.longest, .longestTime, .shortest, .fastest]
+    public static let setOrder: [SetHighlight] = [
+        .longest, .longestTime, .shortest, .fastest, .mostLaps, .comeback, .backToBack,
+    ]
 
-    /// A shortest badge only says something when there is a middle to be shorter than, and it is
-    /// only honest once the engine can revoke a failed start that never was a set.
-    static let minimumSetsForShortest = 3
+    /// A "lowest" badge (shortest, coldest, laziest, …) only says something when there is a
+    /// middle to be lower than; with two values it is just "the other one". For `shortest` it is
+    /// also only honest once the engine can revoke a failed start that never was a set.
+    static let minimumValuesForMinBadge = 3
+
+    /// "Highest" badges need something to beat.
+    static let minimumValuesForMaxBadge = 2
+
+    // Character badges go to the record holder only when the record is worth a badge.
+    // The UI never names these lines.
+
+    /// Night owl: session ends after 21:00 (minutes since start-day midnight).
+    static let nightOwlAfterMinuteOfDay = 21.0 * 60
+    /// Early bird: session starts before 10:00.
+    static let earlyBirdBeforeMinuteOfDay = 10.0 * 60
+    /// Ice bath: water below 17 °C.
+    static let iceBathBelowCelsius = 17.0
+    /// Windiest: above Bft 4.
+    static let windiestAboveBeaufort = 4
+    /// Hottest: air above 25 °C.
+    static let hottestAboveCelsius = 25.0
+    /// Coldest: air below 10 °C.
+    static let coldestBelowCelsius = 10.0
+    /// Rain rider: real rain, not drizzle.
+    static let rainiestAtLeastMmPerHour = 0.5
+    /// Laziest: under a quarter of the session riding.
+    static let laziestBelowRidingRatio = 0.25
+    /// Highest ride %: over half of the session riding.
+    static let highestRidePercentageAboveRidingRatio = 0.5
+    /// Comeback: break before the set longer than 15 min.
+    static let comebackAboveBreakSeconds: TimeInterval = 15 * 60
+    /// Back to back: break before the set under 2 min.
+    static let backToBackBelowBreakSeconds: TimeInterval = 2 * 60
 
     /// Fixed display order for session badges.
     public static let sessionOrder: [SessionHighlight] = [
         .longest, .mostWaterTime, .mostLaps, .highestRidePercentage, .mostCalories, .longestSetEver,
+        .mostSets, .mostDistance, .topSpeed, .laziest,
+        .coldest, .hottest, .windiest, .rainiest, .iceBath, .earlyBird, .nightOwl,
     ]
 
     public static func assignSetHighlights(_ sets: [SetSegmentStats]) -> [SetSegmentStats] {
@@ -19,27 +53,43 @@ public enum HighlightAssigner {
             return sets.map { clearedSet($0) }
         }
 
+        // Ties go to the lowest set index.
+        let ordered = sets.sorted { $0.index < $1.index }
         var byIndex: [Int: [SetHighlight]] = Dictionary(
             uniqueKeysWithValues: sets.map { ($0.index, []) }
         )
 
-        if let winner = uniqueMaxSet(sets, value: { $0.distanceMeters }) {
+        if let winner = uniqueMax(ordered, value: { $0.distanceMeters }) {
             byIndex[winner.index, default: []].append(.longest)
         }
 
-        if let durationWinner = uniqueMaxSet(sets, value: { $0.duration }),
+        if let durationWinner = uniqueMax(ordered, value: { $0.duration }),
            !(byIndex[durationWinner.index]?.contains(.longest) ?? false) {
             byIndex[durationWinner.index, default: []].append(.longestTime)
         }
 
-        if sets.count >= minimumSetsForShortest,
-           let shortest = uniqueMinSet(sets, value: { $0.duration }),
+        if let shortest = uniqueMin(ordered, value: { $0.duration }),
            !(byIndex[shortest.index]?.contains(.longest) ?? false) {
             byIndex[shortest.index, default: []].append(.shortest)
         }
 
-        if let speedWinner = uniqueMaxSet(sets, value: { $0.sustainedSpeedKmh }) {
+        if let speedWinner = uniqueMax(ordered, value: { $0.sustainedSpeedKmh }) {
             byIndex[speedWinner.index, default: []].append(.fastest)
+        }
+
+        if let lapsWinner = uniqueMax(ordered, value: { Double($0.lapCount) }),
+           lapsWinner.lapCount > 0 {
+            byIndex[lapsWinner.index, default: []].append(.mostLaps)
+        }
+
+        let breaks = breaksBefore(ordered)
+        if let comeback = uniqueMax(breaks, value: { $0.seconds }),
+           comeback.seconds > comebackAboveBreakSeconds {
+            byIndex[comeback.index, default: []].append(.comeback)
+        }
+        if let quick = uniqueMin(breaks, value: { $0.seconds }),
+           quick.seconds < backToBackBelowBreakSeconds {
+            byIndex[quick.index, default: []].append(.backToBack)
         }
 
         return sets.map { set in
@@ -58,31 +108,74 @@ public enum HighlightAssigner {
         var byId: [String: [SessionHighlight]] = Dictionary(
             uniqueKeysWithValues: sessions.map { ($0.id, []) }
         )
-
-        if let longest = uniqueMaxSession(sessions, value: \.totalDuration) {
-            byId[longest.id, default: []].append(.longest)
+        func award(
+            _ highlight: SessionHighlight,
+            to session: SessionHighlightInput?,
+            if qualifies: (SessionHighlightInput) -> Bool = { _ in true }
+        ) {
+            guard let session, qualifies(session) else { return }
+            byId[session.id, default: []].append(highlight)
         }
 
-        if let water = uniqueMaxSession(sessions, value: \.ridingDuration),
+        award(.longest, to: uniqueMax(sessions, value: { $0.totalDuration }))
+
+        if let water = uniqueMax(sessions, value: { $0.ridingDuration }),
            !(byId[water.id]?.contains(.longest) ?? false) {
-            byId[water.id, default: []].append(.mostWaterTime)
+            award(.mostWaterTime, to: water)
         }
 
-        if let laps = uniqueMaxSession(sessions, value: \.lapCount) {
-            byId[laps.id, default: []].append(.mostLaps)
-        }
+        award(.mostLaps, to: uniqueMax(sessions, value: { Double($0.lapCount) }))
+        award(
+            .highestRidePercentage,
+            to: uniqueMax(sessions, value: { $0.ridingInactiveRatio }),
+            if: { ($0.ridingInactiveRatio ?? 0) > highestRidePercentageAboveRidingRatio }
+        )
+        award(.mostCalories, to: uniqueMax(sessions, value: { $0.totalEnergyKilocalories }))
+        award(.longestSetEver, to: uniqueMax(sessions, value: { $0.longestSetDistanceMeters }))
+        award(.mostSets, to: uniqueMax(sessions, value: { $0.setCount.map(Double.init) }))
+        award(.mostDistance, to: uniqueMax(sessions, value: { $0.totalDistanceMeters }))
+        award(.topSpeed, to: uniqueMax(sessions, value: { $0.topSpeedKmh }))
+        award(
+            .laziest,
+            to: uniqueMin(sessions, value: { $0.ridingInactiveRatio }),
+            if: { ($0.ridingInactiveRatio ?? 1) < laziestBelowRidingRatio }
+        )
 
-        if let ratio = uniqueMaxSession(sessions, value: { $0.ridingInactiveRatio }) {
-            byId[ratio.id, default: []].append(.highestRidePercentage)
-        }
-
-        if let calories = uniqueMaxSession(sessions, value: { $0.totalEnergyKilocalories }) {
-            byId[calories.id, default: []].append(.mostCalories)
-        }
-
-        if let longestSet = uniqueMaxSession(sessions, value: { $0.longestSetDistanceMeters }) {
-            byId[longestSet.id, default: []].append(.longestSetEver)
-        }
+        award(
+            .coldest,
+            to: uniqueMin(sessions, value: { $0.airTemperatureCelsius }),
+            if: { ($0.airTemperatureCelsius ?? .infinity) < coldestBelowCelsius }
+        )
+        award(
+            .hottest,
+            to: uniqueMax(sessions, value: { $0.airTemperatureCelsius }),
+            if: { ($0.airTemperatureCelsius ?? -.infinity) > hottestAboveCelsius }
+        )
+        award(
+            .windiest,
+            to: uniqueMax(sessions, value: { $0.windSpeedKmh }),
+            if: { BeaufortScale.number(forKmh: $0.windSpeedKmh ?? 0) > windiestAboveBeaufort }
+        )
+        award(
+            .rainiest,
+            to: uniqueMax(sessions, value: { $0.precipitationMmPerHour }),
+            if: { ($0.precipitationMmPerHour ?? 0) >= rainiestAtLeastMmPerHour }
+        )
+        award(
+            .iceBath,
+            to: uniqueMin(sessions, value: { $0.waterTemperatureCelsius }),
+            if: { ($0.waterTemperatureCelsius ?? .infinity) < iceBathBelowCelsius }
+        )
+        award(
+            .earlyBird,
+            to: uniqueMin(sessions, value: { $0.startMinuteOfDay }),
+            if: { ($0.startMinuteOfDay ?? .infinity) < earlyBirdBeforeMinuteOfDay }
+        )
+        award(
+            .nightOwl,
+            to: uniqueMax(sessions, value: { $0.endMinuteOfDay }),
+            if: { ($0.endMinuteOfDay ?? -.infinity) > nightOwlAfterMinuteOfDay }
+        )
 
         return byId
             .mapValues { raw in sessionOrder.filter { raw.contains($0) } }
@@ -91,74 +184,48 @@ public enum HighlightAssigner {
 
     // MARK: - Helpers
 
+    private struct SetBreak {
+        var index: Int
+        var seconds: TimeInterval
+    }
+
+    /// Rest before each set after the first, from the previous set's end to this set's start.
+    private static func breaksBefore(_ ordered: [SetSegmentStats]) -> [SetBreak] {
+        zip(ordered, ordered.dropFirst()).map { previous, set in
+            SetBreak(index: set.index, seconds: max(0, set.startedAt.timeIntervalSince(previous.endedAt)))
+        }
+    }
+
     private static func clearedSet(_ set: SetSegmentStats) -> SetSegmentStats {
         var copy = set
         copy.highlights = []
         return copy
     }
 
-    /// Unique max among comparable values; ties → lowest set index. Nil when all equal or empty.
-    private static func uniqueMaxSet(
-        _ sets: [SetSegmentStats],
-        value: (SetSegmentStats) -> Double?
-    ) -> SetSegmentStats? {
-        let scored = sets.compactMap { set -> (SetSegmentStats, Double)? in
-            guard let scoredValue = value(set) else { return nil }
-            return (set, scoredValue)
+    /// Unique max among items with a value; ties → first in order. Nil when fewer than
+    /// `minimumValuesForMaxBadge` values or all equal.
+    private static func uniqueMax<T>(_ items: [T], value: (T) -> Double?) -> T? {
+        uniqueExtreme(items, minimumCount: minimumValuesForMaxBadge, value: value, isBetter: >)
+    }
+
+    /// Unique min among items with a value; ties → first in order. Nil when fewer than
+    /// `minimumValuesForMinBadge` values or all equal.
+    private static func uniqueMin<T>(_ items: [T], value: (T) -> Double?) -> T? {
+        uniqueExtreme(items, minimumCount: minimumValuesForMinBadge, value: value, isBetter: <)
+    }
+
+    private static func uniqueExtreme<T>(
+        _ items: [T],
+        minimumCount: Int,
+        value: (T) -> Double?,
+        isBetter: (Double, Double) -> Bool
+    ) -> T? {
+        let scored = items.compactMap { item -> (T, Double)? in
+            guard let scoredValue = value(item) else { return nil }
+            return (item, scoredValue)
         }
-        guard scored.count >= 2 else { return nil }
-        guard let best = scored.map(\.1).max() else { return nil }
-        if scored.allSatisfy({ $0.1 == best }) { return nil }
-        return scored
-            .filter { $0.1 == best }
-            .map(\.0)
-            .min(by: { $0.index < $1.index })
-    }
-
-    private static func uniqueMaxSet(
-        _ sets: [SetSegmentStats],
-        value: (SetSegmentStats) -> Double
-    ) -> SetSegmentStats? {
-        uniqueMaxSet(sets, value: { Optional(value($0)) })
-    }
-
-    /// Unique min among comparable values; ties → lowest set index. Nil when all equal or empty.
-    private static func uniqueMinSet(
-        _ sets: [SetSegmentStats],
-        value: (SetSegmentStats) -> Double
-    ) -> SetSegmentStats? {
-        guard sets.count >= 2 else { return nil }
-        let scored = sets.map { ($0, value($0)) }
-        guard let best = scored.map(\.1).min() else { return nil }
-        if scored.allSatisfy({ $0.1 == best }) { return nil }
-        return scored
-            .filter { $0.1 == best }
-            .map(\.0)
-            .min(by: { $0.index < $1.index })
-    }
-
-    private static func uniqueMaxSession<T: Comparable>(
-        _ sessions: [SessionHighlightInput],
-        value: KeyPath<SessionHighlightInput, T>
-    ) -> SessionHighlightInput? {
-        guard let best = sessions.map({ $0[keyPath: value] }).max() else { return nil }
-        let winners = sessions.filter { $0[keyPath: value] == best }
-        guard winners.count < sessions.count else { return nil }
-        return winners.first
-    }
-
-    /// Unique max among sessions with a non-nil value; ties or all-missing → nil.
-    private static func uniqueMaxSession(
-        _ sessions: [SessionHighlightInput],
-        value: (SessionHighlightInput) -> Double?
-    ) -> SessionHighlightInput? {
-        let scored = sessions.compactMap { session -> (SessionHighlightInput, Double)? in
-            guard let scoredValue = value(session) else { return nil }
-            return (session, scoredValue)
-        }
-        guard scored.count >= 2 else { return nil }
-        guard let best = scored.map(\.1).max() else { return nil }
-        if scored.allSatisfy({ $0.1 == best }) { return nil }
-        return scored.filter { $0.1 == best }.map(\.0).first
+        guard scored.count >= minimumCount, let first = scored.first else { return nil }
+        if scored.allSatisfy({ $0.1 == first.1 }) { return nil }
+        return scored.reduce(first) { best, next in isBetter(next.1, best.1) ? next : best }.0
     }
 }

@@ -927,15 +927,9 @@ private struct SetDetailCard: View {
                 if !set.highlights.isEmpty {
                     FlowLayout(spacing: 6) {
                         ForEach(set.highlights, id: \.rawValue) { highlight in
-                            ParkChip(
-                                text: LogbookFormatting.setHighlightLabel(highlight),
-                                systemImage: highlight.badgeIcon,
-                                tint: highlight.badgeTint,
-                                fill: highlight.badgeTint.opacity(0.14)
-                            )
+                            HighlightChip(highlight)
                         }
                     }
-                    .accessibilityLabel(LogbookFormatting.joinedSetHighlights(set.highlights))
                 }
             }
 

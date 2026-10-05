@@ -60,7 +60,9 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
         peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
-        highlights = try container.decodeIfPresent([SetHighlight].self, forKey: .highlights) ?? []
+        // Unknown badge codes (written by a newer build) are dropped, not a decode failure.
+        highlights = (try container.decodeIfPresent([String].self, forKey: .highlights) ?? [])
+            .compactMap(SetHighlight.init(rawValue:))
     }
 
     public func encode(to encoder: Encoder) throws {

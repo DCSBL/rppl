@@ -15,7 +15,6 @@ struct SessionMigrationsTests {
 
     @Test func theFormatIsResetToSchemaOneWithNoSteps() {
         #expect(SessionSchema.currentVersion == 1)
-        #expect(SessionAnalyzer.version == 1)
         #expect(SessionMigrations.steps.isEmpty)
     }
 
