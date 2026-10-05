@@ -1,7 +1,7 @@
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
-updated_at: 2026-09-28
+updated_at: 2026-10-05
 history:
   - date: 2026-09-27
     description: initial (3 cables, Belgium)
@@ -20,6 +20,8 @@ history:
     description: drop hours_unknown (no hours filled in already means unknown)
   - date: 2026-10-05
     description: group 1 hour and 2 hours prices (with gear, own gear, winter) and the two season passes into one entry each; remove author credit and source comments
+  - date: 2026-10-05
+    description: trace the three cables on the map
 
 name: Lakeside Paradise
 address: Duinenwater 41, 8300 Knokke-Heist
@@ -45,17 +47,32 @@ wakesys: true
 cables:
   - name: Pro Cable
     direction: ccw
+    points:
+      - { lat: 51.3374521228029, lon: 3.27476850226543 }
+      - { lat: 51.3378470391418, lon: 3.27488247788915 }
+      - { lat: 51.3377972404421, lon: 3.27755037395499 }
+      - { lat: 51.3374710940648, lon: 3.27789363092708 }
+      - { lat: 51.3370954355624, lon: 3.27753248281371 }
     description: >-
       15 obstacle/jump combinations. From age 12 (younger needs the cable operators'
       permission). Booking required, 1h or 2h blocks, reservations start on the hour.
   - name: Rookie Cable
     direction: cw
+    points:
+      - { lat: 51.3372357401546, lon: 3.27320441428826 }
+      - { lat: 51.3367116648781, lon: 3.27644118378766 }
+      - { lat: 51.3361467867279, lon: 3.27680199247845 }
+      - { lat: 51.335548290739, lon: 3.27545853023206 }
+      - { lat: 51.3364779958063, lon: 3.27292003239036 }
     description: >-
       Newest cable at the park; runs at a slower speed than Pro Cable, 6 obstacles. From
       about age 6-7 (must be able to swim to shore independently with their board).
       Booking required, 1h or 2h blocks, reservations start on the half hour.
   - name: Small Cable 2.0
     direction: 2d
+    points:
+      - { lat: 51.338091273704, lon: 3.27537989915499 }
+      - { lat: 51.3381074664622, lon: 3.27786846829247 }
     description: >-
       Staff-operated, gradual/instructor-paced start with one-on-one guidance. The
       recommended first introduction before booking the full-size cables. Reservations
