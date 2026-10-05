@@ -247,7 +247,11 @@ extension WatchSessionController {
         if let byteSize = outcome.byteSize {
             storedByteSize = byteSize
         }
-        guard let error = outcome.error else { return }
+        guard let error = outcome.error else {
+            consecutiveWriteFailures = 0
+            return
+        }
+        consecutiveWriteFailures += 1
         if outcome.failed.contains(.locations) {
             locationBuffer = SampleRequeue.merge(failed: locations, before: locationBuffer, cap: SampleRequeue.locationCap)
         }
@@ -318,6 +322,38 @@ extension WatchSessionController {
         lastPersistedLowPowerMode = nil
         batteryWarnedCodes = []
         isBatteryAutoStopping = false
+        recordingIssues = []
+        consecutiveWriteFailures = 0
+        lastUsableFixAt = nil
+        cachedFreeBytes = nil
+        recordingAlertGate.reset()
+    }
+
+    /// Re-evaluate what puts the recording at risk (1 Hz) and buzz once per new critical issue.
+    func evaluateRecordingHealth(tick: Int) {
+        if cachedFreeBytes == nil || tick % 30 == 0 {
+            cachedFreeBytes = store?.availableCapacityBytes()
+        }
+        let device = WKInterfaceDevice.current()
+        let now = Date()
+        let issues = RecordingHealth.evaluate(
+            RecordingHealth.Inputs(
+                hkMissing: recordingMode != "workout",
+                consecutiveWriteFailures: consecutiveWriteFailures,
+                freeBytes: cachedFreeBytes,
+                secondsSinceUsableFix: (lastUsableFixAt ?? startedAt).map { now.timeIntervalSince($0) },
+                isProductPaused: isProductPaused,
+                batteryLevel: Double(device.batteryLevel),
+                batteryState: Self.batteryStateCode(device.batteryState),
+                locationReduced: locationManager.accuracyAuthorization == .reducedAccuracy
+            )
+        )
+        if issues != recordingIssues { recordingIssues = issues }
+        let fresh = recordingAlertGate.newCriticalCodes(issues)
+        if !fresh.isEmpty {
+            device.play(.failure)
+            WakeLog.error(.session, "recording at risk: \(fresh.joined(separator: ","))")
+        }
     }
 
     /// Warn the rider while the battery runs down and stop in time to save the workout (see

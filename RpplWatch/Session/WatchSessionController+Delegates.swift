@@ -32,6 +32,7 @@ extension WatchSessionController: CLLocationManagerDelegate {
         }
         if loc.horizontalAccuracy >= 0 {
             lastHorizontalAccuracy = loc.horizontalAccuracy
+            lastUsableFixAt = Date()
         }
         latestLocation = loc
         lastLatitude = loc.coordinate.latitude
