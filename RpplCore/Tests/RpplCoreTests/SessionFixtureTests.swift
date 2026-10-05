@@ -8,7 +8,7 @@ import Testing
 struct SessionFixture: Decodable {
     struct Annotation: Decodable {
         var id: String
-        /// `set`, `badFix`, `lateDelivery`, `noGps`.
+        /// `set`, `badFix`, `lateDelivery`, `noGps`, `event`.
         var kind: String
         /// `good`, `bad`, `missing` — what the recording or live detection did, not the test.
         var verdict: String
@@ -20,6 +20,9 @@ struct SessionFixture: Decodable {
         var toleranceSeconds: TimeInterval?
         var liveStart: Date?
         var liveEnd: Date?
+        /// `event` only: what happened (`jump`, `fall`, `surface_360`, …) and where (`kicker`, `box`).
+        var label: String?
+        var obstacle: String?
     }
 
     var name: String
@@ -30,6 +33,8 @@ struct SessionFixture: Decodable {
     var recordedDetections: [DetectionEvent]
     /// On-disk (arrival) order, repeated and late fixes included.
     var locations: [LocationSample]
+    /// Device motion as the Watch wrote it, only around `event` annotations.
+    var motion: [MotionSample]?
 
     func annotations(kind: String) -> [Annotation] {
         annotations.filter { $0.kind == kind }
@@ -37,6 +42,7 @@ struct SessionFixture: Decodable {
 
     static let names = [
         "downunder-2026-09-30",
+        "project7-2026-10-04",
     ]
 
     static func load(_ name: String) throws -> SessionFixture {
@@ -240,5 +246,55 @@ struct DownUnder20260930Tests {
             _ = sequencer.accept(sample.timestamp)
         }
         #expect(sequencer.droppedCount == 217)
+    }
+}
+
+/// Rider-labelled jumps and falls from 2026-10-04. Nothing detects them yet; these keep the
+/// labels and the motion around them intact for a future detector.
+@Suite("Project720261004")
+struct Project720261004Tests {
+    @Test func everyLabelledEventCarriesFullRateMotion() throws {
+        let fixture = try SessionFixture.load("project7-2026-10-04")
+        let motion = try #require(fixture.motion)
+        let events = fixture.annotations(kind: "event")
+        #expect(events.count == 9)
+        for event in events {
+            let start = try #require(event.start)
+            let end = try #require(event.end)
+            #expect(event.label != nil, "\(event.id): no label")
+            let samples = motion.filter { (start...end).contains($0.timestamp) }
+            // Whole-second timestamps, 25 Hz while riding: one second of window holds ~25 samples.
+            let seconds = end.timeIntervalSince(start) + 1
+            #expect(Double(samples.count) >= seconds * 20, "\(event.id): \(samples.count) samples in \(seconds) s")
+        }
+    }
+
+    /// Set 4: after the fall at the box, a coasted 22 m fix at 21.5 km/h kept the set going.
+    @Test func liveLookbackRevivedSetFourAfterTheFall() throws {
+        let fixture = try SessionFixture.load("project7-2026-10-04")
+        let fall = try #require(fixture.annotations.first { $0.id == "fall-set-04" })
+        let fallEnd = try #require(fall.end)
+        let revived = fixture.recordedDetections.filter {
+            $0.detectorId == "lookback" && $0.code == DetectionCodes.riding && $0.timestamp > fallEnd
+        }
+        #expect(revived.count == 2)
+    }
+
+    /// Set 9: the fastest fix of the set was recorded after the rider fell, not while riding.
+    @Test func setNinePeakSpeedComesFromTheFall() throws {
+        let fixture = try SessionFixture.load("project7-2026-10-04")
+        let set9 = try #require(fixture.annotations.first { $0.id == "set-09" })
+        let fall = try #require(fixture.annotations.first { $0.id == "fall-set-09-lap-3" })
+        let start = try #require(set9.start)
+        let fallStart = try #require(fall.start)
+        let fallEnd = try #require(fall.end)
+        let usable = fixture.locations.filter {
+            $0.timestamp >= start && $0.timestamp <= fallEnd && $0.speed != nil
+                && $0.horizontalAccuracy <= DetectionThresholds.default.maxHorizontalAccuracyM
+        }
+        let fastest = try #require(usable.max { ($0.speed ?? 0) < ($1.speed ?? 0) })
+        #expect(fastest.timestamp > fallStart)
+        let riding = usable.filter { $0.timestamp < fallStart }.compactMap(\.speed).max() ?? 0
+        #expect((fastest.speed ?? 0) > riding)
     }
 }

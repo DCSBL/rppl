@@ -126,7 +126,7 @@ User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing).
 
 ## Motion gives way first
 
-Nothing analyses device motion yet; it is kept for future event / trick analysis. It is the first stream to stop so GPS, detection, health and water keep recording (`MotionRecordingPolicy` in Core, checked after each motion frame and at start):
+Nothing analyses device motion yet; it is kept for future event / trick analysis. `scripts/analyze-session.py` decodes it offline (airtime, impacts, spins next to GPS, per set); labelled examples live in the session fixtures. It is the first stream to stop so GPS, detection, health and water keep recording (`MotionRecordingPolicy` in Core, checked after each motion frame and at start):
 
 | Condition | Effect | `manifest.motionStoppedReason` |
 |-----------|--------|-------------------------------|
