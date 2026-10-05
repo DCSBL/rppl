@@ -37,7 +37,14 @@ struct LogbookSessionDetailView: View {
     @State private var isExporting = false
     @State private var exportTask: Task<Void, Never>?
     @State private var showExportExplainer = false
+    @State private var exportPurpose: ExportPurpose = .share
+    @State private var pendingMail: SessionMail?
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
+
+    private nonisolated enum ExportPurpose: Sendable {
+        case share
+        case mail
+    }
 
     private enum LoadPhase: Equatable {
         case loading
@@ -99,9 +106,17 @@ struct LogbookSessionDetailView: View {
                 if allowsExport, loadPhase == .ready {
                     if isExporting {
                         ProgressView()
+                    } else if MailAvailability.canSend {
+                        Menu {
+                            Button("Export", systemImage: "square.and.arrow.up") { requestExport(.share) }
+                            Button("Send to Rppl", systemImage: "envelope") { requestExport(.mail) }
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .accessibilityLabel(Text("Export"))
                     } else {
                         Button {
-                            requestExport()
+                            requestExport(.share)
                         } label: {
                             Image(systemName: "square.and.arrow.up")
                         }
@@ -116,11 +131,14 @@ struct LogbookSessionDetailView: View {
         ) {
             Button("Understood") {
                 didUnderstandExport = true
-                startExport()
+                startExport(exportPurpose)
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
+        }
+        .sheet(item: $pendingMail) { mail in
+            SessionMailComposer(mail: mail) { pendingMail = nil }
         }
         .alert(
             "Could not export",
@@ -761,18 +779,19 @@ struct LogbookSessionDetailView: View {
         return try SessionLoader.loadExample(packageURL: url, now: Date())
     }
 
-    private func requestExport() {
+    private func requestExport(_ purpose: ExportPurpose) {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
+        exportPurpose = purpose
         if didUnderstandExport {
-            startExport()
+            startExport(purpose)
         } else {
             showExportExplainer = true
         }
     }
 
-    private func startExport() {
+    private func startExport(_ purpose: ExportPurpose) {
         guard allowsExport, exportTask == nil, !isExporting, loadPhase == .ready else { return }
-        if let exportURL {
+        if purpose == .share, let exportURL {
             presentShareSheet(for: exportURL)
             return
         }
@@ -780,7 +799,7 @@ struct LogbookSessionDetailView: View {
         exportErrorText = nil
         isExporting = true
         exportTask = Task(priority: .utility) {
-            await prepareExport()
+            await prepareExport(purpose)
         }
     }
 
@@ -791,7 +810,7 @@ struct LogbookSessionDetailView: View {
         exportURL = nil
     }
 
-    private func prepareExport() async {
+    private func prepareExport(_ purpose: ExportPurpose) async {
         guard case .store(let sessionId) = source, let store else {
             presentExportFailure(
                 String(localized: "Session store missing. Try again from the logbook.")
@@ -802,7 +821,7 @@ struct LogbookSessionDetailView: View {
         let resolvedCity = cityName
 
         do {
-            let url = try await StoreIO.runOffMain {
+            let (url, manifest) = try await StoreIO.runOffMain {
                 let package = try store.buildTransferPackage(sessionId: sessionId)
                 try Task.checkCancellation()
                 let fileName = SessionShareExport.fileName(
@@ -811,12 +830,21 @@ struct LogbookSessionDetailView: View {
                 )
                 let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
                 try SessionShareExport.encode(package).write(to: exportURL, options: [.atomic])
-                return exportURL
+                if purpose == .mail {
+                    let zipURL = try SessionMailShare.zip(exportURL)
+                    try? FileManager.default.removeItem(at: exportURL)
+                    return (zipURL, package.manifest)
+                }
+                return (exportURL, package.manifest)
             }
             try Task.checkCancellation()
-            exportURL = url
             finishExportTask()
-            presentShareSheet(for: url)
+            if purpose == .mail {
+                presentMail(zipURL: url, manifest: manifest, cityName: resolvedCity)
+            } else {
+                exportURL = url
+                presentShareSheet(for: url)
+            }
             WakeLog.debug(.ui, "export OK \(sessionId.prefix(8))… \(url.lastPathComponent)")
         } catch is CancellationError {
             finishExportTask()
@@ -829,6 +857,18 @@ struct LogbookSessionDetailView: View {
     private func finishExportTask() {
         isExporting = false
         exportTask = nil
+    }
+
+    private func presentMail(zipURL: URL, manifest: SessionManifest, cityName: String?) {
+        // Present after toolbar ProgressView → icon swap so the sheet is not dropped.
+        let mail = SessionMail(
+            zipURL: zipURL,
+            subject: SessionMailShare.subject(manifest: manifest, cityName: cityName),
+            body: SessionMailShare.mailBody(manifest: manifest)
+        )
+        Task { @MainActor in
+            pendingMail = mail
+        }
     }
 
     private func presentShareSheet(for url: URL) {
