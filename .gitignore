@@ -3,6 +3,7 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 RpplCore/.build/
+tools/example-session-compiler/.build/
 .swiftpm/*
 # Shared RpplCore scheme: Xcode Cloud PR workflow tests it (includes RpplCoreTests).
 !RpplCore/.swiftpm/xcode/
