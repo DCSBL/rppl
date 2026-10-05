@@ -9,7 +9,6 @@ struct ParkDetailView: View {
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
     @State private var weatherProvider = ParksWeatherProvider.shared
     @State private var weather: ParkWeather?
@@ -355,23 +354,8 @@ struct ParkDetailView: View {
                 .fixedSize(horizontal: false, vertical: true)
             }
 
-            if let weather, let legal = weather.legalURL {
-                Link(destination: legal) {
-                    HStack(spacing: 4) {
-                        if let mark = colorScheme == .dark ? weather.markDarkURL : weather.markLightURL {
-                            AsyncImage(url: mark) { image in
-                                image.resizable().scaledToFit()
-                            } placeholder: {
-                                Text("Apple Weather")
-                            }
-                            .frame(height: 12)
-                        } else {
-                            Text("Apple Weather")
-                        }
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(Color.rpplMuted)
-                }
+            if let weather {
+                AppleWeatherAttribution(info: weather.attribution)
             }
         }
     }
