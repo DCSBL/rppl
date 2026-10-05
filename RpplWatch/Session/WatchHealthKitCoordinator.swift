@@ -36,6 +36,7 @@ extension WatchSessionController {
             metadata: [WorkoutMetadataKeys.detectionCode: code]
         )
         hkRideActivityOpen = true
+        WakeLog.debug(.workout, "beginNewActivity \(code) — \(workoutBuilder?.workoutActivities.count ?? 0) activities")
     }
 
     func endRideActivity(at date: Date) {
@@ -260,6 +261,9 @@ extension WatchSessionController {
 
         do {
             try await startWorkout()
+            // First interval from the start: without it a session with no riding saves none.
+            _ = await waitForWorkoutSessionRunning()
+            beginDetectionActivity(code: DetectionCodes.inactive, at: Date())
             WakeLog.debug(.workout, "HKWorkoutSession started (save on stop)")
             return true
         } catch {
@@ -391,6 +395,7 @@ extension WatchSessionController {
         recordFinishedHkRide(endedAt: requestEnd)
         endRideActivity(at: requestEnd)
         let stoppedDate = await stopWorkoutActivity(session, at: requestEnd)
+        WakeLog.debug(.workout, "saving workout with \(builder.workoutActivities.count) activities")
 
         do {
             var closingMetadata: [String: Any] = [
