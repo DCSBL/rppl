@@ -178,18 +178,13 @@ final class PhoneConnectivityService: NSObject {
         WakeLog.debug(.transfer, "import OK \(sessionId.prefix(8))…")
         acknowledge(sessionId: sessionId)
         PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
-        // Mark first sync before any permission sheets — sync/ack already finished above.
-        UserDefaults.standard.set(true, forKey: AppSettingsKey.didImportSessionFromWatch)
-        Task {
-            await PhonePermissionsController.shared.requestAfterFirstSyncIfNeeded()
-        }
     }
 
     func hasSession(sessionId: String) -> Bool {
         (try? store.listSessionIDs().contains(sessionId)) ?? false
     }
 
-    /// Import a Share export JSON from Files. No Watch ack, no HealthKit, no post-sync permission trigger.
+    /// Import a Share export JSON from Files. No Watch ack, no HealthKit.
     /// Throws `SessionExportImportError.alreadyImported` when the session id is already on disk.
     @discardableResult
     func importExportedSession(from url: URL) async throws -> String {

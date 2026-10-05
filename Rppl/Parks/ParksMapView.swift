@@ -6,6 +6,8 @@ import SwiftUI
 /// tap a pin for the park detail.
 struct ParksMapView: View {
     let parks: [Park]
+    /// Only read here: the blue dot appears once access was granted elsewhere (the recenter button
+    /// asks). Opening the map never prompts.
     let location: ParksLocationProvider
     /// Height of the floating header above this view, so its own controls sit below it
     /// instead of hiding underneath.
@@ -41,7 +43,9 @@ struct ParksMapView: View {
                 cableLines
             }
             searchPinMarker
-            UserAnnotation()
+            if location.availability == .available {
+                UserAnnotation()
+            }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .onMapCameraChange(frequency: .onEnd) { context in
@@ -78,7 +82,6 @@ struct ParksMapView: View {
         .alert(Text("No place found"), isPresented: $searchFailed) {
             Button("OK", role: .cancel) {}
         }
-        .onAppear { location.refresh() }
     }
 
     @MapContentBuilder

@@ -14,10 +14,24 @@ enum ParksLocationAvailability: Equatable {
     case servicesDisabled
 }
 
+enum ParksMapDefaults {
+    /// Opening view of the parks map: all of the Netherlands, never the person's location (that is
+    /// the recenter button's job). Centered a bit north of the country's middle so the country
+    /// sits clear of the floating header.
+    static let netherlands = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 52.35, longitude: 5.3),
+        span: MKCoordinateSpan(latitudeDelta: 3.4, longitudeDelta: 4.6)
+    )
+}
+
 /// One-shot iPhone location fix for "nearby" sorting. Denied or unavailable simply means no distances.
 ///
-/// `refresh()` is the only entry point that requests a fix — callers trigger it on view appear and on
-/// return from background, never continuously, so the Nearby sort doesn't reorder mid-use.
+/// Two entry points, both one-shot — callers trigger them on view appear and on return from
+/// background, never continuously, so the Nearby sort doesn't reorder mid-use:
+/// - `refresh()` never shows a system sheet: it takes a fix only when access was already granted.
+///   Safe from any view that merely *can* use a location.
+/// - `requestAccess()` also asks while access is undecided. Call it only where the person is
+///   looking at, or just tapped, something that needs their location.
 @Observable
 @MainActor
 final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
@@ -48,13 +62,18 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
         authorizationStatus = manager.authorizationStatus
         servicesEnabled = CLLocationManager.locationServicesEnabled()
         switch authorizationStatus {
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
         case .authorizedWhenInUse, .authorizedAlways:
             manager.requestLocation()
         default:
             break
         }
+    }
+
+    func requestAccess() {
+        if manager.authorizationStatus == .notDetermined {
+            manager.requestWhenInUseAuthorization()
+        }
+        refresh()
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

@@ -24,7 +24,7 @@ struct ParksView: View {
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
     @State private var headerHeight: CGFloat = 0
-    @State private var mapPosition: MapCameraPosition = .automatic
+    @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.netherlands)
     @State private var mapPendingRecenter = false
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
@@ -44,6 +44,11 @@ struct ParksView: View {
 
     private var filters: ParkFilters {
         ParkFilters(openOnDate: openFilterDate, cableDirections: cableFilter, favoritesOnly: favoritesOnly)
+    }
+
+    /// The distance-sorted list is on screen: the one place this tab needs the person's location.
+    private var showsNearby: Bool {
+        !showMap && !isSearching && sort == .distance
     }
 
     private func filteredParks(_ parks: [Park]) -> [Park] {
@@ -76,12 +81,23 @@ struct ParksView: View {
     /// see nearby landmarks around the park.
     private static let recenterCameraDistance: CLLocationDistance = 5_000
 
-    /// Jumps the map to the user's location at a reasonable distance; requests a fresh fix first if needed.
+    /// Jumps the map to the user's location at a reasonable distance; requests a fresh fix first if
+    /// needed. Tapping the button is what asks for location access: opening the map never does.
     private func recenterOnUser() {
         if let coordinate = location.coordinate {
             moveMap(to: coordinate)
         } else {
             mapPendingRecenter = true
+            location.requestAccess()
+        }
+    }
+
+    /// Asks for location access only while the Nearby list is showing; every other view of this
+    /// tab just reads a fix when access was already granted.
+    private func refreshLocation() {
+        if showsNearby {
+            location.requestAccess()
+        } else {
             location.refresh()
         }
     }
@@ -164,7 +180,7 @@ struct ParksView: View {
                         if !isSearching, sort == .distance, location.availability != .available {
                             ParksLocationNeededCard(
                                 availability: location.availability,
-                                onRequestAccess: { location.refresh() },
+                                onRequestAccess: { location.requestAccess() },
                                 onOpenSettings: {
                                     if let url = ParkNavigation.appSettingsURL { openURL(url) }
                                 }
@@ -310,15 +326,24 @@ struct ParksView: View {
         }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
         // Nearby list out from under the user while they're scrolling or tapping a park.
-        .onAppear { location.refresh() }
+        .onAppear { refreshLocation() }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
-            location.refresh()
+            refreshLocation()
+        }
+        .onChange(of: showsNearby) { _, shows in
+            if shows { location.requestAccess() }
         }
         .onChange(of: location.coordinate) { _, coordinate in
             guard mapPendingRecenter, let coordinate else { return }
             mapPendingRecenter = false
             moveMap(to: coordinate)
+        }
+        // "Don't Allow" on the recenter prompt: drop the pending jump so a later fix (after the
+        // person enables location in Settings) doesn't move the map out from under them.
+        .onChange(of: location.availability) { _, availability in
+            guard availability == .denied || availability == .servicesDisabled else { return }
+            mapPendingRecenter = false
         }
         // `initial: true`: TabView builds this view lazily, so a notification tap before the Parks
         // tab was ever opened creates it with `openParkId` already set — a plain onChange never fires.
