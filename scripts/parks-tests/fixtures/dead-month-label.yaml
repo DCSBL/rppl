@@ -1,0 +1,7 @@
+version: 1
+id: dead-month-label
+name: Fixture Park
+location: { lat: 52.0, lon: 5.0 }
+opening:
+  rules:
+    - { label: September, months: [9], days: [sat], open: "12:00", close: "18:00" }

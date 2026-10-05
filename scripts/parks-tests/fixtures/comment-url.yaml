@@ -1,0 +1,5 @@
+version: 1
+id: comment-url
+name: Fixture Park
+location: { lat: 52.0, lon: 5.0 }
+# Source: https://www.fixture-park.nl/tarieven

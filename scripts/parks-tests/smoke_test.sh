@@ -26,10 +26,33 @@ check_fails() {
   fi
 }
 
+# Must fail, and say why: the message proves the fixture hit its own check, not another one.
+check_fails_with() {
+  local out
+  out=$(python3 scripts/validate_parks.py "$FIXTURES/$1" 2>&1 || true)
+  if grep -qF -- "$2" <<<"$out"; then
+    echo "ok:   $1 failed with '$2'"
+  else
+    echo "FAIL: $1 was expected to fail with '$2', got:"
+    echo "$out"
+    FAIL=1
+  fi
+}
+
 check_passes valid.yaml
+check_passes accepted.yaml
 check_fails invalid_coords.yaml
 check_fails short_cable.yaml
 check_fails placeholder.yaml
+check_fails_with dead-author.yaml "author 'Rppl'"
+check_fails_with dead-numbered.yaml "numbered only changes"
+check_fails_with dead-month-label.yaml "only repeats its month heading"
+check_fails_with duplicate-prices.yaml "prices repeat name"
+check_fails_with duplicate-links.yaml "links repeat kind"
+check_fails_with comment-url.yaml "URL in comment"
+check_fails_with comment-block.yaml "longer than 3 lines"
+check_fails_with en-dash.yaml "en dash"
+check_fails_with spaced-hyphen.yaml "hyphen used as a dash"
 
 # Duplicate id: neither file is invalid on its own, only together.
 if python3 scripts/validate_parks.py "$FIXTURES/duplicate_id_a.yaml" "$FIXTURES/duplicate_id_b.yaml" >/dev/null 2>&1; then

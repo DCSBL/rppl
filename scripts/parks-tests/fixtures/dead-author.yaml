@@ -1,0 +1,5 @@
+version: 1
+id: dead-author
+name: Fixture Park
+location: { lat: 52.0, lon: 5.0 }
+author: Rppl
