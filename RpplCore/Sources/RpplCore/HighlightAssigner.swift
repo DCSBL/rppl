@@ -15,6 +15,32 @@ public enum HighlightAssigner {
     /// "Highest" badges need something to beat.
     static let minimumValuesForMaxBadge = 2
 
+    // Character badges go to the record holder only when the record is worth a badge.
+    // The UI never names these lines.
+
+    /// Night owl: session ends after 21:00 (minutes since start-day midnight).
+    static let nightOwlAfterMinuteOfDay = 21.0 * 60
+    /// Early bird: session starts before 10:00.
+    static let earlyBirdBeforeMinuteOfDay = 10.0 * 60
+    /// Ice bath: water below 17 °C.
+    static let iceBathBelowCelsius = 17.0
+    /// Windiest: above Bft 4.
+    static let windiestAboveBeaufort = 4
+    /// Hottest: air above 25 °C.
+    static let hottestAboveCelsius = 25.0
+    /// Coldest: air below 10 °C.
+    static let coldestBelowCelsius = 10.0
+    /// Rain rider: real rain, not drizzle.
+    static let rainiestAtLeastMmPerHour = 0.5
+    /// Laziest: under a quarter of the session riding.
+    static let laziestBelowRidingRatio = 0.25
+    /// Highest ride %: over half of the session riding.
+    static let highestRidePercentageAboveRidingRatio = 0.5
+    /// Comeback: break before the set longer than 15 min.
+    static let comebackAboveBreakSeconds: TimeInterval = 15 * 60
+    /// Back to back: break before the set under 2 min.
+    static let backToBackBelowBreakSeconds: TimeInterval = 2 * 60
+
     /// Fixed display order for session badges.
     public static let sessionOrder: [SessionHighlight] = [
         .longest, .mostWaterTime, .mostLaps, .highestRidePercentage, .mostCalories, .longestSetEver,
@@ -57,10 +83,12 @@ public enum HighlightAssigner {
         }
 
         let breaks = breaksBefore(ordered)
-        if let comeback = uniqueMax(breaks, value: { $0.seconds }) {
+        if let comeback = uniqueMax(breaks, value: { $0.seconds }),
+           comeback.seconds > comebackAboveBreakSeconds {
             byIndex[comeback.index, default: []].append(.comeback)
         }
-        if let quick = uniqueMin(breaks, value: { $0.seconds }) {
+        if let quick = uniqueMin(breaks, value: { $0.seconds }),
+           quick.seconds < backToBackBelowBreakSeconds {
             byIndex[quick.index, default: []].append(.backToBack)
         }
 
@@ -80,8 +108,12 @@ public enum HighlightAssigner {
         var byId: [String: [SessionHighlight]] = Dictionary(
             uniqueKeysWithValues: sessions.map { ($0.id, []) }
         )
-        func award(_ highlight: SessionHighlight, to session: SessionHighlightInput?) {
-            guard let session else { return }
+        func award(
+            _ highlight: SessionHighlight,
+            to session: SessionHighlightInput?,
+            if qualifies: (SessionHighlightInput) -> Bool = { _ in true }
+        ) {
+            guard let session, qualifies(session) else { return }
             byId[session.id, default: []].append(highlight)
         }
 
@@ -93,22 +125,57 @@ public enum HighlightAssigner {
         }
 
         award(.mostLaps, to: uniqueMax(sessions, value: { Double($0.lapCount) }))
-        award(.highestRidePercentage, to: uniqueMax(sessions, value: { $0.ridingInactiveRatio }))
+        award(
+            .highestRidePercentage,
+            to: uniqueMax(sessions, value: { $0.ridingInactiveRatio }),
+            if: { ($0.ridingInactiveRatio ?? 0) > highestRidePercentageAboveRidingRatio }
+        )
         award(.mostCalories, to: uniqueMax(sessions, value: { $0.totalEnergyKilocalories }))
         award(.longestSetEver, to: uniqueMax(sessions, value: { $0.longestSetDistanceMeters }))
         award(.mostSets, to: uniqueMax(sessions, value: { $0.setCount.map(Double.init) }))
         award(.mostDistance, to: uniqueMax(sessions, value: { $0.totalDistanceMeters }))
         award(.topSpeed, to: uniqueMax(sessions, value: { $0.topSpeedKmh }))
-        award(.laziest, to: uniqueMin(sessions, value: { $0.ridingInactiveRatio }))
+        award(
+            .laziest,
+            to: uniqueMin(sessions, value: { $0.ridingInactiveRatio }),
+            if: { ($0.ridingInactiveRatio ?? 1) < laziestBelowRidingRatio }
+        )
 
-        award(.coldest, to: uniqueMin(sessions, value: { $0.airTemperatureCelsius }))
-        award(.hottest, to: uniqueMax(sessions, value: { $0.airTemperatureCelsius }))
-        award(.windiest, to: uniqueMax(sessions, value: { $0.windSpeedKmh }))
-        // Dry everywhere means nobody rode in the rain; `uniqueMax` already skips all-zero.
-        award(.rainiest, to: uniqueMax(sessions, value: { $0.precipitationMmPerHour }))
-        award(.iceBath, to: uniqueMin(sessions, value: { $0.waterTemperatureCelsius }))
-        award(.earlyBird, to: uniqueMin(sessions, value: { $0.startMinuteOfDay }))
-        award(.nightOwl, to: uniqueMax(sessions, value: { $0.endMinuteOfDay }))
+        award(
+            .coldest,
+            to: uniqueMin(sessions, value: { $0.airTemperatureCelsius }),
+            if: { ($0.airTemperatureCelsius ?? .infinity) < coldestBelowCelsius }
+        )
+        award(
+            .hottest,
+            to: uniqueMax(sessions, value: { $0.airTemperatureCelsius }),
+            if: { ($0.airTemperatureCelsius ?? -.infinity) > hottestAboveCelsius }
+        )
+        award(
+            .windiest,
+            to: uniqueMax(sessions, value: { $0.windSpeedKmh }),
+            if: { BeaufortScale.number(forKmh: $0.windSpeedKmh ?? 0) > windiestAboveBeaufort }
+        )
+        award(
+            .rainiest,
+            to: uniqueMax(sessions, value: { $0.precipitationMmPerHour }),
+            if: { ($0.precipitationMmPerHour ?? 0) >= rainiestAtLeastMmPerHour }
+        )
+        award(
+            .iceBath,
+            to: uniqueMin(sessions, value: { $0.waterTemperatureCelsius }),
+            if: { ($0.waterTemperatureCelsius ?? .infinity) < iceBathBelowCelsius }
+        )
+        award(
+            .earlyBird,
+            to: uniqueMin(sessions, value: { $0.startMinuteOfDay }),
+            if: { ($0.startMinuteOfDay ?? .infinity) < earlyBirdBeforeMinuteOfDay }
+        )
+        award(
+            .nightOwl,
+            to: uniqueMax(sessions, value: { $0.endMinuteOfDay }),
+            if: { ($0.endMinuteOfDay ?? -.infinity) > nightOwlAfterMinuteOfDay }
+        )
 
         return byId
             .mapValues { raw in sessionOrder.filter { raw.contains($0) } }

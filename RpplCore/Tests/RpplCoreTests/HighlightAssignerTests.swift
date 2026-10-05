@@ -183,12 +183,12 @@ struct HighlightAssignerTests {
     }
 
     @Test func comebackAndBackToBackFollowTheBreaks() {
-        // Breaks before sets 2, 3, 4: 60 s, 600 s, 20 s.
+        // Breaks before sets 2, 3, 4: 60 s, 1200 s, 20 s.
         let result = HighlightAssigner.assignSetHighlights([
             timedSet(index: 1, start: 0, end: 100),
             timedSet(index: 2, start: 160, end: 260),
-            timedSet(index: 3, start: 860, end: 960),
-            timedSet(index: 4, start: 980, end: 1080),
+            timedSet(index: 3, start: 1360, end: 1460),
+            timedSet(index: 4, start: 1480, end: 1580),
         ])
         #expect(result[2].highlights.contains(.comeback))
         #expect(result[3].highlights.contains(.backToBack))
@@ -209,8 +209,8 @@ struct HighlightAssignerTests {
 
         let three = HighlightAssigner.assignSetHighlights([
             timedSet(index: 1, start: 0, end: 100),
-            timedSet(index: 2, start: 400, end: 500),
-            timedSet(index: 3, start: 520, end: 620),
+            timedSet(index: 2, start: 1100, end: 1200),
+            timedSet(index: 3, start: 1220, end: 1320),
         ])
         #expect(three[1].highlights.contains(.comeback))
         #expect(three.allSatisfy { !$0.highlights.contains(.backToBack) })
@@ -320,7 +320,7 @@ struct HighlightAssignerTests {
     @Test func sessionMaxBadgesGoToTheWinner() {
         let map = HighlightAssigner.assignSessionHighlights([
             session("a", sets: 3, distance: 4000, topSpeed: 31, air: 12, wind: 8, rain: 0, end: 15 * 60),
-            session("b", sets: 7, distance: 6000, topSpeed: 36, air: 24, wind: 30, rain: 1.2, end: 21 * 60),
+            session("b", sets: 7, distance: 6000, topSpeed: 36, air: 27, wind: 35, rain: 1.2, end: 22 * 60),
         ])
         #expect(map["b"] == [.mostSets, .mostDistance, .topSpeed, .hottest, .windiest, .rainiest, .nightOwl])
         #expect(map["a"] == nil)
@@ -348,8 +348,8 @@ struct HighlightAssignerTests {
     /// Coldest while the other carries Hottest.
     @Test func sessionMinBadgesNeedThreeValues() {
         let two = HighlightAssigner.assignSessionHighlights([
-            session("a", ratio: 0.3, air: 5, water: 9, start: 8 * 60),
-            session("b", ratio: 0.6, air: 20, water: 18, start: 14 * 60),
+            session("a", ratio: 0.2, air: 5, water: 9, start: 8 * 60),
+            session("b", ratio: 0.6, air: 27, water: 18, start: 14 * 60),
         ])
         #expect(two["a"] == nil)
         #expect(two["b"] == [.highestRidePercentage, .hottest])
@@ -357,13 +357,49 @@ struct HighlightAssignerTests {
 
     @Test func sessionMinBadgesGoToTheLowest() {
         let map = HighlightAssigner.assignSessionHighlights([
-            session("a", ratio: 0.3, air: 5, water: 9, start: 8 * 60),
-            session("b", ratio: 0.6, air: 20, water: 18, start: 14 * 60),
+            session("a", ratio: 0.2, air: 5, water: 9, start: 8 * 60),
+            session("b", ratio: 0.6, air: 27, water: 18, start: 14 * 60),
             session("c", ratio: 0.5, air: 15, water: 14, start: 11 * 60),
         ])
         #expect(map["a"] == [.laziest, .coldest, .iceBath, .earlyBird])
         #expect(map["b"] == [.highestRidePercentage, .hottest])
         #expect(map["c"] == nil)
+    }
+
+    /// Each record holder sits exactly on its badge's line, so nobody earns one.
+    @Test func characterBadgesNeedTheRecordToBeWorthIt() {
+        let map = HighlightAssigner.assignSessionHighlights([
+            session("a", ratio: 0.5, air: 25, wind: 28, rain: 0.4, water: 19, start: 12 * 60, end: 21 * 60),
+            session("b", ratio: 0.25, air: 10, water: 17, start: 10 * 60, end: 19 * 60),
+            session("c", ratio: 0.3, air: 15, wind: 10, rain: 0.1, water: 20, start: 11 * 60, end: 20 * 60),
+        ])
+        #expect(map.isEmpty)
+    }
+
+    @Test func windiestStartsAtBeaufortFive() {
+        let bft4 = HighlightAssigner.assignSessionHighlights([
+            session("a", wind: 28),
+            session("b", wind: 10),
+        ])
+        #expect(bft4.isEmpty)
+
+        let bft5 = HighlightAssigner.assignSessionHighlights([
+            session("a", wind: 29),
+            session("b", wind: 10),
+        ])
+        #expect(bft5["a"] == [.windiest])
+    }
+
+    @Test func breakBadgesNeedARealBreakOrARealRush() {
+        // Breaks before sets 2, 3, 4: exactly 15 min, 5 min, exactly 2 min.
+        let result = HighlightAssigner.assignSetHighlights([
+            timedSet(index: 1, start: 0, end: 100),
+            timedSet(index: 2, start: 1000, end: 1100),
+            timedSet(index: 3, start: 1400, end: 1500),
+            timedSet(index: 4, start: 1620, end: 1720),
+        ])
+        #expect(result.allSatisfy { !$0.highlights.contains(.comeback) })
+        #expect(result.allSatisfy { !$0.highlights.contains(.backToBack) })
     }
 
     @Test func minutesOfDayCountsPastMidnightFromTheStartDay() throws {
