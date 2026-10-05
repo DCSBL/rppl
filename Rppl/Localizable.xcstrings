@@ -9938,22 +9938,6 @@
         }
       }
     },
-    "Back on the water after the longest break this session." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Back on the water after the longest break this session."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terug op het water na de langste pauze deze session."
-          }
-        }
-      }
-    },
     "Shortest break before a set this session. Barely dried off." : {
       "localizations" : {
         "en" : {
@@ -10130,54 +10114,6 @@
         }
       }
     },
-    "Coldest air of all your sessions." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coldest air of all your sessions."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koudste lucht van al je sessions."
-          }
-        }
-      }
-    },
-    "Warmest air of all your sessions." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warmest air of all your sessions."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warmste lucht van al je sessions."
-          }
-        }
-      }
-    },
-    "Most wind of all your sessions." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Most wind of all your sessions."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meeste wind van al je sessions."
-          }
-        }
-      }
-    },
     "Most rain of all your sessions. You were getting wet anyway." : {
       "localizations" : {
         "en" : {
@@ -10194,50 +10130,114 @@
         }
       }
     },
-    "Coldest water of all your sessions." : {
+    "Latest finish of all your sessions. Riding well into the evening." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coldest water of all your sessions."
+            "value" : "Latest finish of all your sessions. Riding well into the evening."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koudste water van al je sessions."
+            "value" : "Laatst gestopt van al je sessions. Tot ver in de avond aan het riden."
           }
         }
       }
     },
-    "Earliest start of all your sessions." : {
+    "Earliest start of all your sessions. On the cable before most people have had breakfast." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Earliest start of all your sessions."
+            "value" : "Earliest start of all your sessions. On the cable before most people have had breakfast."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vroegste start van al je sessions."
+            "value" : "Vroegste start van al je sessions. Op de cable voordat de meesten hebben ontbeten."
           }
         }
       }
     },
-    "Latest finish of all your sessions." : {
+    "Coldest water of all your sessions. Properly cold, too." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Latest finish of all your sessions."
+            "value" : "Coldest water of all your sessions. Properly cold, too."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatst gestopt van al je sessions."
+            "value" : "Koudste water van al je sessions. En echt koud ook."
+          }
+        }
+      }
+    },
+    "Most wind of all your sessions, and it was properly windy." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most wind of all your sessions, and it was properly windy."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste wind van al je sessions, en het waaide flink."
+          }
+        }
+      }
+    },
+    "Warmest air of all your sessions. A proper summer day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmest air of all your sessions. A proper summer day."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmste lucht van al je sessions. Een echte zomerdag."
+          }
+        }
+      }
+    },
+    "Coldest air of all your sessions. Wetsuit weather." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest air of all your sessions. Wetsuit weather."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koudste lucht van al je sessions. Wetsuitweer."
+          }
+        }
+      }
+    },
+    "Back on the water after a long break, the longest this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back on the water after a long break, the longest this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug op het water na een lange pauze, de langste deze session."
           }
         }
       }

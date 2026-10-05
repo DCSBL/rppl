@@ -110,7 +110,7 @@ enum LogbookFormatting {
         case .shortest: return String(localized: "Shortest set this session. Happens to everyone.")
         case .fastest: return String(localized: "Highest sustained speed of all sets this session.")
         case .mostLaps: return String(localized: "Most laps in one set this session.")
-        case .comeback: return String(localized: "Back on the water after the longest break this session.")
+        case .comeback: return String(localized: "Back on the water after a long break, the longest this session.")
         case .backToBack: return String(localized: "Shortest break before a set this session. Barely dried off.")
         }
     }
@@ -149,13 +149,13 @@ enum LogbookFormatting {
         case .mostDistance: return String(localized: "Most distance of all your sessions.")
         case .topSpeed: return String(localized: "Highest speed of all your sessions.")
         case .laziest: return String(localized: "Smallest share of the session spent riding. More dock than cable.")
-        case .coldest: return String(localized: "Coldest air of all your sessions.")
-        case .hottest: return String(localized: "Warmest air of all your sessions.")
-        case .windiest: return String(localized: "Most wind of all your sessions.")
+        case .coldest: return String(localized: "Coldest air of all your sessions. Wetsuit weather.")
+        case .hottest: return String(localized: "Warmest air of all your sessions. A proper summer day.")
+        case .windiest: return String(localized: "Most wind of all your sessions, and it was properly windy.")
         case .rainiest: return String(localized: "Most rain of all your sessions. You were getting wet anyway.")
-        case .iceBath: return String(localized: "Coldest water of all your sessions.")
-        case .earlyBird: return String(localized: "Earliest start of all your sessions.")
-        case .nightOwl: return String(localized: "Latest finish of all your sessions.")
+        case .iceBath: return String(localized: "Coldest water of all your sessions. Properly cold, too.")
+        case .earlyBird: return String(localized: "Earliest start of all your sessions. On the cable before most people have had breakfast.")
+        case .nightOwl: return String(localized: "Latest finish of all your sessions. Riding well into the evening.")
         }
     }
 }
