@@ -146,7 +146,29 @@ public enum SessionLoader {
     public static func loadExample(packageURL: URL, now: Date = Date()) throws -> SessionLoadBundle {
         let data = try SessionImportLimits.readBoundedFile(at: packageURL)
         let package = try SessionImportLimits.decodeTransferPackage(from: data)
-        return try load(package: SessionTimelineRebase.package(package, soEndedAt: now))
+        return try loadExample(package: package, now: now)
+    }
+
+    /// Same, from an already decoded package (see `ExampleSessionPreload`).
+    ///
+    /// A compiled package (`ExampleSessionCompiler`) carries current-analyzer stats in `derived`
+    /// and is used as is; anything else is analyzed from its raw streams.
+    public static func loadExample(package: SessionTransferPackage, now: Date = Date()) throws -> SessionLoadBundle {
+        let shifted = SessionTimelineRebase.package(package, soEndedAt: now)
+        guard let derived = shifted.derived, derived.isCurrentAnalyzer else {
+            return try load(package: shifted)
+        }
+        return SessionLoadBundle(
+            manifest: shifted.manifest,
+            detections: shifted.detections,
+            locations: shifted.locations,
+            health: shifted.health,
+            water: shifted.water,
+            stats: derived.stats,
+            byteSize: 0,
+            mapFrame: derived.mapFrame,
+            cityName: derived.cityName
+        )
     }
 
     private static func makeBundle(

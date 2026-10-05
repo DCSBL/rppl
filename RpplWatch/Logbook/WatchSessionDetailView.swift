@@ -10,7 +10,6 @@ enum WatchSessionDetailSource: Equatable {
 struct WatchSessionDetailView: View {
     let source: WatchSessionDetailSource
 
-    private nonisolated static let exampleFileName = "FBDC7D8C-8FEA-47B6-911B-00E94A8A496C"
     private static let store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
 
     @State private var manifest: SessionManifest?
@@ -202,9 +201,7 @@ struct WatchSessionDetailView: View {
     private func loadExample() async {
         guard loadPhase == .loading else { return }
         do {
-            let bundle = try await StoreIO.runOffMain {
-                try Self.loadBundledExample()
-            }
+            let bundle = try await ExampleSessionPreload.shared.load()
             manifest = bundle.manifest
             stats = bundle.stats
             cityName = bundle.cityName
@@ -230,16 +227,5 @@ struct WatchSessionDetailView: View {
             loadPhase = .failed
             WakeLog.error(.store, "WatchSessionDetail example load: \(error.localizedDescription)")
         }
-    }
-
-    private nonisolated static func loadBundledExample() throws -> SessionLoadBundle {
-        guard let url = Bundle.main.url(
-            forResource: exampleFileName,
-            withExtension: "json",
-            subdirectory: "Exports"
-        ) ?? Bundle.main.url(forResource: exampleFileName, withExtension: "json") else {
-            throw SessionStoreError.ioFailure("Bundled example session missing")
-        }
-        return try SessionLoader.loadExample(packageURL: url)
     }
 }

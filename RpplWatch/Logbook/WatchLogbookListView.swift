@@ -47,6 +47,7 @@ struct WatchLogbookListView: View {
                     .buttonStyle(.bordered)
                     .tint(Color.rpplIdleAccent)
                 }
+                .onAppear { ExampleSessionPreload.warmUp() }
             } else {
                 ForEach(catalog.entries) { entry in
                     NavigationLink {
