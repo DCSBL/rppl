@@ -47,6 +47,21 @@ Export exists so developers can share raw session data for analysis. It is not t
 
 Thresholds: [Docs/RideDetection.md](Docs/RideDetection.md).
 
+## Where to start
+
+Pick the area you want to touch, then open its entry point:
+
+| I want to… | Start here |
+|------------|------------|
+| Change detection (riding / inactive) | `RpplCore/Sources/RpplCore/DetectionEngine.swift`, then [Docs/RideDetection.md](Docs/RideDetection.md). Run `cd RpplCore && swift test`, no device needed. |
+| Change session stats (sets, laps, speed) | `SessionStatsBuilder.swift` in `RpplCore`, [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
+| Change the Watch recording loop | `RpplWatch/WatchSessionController.swift` (needs a real Watch) |
+| Change the iPhone logbook / export | `Rppl/ContentView.swift`, `Rppl/PhoneConnectivityService.swift` |
+| Change copy or translations | the `*.xcstrings` files, and the slang rules in [AGENTS.md](AGENTS.md) |
+| Change the website | `web/`, see [web/README.md](web/README.md) (`npm ci && npm run dev`) |
+
+New here? Read [Docs/DESIGN.md](Docs/DESIGN.md) for the big picture, then do the quick start below. Logic in `RpplCore` is the easiest place to begin because it is covered by `swift test` and has no Apple device dependencies.
+
 ## Quick start (dev)
 
 1. Open `Rppl.xcodeproj` in Xcode 26+.

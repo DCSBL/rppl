@@ -1,0 +1,75 @@
+/* Tokens mirror Rppl/Assets.xcassets (light / dark). */
+:root {
+  --text: #033b4f;
+  --muted: #045876;
+  --accent: #045876;
+  --card: rgb(255 255 255 / 0.6);
+  --hairline: rgb(3 59 79 / 0.08);
+  --backdrop-top: #cfe5f6;
+  --backdrop-bottom: #eef6fc;
+  --sets: #a65a00;
+  --laps: #6b3fc4;
+  --speed: #3c47c9;
+  --riding: #1e7d45;
+  --time: #8a6a00;
+  --track: rgb(3 59 79 / 0.1);
+  --radius: 24px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #fff;
+    --muted: #dbebfb;
+    --accent: #47bfd7;
+    --card: rgb(3 59 79 / 0.6);
+    --hairline: rgb(255 255 255 / 0.08);
+    --backdrop-top: #02070e;
+    --backdrop-bottom: #06283a;
+    --sets: #f5a94e;
+    --laps: #bba0f5;
+    --speed: #8c97ff;
+    --riding: #5bd68a;
+    --time: #ffd54a;
+    --track: rgb(255 255 255 / 0.12);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --card: #fff; }
+  @media (prefers-color-scheme: dark) { :root { --card: #033b4f; } }
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background: linear-gradient(var(--backdrop-top), var(--backdrop-bottom)) fixed;
+  font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { width: min(1040px, 100% - 32px); margin-inline: auto; }
+
+.tile {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 16px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+.tile h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tint, var(--text));
+}
+.tile h3 svg { width: 18px; height: 18px; flex: none; }
+.value { font-size: 40px; font-weight: 700; line-height: 1.1; }
+.value small { font-size: 16px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.caption { color: var(--muted); font-size: 15px; }
