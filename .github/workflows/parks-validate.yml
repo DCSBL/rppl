@@ -2,6 +2,9 @@
 # validation against schema/park.schema.json, and sanity checks (duplicate
 # id, out-of-range coordinates, under-specified cables, placeholder text).
 #
+# Required-check friendly: no `paths:` filter (a never-triggered workflow leaves a required
+# check pending forever). The job always runs; its steps skip when the PR touches no park files.
+#
 # CODEOWNERS still requires an explicit maintainer approval on top of this
 # green check before anything merges to main.
 
@@ -10,12 +13,6 @@ name: Validate parks
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "RpplCore/Sources/RpplCore/Resources/Parks/**"
-      - "schema/**"
-      - "scripts/validate_parks.py"
-      - ".yamllint.yml"
-      - ".github/workflows/parks-validate.yml"
 
 concurrency:
   group: validate-parks-${{ github.event.pull_request.number || github.ref }}
@@ -31,17 +28,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect park changes
+        id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
+          changed_files="$(git diff --name-only "$BASE" "$HEAD")"
+          if printf '%s\n' "$changed_files" \
+            | grep -E '^(RpplCore/Sources/RpplCore/Resources/Parks/|schema/|scripts/validate_parks\.py$|\.yamllint\.yml$|\.github/workflows/parks-validate\.yml$)' \
+            >/dev/null; then
+            echo "parks=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "parks=false" >> "$GITHUB_OUTPUT"
+            echo "No park-related paths changed: validation skipped"
+          fi
 
       - name: Set up Python
+        if: steps.filter.outputs.parks == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
+        if: steps.filter.outputs.parks == 'true'
         run: pip install "pyyaml==6.0.2" "jsonschema==4.23.0" "yamllint==1.35.1"
 
       - name: YAML lint
+        if: steps.filter.outputs.parks == 'true'
         run: yamllint --config-file .yamllint.yml RpplCore/Sources/RpplCore/Resources/Parks/
 
       - name: Schema + sanity validation
+        if: steps.filter.outputs.parks == 'true'
         run: python3 scripts/validate_parks.py

@@ -1,0 +1,79 @@
+version: 1
+id: beavercreek-roermond
+created_at: 2026-10-05
+updated_at: 2026-10-05
+history:
+  - date: 2026-10-05
+    description: initial
+
+name: Beaver Creek Wake Park Roermond
+address: De Weerd 52, 6041 TK Roermond
+timezone: Europe/Amsterdam
+# Pin is geocoded from the address, not the dock. Approximate.
+location:
+  lat: 51.2043775
+  lon: 5.9780566
+
+email: info@wake-park.nl
+website: https://www.wake-park.nl
+wakesys: true
+
+links:
+  - { kind: booking, url: "https://wake-park.wakesys.com/browser/index.php?page=book_ride_select_boat_or_cable&event_type_ID=773&transportation_name=Full%20Size%20Cable" }
+  - { kind: instagram, url: "https://www.instagram.com/wakeparkroermond/" }
+  - { kind: facebook, url: "https://www.facebook.com/wakeparkroermond/" }
+
+cables:
+  - name: Cable
+    description: Full size cable, runs at 30 km/h in regular operation.
+
+opening:
+  booking: optional
+  note: >-
+    Hours depend on season and weather. Tickets can also be bought on site, but can sell out
+    on busy days. Registration with an account is required before the first ride. Children
+    must be 8 or older and able to swim.
+
+prices:
+  - name: Ticket
+    options:
+      - { amount: "26", currency: EUR, per: hour, note: "from price, online booking up to 48 hours ahead" }
+      - { amount: "32", currency: EUR, per: 2 hours, note: "from price, online booking up to 48 hours ahead" }
+      - { amount: "42", currency: EUR, per: day, note: "from price, online booking up to 48 hours ahead" }
+  - name: Booking within 48 hours
+    options:
+      - { amount: "3", currency: EUR, note: surcharge per ticket }
+  - name: RFID wristband
+    options:
+      - { amount: "6", currency: EUR, note: one time }
+  - name: Wetsuit rental
+    options:
+      - { amount: "6", currency: EUR, per: day, note: shorty }
+      - { amount: "12", currency: EUR, per: day, note: full suit }
+  - name: Wakeboard rental
+    options:
+      - { amount: "12", currency: EUR, per: day, note: Easy Up }
+      - { amount: "22", currency: EUR, per: day, note: Easy Ride }
+  - name: Obstacle board rental
+    options:
+      - { amount: "22", currency: EUR, per: day }
+      - { amount: "32", currency: EUR, per: day }
+  - name: Helmet rental
+    options:
+      - { amount: "3", currency: EUR, per: day }
+      - { amount: "5", currency: EUR, per: day }
+  - name: Coaching
+    options:
+      - { amount: "39", currency: EUR, per: hour, note: plus ticket and equipment }
+
+facilities:
+  - Rental (wetsuit, wakeboard, obstacle board, helmet)
+  - Restaurant and bar (Yacht5, separate operator)
+  - Parking (about 80 spaces, EUR 2 per day)
+  - Beginner course (Sundays 11:30-13:00)
+  - Private cable
+  - Groups / events
+
+description: >-
+  Cable park on the Maasplassen near Roermond. A ticket includes waterski or kneeboard, a life
+  vest and a video instruction. Wakeboard costs extra.
