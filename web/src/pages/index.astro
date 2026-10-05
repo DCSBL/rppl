@@ -3,9 +3,9 @@ import Base from "../layouts/Base.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const showcase = [
-  { before: "Track", after: "Sessions", src: "logbook", tint: "var(--sets)", alt: "Rppl logbook: totals and a list of park-day sessions with sets and laps" },
-  { before: "Analyse", after: "Progress", src: "session", tint: "var(--laps)", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
-  { before: "Find", after: "Spots", src: "parks", tint: "var(--speed)", alt: "Parks tab: nearby cable parks with opening hours and distance" },
+  { before: "Track", after: "Sessions", src: "logbook", alt: "Rppl logbook: totals and a list of park-day sessions with sets and laps" },
+  { before: "Analyse", after: "Progress", src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
+  { before: "Find", after: "Spots", src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
 ];
 const features = [
   { title: "Stay focussed", text: "Start recording your session when you are ready, the watch does the rest. The app auto-detects starts, stops and wipeouts.", watch: true },
@@ -13,19 +13,19 @@ const features = [
   { title: "Yours to keep", text: "Your data stays yours, you can view and export your data at any time, to do cool things or to brag about it. Your data is stored on your phone and in iCloud, not on our servers." },
 ];
 ---
-<Base title="Rppl: cable-park wakeboarding tracker" description="Your Cablepark Buddy. Cable-park wakeboarding, recorded on Apple Watch. Automatic set detection, saved to Apple Health. No account, no subscription. Free, private and open source.">
+<Base title="Rppl: cable-park wakeboarding tracker" description="Your Cablepark Buddy. The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.">
   <header class="wrap hero">
     <img class="logo" src={`${base}/favicon.svg`} alt="" width="72" height="72" />
     <h1>Rppl</h1>
-    <p class="lead">Your Cablepark Buddy</p>
-    <p class="caption">Cable-park wakeboarding, recorded on Apple Watch. Automatic set detection. Saved to Apple Health. No account, no subscription. Free, private and open source.</p>
+    <p class="lead"><em>Your</em> Cablepark Buddy</p>
+    <p class="caption">The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.</p>
     <p class="cta"><span class="badge">Coming soon to the App Store</span></p>
   </header>
 
   <main class="wrap">
     <section class="showcase" aria-label="App screenshots">
       {showcase.map((s) => (
-        <div class="row" style={`--tint: ${s.tint}`}>
+        <div class="row">
           <h2>{s.before} <em>Your</em> {s.after}</h2>
           <div class="device phone">
             <img src={`${base}/shots/${s.src}.webp`} alt={s.alt} width="560" height="1215" loading="lazy" />
@@ -59,10 +59,12 @@ const features = [
 </Base>
 
 <style>
+  :root { --your: #5aaec9; }
   .hero { text-align: center; padding: 64px 0 24px; }
   .logo { margin: 0 auto 8px; }
   h1 { font-size: clamp(44px, 9vw, 72px); margin: 0; letter-spacing: -0.02em; }
-  .lead { font-size: clamp(20px, 3.5vw, 28px); font-weight: 600; margin: 8px 0; }
+  .lead { font-size: clamp(28px, 6vw, 48px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 8px 0; }
+  .lead em, .row h2 em { font-style: normal; color: var(--your); }
   .cta { margin-top: 24px; }
   .badge { display: inline-block; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; }
   @media (prefers-color-scheme: dark) { .badge { color: #02070e; } }
@@ -70,8 +72,7 @@ const features = [
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
   .row { display: flex; flex-direction: column; align-items: center; gap: 24px; margin: 72px 0; text-align: center; }
-  .row h2 { font-size: clamp(34px, 7vw, 56px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
-  .row h2 em { font-style: normal; color: var(--tint); }
+  .row h2 { font-size: clamp(36px, 7vw, 60px); line-height: 1.05; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 0; }
   @media (min-width: 760px) {
     .row { flex-direction: row; justify-content: center; gap: 72px; text-align: left; }
     .row > h2 { flex: 1 1 0; max-width: 380px; }
