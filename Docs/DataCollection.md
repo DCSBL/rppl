@@ -34,6 +34,22 @@ Session packages are schema **v1** (`manifest.schemaVersion`). The format was re
 
 Set distance, duration, set count, riding/inactive ratio, calories, sustained/trimmed speeds, session water-temperature mean, and record highlights come from `SessionStatsBuilder` in RpplCore (detections + GPS + health + water).
 
+### Record badges
+
+`HighlightAssigner` hands out record badges. Set badges compare sets within one session and are stored in `derived/view.json`. Session badges compare the whole logbook and are computed when the list loads. A "highest" badge needs at least two values, a "lowest" badge at least three. Ties and missing values (no weather, older sessions) award nothing. Character badges (marked *gated*) also need the record to clear a line, else nobody gets them; the app copy never names the numbers. Tapping a badge in the app explains it.
+
+| Scope | Badge | Rule |
+|-------|-------|------|
+| Set | `longest` / `longestTime` / `shortest` / `fastest` | Distance, duration, shortest duration, sustained speed |
+| Set | `mostLaps` | Most laps (more than zero) |
+| Set | `comeback` / `backToBack` | Longest / shortest break since the previous set; *gated*: over 15 min / under 2 min |
+| Session | `longest` / `mostWaterTime` / `mostLaps` / `mostCalories` / `longestSetEver` | Duration, riding time, laps, energy, longest set by distance |
+| Session | `highestRidePercentage` / `laziest` | Highest / lowest riding ratio; *gated*: over 50% / under 25% |
+| Session | `mostSets` / `mostDistance` / `topSpeed` | Set count, distance, peak speed |
+| Session | `coldest` / `hottest` / `windiest` / `rainiest` | Weather snapshot; *gated*: air below 10 °C / above 25 °C, wind above Bft 4, rain at least 0.5 mm/h |
+| Session | `iceBath` | Coldest water: measured mean, else park estimate; *gated*: below 17 °C |
+| Session | `earlyBird` / `nightOwl` | Earliest start / latest end, local time of day; *gated*: before 10:00 / after 21:00 |
+
 After Stop / import, Core writes `derived/view.json` (`SessionAnalyzer.version` + stats + `MapTrackFrame`). Phone logbook list and detail basics read that file; GPS polyline loads after detail appear. Rebuild when analyzer version is stale or sidecar missing. Layout: [SessionStorage.md](SessionStorage.md).
 
 Watch live UI still uses in-memory trackers while recording. Past sessions stay phone-only.

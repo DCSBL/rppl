@@ -9713,6 +9713,646 @@
           }
         }
       }
+    },
+    "Comeback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comeback"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comeback"
+          }
+        }
+      }
+    },
+    "Back to back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to back"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-to-back"
+          }
+        }
+      }
+    },
+    "Most sets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most sets"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste sets"
+          }
+        }
+      }
+    },
+    "Most distance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most distance"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste afstand"
+          }
+        }
+      }
+    },
+    "Laziest" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laziest"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luiste"
+          }
+        }
+      }
+    },
+    "Coldest" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koudste"
+          }
+        }
+      }
+    },
+    "Hottest" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hottest"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmste"
+          }
+        }
+      }
+    },
+    "Windiest" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windiest"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste wind"
+          }
+        }
+      }
+    },
+    "Rain rider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain rider"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenrider"
+          }
+        }
+      }
+    },
+    "Ice bath" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ice bath"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IJsbad"
+          }
+        }
+      }
+    },
+    "Early bird" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Early bird"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vroege vogel"
+          }
+        }
+      }
+    },
+    "Night owl" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night owl"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachtuil"
+          }
+        }
+      }
+    },
+    "Most calories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most calories"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste calorieën"
+          }
+        }
+      }
+    },
+    "Highest ride %" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest ride %"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoogste riding-%"
+          }
+        }
+      }
+    },
+    "Longest set ever" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest set ever"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langste set ooit"
+          }
+        }
+      }
+    },
+    "Shows what this badge means" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows what this badge means"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toont wat deze badge betekent"
+          }
+        }
+      }
+    },
+    "Most distance of all sets this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most distance of all sets this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste afstand van alle sets deze session."
+          }
+        }
+      }
+    },
+    "Longest time on the water of all sets this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest time on the water of all sets this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langst op het water van alle sets deze session."
+          }
+        }
+      }
+    },
+    "Shortest set this session. Happens to everyone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shortest set this session. Happens to everyone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kortste set deze session. Overkomt iedereen."
+          }
+        }
+      }
+    },
+    "Highest sustained speed of all sets this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest sustained speed of all sets this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoogste constante snelheid van alle sets deze session."
+          }
+        }
+      }
+    },
+    "Most laps in one set this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most laps in one set this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste laps in één set deze session."
+          }
+        }
+      }
+    },
+    "Shortest break before a set this session. Barely dried off." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shortest break before a set this session. Barely dried off."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kortste pauze voor een set deze session. Amper droog."
+          }
+        }
+      }
+    },
+    "Longest session in your logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest session in your logbook."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langste session in je logboek."
+          }
+        }
+      }
+    },
+    "Most time riding of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most time riding of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langst aan het riden van al je sessions."
+          }
+        }
+      }
+    },
+    "Most laps of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most laps of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste laps van al je sessions."
+          }
+        }
+      }
+    },
+    "Biggest share of the session spent riding. Hardly sat on the dock." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biggest share of the session spent riding. Hardly sat on the dock."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grootste deel van de session aan het riden. Amper op de dock gezeten."
+          }
+        }
+      }
+    },
+    "Most calories burned of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most calories burned of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste calorieën verbrand van al je sessions."
+          }
+        }
+      }
+    },
+    "Your longest set ever, by distance." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your longest set ever, by distance."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je langste set ooit, in afstand."
+          }
+        }
+      }
+    },
+    "Most sets of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most sets of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste sets van al je sessions."
+          }
+        }
+      }
+    },
+    "Most distance of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most distance of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste afstand van al je sessions."
+          }
+        }
+      }
+    },
+    "Highest speed of all your sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest speed of all your sessions."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoogste snelheid van al je sessions."
+          }
+        }
+      }
+    },
+    "Smallest share of the session spent riding. More dock than cable." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smallest share of the session spent riding. More dock than cable."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleinste deel van de session aan het riden. Meer dock dan cable."
+          }
+        }
+      }
+    },
+    "Most rain of all your sessions. You were getting wet anyway." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most rain of all your sessions. You were getting wet anyway."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste regen van al je sessions. Nat werd je toch al."
+          }
+        }
+      }
+    },
+    "Latest finish of all your sessions. Riding well into the evening." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Latest finish of all your sessions. Riding well into the evening."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laatst gestopt van al je sessions. Tot ver in de avond aan het riden."
+          }
+        }
+      }
+    },
+    "Earliest start of all your sessions. On the cable before most people have had breakfast." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earliest start of all your sessions. On the cable before most people have had breakfast."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vroegste start van al je sessions. Op de cable voordat de meesten hebben ontbeten."
+          }
+        }
+      }
+    },
+    "Coldest water of all your sessions. Properly cold, too." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest water of all your sessions. Properly cold, too."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koudste water van al je sessions. En echt koud ook."
+          }
+        }
+      }
+    },
+    "Most wind of all your sessions, and it was properly windy." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most wind of all your sessions, and it was properly windy."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeste wind van al je sessions, en het waaide flink."
+          }
+        }
+      }
+    },
+    "Warmest air of all your sessions. A proper summer day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmest air of all your sessions. A proper summer day."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmste lucht van al je sessions. Een echte zomerdag."
+          }
+        }
+      }
+    },
+    "Coldest air of all your sessions. Wetsuit weather." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest air of all your sessions. Wetsuit weather."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koudste lucht van al je sessions. Wetsuitweer."
+          }
+        }
+      }
+    },
+    "Back on the water after a long break, the longest this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back on the water after a long break, the longest this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug op het water na een lange pauze, de langste deze session."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
