@@ -1,4 +1,5 @@
 import SwiftUI
+import RpplCore
 
 /// Record badge chip; tap shows what the badge means.
 ///
