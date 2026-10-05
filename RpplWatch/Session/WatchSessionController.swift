@@ -75,15 +75,13 @@ final class WatchSessionController: NSObject {
     var healthAuthStatus = "unknown"
     var locationAuthStatus = "unknown"
     var motionAvailability = "unknown"
-    /// Structured gate states for Watch permissions onboarding.
+    /// Structured permission states behind the Start gate and the "Can't start yet" sheet.
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
-    /// False until the first off-main Health status lookup returns; gates onboarding vs idle.
-    var isHealthPermissionResolved = false
     @ObservationIgnored var healthStatusLookup: Task<HKAuthorizationStatus, Never>?
     var motionPermission: WatchPermissionState = .notDetermined
-    /// True while an auto or manual system permission sheet sequence is in flight.
-    /// Kept separate from ProgressView so the list stays interactive while HealthKit warms up.
+    /// True while a system permission sheet sequence (session Start or the Permissions button)
+    /// is in flight.
     var isPromptingPermissions = false
 
     var permissionStates: [WatchPermissionKind: WatchPermissionState] {
@@ -96,11 +94,6 @@ final class WatchSessionController: NSObject {
 
     /// Set when Start was refused for a missing required permission; drives the explain sheet.
     var startBlockedBy: WatchPermissionKind?
-
-    /// First run only: a required permission can still show its system sheet.
-    var needsFirstRunPermissionPrompt: Bool {
-        WatchPermissionOrder.needsFirstRunPrompt(states: permissionStates)
-    }
 
     var areRecordingPermissionsReady: Bool {
         WatchPermissionOrder.areAllReady(permissionStates)
