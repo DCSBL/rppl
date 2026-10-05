@@ -8,7 +8,11 @@ Keeps what detection and map tests need, in the order the Watch recorded it:
   arrival order, including repeated and late fixes,
 - the detections the Watch wrote live (`recordedDetections`),
 - `annotations`: hand-written ground truth (good sets, bad sets, bad fixes, late
-  deliveries, GPS gaps). Re-running keeps the annotations already in the output.
+  deliveries, GPS gaps, labelled events such as jumps and falls). Re-running keeps the
+  annotations already in the output,
+- `motion`: device motion rows exactly as the Watch wrote them, only around `event`
+  annotations (± MOTION_PAD_S), so labelled jumps and falls keep their 25 Hz signal without
+  carrying the whole session. Re-run after adding events to refresh the slices.
 
 An export that carries every stream twice (phone import appended a re-sent
 transfer) is collapsed to one copy.
@@ -24,8 +28,12 @@ format and test semantics: RpplCore/Tests/RpplCoreTests/Fixtures/Sessions/README
 from __future__ import annotations
 
 import argparse
+import base64
 import json
+import struct
 import sys
+import zlib
+from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +41,7 @@ OUT_DIR = REPO_ROOT / "RpplCore" / "Tests" / "RpplCoreTests" / "Fixtures" / "Ses
 
 LOCATION_KEYS = ("timestamp", "latitude", "longitude", "horizontalAccuracy", "speed", "course")
 ROUNDING = {"latitude": 7, "longitude": 7, "horizontalAccuracy": 2, "speed": 3, "course": 1}
+MOTION_PAD_S = 2.0
 
 
 def collapse_doubled(items: list) -> tuple[list, bool]:
@@ -54,6 +63,33 @@ def slim_location(sample: dict) -> dict:
     return out
 
 
+def parse_ts(value: str) -> float:
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+
+
+def motion_rows(package: dict) -> list[dict]:
+    """`motionFramesZlib`: `[UInt32 BE length][raw deflate JSONL]` frames (CompressedJSONLFrames)."""
+    blob = package.get("motionFramesZlib")
+    if not blob:
+        return list(package.get("motion") or [])
+    raw = base64.b64decode(blob)
+    offset, chunks = 0, []
+    while offset + 4 <= len(raw):
+        (length,) = struct.unpack(">I", raw[offset : offset + 4])
+        chunks.append(zlib.decompress(raw[offset + 4 : offset + 4 + length], -15))
+        offset += 4 + length
+    return [json.loads(line) for line in b"".join(chunks).decode().splitlines() if line.strip()]
+
+
+def motion_around_events(rows: list[dict], annotations: list[dict]) -> list[dict]:
+    windows = [
+        (parse_ts(a["start"]) - MOTION_PAD_S, parse_ts(a["end"]) + MOTION_PAD_S)
+        for a in annotations
+        if a.get("kind") == "event" and a.get("start") and a.get("end")
+    ]
+    return [row for row in rows if any(start <= parse_ts(row["t"]) <= end for start, end in windows)]
+
+
 def dump(fixture: dict) -> str:
     """One location / detection per line so diffs and reviews stay readable."""
     lines = ["{"]
@@ -61,7 +97,7 @@ def dump(fixture: dict) -> str:
     for index, key in enumerate(keys):
         value = fixture[key]
         comma = "," if index < len(keys) - 1 else ""
-        if key in ("locations", "recordedDetections", "annotations") and isinstance(value, list):
+        if key in ("locations", "recordedDetections", "annotations", "motion") and isinstance(value, list):
             lines.append(f'  "{key}": [')
             for row_index, row in enumerate(value):
                 row_comma = "," if row_index < len(value) - 1 else ""
@@ -104,11 +140,15 @@ def main() -> int:
         "recordedDetections": detections,
         "locations": [slim_location(sample) for sample in locations],
     }
+    motion, _ = collapse_doubled(motion_rows(package))
+    motion = motion_around_events(motion, annotations)
+    if motion:
+        fixture["motion"] = motion
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path.write_text(dump(fixture), encoding="utf-8")
     print(
         f"wrote {out_path.relative_to(REPO_ROOT)}: {len(fixture['locations'])} locations, "
-        f"{len(detections)} detections, {len(annotations)} annotations"
+        f"{len(detections)} detections, {len(annotations)} annotations, {len(motion)} motion rows"
         + (" (export was doubled — collapsed)" if doubled else ""),
         file=sys.stderr,
     )
