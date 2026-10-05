@@ -19,8 +19,9 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove month-name labels, author credit and source comments
 
-author: Rppl
 name: Project 7 Cablepark Rotterdam
 address: Kosboulevard 35, 3059 XZ Rotterdam
 timezone: Europe/Amsterdam
@@ -28,8 +29,6 @@ location:
   lat: 51.979207
   lon: 4.573426
 
-# Nearest official Rijkswaterstaat surface-water temperature station (Hollandsche IJssel at
-# Krimpen a/d IJssel, ~7 km away). Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: krimpenaandeijssel.hollandscheijssel }
 
 phone: 010 - 2600 110
@@ -50,7 +49,6 @@ facilities:
   - Coin shower (€0,50)
   - Toilet
 
-# Source: project7cablepark.nl/tarieven + FAQ
 prices:
   - name: Online ticket
     options:
@@ -86,8 +84,7 @@ prices:
 
 cables:
   - name: Cable
-    direction: cw               # full size (loop); 2d is a 2-point "2.0" cable
-    # First point is the start.
+    direction: cw
     points:
       - { lat: 51.9792871834595, lon: 4.57415297727128 }
       - { lat: 51.9802715418047, lon: 4.57762945411789 }
@@ -95,24 +92,22 @@ cables:
       - { lat: 51.9793930743687, lon: 4.57832199054877 }
       - { lat: 51.9785861824904, lon: 4.57461757152632 }
 
-# Drop-in windows (rules) and fixed-start blocks (slots). A block is available
-# when it fits inside an open window. Source: project7cablepark.nl/openingstijden
 opening:
   booking: required
   note: >-
     Book a block online at least 3 hours in advance and check in at the desk 30 minutes
     before start. Easter, Ascension and Pentecost use weekend hours in April and May.
   rules:
-    - { label: April, months: [4], days: [weekend], open: "12:30", close: "17:00" }
-    - { label: May, months: [5], days: [weekdays], open: "14:00", close: "20:00" }
-    - { label: May, months: [5], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: June, months: [6], days: [weekdays], open: "14:00", close: "21:30" }
-    - { label: June, months: [6], days: [weekend], open: "12:30", close: "21:30" }
-    - { label: July, months: [7], days: [daily], open: "11:00", close: "21:30" }
-    - { label: August, months: [8], days: [daily], open: "11:00", close: "20:00" }
-    - { label: September, months: [9], days: [weekdays], open: "14:00", close: "20:00" }
-    - { label: September, months: [9], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: October, months: [10], days: [weekend], open: "12:30", close: "17:00" }
+    - { months: [4], days: [weekend], open: "12:30", close: "17:00" }
+    - { months: [5], days: [weekdays], open: "14:00", close: "20:00" }
+    - { months: [5], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [6], days: [weekdays], open: "14:00", close: "21:30" }
+    - { months: [6], days: [weekend], open: "12:30", close: "21:30" }
+    - { months: [7], days: [daily], open: "11:00", close: "21:30" }
+    - { months: [8], days: [daily], open: "11:00", close: "20:00" }
+    - { months: [9], days: [weekdays], open: "14:00", close: "20:00" }
+    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [10], days: [weekend], open: "12:30", close: "17:00" }
   slots:
     - { id: "1", start: "11:00", end: "12:30" }
     - { id: "2", start: "12:30", end: "14:00" }

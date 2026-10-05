@@ -1,6 +1,3 @@
-# Sources: https://deberendonck.nl (home, contact, tarieven/openingstijden pages, via
-# user-supplied screenshots, 2026-09-27) + dock location/cable trace from user's in-app editor
-# session (2026-09-27/28).
 version: 1
 id: deberendonck-wijchen
 created_at: 2026-09-27
@@ -14,8 +11,9 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove month-name labels, author credit and source comments; neutral wording in description
 
-author: Rppl
 name: De Berendonck
 address: Weg door de berendonck 29, 6603 LP Wijchen
 timezone: Europe/Amsterdam
@@ -23,10 +21,6 @@ location:
   lat: 51.81116710326
   lon: 5.77213453579262
 
-# Nearest official Rijkswaterstaat surface-water temperature station that actually reports (Grave
-# boven, ~5.9 km away, on the Maas) - found via scripts/find-water-temperature-station.py on
-# 2026-09-28; closer stations (dukenburg, nijmegen.maaswaalkanaal, grave.beneden) haven't reported
-# since the 1980s/90s. Estimate only - not measured at the park itself.
 water_temperature: { provider: rws_nl, station_id: grave.boven }
 
 phone: 024-6411430
@@ -40,7 +34,6 @@ facilities:
   - Wetsuit verhuur
   - Wakeboard verhuur
 
-# Source: deberendonck.nl tarieven page
 prices:
   - name: "1,5 uur"
     options:
@@ -76,9 +69,8 @@ prices:
 
 cables:
   - name: Skibaan
-    direction: cw               # full size (loop)
+    direction: cw
     length_m: 834
-    # First point is the start.
     points:
       - { lat: 51.8113489584493, lon: 5.77203034709951 }
       - { lat: 51.8119159208552, lon: 5.77563958620648 }
@@ -86,8 +78,6 @@ cables:
       - { lat: 51.8131999547377, lon: 5.77444555420045 }
       - { lat: 51.8120378737484, lon: 5.77162364784075 }
 
-# Drop-in windows. Doordeweeks in mei/september is dinsdag t/m vrijdag (maandag gesloten).
-# Source: deberendonck.nl openingstijden skibaan
 opening:
   booking: required
   booking_minutes: [90, 180]
@@ -96,21 +86,21 @@ opening:
     personen kunnen ook buiten openingstijd reserveren. We stoppen uiterlijk bij zonsondergang.
     Tijdens feestdagen of bij besloten groepen kunnen openingstijden afwijken.
   rules:
-    - { label: April, months: [4], days: [weekend], open: "12:30", close: "17:00" }
-    - { label: May, months: [5], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
-    - { label: May, months: [5], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: June, months: [6], days: [weekdays], open: "14:00", close: "21:30" }
-    - { label: June, months: [6], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: July, months: [7], days: [weekdays], open: "12:30", close: "21:30" }
-    - { label: July, months: [7], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: August, months: [8], days: [weekdays], open: "12:30", close: "21:30" }
-    - { label: August, months: [8], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: September, months: [9], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
-    - { label: September, months: [9], days: [weekend], open: "12:30", close: "20:00" }
-    - { label: October, months: [10], days: [weekend], open: "12:30", close: "17:00" }
+    - { months: [4], days: [weekend], open: "12:30", close: "17:00" }
+    - { months: [5], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
+    - { months: [5], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [6], days: [weekdays], open: "14:00", close: "21:30" }
+    - { months: [6], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [7], days: [weekdays], open: "12:30", close: "21:30" }
+    - { months: [7], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [8], days: [weekdays], open: "12:30", close: "21:30" }
+    - { months: [8], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [9], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
+    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [10], days: [weekend], open: "12:30", close: "17:00" }
 
 description: >-
   Waterskiën is inclusief instructie, waterski's en zwemvest; extra materiaal zoals een wetsuit
   kun je bijkopen. Ook wakeboarden mogelijk. Van mei t/m september is er op zondagen de Easyride:
-  de baan draait langzamer en een bootje brengt je terug naar de start, ideaal voor beginners.
+  de baan draait langzamer en een bootje brengt je terug naar de start, geschikt voor beginners.
   Adviesleeftijd: waterskiën vanaf ca. 10 jaar, wakeboarden vanaf ca. 12 jaar.

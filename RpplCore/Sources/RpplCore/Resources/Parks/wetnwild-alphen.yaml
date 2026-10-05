@@ -19,8 +19,9 @@ history:
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove past extra opening hours (2026-09-29 to 2026-10-01), month-name labels, author credit and source comments
 
-author: Rppl
 name: Wet 'n Wild
 address: Sportlaan 5, 2406 LD Alphen aan den Rijn
 timezone: Europe/Amsterdam
@@ -28,11 +29,7 @@ location:
   lat: 52.13616235164614
   lon: 4.6779432055000365
 
-# Nearest official Rijkswaterstaat surface-water temperature station that actually reports
-# (Maarssen kanaal, ~24.7 km away). Re-checked 2026-09-28 via
-# scripts/find-water-temperature-station.py: gouda.voorhaven (~16 km, previously used) had
-# stopped reporting (stale since 2026-08-13); all closer Hollandsche IJssel stations out to ~25 km
-# are stale too, several since 2015. Estimate only - not measured at the park itself.
+# Nearest station that still reports (~25 km); closer ones stopped reporting.
 water_temperature: { provider: rws_nl, station_id: maarssen.kanaal }
 
 phone: 0172 472 412
@@ -45,7 +42,6 @@ cables:
   - name: Cable
     direction: ccw
     length_m: 780
-    # First point is the start.
     points:
       - { lat: 52.13616893686612, lon: 4.67831871475394 }
       - { lat: 52.13359404163105, lon: 4.679863667112853 }
@@ -53,9 +49,6 @@ cables:
       - { lat: 52.13381795147282, lon: 4.680936550695433 }
       - { lat: 52.13640600413686, lon: 4.679423784843997 }
 
-# Opening windows plus hourly, unnumbered blocks bookable per 1 or 2 hours.
-# Source: wetnwild.nl/wakepark (September 2026); October hours from the park's own Instagram
-# post @wetnwildwakepark (seen 2026-09-29).
 opening:
   booking: optional
   numbered: false
@@ -63,26 +56,17 @@ opening:
   note: >-
     Booking ahead is recommended.
   rules:
-    - { label: September, months: [9], days: [wed], open: "16:00", close: "20:00" }
-    - { label: September, months: [9], days: [thu, fri], open: "17:00", close: "20:00" }
-    - { label: September, months: [9], days: [sat], open: "12:00", close: "18:00" }
-    - { label: September, months: [9], days: [sun], open: "13:00", close: "18:00" }
-    - { label: October, months: [10], days: [sat, sun], open: "13:00", close: "16:00" }
+    - { months: [9], days: [wed], open: "16:00", close: "20:00" }
+    - { months: [9], days: [thu, fri], open: "17:00", close: "20:00" }
+    - { months: [9], days: [sat], open: "12:00", close: "18:00" }
+    - { months: [9], days: [sun], open: "13:00", close: "18:00" }
+    - { months: [10], days: [sat, sun], open: "13:00", close: "16:00" }
     - label: Beginner hour
       months: [9]
       days: [sat]
       open: "12:00"
       close: "13:00"
       note: Cable runs at 27 km/h
-  # One-off changes; each stops applying after its dates. Source: the park's Instagram story
-  # "Deze week" @wetnwildwakepark (seen 2026-09-29), extra opening hours.
-  # `sunset` is not calculated; it counts as 00:00, so the park is closed after midnight.
-  # The same story lists Friday 2026-10-02 closed and Sat/Sun 2026-10-03/04 13:00-16:00, which
-  # the regular October rules already give, so those need no exception.
-  exceptions:
-    - { kind: hours, label: Extra opening hours, dates: ["2026-09-29"], open: "17:00", close: sunset }
-    - { kind: hours, label: Extra opening hours, dates: ["2026-09-30"], open: "16:00", close: sunset }
-    - { kind: hours, label: Extra opening hours, dates: ["2026-10-01"], open: "17:30", close: sunset }
   slots:
     - { id: "12:00", start: "12:00", end: "13:00" }
     - { id: "13:00", start: "13:00", end: "14:00" }
@@ -93,8 +77,7 @@ opening:
     - { id: "18:00", start: "18:00", end: "19:00" }
     - { id: "19:00", start: "19:00", end: "20:00" }
 
-# Source: wetnwild.nl/abonnementen-en-tarieven (September 2026). Only 1-hour rates were
-# confirmed; verify 2-hour/day rates and rental prices on-site before relying on them.
+# Only 1-hour rates confirmed; 2-hour, day and rental prices are missing.
 prices:
   - name: "1 hour"
     options:

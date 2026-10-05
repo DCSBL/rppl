@@ -1,12 +1,3 @@
-# Sources (official domain only, fetched 2026-09-27):
-#   https://www.lakesideparadise.be/cable-park/cablepark/
-#   https://www.lakesideparadise.be/cable-park/pro-cable/
-#   https://www.lakesideparadise.be/cable-park/rookie-cable/
-#   https://www.lakesideparadise.be/cable-park/kleine-kabelbaan-2-0/
-#   https://www.lakesideparadise.be/cable-park/reserveren/
-#   https://www.lakesideparadise.be/cable-park/tarieven-verhuur/
-#   https://www.lakesideparadise.be/info/openingsuren/
-#   https://www.lakesideparadise.be/info/ligging/
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
@@ -18,32 +9,26 @@ history:
     description: mark opening hours unknown (reservation-only, no published weekly pattern)
   - date: 2026-09-28
     description: >-
-        rewrite cable and park descriptions per Docs/ParkDescriptions.md tone of voice.
-        Add water_temperature (nearest reporting VMM station, ~2.7 km away),
-        set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
+      rewrite cable and park descriptions per Docs/ParkDescriptions.md tone of voice.
+      Add water_temperature (nearest reporting VMM station, ~2.7 km away),
+      set wakesys flag, drop redundant "(Wakesys)" mentions from cable descriptions
   - date: 2026-10-04
     description: store prices as numbers (amount, currency), same values
   - date: 2026-10-04
     description: group prices of the same name into options
   - date: 2026-10-04
     description: drop hours_unknown (no hours filled in already means unknown)
+  - date: 2026-10-05
+    description: group 1 hour and 2 hours prices (with gear, own gear, winter) and the two season passes into one entry each; remove author credit and source comments
 
-author: Rppl
 name: Lakeside Paradise
 address: Duinenwater 41, 8300 Knokke-Heist
 timezone: Europe/Brussels
-# No dock pin on the official site (only a generic address-level Google Maps embed on
-# /info/ligging/). This is a geocode of the address itself (OpenStreetMap Nominatim, which
-# resolved it directly to the "Lakeside Paradise" building), not a traced/confirmed dock point.
+# Geocode of the address, not a confirmed dock point.
 location:
   lat: 51.3377928
   lon: 3.2731542
 
-# Nearest official VMM surface-water temperature station that's still reporting: "Knokke/
-# Heistlaan/Isabellavaart" on the Isabellavaart canal, ~2.7 km from the dock (verified against
-# the live API on 2026-09-28: 15-min readings up to the same day). Duinenwater itself is a
-# private former sand-quarry lake with no station of its own - estimate only, not measured at
-# the park.
 water_temperature: { provider: vmm_be, station_id: "01265376042" }
 
 phone: "+32 (0)50 60 60 35"
@@ -56,10 +41,7 @@ links:
 
 wakesys: true
 
-# Three separate cable systems. Source (reserveren page) states Pro Cable is
-# "linksdraaiend" (left-turning) and Rookie Cable "rechtsdraaiend" (right-turning); mapped to
-# cw/ccw by plain geometry (turning left throughout a loop = counter-clockwise), not a park
-# fact. Small Cable 2.0 is instructor-paced, gradual-start, 2-point - matches the `2d` code.
+# Pro Cable turns left (ccw) and Rookie Cable right (cw), per the reserveren page.
 cables:
   - name: Pro Cable
     direction: ccw
@@ -88,27 +70,20 @@ opening:
     Saturdays and Sundays afternoons (by reservation), daily in July and August; same reduced
     weekend/school-holiday winter schedule as Pro Cable.
 
-# Source: tarieven-verhuur (September 2026). Non-member session rates and passes; "member"
-# (discounted) rates and private full-cable rentals are noted but not itemized here.
+# Non-member rates; member prices and private rentals are not listed.
 prices:
-  - name: "1 hour with gear"
+  - name: "1 hour"
     options:
-      - { amount: "38", currency: EUR, note: "regular season (April-autumn break); wakeboard and/or wetsuit" }
-  - name: "1 hour own gear"
+      - { amount: "38", currency: EUR, note: "with gear (wakeboard and/or wetsuit), regular season (April-autumn break)" }
+      - { amount: "28", currency: EUR, note: "own gear, regular season (April-autumn break)" }
+      - { amount: "35", currency: EUR, note: "winter season (post-autumn break to Easter); experienced riders only, with or own gear" }
+  - name: "2 hours"
     options:
-      - { amount: "28", currency: EUR, note: regular season (April-autumn break) }
-  - name: "2 hours with gear"
-    options:
-      - { amount: "53", currency: EUR, note: regular season (April-autumn break) }
-  - name: "2 hours own gear"
-    options:
-      - { amount: "38", currency: EUR, note: regular season (April-autumn break) }
+      - { amount: "53", currency: EUR, note: "with gear, regular season (April-autumn break)" }
+      - { amount: "38", currency: EUR, note: "own gear, regular season (April-autumn break)" }
   - name: Daily insurance
     options:
       - { amount: "3", currency: EUR, note: "optional, non-members only" }
-  - name: "1 hour"
-    options:
-      - { amount: "35", currency: EUR, note: "winter season (post-autumn break to Easter); experienced riders only, with or own gear" }
   - name: Winter pass
     options:
       - { amount: "199", currency: EUR, note: "before 1 Nov; own gear, Nov-Mar" }
@@ -116,8 +91,6 @@ prices:
   - name: Season pass
     options:
       - { amount: "799", currency: EUR, note: own gear }
-  - name: Season pass -12
-    options:
       - { amount: "699", currency: EUR, note: "own gear, under 12" }
   - name: Year pass
     options:
