@@ -46,7 +46,11 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
 
     func refresh() {
         authorizationStatus = manager.authorizationStatus
-        servicesEnabled = CLLocationManager.locationServicesEnabled()
+        // `locationServicesEnabled()` can block, so query it off the main thread.
+        Task { [weak self] in
+            let enabled = await Task.detached { CLLocationManager.locationServicesEnabled() }.value
+            self?.servicesEnabled = enabled
+        }
         switch authorizationStatus {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
