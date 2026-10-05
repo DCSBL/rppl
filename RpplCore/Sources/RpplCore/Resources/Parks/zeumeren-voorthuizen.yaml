@@ -1,0 +1,89 @@
+version: 1
+id: zeumeren-voorthuizen
+created_at: 2026-10-05
+updated_at: 2026-10-05
+history:
+  - date: 2026-10-05
+    description: initial, from zeumerenwatersport.nl
+
+name: Zeumeren Watersport
+address: Stroetweg 11, 3781 PR Voorthuizen
+timezone: Europe/Amsterdam
+# Approximate pin from neighbouring official addresses on Stroetweg, not the dock.
+location:
+  lat: 52.1760
+  lon: 5.6218
+
+# Nearest station that still reports (~21 km); closer ones stopped reporting.
+water_temperature: { provider: rws_nl, station_id: eemmeerdijk.km23 }
+
+phone: 0342 781 100
+email: info@zeumerenwatersport.nl
+website: https://zeumerenwatersport.nl
+links:
+  - { kind: booking, url: "https://zeumerenwatersport.nl/reserveren2/" }
+  - { kind: instagram, url: "https://www.instagram.com/zeumeren_watersport/" }
+  - { kind: facebook, url: "https://www.facebook.com/Waterski-Zeumeren-137570016413648" }
+
+cables:
+  - name: Cable
+    description: >-
+      Loop cable of over 800 m that runs 11 m above the lake, with 9 tow points ("meenemers")
+      and 5 corners. 16 obstacles in the water. Minimum age is 10 for waterski and 12 for wakeboard.
+
+opening:
+  booking_minutes: [90, 180]
+  note: >-
+    The cable runs with at least 3 riders. It runs until sunset, so hours can differ with
+    weather or large bookings. Closed on King's Day. Groups of 15 or more can arrange hours
+    outside the schedule. Arrive 15 minutes early for gear. Free cancellation up to 48 hours
+    before, rescheduling up to 24 hours before.
+  rules:
+    - { months: [4], days: [wed], open: "17:00", close: "20:00" }
+    - { months: [4], days: [weekend], open: "12:30", close: "17:00" }
+    - { months: [5], days: [tue, wed, fri], open: "16:30", close: "21:00" }
+    - { from: "2026-06-01", until: "2026-07-17", days: [tue, wed, thu, fri], open: "14:00", close: "21:30" }
+    - { from: "2026-07-18", until: "2026-08-30", days: [weekdays], open: "12:30", close: "21:30" }
+    - { from: "2026-08-31", until: "2026-09-30", days: [tue, wed, fri], open: "15:30", close: "20:00" }
+    - { months: [5, 6, 7, 8, 9], days: [weekend], open: "12:30", close: "20:00" }
+    - { months: [10], days: [wed], open: "17:00", close: sunset }
+    - { months: [10], days: [weekend], open: "12:30", close: "17:00" }
+
+prices:
+  - name: Cable access
+    options:
+      - { amount: "20", currency: EUR, per: "1.5 hours", note: kids up to 15 }
+      - { amount: "30", currency: EUR, per: "3 hours", note: kids up to 15 }
+      - { amount: "44", currency: EUR, per: day, note: kids up to 15 }
+      - { amount: "26", currency: EUR, per: "1.5 hours", note: adults from 16 }
+      - { amount: "36", currency: EUR, per: "3 hours", note: adults from 16 }
+      - { amount: "49", currency: EUR, per: day, note: adults from 16 }
+  - name: Wetsuit
+    options:
+      - { amount: "5", currency: EUR, per: "1.5 hours" }
+      - { amount: "8", currency: EUR, per: "3 hours" }
+      - { amount: "12.50", currency: EUR, per: day }
+  - name: Wakeboard
+    options:
+      - { amount: "10", currency: EUR, per: "1.5 hours" }
+      - { amount: "15", currency: EUR, per: "3 hours" }
+      - { amount: "25", currency: EUR, per: day }
+  - name: 12-ride card
+    options:
+      - { amount: "200", currency: EUR, note: up to 15, pay for 10 and get 12 }
+      - { amount: "260", currency: EUR, note: from 16, pay for 10 and get 12 }
+  - name: Parking
+    options:
+      - { amount: "7", currency: EUR, note: per vehicle on Leisurelands }
+      - { amount: "6", currency: EUR, note: per vehicle with a ticket from Zeumeren Watersport }
+
+facilities:
+  - Terrace
+  - Heated bistro
+  - Lounge seating
+  - Stand-up paddleboarding
+  - Paid parking on Leisurelands
+
+description: >-
+  Cable park on a lake at Leisurelands in Voorthuizen, with waterski and wakeboard on one loop
+  cable. Also offers stand-up paddleboarding and a terrace open to everyone.
