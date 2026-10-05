@@ -1,7 +1,7 @@
 version: 1
 id: aquabest-best
 created_at: 2026-09-27
-updated_at: 2026-09-28
+updated_at: 2026-10-05
 history:
   - date: 2026-09-27
     description: initial, from cableparkaquabest.nl
@@ -15,6 +15,8 @@ history:
     description: rewrite training cable description per Docs/ParkDescriptions.md tone of voice
   - date: 2026-10-05
     description: remove past special-day hours (2026-09-19), month-name label, unused numbered flag, author credit and source comments
+  - date: 2026-10-05
+    description: trace cable and training cable on the map, add direction
 
 name: Cablepark Aquabest
 address: Ekkersweijer 2, 5681 RZ Best
@@ -38,12 +40,21 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
     length_m: 800
+    points:
+      - { lat: 51.5001765898984, lon: 5.43920040715574 }
+      - { lat: 51.4988605085168, lon: 5.43528581219675 }
+      - { lat: 51.4980817041817, lon: 5.43606003723077 }
+      - { lat: 51.4994257510478, lon: 5.43984621561974 }
     description: >-
       4-mast cable ski/wakeboard loop with 10 tow points ("meenemers") and a course of
       obstacles (kickers, rails, boxes) for jumps and tricks.
   - name: Training cable
     direction: 2d
+    points:
+      - { lat: 51.5002104282456, lon: 5.43815134575968 }
+      - { lat: 51.4995340688178, lon: 5.4361968047478 }
     description: >-
       2-mast cable trainer used for beginner instruction and the Saturday/Sunday morning
       wakeboard clinic. Opening hours depend on reservation volume. Call ahead to confirm.

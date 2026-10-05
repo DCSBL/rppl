@@ -1,7 +1,7 @@
 version: 1
 id: view-almere
 created_at: 2026-09-27
-updated_at: 2026-09-28
+updated_at: 2026-10-05
 history:
   - date: 2026-09-27
     description: initial
@@ -17,6 +17,8 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove past opening dates (pre-season Sundays, 2026-10-04), month-name labels, unused numbered flag, author credit and source comments; group clinic prices into one
+  - date: 2026-10-05
+    description: trace both cables on the map, add Alta Twin direction
 
 name: Cablepark VIEW Almere
 address: Bergsmapad 1, 1324 ZK Almere
@@ -41,9 +43,19 @@ cables:
   - name: Grote baan
     # Direction confirmed by a rider, not stated on the park's site.
     direction: ccw
+    points:
+      - { lat: 52.3585546998476, lon: 5.21501871403023 }
+      - { lat: 52.358864713801, lon: 5.21908686853842 }
+      - { lat: 52.3599809561145, lon: 5.22001190227344 }
+      - { lat: 52.3604782564784, lon: 5.21877488269814 }
+      - { lat: 52.35914944718, lon: 5.21479179321656 }
   - name: Alta Twin
-    description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
+    direction: 2d
     length_m: 200
+    points:
+      - { lat: 52.3582029191082, lon: 5.21550000719344 }
+      - { lat: 52.358431785598, lon: 5.21836969075431 }
+    description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
 
 opening:
   booking: optional
