@@ -7,13 +7,7 @@ const showcase = [
   { before: "Analyse", after: "Progress", src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
   { before: "Find", after: "Spots", src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
 ];
-const stats = [
-  { value: "9", label: "Sets", tint: "var(--sets)" },
-  { value: "17", label: "Laps", tint: "var(--laps)" },
-  { value: "27,5", unit: "km/h", label: "Cable speed", tint: "var(--speed)" },
-  { value: "1:42", unit: "hr", label: "On the water", tint: "var(--time)" },
-];
-const keep = ["On your phone", "In your iCloud", "Export anytime", "No Rppl server"];
+const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Export anytime", "No account", "No subscription", "No ads", "No tracking", "No Rppl server", "Open source"];
 ---
 <Base title="Rppl: Your Cablepark Buddy" description="Your Cablepark Buddy. The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.">
   <header class="wrap hero">
@@ -36,35 +30,31 @@ const keep = ["On your phone", "In your iCloud", "Export anytime", "No Rppl serv
       ))}
     </section>
 
-    <section class="focus" aria-labelledby="focus-h">
-      <div class="device watch">
-        <img src={`${base}/shots/watch.webp`} alt="Apple Watch riding view: distance, cable speed, laps, water temperature and heart rate" width="422" height="514" loading="lazy" />
-      </div>
-      <div>
-        <h2 id="focus-h">Stay focussed</h2>
-        <p>Start recording your session when you are ready, the watch does the rest. The app auto-detects starts, stops and wipeouts.</p>
-      </div>
-    </section>
-
     <section class="features" aria-label="More">
       <div class="tile">
-        <h3>At a glance</h3>
-        <p class="caption">See important information about your session, like cable speed and set count.</p>
-        <div class="stats">
-          {stats.map((x) => (
-            <div class="stat" style={`--tint: ${x.tint}`}>
-              <span class="value">{x.value}{x.unit && <small>{x.unit}</small>}</span>
-              <span class="label">{x.label}</span>
-            </div>
-          ))}
+        <div class="visual">
+          <div class="device watch">
+            <img src={`${base}/shots/watch.webp`} alt="Apple Watch riding view: distance, cable speed, laps, water temperature and heart rate" width="422" height="514" loading="lazy" />
+          </div>
         </div>
+        <h3>Stay focussed</h3>
+        <p class="caption">Start recording your session when you are ready, the watch does the rest. The app auto-detects starts, stops and wipeouts.</p>
       </div>
       <div class="tile">
+        <div class="visual">
+          <img class="glance" src={`${base}/shots/glance.webp`} alt="Session cards: 9 sets and 17 laps on a timeline, max and cable speed, 31% riding share" width="458" height="502" loading="lazy" />
+        </div>
+        <h3>At a glance</h3>
+        <p class="caption">See important information about your session, like cable speed and set count.</p>
+      </div>
+      <div class="tile">
+        <div class="visual">
+          <ul class="chips">
+            {keep.map((k) => <li>{k}</li>)}
+          </ul>
+        </div>
         <h3>Yours to keep</h3>
         <p class="caption">Your data stays yours, you can view and export your data at any time, to do cool things or to brag about it. Your data is stored on your phone and in iCloud, not on our servers.</p>
-        <ul class="chips">
-          {keep.map((k) => <li>{k}</li>)}
-        </ul>
       </div>
     </section>
   </main>
@@ -107,30 +97,19 @@ const keep = ["On your phone", "In your iCloud", "Export anytime", "No Rppl serv
   /* Left: action button + two volume buttons. Right: side button. */
   .phone::before { left: -3px; top: 14%; width: 3px; height: 22px; box-shadow: 0 46px 0 #2a2a2c, 0 86px 0 #2a2a2c; border-radius: 2px 0 0 2px; }
   .phone::after { right: -3px; top: 26%; width: 3px; height: 64px; border-radius: 0 2px 2px 0; }
-  .watch { width: 168px; padding: 7px; border-radius: 42px; }
+  .watch { width: 190px; padding: 7px; border-radius: 42px; }
   .watch img { border-radius: 35px; }
   /* Digital Crown + side button on the right. */
   .watch::before { right: -5px; top: 24%; width: 5px; height: 30px; border-radius: 0 3px 3px 0; }
   .watch::after { right: -3px; top: 52%; width: 3px; height: 20px; border-radius: 0 2px 2px 0; }
 
-  .focus { display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center; margin: 72px 0; }
-  .focus h2 { font-size: clamp(36px, 7vw, 60px); line-height: 1.05; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 0 0 12px; }
-  .focus p { font-size: clamp(18px, 2.5vw, 22px); color: var(--muted); max-width: 30ch; margin: 0 auto; }
-  @media (min-width: 760px) {
-    .focus { flex-direction: row; justify-content: center; gap: 72px; text-align: left; }
-    .focus p { margin: 0; }
-  }
-
-  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-  .features .tile { padding: 24px; display: flex; flex-direction: column; gap: 4px; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .features .tile { padding: 24px; display: flex; flex-direction: column; }
+  .visual { height: 270px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .visual .glance { width: 250px; border-radius: 20px; }
   .features h3 { text-transform: none; letter-spacing: 0; font-size: 22px; color: var(--text); margin-bottom: 4px; }
   .features .caption { margin: 0; font-size: 16px; }
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 20px; }
-  .stat { display: flex; flex-direction: column; padding: 12px 14px; border-radius: 16px; background: var(--track); border-left: 4px solid var(--tint); }
-  .stat .value { font-size: 30px; }
-  .stat .value small { font-size: 14px; }
-  .stat .label { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tint); }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: auto 0 0; padding: 20px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; list-style: none; margin: 0; padding: 0; }
   .chips li { padding: 6px 14px; border-radius: 999px; background: var(--track); font-size: 14px; font-weight: 600; color: var(--accent); }
   .foot { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 24px 0 48px; border-top: 1px solid var(--hairline); color: var(--muted); font-size: 15px; }
 </style>
