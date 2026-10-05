@@ -1,8 +1,7 @@
 import { defineConfig } from "astro/config";
 
-// Served from https://dcsbl.github.io/rppl/. Drop `base` once a custom domain is set.
+// Served from the custom domain https://rppl.nl (see public/CNAME).
 export default defineConfig({
-  site: "https://dcsbl.github.io",
-  base: "/rppl",
+  site: "https://rppl.nl",
   trailingSlash: "always",
 });
