@@ -1,9 +1,37 @@
 import Foundation
 
 public enum AppConstants {
-    public static let appGroupID = "group.nl.dcsbl.rppl"
+    public static let prodAppGroupID = "group.nl.dcsbl.rppl"
+    public static let prodICloudContainerIdentifier = "iCloud.nl.dcsbl.rppl"
+    /// Info.plist keys the app targets fill from build settings. The side-by-side Dev variant
+    /// points them at its own App Group and iCloud container (Docs/DevWorkflow.md).
+    public static let appGroupInfoKey = "RpplAppGroupID"
+    public static let iCloudContainerInfoKey = "RpplICloudContainerID"
+
+    /// App Group shared by iPhone and Watch (Info.plist override, else prod).
+    public static var appGroupID: String {
+        resolvedIdentifier(
+            infoValue: Bundle.main.object(forInfoDictionaryKey: appGroupInfoKey),
+            fallback: prodAppGroupID
+        )
+    }
+
     /// iCloud Documents container (iPhone logbook when Drive sync is enabled).
-    public static let iCloudContainerIdentifier = "iCloud.nl.dcsbl.rppl"
+    public static var iCloudContainerIdentifier: String {
+        resolvedIdentifier(
+            infoValue: Bundle.main.object(forInfoDictionaryKey: iCloudContainerInfoKey),
+            fallback: prodICloudContainerIdentifier
+        )
+    }
+
+    /// Non-empty string wins; a missing key or unexpanded `$(…)` placeholder falls back to prod.
+    public static func resolvedIdentifier(infoValue: Any?, fallback: String) -> String {
+        guard let value = (infoValue as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !value.isEmpty, !value.hasPrefix("$(")
+        else { return fallback }
+        return value
+    }
+
     /// Public TestFlight invite link. Opens the TestFlight join page for the Rppl beta.
     public static let betaJoinURL = URL(string: "https://testflight.apple.com/join/R2BymVaX")!
     public static let sessionsDirectoryName = "Sessions"
