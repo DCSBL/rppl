@@ -13,8 +13,23 @@ struct StartPermissionsView: View {
     /// Same order the system sheets appear in.
     private let kinds: [WatchPermissionKind] = [.health, .location, .motion]
 
-    private var isBlocked: Bool {
-        WatchPermissionOrder.startBlocker(states: session.permissionStates) != nil
+    private func state(of kind: WatchPermissionKind) -> WatchPermissionState {
+        session.permissionStates[kind] ?? .notDetermined
+    }
+
+    private var hasUndecided: Bool {
+        kinds.contains { state(of: $0) == .notDetermined }
+    }
+
+    /// Continue stays available while a system sheet can still be asked; once nothing is
+    /// actionable and a required permission is still blocked, only Settings can help.
+    private var canContinue: Bool {
+        hasUndecided || WatchPermissionOrder.startBlocker(states: session.permissionStates) == nil
+    }
+
+    /// Icons appear once the rider decided at least one permission; until then the list is plain.
+    private var showsIcons: Bool {
+        kinds.contains { state(of: $0) != .notDetermined }
     }
 
     var body: some View {
@@ -43,7 +58,7 @@ struct StartPermissionsView: View {
                             Text(actionTitle).frame(maxWidth: .infinity)
                         }
                     }
-                    .disabled(session.isPromptingPermissions || isBlocked)
+                    .disabled(session.isPromptingPermissions || !canContinue)
                 }
             }
         }
@@ -62,12 +77,16 @@ struct StartPermissionsView: View {
     }
 
     private func row(for kind: WatchPermissionKind) -> some View {
-        let state = session.permissionStates[kind] ?? .notDetermined
+        let state = state(of: kind)
         return VStack(alignment: .leading, spacing: 4) {
-            Label {
+            if showsIcons {
+                Label {
+                    Text(kind.title)
+                } icon: {
+                    icon(for: state)
+                }
+            } else {
                 Text(kind.title)
-            } icon: {
-                icon(for: state)
             }
             switch state {
             case .authorized, .unavailable:
@@ -100,7 +119,7 @@ struct StartPermissionsView: View {
         case .denied:
             Image(systemName: "xmark").foregroundStyle(.red)
         case .notDetermined:
-            Image(systemName: "ellipsis").foregroundStyle(.secondary)
+            Image(systemName: "questionmark").foregroundStyle(.orange)
         }
     }
 }
