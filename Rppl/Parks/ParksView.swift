@@ -62,7 +62,6 @@ struct ParksView: View {
         }
         return ParkListing.sorted(
             filtered,
-            favorites: favorites.ids,
             visits: visitCounts,
             userLocation: location.coordinate,
             sort: sort
