@@ -7,7 +7,7 @@ struct ContentView: View {
     @State private var transfer = WatchTransferService.shared
 
     private var debugOverrideSize: CGSize? {
-        guard AppReleaseChannel.allowsDebugTools else { return nil }
+        guard WatchDebugTools.isEnabled else { return nil }
         return session.debugScreenSize.size
     }
 
