@@ -41,7 +41,7 @@ struct ImpactStatsTests {
     }
 
     @Test func glitchAboveCapIgnored() {
-        let samples = [motion(at: 1, x: 2), motion(at: 2, x: 40)]
+        let samples = [motion(at: 1, x: 2), motion(at: 2, x: 80)]
         #expect(ImpactStats.peakG(in: samples, from: t0, to: t0.addingTimeInterval(10)) == 2)
     }
 
@@ -53,7 +53,7 @@ struct ImpactStatsTests {
 
     @Test func setBadgeForEveryHardSet() {
         let result = HighlightAssigner.assignSetHighlights([
-            set(index: 1, impact: 5), set(index: 2, impact: 2), set(index: 3, impact: 7),
+            set(index: 1, impact: 12), set(index: 2, impact: 6), set(index: 3, impact: 24),
         ])
         #expect(result[0].highlights.contains(.highImpact))
         #expect(!result[1].highlights.contains(.highImpact))
@@ -61,7 +61,7 @@ struct ImpactStatsTests {
     }
 
     @Test func singleSetStillGetsImpactBadge() {
-        let result = HighlightAssigner.assignSetHighlights([set(index: 1, impact: 6)])
+        let result = HighlightAssigner.assignSetHighlights([set(index: 1, impact: 15)])
         #expect(result[0].highlights == [.highImpact])
     }
 
@@ -69,11 +69,11 @@ struct ImpactStatsTests {
         func input(_ id: String, _ g: Double?) -> SessionHighlightInput {
             SessionHighlightInput(id: id, totalDuration: 100, ridingDuration: 50, lapCount: 1, peakImpactG: g)
         }
-        let hard = HighlightAssigner.assignSessionHighlights([input("a", 5), input("b", 8)])
+        let hard = HighlightAssigner.assignSessionHighlights([input("a", 12), input("b", 24)])
         #expect(hard["b"]?.contains(.highestImpact) == true)
         #expect(hard["a"]?.contains(.highestImpact) != true)
 
-        let soft = HighlightAssigner.assignSessionHighlights([input("a", 2), input("b", 3)])
+        let soft = HighlightAssigner.assignSessionHighlights([input("a", 6), input("b", 8)])
         #expect(soft["b"]?.contains(.highestImpact) != true)
     }
 

@@ -3,12 +3,13 @@ import Foundation
 /// Peak g-force ("impact") per set, from the Watch's gravity-free `userAcceleration` (already in g).
 public enum ImpactStats {
     /// A set peak at or above this is a notably hard hit (wipeout-grade). Wrist, 25 Hz, gravity
-    /// removed: normal riding and cable starts stay roughly under 2.5 g, falls land well above.
-    /// Educated start value; tune against real sessions.
-    public static let highImpactG = 4.0
+    /// removed. Real session (9 sets): every set ends in a 4–10 g peak (fall or stop), so 10 g
+    /// only marks the clearly harder hits (12 g, 24 g); dock and walking peaks stay under 5 g.
+    /// Calibrated on one session; revisit with more data.
+    public static let highImpactG = 10.0
 
     /// Magnitudes above this are sensor glitches or the watch banging on the dock, not a rider.
-    public static let implausibleAboveG = 16.0
+    public static let implausibleAboveG = 50.0
 
     /// Largest plausible `|userAcceleration|` (g) with a timestamp in `start...end`; nil when
     /// there is none.
