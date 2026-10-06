@@ -61,18 +61,31 @@ public enum SessionLoader {
         let health = try store.readHealthSamples(sessionId: sessionId)
         let water = try store.readWaterTemperatureSamples(sessionId: sessionId)
         let byteSize = try store.sessionByteSize(sessionId: sessionId)
-        let stats = SessionStatsBuilder.build(
+        let existing = try store.readDerivedView(sessionId: sessionId)
+        let needsWrite = existing == nil || existing?.isCurrentAnalyzer != true
+        // Motion is big (25 Hz): parse it only when the sidecar is rebuilt, else reuse its impacts.
+        let motion = needsWrite ? ((try? store.readMotionSamples(sessionId: sessionId)) ?? []) : []
+        var stats = SessionStatsBuilder.build(
             manifest: manifest,
             detections: detections,
             locations: locations,
             health: health,
-            water: water
+            water: water,
+            motion: motion
         )
+        if let existing, !needsWrite {
+            stats.sets = HighlightAssigner.assignSetHighlights(
+                stats.sets.map { set in
+                    var copy = set
+                    copy.peakImpactG = existing.stats.sets.first { $0.index == set.index }?.peakImpactG
+                    return copy
+                }
+            )
+        }
         let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let mapFrame = MapTrackFitter.frame(locations: coords)
-        let existing = try store.readDerivedView(sessionId: sessionId)
         let cityName = existing?.cityName
-        if existing == nil || existing?.isCurrentAnalyzer != true {
+        if needsWrite {
             let mapTracks = SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
             try store.writeDerivedView(
                 DerivedSessionView(
@@ -131,6 +144,7 @@ public enum SessionLoader {
             locations: package.locations,
             health: package.health,
             water: package.water,
+            motion: package.motion,
             byteSize: 0,
             mapFrame: nil,
             cityName: nil
@@ -178,6 +192,7 @@ public enum SessionLoader {
         locations: [LocationSample],
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
+        motion: [MotionSample] = [],
         byteSize: Int64,
         mapFrame: MapTrackFrame?,
         cityName: String?
@@ -187,7 +202,8 @@ public enum SessionLoader {
             detections: detections,
             locations: locations,
             health: health,
-            water: water
+            water: water,
+            motion: motion
         )
         return SessionLoadBundle(
             manifest: manifest,

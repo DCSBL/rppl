@@ -4,7 +4,7 @@ import Foundation
 public enum HighlightAssigner {
     /// Fixed display order for set badges.
     public static let setOrder: [SetHighlight] = [
-        .longest, .longestTime, .shortest, .fastest, .mostLaps, .comeback, .backToBack,
+        .longest, .longestTime, .shortest, .fastest, .mostLaps, .comeback, .backToBack, .highImpact,
     ]
 
     /// A "lowest" badge (shortest, coldest, laziest, …) only says something when there is a
@@ -45,12 +45,17 @@ public enum HighlightAssigner {
     public static let sessionOrder: [SessionHighlight] = [
         .longest, .mostWaterTime, .mostLaps, .highestRidePercentage, .mostCalories, .longestSetEver,
         .mostSets, .mostDistance, .topSpeed, .laziest,
-        .coldest, .hottest, .windiest, .rainiest, .iceBath, .earlyBird, .nightOwl,
+        .coldest, .hottest, .windiest, .rainiest, .iceBath, .earlyBird, .nightOwl, .highestImpact,
     ]
 
     public static func assignSetHighlights(_ sets: [SetSegmentStats]) -> [SetSegmentStats] {
+        // Impact is an absolute threshold, so it needs no other set to beat.
         guard sets.count >= 2 else {
-            return sets.map { clearedSet($0) }
+            return sets.map { set in
+                var copy = clearedSet(set)
+                if ImpactStats.isHighImpact(set.peakImpactG) { copy.highlights = [.highImpact] }
+                return copy
+            }
         }
 
         // Ties go to the lowest set index.
@@ -80,6 +85,10 @@ public enum HighlightAssigner {
         if let lapsWinner = uniqueMax(ordered, value: { Double($0.lapCount) }),
            lapsWinner.lapCount > 0 {
             byIndex[lapsWinner.index, default: []].append(.mostLaps)
+        }
+
+        for set in ordered where ImpactStats.isHighImpact(set.peakImpactG) {
+            byIndex[set.index, default: []].append(.highImpact)
         }
 
         let breaks = breaksBefore(ordered)
@@ -175,6 +184,12 @@ public enum HighlightAssigner {
             .nightOwl,
             to: uniqueMax(sessions, value: { $0.endMinuteOfDay }),
             if: { ($0.endMinuteOfDay ?? -.infinity) > nightOwlAfterMinuteOfDay }
+        )
+
+        award(
+            .highestImpact,
+            to: uniqueMax(sessions, value: { $0.peakImpactG }),
+            if: { ImpactStats.isHighImpact($0.peakImpactG) }
         )
 
         return byId

@@ -9746,6 +9746,86 @@
         }
       }
     },
+    "High impact" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High impact"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoge impact"
+          }
+        }
+      }
+    },
+    "Highest impact" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest impact"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grootste wipeout"
+          }
+        }
+      }
+    },
+    "Impact" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impact"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impact"
+          }
+        }
+      }
+    },
+    "Big g-forces in this set. Wipeout or a hard landing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big g-forces in this set. Wipeout or a hard landing."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flinke g-krachten in deze set. Wipeout of harde landing."
+          }
+        }
+      }
+    },
+    "Hardest impact of all your sessions. Proper wipeout." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hardest impact of all your sessions. Proper wipeout."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hardste impact van al je sessions. Een echte wipeout."
+          }
+        }
+      }
+    },
     "Back to back" : {
       "localizations" : {
         "en" : {

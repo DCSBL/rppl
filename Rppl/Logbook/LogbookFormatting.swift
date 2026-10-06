@@ -100,6 +100,7 @@ enum LogbookFormatting {
         case .mostLaps: return String(localized: "Most laps")
         case .comeback: return String(localized: "Comeback")
         case .backToBack: return String(localized: "Back to back")
+        case .highImpact: return String(localized: "High impact")
         }
     }
 
@@ -112,6 +113,7 @@ enum LogbookFormatting {
         case .mostLaps: return String(localized: "Most laps in one set this session.")
         case .comeback: return String(localized: "Back on the water after a long break, the longest this session.")
         case .backToBack: return String(localized: "Shortest break before a set this session. Barely dried off.")
+        case .highImpact: return String(localized: "Big g-forces in this set. Wipeout or a hard landing.")
         }
     }
 
@@ -134,6 +136,7 @@ enum LogbookFormatting {
         case .iceBath: return String(localized: "Ice bath")
         case .earlyBird: return String(localized: "Early bird")
         case .nightOwl: return String(localized: "Night owl")
+        case .highestImpact: return String(localized: "Highest impact")
         }
     }
 
@@ -156,6 +159,7 @@ enum LogbookFormatting {
         case .iceBath: return String(localized: "Coldest water of all your sessions. Properly cold, too.")
         case .earlyBird: return String(localized: "Earliest start of all your sessions. On the cable before most people have had breakfast.")
         case .nightOwl: return String(localized: "Latest finish of all your sessions. Riding well into the evening.")
+        case .highestImpact: return String(localized: "Hardest impact of all your sessions. Proper wipeout.")
         }
     }
 }

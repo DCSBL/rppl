@@ -11,6 +11,8 @@ public enum SetHighlight: String, Sendable, Equatable, Codable, CaseIterable {
     case comeback
     /// Shortest break before this set.
     case backToBack
+    /// Peak g-force at or above `ImpactStats.highImpactG`.
+    case highImpact
 }
 
 /// Derived session record badges across the logbook.
@@ -32,6 +34,8 @@ public enum SessionHighlight: String, Sendable, Equatable, CaseIterable {
     case iceBath
     case earlyBird
     case nightOwl
+    /// Hardest set impact of the logbook (only when it is a high impact).
+    case highestImpact
 }
 
 /// Per-session inputs for cross-logbook highlight assignment.
@@ -50,6 +54,8 @@ public struct SessionHighlightInput: Sendable, Equatable {
     public var totalDistanceMeters: Double?
     /// Peak speed (km/h) across the session's sets.
     public var topSpeedKmh: Double?
+    /// Hardest set impact (g) across the session's sets.
+    public var peakImpactG: Double?
     /// Air temperature from the session weather snapshot.
     public var airTemperatureCelsius: Double?
     public var windSpeedKmh: Double?
@@ -72,6 +78,7 @@ public struct SessionHighlightInput: Sendable, Equatable {
         setCount: Int? = nil,
         totalDistanceMeters: Double? = nil,
         topSpeedKmh: Double? = nil,
+        peakImpactG: Double? = nil,
         airTemperatureCelsius: Double? = nil,
         windSpeedKmh: Double? = nil,
         precipitationMmPerHour: Double? = nil,
@@ -89,6 +96,7 @@ public struct SessionHighlightInput: Sendable, Equatable {
         self.setCount = setCount
         self.totalDistanceMeters = totalDistanceMeters
         self.topSpeedKmh = topSpeedKmh
+        self.peakImpactG = peakImpactG
         self.airTemperatureCelsius = airTemperatureCelsius
         self.windSpeedKmh = windSpeedKmh
         self.precipitationMmPerHour = precipitationMmPerHour

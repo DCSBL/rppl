@@ -32,6 +32,7 @@ enum MetricKind: CaseIterable, Equatable {
     case energy
     case heartRate
     case park
+    case impact
 
     var systemImage: String {
         switch self {
@@ -50,6 +51,7 @@ enum MetricKind: CaseIterable, Equatable {
         case .energy: "flame"
         case .heartRate: "heart.fill"
         case .park: "mappin.and.ellipse"
+        case .impact: "figure.fall"
         }
     }
 
@@ -64,7 +66,7 @@ enum MetricKind: CaseIterable, Equatable {
         case .inactive: Color.rpplMuted
         case .water: Color.rpplMetricWater
         case .air, .humidity, .wind, .precipitation: Color.rpplMetricAir
-        case .energy, .heartRate: Color.rpplMetricEnergy
+        case .energy, .heartRate, .impact: Color.rpplMetricEnergy
         }
     }
 }
