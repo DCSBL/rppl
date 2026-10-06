@@ -155,6 +155,24 @@ extension WatchSessionController {
         WakeLog.debug(.session, "motion activity updates started")
     }
 
+    /// Only riding is stored (jump analysis later). The altimeter keeps running between sets so its
+    /// zero stays the same all session; samples wait in a short ring, and `ride_enter` backdates to
+    /// the start of its hold so the first seconds of a set are not lost.
+    private func recordAltitude(_ sample: AltitudeSample) {
+        recentAltitudeRing.append(sample)
+        let cutoff = sample.timestamp.addingTimeInterval(-Self.locationRingMaxAge)
+        recentAltitudeRing.removeAll { $0.timestamp < cutoff }
+        if detectionCode == DetectionCodes.riding {
+            altitudeBuffer.append(sample)
+        }
+    }
+
+    func replayAltitudeRingForRideEnter(holdStart: Date) {
+        altitudeBuffer.append(
+            contentsOf: recentAltitudeRing.filter { $0.timestamp >= holdStart }.sorted { $0.timestamp < $1.timestamp }
+        )
+    }
+
     /// Barometric height at the sensor's own ~1 Hz, stored as-is. Skipped silently where there is
     /// no barometer or Motion & Fitness is off; nothing else depends on it.
     func startAltitudeUpdatesIfAvailable() {
@@ -180,7 +198,7 @@ extension WatchSessionController {
                 return
             }
             guard let data, self.isRunning, !self.isProductPaused else { return }
-            self.altitudeBuffer.append(
+            self.recordAltitude(
                 AltitudeSample(
                     timestamp: SensorClock.wallDate(
                         bootOffset: bootOffset,

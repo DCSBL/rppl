@@ -220,6 +220,8 @@ final class WatchSessionController: NSObject {
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []
     var altitudeBuffer: [AltitudeSample] = []
+    /// Last few seconds of height while not riding, for backdating `ride_enter`.
+    var recentAltitudeRing: [AltitudeSample] = []
     var healthBuffer: [HealthMetricSample] = []
     /// Recent GPS fixes for backdating live set meters on `ride_enter`.
     var recentLocationRing: [LocationSample] = []

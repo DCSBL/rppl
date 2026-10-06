@@ -146,6 +146,7 @@ extension WatchSessionController {
         )
         for event in events where event.code == DetectionCodes.riding && event.detectorId == "ride_enter" {
             replayLocationRingForRideEnter(holdStart: event.timestamp)
+            replayAltitudeRingForRideEnter(holdStart: event.timestamp)
         }
         applySensorSamplingMode(dense: SensorSamplingMode.isDense(currentCode: detectionCode))
         guard !events.isEmpty else { return }

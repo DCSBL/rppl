@@ -398,6 +398,7 @@ extension WatchSessionController {
         sessionStartLatitude = nil
         sessionStartLongitude = nil
         recentLocationRing.removeAll(keepingCapacity: true)
+        recentAltitudeRing.removeAll(keepingCapacity: true)
         // Nothing from a previous session may reach this one's files: a callback that finished
         // after the last flush of the previous session once left its samples here.
         locationBuffer.removeAll(keepingCapacity: true)

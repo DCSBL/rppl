@@ -24,7 +24,7 @@ Schema / UML: [DESIGN.md](DESIGN.md) · Core: [../RpplCore/DESIGN.md](../RpplCor
 | deviceMotion | **1 Hz** while `inactive`, **25 Hz** while riding/unsure → framed zlib JSONL, one frame per **30 s**. Expendable: see *Motion gives way first* below | `motion-000.jsonl.zlib` |
 | HR / active energy (mirrored, not saved to Health) | workout builder | `health-000.jsonl` |
 | Water temperature | sparse; Ultra while submerged (~first sample of a bout, then ~15 s) | `water-000.jsonl` |
-| Height (barometer) | `CMAltimeter` relative altitude (m, cm resolution) + pressure (kPa), ~1 Hz while recording; recorded only, nothing reads it yet. Not on every Watch and can drop out, so gaps are normal; relative altitude re-zeros when updates restart (after a product pause) | `altitude-000.jsonl` |
+| Height (barometer) | `CMAltimeter` relative altitude (m, cm resolution) + pressure (kPa), ~1 Hz while riding only (the hold before a confirmed `riding` is backfilled); recorded only, nothing reads it yet. Not on every Watch and can drop out, so gaps are normal; relative altitude re-zeros when updates restart (after a product pause) | `altitude-000.jsonl` |
 | Battery | sparse; raw `WKInterfaceDevice.batteryLevel` (0…1 Float) + state; on change / 60 s / start·stop·pause·resume | `battery-000.jsonl` |
 | Detections | on transitions / revisions | `detections.jsonl` |
 | Manifest | once | `manifest.json` |
