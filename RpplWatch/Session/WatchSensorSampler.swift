@@ -175,7 +175,7 @@ extension WatchSessionController {
         altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self] data, error in
             guard let self else { return }
             if let error {
-                // Gaps are expected; log once per error, never per sample.
+                // Gaps are expected; the stream just stops until the next restart.
                 WakeLog.error(.session, "altimeter: \(error.localizedDescription)")
                 return
             }

@@ -65,7 +65,7 @@ Same folder shape after WC import. The import builds the package in tmp and swap
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
 | `battery-*.jsonl` | Watch battery fraction (0…1) + state | sparse |
-| `altitude-*.jsonl` | `t`, `a` relative altitude (m), `p` pressure (kPa); zero resets per altimeter run; ~45 B a line, so a 4 h session is under 1 MB uncompressed and needs no framing | ~1 Hz, gaps expected |
+| `altitude-*.jsonl` | `t`, `a` relative altitude (m), `p` pressure (kPa); zero resets per altimeter run; ~50 B a line, so a 4 h session is under 1 MB uncompressed and needs no framing | ~1 Hz, gaps expected |
 
 Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present). No public millivolt API on watchOS — battery `level` is the raw `Float` fraction from `WKInterfaceDevice`.
 

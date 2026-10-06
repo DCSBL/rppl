@@ -279,7 +279,7 @@ public struct AltitudeSample: Codable, Equatable, Sendable {
         self.pressureKPa = pressureKPa
     }
 
-    /// Short keys, cm / 0.001 kPa resolution (the sensor's own limit) — about 45 bytes a line.
+    /// Short keys, cm / 0.001 kPa resolution (the sensor's own limit) — about 50 bytes a line.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CompactCodingKeys.self)
         try container.encode(timestamp, forKey: .t)
