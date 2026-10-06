@@ -1032,22 +1032,6 @@
         }
       }
     },
-    "Permissions updated" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permissions updated"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Machtigingen bijgewerkt"
-          }
-        }
-      }
-    },
     "Phone connected" : {
       "localizations" : {
         "en" : {
@@ -2611,22 +2595,6 @@
         }
       }
     },
-    "Rppl needs" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl needs"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl heeft nodig"
-          }
-        }
-      }
-    },
     "Configure" : {
       "localizations" : {
         "en" : {
@@ -2671,6 +2639,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ga door"
+          }
+        }
+      }
+    },
+    "Needed for your session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed for your session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nodig voor je session"
+          }
+        }
+      }
+    },
+    "Asked when you continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asked when you continue"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wordt gevraagd zodra je doorgaat"
           }
         }
       }

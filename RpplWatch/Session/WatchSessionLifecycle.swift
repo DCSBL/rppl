@@ -106,20 +106,8 @@ extension WatchSessionController {
         return status
     }
 
-    /// Safe to call repeatedly. System may only show the sheet while status is notDetermined.
-    func requestPermissions() async {
-        WakeLog.debug(.permissions, "requestPermissions begin")
-        errorText = nil
-        await promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: true)
-        statusText = String(localized: "Permissions updated")
-        WakeLog.debug(
-            .permissions,
-            "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
-        )
-    }
-
-    /// Present the system sheets for permissions still undecided: from `startSession` (the only
-    /// automatic caller, so nothing asks before the rider starts) and the Permissions button.
+    /// Present the system sheets for permissions still undecided: from the permission checklist
+    /// (session Start or the Permissions page), so nothing asks before the rider opens it.
     /// Health first — its sheet is slow to appear; starting it ASAP avoids a spinner freeze on tap.
     /// Each sheet is answered before the next one shows, so the caller sees decided states.
     func promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: Bool = false) async {
@@ -277,11 +265,12 @@ extension WatchSessionController {
     }
 
     func presentPermissionChecklist(activityCode: String?) {
-        if let activityCode { pendingStartActivityCode = activityCode }
+        pendingStartActivityCode = activityCode
         isShowingPermissionChecklist = true
     }
 
-    /// Checklist Continue: ask for what is undecided through the system sheets, then start.
+    /// Checklist Continue: ask for what is undecided through the system sheets, then start
+    /// (or just close when the list was opened from the Permissions page).
     /// A permission that stays blocked keeps the checklist open with its cross and explainer.
     func continueFromPermissionChecklist() async {
         guard !isPromptingPermissions else { return }
@@ -292,7 +281,7 @@ extension WatchSessionController {
         guard isShowingPermissionChecklist else { return }
         guard WatchPermissionOrder.startBlocker(states: permissionStates) == nil else { return }
         isShowingPermissionChecklist = false
-        let code = pendingStartActivityCode ?? ActivityCodes.resolvedStartCode()
+        guard let code = pendingStartActivityCode else { return }
         pendingStartActivityCode = nil
         await startSession(activityCode: code, permissionsReviewed: true)
     }

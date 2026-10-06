@@ -36,8 +36,8 @@ struct IdleSyncPage: View {
                     systemImage: "lock.shield",
                     label: String(localized: "Permissions")
                 ) {
-                    WakeLog.debug(.ui, "tap Request permissions")
-                    Task { await session.requestPermissions() }
+                    WakeLog.debug(.ui, "tap Permissions")
+                    session.presentPermissionChecklist(activityCode: nil)
                 }
                 syncCircle(
                     systemImage: "arrow.clockwise",
