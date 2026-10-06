@@ -55,7 +55,7 @@ jobs:
           changed_files="$(git diff --name-only "$BASE" "$HEAD")"
           # Anything outside these paths can change Core test results.
           if printf '%s\n' "$changed_files" | grep -v -E \
-            '^((schema|Docs|web|assets|contributions)/|RpplCore/Sources/RpplCore/Resources/Parks/.*\.ya?ml$|(scripts/validate_parks\.py|\.yamllint\.yml|LEGAL\.md|README\.md|CONTRIBUTING\.md|AGENTS\.md|\.github/workflows/(parks-validate|web-deploy|release-preflight)\.yml)$)' \
+            '^((schema|Docs|web|assets|contributions)/|RpplCore/Sources/RpplCore/Resources/Parks/.*\.ya?ml$|(scripts/validate_parks\.py|\.yamllint\.yml|LEGAL\.md|README\.md|CONTRIBUTING\.md|AGENTS\.md|\.github/workflows/(parks-validate|web-deploy|release-preflight|release-branch)\.yml)$)' \
             >/dev/null; then
             echo "code=true" >> "$GITHUB_OUTPUT"
           else
