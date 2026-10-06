@@ -1,7 +1,7 @@
 import RpplCore
 import SwiftUI
 
-/// Debug-tools-only screen: the last 100 warnings/failures logged (kept across restarts) via `WakeLog`, across every category
+/// Hidden debug screen (press-and-hold the logo on the About page): debug links on top, then the last 100 warnings/failures logged (kept across restarts) via `WakeLog`, across every category
 /// (sync, transfer, water, …), newest first. Cheap throwaway list — this exists so a developer can
 /// see *why* something silently failed (e.g. a water-temperature fetch) without attaching Console.app.
 struct DebugLogView: View {
@@ -11,16 +11,26 @@ struct DebugLogView: View {
 
     var body: some View {
         List {
-            if entries.isEmpty {
-                Text("No warnings or failures logged yet.")
-                    .foregroundStyle(Color.rpplMuted)
-            } else {
-                ForEach(entries) { entry in
-                    row(entry)
+            Section {
+                #if PARK_ARRIVAL_NOTIFICATIONS
+                NavigationLink {
+                    ParkArrivalDebugView()
+                } label: {
+                    Label("Debug park arrival", systemImage: "ladybug")
+                }
+                #endif
+                NavigationLink {
+                    ParkWaterTemperatureDebugView()
+                } label: {
+                    Label("Debug water temperature", systemImage: "ladybug")
                 }
             }
+
+            Section("Log") {
+                logRows
+            }
         }
-        .navigationTitle("Debug Log")
+        .navigationTitle("Debug")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -43,6 +53,18 @@ struct DebugLogView: View {
         }
         .refreshable { entries = WakeLog.recentEntries() }
         .task { entries = WakeLog.recentEntries() }
+    }
+
+    @ViewBuilder
+    private var logRows: some View {
+        if entries.isEmpty {
+            Text("No warnings or failures logged yet.")
+                .foregroundStyle(Color.rpplMuted)
+        } else {
+            ForEach(entries) { entry in
+                row(entry)
+            }
+        }
     }
 
     private func sendToRppl() {
