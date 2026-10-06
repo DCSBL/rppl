@@ -9,6 +9,8 @@
 		<key>RideTracking</key>
 		<string>Rppl needs precise location to count your sets and laps and to draw your track.</string>
 	</dict>
+	<key>RpplAppGroupID</key>
+	<string>$(RPPL_APP_GROUP_ID)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

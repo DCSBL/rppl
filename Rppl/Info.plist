@@ -6,20 +6,24 @@
 	<false/>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>iCloud.nl.dcsbl.rppl</key>
+		<key>$(RPPL_ICLOUD_CONTAINER)</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>Rppl</string>
+			<string>$(RPPL_ICLOUD_FOLDER_NAME)</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>Any</string>
 		</dict>
 	</dict>
+	<key>RpplAppGroupID</key>
+	<string>$(RPPL_APP_GROUP_ID)</string>
 	<key>RpplBuildDate</key>
 	<string>2026-08-23</string>
 	<key>RpplGitCommit</key>
 	<string></string>
+	<key>RpplICloudContainerID</key>
+	<string>$(RPPL_ICLOUD_CONTAINER)</string>
 	<key>RpplReleaseTag</key>
 	<string></string>
 	<key>UIBackgroundModes</key>

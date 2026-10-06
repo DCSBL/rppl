@@ -205,3 +205,35 @@ WatchConnectivity only pairs apps when IDs match Apple’s rule:
 3. Then scheme **RpplWatch** → paired destination → Cmd+R (or open Watch app manually).
 4. iPhone **Watch** app → My Watch → Rppl → **Show App on Apple Watch** = on.
 5. Confirm Ultra is the active paired Watch for that iPhone.
+
+## Dev variant: clean install next to the real one
+
+The real install (`nl.dcsbl.rppl`) holds real sessions. To test first-run onboarding, permissions, or an empty logbook without touching it, build the **Dev** configuration: a second app (same name "Rppl", orange icon) with its own bundle ids, App Group, and iCloud container. Both live on the same iPhone and Watch.
+
+| | Prod | Dev |
+|---|------|-----|
+| iPhone | `nl.dcsbl.rppl` | `nl.dcsbl.rppl.dev` |
+| Watch | `nl.dcsbl.rppl.watchkitapp` | `nl.dcsbl.rppl.dev.watchkitapp` |
+| App Group | `group.nl.dcsbl.rppl` | `group.nl.dcsbl.rppl.dev` |
+| iCloud container | `iCloud.nl.dcsbl.rppl` | `iCloud.nl.dcsbl.rppl.dev` |
+
+How it is wired: the `Dev` build configuration (copy of Debug, compile flag `RPPL_DEV`) sets `RPPL_APP_GROUP_ID` and `RPPL_ICLOUD_CONTAINER` at project level. Entitlements and `Info.plist` read those settings; `AppConstants.appGroupID` / `iCloudContainerIdentifier` read the Info.plist keys `RpplAppGroupID` / `RpplICloudContainerID` and fall back to prod when absent.
+
+**One-time setup** (Apple Developer portal, or let Xcode automatic signing create it on the first Dev build):
+
+1. App IDs `nl.dcsbl.rppl.dev` and `nl.dcsbl.rppl.dev.watchkitapp`, App Group `group.nl.dcsbl.rppl.dev`, iCloud container `iCloud.nl.dcsbl.rppl.dev`.
+2. Capabilities as prod: HealthKit, WeatherKit, iCloud Documents. The Watch App ID also needs the shallow depth and pressure entitlement; check that it is granted for the new ID first, it is the likeliest blocker.
+
+**Use**
+
+1. Scheme **RpplWatch Dev** (or **Rppl Dev**), paired iPhone + Watch destination, Cmd+R. Same flow as [Device pair](#device-pair-one-cmdr-watch--iphone).
+2. Fresh onboarding: delete the orange-icon Rppl from iPhone and Watch, reinstall. Prefs and permissions start empty.
+3. Empty logbook too: Dev iCloud data survives a reinstall. Clear it in Settings → Apple Account → iCloud → Manage Storage → Rppl Dev (the Dev iCloud folder name), or delete the folder in Files → iCloud Drive → Rppl Dev.
+4. Log real sessions only with the prod app.
+
+**Limits**
+
+- Apple Health is shared: Dev workouts show up next to real ones in Health and Fitness. Delete them there. Health permission prompts are per app and still appear fresh.
+- Dev is a local Xcode install only. The Release workflow (tag → Xcode Cloud → TestFlight) builds prod and never the Dev configuration.
+- The Dev iCloud container cannot see prod sessions. To test the import picker, copy a session folder into Files → Rppl Dev → Sessions.
+- Unsent Watch sessions are lost when you delete the Watch app (see hard constraint 2); use the Dev app for throwaway data only.

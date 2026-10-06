@@ -132,6 +132,7 @@ struct ParkOpeningPage: View {
                 }
             }
         }
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Opening times")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -198,6 +199,8 @@ private struct ParkHoursRow: View {
 struct ParkRuleDetailPage: View {
     let index: Int
     @Environment(ParkEditorSession.self) private var session
+    /// Set once deletion is confirmed; the rule is removed after this page is gone (see `onDisappear`).
+    @State private var deleting = false
 
     private var rule: Binding<ParkOpeningRule> {
         Binding(
@@ -245,17 +248,22 @@ struct ParkRuleDetailPage: View {
                             title: String(localized: "Delete these opening hours?"),
                             message: String(localized: "This cannot be undone.")
                         ) {
+                            deleting = true
                             session.path.removeLast()
-                            session.updateOpening {
-                                if $0.rules?.indices.contains(index) == true { $0.rules?.remove(at: index) }
-                                if $0.rules?.isEmpty == true { $0.rules = nil }
-                            }
                         }
                     }
                 }
             }
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(ParkFormatting.ruleSummary(current).title)
             .navigationBarTitleDisplayMode(.inline)
+            .onDisappear {
+                guard deleting else { return }
+                session.updateOpening {
+                    if $0.rules?.indices.contains(index) == true { $0.rules?.remove(at: index) }
+                    if $0.rules?.isEmpty == true { $0.rules = nil }
+                }
+            }
         }
     }
 
@@ -282,6 +290,8 @@ struct ParkRuleDetailPage: View {
 struct ParkBlockDetailPage: View {
     let index: Int
     @Environment(ParkEditorSession.self) private var session
+    /// Set once deletion is confirmed; the block is removed after this page is gone (see `onDisappear`).
+    @State private var deleting = false
 
     private var slot: Binding<ParkSlot> {
         Binding(
@@ -318,17 +328,22 @@ struct ParkBlockDetailPage: View {
                             title: String(localized: "Delete this block?"),
                             message: String(localized: "This cannot be undone.")
                         ) {
+                            deleting = true
                             session.path.removeLast()
-                            session.updateOpening {
-                                if $0.slots?.indices.contains(index) == true { $0.slots?.remove(at: index) }
-                                if $0.slots?.isEmpty == true { $0.slots = nil }
-                            }
                         }
                     }
                 }
             }
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(ParkFormatting.slot(current))
             .navigationBarTitleDisplayMode(.inline)
+            .onDisappear {
+                guard deleting else { return }
+                session.updateOpening {
+                    if $0.slots?.indices.contains(index) == true { $0.slots?.remove(at: index) }
+                    if $0.slots?.isEmpty == true { $0.slots = nil }
+                }
+            }
         }
     }
 }
@@ -423,6 +438,7 @@ struct ParkDatesPage: View {
                 Text("The hours then count on these dates only, for example Christmas Day or Easter Monday. Swipe a date to remove it.")
             }
         }
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Certain dates")
         .navigationBarTitleDisplayMode(.inline)
     }

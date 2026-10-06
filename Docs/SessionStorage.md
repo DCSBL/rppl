@@ -38,6 +38,8 @@ A missing or stale `derived/view.json` is rebuilt from the raw streams when it i
 | Phone (iCloud Drive **on**, default) | Ubiquity container `iCloud.nl.dcsbl.rppl` → `Documents/Sessions` (Apple file sync) |
 | Phone (iCloud Drive **off** / unavailable) | App Group `group.nl.dcsbl.rppl/Sessions` when available, else Documents |
 
+The Dev configuration swaps in `iCloud.nl.dcsbl.rppl.dev` / `group.nl.dcsbl.rppl.dev` ([Docs/DevWorkflow.md](DevWorkflow.md#dev-variant-clean-install-next-to-the-real-one)).
+
 Same folder shape after WC import. The import builds the package in tmp and swaps it in at the end, so a failure leaves an existing phone copy untouched. Damaged or over-limit motion frames are dropped (`motionStoppedReason` `import_limit`) and never fail the import. Lower than ~10 MB/h when dock time dominates (1 Hz motion + sparse GPS while `inactive`).
 
 ### Phone iCloud Drive

@@ -28,17 +28,6 @@ struct ParkEditorView: View {
         }
         .environment(session)
         .tint(Color.rpplAccent)
-        .scrollDismissesKeyboard(.interactively)
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
-                    )
-                }
-            }
-        }
         .interactiveDismissDisabled(session.isDirty)
         .alert("Keep your changes?", isPresented: $confirmClose) {
             Button("Save as draft") {
