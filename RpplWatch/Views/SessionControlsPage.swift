@@ -66,7 +66,7 @@ struct SessionControlsPage: View {
                 WakeLog.debug(.ui, "confirm Stop session")
                 Task { await session.stopSession() }
             }
-            if AppReleaseChannel.allowsDebugTools, offersDebugDiscard {
+            if WatchDebugTools.isEnabled, offersDebugDiscard {
                 Button("Stop and discard data", role: .destructive) {
                     WakeLog.debug(.ui, "debug: confirm Stop and discard data")
                     Task { await session.discardSession() }

@@ -3,7 +3,7 @@ import WatchKit
 import RpplCore
 
 /// Debug-only: drive detection state and preview a smaller watch's screen size without a real
-/// session or a second device. Gated by `AppReleaseChannel.allowsDebugTools` at the call site.
+/// session or a second device. Gated by `WatchDebugTools.isEnabled` at the call site.
 struct WatchDebugPage: View {
     @Bindable var session: WatchSessionController
 
