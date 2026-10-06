@@ -9,7 +9,8 @@
 # already in the repository brings no new commit, and Xcode Cloud does not start for it. The
 # marker is always new, and it changes a file, so "Start if any file changes" holds. Each marker
 # has the previous branch head as parent, so the push is always a fast-forward (no force push)
-# and any tag on main can be released, in any order.
+# and any tag on main can be released, in any order. Its .github/workflows is the parent's, never
+# the tag's: GitHub refuses a push from the Actions token that changes workflow files.
 #
 # The tag name is user input: it reaches the shell only through env, never interpolated.
 
@@ -60,6 +61,12 @@ jobs:
           # Tagged commit's files + the marker, built in a throwaway index.
           export GIT_INDEX_FILE="$(mktemp -u)"
           git read-tree "$commit"
+          # The Actions token may not push commits that change workflow files. Keep the parent's
+          # copy, so a workflow edit between two tags never shows up in the marker's diff.
+          if [ "$parent" != "$commit" ]; then
+            git rm -r -q -f --cached --ignore-unmatch -- .github/workflows
+            git ls-tree -r "$parent" -- .github/workflows | git update-index --index-info
+          fi
           blob="$(printf 'tag=%s\ncommit=%s\nrun=%s\n' "$RELEASE_TAG" "$commit" "$GITHUB_RUN_ID" | git hash-object -w --stdin)"
           git update-index --add --cacheinfo "100644,${blob},ci_scripts/release-marker.txt"
           tree="$(git write-tree)"
