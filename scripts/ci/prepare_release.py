@@ -4,8 +4,11 @@
 Called from ci_scripts/ci_post_clone.sh when Xcode Cloud builds a release, and from
 .github/workflows/release-preflight.yml with --check-only when a release is published.
 Xcode Cloud starts from the branch release/X.Y.Z (one Build Group per version), which
-.github/workflows/release-branch.yml pushes using --release-branch. A branch build has no
-CI_TAG: --branch finds the release tag that points at the built commit.
+.github/workflows/release-branch.yml pushes using --release-branch. Each push is a marker
+commit: the tagged commit's files plus ci_scripts/release-marker.txt (tag, tagged commit),
+so Xcode Cloud always sees a new commit that changes a file. A branch build has no CI_TAG:
+--branch reads the tag from the marker file, or else finds the release tag that points at
+the built commit (a branch that was not pushed by the workflow).
 
 Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, v2026.9.1-beta.1):
   1. Validate the tag and derive the marketing version X.Y.Z (suffix dropped).
@@ -13,7 +16,8 @@ Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, 
   3. Set every MARKETING_VERSION in Rppl.xcodeproj (iPhone and Watch must match).
   4. Write the GitHub release body as TestFlight/WhatToTest.en-US.txt (plain text, 4000 chars).
   5. Stamp RpplBuildDate, RpplReleaseTag (tag without the v) and RpplGitCommit (short SHA of
-     CI_COMMIT, else git HEAD) in Rppl/Info.plist. The About screen shows them.
+     the tagged commit: the marker's commit, else CI_COMMIT, else git HEAD) in
+     Rppl/Info.plist. The About screen shows them.
 The build number is left alone: Xcode Cloud assigns it (CI_BUILD_NUMBER).
 
 --check-only does steps 1-2 plus a non-empty release body check, writes nothing and
@@ -50,6 +54,7 @@ NOTES_LIMIT = 4000
 TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
 BRANCH_PREFIX = "release/"
 BRANCH_RE = re.compile(r"^release/(\d+\.\d+\.\d+)$")
+MARKER_FILE = Path("ci_scripts/release-marker.txt")
 TAGS_PER_PAGE = 100
 TAGS_MAX_PAGES = 5
 MARKETING_VERSION_RE = re.compile(r"MARKETING_VERSION = [^;]+;")
@@ -137,6 +142,27 @@ def commit_sha(root: Path) -> Optional[str]:
 def short_commit(root: Path) -> Optional[str]:
     sha = commit_sha(root)
     return sha[:SHORT_SHA_LENGTH] if sha else None
+
+
+def read_release_marker(root: Path) -> Optional[Tuple[str, Optional[str]]]:
+    """(release tag, tagged commit SHA or None) from the checkout's marker file, None if there is none.
+
+    The Release branch workflow commits the file, "key=value" lines, onto release/X.Y.Z.
+    """
+    try:
+        text = (root / MARKER_FILE).read_text(encoding="utf-8")
+    except (OSError, ValueError):
+        return None
+    fields = {}
+    for line in text.splitlines():
+        key, separator, value = line.partition("=")
+        if separator:
+            fields[key.strip()] = value.strip()
+    tag = fields.get("tag")
+    if not tag:
+        return None
+    commit = fields.get("commit", "").lower()
+    return tag, commit if SHA_RE.fullmatch(commit) else None
 
 
 def markdown_to_plain(markdown: str) -> str:
@@ -307,13 +333,21 @@ def run(args: argparse.Namespace) -> None:
     retries = 1 if args.check_only or args.release_branch else int(os.environ.get("RPPL_RELEASE_RETRIES", "6"))
     delay = float(os.environ.get("RPPL_RELEASE_RETRY_DELAY", "10"))
 
+    tagged_commit = None
     if not tag and args.branch:
         branch_version = parse_release_branch(args.branch)
-        commit = commit_sha(root)
-        if not commit:
+        built = commit_sha(root)
+        if not built:
             raise ReleaseError("Could not determine the commit being built, so no release tag can be found.")
-        tag = find_release_tag(repo, branch_version, commit, token, retries, delay)
-        print("Branch %s at %s -> release tag %s" % (args.branch, commit[:SHORT_SHA_LENGTH], tag))
+        marker = read_release_marker(root)
+        if marker:
+            tag, tagged_commit = marker
+            if parse_tag(tag)[0] != branch_version:
+                raise ReleaseError("Marker tag %s is not a %s release (branch %s)." % (tag, branch_version, args.branch))
+            print("Branch %s at %s: marker for release tag %s" % (args.branch, built[:SHORT_SHA_LENGTH], tag))
+        else:
+            tag = find_release_tag(repo, branch_version, built, token, retries, delay)
+            print("Branch %s at %s -> release tag %s" % (args.branch, built[:SHORT_SHA_LENGTH], tag))
 
     version, suffix = parse_tag(tag)
     print("Release tag %s -> marketing version %s%s" % (tag, version, " (suffix %s)" % suffix if suffix else ""))
@@ -353,7 +387,7 @@ def run(args: argparse.Namespace) -> None:
         "RpplBuildDate": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
         "RpplReleaseTag": release_label(tag),
     }
-    commit = short_commit(root)
+    commit = tagged_commit[:SHORT_SHA_LENGTH] if tagged_commit else short_commit(root)
     if commit:
         stamps["RpplGitCommit"] = commit
     else:
