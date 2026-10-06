@@ -99,7 +99,7 @@ struct ParkBasicsPage: View {
                 Text("Set from the location. It decides what \"today\" means at the park and when it opens.")
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Basics")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $pickingLocation) {
@@ -270,7 +270,7 @@ struct ParkContactPage: View {
             }
             ParkLinksSection()
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Contact and links")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: focused) { old, _ in
@@ -362,7 +362,7 @@ struct ParkAboutPage: View {
                 Text("What riders find on site. Type one per row; a new row appears as you go. Swipe a row to remove it.")
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
     }

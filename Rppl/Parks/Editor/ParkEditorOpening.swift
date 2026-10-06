@@ -132,7 +132,7 @@ struct ParkOpeningPage: View {
                 }
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Opening times")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -255,7 +255,7 @@ struct ParkRuleDetailPage: View {
                     }
                 }
             }
-            .keyboardDoneButton()
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(ParkFormatting.ruleSummary(current).title)
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -329,7 +329,7 @@ struct ParkBlockDetailPage: View {
                     }
                 }
             }
-            .keyboardDoneButton()
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(ParkFormatting.slot(current))
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -426,7 +426,7 @@ struct ParkDatesPage: View {
                 Text("The hours then count on these dates only, for example Christmas Day or Easter Monday. Swipe a date to remove it.")
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Certain dates")
         .navigationBarTitleDisplayMode(.inline)
     }

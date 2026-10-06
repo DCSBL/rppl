@@ -317,7 +317,7 @@ struct ParkToggleListPage<Value: Hashable>: View {
                 Text(footer)
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -387,19 +387,78 @@ struct ParkMiniMap: View {
 // MARK: - Keyboard
 
 extension View {
-    /// A Done button above the keyboard and drag-to-dismiss. Applied per page: a keyboard toolbar set on
-    /// the navigation stack does not reach every pushed page.
-    func keyboardDoneButton() -> some View {
+    /// Tapping anywhere outside a text field closes the keyboard; dragging the page does too. Applied
+    /// per page: a modifier on the navigation stack does not reach every pushed page.
+    func dismissKeyboardOnTapOutside() -> some View {
         scrollDismissesKeyboard(.interactively)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        UIApplication.shared.sendAction(
-                            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
-                        )
-                    }
-                }
-            }
+            .background(KeyboardTapDismisser())
+    }
+}
+
+/// Adds a tap recognizer to the window that resigns first responder, unless the tap lands in a text
+/// input. It never cancels the touch, so buttons and rows keep working.
+private struct KeyboardTapDismisser: UIViewRepresentable {
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        DispatchQueue.main.async { context.coordinator.attach(to: view.window) }
+    }
+
+    static func dismantleUIView(_ view: UIView, coordinator: Coordinator) {
+        coordinator.detach()
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        private weak var window: UIWindow?
+        private lazy var recognizer: UITapGestureRecognizer = {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(tapped))
+            tap.cancelsTouchesInView = false
+            tap.delegate = self
+            return tap
+        }()
+
+        func attach(to window: UIWindow?) {
+            guard let window, self.window !== window else { return }
+            detach()
+            window.addGestureRecognizer(recognizer)
+            self.window = window
+        }
+
+        func detach() {
+            window?.removeGestureRecognizer(recognizer)
+            window = nil
+        }
+
+        @objc private func tapped() {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+            )
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            !(touch.view?.isInsideTextInput ?? false)
+        }
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
+        ) -> Bool { true }
+    }
+}
+
+private extension UIView {
+    var isInsideTextInput: Bool {
+        var view: UIView? = self
+        while let current = view {
+            if current is UITextField || current is UITextView { return true }
+            view = current.superview
+        }
+        return false
     }
 }

@@ -37,7 +37,7 @@ struct ParkCablesPage: View {
                 Text("Type a name to add a cable, for example Beginner or Main cable. Tap the line under a name for its details and the trace.")
             }
         }
-        .keyboardDoneButton()
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Cables")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -185,7 +185,7 @@ struct ParkCableDetailPage: View {
                     }
                 }
             }
-            .keyboardDoneButton()
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(cable.name ?? String(localized: "Cable \(index + 1)"))
             .navigationBarTitleDisplayMode(.inline)
             .task { location.refresh() }
