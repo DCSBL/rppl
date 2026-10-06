@@ -383,11 +383,11 @@ struct ParksTests {
         let fav = Park(id: "fav", name: "Zed", location: ParkCoordinate(lat: 54.0, lon: 6.0))
         let me = ParkCoordinate(lat: 52.001, lon: 4.001)
         let parks = [far, fav, near]
-        let byDistance = ParkListing.sorted(parks, favorites: ["fav"], visits: [:], userLocation: me, sort: .distance)
-        #expect(byDistance.map(\.id) == ["fav", "near", "far"])
-        let byVisits = ParkListing.sorted(parks, favorites: [], visits: ["far": 3, "near": 1], userLocation: me, sort: .visits)
+        let byDistance = ParkListing.sorted(parks, visits: [:], userLocation: me, sort: .distance)
+        #expect(byDistance.map(\.id) == ["near", "far", "fav"])
+        let byVisits = ParkListing.sorted(parks, visits: ["far": 3, "near": 1], userLocation: me, sort: .visits)
         #expect(byVisits.map(\.id) == ["far", "near", "fav"])
-        let noFix = ParkListing.sorted(parks, favorites: [], visits: [:], userLocation: nil, sort: .distance)
+        let noFix = ParkListing.sorted(parks, visits: [:], userLocation: nil, sort: .distance)
         #expect(noFix.map(\.id) == ["far", "near", "fav"])
 
         let counts = ParkListing.visitCounts(

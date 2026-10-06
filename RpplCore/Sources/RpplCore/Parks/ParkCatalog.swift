@@ -299,10 +299,9 @@ public enum ParkListing {
         }
     }
 
-    /// Favorites first, then by the chosen sort. Distance sort without a fix falls back to name.
+    /// Ordered by the chosen sort only; favourites get no priority. Distance sort without a fix falls back to name.
     public static func sorted(
         _ parks: [Park],
-        favorites: Set<String>,
         visits: [String: Int],
         userLocation: ParkCoordinate?,
         sort: ParkListSort
@@ -314,9 +313,6 @@ public enum ParkListing {
             a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
         }
         return parks.sorted { a, b in
-            let favA = favorites.contains(a.id)
-            let favB = favorites.contains(b.id)
-            if favA != favB { return favA }
             if sort == .visits {
                 let visitsA = visits[a.id] ?? 0
                 let visitsB = visits[b.id] ?? 0

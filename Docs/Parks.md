@@ -1,6 +1,6 @@
 # Parks
 
-The Parks tab lists cable parks (favorites first, then nearby or most visited) with a detail screen per park. Each park is one YAML file.
+The Parks tab lists cable parks (nearby or most visited; the Favourites filter narrows to starred parks) with a detail screen per park. Each park is one YAML file.
 
 ## Data sources and rules
 
