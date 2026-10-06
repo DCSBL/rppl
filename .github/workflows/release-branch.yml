@@ -1,0 +1,52 @@
+# Release branch. Xcode Cloud builds the branch release/X.Y.Z (Docs/Release.md), so every
+# build of a version (betas, release candidates, final) lands in one Build Group.
+#
+# release published: validate the tag (format, on main), then fast-forward release/X.Y.Z to the
+# tagged commit. That push starts the Xcode Cloud Release workflow. No force push: a tag on a
+# commit behind the branch fails here. A tag on the commit the branch already points at pushes
+# nothing and starts no build; promote the build testers already verified.
+#
+# The tag name is user input: it reaches the shell only through env, never interpolated.
+
+name: Release branch
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: release-branch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  push-branch:
+    name: push release branch
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag
+        id: branch
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/ci/prepare_release.py --release-branch --tag "$RELEASE_TAG"
+
+      - name: Push release branch
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          commit="$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
+          remote="$(git ls-remote origin "refs/heads/${RELEASE_BRANCH}" | cut -f1)"
+          if [ "$remote" = "$commit" ]; then
+            echo "::notice::${RELEASE_BRANCH} already points at ${commit}. Nothing pushed, so Xcode Cloud starts no build."
+            exit 0
+          fi
+          git push origin "${commit}:refs/heads/${RELEASE_BRANCH}"

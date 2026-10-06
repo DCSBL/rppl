@@ -21,6 +21,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import prepare_release as pr  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+COMMIT = "abcdef0123456789abcdef0123456789abcdef01"
+
+
+def tag_item(name, sha):
+    """One entry of GitHub's list-tags response."""
+    return {"name": name, "commit": {"sha": sha}}
 
 
 def run_main(argv, env=None):
@@ -241,6 +247,137 @@ class RunTests(unittest.TestCase):
             code, _, _ = run_main(["--tag", "v1.2.3", "--root", str(self.tmp)], env)
         self.assertEqual(code, 0)
         self.assertEqual(self.notes.read_text(), "Late notes\n")
+
+    def test_branch_build_finds_the_tag_at_the_commit(self):
+        env = {"RPPL_GITHUB_TOKEN": "t", "RPPL_RELEASE_RETRY_DELAY": "0", "CI_COMMIT": COMMIT}
+        # tags list, on-main check, then the release body.
+        responses = [
+            (200, [tag_item("2026.10.3", "f" * 40), tag_item("v1.2.3-beta.2", COMMIT)]),
+            (200, {"status": "identical"}),
+            (200, {"body": "Branch notes"}),
+        ]
+        with mock.patch.object(pr, "http_get_json", side_effect=responses) as get:
+            code, out, _ = run_main(["--branch", "release/1.2.3", "--root", str(self.tmp)], env)
+        self.assertEqual(code, 0)
+        self.assertIn("release tag v1.2.3-beta.2", out)
+        self.assertIn("compare/main...v1.2.3-beta.2", get.call_args_list[1][0][0])
+        self.assertIn("releases/tags/v1.2.3-beta.2", get.call_args_list[2][0][0])
+        self.assertIn("MARKETING_VERSION = 1.2.3;", (self.tmp / pr.PBXPROJ).read_text())
+        self.assertEqual(self.notes.read_text(), "Branch notes\n")
+        self.assertRegex((self.tmp / pr.APP_INFO_PLIST).read_text(), r"<key>RpplReleaseTag</key>\s*<string>1\.2\.3-beta\.2</string>")
+
+    def test_branch_build_reads_branch_from_env(self):
+        env = dict(self.env, CI_BRANCH="release/3.0.0", CI_COMMIT=COMMIT)
+        with mock.patch.object(pr, "http_get_json", return_value=(200, [tag_item("3.0.0", COMMIT)])):
+            code, _, _ = run_main(["--root", str(self.tmp)], env)
+        self.assertEqual(code, 0)
+        self.assertIn("MARKETING_VERSION = 3.0.0;", (self.tmp / pr.PBXPROJ).read_text())
+
+    def test_branch_build_without_a_tag_fails_and_writes_nothing(self):
+        before = (self.tmp / pr.PBXPROJ).read_text()
+        env = {"RPPL_RELEASE_RETRIES": "1", "CI_COMMIT": COMMIT}
+        with mock.patch.object(pr, "http_get_json", return_value=(200, [tag_item("1.2.3", "f" * 40)])):
+            code, _, err = run_main(["--branch", "release/1.2.3", "--root", str(self.tmp)], env)
+        self.assertEqual(code, 2)
+        self.assertIn("No release tag", err)
+        self.assertEqual((self.tmp / pr.PBXPROJ).read_text(), before)
+        self.assertFalse(self.notes.exists())
+
+    def test_branch_build_rejects_other_branches(self):
+        for branch in ("main", "release/1.2", "release/1.2.3-beta.1", "feature/release/1.2.3", "release/"):
+            with self.subTest(branch=branch):
+                code, _, err = run_main(["--branch", branch, "--root", str(self.tmp)], self.env)
+                self.assertEqual(code, 2)
+                self.assertIn("not a release branch", err)
+                self.assertFalse(self.notes.exists())
+
+    def test_release_branch_mode_reports_the_branch_and_writes_nothing(self):
+        before = (self.tmp / pr.PBXPROJ).read_text()
+        output = self.tmp / "github_output"
+        env = dict(self.env, GITHUB_OUTPUT=str(output))
+        code, out, _ = run_main(["--tag", "v2026.10.4-beta.1", "--root", str(self.tmp), "--release-branch"], env)
+        self.assertEqual(code, 0)
+        self.assertIn("release/2026.10.4", out)
+        self.assertEqual(output.read_text(), "branch=release/2026.10.4\n")
+        self.assertEqual((self.tmp / pr.PBXPROJ).read_text(), before)
+        self.assertFalse(self.notes.exists())
+
+    def test_release_branch_mode_rejects_a_bad_tag(self):
+        code, _, err = run_main(["--tag", "latest", "--root", str(self.tmp), "--release-branch"], self.env)
+        self.assertEqual(code, 2)
+        self.assertIn("not a release tag", err)
+
+    def test_release_branch_mode_stops_on_a_tag_off_main(self):
+        with mock.patch.object(pr, "http_get_json", return_value=(200, {"status": "diverged"})):
+            code, _, err = run_main(["--tag", "v1.2.3", "--root", str(self.tmp), "--release-branch"])
+        self.assertEqual(code, 2)
+        self.assertIn("not on main", err)
+
+
+class ReleaseBranchTests(unittest.TestCase):
+    def test_release_branch(self):
+        self.assertEqual(pr.release_branch("2026.10.4"), "release/2026.10.4")
+
+    def test_parse_release_branch(self):
+        self.assertEqual(pr.parse_release_branch("release/2026.10.4"), "2026.10.4")
+        self.assertEqual(pr.parse_release_branch("release/1.0.0"), "1.0.0")
+
+    def test_parse_release_branch_rejects_everything_else(self):
+        for branch in ("", "main", "release", "release/", "release/1.2", "release/1.2.3.4", "release/v1.2.3",
+                       "release/1.2.3-beta.1", "release/1.2.3/x", "Release/1.2.3", "feature/release/1.2.3"):
+            with self.subTest(branch=branch):
+                with self.assertRaises(pr.ReleaseError):
+                    pr.parse_release_branch(branch)
+
+
+class FindReleaseTagTests(unittest.TestCase):
+    def find(self, responses, retries=1, version="1.2.3", commit=COMMIT):
+        with mock.patch.object(pr, "http_get_json", side_effect=responses) as get, \
+                mock.patch.object(pr.time, "sleep"):
+            result = pr.find_release_tag("o/r", version, commit, "t", retries, 0)
+        return result, get
+
+    def test_matches_version_and_commit(self):
+        tags = [
+            tag_item("1.2.3-beta.1", "e" * 40),
+            tag_item("1.2.4-beta.1", COMMIT),  # right commit, other version
+            tag_item("v1.2.3-beta.2", COMMIT),
+            tag_item("latest", COMMIT),  # not a release tag
+        ]
+        result, _ = self.find([(200, tags)])
+        self.assertEqual(result, "v1.2.3-beta.2")
+
+    def test_sha_comparison_ignores_case(self):
+        result, _ = self.find([(200, [tag_item("1.2.3", COMMIT.upper())])])
+        self.assertEqual(result, "1.2.3")
+
+    def test_prefers_the_final_tag_then_the_last_name(self):
+        both = [tag_item("1.2.3-rc.1", COMMIT), tag_item("1.2.3", COMMIT), tag_item("1.2.3-beta.1", COMMIT)]
+        self.assertEqual(self.find([(200, both)])[0], "1.2.3")
+        betas = [tag_item("1.2.3-beta.1", COMMIT), tag_item("1.2.3-beta.2", COMMIT)]
+        self.assertEqual(self.find([(200, betas)])[0], "1.2.3-beta.2")
+
+    def test_follows_pages(self):
+        full = [tag_item("0.0.%d" % n, "e" * 40) for n in range(pr.TAGS_PER_PAGE)]
+        result, get = self.find([(200, full), (200, [tag_item("1.2.3-beta.1", COMMIT)])])
+        self.assertEqual(result, "1.2.3-beta.1")
+        self.assertEqual(get.call_count, 2)
+        self.assertIn("page=2", get.call_args_list[1][0][0])
+
+    def test_waits_for_the_tag_to_appear(self):
+        result, get = self.find([(200, []), (200, [tag_item("1.2.3", COMMIT)])], retries=3)
+        self.assertEqual(result, "1.2.3")
+        self.assertEqual(get.call_count, 2)
+
+    def test_no_match_names_the_commit(self):
+        with self.assertRaisesRegex(pr.ReleaseError, "No release tag for 1.2.3 points at commit abcdef0"):
+            self.find([(200, [tag_item("1.2.3", "e" * 40)])])
+
+    def test_api_failure_is_an_error_not_a_missing_tag(self):
+        with self.assertRaisesRegex(pr.ReleaseError, "HTTP 401"):
+            self.find([(401, None)], retries=5)
+        with self.assertRaisesRegex(pr.ReleaseError, "HTTP 0"):
+            self.find([(0, None)])
 
 
 class ShortCommitTests(unittest.TestCase):

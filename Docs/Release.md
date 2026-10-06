@@ -2,7 +2,7 @@
 
 Publishing a GitHub release builds Rppl (iPhone app with the embedded Watch app) in Xcode Cloud and sends it to **TestFlight internal** testers automatically. Version and "What to Test" come from the release. Everything after that is manual in App Store Connect: adding the build to an external TestFlight group and submitting to the App Store (see [Promote a build](#promote-a-build-manual)).
 
-Merging to `main` does **not** build anything in Xcode Cloud. Only a release tag does.
+Merging to `main` does **not** build anything in Xcode Cloud. Only a release does: publishing it pushes the branch `release/X.Y.Z` (see [Release branches](#release-branches-and-build-groups)), and Xcode Cloud builds that branch.
 
 ## Why Xcode Cloud, and where each check runs
 
@@ -12,7 +12,7 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
 |-------|-----------|-------|
 | Pull request into `main` | pre-commit, `RpplCore tests (Linux)`, release script tests | GitHub Actions ([DevWorkflow.md](DevWorkflow.md#github-actions)) |
 | Merge into `main` | `RpplCore tests (Linux)` again, so a merge that breaks `main` shows red before you tag | GitHub Actions |
-| GitHub release published (tag created) | Release preflight check; then, on the tagged commit, release script tests and `RpplCore` `swift test` **before** the archive; then archive and TestFlight internal | GitHub Actions + Xcode Cloud |
+| GitHub release published (tag created) | Release preflight check and the push of `release/X.Y.Z`; then, on the released commit, release script tests and `RpplCore` `swift test` **before** the archive; then archive and TestFlight internal | GitHub Actions + Xcode Cloud |
 | Add to external group / App Store | You press the button | App Store Connect |
 
 ## Cut a release
@@ -21,13 +21,14 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
 2. GitHub → **Releases** → **Draft a new release**.
 3. **Tag**: create a semver tag targeting `main`, with or without a leading `v`: `2026.9.1` or `v2026.9.1`. For a candidate you want to iterate on, add `-beta.1`, `-beta.2`, and so on.
 4. **Description**: write the release notes, or use **Generate release notes** (PR titles). Testers see this text as "What to Test".
-5. **Publish**. The tag is created, which starts the Xcode Cloud **Release** workflow.
+5. **Publish**. The tag is created. GitHub Actions → **Release branch** then moves `release/X.Y.Z` to the tagged commit, which starts the Xcode Cloud **Release** workflow.
 6. Check the run:
    - GitHub Actions → **Release preflight** shows the tag verdict and a preview of the "What to Test" text. Red means fix the release, then **Rebuild** in Xcode Cloud (the build only reads the description when it starts).
-   - App Store Connect → Xcode Cloud → the run. The log of the *Post-Clone* step prints the version and notes it used.
+   - GitHub Actions → **Release branch** must be green. Red means no build started: a bad tag, a tag that is not on `main`, or a tag on a commit behind `release/X.Y.Z`.
+   - App Store Connect → Xcode Cloud → the run, listed under the group `release/X.Y.Z`. The log of the *Post-Clone* step prints the tag it found for the commit, the version and the notes it used.
 7. Internal testers get the build as soon as processing finishes.
 
-Tag rules (the build fails within seconds on anything else):
+Tag rules (the **Release branch** workflow fails on anything else and no build starts):
 
 | Tag | Result |
 |-----|--------|
@@ -36,6 +37,23 @@ Tag rules (the build fails within seconds on anything else):
 | `2026.9`, `v1.2`, `latest`, `vNext` | rejected; App Store versions are three integers |
 
 Build numbers are not set by the repo. Xcode Cloud assigns an integer per app and increments it for every build.
+
+## Release branches and build groups
+
+Xcode Cloud (and TestFlight's **Build Groups** view) groups builds by workflow and Git ref. A tag is its own ref, so building tags gave every beta its own group. The Release workflow therefore starts on the branch `release/X.Y.Z` instead, and every build of one version (`-beta.1`, `-beta.2`, `-rc.1`, the final) lands in the group `release/X.Y.Z`. The next version starts a new group.
+
+Nothing changes in how you release: you still publish a GitHub release. The **Release branch** workflow does the rest:
+
+1. Validates the tag (format, on `main`), the same check the build does.
+2. Fast-forwards `release/X.Y.Z` to the tagged commit. A new version creates the branch. No force push: a tag on a commit behind the branch fails the job, because the branch only moves forward.
+3. Xcode Cloud starts on that push. The build has no `CI_TAG`, so the Post-Clone step looks up the release tag that points at the commit (GitHub tags API) and derives version, notes and the About label from it exactly as before.
+
+Consequences:
+
+- Publishing a release on the commit `release/X.Y.Z` already points at pushes nothing and starts no build. That is the normal "promote the build testers verified" case: add the existing build to Public beta or the App Store instead of building again.
+- If two tags of one version point at one commit (a final tag on the last beta's commit), a rebuild of that commit uses the final tag.
+- `release/*` branches are build triggers, not development branches. Do not push work to them by hand; a push without a matching release tag fails in the Post-Clone step.
+- TestFlight → **Versions** is still the per-version overview of builds. **Build Groups** now shows one entry per version too.
 
 ## Versions, betas and Beta App Review
 
@@ -58,11 +76,11 @@ About 15 minutes. The workflow lives in App Store Connect / Xcode, not in this r
 1. **Retire the old workflows.** App Store Connect → Xcode Cloud → Workflows. **Nightly TestFlight** (its schedule and any *Branch Changes on `main`* condition, which is what built TestFlight on every merge) must not exist. **Test - PR** must be deactivated (its *Pull Request Changes* start condition only started Core tests, which run on GitHub now). Deleting it is fine too. These two spent the free compute hours. Only **Release** is active.
 2. **TestFlight groups.** The Release post-action targets the internal group **internal** (the maintainer; formerly named `nightly`). **Public beta** is the external group and stays empty until you add a build by hand. An old empty group `internal-old` can be deleted.
 3. **Build number.** Nothing to do normally: Xcode Cloud numbers builds sequentially across all workflows of the product (App Store Connect → Xcode Cloud → Settings → Build Number shows the next one). Raise *Next Build Number* only if you upload a build manually with a higher number. Only Admin or App Manager can edit it.
-4. **GitHub token** (the repo is private, so Xcode Cloud cannot read release notes without one). GitHub → Settings → Developer settings → Fine-grained tokens: only repository `DCSBL/rppl`, permission **Contents: Read-only**. Note the expiry in your calendar. Without a valid token the build still ships, but "What to Test" falls back to the last commit subjects and the "tag is on main" check is skipped (both log a warning).
+4. **GitHub token** (the repo is private, so Xcode Cloud cannot read release notes without one). GitHub → Settings → Developer settings → Fine-grained tokens: only repository `DCSBL/rppl`, permission **Contents: Read-only**. Note the expiry in your calendar. The build reads the release and lists the repository's tags with it. Without a valid token the build **fails**: a branch build cannot find its release tag. (The release *notes* alone would only fall back to the last commit subjects with a warning.) The **Release branch** workflow uses the Actions token, not this one.
 5. **Xcode Cloud workflow.** App Store Connect → Xcode Cloud → Workflows (or Xcode → Product → Xcode Cloud → Manage Workflows). The **Release** workflow on `Rppl.xcodeproj` is configured as follows. Use these settings to recreate it:
    - **General**: turn **Restrict Editing** on. Apple requires it for workflows that deploy to external testers; it costs nothing on a solo account and avoids a surprise when you add external later.
    - **Environment**: Xcode Version pinned to a released Xcode (currently **Xcode 27 (27A266a)**) rather than floating on "Latest Release", so a new Xcode never lands in the middle of a release. Bump it by hand when App Store Connect requires a newer SDK. Environment variable `RPPL_GITHUB_TOKEN` holds the token, marked **Secret** (redacted).
-   - **Start Conditions**: exactly one, **Tag Changes → Any Tags**, with **Auto-cancel Builds** off. Xcode Cloud only offers *Any Tag* or *Tags beginning with …* (no regex), and `2026.9.1` and `v2026.9.1` share no prefix, so *Any Tag* is the only setting that covers both. The post-clone script rejects tags that are not releases in seconds. No Branch Changes, no Schedule, no Manual Start, and no Custom Conditions (a "don't start on docs-only changes" filter would silently skip a release).
+   - **Start Conditions**: exactly one, **Branch Changes → Branches beginning with `release/`**, with **Auto-cancel Builds** off and **Files and Folders** left on *Start if any file changes*. No Tag Changes (a tag start next to the branch start builds every release twice), no Schedule, no Manual Start, and no Custom Conditions (a "don't start on docs-only changes" filter would silently skip a release). The post-clone script rejects any other branch in seconds.
    - **Actions**: **Archive** the `Rppl` scheme for iOS. No Xcode Cloud Test action: the `Rppl` scheme only runs the thin `RpplTests` and the slow `RpplUITests`, while the real suite is `RpplCore`. That runs in the Post-Clone step instead (see [What the build does](#what-the-build-does)). Set **Distribution Preparation** to **App Store Connect** (Xcode calls it "TestFlight and App Store"), not "TestFlight (Internal Testing Only)": an internal-only archive can never go to external testers or the App Store.
    - **Post-Actions**: **TestFlight Internal Testing** with the group **internal**. Do not add *TestFlight External Testing*; external stays manual.
 6. **TestFlight test information**, needed before the first external promotion (internal testers skip it). App Store Connect → Rppl → TestFlight → Test Information: Beta App Description (required), feedback email, review contact and review notes ("Needs an Apple Watch and Health permission. No login."). The external group is **Public beta**. Check the app's TestFlight language includes English (US), which is the file the script writes (`WhatToTest.en-US.txt`).
@@ -92,15 +110,16 @@ Xcode Cloud never submits anything beyond internal TestFlight and this repo has 
 
 ## What the build does
 
-`ci_scripts/ci_post_clone.sh` requires `CI_TAG` (an untagged start fails immediately), runs `scripts/ci/prepare_release.py`, then tests the tagged commit before the archive starts. A failing test fails the build and nothing reaches TestFlight. `prepare_release.py`:
+`ci_scripts/ci_post_clone.sh` requires a `release/X.Y.Z` branch (`CI_BRANCH`) or a `CI_TAG`; any other start fails immediately. It runs `scripts/ci/prepare_release.py`, then tests the released commit before the archive starts. A failing test fails the build and nothing reaches TestFlight. `prepare_release.py`:
 
-1. Validates the tag and derives the marketing version X.Y.Z (the `v` and the suffix are dropped).
-2. Checks the tagged commit is on `main` (GitHub compare API). Ahead or diverged fails the build.
-3. Sets every `MARKETING_VERSION` in `Rppl.xcodeproj` so iPhone and Watch match. App Store validation rejects a Watch app whose version differs from its companion.
-4. Fetches the release description (retrying for about a minute if the release is not visible yet), converts markdown to plain text, caps it at 4000 characters and writes `TestFlight/WhatToTest.en-US.txt`, which Xcode Cloud attaches to the TestFlight build.
-5. Stamps `RpplBuildDate`, `RpplReleaseTag` (the tag without a leading `v`) and `RpplGitCommit` (short SHA from `CI_COMMIT`, else `git rev-parse HEAD`) in `Rppl/Info.plist`. The About screen shows them.
+1. On a branch build, finds the release tag of that version that points at `CI_COMMIT` (GitHub tags API, retrying for about a minute). No such tag fails the build.
+2. Validates the tag and derives the marketing version X.Y.Z (the `v` and the suffix are dropped).
+3. Checks the tagged commit is on `main` (GitHub compare API). Ahead or diverged fails the build.
+4. Sets every `MARKETING_VERSION` in `Rppl.xcodeproj` so iPhone and Watch match. App Store validation rejects a Watch app whose version differs from its companion.
+5. Fetches the release description (retrying for about a minute if the release is not visible yet), converts markdown to plain text, caps it at 4000 characters and writes `TestFlight/WhatToTest.en-US.txt`, which Xcode Cloud attaches to the TestFlight build.
+6. Stamps `RpplBuildDate`, `RpplReleaseTag` (the tag without a leading `v`) and `RpplGitCommit` (short SHA from `CI_COMMIT`, else `git rev-parse HEAD`) in `Rppl/Info.plist`. The About screen shows them.
 
-After that the Post-Clone step runs the release script unit tests and `swift test` for `RpplCore` (on macOS with the pinned Xcode, so the Apple-only code paths run too). The tagged commit is tested because `main` after merging can differ from every green PR. A failure shows up in the Post-Clone log.
+After that the Post-Clone step runs the release script unit tests and `swift test` for `RpplCore` (on macOS with the pinned Xcode, so the Apple-only code paths run too). The released commit is tested because `main` after merging can differ from every green PR. A failure shows up in the Post-Clone log.
 
 **Emergency skip.** If a test blocks a release you must ship, add environment variable `RPPL_SKIP_TESTS` = `1` to the Release workflow, rebuild, then remove it again. The log prints a warning. Not a normal path: fix or revert the test instead.
 
@@ -122,16 +141,19 @@ Unit tests: `python3 -m unittest discover -s scripts/ci -p 'test_*.py'` (also ru
 
 | Pitfall | What to know |
 |---------|--------------|
-| No "release published" trigger | Xcode Cloud starts from tags. Publishing a release creates the tag; drafts create none. Pushing a bare tag also builds (no notes, so the commit-list fallback is used). Moving a tag rebuilds. |
-| Any tag starts a run | *Any Tag* is the only way to match tags with and without `v`. A tag that is not a release (`latest`) starts a run that fails in the Post-Clone step. Delete the tag. |
+| No "release published" trigger | Xcode Cloud starts from branches, and the **Release branch** workflow pushes `release/X.Y.Z` when a release is published. Drafts create no tag and no build. A bare tag (pushed without a release) starts nothing: there is no Tag Changes condition. |
+| Tag start next to the branch start | A Tag Changes condition left on the workflow builds each release twice (once per ref) and splits the Build Groups again. Keep only Branch Changes. |
+| Release on the branch's current commit | Pushes nothing, so no build. Promote the existing build, or release a new commit. |
+| Tag behind the branch | `release/X.Y.Z` only moves forward. Tagging an older commit of the same version fails the **Release branch** job. Tag a newer commit, or bump the version. |
+| Branch without a tag | A manual push to a `release/*` branch, or a deleted tag, starts a build that fails in Post-Clone with "No release tag". Delete the branch or restore the tag. |
 | Old workflows still alive | A leftover Nightly or Branch Changes workflow keeps spending compute hours and TestFlight builds. Delete them (setup step 1). |
 | Internal-only archive | Builds from "TestFlight (Internal Testing Only)" can never go external or to the App Store. |
 | Beta App Review | First build of each version waits for review. Test Information must be filled in or external distribution fails. |
-| Auto-cancel Builds | On by default; two quick tags would cancel the first. Off for Release. |
+| Auto-cancel Builds | On by default; two quick pushes to one branch would cancel the first. Off for Release. |
 | Watch version mismatch | iPhone and Watch marketing versions must match; the script sets all of them. |
 | Build number collisions | Xcode Cloud's counter is per app. Set *Next Build Number* above any manual upload. |
 | Release edited after publish | The build already read it. Use **Rebuild**; notes are fetched again. |
-| Token expired | Warning in the Post-Clone log, fallback notes. Rotate the token before its expiry. |
+| Token expired | The Post-Clone step cannot list tags, so the build fails (see setup step 4). Rotate the token before its expiry. |
 | Versions only go up | App Store Connect rejects an upload at or below a version that already shipped. The repo's own `MARKETING_VERSION` is `1.0`, so the first year-based tag (`2026.x.y`) is above it. Never tag a lower version after that. |
 | Signing capabilities | Cloud signing needs HealthKit, WeatherKit, iCloud and the Watch depth entitlement enabled on the App IDs. Keep them enabled; the first release run exercises them. |
 | Build expiry | TestFlight builds expire after 90 days. |
