@@ -82,12 +82,21 @@ struct LogbookView: View {
                                 "Record a park day on Apple Watch. Or browse the example session."
                             )
                         } actions: {
-                            Button("Show example session") {
-                                showExampleSession = true
+                            VStack(spacing: 12) {
+                                Button("Show example session") {
+                                    showExampleSession = true
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                                .tint(Color.rpplAccent)
+
+                                Text(
+                                    "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby."
+                                )
+                                .font(.footnote)
+                                .foregroundStyle(Color.rpplMuted)
+                                .multilineTextAlignment(.center)
                             }
-                            .buttonStyle(.bordered)
-                            .controlSize(.small)
-                            .tint(Color.rpplAccent)
                         }
                         .foregroundStyle(Color.rpplText)
                         .onAppear { ExampleSessionPreload.warmUp() }

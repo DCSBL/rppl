@@ -1757,6 +1757,22 @@
         }
       }
     },
+    "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start je eerste session op Apple Watch. Rppl neemt je parkdag daar op en zet hem hier neer zodra je iPhone in de buurt is."
+          }
+        }
+      }
+    },
     "Record a park day on Apple Watch. Or browse the example session." : {
       "localizations" : {
         "en" : {
