@@ -1,18 +1,26 @@
 version: 1
 id: breakout-harkstede
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial
+  - date: 2026-10-06
+    description: Park pin and cable layout traced on the map
 
 name: Break Out Grunopark
 address: Hoofdweg 163, 9614 AD Harkstede
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
-location:
-  lat: 53.2128311
-  lon: 6.6633385
+location: { lat: 53.212717077, lon: 6.661094607 }
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - { lat: 53.212727356, lon: 6.660770893 }
+      - { lat: 53.215471831, lon: 6.662013286 }
+      - { lat: 53.215681941, lon: 6.660306638 }
+      - { lat: 53.212963639, lon: 6.659183592 }
 
 phone: 050 - 541 17 06
 email: info@breakout-grunopark.nl
