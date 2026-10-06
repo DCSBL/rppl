@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Prepare a release build from a GitHub release tag (Xcode Cloud + GitHub preflight).
 
-Called from ci_scripts/ci_post_clone.sh when Xcode Cloud builds a tag, and from
+Called from ci_scripts/ci_post_clone.sh when Xcode Cloud builds a release, and from
 .github/workflows/release-preflight.yml with --check-only when a release is published.
+Xcode Cloud starts from the branch release/X.Y.Z (one Build Group per version), which
+.github/workflows/release-branch.yml pushes using --release-branch. A branch build has no
+CI_TAG: --branch finds the release tag that points at the built commit.
 
 Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, v2026.9.1-beta.1):
   1. Validate the tag and derive the marketing version X.Y.Z (suffix dropped).
@@ -15,6 +18,9 @@ The build number is left alone: Xcode Cloud assigns it (CI_BUILD_NUMBER).
 
 --check-only does steps 1-2 plus a non-empty release body check, writes nothing and
 prints the What to Test preview (also to $GITHUB_STEP_SUMMARY when set).
+
+--release-branch does steps 1-2, writes nothing and reports the branch name release/X.Y.Z
+("branch=..." in $GITHUB_OUTPUT when set).
 
 Environment:
   RPPL_GITHUB_TOKEN / GITHUB_TOKEN   read access to the release (repo is private)
@@ -42,6 +48,10 @@ DEFAULT_REPO = "DCSBL/rppl"
 NOTES_LOCALE = "en-US"
 NOTES_LIMIT = 4000
 TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
+BRANCH_PREFIX = "release/"
+BRANCH_RE = re.compile(r"^release/(\d+\.\d+\.\d+)$")
+TAGS_PER_PAGE = 100
+TAGS_MAX_PAGES = 5
 MARKETING_VERSION_RE = re.compile(r"MARKETING_VERSION = [^;]+;")
 SHA_RE = re.compile(r"[0-9a-f]{7,64}")
 SHORT_SHA_LENGTH = 7
@@ -72,6 +82,19 @@ def parse_tag(tag: str) -> Tuple[str, Optional[str]]:
     return match.group(1), match.group(2)
 
 
+def release_branch(version: str) -> str:
+    """The branch Xcode Cloud builds for a marketing version: every build of X.Y.Z shares it."""
+    return BRANCH_PREFIX + version
+
+
+def parse_release_branch(branch: str) -> str:
+    """Return the marketing version of release/X.Y.Z or raise ReleaseError."""
+    match = BRANCH_RE.fullmatch(branch)
+    if not match:
+        raise ReleaseError("Branch %r is not a release branch. Expected release/X.Y.Z." % branch)
+    return match.group(1)
+
+
 def bump_marketing_version(pbxproj_text: str, version: str) -> Tuple[str, int]:
     """Set every MARKETING_VERSION to version; return (new text, occurrences)."""
     new_text, count = MARKETING_VERSION_RE.subn("MARKETING_VERSION = %s;" % version, pbxproj_text)
@@ -96,8 +119,8 @@ def release_label(tag: str) -> str:
     return tag[1:] if tag.startswith("v") else tag
 
 
-def short_commit(root: Path) -> Optional[str]:
-    """Short SHA of the commit being built: Xcode Cloud's CI_COMMIT, else git HEAD. None if unknown."""
+def commit_sha(root: Path) -> Optional[str]:
+    """Full SHA of the commit being built: Xcode Cloud's CI_COMMIT, else git HEAD. None if unknown."""
     sha = (os.environ.get("CI_COMMIT") or "").strip().lower()
     if not sha:
         try:
@@ -108,7 +131,12 @@ def short_commit(root: Path) -> Optional[str]:
             sha = head.stdout.strip().lower() if head.returncode == 0 else ""
         except (OSError, subprocess.SubprocessError):
             sha = ""
-    return sha[:SHORT_SHA_LENGTH] if SHA_RE.fullmatch(sha) else None
+    return sha if SHA_RE.fullmatch(sha) else None
+
+
+def short_commit(root: Path) -> Optional[str]:
+    sha = commit_sha(root)
+    return sha[:SHORT_SHA_LENGTH] if sha else None
 
 
 def markdown_to_plain(markdown: str) -> str:
@@ -177,6 +205,51 @@ def fetch_release(repo: str, tag: str, token: Optional[str], retries: int, delay
     return None
 
 
+def pick_tag(candidates: list) -> str:
+    """One tag when several release tags share a commit: the final one (no suffix), else the last by name."""
+    final = [name for name in candidates if parse_tag(name)[1] is None]
+    return sorted(final or candidates)[-1]
+
+
+def find_release_tag(repo: str, version: str, commit: str, token: Optional[str], retries: int, delay: float) -> str:
+    """The release tag of `version` that points at `commit` (GitHub tags API), waiting for it to appear.
+
+    A branch build has no CI_TAG. The tags API lists the commit an annotated tag points at too.
+    Raises ReleaseError when no tag matches or the API cannot be read.
+    """
+    url = "https://api.github.com/repos/%s/tags?per_page=%d" % (repo, TAGS_PER_PAGE)
+    status = 0
+    for attempt in range(1, retries + 1):
+        candidates = []
+        for page in range(1, TAGS_MAX_PAGES + 1):
+            status, payload = http_get_json("%s&page=%d" % (url, page), token)
+            if status != 200 or not isinstance(payload, list):
+                break
+            for item in payload:
+                name = item.get("name") or ""
+                if (item.get("commit") or {}).get("sha", "").lower() != commit or not TAG_RE.fullmatch(name):
+                    continue
+                if parse_tag(name)[0] == version:
+                    candidates.append(name)
+            if len(payload) < TAGS_PER_PAGE:
+                break
+        if candidates:
+            return pick_tag(candidates)
+        if status in (401, 403):
+            break
+        if attempt < retries:
+            time.sleep(delay)
+    if status == 200:
+        raise ReleaseError(
+            "No release tag for %s points at commit %s. Publish the GitHub release first; "
+            "its tag must be on the commit release/%s points at." % (version, commit[:SHORT_SHA_LENGTH], version)
+        )
+    raise ReleaseError(
+        "Could not list tags to find the release for %s (HTTP %d). Token expired or missing Contents: read?"
+        % (version, status)
+    )
+
+
 def check_on_main(repo: str, tag: str, token: Optional[str]) -> None:
     """Raise ReleaseError when the tagged commit is not in main's history. Skips if unreachable."""
     url = "https://api.github.com/repos/%s/compare/main...%s" % (repo, tag)
@@ -228,17 +301,34 @@ def write_summary(title: str, notes: str) -> None:
 def run(args: argparse.Namespace) -> None:
     root = Path(args.root).resolve()
     tag = args.tag
-    version, suffix = parse_tag(tag)
     repo = os.environ.get("RPPL_GITHUB_REPO") or os.environ.get("GITHUB_REPOSITORY") or DEFAULT_REPO
     token = os.environ.get("RPPL_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
     offline = bool(os.environ.get("RPPL_RELEASE_JSON"))
-    retries = 1 if args.check_only else int(os.environ.get("RPPL_RELEASE_RETRIES", "6"))
+    retries = 1 if args.check_only or args.release_branch else int(os.environ.get("RPPL_RELEASE_RETRIES", "6"))
     delay = float(os.environ.get("RPPL_RELEASE_RETRY_DELAY", "10"))
 
+    if not tag and args.branch:
+        branch_version = parse_release_branch(args.branch)
+        commit = commit_sha(root)
+        if not commit:
+            raise ReleaseError("Could not determine the commit being built, so no release tag can be found.")
+        tag = find_release_tag(repo, branch_version, commit, token, retries, delay)
+        print("Branch %s at %s -> release tag %s" % (args.branch, commit[:SHORT_SHA_LENGTH], tag))
+
+    version, suffix = parse_tag(tag)
     print("Release tag %s -> marketing version %s%s" % (tag, version, " (suffix %s)" % suffix if suffix else ""))
 
     if not offline:
         check_on_main(repo, tag, token)
+
+    if args.release_branch:
+        branch = release_branch(version)
+        print("Release branch for %s: %s" % (tag, branch))
+        output = os.environ.get("GITHUB_OUTPUT")
+        if output:
+            with open(output, "a", encoding="utf-8") as handle:
+                handle.write("branch=%s\n" % branch)
+        return
 
     release = load_release(repo, tag, token, retries, delay)
     body = markdown_to_plain((release or {}).get("body") or "")
@@ -287,8 +377,17 @@ def run(args: argparse.Namespace) -> None:
 def main(argv: Optional[list] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--tag", default=os.environ.get("CI_TAG", ""), help="release tag (default: $CI_TAG)")
+    parser.add_argument(
+        "--branch", default=os.environ.get("CI_BRANCH", ""),
+        help="release/X.Y.Z branch to find the tag for when there is no tag (default: $CI_BRANCH)",
+    )
     parser.add_argument("--root", default=str(Path(__file__).resolve().parents[2]), help="repository root")
-    parser.add_argument("--check-only", action="store_true", help="validate and preview, write nothing")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--check-only", action="store_true", help="validate and preview, write nothing")
+    modes.add_argument(
+        "--release-branch", action="store_true",
+        help="validate the tag and report the release/X.Y.Z branch to push, write nothing",
+    )
     args = parser.parse_args(argv)
     try:
         run(args)
