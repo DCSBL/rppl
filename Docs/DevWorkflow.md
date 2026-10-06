@@ -149,11 +149,11 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 ## Xcode Cloud
 
-Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, and the **Release** workflow archives it and sends it to TestFlight internal. Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux), also after each merge), in the local push gate, and once more on the tagged commit before a release archive. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
+Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, the **Release branch** GitHub workflow pushes `release/X.Y.Z` to the tagged commit, and the **Release** workflow archives that branch and sends it to TestFlight internal (one Build Group per version). Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux), also after each merge), in the local push gate, and once more on the tagged commit before a release archive. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).
 
 The older **Nightly TestFlight** and **PR / Core tests** workflows are retired (they spent the free compute hours). Nightly is gone and `Test - PR` is deactivated in App Store Connect; keep it that way (or delete it).
 
-[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires `CI_TAG`, so a start without a tag fails immediately instead of archiving. Otherwise it runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py) and then the release script tests and `swift test` for `RpplCore`, so a failing test stops the build before the archive ([Release.md](Release.md#what-the-build-does)).
+[`ci_scripts/ci_post_clone.sh`](../ci_scripts/ci_post_clone.sh) runs after clone in every Xcode Cloud build. It requires a `release/X.Y.Z` branch (`CI_BRANCH`) or `CI_TAG`, so any other start fails immediately instead of archiving. Otherwise it runs [`scripts/ci/prepare_release.py`](../scripts/ci/prepare_release.py) and then the release script tests and `swift test` for `RpplCore`, so a failing test stops the build before the archive ([Release.md](Release.md#what-the-build-does)).
 
 Dry-run the failure path locally (no tag, exit 1) or a tag against a throwaway worktree (see [Release.md](Release.md#what-the-build-does)):
 
