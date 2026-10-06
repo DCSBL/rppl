@@ -208,7 +208,7 @@ WatchConnectivity only pairs apps when IDs match Apple’s rule:
 
 ## Dev variant: clean install next to the real one
 
-The real install (`nl.dcsbl.rppl`) holds real sessions. To test first-run onboarding, permissions, or an empty logbook without touching it, build the **Dev** configuration: a second app ("Rppl Dev", orange icon) with its own bundle ids, App Group, and iCloud container. Both live on the same iPhone and Watch.
+The real install (`nl.dcsbl.rppl`) holds real sessions. To test first-run onboarding, permissions, or an empty logbook without touching it, build the **Dev** configuration: a second app (same name "Rppl", orange icon) with its own bundle ids, App Group, and iCloud container. Both live on the same iPhone and Watch.
 
 | | Prod | Dev |
 |---|------|-----|
@@ -227,8 +227,8 @@ How it is wired: the `Dev` build configuration (copy of Debug, compile flag `RPP
 **Use**
 
 1. Scheme **RpplWatch Dev** (or **Rppl Dev**), paired iPhone + Watch destination, Cmd+R. Same flow as [Device pair](#device-pair-one-cmdr-watch--iphone).
-2. Fresh onboarding: delete Rppl Dev from iPhone and Watch, reinstall. Prefs and permissions start empty.
-3. Empty logbook too: Dev iCloud data survives a reinstall. Clear it in Settings → Apple Account → iCloud → Manage Storage → Rppl Dev, or delete the folder in Files → iCloud Drive → Rppl Dev.
+2. Fresh onboarding: delete the orange-icon Rppl from iPhone and Watch, reinstall. Prefs and permissions start empty.
+3. Empty logbook too: Dev iCloud data survives a reinstall. Clear it in Settings → Apple Account → iCloud → Manage Storage → Rppl Dev (the Dev iCloud folder name), or delete the folder in Files → iCloud Drive → Rppl Dev.
 4. Log real sessions only with the prod app.
 
 **Limits**

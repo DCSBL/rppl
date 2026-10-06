@@ -11,7 +11,7 @@
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>$(INFOPLIST_KEY_CFBundleDisplayName)</string>
+			<string>$(RPPL_ICLOUD_FOLDER_NAME)</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>Any</string>
 		</dict>

@@ -525,6 +525,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl;
+				RPPL_ICLOUD_FOLDER_NAME = Rppl;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -588,6 +589,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl;
+				RPPL_ICLOUD_FOLDER_NAME = Rppl;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -822,6 +824,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl.dev;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl.dev;
+				RPPL_ICLOUD_FOLDER_NAME = "Rppl Dev";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -892,7 +895,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Rppl/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Dev";
+				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch.";
@@ -996,7 +999,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RpplWatch/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Rppl Dev";
+				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rppl saves your cable-park workout to Health when the session ends.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Rppl records GPS for the full park session, including when the wrist is down.";
