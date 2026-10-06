@@ -8,6 +8,7 @@ struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var showDisableDeleteConfirm = false
+    @State private var showDebug = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
@@ -36,13 +37,6 @@ struct AppInfoView: View {
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
                         .tint(Color.rpplAccent)
-                    if AppReleaseChannel.allowsDebugTools {
-                        NavigationLink {
-                            ParkWaterTemperatureDebugView()
-                        } label: {
-                            Label("Debug water temperature", systemImage: "ladybug")
-                        }
-                    }
                 } header: {
                     Text("Park water temperature")
                 } footer: {
@@ -58,18 +52,6 @@ struct AppInfoView: View {
                 }
 
                 if AppReleaseChannel.allowsDebugTools {
-                    Section {
-                        NavigationLink {
-                            DebugLogView()
-                        } label: {
-                            Label("Debug log", systemImage: "list.bullet.rectangle")
-                        }
-                    } header: {
-                        Text("Debug")
-                    } footer: {
-                        Text("Recent warnings and failures logged across the app (sync, transfer, water temperature, …).")
-                    }
-
                     Section {
                         Button(action: onImportSessionTapped) {
                             if isImporting {
@@ -120,13 +102,7 @@ struct AppInfoView: View {
 
                 Section {
                     VStack(spacing: 8) {
-                        Image("icon-simple")
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 48, height: 48)
-                            .foregroundStyle(Color.rpplMuted.opacity(0.4))
-                            .accessibilityHidden(true)
+                        HiddenDebugLogo { showDebug = true }
 
                         VStack(spacing: 2) {
                             Text(versionInfo.headline)
@@ -158,6 +134,7 @@ struct AppInfoView: View {
             .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
+            .navigationDestination(isPresented: $showDebug) { DebugLogView() }
             .alert(
                 "Turn off iCloud Drive?",
                 isPresented: $showDisableDeleteConfirm

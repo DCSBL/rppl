@@ -2,7 +2,7 @@
 import SwiftUI
 import RpplCore
 
-/// The park-arrival toggle, debug link, and explanation. Shown in the main Settings screen and,
+/// The park-arrival toggle and explanation. Shown in the main Settings screen and,
 /// mirrored, on the Notifications permission detail screen — turning the feature on needs
 /// notification access, so riders can enable it from either place.
 struct ParkArrivalNotificationsSection: View {
@@ -12,14 +12,6 @@ struct ParkArrivalNotificationsSection: View {
     var body: some View {
         Section {
             row
-
-            if AppReleaseChannel.allowsDebugTools {
-                NavigationLink {
-                    ParkArrivalDebugView()
-                } label: {
-                    Label("Debug park arrival", systemImage: "ladybug")
-                }
-            }
         } header: {
             Text("Park arrival notifications")
         } footer: {
