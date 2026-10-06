@@ -161,7 +161,7 @@ struct HighlightAssignerTests {
 
     @Test func setOrderIsFixed() {
         #expect(HighlightAssigner.setOrder == [
-            .longest, .longestTime, .shortest, .fastest, .mostLaps, .comeback, .backToBack,
+            .longest, .longestTime, .shortest, .fastest, .mostLaps, .comeback, .backToBack, .highImpact,
         ])
     }
 
