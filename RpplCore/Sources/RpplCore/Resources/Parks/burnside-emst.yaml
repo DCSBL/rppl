@@ -1,18 +1,27 @@
 version: 1
 id: burnside-emst
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial, from burnsidecablepark.nl
+  - date: 2026-10-06
+    description: Park pin and cable layout traced on the map
 
 name: Burnside Cablepark
 address: Viskweekweg 3, 8166 KJ Emst
 timezone: Europe/Amsterdam
-# Business pin for the official address, geocoded (not on the park's site), not the dock.
-location:
-  lat: 52.3096999
-  lon: 5.9985341
+location: { lat: 52.30984573, lon: 5.998621532 }
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - { lat: 52.31010921, lon: 5.999068967 }
+      - { lat: 52.308090296, lon: 6.000249723 }
+      - { lat: 52.307932288, lon: 6.002580796 }
+      - { lat: 52.309395715, lon: 6.003668965 }
+      - { lat: 52.31062162, lon: 6.001413274 }
 
 # water_temperature left out: nearest still-reporting RWS station (eefde.sluis.beneden, ~23 km)
 # is on a river lock, not this water body.

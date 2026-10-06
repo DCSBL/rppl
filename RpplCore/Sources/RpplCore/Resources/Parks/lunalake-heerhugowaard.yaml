@@ -1,16 +1,28 @@
 version: 1
 id: lunalake-heerhugowaard
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial
+  - date: 2026-10-06
+    description: Cable layout traced on the map
 
 name: Luna Lake
 address: Strand van Luna 3, 1704 ZZ Heerhugowaard
 timezone: Europe/Amsterdam
 # Approximate pin from the street address, not the dock.
 location: { lat: 52.644346, lon: 4.797034 }
+
+cables:
+  - name: Cable
+    direction: cw
+    points:
+      - { lat: 52.645121465, lon: 4.797580033 }
+      - { lat: 52.646529257, lon: 4.795659651 }
+      - { lat: 52.647366335, lon: 4.795668632 }
+      - { lat: 52.647339691, lon: 4.797090868 }
+      - { lat: 52.645680512, lon: 4.798786212 }
 
 phone: 06 16 67 67 49
 email: info@lunalake.nl

@@ -1,18 +1,17 @@
 version: 1
 id: zeumeren-voorthuizen
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial, from zeumerenwatersport.nl
+  - date: 2026-10-06
+    description: Park pin and cable layout traced on the map
 
 name: Zeumeren Watersport
 address: Stroetweg 11, 3781 PR Voorthuizen
 timezone: Europe/Amsterdam
-# Approximate pin from neighbouring official addresses on Stroetweg, not the dock.
-location:
-  lat: 52.1760
-  lon: 5.6218
+location: { lat: 52.173867309, lon: 5.619014101 }
 
 # Nearest station that still reports (~21 km); closer ones stopped reporting.
 water_temperature: { provider: rws_nl, station_id: eemmeerdijk.km23 }
@@ -27,6 +26,13 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
+    points:
+      - { lat: 52.173418768, lon: 5.619233988 }
+      - { lat: 52.172608302, lon: 5.616489689 }
+      - { lat: 52.171550315, lon: 5.615899834 }
+      - { lat: 52.171179977, lon: 5.616863751 }
+      - { lat: 52.172253925, lon: 5.620147848 }
     description: >-
       Loop cable of over 800 m that runs 11 m above the lake, with 9 tow points ("meenemers")
       and 5 corners. 16 obstacles in the water. Minimum age is 10 for waterski and 12 for wakeboard.

@@ -1,18 +1,17 @@
 version: 1
 id: wakeup-antwerp
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial (full size and 2.0 cable, hours and prices from the park's own site)
+  - date: 2026-10-06
+    description: Park pin and cable layout traced on the map
 
 name: WakeUp Cable Antwerpen
 address: Neel Dofflaan 50, 2050 Antwerpen
 timezone: Europe/Brussels
-# Geocode of the street, not a confirmed dock point.
-location:
-  lat: 51.2168178
-  lon: 4.3661184
+location: { lat: 51.215826418, lon: 4.365119488 }
 
 phone: "+32 488 705 788"
 email: Info@wakeupcable.be
@@ -24,8 +23,19 @@ links:
 
 cables:
   - name: Grote Kabel (6.0)
+    direction: cw
+    points:
+      - { lat: 51.215558413, lon: 4.365327992 }
+      - { lat: 51.214423024, lon: 4.366555716 }
+      - { lat: 51.214243336, lon: 4.366419953 }
+      - { lat: 51.214209157, lon: 4.366076425 }
+      - { lat: 51.215374046, lon: 4.364853796 }
+      - { lat: 51.21554997, lon: 4.365031985 }
   - name: Kleine Kabel (2.0)
     direction: 2d
+    points:
+      - { lat: 51.214437932, lon: 4.36687892 }
+      - { lat: 51.213573089, lon: 4.366386561 }
 
 opening:
   booking: required

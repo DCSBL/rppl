@@ -1,18 +1,17 @@
 version: 1
 id: beavercreek-roermond
 created_at: 2026-10-05
-updated_at: 2026-10-05
+updated_at: 2026-10-06
 history:
   - date: 2026-10-05
     description: initial
+  - date: 2026-10-06
+    description: Park pin and cable layout traced on the map
 
 name: Beaver Creek Wake Park Roermond
 address: De Weerd 52, 6041 TK Roermond
 timezone: Europe/Amsterdam
-# Pin is geocoded from the address, not the dock. Approximate.
-location:
-  lat: 51.2043775
-  lon: 5.9780566
+location: { lat: 51.206912007, lon: 5.972829739 }
 
 email: info@wake-park.nl
 website: https://www.wake-park.nl
@@ -25,6 +24,13 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
+    points:
+      - { lat: 51.207016626, lon: 5.972208024 }
+      - { lat: 51.208319831, lon: 5.9718247 }
+      - { lat: 51.208521512, lon: 5.97048271 }
+      - { lat: 51.20777533, lon: 5.969784096 }
+      - { lat: 51.206609903, lon: 5.971250944 }
     description: Full size cable, runs at 30 km/h in regular operation.
 
 opening:
