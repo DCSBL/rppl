@@ -17,7 +17,7 @@ struct ActiveSessionView: View {
                 .tag(SessionTab.controls)
             SessionSetUIPage(session: session)
                 .tag(SessionTab.activity)
-            if AppReleaseChannel.allowsDebugTools {
+            if WatchDebugTools.isEnabled {
                 WatchDebugPage(session: session)
                     .tag(SessionTab.debug)
             }

@@ -19,6 +19,7 @@ extension WatchSessionController {
     }
 
     func applyDetectionSimulation(_ mode: DetectionSimulationMode) {
+        guard WatchDebugTools.isEnabled else { return }
         detectionSimulationMode = mode
         switch mode {
         case .detected:
