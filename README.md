@@ -24,7 +24,7 @@ There is no account and no Rppl server. Your data stays on your devices (and in 
 
 **Needs:** iPhone + Apple Watch · iOS 26+ · watchOS 26+.
 
-## A note from Duco
+## A note from the developer
 
 Hi! My name is Duco. Since this year I’ve often been at a cable park to wakeboard. The regular Apple Workout app is too basic, so I went looking for a better tracker. What I found was either too complex, too limited, full of subscriptions, or hungry for my data. That had to be different.
 
