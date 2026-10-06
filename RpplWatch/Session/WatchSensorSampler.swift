@@ -155,6 +155,47 @@ extension WatchSessionController {
         WakeLog.debug(.session, "motion activity updates started")
     }
 
+    /// Barometric height at the sensor's own ~1 Hz, stored as-is. Skipped silently where there is
+    /// no barometer or Motion & Fitness is off; nothing else depends on it.
+    func startAltitudeUpdatesIfAvailable() {
+        altitudeUpdatesStarted = false
+        guard CMAltimeter.isRelativeAltitudeAvailable() else {
+            WakeLog.debug(.session, "altimeter unavailable — skipped")
+            return
+        }
+        switch CMAltimeter.authorizationStatus() {
+        case .denied, .restricted:
+            WakeLog.debug(.session, "altimeter not authorized — skipped")
+            return
+        default:
+            break
+        }
+        // Measured at every (re)start so a clock adjustment cannot leave a stale offset behind.
+        let bootOffset = SensorClock.bootOffset(now: Date(), systemUptime: ProcessInfo.processInfo.systemUptime)
+        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self] data, error in
+            guard let self else { return }
+            if let error {
+                // Gaps are expected; log once per error, never per sample.
+                WakeLog.error(.session, "altimeter: \(error.localizedDescription)")
+                return
+            }
+            guard let data, self.isRunning, !self.isProductPaused else { return }
+            self.altitudeBuffer.append(
+                AltitudeSample(
+                    timestamp: SensorClock.wallDate(
+                        bootOffset: bootOffset,
+                        sensorTimestamp: data.timestamp,
+                        now: Date()
+                    ),
+                    relativeAltitudeMeters: data.relativeAltitude.doubleValue,
+                    pressureKPa: data.pressure.doubleValue
+                )
+            )
+        }
+        altitudeUpdatesStarted = true
+        WakeLog.debug(.session, "altimeter updates started")
+    }
+
     func stopSensors() {
         WakeLog.debug(.session, "stopSensors")
         locationManager.stopUpdatingLocation()
@@ -165,6 +206,10 @@ extension WatchSessionController {
         if activityUpdatesStarted {
             activityManager.stopActivityUpdates()
             activityUpdatesStarted = false
+        }
+        if altitudeUpdatesStarted {
+            altimeter.stopRelativeAltitudeUpdates()
+            altitudeUpdatesStarted = false
         }
     }
 
@@ -187,6 +232,7 @@ extension WatchSessionController {
         let health = healthBuffer
         let water = waterBuffer
         let battery = batteryBuffer
+        let altitude = altitudeBuffer
         locationBuffer.removeAll(keepingCapacity: true)
         if motionDue {
             motionBuffer.removeAll(keepingCapacity: true)
@@ -195,8 +241,10 @@ extension WatchSessionController {
         healthBuffer.removeAll(keepingCapacity: true)
         waterBuffer.removeAll(keepingCapacity: true)
         batteryBuffer.removeAll(keepingCapacity: true)
+        altitudeBuffer.removeAll(keepingCapacity: true)
 
         guard !locations.isEmpty || !motions.isEmpty || !health.isEmpty || !water.isEmpty || !battery.isEmpty
+            || !altitude.isEmpty
         else {
             await flushChain?.value
             return
@@ -215,10 +263,18 @@ extension WatchSessionController {
                 health: health,
                 water: water,
                 battery: battery,
+                altitude: altitude,
                 store: store,
                 sessionId: sessionId
             )
-            self?.handleFlushOutcome(outcome, locations: locations, health: health, water: water, battery: battery)
+            self?.handleFlushOutcome(
+                outcome,
+                locations: locations,
+                health: health,
+                water: water,
+                battery: battery,
+                altitude: altitude
+            )
             guard !motions.isEmpty else { return }
             let decision: MotionRecordingPolicy.Decision
             do {
@@ -251,7 +307,8 @@ extension WatchSessionController {
         locations: [LocationSample],
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
-        battery: [BatterySample]
+        battery: [BatterySample],
+        altitude: [AltitudeSample]
     ) {
         if let byteSize = outcome.byteSize {
             storedByteSize = byteSize
@@ -273,11 +330,14 @@ extension WatchSessionController {
         if outcome.failed.contains(.battery) {
             batteryBuffer = SampleRequeue.merge(failed: battery, before: batteryBuffer, cap: SampleRequeue.batteryCap)
         }
+        if outcome.failed.contains(.altitude) {
+            altitudeBuffer = SampleRequeue.merge(failed: altitude, before: altitudeBuffer, cap: SampleRequeue.altitudeCap)
+        }
         errorText = String(localized: "Flush: \(error)")
         WakeLog.error(
             .store,
             "flush failed \(outcome.failed.map(\.rawValue).sorted()) loc=\(locations.count) health=\(health.count) "
-                + "water=\(water.count) battery=\(battery.count): \(error) — kept for retry"
+                + "water=\(water.count) battery=\(battery.count) altitude=\(altitude.count): \(error) — kept for retry"
         )
     }
 
@@ -325,6 +385,7 @@ extension WatchSessionController {
 
     func resetBatteryTracking() {
         batteryBuffer.removeAll(keepingCapacity: true)
+        altitudeBuffer.removeAll(keepingCapacity: true)
         lastPersistedBatteryAt = nil
         lastPersistedBatteryLevel = nil
         lastPersistedBatteryState = nil
@@ -544,6 +605,7 @@ extension StoreIO {
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
         battery: [BatterySample],
+        altitude: [AltitudeSample],
         store: SessionFileStore,
         sessionId: String
     ) async -> FlushOutcome {
@@ -553,6 +615,7 @@ extension StoreIO {
                 health: health,
                 water: water,
                 battery: battery,
+                altitude: altitude,
                 store: store,
                 sessionId: sessionId
             )

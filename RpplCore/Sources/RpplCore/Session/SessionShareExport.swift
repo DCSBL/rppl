@@ -45,6 +45,9 @@ public enum SessionShareExport {
         if !package.battery.isEmpty {
             fields.append(("battery", try encodeFragment(package.battery, encoder: encoder)))
         }
+        if !package.altitude.isEmpty {
+            fields.append(("altitude", try encodeFragment(package.altitude, encoder: encoder)))
+        }
         if let derived = package.derived {
             fields.append(("derived", try encodeFragment(derived, encoder: encoder)))
         }

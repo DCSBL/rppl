@@ -39,6 +39,7 @@ public enum SessionStoreError: Error, Equatable, Sendable, LocalizedError {
 ///   health-000.jsonl
 ///   water-000.jsonl (optional; Ultra submerged water temperature)
 ///   battery-000.jsonl (optional; Watch battery level + state)
+///   altitude-000.jsonl (optional; barometric relative altitude + pressure, when the Watch has one)
 ///   derived/view.json (optional; SessionStats + MapTrackFrame)
 /// ```
 public final class SessionFileStore: @unchecked Sendable {
@@ -370,6 +371,15 @@ public final class SessionFileStore: @unchecked Sendable {
         try appendJSONLines(samples, to: name, sessionId: sessionId)
     }
 
+    public func appendAltitudeSamples(
+        _ samples: [AltitudeSample],
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws {
+        let name = String(format: "altitude-%03d.jsonl", chunkIndex)
+        try appendJSONLines(samples, to: name, sessionId: sessionId)
+    }
+
     /// Stores framed motion bytes, keeping only the leading frames that are complete and inside the
     /// decode limits. Motion is expendable, so damaged or oversized input costs motion only: the
     /// dropped byte count is returned, never thrown. Nothing is written when no frame is usable.
@@ -532,6 +542,7 @@ public final class SessionFileStore: @unchecked Sendable {
         if name.hasPrefix("health-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("water-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("battery-") && name.hasSuffix(".jsonl") { return true }
+        if name.hasPrefix("altitude-") && name.hasSuffix(".jsonl") { return true }
         if name.hasPrefix("motion-") && name.hasSuffix(".jsonl.zlib") { return true }
         return false
     }
@@ -596,6 +607,14 @@ public final class SessionFileStore: @unchecked Sendable {
     ) throws -> [BatterySample] {
         let name = String(format: "battery-%03d.jsonl", chunkIndex)
         return try readJSONL(BatterySample.self, from: name, sessionId: sessionId)
+    }
+
+    public func readAltitudeSamples(
+        sessionId: String,
+        chunkIndex: Int = 0
+    ) throws -> [AltitudeSample] {
+        let name = String(format: "altitude-%03d.jsonl", chunkIndex)
+        return try readJSONL(AltitudeSample.self, from: name, sessionId: sessionId)
     }
 
     /// Stamps the session end and queues it for transfer. Only for stop and crash recovery, so
@@ -738,6 +757,7 @@ public final class SessionFileStore: @unchecked Sendable {
         try SessionImportLimits.validateArrayCount(package.health, limit: SessionImportLimits.maxHealthSamples, label: "health")
         try SessionImportLimits.validateArrayCount(package.water, limit: SessionImportLimits.maxWaterSamples, label: "water")
         try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+        try SessionImportLimits.validateArrayCount(package.altitude, limit: SessionImportLimits.maxAltitudeSamples, label: "altitude")
 
         let sessionId = package.manifest.sessionId
         let phoneStore = SessionFileStore(rootURL: phoneRoot, fileManager: fileManager)
@@ -752,7 +772,8 @@ public final class SessionFileStore: @unchecked Sendable {
             // (a pruned Watch session re-sent by mistake). Keep the copy; the caller still acks.
             let incomingEmpty = package.detections.isEmpty && package.locations.isEmpty
                 && package.health.isEmpty && package.motion.isEmpty && package.water.isEmpty
-                && package.battery.isEmpty && (package.motionFramesZlib?.isEmpty ?? true)
+                && package.battery.isEmpty && package.altitude.isEmpty
+                && (package.motionFramesZlib?.isEmpty ?? true)
             if incomingEmpty {
                 let hasData = ((try? phoneStore.readDetections(sessionId: sessionId))?.isEmpty == false)
                     || ((try? phoneStore.readLocationSamples(sessionId: sessionId))?.isEmpty == false)
@@ -790,6 +811,9 @@ public final class SessionFileStore: @unchecked Sendable {
         }
         if !package.battery.isEmpty {
             try staging.appendBatterySamples(package.battery, sessionId: sessionId)
+        }
+        if !package.altitude.isEmpty {
+            try staging.appendAltitudeSamples(package.altitude, sessionId: sessionId)
         }
         try staging.writeManifest(imported)
         if let derived = package.derived, derived.isCurrentAnalyzer {
@@ -863,6 +887,7 @@ public final class SessionFileStore: @unchecked Sendable {
         let health = try readHealthSamples(sessionId: sessionId)
         let water = try readWaterTemperatureSamples(sessionId: sessionId)
         let battery = try readBatterySamples(sessionId: sessionId)
+        let altitude = try readAltitudeSamples(sessionId: sessionId)
         // Rebuildable from the raw streams, so a failure here costs nothing.
         let derived = try? ensureDerivedView(sessionId: sessionId)
         return SessionTransferPackage(
@@ -873,6 +898,7 @@ public final class SessionFileStore: @unchecked Sendable {
             health: health,
             water: water,
             battery: battery,
+            altitude: altitude,
             derived: derived
         )
     }
@@ -1066,6 +1092,8 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
     public var water: [WaterTemperatureSample]
     /// Sparse Watch battery samples (`battery-000.jsonl`). Empty when none were logged.
     public var battery: [BatterySample]
+    /// Barometric samples (`altitude-000.jsonl`). Empty when the Watch has no barometer or none arrived.
+    public var altitude: [AltitudeSample]
     /// Fast view sidecar when present (Watch Stop / current analyzer).
     public var derived: DerivedSessionView?
 
@@ -1078,6 +1106,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         health: [HealthMetricSample],
         water: [WaterTemperatureSample] = [],
         battery: [BatterySample] = [],
+        altitude: [AltitudeSample] = [],
         derived: DerivedSessionView? = nil
     ) {
         self.manifest = manifest
@@ -1088,6 +1117,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         self.health = health
         self.water = water
         self.battery = battery
+        self.altitude = altitude
         self.derived = derived
     }
 
@@ -1101,6 +1131,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         health = try container.decode([HealthMetricSample].self, forKey: .health)
         water = try container.decodeIfPresent([WaterTemperatureSample].self, forKey: .water) ?? []
         battery = try container.decodeIfPresent([BatterySample].self, forKey: .battery) ?? []
+        altitude = try container.decodeIfPresent([AltitudeSample].self, forKey: .altitude) ?? []
         // Soft-fail derived: stale keys / analyzer drift must not block raw import (rebuild on ensure).
         if container.contains(.derived) {
             derived = try? container.decode(DerivedSessionView.self, forKey: .derived)
@@ -1114,6 +1145,7 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         try SessionImportLimits.validateArrayCount(health, limit: SessionImportLimits.maxHealthSamples, label: "health")
         try SessionImportLimits.validateArrayCount(water, limit: SessionImportLimits.maxWaterSamples, label: "water")
         try SessionImportLimits.validateArrayCount(battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+        try SessionImportLimits.validateArrayCount(altitude, limit: SessionImportLimits.maxAltitudeSamples, label: "altitude")
         if let motionFramesZlib, motionFramesZlib.count > SessionImportLimits.maxMotionFramesZlibBytes {
             throw SessionStoreError.importTooLarge(motionFramesZlib.count)
         }
@@ -1136,12 +1168,15 @@ public struct SessionTransferPackage: Codable, Equatable, Sendable {
         if !battery.isEmpty {
             try container.encode(battery, forKey: .battery)
         }
+        if !altitude.isEmpty {
+            try container.encode(altitude, forKey: .altitude)
+        }
         if let derived {
             try container.encode(derived, forKey: .derived)
         }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case manifest, detections, locations, motion, motionFramesZlib, health, water, battery, derived
+        case manifest, detections, locations, motion, motionFramesZlib, health, water, battery, altitude, derived
     }
 }

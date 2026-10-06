@@ -262,6 +262,43 @@ public struct WaterTemperatureSample: Codable, Equatable, Sendable {
     }
 }
 
+/// Barometric height from `CMAltimeter` (~1 Hz). Recorded only; nothing reads it yet.
+/// Not always available: older Watches have no barometer, and the stream has gaps (product pause,
+/// altimeter errors), so analysis must treat missing samples as normal.
+public struct AltitudeSample: Codable, Equatable, Sendable {
+    public var timestamp: Date
+    /// Metres relative to where this altimeter run started — the zero resets whenever the Watch
+    /// restarts updates (after a product pause), so only compare samples within one run.
+    public var relativeAltitudeMeters: Double
+    /// Barometric pressure in kilopascals.
+    public var pressureKPa: Double
+
+    public init(timestamp: Date, relativeAltitudeMeters: Double, pressureKPa: Double) {
+        self.timestamp = timestamp
+        self.relativeAltitudeMeters = relativeAltitudeMeters
+        self.pressureKPa = pressureKPa
+    }
+
+    /// Short keys, cm / 0.001 kPa resolution (the sensor's own limit) — about 45 bytes a line.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CompactCodingKeys.self)
+        try container.encode(timestamp, forKey: .t)
+        try container.encode((relativeAltitudeMeters * 100).rounded() / 100, forKey: .a)
+        try container.encode((pressureKPa * 1000).rounded() / 1000, forKey: .p)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CompactCodingKeys.self)
+        timestamp = try container.decode(Date.self, forKey: .t)
+        relativeAltitudeMeters = try container.decode(Double.self, forKey: .a)
+        pressureKPa = try container.decode(Double.self, forKey: .p)
+    }
+
+    private enum CompactCodingKeys: String, CodingKey {
+        case t, a, p
+    }
+}
+
 /// Sparse Watch battery reading (`WKInterfaceDevice.batteryLevel` / `batteryState`).
 /// No public mV API — `level` is the raw 0…1 fraction (full Float precision as Double).
 public struct BatterySample: Codable, Equatable, Sendable {

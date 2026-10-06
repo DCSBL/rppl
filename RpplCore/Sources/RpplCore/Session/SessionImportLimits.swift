@@ -9,6 +9,8 @@ public enum SessionImportLimits {
     public static let maxHealthSamples = 200_000
     public static let maxWaterSamples = 20_000
     public static let maxBatterySamples = 20_000
+    /// ~1 Hz: 200,000 covers a 55 h session.
+    public static let maxAltitudeSamples = 200_000
     public static let maxMotionFramesZlibBytes = 64 * 1024 * 1024
     public static let maxHeatmapTrackCount = 100
     public static let maxHeatmapPointsPerTrack = 10_000

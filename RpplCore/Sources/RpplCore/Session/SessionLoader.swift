@@ -123,6 +123,7 @@ public enum SessionLoader {
         try SessionImportLimits.validateArrayCount(package.health, limit: SessionImportLimits.maxHealthSamples, label: "health")
         try SessionImportLimits.validateArrayCount(package.water, limit: SessionImportLimits.maxWaterSamples, label: "water")
         try SessionImportLimits.validateArrayCount(package.battery, limit: SessionImportLimits.maxBatterySamples, label: "battery")
+        try SessionImportLimits.validateArrayCount(package.altitude, limit: SessionImportLimits.maxAltitudeSamples, label: "altitude")
 
         return makeBundle(
             manifest: package.manifest,

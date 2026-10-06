@@ -13,6 +13,7 @@ On-disk layout for Watch and iPhone session packages. Streams and HealthKit poli
   health-000.jsonl
   water-000.jsonl         # optional Ultra
   battery-000.jsonl       # optional Watch battery level + state
+  altitude-000.jsonl      # optional barometric relative altitude + pressure
   derived/
     view.json             # analyzerVersion + SessionStats + MapTrackFrame?
 ```
@@ -64,6 +65,7 @@ Same folder shape after WC import. The import builds the package in tmp and swap
 | `health-*.jsonl` | Mirrored HR / energy | workout cadence |
 | `water-*.jsonl` | Ultra water temperature | sparse |
 | `battery-*.jsonl` | Watch battery fraction (0…1) + state | sparse |
+| `altitude-*.jsonl` | `t`, `a` relative altitude (m), `p` pressure (kPa); zero resets per altimeter run; ~45 B a line, so a 4 h session is under 1 MB uncompressed and needs no framing | ~1 Hz, gaps expected |
 
 Raw is the regeneration source when analyzers change. Export / WC transfer carries these streams (motion as framed zlib when present). No public millivolt API on watchOS — battery `level` is the raw `Float` fraction from `WKInterfaceDevice`.
 
@@ -111,7 +113,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 | Read | Phone list / detail basics from `view.json`; rebuild only if missing or analyzer version stale |
 | Map | Store device-agnostic `MapTrackFrame` + distilled `mapTracks` (heatmap set paths, start pin). Phone computes camera distance for its map view size |
 | Mid-record | No derived write; live metrics stay RAM |
-| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = the last recorded sample (detections, GPS, health, water or battery, so the final set is kept), `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
+| Crash | No resume. On next Watch launch, sessions left in `recording` (not the active one) are finalized: terminal `inactive` marker with `detectorId` `crash_recovered`, `endedAt` = the last recorded sample (detections, GPS, health, water, battery or altitude, so the final set is kept), `readyToTransfer`, derived view built, then queued for transfer. No prompt; the rider starts a new session manually |
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 

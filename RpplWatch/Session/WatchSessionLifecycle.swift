@@ -402,6 +402,7 @@ extension WatchSessionController {
         // after the last flush of the previous session once left its samples here.
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
+        altitudeBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
         pendingRouteLocations.removeAll(keepingCapacity: true)
         locationSequencer.reset(notBefore: Date())
@@ -416,6 +417,7 @@ extension WatchSessionController {
         lastMotionFlushAt = nil
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
+        startAltitudeUpdatesIfAvailable()
         startWaterSubmersionIfAvailable()
 
         startedAt = Date()
@@ -598,6 +600,7 @@ extension WatchSessionController {
         // Callbacks that land after the final flush must not linger into the next session.
         locationBuffer.removeAll(keepingCapacity: true)
         motionBuffer.removeAll(keepingCapacity: true)
+        altitudeBuffer.removeAll(keepingCapacity: true)
         healthBuffer.removeAll(keepingCapacity: true)
         if !pendingDetections.isEmpty {
             WakeLog.error(.detection, "session ended with \(pendingDetections.count) detection event(s) unwritten")
@@ -690,6 +693,7 @@ extension WatchSessionController {
         startLocation()
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
+        startAltitudeUpdatesIfAvailable()
         considerPersistingBattery(force: true)
         startBackgroundLoops()
         if let session = workoutSession, session.state == .paused {

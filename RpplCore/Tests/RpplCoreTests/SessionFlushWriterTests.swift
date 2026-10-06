@@ -12,13 +12,15 @@ struct SessionFlushWriterTests {
         locations: [Int] = [],
         health: [Int] = [],
         water: [Int] = [],
-        battery: [Int] = []
+        battery: [Int] = [],
+        altitude: [Int] = []
     ) -> FlushOutcome {
         SessionFlushWriter.write(
             locations: locations.map { Samples.location($0) },
             health: health.map { Samples.health($0) },
             water: water.map { Samples.water($0) },
             battery: battery.map { Samples.battery($0) },
+            altitude: altitude.map { Samples.altitude($0) },
             store: session.store,
             sessionId: session.sessionId
         )
@@ -86,12 +88,14 @@ struct SessionFlushWriterTests {
     @Test func everyStreamFailingIsReportedPerStream() throws {
         let session = try TempSession.make()
         defer { session.cleanup() }
-        _ = flush(session, locations: [0], health: [0], water: [0], battery: [0])
-        for name in ["location-000.jsonl", "health-000.jsonl", "water-000.jsonl", "battery-000.jsonl"] {
+        _ = flush(session, locations: [0], health: [0], water: [0], battery: [0], altitude: [0])
+        for name in [
+            "location-000.jsonl", "health-000.jsonl", "water-000.jsonl", "battery-000.jsonl", "altitude-000.jsonl"
+        ] {
             try session.makeUnwritable(name)
         }
 
-        let outcome = flush(session, locations: [1], health: [1], water: [1], battery: [1])
+        let outcome = flush(session, locations: [1], health: [1], water: [1], battery: [1], altitude: [1])
 
         #expect(outcome.failed == Set(FlushStream.allCases))
     }
