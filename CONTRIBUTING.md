@@ -76,7 +76,7 @@ make check
 
 Details: [Docs/DevWorkflow.md](Docs/DevWorkflow.md).
 
-Bundle IDs (`.dev` builds): `nl.dcsbl.rppl` · Watch `nl.dcsbl.rppl.watchkitapp` · App Group `group.nl.dcsbl.rppl`.
+Bundle IDs: `nl.dcsbl.rppl` · Watch `nl.dcsbl.rppl.watchkitapp` · App Group `group.nl.dcsbl.rppl`. The side-by-side **Dev** configuration uses a `.dev` suffix on all of them ([Docs/DevWorkflow.md](Docs/DevWorkflow.md#dev-variant-clean-install-next-to-the-real-one)).
 
 ## Ideas and pull requests
 

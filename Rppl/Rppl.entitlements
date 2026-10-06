@@ -8,7 +8,7 @@
 	<true/>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.nl.dcsbl.rppl</string>
+		<string>$(RPPL_ICLOUD_CONTAINER)</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
@@ -16,11 +16,11 @@
 	</array>
 	<key>com.apple.developer.ubiquity-container-identifiers</key>
 	<array>
-		<string>iCloud.nl.dcsbl.rppl</string>
+		<string>$(RPPL_ICLOUD_CONTAINER)</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.nl.dcsbl.rppl</string>
+		<string>$(RPPL_APP_GROUP_ID)</string>
 	</array>
 </dict>
 </plist>
