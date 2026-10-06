@@ -19,6 +19,8 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
     /// This set's cable speed (km/h), rounded to 0.5; see `CableSpeedEstimator.cableSpeedKmh(setWindow:...)`.
     /// Session-wide value unless this set's own estimate clears the override threshold.
     public var cableSpeedKmh: Double?
+    /// Peak g-force (|userAcceleration|) in this set; see `ImpactStats`. Nil without motion data.
+    public var peakImpactG: Double?
     /// Record badges for this set within the session (empty if none).
     public var highlights: [SetHighlight]
 
@@ -33,6 +35,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         averageSpeedKmh: Double? = nil,
         peakSpeedKmh: Double? = nil,
         cableSpeedKmh: Double? = nil,
+        peakImpactG: Double? = nil,
         highlights: [SetHighlight] = []
     ) {
         self.index = index
@@ -45,6 +48,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         self.averageSpeedKmh = averageSpeedKmh
         self.peakSpeedKmh = peakSpeedKmh
         self.cableSpeedKmh = cableSpeedKmh
+        self.peakImpactG = peakImpactG
         self.highlights = highlights
     }
 
@@ -60,6 +64,7 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         averageSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .averageSpeedKmh)
         peakSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .peakSpeedKmh)
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
+        peakImpactG = try container.decodeIfPresent(Double.self, forKey: .peakImpactG)
         // Unknown badge codes (written by a newer build) are dropped, not a decode failure.
         highlights = (try container.decodeIfPresent([String].self, forKey: .highlights) ?? [])
             .compactMap(SetHighlight.init(rawValue:))
@@ -77,13 +82,14 @@ public struct SetSegmentStats: Codable, Equatable, Sendable, Identifiable {
         try container.encodeIfPresent(averageSpeedKmh, forKey: .averageSpeedKmh)
         try container.encodeIfPresent(peakSpeedKmh, forKey: .peakSpeedKmh)
         try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
+        try container.encodeIfPresent(peakImpactG, forKey: .peakImpactG)
         try container.encode(highlights, forKey: .highlights)
     }
 
     private enum CodingKeys: String, CodingKey {
         case index, startedAt, endedAt, duration, distanceMeters
         case lapCount
-        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, cableSpeedKmh, highlights
+        case sustainedSpeedKmh, averageSpeedKmh, peakSpeedKmh, cableSpeedKmh, peakImpactG, highlights
     }
 }
 

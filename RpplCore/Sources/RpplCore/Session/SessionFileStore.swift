@@ -300,12 +300,14 @@ public final class SessionFileStore: @unchecked Sendable {
         let locations = (try? readLocationSamples(sessionId: sessionId)) ?? []
         let health = (try? readHealthSamples(sessionId: sessionId)) ?? []
         let water = (try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []
+        let motion = (try? readMotionSamples(sessionId: sessionId)) ?? []
         let stats = SessionStatsBuilder.build(
             manifest: manifest,
             detections: detections,
             locations: locations,
             health: health,
-            water: water
+            water: water,
+            motion: motion
         )
         let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let mapFrame = MapTrackFitter.frame(locations: coords)

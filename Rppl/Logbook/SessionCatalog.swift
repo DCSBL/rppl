@@ -98,6 +98,7 @@ final class SessionCatalog {
                         setCount: stats.setCount,
                         totalDistanceMeters: stats.totalDistanceMeters,
                         topSpeedKmh: entry.topSpeedKmh,
+                        peakImpactG: stats.sets.compactMap(\.peakImpactG).max(),
                         airTemperatureCelsius: manifest.weather?.temperatureCelsius,
                         windSpeedKmh: manifest.weather?.windSpeedKmh,
                         precipitationMmPerHour: manifest.weather?.precipitationMmPerHour,

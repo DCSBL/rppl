@@ -8,6 +8,7 @@ public enum SessionStatsBuilder {
         locations: [LocationSample],
         health: [HealthMetricSample],
         water: [WaterTemperatureSample] = [],
+        motion: [MotionSample] = [],
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
         lapThresholds: LapThresholds = .default
     ) -> SessionStats {
@@ -79,6 +80,7 @@ public enum SessionStatsBuilder {
                 sessionSpeedKmh: sessionCableSpeedKmh,
                 locations: sortedLocations
             )
+            let peakImpact = ImpactStats.peakG(in: motion, from: window.start, to: window.end)
             sets.append(
                 SetSegmentStats(
                     index: index + 1,
@@ -90,7 +92,8 @@ public enum SessionStatsBuilder {
                     sustainedSpeedKmh: sustained,
                     averageSpeedKmh: average,
                     peakSpeedKmh: peak,
-                    cableSpeedKmh: cableSpeed
+                    cableSpeedKmh: cableSpeed,
+                    peakImpactG: peakImpact
                 )
             )
             totalDistance += distance

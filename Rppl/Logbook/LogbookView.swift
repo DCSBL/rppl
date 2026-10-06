@@ -422,6 +422,7 @@ extension SessionHighlight {
         case .iceBath: "snowflake"
         case .earlyBird: "sunrise.fill"
         case .nightOwl: "moon.stars.fill"
+        case .highestImpact: "burst.fill"
         }
     }
 
@@ -444,6 +445,7 @@ extension SessionHighlight {
         case .iceBath: .blue
         case .earlyBird: .yellow
         case .nightOwl: .indigo
+        case .highestImpact: .red
         }
     }
 }
@@ -458,6 +460,7 @@ extension SetHighlight {
         case .mostLaps: "arrow.triangle.2.circlepath"
         case .comeback: "arrow.counterclockwise"
         case .backToBack: "forward.fill"
+        case .highImpact: "figure.fall"
         }
     }
 
@@ -470,6 +473,7 @@ extension SetHighlight {
         case .mostLaps: .pink
         case .comeback: .green
         case .backToBack: .teal
+        case .highImpact: .red
         }
     }
 }

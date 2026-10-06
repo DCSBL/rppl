@@ -98,7 +98,7 @@ derived/view.json
 
 ## Derived stats today
 
-`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion never loaded for logbook UI. Session map uses distilled `mapTracks` (heatmap set paths + start pin) and `MapTrackFrame` for camera; phone may rebuild from raw when derived is stale.
+`SessionStatsBuilder` builds stats from raw streams. Catalog and detail basics read `derived/view.json` when present (ensure rebuilds if missing/stale). Motion is read only while the derived view is (re)built, to compute per-set peak g-force (`peakImpactG`, see `ImpactStats`); it is never loaded for logbook UI. Session map uses distilled `mapTracks` (heatmap set paths + start pin) and `MapTrackFrame` for camera; phone may rebuild from raw when derived is stale.
 
 ## Fast view files
 

@@ -146,6 +146,7 @@ public enum SessionTimelineRebase {
             averageSpeedKmh: set.averageSpeedKmh,
             peakSpeedKmh: set.peakSpeedKmh,
             cableSpeedKmh: set.cableSpeedKmh,
+            peakImpactG: set.peakImpactG,
             highlights: set.highlights
         )
     }

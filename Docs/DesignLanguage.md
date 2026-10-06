@@ -63,6 +63,7 @@ Every metric has one symbol and one tint, everywhere: tile header, chip, chart, 
 | Humidity | `.humidity` | `humidity` | `RpplMetricAir` |
 | Calories | `.energy` | `flame` | `RpplMetricEnergy` |
 | Heart rate | `.heartRate` | `heart.fill` | `RpplMetricEnergy` |
+| Impact (peak g, high-impact sets only) | `.impact` | `figure.fall` | `RpplMetricEnergy` |
 | Park | `.park` | `mappin.and.ellipse` | `RpplAccent` |
 
 All tints reach at least 4.3:1 against light and dark tiles (graphics need 3:1). Check new colors the same way before adding them.

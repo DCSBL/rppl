@@ -968,6 +968,10 @@ private struct SetDetailCard: View {
                     value: cableSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
                     caption: "Cable speed"
                 )
+                // Only the hard hits get a number; a normal set is not a g-force story.
+                if set.highlights.contains(.highImpact), let peakImpactG = set.peakImpactG {
+                    StatChip(metric: .impact, value: ImpactFormat.text(peakImpactG), caption: "Impact")
+                }
             }
 
             Text(
