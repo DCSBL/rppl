@@ -317,6 +317,7 @@ struct ParkToggleListPage<Value: Hashable>: View {
                 Text(footer)
             }
         }
+        .keyboardDoneButton()
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -380,5 +381,25 @@ struct ParkMiniMap: View {
             longitudeDelta: max(((lons.max() ?? 0) - (lons.min() ?? 0)) * 1.6, meters / 111_000)
         )
         return MKCoordinateRegion(center: center, span: span)
+    }
+}
+
+// MARK: - Keyboard
+
+extension View {
+    /// A Done button above the keyboard and drag-to-dismiss. Applied per page: a keyboard toolbar set on
+    /// the navigation stack does not reach every pushed page.
+    func keyboardDoneButton() -> some View {
+        scrollDismissesKeyboard(.interactively)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                        )
+                    }
+                }
+            }
     }
 }
