@@ -532,22 +532,6 @@
         }
       }
     },
-    "How to fix" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How to fix"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoe te herstellen"
-          }
-        }
-      }
-    },
     "Idle" : {
       "localizations" : {
         "en" : {
@@ -1044,22 +1028,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Machtigingen"
-          }
-        }
-      }
-    },
-    "Permissions updated" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permissions updated"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Machtigingen bijgewerkt"
           }
         }
       }
@@ -2387,22 +2355,6 @@
         }
       }
     },
-    "Try again" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try Again"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opnieuw proberen"
-          }
-        }
-      }
-    },
     "Discard session?" : {
       "localizations" : {
         "en" : {
@@ -2547,38 +2499,6 @@
         }
       }
     },
-    "Can't start yet" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can't start yet"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kan nog niet starten"
-          }
-        }
-      }
-    },
-    "Rppl needs access to %@ to record a session." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl needs access to %@ to record a session."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl heeft toegang tot %@ nodig om een session op te nemen."
-          }
-        }
-      }
-    },
     "Close" : {
       "localizations" : {
         "en" : {
@@ -2671,6 +2591,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opname loopt risico"
+          }
+        }
+      }
+    },
+    "Configure" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configureer"
+          }
+        }
+      }
+    },
+    "Sets up permissions, then starts a session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets up permissions, then starts a session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stelt machtigingen in en start dan een session"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ga door"
+          }
+        }
+      }
+    },
+    "Needed for your session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed for your session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nodig voor je session"
+          }
+        }
+      }
+    },
+    "Asked when you continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asked when you continue"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wordt gevraagd zodra je doorgaat"
           }
         }
       }

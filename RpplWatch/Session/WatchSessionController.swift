@@ -75,7 +75,7 @@ final class WatchSessionController: NSObject {
     var healthAuthStatus = "unknown"
     var locationAuthStatus = "unknown"
     var motionAvailability = "unknown"
-    /// Structured permission states behind the Start gate and the "Can't start yet" sheet.
+    /// Structured permission states behind the Start gate and the start permission checklist.
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
     @ObservationIgnored var healthStatusLookup: Task<HKAuthorizationStatus, Never>?
@@ -92,8 +92,15 @@ final class WatchSessionController: NSObject {
         ]
     }
 
-    /// Set when Start was refused for a missing required permission; drives the explain sheet.
-    var startBlockedBy: WatchPermissionKind?
+    /// Drives the permission checklist sheet shown when Start needs access.
+    var isShowingPermissionChecklist = false
+    /// Activity the checklist starts once the permissions are in place.
+    var pendingStartActivityCode: String?
+
+    /// The idle start card reads "Configure" while the checklist would come up first.
+    var needsPermissionSetup: Bool {
+        WatchPermissionOrder.needsSetup(permissionStates)
+    }
 
     var areRecordingPermissionsReady: Bool {
         WatchPermissionOrder.areAllReady(permissionStates)
@@ -275,12 +282,9 @@ final class WatchSessionController: NSObject {
         locationManager.activityType = .fitness
         // Permission status is refreshed from ContentView.onAppear — never block init on healthd.
 
-        if CMWaterSubmersionManager.waterSubmersionAvailable {
-            let manager = CMWaterSubmersionManager()
-            manager.delegate = self
-            waterManager = manager
-            waterTemperatureAvailable = true
-        }
+        // The submersion manager itself is created at session start (`startWaterSubmersionIfAvailable`):
+        // creating it asks for Motion & Fitness access, which must not pop up when the app opens.
+        waterTemperatureAvailable = CMWaterSubmersionManager.waterSubmersionAvailable
     }
 
 }

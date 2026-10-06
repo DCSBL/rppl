@@ -76,4 +76,12 @@ public enum WatchPermissionOrder {
             !kind.blocksRecording(when: states[kind] ?? .notDetermined)
         }
     }
+
+    /// True when Start should show the permission checklist first: a required permission blocks
+    /// recording, or any permission can still show its system sheet. A denied optional permission
+    /// (Motion) alone does not: it cannot be asked again, and recording works without it.
+    public static func needsSetup(_ states: [WatchPermissionKind: WatchPermissionState]) -> Bool {
+        startBlocker(states: states) != nil
+            || WatchPermissionKind.allCases.contains { (states[$0] ?? .notDetermined) == .notDetermined }
+    }
 }

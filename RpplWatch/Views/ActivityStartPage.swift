@@ -5,6 +5,7 @@ struct ActivityStartPage: View {
     let code: String
     var isStarting: Bool
     var enabled: Bool
+    var needsSetup = false
     let action: () -> Void
 
     var body: some View {
@@ -19,7 +20,9 @@ struct ActivityStartPage: View {
             .buttonStyle(.plain)
             .disabled(!enabled && !isStarting)
             .accessibilityLabel(ActivityCodes.localizedTitle(for: code))
-            .accessibilityHint(String(localized: "Starts a session"))
+            .accessibilityHint(needsSetup
+                ? String(localized: "Sets up permissions, then starts a session")
+                : String(localized: "Starts a session"))
         }
         .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
@@ -59,6 +62,15 @@ struct ActivityStartPage: View {
             ProgressView()
                 .tint(Color.rpplIdleAccent)
                 .frame(width: side, height: side)
+        } else if needsSetup {
+            Text("Configure")
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(Color.rpplIdleAccentForeground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.horizontal, 14)
+                .frame(height: side)
+                .background(Capsule().fill(Color.rpplIdleAccent))
         } else {
             Image(systemName: "chevron.right")
                 .font(.title3.weight(.bold))

@@ -85,3 +85,31 @@ struct WatchStartBlockerTests {
         #expect(WatchPermissionOrder.startBlocker(states: states) == nil)
     }
 }
+
+struct WatchNeedsSetupTests {
+    private typealias States = [WatchPermissionKind: WatchPermissionState]
+
+    @Test func undecidedPermissionNeedsSetup() {
+        let states: States = [.health: .authorized, .location: .authorized, .motion: .notDetermined]
+        #expect(WatchPermissionOrder.needsSetup(states))
+    }
+
+    @Test func missingStatesCountAsUndecided() {
+        #expect(WatchPermissionOrder.needsSetup([:]))
+    }
+
+    @Test func requiredDenialNeedsSetup() {
+        let states: States = [.health: .denied, .location: .authorized, .motion: .authorized]
+        #expect(WatchPermissionOrder.needsSetup(states))
+    }
+
+    @Test func deniedMotionAloneSkipsSetup() {
+        let states: States = [.health: .authorized, .location: .authorized, .motion: .denied]
+        #expect(!WatchPermissionOrder.needsSetup(states))
+    }
+
+    @Test func allReadySkipsSetup() {
+        let states: States = [.health: .authorized, .location: .authorized, .motion: .unavailable]
+        #expect(!WatchPermissionOrder.needsSetup(states))
+    }
+}

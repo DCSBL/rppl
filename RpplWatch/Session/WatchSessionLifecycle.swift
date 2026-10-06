@@ -106,20 +106,8 @@ extension WatchSessionController {
         return status
     }
 
-    /// Safe to call repeatedly. System may only show the sheet while status is notDetermined.
-    func requestPermissions() async {
-        WakeLog.debug(.permissions, "requestPermissions begin")
-        errorText = nil
-        await promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: true)
-        statusText = String(localized: "Permissions updated")
-        WakeLog.debug(
-            .permissions,
-            "status health=\(healthAuthStatus) loc=\(locationAuthStatus) motion=\(motionAvailability)"
-        )
-    }
-
-    /// Present the system sheets for permissions still undecided: from `startSession` (the only
-    /// automatic caller, so nothing asks before the rider starts) and the Permissions button.
+    /// Present the system sheets for permissions still undecided: from the permission checklist
+    /// (session Start or the Permissions page), so nothing asks before the rider opens it.
     /// Health first — its sheet is slow to appear; starting it ASAP avoids a spinner freeze on tap.
     /// Each sheet is answered before the next one shows, so the caller sees decided states.
     func promptUndeterminedPermissionsInOrder(includeDeniedHealthRetry: Bool = false) async {
@@ -269,14 +257,39 @@ extension WatchSessionController {
         }
     }
 
-    func reportStartBlocked(by kind: WatchPermissionKind) {
+    func reportStartBlocked(by kind: WatchPermissionKind, activityCode: String? = nil) {
         WakeLog.error(.permissions, "start blocked — \(kind.rawValue) access missing")
         errorText = nil
-        startBlockedBy = kind
+        presentPermissionChecklist(activityCode: activityCode)
         WKInterfaceDevice.current().play(.failure)
     }
 
-    func startSession(activityCode: String = ActivityCodes.resolvedStartCode()) async {
+    func presentPermissionChecklist(activityCode: String?) {
+        pendingStartActivityCode = activityCode
+        isShowingPermissionChecklist = true
+    }
+
+    /// Checklist Continue: ask for what is undecided through the system sheets, then start
+    /// (or just close when the list was opened from the Permissions page).
+    /// A permission that stays blocked keeps the checklist open with its cross and explainer.
+    func continueFromPermissionChecklist() async {
+        guard !isPromptingPermissions else { return }
+        await promptUndeterminedPermissionsInOrder()
+        await requestFullAccuracyIfReduced()
+        await refreshHealthPermissionStatus()
+        // Closed while a system sheet was up: the rider backed out, do not start behind their back.
+        guard isShowingPermissionChecklist else { return }
+        guard WatchPermissionOrder.startBlocker(states: permissionStates) == nil else { return }
+        isShowingPermissionChecklist = false
+        guard let code = pendingStartActivityCode else { return }
+        pendingStartActivityCode = nil
+        await startSession(activityCode: code, permissionsReviewed: true)
+    }
+
+    func startSession(
+        activityCode: String = ActivityCodes.resolvedStartCode(),
+        permissionsReviewed: Bool = false
+    ) async {
         // A busy request must not wipe the summary of a session that is still saving.
         switch startGateDecision() {
         case .start:
@@ -285,11 +298,15 @@ extension WatchSessionController {
             WakeLog.debug(.session, "startSession ignored — \(busyStateDescription)")
             return
         case .blockedByPermission(let kind):
-            reportStartBlocked(by: kind)
+            reportStartBlocked(by: kind, activityCode: activityCode)
+            return
+        }
+        let code = activityCode.isEmpty ? ActivityCodes.wakeboard : activityCode
+        if !permissionsReviewed, WatchPermissionOrder.needsSetup(permissionStates) {
+            presentPermissionChecklist(activityCode: code)
             return
         }
         endedSessionSummary = nil
-        let code = activityCode.isEmpty ? ActivityCodes.wakeboard : activityCode
         WakeLog.debug(.session, "startSession begin activity=\(code)")
         errorText = nil
         statusText = String(localized: "Starting…")
@@ -308,7 +325,7 @@ extension WatchSessionController {
             isStarting = false
             startingActivityCode = nil
             statusText = String(localized: "Idle")
-            reportStartBlocked(by: kind)
+            reportStartBlocked(by: kind, activityCode: code)
             return
         }
 
@@ -399,6 +416,7 @@ extension WatchSessionController {
         lastMotionFlushAt = nil
         startMotionIfAvailable()
         startActivityUpdatesIfAvailable()
+        startWaterSubmersionIfAvailable()
 
         startedAt = Date()
         pausedAccumulated = 0
