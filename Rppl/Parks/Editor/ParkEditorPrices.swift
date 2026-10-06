@@ -85,6 +85,8 @@ private struct ParkPriceRow: View {
 struct ParkPriceDetailPage: View {
     let index: Int
     @Environment(ParkEditorSession.self) private var session
+    /// Set once deletion is confirmed; the price is removed after this page is gone (see `onDisappear`).
+    @State private var deleting = false
 
     private var price: Binding<ParkPrice> {
         Binding(
@@ -132,15 +134,19 @@ struct ParkPriceDetailPage: View {
                             title: String(localized: "Delete \(name)?"),
                             message: String(localized: "This cannot be undone.")
                         ) {
+                            deleting = true
                             session.path.removeLast()
-                            session.park.prices?.remove(at: index)
-                            if session.park.prices?.isEmpty == true { session.park.prices = nil }
                         }
                     }
                 }
             }
             .navigationTitle(current.name.isEmpty ? String(localized: "Price") : current.name)
             .navigationBarTitleDisplayMode(.inline)
+            .onDisappear {
+                guard deleting else { return }
+                session.park.prices?.remove(at: index)
+                if session.park.prices?.isEmpty == true { session.park.prices = nil }
+            }
         }
     }
 
