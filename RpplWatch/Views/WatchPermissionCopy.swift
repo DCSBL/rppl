@@ -1,7 +1,7 @@
 import Foundation
 import RpplCore
 
-/// Watch copy for each recording permission: shown by the "Can't start yet" sheet.
+/// Watch copy for each recording permission: shown by the start permission checklist.
 extension WatchPermissionKind {
     var title: String {
         switch self {

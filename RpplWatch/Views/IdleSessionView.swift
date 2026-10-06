@@ -18,7 +18,8 @@ struct IdleSessionView: View {
                     ActivityStartPage(
                         code: code,
                         isStarting: session.isStarting && session.startingActivityCode == code,
-                        enabled: canStart
+                        enabled: canStart,
+                        needsSetup: session.needsPermissionSetup
                     ) {
                         start(code)
                     }
@@ -42,13 +43,8 @@ struct IdleSessionView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .sheet(isPresented: Binding(
-            get: { session.startBlockedBy != nil },
-            set: { if !$0 { session.startBlockedBy = nil } }
-        )) {
-            if let kind = session.startBlockedBy {
-                StartBlockedView(kind: kind, session: session)
-            }
+        .sheet(isPresented: $session.isShowingPermissionChecklist) {
+            StartPermissionsView(session: session)
         }
     }
 

@@ -122,6 +122,15 @@ extension WatchSessionController {
         liveSetTracker.replayLocationsForSetEnter(samples, from: holdStart)
     }
 
+    /// Created on first session start, once the rider has been through the permission checklist:
+    /// the manager asks for Motion & Fitness access the moment it exists.
+    func startWaterSubmersionIfAvailable() {
+        guard waterManager == nil, CMWaterSubmersionManager.waterSubmersionAvailable else { return }
+        let manager = CMWaterSubmersionManager()
+        manager.delegate = self
+        waterManager = manager
+    }
+
     func startActivityUpdatesIfAvailable() {
         activityUpdatesStarted = false
         guard CMMotionActivityManager.isActivityAvailable() else {
