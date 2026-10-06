@@ -1,10 +1,16 @@
 # Release branch. Xcode Cloud builds the branch release/X.Y.Z (Docs/Release.md), so every
 # build of a version (betas, release candidates, final) lands in one Build Group.
 #
-# release published: validate the tag (format, on main), then fast-forward release/X.Y.Z to the
-# tagged commit. That push starts the Xcode Cloud Release workflow. No force push: a tag on a
-# commit behind the branch fails here. A tag on the commit the branch already points at pushes
-# nothing and starts no build; promote the build testers already verified.
+# release published: validate the tag (format, on main), then push a marker commit to
+# release/X.Y.Z: the tagged commit's files plus ci_scripts/release-marker.txt (tag, tagged
+# commit, run id). That push starts the Xcode Cloud Release workflow.
+#
+# Why a marker commit and not the tagged commit itself: a branch created at a commit that is
+# already in the repository brings no new commit, and Xcode Cloud does not start for it. The
+# marker is always new, and it changes a file, so "Start if any file changes" holds. Each marker
+# has the previous branch head as parent, so the push is always a fast-forward (no force push)
+# and any tag on main can be released, in any order. Its .github/workflows is the parent's, never
+# the tag's: GitHub refuses a push from the Actions token that changes workflow files.
 #
 # The tag name is user input: it reaches the shell only through env, never interpolated.
 
@@ -38,15 +44,34 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/ci/prepare_release.py --release-branch --tag "$RELEASE_TAG"
 
-      - name: Push release branch
+      - name: Push marker commit
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_BRANCH: ${{ steps.branch.outputs.branch }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
+          set -euo pipefail
           commit="$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
-          remote="$(git ls-remote origin "refs/heads/${RELEASE_BRANCH}" | cut -f1)"
-          if [ "$remote" = "$commit" ]; then
-            echo "::notice::${RELEASE_BRANCH} already points at ${commit}. Nothing pushed, so Xcode Cloud starts no build."
-            exit 0
+          if ! parent="$(git rev-parse --verify --quiet "refs/remotes/origin/${RELEASE_BRANCH}")"; then
+            parent="$commit"
           fi
-          git push origin "${commit}:refs/heads/${RELEASE_BRANCH}"
+          # Tagged commit's files + the marker, built in a throwaway index.
+          export GIT_INDEX_FILE="$(mktemp -u)"
+          git read-tree "$commit"
+          # The Actions token may not push commits that change workflow files. Keep the parent's
+          # copy, so a workflow edit between two tags never shows up in the marker's diff.
+          if [ "$parent" != "$commit" ]; then
+            git rm -r -q -f --cached --ignore-unmatch -- .github/workflows
+            git ls-tree -r "$parent" -- .github/workflows | git update-index --index-info
+          fi
+          blob="$(printf 'tag=%s\ncommit=%s\nrun=%s\n' "$RELEASE_TAG" "$commit" "$GITHUB_RUN_ID" | git hash-object -w --stdin)"
+          git update-index --add --cacheinfo "100644,${blob},ci_scripts/release-marker.txt"
+          tree="$(git write-tree)"
+          unset GIT_INDEX_FILE
+          marker="$(git commit-tree "$tree" -p "$parent" \
+            -m "Release ${RELEASE_TAG}" \
+            -m "Xcode Cloud trigger. Tree of ${commit} plus ci_scripts/release-marker.txt.")"
+          git push origin "${marker}:refs/heads/${RELEASE_BRANCH}"

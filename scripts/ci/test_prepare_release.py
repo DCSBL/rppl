@@ -283,6 +283,38 @@ class RunTests(unittest.TestCase):
         self.assertEqual((self.tmp / pr.PBXPROJ).read_text(), before)
         self.assertFalse(self.notes.exists())
 
+    def write_marker(self, text):
+        marker = self.tmp / pr.MARKER_FILE
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.write_text(text)
+
+    def test_branch_build_reads_the_marker_file_without_listing_tags(self):
+        self.write_marker("tag=v1.2.3-beta.5\ncommit=%s\nrun=7\n" % COMMIT)
+        env = dict(self.env, CI_COMMIT="e" * 40)
+        with mock.patch.object(pr, "http_get_json", side_effect=AssertionError("no API call expected")):
+            code, out, _ = run_main(["--branch", "release/1.2.3", "--root", str(self.tmp)], env)
+        self.assertEqual(code, 0)
+        self.assertIn("marker for release tag v1.2.3-beta.5", out)
+        self.assertIn("MARKETING_VERSION = 1.2.3;", (self.tmp / pr.PBXPROJ).read_text())
+        plist = (self.tmp / pr.APP_INFO_PLIST).read_text()
+        self.assertRegex(plist, r"<key>RpplReleaseTag</key>\s*<string>1\.2\.3-beta\.5</string>")
+        # The About screen links the tagged commit, not the marker commit that was built.
+        self.assertRegex(plist, r"<key>RpplGitCommit</key>\s*<string>abcdef0</string>")
+
+    def test_branch_build_rejects_a_marker_for_another_version(self):
+        before = (self.tmp / pr.PBXPROJ).read_text()
+        self.write_marker("tag=1.2.4\ncommit=%s\n" % COMMIT)
+        code, _, err = run_main(["--branch", "release/1.2.3", "--root", str(self.tmp)], dict(self.env, CI_COMMIT=COMMIT))
+        self.assertEqual(code, 2)
+        self.assertIn("not a 1.2.3 release", err)
+        self.assertEqual((self.tmp / pr.PBXPROJ).read_text(), before)
+
+    def test_branch_build_rejects_a_marker_with_a_bad_tag(self):
+        self.write_marker("tag=latest\n")
+        code, _, err = run_main(["--branch", "release/1.2.3", "--root", str(self.tmp)], dict(self.env, CI_COMMIT=COMMIT))
+        self.assertEqual(code, 2)
+        self.assertIn("not a release tag", err)
+
     def test_branch_build_rejects_other_branches(self):
         for branch in ("main", "release/1.2", "release/1.2.3-beta.1", "feature/release/1.2.3", "release/"):
             with self.subTest(branch=branch):
@@ -328,6 +360,33 @@ class ReleaseBranchTests(unittest.TestCase):
             with self.subTest(branch=branch):
                 with self.assertRaises(pr.ReleaseError):
                     pr.parse_release_branch(branch)
+
+
+class ReadReleaseMarkerTests(unittest.TestCase):
+    def read(self, text=None):
+        root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, root, True)
+        if text is not None:
+            (root / pr.MARKER_FILE).parent.mkdir(parents=True)
+            (root / pr.MARKER_FILE).write_text(text)
+        return pr.read_release_marker(root)
+
+    def test_no_file_is_no_marker(self):
+        self.assertIsNone(self.read())
+
+    def test_reads_tag_and_commit(self):
+        self.assertEqual(self.read("tag=2026.10.4-beta.4\ncommit=%s\nrun=1\n" % COMMIT), ("2026.10.4-beta.4", COMMIT))
+
+    def test_commit_is_lowercased_and_optional_or_ignored_when_garbage(self):
+        self.assertEqual(self.read("tag=1.0.0\ncommit=%s\n" % COMMIT.upper()), ("1.0.0", COMMIT))
+        self.assertEqual(self.read("tag=1.0.0\n"), ("1.0.0", None))
+        self.assertEqual(self.read("tag=1.0.0\ncommit=not-a-sha\n"), ("1.0.0", None))
+
+    def test_without_a_tag_it_is_no_marker(self):
+        self.assertIsNone(self.read("commit=%s\n" % COMMIT))
+        self.assertIsNone(self.read("tag=\n"))
+        self.assertIsNone(self.read("garbage\n"))
+        self.assertIsNone(self.read(""))
 
 
 class FindReleaseTagTests(unittest.TestCase):
