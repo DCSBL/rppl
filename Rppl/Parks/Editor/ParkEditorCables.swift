@@ -95,6 +95,8 @@ struct ParkCableDetailPage: View {
     @Environment(\.dismiss) private var dismiss
     @State private var location = ParksLocationProvider()
     @State private var tracing = false
+    /// Set once deletion is confirmed; the cable is removed after this page is gone (see `onDisappear`).
+    @State private var deleting = false
 
     private enum Kind: Hashable { case fullSize, twoD }
 
@@ -178,9 +180,8 @@ struct ParkCableDetailPage: View {
                             title: String(localized: "Delete \(name)?"),
                             message: String(localized: "This cannot be undone.")
                         ) {
+                            deleting = true
                             session.path.removeLast()
-                            session.park.cables?.remove(at: index)
-                            if session.park.cables?.isEmpty == true { session.park.cables = nil }
                         }
                     }
                 }
@@ -189,6 +190,11 @@ struct ParkCableDetailPage: View {
             .navigationTitle(cable.name ?? String(localized: "Cable \(index + 1)"))
             .navigationBarTitleDisplayMode(.inline)
             .task { location.refresh() }
+            .onDisappear {
+                guard deleting else { return }
+                session.park.cables?.remove(at: index)
+                if session.park.cables?.isEmpty == true { session.park.cables = nil }
+            }
             .fullScreenCover(isPresented: $tracing) {
                 CableTraceView(cable: cableBinding, center: traceCenter)
             }
