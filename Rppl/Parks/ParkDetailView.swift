@@ -10,6 +10,7 @@ struct ParkDetailView: View {
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
     @State private var weatherProvider = ParksWeatherProvider.shared
     @State private var weather: ParkWeather?
     @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
@@ -118,8 +119,14 @@ struct ParkDetailView: View {
                 .ignoresSafeArea()
         }
         .alert(removeTitle, isPresented: $confirmRemove) {
-            Button(removeTitle, role: .destructive) { ParkStore.shared.removeUserVersion(id: park.id) }
+            Button(removeTitle, role: .destructive) {
+                let removesCustomPark = entry?.origin == .custom
+                ParkStore.shared.removeUserVersion(id: park.id)
+                if removesCustomPark { dismiss() }
+            }
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(removeMessage)
         }
         .task {
             drafts.reload()
@@ -157,6 +164,12 @@ struct ParkDetailView: View {
 
     private var removeTitle: String {
         entry?.origin == .custom ? String(localized: "Delete park") : String(localized: "Revert to app version")
+    }
+
+    private var removeMessage: String {
+        entry?.origin == .custom
+            ? String(localized: "This permanently deletes the park and all its details.")
+            : String(localized: "This permanently removes your changes. The app version shows again.")
     }
 
     private func startEditing() {

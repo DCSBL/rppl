@@ -10353,6 +10353,38 @@
           }
         }
       }
+    },
+    "This permanently deletes the park and all its details." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This permanently deletes the park and all its details."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit verwijdert het park en alle details definitief."
+          }
+        }
+      }
+    },
+    "This permanently removes your changes. The app version shows again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This permanently removes your changes. The app version shows again."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit verwijdert je wijzigingen definitief. De app-versie wordt weer getoond."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
