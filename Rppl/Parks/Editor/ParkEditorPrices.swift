@@ -31,6 +31,7 @@ struct ParkPricesPage: View {
                 Text("Type a name to add a price, for example Day pass or Wetsuit rental. Tap the line under a name to fill in its amounts.")
             }
         }
+        .dismissKeyboardOnTapOutside()
         .navigationTitle("Prices")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -139,6 +140,7 @@ struct ParkPriceDetailPage: View {
                     }
                 }
             }
+            .dismissKeyboardOnTapOutside()
             .navigationTitle(current.name.isEmpty ? String(localized: "Price") : current.name)
             .navigationBarTitleDisplayMode(.inline)
         }
