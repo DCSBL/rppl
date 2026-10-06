@@ -79,6 +79,10 @@ enum Samples {
         BatterySample(timestamp: time(second), level: 0.9, state: "unplugged")
     }
 
+    static func altitude(_ second: Int) -> AltitudeSample {
+        AltitudeSample(timestamp: time(second), relativeAltitudeMeters: 0.5, pressureKPa: 101.3)
+    }
+
     static func motion(_ second: Int) -> MotionSample {
         MotionSample(
             timestamp: time(second),

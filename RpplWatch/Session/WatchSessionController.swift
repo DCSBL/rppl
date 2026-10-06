@@ -182,6 +182,9 @@ final class WatchSessionController: NSObject {
     let locationManager = CLLocationManager()
     let motionManager = CMMotionManager()
     let activityManager = CMMotionActivityManager()
+    /// Barometer. Recorded only; not every Watch has one and it can drop out mid-session.
+    let altimeter = CMAltimeter()
+    var altitudeUpdatesStarted = false
     var waterManager: CMWaterSubmersionManager?
 
     var store: SessionFileStore?
@@ -216,6 +219,9 @@ final class WatchSessionController: NSObject {
     var detectionEngine = DetectionEngine()
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []
+    var altitudeBuffer: [AltitudeSample] = []
+    /// Last few seconds of height while not riding, for backdating `ride_enter`.
+    var recentAltitudeRing: [AltitudeSample] = []
     var healthBuffer: [HealthMetricSample] = []
     /// Recent GPS fixes for backdating live set meters on `ride_enter`.
     var recentLocationRing: [LocationSample] = []

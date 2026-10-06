@@ -13,6 +13,7 @@ struct TransferPackageCompletenessTests {
         "health-000.jsonl",
         "water-000.jsonl",
         "battery-000.jsonl",
+        "altitude-000.jsonl",
         "motion-000.jsonl.zlib"
     ]
 
@@ -25,6 +26,7 @@ struct TransferPackageCompletenessTests {
             health: (0..<10).map { Samples.health($0) },
             water: [Samples.water(0)],
             battery: [Samples.battery(0)],
+            altitude: (0..<10).map { Samples.altitude($0) },
             store: session.store,
             sessionId: id
         )
@@ -47,6 +49,7 @@ struct TransferPackageCompletenessTests {
         #expect(package.health.count == 10)
         #expect(package.water.count == 1)
         #expect(package.battery.count == 1)
+        #expect(package.altitude.count == 10)
         #expect(package.motionFramesZlib?.isEmpty == false)
     }
 

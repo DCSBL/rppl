@@ -15,6 +15,7 @@ public enum SampleRequeue {
     public static let healthCap = 3_600
     public static let waterCap = 1_000
     public static let batteryCap = 500
+    public static let altitudeCap = 3_600
 
     /// Below this much free space the Watch warns at Start.
     public static let lowStorageWarningBytes: Int64 = 200 * 1024 * 1024

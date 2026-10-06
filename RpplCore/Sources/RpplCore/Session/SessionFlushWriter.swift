@@ -3,7 +3,7 @@ import Foundation
 /// The JSONL streams the Watch buffers in memory and flushes together. Motion is separate: it is
 /// written once per frame interval and its failure never costs these.
 public enum FlushStream: String, Sendable, CaseIterable {
-    case locations, health, water, battery
+    case locations, health, water, battery, altitude
 }
 
 public struct FlushOutcome: Sendable, Equatable {
@@ -29,6 +29,7 @@ public enum SessionFlushWriter {
         health: [HealthMetricSample],
         water: [WaterTemperatureSample],
         battery: [BatterySample],
+        altitude: [AltitudeSample] = [],
         store: SessionFileStore,
         sessionId: String
     ) -> FlushOutcome {
@@ -52,6 +53,9 @@ public enum SessionFlushWriter {
         }
         if !battery.isEmpty {
             attempt(.battery) { try store.appendBatterySamples(battery, sessionId: sessionId) }
+        }
+        if !altitude.isEmpty {
+            attempt(.altitude) { try store.appendAltitudeSamples(altitude, sessionId: sessionId) }
         }
         outcome.byteSize = try? store.sessionByteSize(sessionId: sessionId)
         return outcome

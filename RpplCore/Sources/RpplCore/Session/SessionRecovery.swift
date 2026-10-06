@@ -19,7 +19,7 @@ public enum SessionRecovery {
 
 extension SessionFileStore {
     /// Latest timestamp across the streams recorded before a crash: detections, GPS, health,
-    /// water and battery. Motion is left out (large, and never later than GPS in practice).
+    /// water, battery and altitude. Motion is left out (large, and never later than GPS in practice).
     /// Unreadable streams count as empty. `nil` when nothing was recorded.
     public func lastRecordedTimestamp(sessionId: String) -> Date? {
         let detections = ((try? readDetections(sessionId: sessionId)) ?? []).map(\.timestamp)
@@ -27,7 +27,8 @@ extension SessionFileStore {
         let health = ((try? readHealthSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
         let water = ((try? readWaterTemperatureSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
         let battery = ((try? readBatterySamples(sessionId: sessionId)) ?? []).map(\.timestamp)
-        return [detections.max(), locations.max(), health.max(), water.max(), battery.max()]
+        let altitude = ((try? readAltitudeSamples(sessionId: sessionId)) ?? []).map(\.timestamp)
+        return [detections.max(), locations.max(), health.max(), water.max(), battery.max(), altitude.max()]
             .compactMap { $0 }
             .max()
     }
