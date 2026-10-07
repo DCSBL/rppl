@@ -41,6 +41,11 @@ struct LogbookSessionDetailView: View {
     @State private var weatherAttribution = WeatherAttributionProvider.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showEditor = false
+    @State private var flagDraft = SetFlagDraft(saved: nil)
+    @State private var customFlags = SetFlagStorage.loadCustoms()
+    @State private var showsLeaveDialog = false
+    @State private var flagSaveError: String?
+    @Environment(\.dismiss) private var dismiss
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -66,6 +71,13 @@ struct LogbookSessionDetailView: View {
 
     /// Typed in by hand: no map, speed, riding, calories or set list, and it can be edited.
     private var isManual: Bool { manifest?.manual != nil }
+
+    private var editsFlags: Bool {
+        if case .store = source { return !isManual }
+        return false
+    }
+
+    private var hasFlagDraft: Bool { editsFlags && flagDraft.isDirty }
 
     private var allowsExport: Bool {
         if case .store = source { return true }
@@ -105,14 +117,36 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
+        .navigationBarBackButtonHidden(hasFlagDraft)
+        .onChange(of: flagDraft) { _, draft in persistFlagDraft(draft) }
+        .confirmationDialog("Save flag changes?", isPresented: $showsLeaveDialog, titleVisibility: .visible) {
+            Button("Store") { if saveFlags() { dismiss() } }
+            Button("Discard", role: .destructive) {
+                discardFlags()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Could not save flags", isPresented: Binding(get: { flagSaveError != nil }, set: { if !$0 { flagSaveError = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(flagSaveError ?? "")
+        }
         .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
         .onDisappear {
             cancelLoad()
             cancelExport()
         }
         .toolbar {
+            if hasFlagDraft {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Back", systemImage: "chevron.backward") { showsLeaveDialog = true }
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
-                if isManual {
+                if hasFlagDraft {
+                    Button("Done") { _ = saveFlags() }
+                } else if isManual {
                     Button("Edit") { showEditor = true }
                 } else if allowsExport, loadPhase == .ready {
                     if isExporting {
@@ -547,6 +581,11 @@ struct LogbookSessionDetailView: View {
                     .font(.subheadline)
                 }
             }
+            if let flags = manifest?.manual?.flags, !flags.isEmpty {
+                FlowLayout(spacing: 6) {
+                    ForEach(flags, id: \.self) { SetFlagBadge(flag: $0) }
+                }
+            }
             if !stats.sets.isEmpty, end > start {
                 TimelineBar(
                     spans: stats.sets.map {
@@ -564,6 +603,73 @@ struct LogbookSessionDetailView: View {
                 .foregroundStyle(RpplDesign.secondaryText)
             }
         }
+    }
+
+    // MARK: Set flags
+
+    private var flagSessionId: String? {
+        if case .store(let sessionId) = source { return sessionId }
+        return nil
+    }
+
+    /// Picks up an unsaved draft left by a background or force-quit; a running draft is kept.
+    private func restoreFlagDraft(sessionId: String) {
+        guard !flagDraft.isDirty else { return }
+        flagDraft = SetFlagDraft(
+            saved: manifest?.setFlags,
+            draft: SetFlagStorage.loadDraft(sessionId: sessionId)
+        )
+    }
+
+    private func persistFlagDraft(_ draft: SetFlagDraft) {
+        guard let sessionId = flagSessionId else { return }
+        if draft.isDirty {
+            SetFlagStorage.saveDraft(draft.result, sessionId: sessionId)
+        } else {
+            SetFlagStorage.clearDraft(sessionId: sessionId)
+        }
+    }
+
+    /// Writes the draft to the manifest. False (with an alert) when that fails.
+    @discardableResult
+    private func saveFlags() -> Bool {
+        guard let store, let sessionId = flagSessionId else { return false }
+        do {
+            try store.setSetFlags(flagDraft.result, sessionId: sessionId)
+            manifest = try store.readManifest(sessionId: sessionId)
+            flagDraft = SetFlagDraft(saved: manifest?.setFlags)
+            return true
+        } catch {
+            flagSaveError = error.localizedDescription
+            return false
+        }
+    }
+
+    private func discardFlags() {
+        flagDraft.discard()
+    }
+
+    private func flagging(forSet index: Int) -> SetFlagging? {
+        guard editsFlags else { return nil }
+        return SetFlagging(
+            selected: flagDraft.flags(forSet: index),
+            customs: customFlags,
+            toggle: { flagDraft.toggle($0, forSet: index) },
+            addCustom: { text in
+                guard let flag = SetFlags.normalized(custom: text) else { return }
+                if SetFlags.kind(of: flag) == .custom, !SetFlags.contains(flag, in: customFlags) {
+                    customFlags.append(flag)
+                    SetFlagStorage.saveCustoms(customFlags)
+                }
+                if !SetFlags.contains(flag, in: flagDraft.flags(forSet: index)) {
+                    flagDraft.toggle(flag, forSet: index)
+                }
+            },
+            deleteCustom: { flag in
+                customFlags.removeAll { $0.caseInsensitiveCompare(flag) == .orderedSame }
+                SetFlagStorage.saveCustoms(customFlags)
+            }
+        )
     }
 
     private func distanceText(_ stats: SessionStats) -> String {
@@ -629,7 +735,8 @@ struct LogbookSessionDetailView: View {
                             locations: SessionLocationHelpers.downsample(
                                 SessionLocationHelpers.locations(for: set, in: allLocations),
                                 maxCount: Self.setMapPointBudget
-                            )
+                            ),
+                            flagging: flagging(forSet: set.index)
                         )
                     }
                 }
@@ -738,6 +845,7 @@ struct LogbookSessionDetailView: View {
                 } else if let cityName {
                     SessionCityResolver.shared.remember(sessionId: sessionId, cityName: cityName)
                 }
+                restoreFlagDraft(sessionId: sessionId)
                 loadPhase = .ready
                 loadTask = nil
                 tracksLoading = true
@@ -938,6 +1046,7 @@ private struct SetDetailCard: View {
     let set: SetSegmentStats
     let locations: [LocationSample]
     var rendering: SessionMapRendering = .flat
+    var flagging: SetFlagging?
 
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
@@ -968,6 +1077,10 @@ private struct SetDetailCard: View {
                             HighlightChip(highlight)
                         }
                     }
+                }
+
+                if let flagging {
+                    SetFlagRow(title: String(localized: "Set \(set.index) flags"), flagging: flagging)
                 }
             }
 

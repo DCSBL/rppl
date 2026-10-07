@@ -58,6 +58,10 @@ Same folder shape after WC import. The import builds the package in tmp and swap
 
 `manifest.manual` (`ManualEntry`) marks a session typed in on iPhone: per-cable set/lap tallies, an estimated distance (laps x lap length; a 2.0 cable is ridden there and back) and a location. There are no sensor streams: `SessionStatsBuilder` builds the stats from the entry, so a rebuilt `derived/view.json` keeps them, and the location centers `mapFrame` so park matching and visits work as for tracked sessions. Written `acknowledged` with `endedAt` set, never to HealthKit, and not mirrored to the Watch logbook (`SessionManifest.mirrorsToWatch`). Tracked sessions are never edited (apart from the park link); manual sessions are, through `SessionFileStore.saveManual`. Past weather comes from WeatherKit hourly history after saving, best effort.
 
+### Set flags
+
+Self-notes per set ("failed start", "new trick", custom text). `manifest.setFlags` maps a set index (`SetSegmentStats.index`, as a string) to opaque flag strings; preset codes are `SetFlags` in Core, anything else is a custom label and round-trips untouched. It is a phone-written sidecar like the park link: raw streams and `derived/view.json` are never changed, and a rebuild keeps the flags. Flags are keyed by index, so an analyzer change that renumbers sets would shift them. Manual sessions have no per-set rows; they carry session-level `manual.flags`. Export includes the manifest, so flags travel with the session. The phone edits flags as a draft kept in `UserDefaults` (survives backgrounding and force-quit) until Done / Store.
+
 ## What is stored (raw)
 
 | File | Role | Approx |

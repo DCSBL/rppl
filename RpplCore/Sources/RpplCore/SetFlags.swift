@@ -72,10 +72,10 @@ public struct SetFlagDraft: Codable, Equatable, Sendable {
     public private(set) var base: [String: [String]]
     public private(set) var draft: [String: [String]]
 
-    public init(saved: [String: [String]]?) {
+    public init(saved: [String: [String]]?, draft: [String: [String]]? = nil) {
         let clean = Self.clean(saved ?? [:])
         base = clean
-        draft = clean
+        self.draft = draft.map(Self.clean) ?? clean
     }
 
     public var isDirty: Bool { draft != base }

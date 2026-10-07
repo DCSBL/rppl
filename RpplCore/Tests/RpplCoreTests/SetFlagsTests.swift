@@ -41,6 +41,13 @@ struct SetFlagsTests {
         #expect(draft.flags(forSet: 1) == ["clean_exit"])
     }
 
+    @Test func draftRestoresOverFreshSavedFlags() {
+        let draft = SetFlagDraft(saved: ["1": ["wipeout"]], draft: ["1": ["wipeout", "new_trick"], "2": []])
+        #expect(draft.isDirty)
+        #expect(draft.flags(forSet: 1) == ["wipeout", "new_trick"])
+        #expect(!SetFlagDraft(saved: ["1": ["wipeout"]], draft: ["1": ["wipeout"]]).isDirty)
+    }
+
     @Test func draftSurvivesCodableRoundTrip() throws {
         var draft = SetFlagDraft(saved: nil)
         draft.toggle("Tail grab", forSet: 3)

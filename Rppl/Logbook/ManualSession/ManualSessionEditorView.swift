@@ -11,6 +11,7 @@ struct ManualSessionDraft: Equatable, Sendable {
     var spot: ParkCoordinate?
     var spotName: String?
     var tallies: [ManualEntry.Tally]
+    var flags: [String] = []
 
     /// A two-hour session that ended now (to the minute).
     static func new(now: Date = .now) -> ManualSessionDraft {
@@ -47,6 +48,7 @@ struct ManualSessionEditorView: View {
     @State private var isSaving = false
     @State private var showDiscard = false
     @State private var errorText: String?
+    @State private var customFlags = SetFlagStorage.loadCustoms()
 
     init(editing sessionId: String? = nil, onSaved: @escaping (String) -> Void = { _ in }) {
         editing = sessionId
@@ -71,7 +73,8 @@ struct ManualSessionEditorView: View {
             parkId: manifest.parkId,
             spot: ownSpot ? manual.location : nil,
             spotName: ownSpot ? (try? store.readDerivedView(sessionId: sessionId))?.cityName : nil,
-            tallies: manual.tallies
+            tallies: manual.tallies,
+            flags: manual.flags ?? []
         )
     }
 
@@ -108,6 +111,15 @@ struct ManualSessionEditorView: View {
                     }
                 } else {
                     Section("Sets & laps") { tallyRows($draft.tallies[0]) }
+                }
+                Section("Flags") {
+                    SetFlagCloud(flagging: SetFlagging(
+                        selected: draft.flags,
+                        customs: customFlags,
+                        toggle: { draft.flags = SetFlags.toggling($0, in: draft.flags) },
+                        addCustom: addCustomFlag,
+                        deleteCustom: deleteCustomFlag
+                    ))
                 }
                 if let distanceM {
                     Section {
@@ -151,11 +163,26 @@ struct ManualSessionEditorView: View {
         CountField(title: "Laps", value: tally.laps)
     }
 
+    private func addCustomFlag(_ text: String) {
+        guard let flag = SetFlags.normalized(custom: text) else { return }
+        if SetFlags.kind(of: flag) == .custom, !SetFlags.contains(flag, in: customFlags) {
+            customFlags.append(flag)
+            SetFlagStorage.saveCustoms(customFlags)
+        }
+        if !SetFlags.contains(flag, in: draft.flags) { draft.flags = SetFlags.toggling(flag, in: draft.flags) }
+    }
+
+    private func deleteCustomFlag(_ flag: String) {
+        customFlags.removeAll { $0.caseInsensitiveCompare(flag) == .orderedSame }
+        SetFlagStorage.saveCustoms(customFlags)
+    }
+
     private func save() {
         isSaving = true
         let store = connectivity.store
         let (draft, editing) = (draft, editing)
-        let entry = ManualEntry(tallies: draft.tallies, distanceM: distanceM, location: park?.location ?? draft.spot)
+        let entry = ManualEntry(tallies: draft.tallies, distanceM: distanceM, location: park?.location ?? draft.spot,
+                           flags: draft.flags.isEmpty ? nil : draft.flags)
         let parkId = park?.id
         let label = park?.name ?? (draft.spot == nil ? nil : (draft.spotName ?? String(localized: "Own location")))
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
