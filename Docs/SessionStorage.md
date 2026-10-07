@@ -56,7 +56,7 @@ Same folder shape after WC import. The import builds the package in tmp and swap
 
 ### Manual sessions
 
-`manifest.manual` (`ManualEntry`) marks a session typed in on iPhone: per-cable set/lap tallies, an estimated distance (laps x lap length; a 2D cable is ridden there and back) and a location. There are no sensor streams: `SessionStatsBuilder` builds the stats from the entry, so a rebuilt `derived/view.json` keeps them, and the location centers `mapFrame` so park matching and visits work as for tracked sessions. Written `acknowledged` with `endedAt` set, never to HealthKit, and not mirrored to the Watch logbook (`SessionManifest.mirrorsToWatch`). Tracked sessions are never edited (apart from the park link); manual sessions are, through `SessionFileStore.saveManual`. Past weather comes from WeatherKit hourly history after saving, best effort.
+`manifest.manual` (`ManualEntry`) marks a session typed in on iPhone: per-cable set/lap tallies, an estimated distance (laps x lap length; a 2.0 cable is ridden there and back) and a location. There are no sensor streams: `SessionStatsBuilder` builds the stats from the entry, so a rebuilt `derived/view.json` keeps them, and the location centers `mapFrame` so park matching and visits work as for tracked sessions. Written `acknowledged` with `endedAt` set, never to HealthKit, and not mirrored to the Watch logbook (`SessionManifest.mirrorsToWatch`). Tracked sessions are never edited (apart from the park link); manual sessions are, through `SessionFileStore.saveManual`. Past weather comes from WeatherKit hourly history after saving, best effort.
 
 ## What is stored (raw)
 

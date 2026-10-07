@@ -6,7 +6,7 @@ import Testing
 struct ManualEntryTests {
     private let t0 = Date(timeIntervalSince1970: 1_790_000_000)
     private let loop = ParkCable(direction: .clockwise, lengthM: 1_000)
-    private let twoD = ParkCable(direction: .twoD, lengthM: 400)
+    private let twoPointZero = ParkCable(direction: .twoPointZero, lengthM: 400)
     private let unknown = ParkCable(direction: .clockwise)
 
     private func manifest(
@@ -30,15 +30,15 @@ struct ManualEntryTests {
 
     // MARK: Distance estimate
 
-    @Test func lapLengthLoopIsLengthAndTwoDIsThereAndBack() {
+    @Test func lapLengthLoopIsLengthAndTwoPointZeroIsThereAndBack() {
         #expect(loop.lapLengthM == 1_000)
-        #expect(twoD.lapLengthM == 800)
+        #expect(twoPointZero.lapLengthM == 800)
         #expect(unknown.lapLengthM == nil)
     }
 
     @Test func distanceSumsLapsPerCable() {
         let tallies = [ManualEntry.Tally(sets: 1, laps: 3), .init(sets: 2, laps: 2)]
-        #expect(ManualEntry.distanceM(tallies: tallies, cables: [loop, twoD]) == 3 * 1_000 + 2 * 800)
+        #expect(ManualEntry.distanceM(tallies: tallies, cables: [loop, twoPointZero]) == 3 * 1_000 + 2 * 800)
     }
 
     @Test func distanceIsNilWithoutLengthOrLapsOrCable() {
