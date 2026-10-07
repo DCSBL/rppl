@@ -11119,6 +11119,54 @@
           }
         }
       }
+    },
+    "Remove this label?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove this label?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Label verwijderen?"
+          }
+        }
+      }
+    },
+    "“%@” will be removed from all sets." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” will be removed from all sets."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” wordt van alle sets verwijderd."
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijder"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

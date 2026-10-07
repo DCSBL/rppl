@@ -63,6 +63,15 @@ struct SetFlagsTests {
         #expect(draft.flags(forSet: 1) == ["clean_exit"])
     }
 
+    @Test func removeEverywhereTakesLabelOffAllSets() {
+        var draft = SetFlagDraft(saved: ["1": ["Tail grab", "rail"], "2": ["tail grab"], "3": ["wipeout"]])
+        #expect(draft.isUsed("Tail grab"))
+        draft.removeEverywhere("Tail grab")
+        #expect(!draft.isUsed("Tail grab"))
+        #expect(draft.result == ["1": ["rail"], "3": ["wipeout"]])
+        #expect(draft.isDirty)
+    }
+
     @Test func storePersistsFlagsAndUnknownCodesRoundTrip() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)

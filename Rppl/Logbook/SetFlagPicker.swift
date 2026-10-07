@@ -70,6 +70,9 @@ struct SetFlagging {
     var customs: [String]
     var toggle: (String) -> Void
     var addCustom: (String) -> Void
+    /// Whether any set currently carries the label.
+    var isUsed: (String) -> Bool
+    /// Removes the label from the saved list and from every set.
     var deleteCustom: (String) -> Void
 }
 
@@ -106,6 +109,7 @@ struct SetFlagBadge: View {
 struct SetFlagCloud: View {
     let flagging: SetFlagging
     @State private var customText = ""
+    @State private var pendingDelete: String?
 
     private var customFlags: [String] {
         let extra = flagging.selected.filter { SetFlags.kind(of: $0) == .custom }
@@ -131,6 +135,18 @@ struct SetFlagCloud: View {
             .padding(.vertical, 8)
             .background(Color.rpplFill, in: Capsule())
         }
+        .confirmationDialog(
+            "Remove this label?", isPresented: deletePrompt, titleVisibility: .visible, presenting: pendingDelete
+        ) { flag in
+            Button("Remove", role: .destructive) { flagging.deleteCustom(flag) }
+            Button("Cancel", role: .cancel) {}
+        } message: { flag in
+            Text("“\(flag)” will be removed from all sets.")
+        }
+    }
+
+    private var deletePrompt: Binding<Bool> {
+        Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
     }
 
     private func group(_ kind: SetFlagKind, flags: [String]) -> some View {
@@ -148,7 +164,7 @@ struct SetFlagCloud: View {
                         .contextMenu {
                             if kind == .custom {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
-                                    flagging.deleteCustom(flag)
+                                    if flagging.isUsed(flag) { pendingDelete = flag } else { flagging.deleteCustom(flag) }
                                 }
                             }
                         }

@@ -121,6 +121,19 @@ public struct SetFlagDraft: Equatable, Sendable {
 
     public mutating func discard() { draft = base }
 
+    /// Whether any set in the draft carries `flag`.
+    public func isUsed(_ flag: String) -> Bool {
+        draft.values.contains { SetFlags.contains(flag, in: $0) }
+    }
+
+    /// Takes `flag` off every set (a deleted custom label).
+    public mutating func removeEverywhere(_ flag: String) {
+        for (key, flags) in draft {
+            let kept = flags.filter { $0.caseInsensitiveCompare(flag) != .orderedSame }
+            draft[key] = kept.isEmpty ? nil : kept
+        }
+    }
+
     private static func clean(_ flags: [String: [String]]) -> [String: [String]] {
         flags.filter { !$0.value.isEmpty }
     }

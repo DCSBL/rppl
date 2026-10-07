@@ -670,7 +670,9 @@ struct LogbookSessionDetailView: View {
                     flagDraft.toggle(flag, forSet: index)
                 }
             },
+            isUsed: { flagDraft.isUsed($0) },
             deleteCustom: { flag in
+                flagDraft.removeEverywhere(flag)
                 customFlags.removeAll { $0.caseInsensitiveCompare(flag) == .orderedSame }
                 SetFlagStorage.saveCustoms(customFlags)
             }
