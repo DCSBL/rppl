@@ -55,6 +55,28 @@ struct ManualEntryTests {
         #expect(entry.setCount == 3 && entry.lapCount == 1)
     }
 
+    @Test func unknownCountsStayNilAndDifferFromZero() {
+        #expect(ManualEntry().setCount == nil && ManualEntry().lapCount == nil)
+        let zero = ManualEntry(tallies: [.init(sets: 0, laps: 0)])
+        #expect(zero.setCount == 0 && zero.lapCount == 0)
+        // Unknown cables add nothing to the known total of the others.
+        let mixed = ManualEntry(tallies: [.init(sets: nil, laps: 2), .init(sets: 1, laps: nil)])
+        #expect(mixed.setCount == 1 && mixed.lapCount == 2)
+        #expect(ManualEntry.distanceM(tallies: [.init()], cables: [loop]) == nil)
+    }
+
+    @Test func unknownCountsFlowIntoStatsAndRoundTrip() throws {
+        let (store, root) = makeStore()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let m = manifest(entry: ManualEntry(tallies: [.init(sets: nil, laps: 0)]))
+        try store.saveManual(m, label: nil)
+
+        let stats = try store.ensureDerivedView(sessionId: m.sessionId).stats
+        #expect(stats.knownSetCount == nil)
+        #expect(stats.knownLapCount == 0)
+        #expect(try store.readManifest(sessionId: m.sessionId).manual?.tallies == [.init(sets: nil, laps: 0)])
+    }
+
     // MARK: Stats and storage
 
     @Test func statsComeFromTheEntryAndSurviveReanalysis() throws {

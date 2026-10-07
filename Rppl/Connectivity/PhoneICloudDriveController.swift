@@ -75,6 +75,15 @@ final class PhoneICloudDriveController: NSObject {
         ubiquityContainerURL.map { AppConstants.iCloudDocumentsSessionsRoot(containerURL: $0) }
     }
 
+    /// Files app deep link to the iCloud Drive Sessions folder; nil unless sync is on and available.
+    var filesAppFolderURL: URL? {
+        guard isSyncEnabled, isICloudAvailable, let root = iCloudSessionsRoot else { return nil }
+        return URL(string: root.absoluteString.replacingOccurrences(
+            of: "file://",
+            with: "shareddocuments://"
+        ))
+    }
+
     /// Preferred live store root for the current preference + availability.
     func preferredSessionsRoot() -> URL {
         if isSyncEnabled, let iCloudSessionsRoot {
