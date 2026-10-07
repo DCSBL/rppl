@@ -54,6 +54,7 @@ history:
   - { date: 2026-09-24, description: initial }
 
 name: Project 7 Cablepark Rotterdam
+languages: [nl, en]               # optional: languages the park works in, main first (BCP-47: nl-BE, fr-BE, en)
 address: Kosboulevard 35, 3059 XZ Rotterdam
 timezone: Europe/Amsterdam        # used to resolve "today"; default Europe/Amsterdam
 location: { lat: 51.979207, lon: 4.573426 }
@@ -86,7 +87,7 @@ prices:                           # a name with one or more amounts
   - name: Skis
     options:
       - { amount: "10", currency: EUR, per: hour }
-      - { amount: "15", currency: EUR, per: "2 hours" }
+      - { amount: "15", currency: EUR, per: "2 hours" }   # or per: { nl: per 2 uur, en: per 2 hours }
   - name: Day pass
     options:
       - { amount: "38.50", currency: EUR, note: kids up to 15 }
@@ -106,6 +107,16 @@ water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
 ### Prices
 
 A price is a `name` with `options`: one entry per amount ("skis": €10 for 1 hour, €15 for 2 hours; "day pass": one amount per audience). `amount` is exact decimal text, signed (negative is a discount); a plain YAML number is read the same. `currency` is an ISO 4217 code. `per` is free text; `person`, `hour`, `day` and `session` are shown in the reader's language ("per hour"), anything else as written ("per season", "1,5 uur"). `note` says who or what the amount is for. The detail screen groups the amounts under the name and formats them in the reader's own number format (`€12,34` or `$12.34`). In the editor people type the amount (`12,34`, `1.234,56`, `12,-`, `-3`) and `ParkPriceParser` reads it. Times are stored as 24 hour `HH:mm` (or `sunset`), dates as `yyyy-MM-dd`.
+
+### Languages
+
+A park may work in more than one language (Brussels: `nl-BE`, `fr-BE`, `en`). `languages` lists them, main language first; absent means the text is as written.
+
+- **Long text** (`description`, cable `description`, `opening.note`) is written **once, in the first language**. It is not translated per language.
+- **Short text with units** ("per 2 hours", "kids up to 15") is where a single language breaks, so `per` and `note` of a price option may be a map from language tag to text instead of a string: `per: { nl: per 2 uur, fr: pour 2 heures, en: per 2 hours }`. Every key must be in `languages` (matched on the language code, so `fr` covers `fr-BE`); a map without `languages` fails the validator.
+- **Which variant shows:** the reader's language (exact tag, then same language code), else the park's languages in order, else English, else the plain text. Code: `ParkLanguage.resolve`, `ParkPriceOption.resolvedPer` / `resolvedNote`. In code `per` / `note` hold the English variant (else the first by tag) of a map, for places that want one string.
+- Provide a variant only for languages the park itself publishes in. Do not translate on the park's behalf.
+- The in-app editor shows and edits the plain text. Typing in `per` / `note` replaces the variants of that field.
 
 ### Opening rules and slots
 

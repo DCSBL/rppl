@@ -628,7 +628,7 @@ struct ParkDetailView: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(price.name).foregroundStyle(Color.rpplText)
-                    if let note = only.note { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
+                    if let note = only.resolvedNote(parkLanguages: park.languages) { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
                 }
                 Spacer(minLength: 8)
                 Text(ParkFormatting.amount(only) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
@@ -639,10 +639,10 @@ struct ParkDetailView: View {
                 ForEach(Array(options.enumerated()), id: \.offset) { _, option in
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(ParkFormatting.perText(option.per) ?? option.note ?? "")
+                            Text(ParkFormatting.perText(option, parkLanguages: park.languages) ?? option.resolvedNote(parkLanguages: park.languages) ?? "")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.rpplMuted)
-                            if option.per != nil, let note = option.note {
+                            if option.per != nil, let note = option.resolvedNote(parkLanguages: park.languages) {
                                 Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
                             }
                         }

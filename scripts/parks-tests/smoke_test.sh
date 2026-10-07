@@ -41,6 +41,7 @@ check_fails_with() {
 
 check_passes valid.yaml
 check_passes accepted.yaml
+check_passes languages-ok.yaml
 check_fails invalid_coords.yaml
 check_fails short_cable.yaml
 check_fails placeholder.yaml
@@ -53,6 +54,8 @@ check_fails_with comment-url.yaml "URL in comment"
 check_fails_with comment-block.yaml "longer than 3 lines"
 check_fails_with en-dash.yaml "en dash"
 check_fails_with spaced-hyphen.yaml "hyphen used as a dash"
+check_fails_with languages-unlisted.yaml "not in languages"
+check_fails_with languages-missing.yaml "no \`languages\` list"
 
 # Duplicate id: neither file is invalid on its own, only together.
 if python3 scripts/validate_parks.py "$FIXTURES/duplicate_id_a.yaml" "$FIXTURES/duplicate_id_b.yaml" >/dev/null 2>&1; then

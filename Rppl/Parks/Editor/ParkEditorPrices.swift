@@ -225,11 +225,13 @@ private struct ParkPriceOptionRow: View {
             Button("Just this amount") {
                 customUnit = false
                 option.per = nil
+                option.perByLanguage = nil
             }
             ForEach(ParkPriceUnit.all, id: \.self) { unit in
                 Button(ParkFormatting.perText(unit) ?? unit) {
                     customUnit = false
                     option.per = unit
+                    option.perByLanguage = nil
                 }
             }
             Button("Other…") {
@@ -265,6 +267,7 @@ private struct ParkPriceOptionRow: View {
             set: {
                 let clean = ParkText.sanitizeTyping($0, field: .label)
                 option.per = clean.isEmpty ? nil : clean
+                option.perByLanguage = nil
             }
         )
     }
@@ -275,6 +278,7 @@ private struct ParkPriceOptionRow: View {
             set: {
                 let clean = ParkText.sanitizeTyping($0, field: .note)
                 option.note = clean.isEmpty ? nil : clean
+                option.noteByLanguage = nil
             }
         )
     }
