@@ -36,8 +36,6 @@ struct PhonePermissionsListSection: View {
             #endif
         } header: {
             Text("Permissions")
-        } footer: {
-            Text("Rppl asks only when a feature needs it.")
         }
         .onAppear { permissions.refresh() }
     }

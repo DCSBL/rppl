@@ -305,13 +305,13 @@ struct ParksTests {
         name: Bare
         location: { lat: 1, lon: 2 }
         cables:
-          - { name: Beginner, direction: 2d, length_m: 320, description: Short }
+          - { name: Beginner, direction: "2.0", length_m: 320, description: Short }
           - { direction: custom-loop }
         """
         let park = try ParkCatalog.parse(yaml: yaml, fallbackId: "x")
         #expect(park.opening == nil)
         #expect(park.cables?.first?.effectiveLengthM == 320)
-        #expect(park.cables?.first?.direction == .twoD)
+        #expect(park.cables?.first?.direction == .twoPointZero)
         #expect(park.cables?.last?.direction?.rawValue == "custom-loop")
         #expect(park.cables?.last?.effectiveLengthM == nil)
         #expect(park.schedule().isOpen == false)
@@ -340,9 +340,9 @@ struct ParksTests {
         #expect(length > open)
         #expect(abs(open - 660.3) < 1)
         #expect(abs(length - 744.5) < 1)
-        var twoD = cable
-        twoD.direction = .twoD
-        #expect(twoD.computedLengthM == open)
+        var twoPointZero = cable
+        twoPointZero.direction = .twoPointZero
+        #expect(twoPointZero.computedLengthM == open)
     }
 
     @Test func yamlRoundTrip() throws {
@@ -430,8 +430,8 @@ struct ParksTests {
         #expect(ParkListing.filtered(parks, favorites: [], filters: ccwOnly).map(\.id) == [wetNWild.id])
         let cwOnly = ParkFilters(cableDirections: [.clockwise])
         #expect(ParkListing.filtered(parks, favorites: [], filters: cwOnly).map(\.id) == [project7.id])
-        let twoDOnly = ParkFilters(cableDirections: [.twoD])
-        #expect(ParkListing.filtered(parks, favorites: [], filters: twoDOnly).isEmpty)
+        let twoPointZeroOnly = ParkFilters(cableDirections: [.twoPointZero])
+        #expect(ParkListing.filtered(parks, favorites: [], filters: twoPointZeroOnly).isEmpty)
 
         // 2026-09-24 (Thursday) project7 is open; 2026-10-07 both are closed.
         let openThursday = ParkFilters(openOnDate: date("2026-09-24"))

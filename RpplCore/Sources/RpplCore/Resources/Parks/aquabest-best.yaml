@@ -51,7 +51,7 @@ cables:
       4-mast cable ski/wakeboard loop with 10 tow points ("meenemers") and a course of
       obstacles (kickers, rails, boxes) for jumps and tricks.
   - name: Training cable
-    direction: 2d
+    direction: "2.0"
     points:
       - { lat: 51.5002104282456, lon: 5.43815134575968 }
       - { lat: 51.4995340688178, lon: 5.4361968047478 }

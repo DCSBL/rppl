@@ -32,7 +32,7 @@ cables:
       - { lat: 51.215374046, lon: 4.364853796 }
       - { lat: 51.21554997, lon: 4.365031985 }
   - name: Kleine Kabel (2.0)
-    direction: 2d
+    direction: "2.0"
     points:
       - { lat: 51.214437932, lon: 4.36687892 }
       - { lat: 51.213573089, lon: 4.366386561 }

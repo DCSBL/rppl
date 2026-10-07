@@ -9,6 +9,7 @@ struct MetricDisplayTests {
         #expect(MetricDisplay.split("398 kcal") == .init(value: "398", unit: "kcal"))
         #expect(MetricDisplay.split("19 °C") == .init(value: "19", unit: "°C"))
         #expect(MetricDisplay.split("10 sets") == .init(value: "10", unit: "sets"))
+        #expect(MetricDisplay.split("~1,2 km") == .init(value: "~1,2", unit: "km"))
     }
 
     @Test func splitsOnNonBreakingSpaces() {
@@ -40,6 +41,13 @@ struct MetricDisplayTests {
         let distance = MetricDisplay.split(DistanceFormat.kilometers(14_000, locale: nl))
         #expect(distance.value == "14")
         #expect(distance.unit != nil)
+    }
+
+    @Test func approximateDistanceRoundsInTheShownUnit() {
+        #expect(DistanceFormat.approximateKilometers(1_609, locale: Locale(identifier: "en_US")) == "~1 mi")
+        #expect(DistanceFormat.approximateKilometers(1_609, locale: Locale(identifier: "en_GB")) == "~1 mi")
+        let nl = MetricDisplay.split(DistanceFormat.approximateKilometers(1_620, locale: Locale(identifier: "nl_NL")))
+        #expect(nl.value == "~1,6" && nl.unit != nil)
     }
     #endif
 

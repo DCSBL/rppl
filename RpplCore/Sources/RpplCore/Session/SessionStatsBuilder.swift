@@ -11,6 +11,7 @@ public enum SessionStatsBuilder {
         maxHorizontalAccuracyM: Double = DetectionThresholds.default.maxHorizontalAccuracyM,
         lapThresholds: LapThresholds = .default
     ) -> SessionStats {
+        if let manual = manifest.manual { return manualStats(manifest: manifest, manual: manual) }
         let sessionStart = manifest.startedAt
         let sessionEnd = manifest.endedAt ?? inferSessionEnd(
             manifest: manifest,
@@ -132,6 +133,24 @@ public enum SessionStatsBuilder {
             averageWaterTemperatureCelsius: waterAverage,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
             cableSpeedKmh: sessionCableSpeedKmh
+        )
+    }
+
+    /// A manual session has no streams: its typed-in counts are the stats.
+    static func manualStats(manifest: SessionManifest, manual: ManualEntry) -> SessionStats {
+        let end = manifest.endedAt ?? manifest.startedAt
+        return SessionStats(
+            startedAt: manifest.startedAt,
+            endedAt: end,
+            totalDuration: max(0, end.timeIntervalSince(manifest.startedAt)),
+            totalDistanceMeters: manual.distanceM ?? 0,
+            activeEnergyKilocalories: nil,
+            setCount: manual.setCount,
+            ridingDuration: 0,
+            inactiveDuration: 0,
+            ridingInactiveRatio: 0,
+            sets: [],
+            manualLapCount: manual.lapCount
         )
     }
 

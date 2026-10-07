@@ -70,13 +70,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl shows GPS tracks from Apple Watch sessions on the map and sorts cable parks by distance from you."
+            "value" : "Rppl uses your location to sort cable parks by distance and to fill in a spot when you add a park or session."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl toont GPS-sporen van Apple Watch-sessions op de kaart en sorteert cable parks op afstand tot jou."
+            "value" : "Rppl gebruikt je locatie om cable parks op afstand te sorteren en een plek in te vullen als je een park of session toevoegt."
           }
         }
       }

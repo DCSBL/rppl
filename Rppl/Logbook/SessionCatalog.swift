@@ -82,6 +82,16 @@ final class SessionCatalog {
                 loaded.compactMap { entry in
                     guard let stats = entry.stats else { return nil }
                     let manifest = entry.manifest
+                    if manifest.manual != nil {
+                        // Typed-in sessions only compete for "most sets" and "most laps".
+                        return SessionHighlightInput(
+                            id: manifest.sessionId,
+                            totalDuration: 0,
+                            ridingDuration: 0,
+                            lapCount: stats.totalLapCount,
+                            setCount: stats.setCount
+                        )
+                    }
                     let minutes = SessionHighlightInput.minutesOfDay(
                         start: stats.startedAt,
                         end: stats.endedAt,

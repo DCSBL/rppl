@@ -2,19 +2,19 @@
   "_comment": "Written by scripts/check-core-coverage.py --update. Only ratchets up; see the script.",
   "tolerance": 0.2,
   "criticalMissedLinesAllowed": 2,
-  "lines": 90.7,
-  "functions": 83.94,
+  "lines": 92.53,
+  "functions": 86.35,
   "critical": {
     "Session/SessionFileStore.swift": {
-      "lines": 1125,
-      "missed": 59
+      "lines": 986,
+      "missed": 32
     },
     "Session/SessionFlushWriter.swift": {
-      "lines": 42,
+      "lines": 46,
       "missed": 0
     },
     "Session/CompressedJSONLFrames.swift": {
-      "lines": 222,
+      "lines": 180,
       "missed": 6
     },
     "Session/StoreIO.swift": {
@@ -26,7 +26,7 @@
       "missed": 0
     },
     "Session/SessionRecovery.swift": {
-      "lines": 37,
+      "lines": 59,
       "missed": 1
     },
     "Session/SessionPackageLocator.swift": {
@@ -54,12 +54,12 @@
       "missed": 0
     },
     "Session/SessionStatsBuilder.swift": {
-      "lines": 293,
+      "lines": 311,
       "missed": 5
     },
     "Session/SessionLoader.swift": {
-      "lines": 132,
-      "missed": 13
+      "lines": 146,
+      "missed": 10
     },
     "Sync/SessionImportFailure.swift": {
       "lines": 13,
