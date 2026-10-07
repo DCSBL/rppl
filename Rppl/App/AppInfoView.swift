@@ -31,25 +31,15 @@ struct AppInfoView: View {
 
                 PhonePermissionsListSection(permissions: permissions)
 
-                #if PARK_ARRIVAL_NOTIFICATIONS
-                ParkArrivalNotificationsSection()
-                #endif
-
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
                         .tint(Color.rpplAccent)
                 } header: {
                     Text("Park water temperature")
                 } footer: {
-                    #if PARK_ARRIVAL_NOTIFICATIONS
-                    Text(
-                        "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen and the arrival notification. The reading is an estimate."
-                    )
-                    #else
                     Text(
                         "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate."
                     )
-                    #endif
                 }
 
                 if AppReleaseChannel.allowsDebugTools {

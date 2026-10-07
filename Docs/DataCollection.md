@@ -80,7 +80,7 @@ Do **not** dual-write walking+running or swimming distance (pollutes those Healt
 
 **Health access is required to start.** The HK workout session is what keeps the app running with the wrist down (watchOS suspends it otherwise, stopping GPS, motion and detection), and an `HKWorkoutSession` cannot start without workout sharing access. Health must be `authorized` — denied, restricted or unavailable (including the Simulator) all block Start. Location is required the same way. The Watch stays browsable: the logbook and existing sessions remain viewable, and only Start (idle tap, Action Button, Siri) is refused with a "Can't start yet" sheet that names the missing permission, explains why and how to enable it (Health app › Sharing › Apps › Rppl; watchOS cannot deep-link to Settings), and offers **Try again**. Nothing asks before the first Start: there is no onboarding screen, and launching the Watch app only reads permission status. `startSession` presents the system sheets still undecided (Health, Location, Motion), each answered before the next shows (the Location answer is awaited, bounded at 60 s, so Start never reads an undecided state as blocked). The idle Permissions button and the "Can't start yet" sheet's **Try again** are the only other triggers. The decision lives in Core (`WatchPermissionOrder.startBlocker`, `SessionStartGate`).
 
-**iPhone asks just in time too.** No sheet at launch or on first sync. Location is requested where it is used: the Parks *Nearby* list, the map's *Center on my location* button, the park editor's *Use my current location* button, and the opt-in park-arrival toggle. Opening the Parks map never prompts and starts on the Netherlands; the blue dot and recentering need location granted. The About › Permissions rows stay as a manual way to allow or fix a permission.
+**iPhone asks just in time too.** No sheet at launch or on first sync. Location is requested where it is used: the Parks *Nearby* list, the map's *Center on my location* button, and the park editor's *Use my current location* button. Opening the Parks map never prompts and starts on the Netherlands; the blue dot and recentering need location granted. The About › Permissions rows stay as a manual way to allow or fix a permission.
 
 If the workout start only *times out or fails* (busy `healthd`, older watches), the session is not blocked: it records in a temporary **sensors-only** mode (GPS + detections, shown as "Screen-on only") and retries the HK start every 30 s (max 10) until a workout session protects the recording.
 
@@ -145,6 +145,10 @@ Payload is pretty-printed `SessionTransferPackage` JSON with top-level **`manife
 User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing). In-app: **iPhone → Rppl → Legal → Terms & Privacy policy**.
 
 Session detail (iPhone): the toolbar Export button opens the share sheet with the raw JSON. When Mail is set up (`MFMailComposeViewController.canSendMail()`), it becomes a menu with **Send to Rppl**: the export is zipped, attached to a mail to rppl@dcsbl.nl with a "Why I'm sending this session" template, and capped at 20 MB. Larger sessions show a message pointing to Export; there is no base64 / plain-text fallback.
+
+## Set flags
+
+Rider self-notes per detected set (`manifest.setFlags`, see [SessionStorage.md](SessionStorage.md#set-flags)), added on the phone after the set. No timestamps: one flag list per set, meant as notes and as labels for later ML. Not a detection taxonomy; the strings stay opaque.
 
 ## Motion gives way first
 

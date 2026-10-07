@@ -41,6 +41,11 @@ struct LogbookSessionDetailView: View {
     @State private var weatherAttribution = WeatherAttributionProvider.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showEditor = false
+    @State private var flagDraft = SetFlagDraft(saved: nil)
+    @State private var customFlags = UserDefaults.standard.stringArray(forKey: AppSettingsKey.customSetFlags) ?? []
+    @State private var isEditingFlags = false
+    @State private var showsDiscardDialog = false
+    @State private var flagSaveError: String?
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -67,6 +72,12 @@ struct LogbookSessionDetailView: View {
     /// Typed in by hand: no map, speed, riding, calories or set list, and it can be edited.
     private var isManual: Bool { manifest?.manual != nil }
 
+    /// Flags can be edited on a stored session that has sets to flag.
+    private var canEditFlags: Bool {
+        guard case .store = source, loadPhase == .ready else { return false }
+        return isManual || sessionStats?.sets.isEmpty == false
+    }
+
     private var allowsExport: Bool {
         if case .store = source { return true }
         return false
@@ -89,12 +100,18 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     if isManual {
                         ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
+                    if isEditingFlags {
+                        Button("Edit session details", systemImage: "slider.horizontal.3") { showEditor = true }
+                            .buttonStyle(.bordered)
+                            .frame(maxWidth: .infinity)
+                    }
                     } else {
                         sessionMap
                     }
                     parkLink
+                        .disabled(isEditingFlags)
                     sessionStatsCard
-                    if !isManual { setsSection }
+                    if isManual { manualSetsSection } else { setsSection }
                 }
             }
             .padding(.horizontal, 20)
@@ -105,33 +122,60 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
+        .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
+        .navigationBarBackButtonHidden(isEditingFlags)
+        .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
+            Button("Discard changes", role: .destructive) { endFlagEditing() }
+            Button("Keep editing", role: .cancel) {}
+        }
+        .alert("Could not save flags", isPresented: Binding(get: { flagSaveError != nil }, set: { if !$0 { flagSaveError = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(flagSaveError ?? "")
+        }
         .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
         .onDisappear {
             cancelLoad()
             cancelExport()
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if isManual {
-                    Button("Edit") { showEditor = true }
-                } else if allowsExport, loadPhase == .ready {
-                    if isExporting {
-                        ProgressView()
-                    } else if MailAvailability.canSend {
-                        Menu {
-                            Button("Export", systemImage: "square.and.arrow.up") { requestExport(.share) }
-                            Button("Send to Rppl", systemImage: "envelope") { requestExport(.mail) }
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
+            if isEditingFlags {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Discard", systemImage: "xmark") {
+                        if flagDraft.isDirty { showsDiscardDialog = true } else { endFlagEditing() }
+                    }
+                    .labelStyle(.iconOnly)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { if saveFlags() { isEditingFlags = false } }
+                }
+            } else {
+                if canEditFlags {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Edit flags", systemImage: "pencil") { beginFlagEditing() }
+                            .labelStyle(.iconOnly)
+                    }
+                }
+                if !isManual, allowsExport, loadPhase == .ready {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        if isExporting {
+                            ProgressView()
+                        } else if MailAvailability.canSend {
+                            Menu {
+                                Button("Export", systemImage: "square.and.arrow.up") { requestExport(.share) }
+                                Button("Send to Rppl", systemImage: "envelope") { requestExport(.mail) }
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                            .accessibilityLabel(Text("Export"))
+                        } else {
+                            Button {
+                                requestExport(.share)
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                            .accessibilityLabel(Text("Export"))
                         }
-                        .accessibilityLabel(Text("Export"))
-                    } else {
-                        Button {
-                            requestExport(.share)
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                        .accessibilityLabel(Text("Export"))
                     }
                 }
             }
@@ -569,6 +613,85 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    // MARK: Set flags
+
+    private func beginFlagEditing() {
+        flagDraft = SetFlagDraft(saved: manifest?.setFlags)
+        isEditingFlags = true
+    }
+
+    private func endFlagEditing() {
+        flagDraft.discard()
+        isEditingFlags = false
+    }
+
+    /// Writes the draft to the manifest. False (with an alert) when that fails.
+    private func saveFlags() -> Bool {
+        guard let store, case .store(let sessionId) = source else { return false }
+        var result = flagDraft.draft
+        if let manual = manifest?.manual { result = SetFlags.trimmed(result, toSetCount: manual.setCount ?? 0) }
+        do {
+            try store.setSetFlags(result, sessionId: sessionId)
+            manifest = try store.readManifest(sessionId: sessionId)
+            flagDraft = SetFlagDraft(saved: manifest?.setFlags)
+            return true
+        } catch {
+            flagSaveError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Draft while editing, what is stored otherwise.
+    private func flags(forSet index: Int) -> [String] {
+        isEditingFlags
+            ? flagDraft.flags(forSet: index)
+            : manifest?.setFlags?[String(index)] ?? []
+    }
+
+    private func flagging(forSet index: Int) -> SetFlagging? {
+        guard isEditingFlags else { return nil }
+        return SetFlagging(
+            selected: flagDraft.flags(forSet: index),
+            customs: customFlags,
+            toggle: { flagDraft.toggle($0, forSet: index) },
+            addCustom: { text in
+                guard let flag = SetFlags.normalized(custom: text) else { return }
+                if SetFlags.kind(of: flag) == .custom, !SetFlags.contains(flag, in: customFlags) {
+                    customFlags.append(flag)
+                }
+                if !SetFlags.contains(flag, in: flagDraft.flags(forSet: index)) {
+                    flagDraft.toggle(flag, forSet: index)
+                }
+            },
+            deleteCustom: { flag in
+                flagDraft.removeEverywhere(flag)
+                customFlags.removeAll { $0.caseInsensitiveCompare(flag) == .orderedSame }
+            }
+        )
+    }
+
+    /// Read mode lists only the manual sets that carry flags; edit mode offers every set.
+    private var manualFlagSetIndexes: [Int] {
+        guard let count = manifest?.manual?.setCount, count > 0 else { return [] }
+        return (1...count).filter { isEditingFlags || !flags(forSet: $0).isEmpty }
+    }
+
+    /// Manual sessions: one flag spot per typed-in set, nothing else.
+    @ViewBuilder
+    private var manualSetsSection: some View {
+        let indexes = manualFlagSetIndexes
+        if !indexes.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Sets")
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.rpplText)
+                ForEach(indexes, id: \.self) { index in
+                    ManualSetCard(index: index, flags: flags(forSet: index), flagging: flagging(forSet: index))
+                }
+            }
+        }
+    }
+
     private func distanceText(_ stats: SessionStats) -> String {
         guard isManual else { return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters) }
         return stats.totalDistanceMeters > 0 ? LogbookFormatting.approximateDistance(stats.totalDistanceMeters) : "-"
@@ -632,7 +755,9 @@ struct LogbookSessionDetailView: View {
                             locations: SessionLocationHelpers.downsample(
                                 SessionLocationHelpers.locations(for: set, in: allLocations),
                                 maxCount: Self.setMapPointBudget
-                            )
+                            ),
+                            flags: flags(forSet: set.index),
+                            flagging: flagging(forSet: set.index)
                         )
                     }
                 }
@@ -941,6 +1066,8 @@ private struct SetDetailCard: View {
     let set: SetSegmentStats
     let locations: [LocationSample]
     var rendering: SessionMapRendering = .flat
+    var flags: [String] = []
+    var flagging: SetFlagging?
 
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
@@ -953,17 +1080,7 @@ private struct SetDetailCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
-                Label {
-                    Text("Set \(set.index)")
-                } icon: {
-                    Image(systemName: MetricKind.sets.systemImage)
-                        .foregroundStyle(MetricKind.sets.tint)
-                }
-                .foregroundStyle(Color.rpplText)
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .fixedSize(horizontal: false, vertical: true)
+                SetCardTitle(index: set.index)
 
                 if !set.highlights.isEmpty {
                     FlowLayout(spacing: 6) {
@@ -972,6 +1089,8 @@ private struct SetDetailCard: View {
                         }
                     }
                 }
+
+                SetFlagRow(title: String(localized: "Set \(set.index) flags"), flags: flags, flagging: flagging)
             }
 
             if locations.count >= 2 {

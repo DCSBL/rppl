@@ -3,7 +3,6 @@ import RpplCore
 import SwiftUI
 
 struct ParksView: View {
-    @Binding var navigation: ParksNavigationRequest
     @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
@@ -346,15 +345,6 @@ struct ParksView: View {
         .onChange(of: location.availability) { _, availability in
             guard availability == .denied || availability == .servicesDisabled else { return }
             mapPendingRecenter = false
-        }
-        // `initial: true`: TabView builds this view lazily, so a notification tap before the Parks
-        // tab was ever opened creates it with `openParkId` already set — a plain onChange never fires.
-        .onChange(of: navigation.openParkId, initial: true) { _, parkId in
-            guard let parkId else { return }
-            navigation.openParkId = nil
-            if store.entries.isEmpty { store.reload() }
-            guard let park = store.entry(id: parkId)?.park else { return }
-            path.append(park)
         }
     }
 }

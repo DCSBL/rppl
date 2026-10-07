@@ -341,7 +341,7 @@ struct ParkWeather: Equatable, Sendable {
 /// Current air temperature and wind at a park via WeatherKit. Failures just hide the weather row.
 ///
 /// Shared (`.shared`) rather than per-view so the cache and rate limit below apply across
-/// park-detail navigations and geofence arrivals. WeatherKit calls are capped per month, so each
+/// park-detail navigations. WeatherKit calls are capped per month, so each
 /// location (coarse grid, see `WeatherFetchThrottle`) hits the network at most once per hour —
 /// failed attempts included. Within that hour callers get the cached value, or nil after a failure.
 @Observable

@@ -181,6 +181,7 @@ struct ManualSessionEditorView: View {
                     manifest.parkId = parkId
                     manifest.parkIdSource = SessionParkSource.manual
                     manifest.manual = entry
+                    manifest.setFlags = manifest.setFlags.map { SetFlags.trimmed($0, toSetCount: entry.setCount ?? 0) }
                     if changed { manifest.weather = nil }
                     try store.saveManual(manifest, label: label)
                     return (manifest.sessionId, changed)
