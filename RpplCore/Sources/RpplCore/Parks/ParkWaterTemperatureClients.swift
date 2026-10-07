@@ -270,7 +270,7 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
 }
 
 /// Registry of the concrete fetchers, keyed by `ParkWaterTemperatureSource.provider`. Shared by the
-/// phone (park screen, arrival notification) and the Watch (session-start estimate). A future
+/// phone (park screen) and the Watch (session-start estimate). A future
 /// country adds an entry here, not a new abstraction.
 public enum ParkWaterTemperatureFetchers {
     private static let fetchers: [String: any ParkWaterTemperatureFetching] = [

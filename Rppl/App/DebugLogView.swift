@@ -12,13 +12,6 @@ struct DebugLogView: View {
     var body: some View {
         List {
             Section {
-                #if PARK_ARRIVAL_NOTIFICATIONS
-                NavigationLink {
-                    ParkArrivalDebugView()
-                } label: {
-                    Label("Debug park arrival", systemImage: "ladybug")
-                }
-                #endif
                 NavigationLink {
                     ParkWaterTemperatureDebugView()
                 } label: {

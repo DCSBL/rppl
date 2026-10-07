@@ -15,14 +15,6 @@ enum AppSettingsKey {
     static let iCloudHiddenSessionIDs = "rppl.iCloudHiddenSessionIds"
     /// Session ids the user declined to import or deleted (skip import picker across launches).
     static let iCloudDismissedImportSessionIDs = "rppl.iCloudDismissedImportSessionIds"
-    #if PARK_ARRIVAL_NOTIFICATIONS
-    /// Park arrival geofence notifications (opt-in; default off).
-    static let parkArrivalNotificationsEnabled = "rppl.parkArrivalNotificationsEnabled"
-    /// `[String: Double]` park id → last-notified `timeIntervalSince1970`, for the 12h cooldown.
-    static let parkArrivalLastNotified = "rppl.parkArrivalLastNotified"
-    /// First-time "here's why you got this / how it works" explainer, shown once on first tap.
-    static let didShowParkArrivalExplainer = "rppl.didShowParkArrivalExplainer"
-    #endif
     /// Estimated ambient water temperature per park, from an open government API (opt-in; default off).
     static let parkWaterTemperatureEnabled = "rppl.parkWaterTemperatureEnabled"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.

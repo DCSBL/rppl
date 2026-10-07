@@ -4,9 +4,6 @@ import CoreMotion
 import HealthKit
 import RpplCore
 import Observation
-#if PARK_ARRIVAL_NOTIFICATIONS
-import UserNotifications
-#endif
 
 /// Reads / requests iPhone companion permissions. Never gates WatchConnectivity sync. Requests only
 /// come from a tap on the About permissions list (or the feature that needs it): nothing asks on its own.
@@ -18,12 +15,6 @@ final class PhonePermissionsController: NSObject {
     var locationPermission: WatchPermissionState = .notDetermined
     var healthPermission: WatchPermissionState = .notDetermined
     var motionPermission: WatchPermissionState = .notDetermined
-    /// Not a `WatchPermissionKind` case — notifications aren't part of the Watch recording gate
-    /// this enum was built for, so this row is added separately in `PhonePermissionsListSection`.
-    /// Stays outside `#if PARK_ARRIVAL_NOTIFICATIONS`: `@Observable` skips members inside `#if`
-    /// blocks, which would silently stop tracking it in the builds that show the row.
-    var notificationPermission: WatchPermissionState = .notDetermined
-
     var permissionStates: [WatchPermissionKind: WatchPermissionState] {
         [
             .location: locationPermission,
@@ -45,9 +36,6 @@ final class PhonePermissionsController: NSObject {
 
     func refresh() {
         locationPermission = Self.locationState(locationManager.authorizationStatus)
-        #if PARK_ARRIVAL_NOTIFICATIONS
-        Task { await refreshNotifications() }
-        #endif
 
         if HKHealthStore.isHealthDataAvailable() {
             refreshHealth()
@@ -152,32 +140,6 @@ final class PhonePermissionsController: NSObject {
         }
     }
 
-    #if PARK_ARRIVAL_NOTIFICATIONS
-    private func refreshNotifications() async {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        notificationPermission = Self.notificationState(settings.authorizationStatus)
-    }
-
-    /// Only prompts while undetermined — notifications have no re-prompt API after deny, same as
-    /// Motion. Used by the standalone Notifications row in `PhonePermissionsListSection`.
-    func requestNotifications() async {
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        if settings.authorizationStatus == .notDetermined {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-        }
-        await refreshNotifications()
-    }
-
-    private static func notificationState(_ status: UNAuthorizationStatus) -> WatchPermissionState {
-        switch status {
-        case .notDetermined: return .notDetermined
-        case .denied: return .denied
-        case .authorized, .provisional, .ephemeral: return .authorized
-        @unknown default: return .notDetermined
-        }
-    }
-    #endif
 }
 
 extension PhonePermissionsController: CLLocationManagerDelegate {

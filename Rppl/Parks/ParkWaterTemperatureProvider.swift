@@ -7,7 +7,7 @@ import RpplCore
 /// `ParkWaterTemperatureFetchers`, not a new abstraction).
 ///
 /// Shared (`.shared`) rather than per-view so the cache and failure backoff apply across
-/// park-detail navigations and geofence arrivals, matching `ParksWeatherProvider`.
+/// park-detail navigations, matching `ParksWeatherProvider`.
 @Observable
 @MainActor
 final class ParkWaterTemperatureProvider {
@@ -20,7 +20,7 @@ final class ParkWaterTemperatureProvider {
     /// A reading older than this is stale (some stations, e.g. wetnwild-alphen's, report
     /// infrequently or have stopped reporting) — never shown, even if the fetch itself succeeded.
     private static let maxReadingAge: TimeInterval = 48 * 60 * 60
-    /// Skip re-hitting a station that just failed, so a screen revisit or geofence arrival
+    /// Skip re-hitting a station that just failed, so a screen revisit or revisit
     /// doesn't retry an already-failing request.
     private static let failureBackoff: TimeInterval = 5 * 60
     private static let fetchTimeout: TimeInterval = 8

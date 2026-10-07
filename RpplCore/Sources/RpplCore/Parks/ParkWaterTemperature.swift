@@ -4,7 +4,7 @@ import Foundation
 /// Always an estimate: it comes from the nearest official monitoring station for that water body,
 /// not a sensor at the park itself. Distinct from the Watch Ultra's in-session submersion-sensor
 /// water temperature (`CMWaterSubmersionManager`) — this one is a network estimate shown on the
-/// park screen and in the arrival notification, unrelated to what happens during a recording.
+/// park screen, unrelated to what happens during a recording.
 public struct ParkWaterTemperature: Codable, Equatable, Sendable {
     public var celsius: Double
     public var observedAt: Date
