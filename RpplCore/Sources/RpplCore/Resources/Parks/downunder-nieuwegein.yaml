@@ -44,7 +44,7 @@ cables:
       - { lat: 52.046562682144, lon: 5.12613465170407 }
       - { lat: 52.0475684466966, lon: 5.12699037836458 }
   - name: Short cable
-    direction: 2d
+    direction: "2.0"
     description: Short cable for improving your skills with guidance.
     points:
       - { lat: 52.0487455425389, lon: 5.12379010152744 }

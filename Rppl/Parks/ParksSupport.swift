@@ -223,7 +223,7 @@ enum ParkFormatting {
     static func cableType(_ direction: ParkCableDirection?) -> String? {
         switch direction {
         case .some(.clockwise), .some(.counterClockwise): String(localized: "Full size")
-        case .some(.twoD): String(localized: "2.0")
+        case .some(.twoPointZero): String(localized: "2.0")
         case .some(let other): other.rawValue
         case .none: nil
         }

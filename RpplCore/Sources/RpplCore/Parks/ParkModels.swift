@@ -14,7 +14,7 @@ public struct ParkCoordinate: Codable, Equatable, Sendable {
     }
 }
 
-/// Opaque string so unknown values round-trip (`cw`, `ccw`, `2d`, …).
+/// Opaque string so unknown values round-trip (`cw`, `ccw`, `2.0`, …).
 public struct ParkCableDirection: RawRepresentable, Codable, Equatable, Hashable, Sendable {
     public let rawValue: String
 
@@ -33,9 +33,9 @@ public struct ParkCableDirection: RawRepresentable, Codable, Equatable, Hashable
 
     public static let clockwise = ParkCableDirection(rawValue: "cw")
     public static let counterClockwise = ParkCableDirection(rawValue: "ccw")
-    public static let twoD = ParkCableDirection(rawValue: "2d")
+    public static let twoPointZero = ParkCableDirection(rawValue: "2.0")
 
-    /// Loop cables return to the start; 2D cables run back and forth on one line.
+    /// Loop cables return to the start; 2.0 cables run back and forth on one line.
     public var isLoop: Bool { self == .clockwise || self == .counterClockwise }
 }
 
