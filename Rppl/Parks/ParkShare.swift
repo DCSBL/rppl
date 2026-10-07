@@ -30,18 +30,20 @@ enum ParkShare {
     static let blockStart = "----- START RPPL PARK -----"
     static let blockEnd = "----- END RPPL PARK -----"
 
-    /// `changedSections` is a "these sections are changed" summary.
-    /// `yamlNote` describes where the recipient finds the YAML (attached vs. inlined below).
-    static func mailBody(
-        changedSections: [ParkSection] = [],
-        yamlNote: String
-    ) -> String {
-        var body = String(localized: "Hi Rppl,\n\nHere is a park I added or updated. \(yamlNote)\n")
+    /// `changedSections` lists which parts of the park were edited; `attached` says whether the YAML is a
+    /// file on the mail or base64 below the text.
+    static func mailBody(park: Park, changedSections: [ParkSection] = [], attached: Bool) -> String {
+        let intro = attached
+            ? String(localized: "I edited some information about \(park.name). The YAML file is attached. Can you review this so it can be shown to other riders?")
+            : String(localized: "I edited some information about \(park.name). This is sent as base64 below. Can you review this so it can be shown to other riders?")
+        var body = String(localized: "Hi there,") + "\n\n" + intro + "\n\n"
         if !changedSections.isEmpty {
-            let list = changedSections.map { "- \($0.label)" }.joined(separator: "\n")
-            body += "\n" + String(localized: "Changed sections:") + "\n" + list + "\n"
+            let list = changedSections.enumerated()
+                .map { $0.offset == 0 ? $0.element.label : $0.element.label.lowercased() }
+                .joined(separator: ", ")
+            body += String(localized: "The following data was changed: \(list).") + "\n\n"
         }
-        body += "\n" + String(localized: "Notes:") + "\n"
+        body += String(localized: "Thanks!") + "\n"
         return body
     }
 
@@ -52,7 +54,7 @@ enum ParkShare {
     }
 
     static func subject(for park: Park) -> String {
-        String(localized: "Park: \(park.name)")
+        String(localized: "Edited park: \(park.name)")
     }
 
     /// `mailto:` link for devices without a configured Mail account (`MFMailComposeViewController.canSendMail() == false`).
@@ -61,10 +63,7 @@ enum ParkShare {
     /// base64-encoded rather than inlined as plain text.
     static func mailtoURL(for park: Park, changedSections: [ParkSection] = []) -> URL? {
         guard let yaml = try? ParkCatalog.encode(park) else { return nil }
-        var body = mailBody(
-            changedSections: changedSections,
-            yamlNote: String(localized: "The YAML is base64-encoded below.")
-        )
+        var body = mailBody(park: park, changedSections: changedSections, attached: false)
         body += "\n" + armoredBlock(for: yaml) + "\n"
         var components = URLComponents()
         components.scheme = "mailto"
@@ -102,10 +101,7 @@ struct ParkMailComposer: UIViewControllerRepresentable {
         controller.mailComposeDelegate = context.coordinator
         controller.setToRecipients([ParkShare.feedbackAddress])
         controller.setSubject(ParkShare.subject(for: park))
-        let body = ParkShare.mailBody(
-            changedSections: changedSections,
-            yamlNote: String(localized: "The YAML file is attached.")
-        )
+        let body = ParkShare.mailBody(park: park, changedSections: changedSections, attached: true)
         controller.setMessageBody(body, isHTML: false)
         if let url = ParkShare.yamlFile(for: park), let data = try? Data(contentsOf: url) {
             controller.addAttachmentData(data, mimeType: "application/x-yaml", fileName: url.lastPathComponent)
