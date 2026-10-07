@@ -37,3 +37,7 @@ the reference style. Applies whenever an AI agent drafts or rewrites this text, 
 Same rules: no dash-as-punctuation, no hype adjectives, state the fact plainly.
 ("This cable suits beginners and advanced riders", not "This amazing cable delivers a fantastic
 experience for riders of all levels.")
+
+## Parks with several languages
+
+Write park and cable `description` and `opening.note` once, in the first language of the park's `languages` list (see [Parks.md](Parks.md#languages)). The rules above apply to that text. Wakeboard slang stays English in every language.

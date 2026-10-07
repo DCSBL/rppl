@@ -136,7 +136,9 @@ def check_prose_dashes(data) -> list[str]:
     for path, text in iter_strings(data):
         if path.startswith("$.history"):
             continue
-        key = path.rsplit(".", 1)[-1].split("[")[0]
+        parts = [part.split("[")[0] for part in path.split(".")]
+        # `note: { nl: ..., en: ... }`: the variant's key is a language, the field is one level up.
+        key = parts[-2] if len(parts) > 1 and parts[-2] in PROSE_KEYS else parts[-1]
         if key in PROSE_KEYS and DASH_AS_PUNCTUATION.search(text):
             problems.append(f"hyphen used as a dash at {path}: {text!r}")
     return problems
@@ -246,6 +248,31 @@ def check_dead_data(data: dict) -> list[str]:
     return problems
 
 
+def language_code(tag: str) -> str:
+    return re.split(r"[-_]", tag.lower())[0]
+
+
+def check_languages(data: dict) -> list[str]:
+    """Per-language text (`per`, `note` as a map) needs `languages`, and every key must be one of them."""
+    declared = data.get("languages")
+    codes = {language_code(tag) for tag in declared} if isinstance(declared, list) else set()
+    problems = []
+    for index, price in enumerate(data.get("prices") or []):
+        for o_index, option in enumerate(price.get("options") or [] if isinstance(price, dict) else []):
+            for field in ("per", "note"):
+                value = option.get(field) if isinstance(option, dict) else None
+                if not isinstance(value, dict):
+                    continue
+                where = f"prices[{index}].options[{o_index}].{field}"
+                if not codes:
+                    problems.append(f"{where} has language variants but the park has no `languages` list")
+                    continue
+                for tag in value:
+                    if language_code(str(tag)) not in codes:
+                        problems.append(f"{where} has variant {tag!r} which is not in languages {declared}")
+    return problems
+
+
 def check_duplicates(data: dict) -> list[str]:
     """One price per name (several amounts are options of it) and one link per kind."""
     problems = []
@@ -289,6 +316,7 @@ def check_sanity(data: dict) -> list[str]:
     problems += check_prose_dashes(data)
     problems += check_dead_data(data)
     problems += check_duplicates(data)
+    problems += check_languages(data)
     return problems
 
 
