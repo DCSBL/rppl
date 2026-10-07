@@ -1,7 +1,7 @@
 version: 1
 id: project7-rotterdam
 created_at: 2026-09-24
-updated_at: 2026-09-26
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -21,8 +21,13 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels, author credit and source comments
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Project 7 Cablepark Rotterdam
+languages:
+  - en
+  - nl
 address: Kosboulevard 35, 3059 XZ Rotterdam
 timezone: Europe/Amsterdam
 location:
@@ -60,40 +65,56 @@ prices:
     options:
       - amount: "29"
         currency: EUR
-        per: "1.5h block"
+        per:
+          en: "1.5h block"
+          nl: "blok van 1,5 uur"
   - name: Counter ticket
     options:
       - amount: "31"
         currency: EUR
-        per: "1.5h block"
+        per:
+          en: "1.5h block"
+          nl: "blok van 1,5 uur"
   - name: "10x block card"
     options:
       - amount: "260"
         currency: EUR
-        note: "voordeelkaart, 1.5h blocks"
+        note:
+          en: "discount card, 1.5h blocks"
+          nl: "voordeelkaart, blokken van 1,5 uur"
   - name: Wetsuit rental
     options:
       - amount: "7.50"
         currency: EUR
-        per: per 1.5h
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Wakeboard rental
     options:
       - amount: "12.50"
         currency: EUR
-        per: per 1.5h
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Obstacle board rental
     options:
       - amount: "20"
         currency: EUR
-        per: per 1.5h
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Monthly pass
     options:
       - amount: "345"
         currency: EUR
-        note: "May, June or September"
+        note:
+          en: "May, June or September"
+          nl: "mei, juni of september"
       - amount: "395"
         currency: EUR
-        note: July or August
+        note:
+          en: July or August
+          nl: juli of augustus
   - name: Season pass
     options:
       - amount: "995"
@@ -102,13 +123,17 @@ prices:
     options:
       - amount: "29"
         currency: EUR
-        note: "belevenisbon, redeem for one online ticket"
+        note:
+          en: "experience voucher, redeem for one online ticket"
+          nl: "belevenisbon, in te wisselen voor één online ticket"
   - name: Group discount
     options:
       - amount: "-3"
         currency: EUR
         per: person
-        note: "11+ people, paid as one group"
+        note:
+          en: "11+ people, paid as one group"
+          nl: "vanaf 11 personen, als één groep betaald"
 
 cables:
   - name: Cable

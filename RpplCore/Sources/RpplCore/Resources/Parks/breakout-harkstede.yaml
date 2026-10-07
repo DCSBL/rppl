@@ -1,14 +1,19 @@
 version: 1
 id: breakout-harkstede
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Break Out Grunopark
+languages:
+  - en
+  - nl
 address: Hoofdweg 163, 9614 AD Harkstede
 timezone: Europe/Amsterdam
 location:
@@ -45,22 +50,30 @@ prices:
     options:
       - amount: "24"
         currency: EUR
-        note: Per person
+        note:
+          en: Per person
+          nl: Per persoon
   - name: Waterskiën 2 hours
     options:
       - amount: "36"
         currency: EUR
-        note: Per person
+        note:
+          en: Per person
+          nl: Per persoon
   - name: Waterskiën day pass
     options:
       - amount: "58"
         currency: EUR
-        note: Per person
+        note:
+          en: Per person
+          nl: Per persoon
   - name: Waterskiën group hour
     options:
       - amount: "300"
         currency: EUR
-        note: Per hour
+        note:
+          en: Per hour
+          nl: Per uur
 
 facilities:
   - Climbing park

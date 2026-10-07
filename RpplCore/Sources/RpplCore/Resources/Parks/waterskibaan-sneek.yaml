@@ -1,14 +1,19 @@
 version: 1
 id: waterskibaan-sneek
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Waterskibaan Sneek
+languages:
+  - en
+  - nl
 address: Paviljoenwei 1D, 8626 GD Sneek
 timezone: Europe/Amsterdam
 location:
@@ -134,26 +139,38 @@ prices:
     options:
       - amount: "18.50"
         currency: EUR
-        note: Youth
+        note:
+          en: Youth
+          nl: Jeugd
       - amount: "24"
         currency: EUR
-        note: Adult
+        note:
+          en: Adult
+          nl: Volwassene
   - name: "2 hours"
     options:
       - amount: "25"
         currency: EUR
-        note: Youth
+        note:
+          en: Youth
+          nl: Jeugd
       - amount: "34"
         currency: EUR
-        note: Adult
+        note:
+          en: Adult
+          nl: Volwassene
   - name: "3 hours"
     options:
       - amount: "40"
         currency: EUR
-        note: Youth
+        note:
+          en: Youth
+          nl: Jeugd
       - amount: "50"
         currency: EUR
-        note: Adult
+        note:
+          en: Adult
+          nl: Volwassene
   - name: Wetsuit
     options:
       - amount: "5"
@@ -161,10 +178,14 @@ prices:
         per: hour
       - amount: "6"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
       - amount: "7"
         currency: EUR
-        per: "3 hours"
+        per:
+          en: "3 hours"
+          nl: 3 uur
   - name: Obstacle board
     options:
       - amount: "6"
@@ -172,7 +193,11 @@ prices:
         per: hour
       - amount: "10"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
       - amount: "15"
         currency: EUR
-        per: "3 hours"
+        per:
+          en: "3 hours"
+          nl: 3 uur

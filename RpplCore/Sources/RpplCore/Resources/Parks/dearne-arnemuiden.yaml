@@ -1,7 +1,7 @@
 version: 1
 id: dearne-arnemuiden
 created_at: 2026-09-27
-updated_at: 2026-10-05
+updated_at: 2026-10-07
 history:
   - date: 2026-09-27
     description: initial
@@ -17,8 +17,13 @@ history:
     description: remove unused numbered flag, author credit and source comments
   - date: 2026-10-05
     description: move park pin to the cable, trace cable on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Watersportverhuurbedrijf De Arne
+languages:
+  - en
+  - nl
 address: Muidenweg 2, 4341 PZ Arnemuiden
 timezone: Europe/Amsterdam
 location:
@@ -79,17 +84,23 @@ prices:
     options:
       - amount: "18"
         currency: EUR
-        note: Includes helmet and impact vest
+        note:
+          en: Includes helmet and impact vest
+          nl: Inclusief helm en impactvest
   - name: "30 min"
     options:
       - amount: "36"
         currency: EUR
-        note: Includes helmet and impact vest
+        note:
+          en: Includes helmet and impact vest
+          nl: Inclusief helm en impactvest
   - name: "60 min"
     options:
       - amount: "72"
         currency: EUR
-        note: Includes helmet and impact vest
+        note:
+          en: Includes helmet and impact vest
+          nl: Inclusief helm en impactvest
   - name: Wakeboard/waterski rental
     options:
       - amount: "7"

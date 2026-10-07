@@ -15,11 +15,14 @@ history:
     description: trace cable on the map, add direction
   - date: 2026-10-07
     description: add languages (nl, en) and English variants of per and note
+  - date: 2026-10-07
+    description: add German variants of per and note
 
 name: BetuweStrand
 languages:
   - nl
   - en
+  - de
 address: A. Kraalweg 40, 4153 XC Beesd
 timezone: Europe/Amsterdam
 # Business pin from the park's route page, not the dock.
@@ -66,21 +69,25 @@ prices:
         note:
           nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "bis 12 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "23"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "ab 13 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "20.50"
         currency: EUR
         note:
           nl: "t/m 12 jaar, 4 jul-30 aug 2026"
           en: "up to 12, 4 Jul-30 Aug 2026"
+          de: "bis 12 Jahre, 4. Jul-30. Aug 2026"
       - amount: "27"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 4 jul-30 aug 2026"
           en: "13 and older, 4 Jul-30 Aug 2026"
+          de: "ab 13 Jahre, 4. Jul-30. Aug 2026"
   - name: "2 uur"
     options:
       - amount: "23"
@@ -88,21 +95,25 @@ prices:
         note:
           nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "bis 12 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "29"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "ab 13 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "27"
         currency: EUR
         note:
           nl: "t/m 12 jaar, 4 jul-30 aug 2026"
           en: "up to 12, 4 Jul-30 Aug 2026"
+          de: "bis 12 Jahre, 4. Jul-30. Aug 2026"
       - amount: "35"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 4 jul-30 aug 2026"
           en: "13 and older, 4 Jul-30 Aug 2026"
+          de: "ab 13 Jahre, 4. Jul-30. Aug 2026"
   - name: "1 dag"
     options:
       - amount: "38"
@@ -110,21 +121,25 @@ prices:
         note:
           nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "bis 12 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "51"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "ab 13 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "45"
         currency: EUR
         note:
           nl: "t/m 12 jaar, 4 jul-30 aug 2026"
           en: "up to 12, 4 Jul-30 Aug 2026"
+          de: "bis 12 Jahre, 4. Jul-30. Aug 2026"
       - amount: "58"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 4 jul-30 aug 2026"
           en: "13 and older, 4 Jul-30 Aug 2026"
+          de: "ab 13 Jahre, 4. Jul-30. Aug 2026"
   - name: "2 dagen"
     options:
       - amount: "63"
@@ -132,21 +147,25 @@ prices:
         note:
           nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "bis 12 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "84"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026"
           en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026"
+          de: "ab 13 Jahre, 28. Mär-3. Jul & 31. Aug-27. Sep 2026"
       - amount: "75"
         currency: EUR
         note:
           nl: "t/m 12 jaar, 4 jul-30 aug 2026"
           en: "up to 12, 4 Jul-30 Aug 2026"
+          de: "bis 12 Jahre, 4. Jul-30. Aug 2026"
       - amount: "96"
         currency: EUR
         note:
           nl: "vanaf 13 jaar, 4 jul-30 aug 2026"
           en: "13 and older, 4 Jul-30 Aug 2026"
+          de: "ab 13 Jahre, 4. Jul-30. Aug 2026"
   - name: "1 week"
     options:
       - amount: "130"
@@ -154,11 +173,13 @@ prices:
         note:
           nl: t/m 12 jaar
           en: up to 12
+          de: bis 12 Jahre
       - amount: "181"
         currency: EUR
         note:
           nl: vanaf 13 jaar
           en: 13 and older
+          de: ab 13 Jahre
   - name: "2 weken"
     options:
       - amount: "195"
@@ -166,11 +187,13 @@ prices:
         note:
           nl: t/m 12 jaar
           en: up to 12
+          de: bis 12 Jahre
       - amount: "270"
         currency: EUR
         note:
           nl: vanaf 13 jaar
           en: 13 and older
+          de: ab 13 Jahre
   - name: "3 weken"
     options:
       - amount: "294"
@@ -178,11 +201,13 @@ prices:
         note:
           nl: t/m 12 jaar
           en: up to 12
+          de: bis 12 Jahre
       - amount: "407"
         currency: EUR
         note:
           nl: vanaf 13 jaar
           en: 13 and older
+          de: ab 13 Jahre
   - name: "4 weken"
     options:
       - amount: "390"
@@ -190,11 +215,13 @@ prices:
         note:
           nl: t/m 12 jaar
           en: up to 12
+          de: bis 12 Jahre
       - amount: "545"
         currency: EUR
         note:
           nl: vanaf 13 jaar
           en: 13 and older
+          de: ab 13 Jahre
   - name: Geheel seizoen 2026
     options:
       - amount: "650"
@@ -202,11 +229,13 @@ prices:
         note:
           nl: t/m 12 jaar
           en: up to 12
+          de: bis 12 Jahre
       - amount: "810"
         currency: EUR
         note:
           nl: vanaf 13 jaar
           en: 13 and older
+          de: ab 13 Jahre
   - name: Wetsuit huur
     options:
       - amount: "6"
@@ -214,11 +243,13 @@ prices:
         per:
           nl: per uur
           en: per hour
+          de: pro Stunde
       - amount: "8"
         currency: EUR
         per:
           nl: per 2 uur
           en: per 2 hours
+          de: pro 2 Stunden
       - amount: "12"
         currency: EUR
         per: day
@@ -227,6 +258,7 @@ prices:
         per:
           nl: per 2 dagen
           en: per 2 days
+          de: pro 2 Tage
   - name: Wakeboard huur
     options:
       - amount: "10"
@@ -234,11 +266,13 @@ prices:
         per:
           nl: per uur
           en: per hour
+          de: pro Stunde
       - amount: "15"
         currency: EUR
         per:
           nl: per 2 uur
           en: per 2 hours
+          de: pro 2 Stunden
       - amount: "25"
         currency: EUR
         per: day
@@ -247,6 +281,7 @@ prices:
         per:
           nl: per 2 dagen
           en: per 2 days
+          de: pro 2 Tage
 
 links:
   - kind: booking

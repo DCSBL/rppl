@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-09-26
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -19,8 +19,13 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels and source comments; plain hyphen in the summer holiday note
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Cablepark de Wollebrand
+languages:
+  - en
+  - nl
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
 timezone: Europe/Amsterdam
 location:
@@ -178,22 +183,30 @@ prices:
     options:
       - amount: "5"
         currency: EUR
-        per: per 80 min
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: Wakeboard rental
     options:
       - amount: "10"
         currency: EUR
-        per: per 80 min
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: Obstacle board rental
     options:
       - amount: "20"
         currency: EUR
-        per: per 80 min
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: "10x block (80 min)"
     options:
       - amount: "220"
         currency: EUR
-        note: "€ 30,00 discount"
+        note:
+          en: "€ 30,00 discount"
+          nl: "€ 30,00 korting"
 
 facilities:
   - Rental (skis, wakeboard, wetsuit)

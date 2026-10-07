@@ -1,7 +1,7 @@
 version: 1
 id: lakeside-paradise-knokke
 created_at: 2026-09-27
-updated_at: 2026-10-05
+updated_at: 2026-10-07
 history:
   - date: 2026-09-27
     description: initial (3 cables, Belgium)
@@ -22,8 +22,15 @@ history:
     description: group 1 hour and 2 hours prices (with gear, own gear, winter) and the two season passes into one entry each; remove author credit and source comments
   - date: 2026-10-05
     description: trace the three cables on the map
+  - date: 2026-10-07
+    description: add languages (en, nl, fr, de) and Dutch, French and German variants of note
 
 name: Lakeside Paradise
+languages:
+  - en
+  - nl
+  - fr
+  - de
 address: Duinenwater 41, 8300 Knokke-Heist
 timezone: Europe/Brussels
 # Geocode of the address, not a confirmed dock point.
@@ -110,62 +117,118 @@ prices:
     options:
       - amount: "38"
         currency: EUR
-        note: "with gear (wakeboard and/or wetsuit), regular season (April-autumn break)"
+        note:
+          en: "with gear (wakeboard and/or wetsuit), regular season (April-autumn break)"
+          nl: "met materiaal (wakeboard en/of wetsuit), regulier seizoen (april tot herfstvakantie)"
+          fr: "avec matériel (wakeboard et/ou combinaison), saison régulière (avril jusqu'aux vacances d'automne)"
+          de: "mit Ausrüstung (Wakeboard und/oder Neoprenanzug), reguläre Saison (April bis Herbstferien)"
       - amount: "28"
         currency: EUR
-        note: "own gear, regular season (April-autumn break)"
+        note:
+          en: "own gear, regular season (April-autumn break)"
+          nl: "eigen materiaal, regulier seizoen (april tot herfstvakantie)"
+          fr: "matériel personnel, saison régulière (avril jusqu'aux vacances d'automne)"
+          de: "eigene Ausrüstung, reguläre Saison (April bis Herbstferien)"
       - amount: "35"
         currency: EUR
-        note: "winter season (post-autumn break to Easter); experienced riders only, with or own gear"
+        note:
+          en: "winter season (post-autumn break to Easter); experienced riders only, with gear or own gear"
+          nl: "winterseizoen (na de herfstvakantie tot Pasen); alleen ervaren riders, met materiaal of eigen materiaal"
+          fr: "saison d'hiver (après les vacances d'automne jusqu'à Pâques) ; wakeboarders expérimentés uniquement, avec matériel ou matériel personnel"
+          de: "Wintersaison (nach den Herbstferien bis Ostern); nur erfahrene Wakeboarder, mit Ausrüstung oder eigener Ausrüstung"
   - name: "2 hours"
     options:
       - amount: "53"
         currency: EUR
-        note: "with gear, regular season (April-autumn break)"
+        note:
+          en: "with gear, regular season (April-autumn break)"
+          nl: "met materiaal, regulier seizoen (april tot herfstvakantie)"
+          fr: "avec matériel, saison régulière (avril jusqu'aux vacances d'automne)"
+          de: "mit Ausrüstung, reguläre Saison (April bis Herbstferien)"
       - amount: "38"
         currency: EUR
-        note: "own gear, regular season (April-autumn break)"
+        note:
+          en: "own gear, regular season (April-autumn break)"
+          nl: "eigen materiaal, regulier seizoen (april tot herfstvakantie)"
+          fr: "matériel personnel, saison régulière (avril jusqu'aux vacances d'automne)"
+          de: "eigene Ausrüstung, reguläre Saison (April bis Herbstferien)"
   - name: Daily insurance
     options:
       - amount: "3"
         currency: EUR
-        note: "optional, non-members only"
+        note:
+          en: "optional, non-members only"
+          nl: "optioneel, alleen voor niet-leden"
+          fr: "facultative, uniquement pour les non-membres"
+          de: "optional, nur für Nicht-Mitglieder"
   - name: Winter pass
     options:
       - amount: "199"
         currency: EUR
-        note: "before 1 Nov; own gear, Nov-Mar"
+        note:
+          en: "before 1 Nov; own gear, Nov-Mar"
+          nl: "tot 1 nov; eigen materiaal, nov-mrt"
+          fr: "jusqu'au 1er nov. ; matériel personnel, nov.-mars"
+          de: "bis 1. Nov; eigene Ausrüstung, Nov-März"
       - amount: "259"
         currency: EUR
-        note: "from 1 Nov; own gear, Nov-Mar"
+        note:
+          en: "from 1 Nov; own gear, Nov-Mar"
+          nl: "vanaf 1 nov; eigen materiaal, nov-mrt"
+          fr: "à partir du 1er nov. ; matériel personnel, nov.-mars"
+          de: "ab 1. Nov; eigene Ausrüstung, Nov-März"
   - name: Season pass
     options:
       - amount: "799"
         currency: EUR
-        note: own gear
+        note:
+          en: own gear
+          nl: eigen materiaal
+          fr: matériel personnel
+          de: eigene Ausrüstung
       - amount: "699"
         currency: EUR
-        note: "own gear, under 12"
+        note:
+          en: "own gear, under 12"
+          nl: "eigen materiaal, onder 12 jaar"
+          fr: "matériel personnel, moins de 12 ans"
+          de: "eigene Ausrüstung, unter 12 Jahren"
   - name: Year pass
     options:
       - amount: "959"
         currency: EUR
-        note: own gear
+        note:
+          en: own gear
+          nl: eigen materiaal
+          fr: matériel personnel
+          de: eigene Ausrüstung
   - name: "10x 1h with gear"
     options:
       - amount: "250"
         currency: EUR
-        note: "member pass, +1 hour free"
+        note:
+          en: "member pass, +1 hour free"
+          nl: "ledenpas, +1 uur gratis"
+          fr: "pass membre, +1 heure gratuite"
+          de: "Mitgliederpass, +1 Stunde gratis"
   - name: "10x 2h with gear"
     options:
       - amount: "350"
         currency: EUR
-        note: "member pass, +2 hours free"
+        note:
+          en: "member pass, +2 hours free"
+          nl: "ledenpas, +2 uur gratis"
+          fr: "pass membre, +2 heures gratuites"
+          de: "Mitgliederpass, +2 Stunden gratis"
   - name: Wristband
     options:
       - amount: "6"
         currency: EUR
-        note: "one-off, first visit"
+        note:
+          en: "one-off, first visit"
+          nl: "eenmalig, eerste bezoek"
+          fr: "unique, première visite"
+          de: "einmalig, erster Besuch"
 
 facilities:
   - Pro shop

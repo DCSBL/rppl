@@ -1,14 +1,19 @@
 version: 1
 id: lunalake-heerhugowaard
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial
   - date: 2026-10-06
     description: Cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (nl, en) and Dutch variants of per and note
 
 name: Luna Lake
+languages:
+  - nl
+  - en
 address: Strand van Luna 3, 1704 ZZ Heerhugowaard
 timezone: Europe/Amsterdam
 # Approximate pin from the street address, not the dock.
@@ -104,10 +109,14 @@ prices:
         per: hour
       - amount: "33"
         currency: EUR
-        per: "2 hours"
+        per:
+          nl: 2 uur
+          en: "2 hours"
       - amount: "42"
         currency: EUR
-        per: "3 hours"
+        per:
+          nl: 3 uur
+          en: "3 hours"
   - name: Wetsuit
     options:
       - amount: "5"
@@ -115,10 +124,14 @@ prices:
         per: hour
       - amount: "8"
         currency: EUR
-        per: "2 hours"
+        per:
+          nl: 2 uur
+          en: "2 hours"
       - amount: "11"
         currency: EUR
-        per: "3 hours"
+        per:
+          nl: 3 uur
+          en: "3 hours"
   - name: Wakeboard
     options:
       - amount: "8"
@@ -126,25 +139,35 @@ prices:
         per: hour
       - amount: "12.50"
         currency: EUR
-        per: "2 hours"
+        per:
+          nl: 2 uur
+          en: "2 hours"
       - amount: "17"
         currency: EUR
-        per: "3 hours"
+        per:
+          nl: 3 uur
+          en: "3 hours"
   - name: Day pass
     options:
       - amount: "55"
         currency: EUR
-        note: equipment not included
+        note:
+          nl: materiaal niet inbegrepen
+          en: equipment not included
   - name: 12-ride card
     options:
       - amount: "240"
         currency: EUR
-        note: twelve one-hour sessions
+        note:
+          nl: twaalf sessies van een uur
+          en: twelve one-hour sessions
   - name: Season pass
     options:
       - amount: "875"
         currency: EUR
-        note: 4 April-31 October 2026
+        note:
+          nl: 4 april t/m 31 oktober 2026
+          en: 4 April-31 October 2026
 
 links:
   - kind: booking

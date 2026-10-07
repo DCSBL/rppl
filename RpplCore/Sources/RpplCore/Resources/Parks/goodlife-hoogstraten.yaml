@@ -1,12 +1,17 @@
 version: 1
 id: goodlife-hoogstraten
 created_at: 2026-10-06
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-06
     description: initial (cable layout, October hours and prices)
+  - date: 2026-10-07
+    description: add languages (nl, en) and Dutch variants of per and note
 
 name: Goodlife Cablepark
+languages:
+  - nl
+  - en
 address: Hoogeind 74b, 2321 Meer, Hoogstraten
 timezone: Europe/Brussels
 location:
@@ -59,37 +64,61 @@ prices:
       - amount: "30"
         currency: EUR
         per: hour
-        note: under 16
+        note:
+          nl: onder 16 jaar
+          en: under 16
       - amount: "42.60"
         currency: EUR
-        per: "2 hours"
-        note: under 16
+        per:
+          nl: 2 uur
+          en: "2 hours"
+        note:
+          nl: onder 16 jaar
+          en: under 16
       - amount: "37.50"
         currency: EUR
         per: hour
-        note: 16 and older
+        note:
+          nl: 16 jaar en ouder
+          en: 16 and older
       - amount: "53.50"
         currency: EUR
-        per: "2 hours"
-        note: 16 and older
+        per:
+          nl: 2 uur
+          en: "2 hours"
+        note:
+          nl: 16 jaar en ouder
+          en: 16 and older
   - name: Own gear
     options:
       - amount: "23.50"
         currency: EUR
         per: hour
-        note: under 16
+        note:
+          nl: onder 16 jaar
+          en: under 16
       - amount: "30"
         currency: EUR
-        per: "2 hours"
-        note: under 16
+        per:
+          nl: 2 uur
+          en: "2 hours"
+        note:
+          nl: onder 16 jaar
+          en: under 16
       - amount: "26.50"
         currency: EUR
         per: hour
-        note: 16 and older
+        note:
+          nl: 16 jaar en ouder
+          en: 16 and older
       - amount: "37.50"
         currency: EUR
-        per: "2 hours"
-        note: 16 and older
+        per:
+          nl: 2 uur
+          en: "2 hours"
+        note:
+          nl: 16 jaar en ouder
+          en: 16 and older
 
 description: >-
   Cablepark op recreatiedomein De Mosten, met een strandbar aan het water.

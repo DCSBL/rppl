@@ -1,7 +1,7 @@
 version: 1
 id: wetnwild-alphen
 created_at: 2026-09-24
-updated_at: 2026-09-29
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -21,8 +21,13 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove past extra opening hours (2026-09-29 to 2026-10-01), month-name labels, author credit and source comments
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Wet 'n Wild
+languages:
+  - en
+  - nl
 address: Sportlaan 5, 2406 LD Alphen aan den Rijn
 timezone: Europe/Amsterdam
 location:
@@ -138,15 +143,21 @@ prices:
     options:
       - amount: "25"
         currency: EUR
-        note: "From 15 years. Skis/board, life vest, helmet and instruction included"
+        note:
+          en: "From 15 years. Skis/board, life vest, helmet and instruction included"
+          nl: "Vanaf 15 jaar. Waterski's/board, zwemvest, helm en instructie inbegrepen"
       - amount: "20"
         currency: EUR
-        note: Up to 14 years
+        note:
+          en: Up to 14 years
+          nl: T/m 14 jaar
   - name: Kids Wake Club
     options:
       - amount: "175"
         currency: EUR
-        note: "8 lessons"
+        note:
+          en: "8 lessons"
+          nl: 8 lessen
   - name: Kids Wake Club trial lesson
     options:
       - amount: "21.50"
@@ -156,7 +167,9 @@ prices:
     options:
       - amount: "-2"
         currency: EUR
-        note: "per person, when booked online"
+        note:
+          en: "per person, when booked online"
+          nl: "per persoon, bij online boeken"
 
 facilities:
   - Changing rooms (male/female)

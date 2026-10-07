@@ -1,7 +1,7 @@
 version: 1
 id: downunder-nieuwegein
 created_at: 2026-09-24
-updated_at: 2026-09-25
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -13,8 +13,13 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels, author credit and source comments
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Cable Park Down Under
+languages:
+  - en
+  - nl
 address: Ravensewetering 1, 3439 ZZ Nieuwegein
 timezone: Europe/Amsterdam
 location:
@@ -214,34 +219,50 @@ prices:
     options:
       - amount: "25"
         currency: EUR
-        note: "From 15 years. Life vest, helmet and instruction included"
+        note:
+          en: "From 15 years. Life vest, helmet and instruction included"
+          nl: "Vanaf 15 jaar. Zwemvest, helm en instructie inbegrepen"
       - amount: "20"
         currency: EUR
-        note: "Up to 14 years. Life vest, helmet and instruction included"
+        note:
+          en: "Up to 14 years. Life vest, helmet and instruction included"
+          nl: "T/m 14 jaar. Zwemvest, helm en instructie inbegrepen"
   - name: "2 hours"
     options:
       - amount: "35"
         currency: EUR
-        note: From 15 years
+        note:
+          en: From 15 years
+          nl: Vanaf 15 jaar
       - amount: "30"
         currency: EUR
-        note: Up to 14 years
+        note:
+          en: Up to 14 years
+          nl: T/m 14 jaar
   - name: Day
     options:
       - amount: "55"
         currency: EUR
-        note: From 15 years
+        note:
+          en: From 15 years
+          nl: Vanaf 15 jaar
       - amount: "47.50"
         currency: EUR
-        note: Up to 14 years
+        note:
+          en: Up to 14 years
+          nl: T/m 14 jaar
   - name: Wetsuit rental
     options:
       - amount: "5"
         currency: EUR
-        per: "1 hour"
+        per:
+          en: "1 hour"
+          nl: 1 uur
       - amount: "7.50"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
       - amount: "10"
         currency: EUR
         per: day
@@ -249,10 +270,14 @@ prices:
     options:
       - amount: "5"
         currency: EUR
-        per: "1 hour"
+        per:
+          en: "1 hour"
+          nl: 1 uur
       - amount: "7.50"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
       - amount: "10"
         currency: EUR
         per: day

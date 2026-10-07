@@ -1,7 +1,7 @@
 version: 1
 id: view-almere
 created_at: 2026-09-27
-updated_at: 2026-10-05
+updated_at: 2026-10-07
 history:
   - date: 2026-09-27
     description: initial
@@ -19,8 +19,13 @@ history:
     description: remove past opening dates (pre-season Sundays, 2026-10-04), month-name labels, unused numbered flag, author credit and source comments; group clinic prices into one
   - date: 2026-10-05
     description: trace both cables on the map, add Alta Twin direction
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Cablepark VIEW Almere
+languages:
+  - en
+  - nl
 address: Bergsmapad 1, 1324 ZK Almere
 timezone: Europe/Amsterdam
 # Business pin for the official address, not the dock.
@@ -156,66 +161,98 @@ prices:
     options:
       - amount: "27.50"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "22.50"
         currency: EUR
-        note: Kids up to 12 years
+        note:
+          en: Kids up to 12 years
+          nl: Kids t/m 12 jaar
   - name: "2 hours"
     options:
       - amount: "37.50"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "30"
         currency: EUR
-        note: Kids up to 12 years
+        note:
+          en: Kids up to 12 years
+          nl: Kids t/m 12 jaar
   - name: "3 hours"
     options:
       - amount: "45"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "37.50"
         currency: EUR
-        note: Kids up to 12 years
+        note:
+          en: Kids up to 12 years
+          nl: Kids t/m 12 jaar
   - name: "4 hours"
     options:
       - amount: "50"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "42.50"
         currency: EUR
-        note: Kids up to 12 years
+        note:
+          en: Kids up to 12 years
+          nl: Kids t/m 12 jaar
   - name: Day pass
     options:
       - amount: "55"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "47.50"
         currency: EUR
-        note: Kids up to 12 years
+        note:
+          en: Kids up to 12 years
+          nl: Kids t/m 12 jaar
   - name: Wakeboard set
     options:
       - amount: "25"
         currency: EUR
-        note: "Board, helmet, life vest and wetsuit"
+        note:
+          en: "Board, helmet, life vest and wetsuit"
+          nl: "Wakeboard, helm, zwemvest en wetsuit"
   - name: Waterski set
     options:
       - amount: "17.50"
         currency: EUR
-        note: "Skis, helmet, life vest and wetsuit"
+        note:
+          en: "Skis, helmet, life vest and wetsuit"
+          nl: "Waterski's, helm, zwemvest en wetsuit"
   - name: Clinic
     options:
       - amount: "85"
         currency: EUR
-        note: "1 person, on the Alta Twin, 15-20 min effective lesson time"
+        note:
+          en: "1 person, on the Alta Twin, 15-20 min effective lesson time"
+          nl: "1 persoon, op de Alta Twin, 15-20 min effectieve lestijd"
       - amount: "100"
         currency: EUR
-        note: 2 people
+        note:
+          en: 2 people
+          nl: 2 personen
       - amount: "120"
         currency: EUR
-        note: 3 people
+        note:
+          en: 3 people
+          nl: 3 personen
       - amount: "130"
         currency: EUR
-        note: 4 people
+        note:
+          en: 4 people
+          nl: 4 personen
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

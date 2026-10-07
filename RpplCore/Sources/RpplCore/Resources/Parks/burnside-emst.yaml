@@ -1,14 +1,19 @@
 version: 1
 id: burnside-emst
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial, from burnsidecablepark.nl
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Burnside Cablepark
+languages:
+  - en
+  - nl
 address: Viskweekweg 3, 8166 KJ Emst
 timezone: Europe/Amsterdam
 location:
@@ -124,101 +129,151 @@ prices:
     options:
       - amount: "45"
         currency: EUR
-        note: "On very busy days a day pass can mean waiting when the dock is full"
+        note:
+          en: "On very busy days a day pass can mean waiting when the dock is full"
+          nl: Op superdrukke dagen moet je met een dagkaart wachten als de dock vol is
   - name: "Strip card 12 x 1.5 hours"
     options:
       - amount: "250"
         currency: EUR
-        note: "Can be shared with family or a group until used up"
+        note:
+          en: "Can be shared with family or a group until used up"
+          nl: "Te delen met familie of een groep, tot de kaart op is"
   - name: Season pass
     options:
       - amount: "850"
         currency: EUR
-        note: Adults
+        note:
+          en: Adults
+          nl: Volwassenen
       - amount: "650"
         currency: EUR
-        note: Kids up to 10 years
+        note:
+          en: Kids up to 10 years
+          nl: Kinderen t/m 10 jaar
   - name: Waterskis with life vest
     options:
       - amount: "0"
         currency: EUR
-        note: Free
+        note:
+          en: Free
+          nl: Gratis
   - name: Wakeboard with life vest
     options:
       - amount: "10"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "15"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "25"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Sliderboard with helmet and life vest
     options:
       - amount: "25"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "35"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "45"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Kneeboard with life vest
     options:
       - amount: "5"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "10"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "15"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Wakeskate with life vest
     options:
       - amount: "5"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "10"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "15"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Stand up paddle board
     options:
       - amount: "20"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "30"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "40"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Wetsuit with life vest
     options:
       - amount: "5"
         currency: EUR
-        note: "1.5 hours"
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
       - amount: "7.50"
         currency: EUR
-        note: "3 hours"
+        note:
+          en: "3 hours"
+          nl: 3 uur
       - amount: "10"
         currency: EUR
-        note: Day
+        note:
+          en: Day
+          nl: Dag
   - name: Parking
     options:
       - amount: "7"
         currency: EUR
         per: day
-        note: "On the Leisurelands grounds, first 15 minutes free"
+        note:
+          en: "On the Leisurelands grounds, first 15 minutes free"
+          nl: "Op het terrein van Leisurelands, eerste 15 minuten gratis"
       - amount: "6"
         currency: EUR
         per: day
-        note: "Exit ticket at the park's cashier"
+        note:
+          en: "Exit ticket at the park's cashier"
+          nl: Uitrijkaart bij de kassa van het park
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

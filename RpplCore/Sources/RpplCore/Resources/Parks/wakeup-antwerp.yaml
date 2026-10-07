@@ -1,14 +1,19 @@
 version: 1
 id: wakeup-antwerp
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial (full size and 2.0 cable, hours and prices from the park's own site)
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: WakeUp Cable Antwerpen
+languages:
+  - en
+  - nl
 address: Neel Dofflaan 50, 2050 Antwerpen
 timezone: Europe/Brussels
 location:
@@ -168,7 +173,9 @@ prices:
       - amount: "30"
         currency: EUR
         per: person
-        note: "min 2, max 4 people, includes helmet and life vest"
+        note:
+          en: "min 2, max 4 people, includes helmet and life vest"
+          nl: "min 2, max 4 deelnemers, inclusief helm en reddingsvest"
   - name: Grote Kabel, full cable with instructor
     options:
       - amount: "160"
@@ -181,7 +188,9 @@ prices:
         per: hour
       - amount: "8"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
   - name: Beginner board or skis
     options:
       - amount: "6"
@@ -189,7 +198,9 @@ prices:
         per: hour
       - amount: "10"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
   - name: Pro wakeboard
     options:
       - amount: "14"
@@ -197,31 +208,45 @@ prices:
         per: hour
       - amount: "20"
         currency: EUR
-        per: "2 hours"
+        per:
+          en: "2 hours"
+          nl: 2 uur
   - name: Kleine Kabel, 1 hour
     options:
       - amount: "26"
         currency: EUR
-        note: own equipment
+        note:
+          en: own equipment
+          nl: eigen materiaal
       - amount: "37"
         currency: EUR
-        note: "full package (board, wetsuit, helmet)"
+        note:
+          en: "full package (board, wetsuit, helmet)"
+          nl: "volledig pakket (board, wetsuit, helm)"
   - name: Kleine Kabel, 2 hours
     options:
       - amount: "36"
         currency: EUR
-        note: own equipment
+        note:
+          en: own equipment
+          nl: eigen materiaal
       - amount: "53"
         currency: EUR
-        note: "full package (board, wetsuit, helmet)"
+        note:
+          en: "full package (board, wetsuit, helmet)"
+          nl: "volledig pakket (board, wetsuit, helm)"
   - name: Kleine Kabel, pass
     options:
       - amount: "250"
         currency: EUR
-        note: 12 x 1 hour
+        note:
+          en: 12 x 1 hour
+          nl: 12 x 1 uur
       - amount: "350"
         currency: EUR
-        note: 12 x 2 hours
+        note:
+          en: 12 x 2 hours
+          nl: 12 x 2 uur
   - name: Week member
     options:
       - amount: "650"

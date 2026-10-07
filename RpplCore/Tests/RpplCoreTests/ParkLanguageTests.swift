@@ -72,18 +72,37 @@ struct ParkLanguageTests {
         #expect(parsed.languages == ["nl-BE", "fr-BE", "en"])
     }
 
-    @Test func bundledDutchParksShowEnglishToEnglishReaders() throws {
-        for id in ["betuwestrand-beesd", "deberendonck-wijchen"] {
-            let park = try #require(ParkCatalog.loadBundled().first { $0.id == id })
-            #expect(park.languages == ["nl", "en"])
-            let options = (park.prices ?? []).flatMap(\.options)
-            let withVariants = options.filter { $0.perByLanguage != nil }
-            #expect(!withVariants.isEmpty)
-            for option in withVariants {
-                #expect(option.resolvedPer(readerLanguages: ["nl-NL"], parkLanguages: park.languages) == option.perByLanguage?["nl"])
-                #expect(option.resolvedPer(readerLanguages: ["en-GB"], parkLanguages: park.languages) == option.perByLanguage?["en"])
+    @Test func everyListedLanguageHasItsTextOnEveryBundledPark() throws {
+        let parks = ParkCatalog.loadBundled().filter { ($0.languages?.count ?? 0) > 1 }
+        #expect(!parks.isEmpty)
+        for park in parks {
+            let languages = try #require(park.languages)
+            for option in (park.prices ?? []).flatMap(\.options) {
+                // Only the units the app translates itself may stay plain text.
+                if option.perByLanguage == nil, let per = option.per {
+                    #expect(ParkPriceUnit.all.contains(per), "\(park.id): per \(per) has no variants")
+                }
+                #expect(option.noteByLanguage != nil || option.note == nil, "\(park.id): note \(option.note ?? "") has no variants")
+                for variants in [option.perByLanguage, option.noteByLanguage].compactMap({ $0 }) {
+                    for language in languages {
+                        #expect(
+                            variants.keys.contains { ParkLanguage.base($0) == ParkLanguage.base(language) },
+                            "\(park.id): no \(language) variant in \(variants)"
+                        )
+                    }
+                }
             }
         }
+    }
+
+    @Test func dutchAndEnglishReadersGetTheirOwnLanguageOnTheBundledParks() throws {
+        let park = try #require(ParkCatalog.loadBundled().first { $0.id == "view-almere" })
+        let adults = try #require(park.prices?.first?.options.first)
+        #expect(park.languages == ["en", "nl"])
+        #expect(adults.resolvedNote(readerLanguages: ["nl-NL"], parkLanguages: park.languages) == "Volwassenen")
+        #expect(adults.resolvedNote(readerLanguages: ["en-GB"], parkLanguages: park.languages) == "Adults")
+        // A reader of a language the park does not list gets the park's main language.
+        #expect(adults.resolvedNote(readerLanguages: ["ja"], parkLanguages: park.languages) == "Adults")
     }
 
     @Test func finalizedDropsBlankVariantsAndBadTags() {

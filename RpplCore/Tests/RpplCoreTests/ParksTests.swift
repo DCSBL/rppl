@@ -139,7 +139,16 @@ struct ParksTests {
     }
 
     @Test func lastUpdatedParsesDateOnlyString() throws {
-        let updated = try #require(try project7().lastUpdated)
+        let park = try ParkCatalog.parse(yaml: """
+            version: 1
+            id: p
+            name: P
+            updated_at: 2026-09-26
+            location:
+              lat: 52.0
+              lon: 5.0
+            """, fallbackId: "p")
+        let updated = try #require(park.lastUpdated)
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = amsterdam
         let parts = calendar.dateComponents([.year, .month, .day], from: updated)

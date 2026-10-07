@@ -1,14 +1,20 @@
 version: 1
 id: beavercreek-roermond
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl, de) and Dutch and German variants of per and note
 
 name: Beaver Creek Wake Park Roermond
+languages:
+  - en
+  - nl
+  - de
 address: De Weerd 52, 6041 TK Roermond
 timezone: Europe/Amsterdam
 location:
@@ -56,45 +62,75 @@ prices:
       - amount: "26"
         currency: EUR
         per: hour
-        note: "from price, online booking up to 48 hours ahead"
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
       - amount: "32"
         currency: EUR
-        per: 2 hours
-        note: "from price, online booking up to 48 hours ahead"
+        per:
+          en: 2 hours
+          nl: 2 uur
+          de: 2 Stunden
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
       - amount: "42"
         currency: EUR
         per: day
-        note: "from price, online booking up to 48 hours ahead"
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
   - name: Booking within 48 hours
     options:
       - amount: "3"
         currency: EUR
-        note: surcharge per ticket
+        note:
+          en: surcharge per ticket
+          nl: toeslag per ticket
+          de: Aufpreis pro Ticket
   - name: RFID wristband
     options:
       - amount: "6"
         currency: EUR
-        note: one time
+        note:
+          en: one time
+          nl: eenmalig
+          de: einmalig
   - name: Wetsuit rental
     options:
       - amount: "6"
         currency: EUR
         per: day
-        note: shorty
+        note:
+          en: shorty
+          nl: shorty
+          de: Shorty
       - amount: "12"
         currency: EUR
         per: day
-        note: full suit
+        note:
+          en: full suit
+          nl: full suit
+          de: Fullsuit
   - name: Wakeboard rental
     options:
       - amount: "12"
         currency: EUR
         per: day
-        note: Easy Up
+        note:
+          en: Easy Up
+          nl: Easy Up
+          de: Easy Up
       - amount: "22"
         currency: EUR
         per: day
-        note: Easy Ride
+        note:
+          en: Easy Ride
+          nl: Easy Ride
+          de: Easy Ride
   - name: Obstacle board rental
     options:
       - amount: "22"
@@ -116,7 +152,10 @@ prices:
       - amount: "39"
         currency: EUR
         per: hour
-        note: plus ticket and equipment
+        note:
+          en: plus ticket and equipment
+          nl: plus ticket en materiaal
+          de: zzgl. Ticket und Equipment
 
 facilities:
   - Rental (wetsuit, wakeboard, obstacle board, helmet)
