@@ -91,7 +91,7 @@ struct ParkPriceParserTests {
                 ParkPriceOption(amount: "10", currency: "EUR", per: "1 hour"),
                 ParkPriceOption(amount: "15", currency: "EUR", per: "2 hours", note: "own gear"),
             ]),
-            ParkPrice(name: "Group discount", options: [ParkPriceOption(amount: "-3.50", currency: "EUR", per: ParkPriceUnit.person)]),
+            ParkPrice(name: "Group discount", options: [ParkPriceOption(amount: "-3.50", currency: "EUR", per: LocalizedText(ParkPriceUnit.person))]),
             ParkPrice(name: "Draft"),
         ]
         let yaml = try ParkCatalog.encode(park)
@@ -129,7 +129,7 @@ struct ParkPriceParserTests {
         let park = try #require(ParkCatalog.loadBundled().first { $0.id == "downunder-nieuwegein" })
         let wetsuit = try #require(park.prices?.first { $0.name == "Wetsuit rental" })
         #expect(wetsuit.options.map(\.amount) == ["5", "7.50", "10"])
-        #expect(wetsuit.options.map(\.per) == ["1 hour", "2 hours", ParkPriceUnit.day])
+        #expect(wetsuit.options.map { $0.per?.text } == ["1 hour", "2 hours", ParkPriceUnit.day])
         #expect(park.prices?.filter { $0.name == "Wetsuit rental" }.count == 1)
     }
 }

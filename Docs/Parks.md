@@ -113,8 +113,8 @@ A price is a `name` with `options`: one entry per amount ("skis": €10 for 1 ho
 A park may work in more than one language (Brussels: `nl-BE`, `fr-BE`, `en`). `languages` lists them, main language first; absent means the text is as written.
 
 - **Long text** (`description`, cable `description`, `opening.note`) is written **once, in the first language**. It is not translated per language.
-- **Short text with units** ("per 2 hours", "kids up to 15") is where a single language breaks, so `per` and `note` of a price option may be a map from language tag to text instead of a string: `per: { nl: per 2 uur, fr: pour 2 heures, en: per 2 hours }`. Every key must be in `languages` (matched on the language code, so `fr` covers `fr-BE`); a map without `languages` fails the validator.
-- **Which variant shows:** the reader's language (exact tag, then same language code), else the park's languages in order, else English, else the plain text. Code: `ParkLanguage.resolve`, `ParkPriceOption.resolvedPer` / `resolvedNote`. In code `per` / `note` hold the English variant (else the first by tag) of a map, for places that want one string.
+- **Short text with units** ("per 2 hours", "kids up to 15") is where a single language breaks, so `per` and `note` of a price option may be a map from language tag to text instead of a string: `per: { nl: per 2 uur, fr: pour 2 heures, en: per 2 hours }`. Every key must be in `languages` and each language appears once (matched on the language code, so `fr` covers `fr-BE`); a map without `languages` fails the validator.
+- **Which variant shows:** the reader's language, else the park's languages in order, else English, else the plain text (`LocalizedText.resolved`; for a map `LocalizedText.text` is the English variant, else the first by tag).
 - Provide a variant only for languages the park itself publishes in. Do not translate on the park's behalf.
 - The in-app editor shows and edits the plain text. Typing in `per` / `note` replaces the variants of that field.
 

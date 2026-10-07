@@ -55,6 +55,7 @@ check_fails_with comment-block.yaml "longer than 3 lines"
 check_fails_with en-dash.yaml "en dash"
 check_fails_with spaced-hyphen.yaml "hyphen used as a dash"
 check_fails_with languages-unlisted.yaml "not in languages"
+check_fails_with languages-duplicate-code.yaml "same language code"
 check_fails_with languages-missing.yaml "no \`languages\` list"
 
 # Duplicate id: neither file is invalid on its own, only together.

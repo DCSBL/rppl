@@ -616,11 +616,12 @@ struct ParkDetailView: View {
     @ViewBuilder
     private func priceRow(_ price: ParkPrice) -> some View {
         let options = price.options.filter { $0.amount != nil }
+        let languages = park.languages
         if options.count == 1, let only = options.first, only.per == nil {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(price.name).foregroundStyle(Color.rpplText)
-                    if let note = only.resolvedNote(parkLanguages: park.languages) { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
+                    if let note = only.note?.resolved(parkLanguages: languages) { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
                 }
                 Spacer(minLength: 8)
                 Text(ParkFormatting.amount(only) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
@@ -631,10 +632,10 @@ struct ParkDetailView: View {
                 ForEach(Array(options.enumerated()), id: \.offset) { _, option in
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(ParkFormatting.perText(option, parkLanguages: park.languages) ?? option.resolvedNote(parkLanguages: park.languages) ?? "")
+                            Text(ParkFormatting.perText(option.per?.resolved(parkLanguages: languages)) ?? option.note?.resolved(parkLanguages: languages) ?? "")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.rpplMuted)
-                            if option.per != nil, let note = option.resolvedNote(parkLanguages: park.languages) {
+                            if option.per != nil, let note = option.note?.resolved(parkLanguages: languages) {
                                 Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
                             }
                         }

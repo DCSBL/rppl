@@ -248,28 +248,35 @@ def check_dead_data(data: dict) -> list[str]:
     return problems
 
 
-def language_code(tag: str) -> str:
-    return re.split(r"[-_]", tag.lower())[0]
+def localized_maps(value, path="$"):
+    """Yield (path, map) for every `per` / `note` written as a language map."""
+    if isinstance(value, dict):
+        for key, sub in value.items():
+            if key in ("per", "note") and isinstance(sub, dict):
+                yield f"{path}.{key}", sub
+            else:
+                yield from localized_maps(sub, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, sub in enumerate(value):
+            yield from localized_maps(sub, f"{path}[{index}]")
 
 
 def check_languages(data: dict) -> list[str]:
-    """Per-language text (`per`, `note` as a map) needs `languages`, and every key must be one of them."""
-    declared = data.get("languages")
-    codes = {language_code(tag) for tag in declared} if isinstance(declared, list) else set()
+    """A language map needs `languages`, only uses those languages, and has one variant per language code."""
+
+    def code(tag) -> str:
+        return re.split(r"[-_]", str(tag).lower())[0]
+
+    declared = {code(tag) for tag in data.get("languages") or []}
     problems = []
-    for index, price in enumerate(data.get("prices") or []):
-        for o_index, option in enumerate(price.get("options") or [] if isinstance(price, dict) else []):
-            for field in ("per", "note"):
-                value = option.get(field) if isinstance(option, dict) else None
-                if not isinstance(value, dict):
-                    continue
-                where = f"prices[{index}].options[{o_index}].{field}"
-                if not codes:
-                    problems.append(f"{where} has language variants but the park has no `languages` list")
-                    continue
-                for tag in value:
-                    if language_code(str(tag)) not in codes:
-                        problems.append(f"{where} has variant {tag!r} which is not in languages {declared}")
+    for path, variants in localized_maps(data):
+        codes = [code(tag) for tag in variants]
+        if not declared:
+            problems.append(f"{path} has language variants but the park has no `languages` list")
+        else:
+            problems += [f"{path} has variant {tag!r} which is not in languages" for tag in variants if code(tag) not in declared]
+        if len(set(codes)) < len(codes):
+            problems.append(f"{path} has two variants for the same language code: {sorted(variants)}")
     return problems
 
 

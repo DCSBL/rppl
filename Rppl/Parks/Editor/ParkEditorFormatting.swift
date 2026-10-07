@@ -43,15 +43,10 @@ extension ParkFormatting {
         }
     }
 
-    /// `perText` of the option's `per` in the reader's language (see `ParkLanguage.resolve`).
-    static func perText(_ option: ParkPriceOption, parkLanguages: [String]?) -> String? {
-        perText(option.resolvedPer(parkLanguages: parkLanguages))
-    }
-
     /// "€10 per hour", "€38,50 · kids up to 15".
     static func optionLine(_ option: ParkPriceOption, fallbackCurrency: String? = nil, parkLanguages: [String]? = nil) -> String {
-        [amount(option, fallbackCurrency: fallbackCurrency), perText(option, parkLanguages: parkLanguages),
-         option.resolvedNote(parkLanguages: parkLanguages)]
+        [amount(option, fallbackCurrency: fallbackCurrency), perText(option.per?.resolved(parkLanguages: parkLanguages)),
+         option.note?.resolved(parkLanguages: parkLanguages)]
             .compactMap { $0 }
             .joined(separator: " · ")
     }

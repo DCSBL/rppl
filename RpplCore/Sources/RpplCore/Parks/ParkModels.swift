@@ -145,50 +145,19 @@ public struct ParkPriceOption: Codable, Equatable, Sendable {
     public var amount: String?
     /// ISO 4217 code (`EUR`). nil reads as the currency of the other prices.
     public var currency: String?
-    /// See `ParkPriceUnit`. nil is "just this amount".
-    public var per: String?
-    /// Who or what this amount is for ("kids up to 15", "own gear").
-    public var note: String?
-    /// Per-language variants of `per` / `note`, keyed by language tag (`nl`, `fr-BE`). When set, `per`
-    /// / `note` hold the English variant (else the first by tag) for code that wants one string;
-    /// show text through `resolvedPer` / `resolvedNote`. nil when the YAML is a plain string.
-    public var perByLanguage: [String: String]?
-    public var noteByLanguage: [String: String]?
+    /// See `ParkPriceUnit`. nil is "just this amount". Free text may carry a variant per language.
+    public var per: LocalizedText?
+    /// Who or what this amount is for ("kids up to 15", "own gear"). May carry a variant per language.
+    public var note: LocalizedText?
 
-    public init(
-        amount: String? = nil, currency: String? = nil, per: String? = nil, note: String? = nil,
-        perByLanguage: [String: String]? = nil, noteByLanguage: [String: String]? = nil
-    ) {
+    public init(amount: String? = nil, currency: String? = nil, per: LocalizedText? = nil, note: LocalizedText? = nil) {
         self.amount = amount
         self.currency = currency
         self.per = per
         self.note = note
-        self.perByLanguage = perByLanguage
-        self.noteByLanguage = noteByLanguage
     }
 
     enum CodingKeys: String, CodingKey { case amount, currency, per, note }
-
-    /// `per` in the reader's language, else the park's main language, else as written.
-    public func resolvedPer(
-        readerLanguages: [String] = ParkLanguage.readerLanguages, parkLanguages: [String]? = nil
-    ) -> String? {
-        ParkLanguage.resolve(perByLanguage, fallback: per, readerLanguages: readerLanguages, parkLanguages: parkLanguages)
-    }
-
-    public func resolvedNote(
-        readerLanguages: [String] = ParkLanguage.readerLanguages, parkLanguages: [String]? = nil
-    ) -> String? {
-        ParkLanguage.resolve(noteByLanguage, fallback: note, readerLanguages: readerLanguages, parkLanguages: parkLanguages)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(amount, forKey: .amount)
-        try container.encodeIfPresent(currency, forKey: .currency)
-        try LocalizedField.encode(&container, text: per, variants: perByLanguage, forKey: .per)
-        try LocalizedField.encode(&container, text: note, variants: noteByLanguage, forKey: .note)
-    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -201,8 +170,8 @@ public struct ParkPriceOption: Codable, Equatable, Sendable {
             amount = nil
         }
         currency = try container.decodeIfPresent(String.self, forKey: .currency)
-        (per, perByLanguage) = try LocalizedField.decode(container, forKey: .per)
-        (note, noteByLanguage) = try LocalizedField.decode(container, forKey: .note)
+        per = try container.decodeIfPresent(LocalizedText.self, forKey: .per)
+        note = try container.decodeIfPresent(LocalizedText.self, forKey: .note)
     }
 }
 

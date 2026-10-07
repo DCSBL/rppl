@@ -169,6 +169,6 @@ extension ParkPriceOption {
 
     /// Nothing filled in yet.
     public var isBlank: Bool {
-        (amount ?? "").isEmpty && (per ?? "").isEmpty && (note ?? "").isEmpty
+        (amount ?? "").isEmpty && (per?.text ?? "").isEmpty && (note?.text ?? "").isEmpty
     }
 }

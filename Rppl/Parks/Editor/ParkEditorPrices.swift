@@ -178,7 +178,7 @@ private struct ParkPriceOptionRow: View {
         self.context = context
         self.defaultCurrency = defaultCurrency
         _text = State(initialValue: ParkFormatting.amountInputText(option.wrappedValue))
-        let per = option.wrappedValue.per
+        let per = option.wrappedValue.per?.text
         _customUnit = State(initialValue: per != nil && !ParkPriceUnit.all.contains(per ?? ""))
     }
 
@@ -225,18 +225,16 @@ private struct ParkPriceOptionRow: View {
             Button("Just this amount") {
                 customUnit = false
                 option.per = nil
-                option.perByLanguage = nil
             }
             ForEach(ParkPriceUnit.all, id: \.self) { unit in
                 Button(ParkFormatting.perText(unit) ?? unit) {
                     customUnit = false
-                    option.per = unit
-                    option.perByLanguage = nil
+                    option.per = LocalizedText(unit)
                 }
             }
             Button("Other…") {
                 customUnit = true
-                if ParkPriceUnit.all.contains(option.per ?? "") { option.per = nil }
+                if ParkPriceUnit.all.contains(option.per?.text ?? "") { option.per = nil }
             }
         } label: {
             pill(unitTitle)
@@ -245,7 +243,7 @@ private struct ParkPriceOptionRow: View {
 
     private var unitTitle: String {
         if customUnit { return String(localized: "Other") }
-        return ParkFormatting.perText(option.per) ?? String(localized: "Per…")
+        return ParkFormatting.perText(option.per?.text) ?? String(localized: "Per…")
     }
 
     private func pill(_ title: String) -> some View {
@@ -263,22 +261,20 @@ private struct ParkPriceOptionRow: View {
 
     private var unitText: Binding<String> {
         Binding(
-            get: { option.per ?? "" },
+            get: { option.per?.text ?? "" },
             set: {
                 let clean = ParkText.sanitizeTyping($0, field: .label)
-                option.per = clean.isEmpty ? nil : clean
-                option.perByLanguage = nil
+                option.per = clean.isEmpty ? nil : LocalizedText(clean)
             }
         )
     }
 
     private var noteText: Binding<String> {
         Binding(
-            get: { option.note ?? "" },
+            get: { option.note?.text ?? "" },
             set: {
                 let clean = ParkText.sanitizeTyping($0, field: .note)
-                option.note = clean.isEmpty ? nil : clean
-                option.noteByLanguage = nil
+                option.note = clean.isEmpty ? nil : LocalizedText(clean)
             }
         )
     }

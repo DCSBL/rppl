@@ -44,7 +44,7 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})*$" }
+      "items": { "$ref": "#/$defs/langTag" }
     },
     "location": { "$ref": "#/$defs/coordinate" },
     "address": { "type": "string", "minLength": 1 },
@@ -128,6 +128,11 @@
     }
   },
   "$defs": {
+    "langTag": {
+      "description": "BCP-47 language tag: nl, fr-BE.",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})*$"
+    },
     "localizedText": {
       "description": "Plain text, or a map from language tag to text. Keys must be listed in `languages`.",
       "oneOf": [
@@ -135,7 +140,7 @@
         {
           "type": "object",
           "minProperties": 1,
-          "propertyNames": { "pattern": "^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})*$" },
+          "propertyNames": { "$ref": "#/$defs/langTag" },
           "additionalProperties": { "type": "string", "minLength": 1 }
         }
       ]

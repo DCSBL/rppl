@@ -97,9 +97,6 @@ public enum ParkDraft {
         park.name = ParkText.finalize(park.name, field: .name) ?? ""
         park.author = ParkText.finalize(park.author, field: .author)
         park.address = ParkText.finalize(park.address, field: .address)
-        var seenLanguages = Set<String>()
-        let languages = (park.languages ?? []).filter { ParkLanguage.isValidTag($0) && seenLanguages.insert($0.lowercased()).inserted }
-        park.languages = languages.isEmpty ? nil : languages
         park.description = ParkText.finalize(park.description, field: .description)
         park.phone = ParkText.finalize(park.phone, field: .phone)
         park.email = ParkText.finalize(park.email, field: .email)
@@ -124,10 +121,8 @@ public enum ParkDraft {
             price.name = ParkText.finalize(price.name, field: .label) ?? ""
             price.options = price.options.prefix(ParkLimits.priceOptions).map { option in
                 var option = option
-                option.per = ParkText.finalize(option.per, field: .label)
-                option.note = ParkText.finalize(option.note, field: .note)
-                option.perByLanguage = Self.finalizeVariants(option.perByLanguage, field: .label)
-                option.noteByLanguage = Self.finalizeVariants(option.noteByLanguage, field: .note)
+                option.per = Self.finalize(option.per, field: .label)
+                option.note = Self.finalize(option.note, field: .note)
                 option.currency = option.currency.flatMap { $0.isEmpty ? nil : $0.uppercased() }
                 option.amount = option.amount.flatMap { text in
                     if case .amount(let parsed) = ParkPriceParser.parse(text) { return parsed.text }
@@ -176,16 +171,15 @@ public enum ParkDraft {
         return park
     }
 
-    /// Real dates only, each once, oldest first. Nothing left is nil.
-    /// Cleans each language variant, drops blank ones and keys that are not language tags.
-    private static func finalizeVariants(_ variants: [String: String]?, field: ParkTextField) -> [String: String]? {
-        let cleaned = (variants ?? [:]).reduce(into: [String: String]()) { result, entry in
-            guard ParkLanguage.isValidTag(entry.key), let text = ParkText.finalize(entry.value, field: field) else { return }
-            result[entry.key] = text
-        }
-        return cleaned.isEmpty ? nil : cleaned
+    /// Cleaned text and variants; nil when the text is blank.
+    private static func finalize(_ value: LocalizedText?, field: ParkTextField) -> LocalizedText? {
+        guard var value, let text = ParkText.finalize(value.text, field: field) else { return nil }
+        value.text = text
+        value.variants = value.variants.compactMapValues { ParkText.finalize($0, field: field) }
+        return value
     }
 
+    /// Real dates only, each once, oldest first. Nothing left is nil.
     private static func tidyDates(_ dates: [String]?) -> [String]? {
         guard let dates else { return nil }
         let tidy = Array(Set(dates.filter(ParkDateText.isValid))).sorted().prefix(ParkLimits.dates)
