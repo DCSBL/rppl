@@ -75,12 +75,7 @@ struct LogbookSessionDetailView: View {
     /// Flags can be edited on a stored session that has sets to flag.
     private var canEditFlags: Bool {
         guard case .store = source, loadPhase == .ready else { return false }
-        return isManual || flagSetCount > 0
-    }
-
-    /// Detected sets for a tracked session; the typed-in set total for a manual one.
-    private var flagSetCount: Int {
-        manifest?.manual?.setCount ?? sessionStats?.sets.count ?? 0
+        return isManual || sessionStats?.sets.isEmpty == false
     }
 
     private var allowsExport: Bool {
@@ -634,7 +629,7 @@ struct LogbookSessionDetailView: View {
     private func saveFlags() -> Bool {
         guard let store, case .store(let sessionId) = source else { return false }
         var result = flagDraft.draft
-        if let manual = manifest?.manual { result = SetFlags.trimmed(result, toSetCount: manual.setCount) }
+        if let manual = manifest?.manual { result = SetFlags.trimmed(result, toSetCount: manual.setCount ?? 0) }
         do {
             try store.setSetFlags(result, sessionId: sessionId)
             manifest = try store.readManifest(sessionId: sessionId)
