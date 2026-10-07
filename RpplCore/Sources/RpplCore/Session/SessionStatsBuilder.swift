@@ -113,10 +113,7 @@ public enum SessionStatsBuilder {
         }()
 
         let highlightedSets = HighlightAssigner.assignSetHighlights(sets)
-        let waterAverage: Double? = {
-            guard !water.isEmpty else { return nil }
-            return water.map(\.celsius).reduce(0, +) / Double(water.count)
-        }()
+        let waterSummary = WaterTemperatureSummary.make(from: water)
 
         return SessionStats(
             startedAt: sessionStart,
@@ -130,7 +127,8 @@ public enum SessionStatsBuilder {
             inactiveDuration: inactiveDuration,
             ridingInactiveRatio: ratio,
             sets: highlightedSets,
-            averageWaterTemperatureCelsius: waterAverage,
+            averageWaterTemperatureCelsius: waterSummary?.currentCelsius,
+            waterTemperatureRangeCelsius: waterSummary?.range,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
             cableSpeedKmh: sessionCableSpeedKmh
         )

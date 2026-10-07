@@ -395,6 +395,9 @@ struct LogbookSessionDetailView: View {
                                 stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
                                     ?? TemperatureFormat.placeholder
                             )
+                            if let range = stats.waterTemperatureRangeCelsius {
+                                StatChip(metric: .water, value: LogbookFormatting.waterTemperatureRange(range))
+                            }
                         }
                     }
                     if let weather = manifest?.weather {

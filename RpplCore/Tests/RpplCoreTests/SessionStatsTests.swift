@@ -355,6 +355,32 @@ struct SessionStatsBuilderTests {
         #expect(stats.averageWaterTemperatureCelsius == 20)
     }
 
+    @Test func waterTemperatureForgetsEarlyUnderSuitReadings() {
+        // 10 min under the suit at 28 °C, then on top at 17 °C every minute.
+        var water = (0..<10).map { waterSample(at: Double($0) * 60, celsius: 28) }
+        water += (10..<20).map { waterSample(at: Double($0) * 60, celsius: 17) }
+        let summary = WaterTemperatureSummary.make(from: water)
+        #expect(summary?.currentCelsius == 17)
+        #expect(summary?.range == 17...28)
+    }
+
+    @Test func waterTemperatureWindowNeedsFiveSamplesAndFiveMinutes() {
+        // Five samples within 40 s: count met, span not → keep widening to all samples.
+        let quick = [28, 28, 17, 17, 17].enumerated().map { waterSample(at: Double($0.offset) * 10, celsius: Double($0.element)) }
+        #expect(WaterTemperatureSummary.make(from: quick)?.currentCelsius == (28 + 28 + 51) / 5)
+        // Sparse: 6 samples 2 min apart → window of the last 4 would span 6 min but only 4 samples.
+        let sparse = [30, 30, 18, 18, 18, 18].enumerated().map { waterSample(at: Double($0.offset) * 120, celsius: Double($0.element)) }
+        #expect(WaterTemperatureSummary.make(from: sparse)?.currentCelsius == (30 + 18 * 4) / 5)
+    }
+
+    @Test func waterTemperatureRangeOnlyAboveThreeDegrees() {
+        let flat = [18, 19, 21].enumerated().map { waterSample(at: Double($0.offset), celsius: Double($0.element)) }
+        #expect(WaterTemperatureSummary.make(from: flat)?.range == nil)
+        let wide = [18, 22].enumerated().map { waterSample(at: Double($0.offset), celsius: Double($0.element)) }
+        #expect(WaterTemperatureSummary.make(from: wide)?.range == 18...22)
+        #expect(WaterTemperatureSummary.make(from: []) == nil)
+    }
+
     @Test func missingCapabilityHidesWaterTemperature() {
         let stats = SessionStatsBuilder.build(
             manifest: manifest(endedAt: t0.addingTimeInterval(60)),
