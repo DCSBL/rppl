@@ -29,9 +29,8 @@ enum LogbookFormatting {
         DistanceFormat.kilometers(meters)
     }
 
-    /// An estimate, rounded to 100 m so it does not look measured: "~1.2 km".
     static func approximateDistance(_ meters: Double) -> String {
-        "~" + DistanceFormat.kilometers((meters / 100).rounded() * 100)
+        DistanceFormat.approximateKilometers(meters)
     }
 
     static func speedKilometersPerHour(_ kmh: Double) -> String {

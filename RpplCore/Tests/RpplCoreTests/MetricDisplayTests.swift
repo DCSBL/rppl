@@ -42,6 +42,13 @@ struct MetricDisplayTests {
         #expect(distance.value == "14")
         #expect(distance.unit != nil)
     }
+
+    @Test func approximateDistanceRoundsInTheShownUnit() {
+        #expect(DistanceFormat.approximateKilometers(1_609, locale: Locale(identifier: "en_US")) == "~1 mi")
+        #expect(DistanceFormat.approximateKilometers(1_609, locale: Locale(identifier: "en_GB")) == "~1 mi")
+        let nl = MetricDisplay.split(DistanceFormat.approximateKilometers(1_620, locale: Locale(identifier: "nl_NL")))
+        #expect(nl.value == "~1,6" && nl.unit != nil)
+    }
     #endif
 
     @Test func fractionClampsToUnitRange() {
