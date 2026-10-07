@@ -18,9 +18,6 @@ struct RpplApp: App {
                     await PhoneICloudDriveController.shared.refreshAvailability()
                     PhoneICloudDriveController.shared.applyPreferredRootIfNeeded(reason: "active")
                 }
-                #if PARK_ARRIVAL_NOTIFICATIONS
-                ParkArrivalController.shared.refreshMonitoredRegionsIfEnabled()
-                #endif
             }
         }
     }
@@ -32,8 +29,5 @@ struct RpplApp: App {
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
         _ = PhoneConnectivityService.shared
         PhoneICloudDriveController.shared.start()
-        #if PARK_ARRIVAL_NOTIFICATIONS
-        ParkArrivalController.shared.refreshMonitoredRegionsIfEnabled()
-        #endif
     }
 }
