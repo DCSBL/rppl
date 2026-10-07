@@ -269,12 +269,12 @@ def check_dead_data(data: dict) -> list[str]:
 
 
 def language_code(tag: str) -> str:
-    return re.split(r"[-_]", tag.lower())[0]
+    return re.split(r"[-_]", str(tag).lower())[0]
 
 
 def repeated_codes(tags) -> list[str]:
     """Language codes that more than one of `tags` stands for (`nl` and `nl-BE` are one language)."""
-    codes = [language_code(str(tag)) for tag in tags]
+    codes = [language_code(tag) for tag in tags]
     return sorted({code for code in codes if codes.count(code) > 1})
 
 
@@ -304,11 +304,11 @@ def check_languages(data: dict) -> list[str]:
                     problems.append(f"{where} has language variants but the park has no `languages` list")
                     continue
                 for tag in value:
-                    if language_code(str(tag)) not in codes:
+                    if language_code(tag) not in codes:
                         problems.append(f"{where} has variant {tag!r} which is not in languages {declared}")
                 if repeated_codes(value):
                     problems.append(f"{where} has more than one variant for {repeated_codes(value)}")
-                have = {language_code(str(tag)) for tag in value}
+                have = {language_code(tag) for tag in value}
                 missing = [tag for tag in declared if language_code(tag) not in have]
                 if missing:
                     problems.append(f"{where} has no variant for {missing}")
