@@ -61,7 +61,8 @@ struct ParkLanguageTests {
         #expect(option.per == "per 2 hours")
         #expect(option.perByLanguage?["fr"] == "pour 2 heures")
         #expect(option.resolvedPer(readerLanguages: ["nl-NL"], parkLanguages: parsed.languages) == "per 2 uur")
-        #expect(option.resolvedNote(readerLanguages: ["fr"], parkLanguages: ["nl-BE", "en"]) == "kids")
+        #expect(option.resolvedNote(readerLanguages: ["fr"], parkLanguages: ["nl-BE", "en"]) == "kinderen")
+        #expect(option.resolvedNote(readerLanguages: ["de"], parkLanguages: nil) == "kids")
         let again = try ParkCatalog.parse(yaml: try ParkCatalog.encode(parsed), fallbackId: "p")
         #expect(again == parsed)
     }
