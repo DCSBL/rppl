@@ -41,7 +41,7 @@ jobs:
           # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
           changed_files="$(git diff --name-only "$BASE" "$HEAD")"
           if printf '%s\n' "$changed_files" \
-            | grep -E '^(RpplCore/Sources/RpplCore/Resources/Parks/|schema/|scripts/validate_parks\.py$|\.yamllint\.yml$|\.github/workflows/parks-validate\.yml$)' \
+            | grep -E '^(RpplCore/Sources/RpplCore/Resources/Parks/|schema/|scripts/(validate|format)_parks\.py$|\.yamllint\.yml$|\.github/workflows/parks-validate\.yml$)' \
             >/dev/null; then
             echo "parks=true" >> "$GITHUB_OUTPUT"
           else

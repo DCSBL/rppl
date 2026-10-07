@@ -1,16 +1,26 @@
 version: 1
 id: accepted
 name: Fixture Park
-location: { lat: 52.0, lon: 5.0 }
+location:
+  lat: 52.0
+  lon: 5.0
 # One short remark about a non-obvious choice.
 # Two lines are fine, three at most.
 links:
-  - { kind: booking, url: "https://www.fixture-park.nl/book#slot" }
+  - kind: booking
+    url: "https://www.fixture-park.nl/book#slot"
 opening:
   rules:
-    - { label: Pre-season Sundays, dates: ["2026-03-15"], open: "13:00", close: "17:00" }
+    - label: Pre-season Sundays
+      dates:
+        - "2026-03-15"
+      open: "13:00"
+      close: "17:00"
   exceptions:
-    - { kind: closed, label: Wind, dates: ["2026-04-01"] }
+    - kind: closed
+      label: Wind
+      dates:
+        - "2026-04-01"
 description: >-
   A # inside a block scalar is text, and so is https://www.fixture-park.nl/#top here.
   Ranges like 14:00-20:00 keep a plain hyphen.

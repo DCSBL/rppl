@@ -139,7 +139,16 @@ struct ParksTests {
     }
 
     @Test func lastUpdatedParsesDateOnlyString() throws {
-        let updated = try #require(try project7().lastUpdated)
+        let park = try ParkCatalog.parse(yaml: """
+            version: 1
+            id: p
+            name: P
+            updated_at: 2026-09-26
+            location:
+              lat: 52.0
+              lon: 5.0
+            """, fallbackId: "p")
+        let updated = try #require(park.lastUpdated)
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = amsterdam
         let parts = calendar.dateComponents([.year, .month, .day], from: updated)
@@ -356,6 +365,16 @@ struct ParksTests {
         // The encoder trims coordinate digits past double precision; compare the rest exactly.
         decoded.cables = park.cables
         #expect(decoded == park)
+    }
+
+    @Test func appWritesNativeBlockYAML() throws {
+        // The editor's files and "Send to Rppl" mails reach scripts/validate_parks.py, which rejects
+        // JSON-like `{ }` / `[ ]` collections (empty ones excepted).
+        let flowCollection = "(?m)(^|: |- )[\\[{](?![\\]}]$)"
+        for park in ParkCatalog.loadBundled() {
+            let yaml = try ParkCatalog.encode(park)
+            #expect(yaml.range(of: flowCollection, options: .regularExpression) == nil, "\(park.id) was written with flow style")
+        }
     }
 
     @Test func userFileOverridesBundledById() throws {

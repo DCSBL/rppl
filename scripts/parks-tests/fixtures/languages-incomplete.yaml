@@ -1,6 +1,10 @@
 version: 1
-id: languages-missing
+id: languages-incomplete
 name: Fixture Park
+languages:
+  - nl
+  - fr
+  - en
 location:
   lat: 50.85
   lon: 4.35
@@ -9,6 +13,6 @@ prices:
     options:
       - amount: "15"
         currency: EUR
-        per:
-          nl: per 2 uur
-          en: per 2 hours
+        note:
+          nl: kinderen
+          en: kids

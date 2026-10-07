@@ -1,10 +1,26 @@
 version: 1
 id: languages-ok
 name: Fixture Park
-languages: [nl-BE, fr-BE, en]
-location: { lat: 50.85, lon: 4.35 }
+languages:
+  - nl-BE
+  - fr-BE
+  - en
+location:
+  lat: 50.85
+  lon: 4.35
 prices:
   - name: Skis
     options:
-      - { amount: "15", currency: EUR, per: { nl: per 2 uur, fr: pour 2 heures, en: per 2 hours } }
-      - { amount: "10", currency: EUR, per: hour, note: { nl: kinderen, en: kids } }
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: per 2 uur
+          fr: pour 2 heures
+          en: per 2 hours
+      - amount: "10"
+        currency: EUR
+        per: hour
+        note:
+          nl: kinderen
+          fr: enfants
+          en: kids

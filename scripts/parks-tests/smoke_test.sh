@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Smoke test for scripts/validate_parks.py: the one valid fixture must pass,
-# each invalid fixture must fail. Run from the repo root:
+# Smoke test for scripts/validate_parks.py and scripts/format_parks.py: the valid fixtures must
+# pass, each invalid fixture must fail, the formatter must produce expected/. Run from the repo root:
 #   bash scripts/parks-tests/smoke_test.sh
 set -euo pipefail
 
@@ -56,6 +56,33 @@ check_fails_with en-dash.yaml "en dash"
 check_fails_with spaced-hyphen.yaml "hyphen used as a dash"
 check_fails_with languages-unlisted.yaml "not in languages"
 check_fails_with languages-missing.yaml "no \`languages\` list"
+check_fails_with languages-incomplete.yaml "has no variant for ['fr']"
+check_fails_with languages-plain.yaml "is plain text 'kids'"
+check_fails_with languages-repeated.yaml "more than once"
+check_fails_with flow-style.yaml "flow style"
+check_passes ../expected/flow-style.yaml
+
+# format_parks.py: the flow-style fixture becomes the expected block file and a second run changes
+# nothing; a comment inside a flow collection stops the conversion instead of being dropped.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+cp "$FIXTURES/flow-style.yaml" "$FIXTURES/flow-comment.yaml" "$tmp/"
+python3 scripts/format_parks.py "$tmp/flow-style.yaml" >/dev/null
+if diff -u scripts/parks-tests/expected/flow-style.yaml "$tmp/flow-style.yaml" \
+  && python3 scripts/format_parks.py --check "$tmp/flow-style.yaml" >/dev/null; then
+  echo "ok:   format_parks.py converted flow-style.yaml, a second run changes nothing"
+else
+  echo "FAIL: format_parks.py output differs from expected/flow-style.yaml"
+  FAIL=1
+fi
+out=$(python3 scripts/format_parks.py "$tmp/flow-comment.yaml" 2>&1 || true)
+if grep -qF "would be lost" <<<"$out" && grep -qF "# a comment inside" "$tmp/flow-comment.yaml"; then
+  echo "ok:   format_parks.py refused flow-comment.yaml and left it alone"
+else
+  echo "FAIL: format_parks.py should refuse flow-comment.yaml, got:"
+  echo "$out"
+  FAIL=1
+fi
 
 # Duplicate id: neither file is invalid on its own, only together.
 if python3 scripts/validate_parks.py "$FIXTURES/duplicate_id_a.yaml" "$FIXTURES/duplicate_id_b.yaml" >/dev/null 2>&1; then
