@@ -31,7 +31,16 @@ struct ManualSessionLocationPicker: View {
                         dismiss()
                     } label: {
                         HStack {
-                            Text(park.name).foregroundStyle(Color.rpplText)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(park.name).foregroundStyle(Color.rpplText)
+                                if let address = park.address {
+                                    Text(address)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.rpplMuted)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
                             Spacer()
                             if draft.parkId == park.id { Image(systemName: "checkmark") }
                         }
