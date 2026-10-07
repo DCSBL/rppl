@@ -18,6 +18,8 @@ Checks, per the CI-validation issue:
     hyphen used as a dash in description/note text (Docs/ParkDescriptions.md)
   - Dead data the app ignores or hides: `author: Rppl`, `numbered` without slots,
     `hours_unknown`, a rule label that only repeats its month
+  - Languages: per-language text needs `languages`, and with several languages every free
+    `per` / `note` has a variant for each (the plain units person/hour/day/session excepted)
   - One price per name (group amounts as options) and one link per kind
   - Comments stay short: at most 3 lines in a row and no URLs (sources go in the PR
     description, not in the file)
@@ -55,6 +57,9 @@ MONTH_NAMES = {
     "january", "february", "march", "april", "may", "june",
     "july", "august", "september", "october", "november", "december",
 }  # fmt: skip
+
+# `per` values the app translates itself (ParkPriceUnit in ParkModels.swift): no language variants needed.
+UNITS = {"person", "hour", "day", "session"}
 
 # Free-text fields written per Docs/ParkDescriptions.md. `history` entries are changelog lines, not copy.
 PROSE_KEYS = {"description", "note"}
@@ -267,24 +272,46 @@ def language_code(tag: str) -> str:
     return re.split(r"[-_]", tag.lower())[0]
 
 
+def repeated_codes(tags) -> list[str]:
+    """Language codes that more than one of `tags` stands for (`nl` and `nl-BE` are one language)."""
+    codes = [language_code(str(tag)) for tag in tags]
+    return sorted({code for code in codes if codes.count(code) > 1})
+
+
 def check_languages(data: dict) -> list[str]:
-    """Per-language text (`per`, `note` as a map) needs `languages`, and every key must be one of them."""
+    """Per-language text (`per`, `note` as a map) needs `languages`, and with several languages
+    every free text needs a variant for each of them (the app shows the units in `UNITS` itself)."""
     declared = data.get("languages")
     codes = {language_code(tag) for tag in declared} if isinstance(declared, list) else set()
     problems = []
+    if isinstance(declared, list) and repeated_codes(declared):
+        problems.append(f"languages {declared} list {repeated_codes(declared)} more than once; one tag per language")
     for index, price in enumerate(data.get("prices") or []):
         for o_index, option in enumerate(price.get("options") or [] if isinstance(price, dict) else []):
             for field in ("per", "note"):
                 value = option.get(field) if isinstance(option, dict) else None
+                where = f"prices[{index}].options[{o_index}].{field}"
+                if isinstance(value, str):
+                    if len(codes) > 1 and not (field == "per" and value in UNITS):
+                        problems.append(
+                            f"{where} is plain text {value!r} but the park lists several languages; "
+                            "give it a variant per language"
+                        )
+                    continue
                 if not isinstance(value, dict):
                     continue
-                where = f"prices[{index}].options[{o_index}].{field}"
                 if not codes:
                     problems.append(f"{where} has language variants but the park has no `languages` list")
                     continue
                 for tag in value:
                     if language_code(str(tag)) not in codes:
                         problems.append(f"{where} has variant {tag!r} which is not in languages {declared}")
+                if repeated_codes(value):
+                    problems.append(f"{where} has more than one variant for {repeated_codes(value)}")
+                have = {language_code(str(tag)) for tag in value}
+                missing = [tag for tag in declared if language_code(tag) not in have]
+                if missing:
+                    problems.append(f"{where} has no variant for {missing}")
     return problems
 
 

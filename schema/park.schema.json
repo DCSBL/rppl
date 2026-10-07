@@ -129,7 +129,7 @@
   },
   "$defs": {
     "localizedText": {
-      "description": "Plain text, or a map from language tag to text. Keys must be listed in `languages`.",
+      "description": "Plain text, or a map from language tag to text. Keys must be listed in `languages`; a park with several languages gives every free text a variant per language (checked by scripts/validate_parks.py).",
       "oneOf": [
         { "type": "string", "minLength": 1 },
         {

@@ -1,0 +1,16 @@
+version: 1
+id: languages-repeated
+name: Fixture Park
+languages:
+  - nl-BE
+  - nl
+location:
+  lat: 50.85
+  lon: 4.35
+prices:
+  - name: Skis
+    options:
+      - amount: "15"
+        currency: EUR
+        note:
+          nl: kinderen

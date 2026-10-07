@@ -56,6 +56,9 @@ check_fails_with en-dash.yaml "en dash"
 check_fails_with spaced-hyphen.yaml "hyphen used as a dash"
 check_fails_with languages-unlisted.yaml "not in languages"
 check_fails_with languages-missing.yaml "no \`languages\` list"
+check_fails_with languages-incomplete.yaml "has no variant for ['fr']"
+check_fails_with languages-plain.yaml "is plain text 'kids'"
+check_fails_with languages-repeated.yaml "more than once"
 check_fails_with flow-style.yaml "flow style"
 check_passes ../expected/flow-style.yaml
 
