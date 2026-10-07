@@ -10,6 +10,7 @@ one line per problem) if any file fails.
 
 Checks, per the CI-validation issue:
   - YAML syntax (YAML lint)
+  - Native block-style YAML: no JSON-like `{ }` or `[ ]` collections (scripts/format_parks.py converts)
   - JSON-schema validation against schema/park.schema.json
   - Sanity: duplicate `id` across files, lat/lon out of range, a cable with
     fewer than 2 points, obvious placeholder/TODO values
@@ -43,6 +44,8 @@ try:
 except ImportError:
     print("error: jsonschema is required (pip install jsonschema)", file=sys.stderr)
     sys.exit(2)
+
+from format_parks import flow_spots
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "schema" / "park.schema.json"
@@ -118,6 +121,18 @@ def check_placeholders(data) -> list[str]:
                 problems.append(f"placeholder-looking value at {path}: {text!r}")
                 break
     return problems
+
+
+def check_block_style(raw: str) -> list[str]:
+    """Native YAML only: block style, never the JSON-like `{ a: 1 }` or `[a, b]`."""
+    lines = [line for line, _ in flow_spots(raw)]
+    if not lines:
+        return []
+    shown = ", ".join(str(line) for line in lines[:8]) + (", ..." if len(lines) > 8 else "")
+    return [
+        f"flow style (JSON-like {{ }} or [ ]) on line(s) {shown}; "
+        "use block style, `python3 scripts/format_parks.py <file>` converts it"
+    ]
 
 
 def check_dashes(raw: str) -> list[str]:
@@ -338,6 +353,7 @@ def validate_file(path: Path, schema: dict) -> tuple[dict | None, list[str]]:
     if not isinstance(data, dict):
         return None, ["top-level YAML document must be a mapping"]
 
+    problems += check_block_style(raw)
     data = normalize_dates(data)
 
     validator = jsonschema.Draft202012Validator(schema)
