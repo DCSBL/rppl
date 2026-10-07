@@ -35,6 +35,8 @@ repos:
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplWatch/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
           - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin,weerd"
+          # Park text in other languages: the `nl:`/`fr:`/`de:` lines of a language map (Docs/Parks.md#languages).
+          - '--ignore-regex=^\s+(nl|fr|de|es|it|pt|pl|da|sv)(-[A-Za-z0-9]+)?:\s.*$'
         stages: [pre-commit]
 
   - repo: local
