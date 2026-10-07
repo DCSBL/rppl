@@ -74,14 +74,14 @@ struct CableTraceView: View {
                     .accessibilityLabel(Text("Map style"))
                 }
             }
-            .alert("Is this cable a full-size loop or 2D?", isPresented: $askShape) {
+            .alert("Is this cable a full-size loop or 2.0?", isPresented: $askShape) {
                 Button("Full size (loop)") {
                     // Points are in travel order, so the winding of the trace is the direction riders go.
                     cable.direction = cable.tracedWindingIsClockwise == false ? .counterClockwise : .clockwise
                     dismiss()
                 }
-                Button("2D (back and forth)") {
-                    cable.direction = .twoD
+                Button("2.0 (back and forth)") {
+                    cable.direction = .twoPointZero
                     dismiss()
                 }
                 Button("Keep tracing", role: .cancel) {}

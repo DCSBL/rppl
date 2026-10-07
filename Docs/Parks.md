@@ -63,7 +63,7 @@ website: https://www.project7cablepark.nl
 
 cables:
   - name: Cable                   # optional ("Beginner", "Advanced", …)
-    direction: cw                 # cw | ccw = "full size" (goes round), 2d = 2-point "2.0" cable
+    direction: cw                 # cw | ccw = "full size" (goes round), "2.0" = 2-point cable
     description: optional text
     length_m: 760                 # optional; wins over the length computed from points
     points:                       # optional; listed in travel order, first point is the start
@@ -132,7 +132,7 @@ Rules and slots share optional selectors, all of which must match a date:
 - Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
 - Recurring special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. Unplanned openings, closures and events use `exceptions` instead.
 - Today shows notices for the day's exceptions under the hours; a park detail with announced exceptions still ahead gets an "Upcoming changes" card. The list chip reads "Closed · <label>" when a labelled `closed` exception is the reason.
-- Cables are called "full size" (`cw`/`ccw`) or "2.0" (`2d`). The map shows an arrow on each start point, pointing towards the next traced point.
+- Cables are called "full size" (`cw`/`ccw`) or "2.0". The map shows an arrow on each start point, pointing towards the next traced point.
 
 ### Exceptions
 
@@ -183,7 +183,7 @@ opening:
 
 ### Cable length
 
-`length_m` is used when present. Otherwise the length is computed from `points`; loop cables (`cw`, `ccw`) include the closing segment back to the first point, `2d` cables count the traced line once. With neither, no length is shown.
+`length_m` is used when present. Otherwise the length is computed from `points`; loop cables (`cw`, `ccw`) include the closing segment back to the first point, `"2.0"` cables count the traced line once. With neither, no length is shown.
 
 ### Visits
 

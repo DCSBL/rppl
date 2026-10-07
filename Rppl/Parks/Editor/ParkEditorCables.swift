@@ -98,7 +98,7 @@ struct ParkCableDetailPage: View {
     /// Set once deletion is confirmed; the cable is removed after this page is gone (see `onDisappear`).
     @State private var deleting = false
 
-    private enum Kind: Hashable { case fullSize, twoD }
+    private enum Kind: Hashable { case fullSize, twoPointZero }
 
     var body: some View {
         if let cable = session.park.cables?[safe: index] {
@@ -114,7 +114,7 @@ struct ParkCableDetailPage: View {
                 Section {
                     Picker("Type", selection: kind) {
                         Text("Full size").tag(Kind?.some(.fullSize))
-                        Text("2.0").tag(Kind?.some(.twoD))
+                        Text("2.0").tag(Kind?.some(.twoPointZero))
                     }
                     .pickerStyle(.segmented)
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
@@ -231,7 +231,7 @@ struct ParkCableDetailPage: View {
             get: {
                 guard let direction = session.park.cables?[safe: index]?.direction else { return nil }
                 if direction.isLoop { return .fullSize }
-                return direction == .twoD ? .twoD : nil
+                return direction == .twoPointZero ? .twoPointZero : nil
             },
             set: { new in
                 guard session.park.cables?.indices.contains(index) == true else { return }
@@ -241,7 +241,7 @@ struct ParkCableDetailPage: View {
                     // The traced order tells which way riders go; without a trace, clockwise.
                     let clockwise = session.park.cables?[index].tracedWindingIsClockwise ?? true
                     session.park.cables?[index].direction = clockwise ? .clockwise : .counterClockwise
-                case .twoD?: session.park.cables?[index].direction = .twoD
+                case .twoPointZero?: session.park.cables?[index].direction = .twoPointZero
                 case nil: session.park.cables?[index].direction = nil
                 }
             }

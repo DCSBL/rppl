@@ -3312,22 +3312,6 @@
         }
       }
     },
-    "2D" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2D"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2D"
-          }
-        }
-      }
-    },
     "Daily" : {
       "localizations" : {
         "en" : {
@@ -5560,18 +5544,18 @@
         }
       }
     },
-    "Is this cable a full-size loop or 2D?" : {
+    "Is this cable a full-size loop or 2.0?" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Is this cable a full-size loop or 2D?"
+            "value" : "Is this cable a full-size loop or 2.0?"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Is deze cable een full-size loop of 2D?"
+            "value" : "Is deze cable een full-size loop of 2.0?"
           }
         }
       }
@@ -5592,18 +5576,18 @@
         }
       }
     },
-    "2D (back and forth)" : {
+    "2.0 (back and forth)" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2D (back and forth)"
+            "value" : "2.0 (back and forth)"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2D (heen en weer)"
+            "value" : "2.0 (heen en weer)"
           }
         }
       }
@@ -6468,22 +6452,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Begrepen"
-          }
-        }
-      }
-    },
-    "Rppl asks only when a feature needs it." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl asks only when a feature needs it."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl vraagt alleen toestemming als een functie het nodig heeft."
           }
         }
       }
