@@ -783,6 +783,18 @@ struct ParksTests {
         #expect(cable.points == nil)
     }
 
+    @Test func draftRemovesAndMovesPointsAndIgnoresBadIndex() {
+        var cable = ParkCable(points: [ParkCablePoint(lat: 1, lon: 1), ParkCablePoint(lat: 2, lon: 2)])
+        ParkDraft.move(&cable, index: 1, to: ParkCoordinate(lat: 3, lon: 4))
+        #expect(cable.points?[1].coordinate == ParkCoordinate(lat: 3, lon: 4))
+        ParkDraft.move(&cable, index: 9, to: ParkCoordinate(lat: 0, lon: 0))
+        ParkDraft.remove(&cable, index: 9)
+        #expect(cable.points?.count == 2)
+        ParkDraft.remove(&cable, index: 0)
+        ParkDraft.remove(&cable, index: 0)
+        #expect(cable.points == nil)
+    }
+
     @Test func invalidCablePointIsFlaggedSeparatelyFromTooShort() {
         let cable = ParkCable(points: [ParkCablePoint(lat: 52, lon: 4), ParkCablePoint(lat: 95, lon: 4)])
         var park = Park(id: "a", name: "A", location: ParkCoordinate(lat: 52, lon: 4))
