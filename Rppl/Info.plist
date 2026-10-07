@@ -6,12 +6,21 @@
 	<false/>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>$(RPPL_ICLOUD_CONTAINER)</key>
+		<key>iCloud.nl.dcsbl.rppl</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>$(RPPL_ICLOUD_FOLDER_NAME)</string>
+			<string>Rppl</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+		<key>iCloud.nl.dcsbl.rppl.dev</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Rppl Dev</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>Any</string>
 		</dict>
