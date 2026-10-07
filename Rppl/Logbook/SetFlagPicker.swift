@@ -54,14 +54,6 @@ enum SetFlagLabels {
         default: flag
         }
     }
-
-    static func sorted(_ flags: [String]) -> [String] {
-        flags.sorted {
-            let (x, y) = (SetFlags.isCatchAll($0), SetFlags.isCatchAll($1))
-            if x != y { return y }
-            return label($0).localizedCaseInsensitiveCompare(label($1)) == .orderedAscending
-        }
-    }
 }
 
 /// What a set card needs to show and change its flags.
@@ -70,8 +62,6 @@ struct SetFlagging {
     var customs: [String]
     var toggle: (String) -> Void
     var addCustom: (String) -> Void
-    /// Whether any set currently carries the label.
-    var isUsed: (String) -> Bool
     /// Removes the label from the saved list and from every set.
     var deleteCustom: (String) -> Void
 }
@@ -109,18 +99,17 @@ struct SetFlagBadge: View {
 struct SetFlagCloud: View {
     let flagging: SetFlagging
     @State private var customText = ""
-    @State private var pendingDelete: String?
 
     private var customFlags: [String] {
         let extra = flagging.selected.filter { SetFlags.kind(of: $0) == .custom }
         var seen = Set<String>()
-        return SetFlagLabels.sorted(flagging.customs + extra).filter { seen.insert($0.lowercased()).inserted }
+        return SetFlags.ordered(flagging.customs + extra, by: SetFlagLabels.label).filter { seen.insert($0.lowercased()).inserted }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ForEach([SetFlagKind.start, .exit, .trick], id: \.self) { kind in
-                group(kind, flags: SetFlagLabels.sorted(SetFlags.presets(of: kind)))
+                group(kind, flags: SetFlags.ordered(SetFlags.presets(of: kind), by: SetFlagLabels.label))
             }
             group(.custom, flags: customFlags)
             HStack {
@@ -135,18 +124,6 @@ struct SetFlagCloud: View {
             .padding(.vertical, 8)
             .background(Color.rpplFill, in: Capsule())
         }
-        .confirmationDialog(
-            "Remove this label?", isPresented: deletePrompt, titleVisibility: .visible, presenting: pendingDelete
-        ) { flag in
-            Button("Remove", role: .destructive) { flagging.deleteCustom(flag) }
-            Button("Cancel", role: .cancel) {}
-        } message: { flag in
-            Text("“\(flag)” will be removed from all sets.")
-        }
-    }
-
-    private var deletePrompt: Binding<Bool> {
-        Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
     }
 
     private func group(_ kind: SetFlagKind, flags: [String]) -> some View {
@@ -164,7 +141,7 @@ struct SetFlagCloud: View {
                         .contextMenu {
                             if kind == .custom {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
-                                    if flagging.isUsed(flag) { pendingDelete = flag } else { flagging.deleteCustom(flag) }
+                                    flagging.deleteCustom(flag)
                                 }
                             }
                         }
@@ -177,31 +154,6 @@ struct SetFlagCloud: View {
         guard SetFlags.normalized(custom: customText) != nil else { return }
         flagging.addCustom(customText)
         customText = ""
-    }
-}
-
-/// Medium sheet around the cloud. Changes apply to the caller's draft as they are tapped.
-struct SetFlagSheet: View {
-    let title: String
-    let flagging: SetFlagging
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                SetFlagCloud(flagging: flagging)
-                    .padding(20)
-            }
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-        .presentationBackground(Color.rpplBackground)
     }
 }
 
@@ -233,7 +185,18 @@ struct SetFlagRow: View {
                 }
             }
             .sheet(isPresented: $showsPicker) {
-                if let flagging { SetFlagSheet(title: title, flagging: flagging) }
+                if let flagging {
+                    NavigationStack {
+                        ScrollView { SetFlagCloud(flagging: flagging).padding(20) }
+                            .navigationTitle(title)
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .confirmationAction) { Button("Done") { showsPicker = false } }
+                            }
+                    }
+                    .presentationDetents([.medium, .large])
+                    .presentationBackground(Color.rpplBackground)
+                }
             }
         }
     }
@@ -271,18 +234,5 @@ struct ManualSetCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .rpplTileChrome()
-    }
-}
-
-/// Phone-local list of custom flag labels.
-enum SetFlagStorage {
-    private static let customsKey = "rppl.customSetFlags"
-
-    static func loadCustoms() -> [String] {
-        UserDefaults.standard.stringArray(forKey: customsKey) ?? []
-    }
-
-    static func saveCustoms(_ customs: [String]) {
-        UserDefaults.standard.set(customs, forKey: customsKey)
     }
 }

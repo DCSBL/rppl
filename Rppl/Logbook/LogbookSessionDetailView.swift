@@ -42,7 +42,7 @@ struct LogbookSessionDetailView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showEditor = false
     @State private var flagDraft = SetFlagDraft(saved: nil)
-    @State private var customFlags = SetFlagStorage.loadCustoms()
+    @State private var customFlags = UserDefaults.standard.stringArray(forKey: AppSettingsKey.customSetFlags) ?? []
     @State private var isEditingFlags = false
     @State private var showsDiscardDialog = false
     @State private var flagSaveError: String?
@@ -127,6 +127,7 @@ struct LogbookSessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
+        .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
         .navigationBarBackButtonHidden(isEditingFlags)
         .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { endFlagEditing() }
@@ -616,11 +617,6 @@ struct LogbookSessionDetailView: View {
 
     // MARK: Set flags
 
-    private var flagSessionId: String? {
-        if case .store(let sessionId) = source { return sessionId }
-        return nil
-    }
-
     private func beginFlagEditing() {
         flagDraft = SetFlagDraft(saved: manifest?.setFlags)
         isEditingFlags = true
@@ -633,8 +629,8 @@ struct LogbookSessionDetailView: View {
 
     /// Writes the draft to the manifest. False (with an alert) when that fails.
     private func saveFlags() -> Bool {
-        guard let store, let sessionId = flagSessionId else { return false }
-        var result = flagDraft.result
+        guard let store, case .store(let sessionId) = source else { return false }
+        var result = flagDraft.draft
         if let manual = manifest?.manual { result = SetFlags.trimmed(result, toSetCount: manual.setCount) }
         do {
             try store.setSetFlags(result, sessionId: sessionId)
@@ -651,7 +647,7 @@ struct LogbookSessionDetailView: View {
     private func flags(forSet index: Int) -> [String] {
         isEditingFlags
             ? flagDraft.flags(forSet: index)
-            : manifest?.setFlags?[SetFlags.key(forSet: index)] ?? []
+            : manifest?.setFlags?[String(index)] ?? []
     }
 
     private func flagging(forSet index: Int) -> SetFlagging? {
@@ -664,27 +660,28 @@ struct LogbookSessionDetailView: View {
                 guard let flag = SetFlags.normalized(custom: text) else { return }
                 if SetFlags.kind(of: flag) == .custom, !SetFlags.contains(flag, in: customFlags) {
                     customFlags.append(flag)
-                    SetFlagStorage.saveCustoms(customFlags)
                 }
                 if !SetFlags.contains(flag, in: flagDraft.flags(forSet: index)) {
                     flagDraft.toggle(flag, forSet: index)
                 }
             },
-            isUsed: { flagDraft.isUsed($0) },
             deleteCustom: { flag in
                 flagDraft.removeEverywhere(flag)
                 customFlags.removeAll { $0.caseInsensitiveCompare(flag) == .orderedSame }
-                SetFlagStorage.saveCustoms(customFlags)
             }
         )
+    }
+
+    /// Read mode lists only the manual sets that carry flags; edit mode offers every set.
+    private var manualFlagSetIndexes: [Int] {
+        guard let count = manifest?.manual?.setCount, count > 0 else { return [] }
+        return (1...count).filter { isEditingFlags || !flags(forSet: $0).isEmpty }
     }
 
     /// Manual sessions: one flag spot per typed-in set, nothing else.
     @ViewBuilder
     private var manualSetsSection: some View {
-        // Read mode lists only the sets that carry flags; edit mode offers every set.
-        let count = manifest?.manual?.setCount ?? 0
-        let indexes = (1...max(count, 1)).filter { count > 0 && (isEditingFlags || !flags(forSet: $0).isEmpty) }
+        let indexes = manualFlagSetIndexes
         if !indexes.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Sets")

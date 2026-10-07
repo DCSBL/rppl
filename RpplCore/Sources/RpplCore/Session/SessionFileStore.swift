@@ -256,8 +256,7 @@ public final class SessionFileStore: @unchecked Sendable {
         defer { lock.unlock() }
 
         var manifest = try readManifest(sessionId: sessionId)
-        let clean = flags.filter { !$0.value.isEmpty }
-        manifest.setFlags = clean.isEmpty ? nil : clean
+        manifest.setFlags = flags.isEmpty ? nil : flags
         try writeManifest(manifest)
     }
 

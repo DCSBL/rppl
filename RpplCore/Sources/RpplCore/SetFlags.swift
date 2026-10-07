@@ -14,31 +14,24 @@ public enum SetFlagKind: Int, Sendable, CaseIterable {
 /// Self-notes on a set: opaque strings, never a closed enum. Presets are known snake_case codes the
 /// UI localizes; any other string is a custom label shown verbatim and must round-trip untouched.
 public enum SetFlags {
-    public static let starts = [
-        "clean_start", "failed_start", "jump_start", "nollie_start", "other_start", "sit_start", "slide_start"
-    ]
-    public static let exits = ["cable_snap", "cable_stopped", "clean_exit", "dry_exit", "fall", "wipeout"]
-    public static let tricks = [
-        "180", "360", "backroll", "box", "failed_jump", "frontroll", "kicker", "new_trick", "ollie", "rail",
-        "raley", "switch", "tantrum"
+    /// Presets per kind, alphabetical by code. Custom flags are everything else.
+    public static let groups: [(kind: SetFlagKind, flags: [String])] = [
+        (.start, ["clean_start", "failed_start", "jump_start", "nollie_start", "other_start", "sit_start", "slide_start"]),
+        (.exit, ["cable_snap", "cable_stopped", "clean_exit", "dry_exit", "fall", "wipeout"]),
+        (.trick, [
+            "180", "360", "backroll", "box", "failed_jump", "frontroll", "kicker", "new_trick", "ollie", "rail",
+            "raley", "switch", "tantrum"
+        ])
     ]
     public static let maxLength = 24
 
     public static func kind(of flag: String) -> SetFlagKind {
-        if starts.contains(flag) { return .start }
-        if exits.contains(flag) { return .exit }
-        if tricks.contains(flag) { return .trick }
-        return .custom
+        groups.first { $0.flags.contains(flag) }?.kind ?? .custom
     }
 
     /// Presets of one kind (empty for `.custom`).
     public static func presets(of kind: SetFlagKind) -> [String] {
-        switch kind {
-        case .start: starts
-        case .exit: exits
-        case .trick: tricks
-        case .custom: []
-        }
+        groups.first { $0.kind == kind }?.flags ?? []
     }
 
     /// Typed custom text to a stored flag: trimmed, whitespace collapsed, capped. Text that spells a
@@ -69,13 +62,14 @@ public enum SetFlags {
     /// "Other" style flags (`other_start`) always sit last in their group, whatever the alphabet says.
     public static func isCatchAll(_ flag: String) -> Bool { flag.hasPrefix("other_") }
 
-    public static func ordered(_ flags: [String]) -> [String] {
+    /// Grouped by kind, catch-alls last, then alphabetical by `key` (the code, or a localized label).
+    public static func ordered(_ flags: [String], by key: (String) -> String = { $0 }) -> [String] {
         flags.sorted {
             let (a, b) = (kind(of: $0).rawValue, kind(of: $1).rawValue)
             if a != b { return a < b }
             let (x, y) = (isCatchAll($0), isCatchAll($1))
             if x != y { return y }
-            return $0.localizedCaseInsensitiveCompare($1) == .orderedAscending
+            return key($0).localizedCaseInsensitiveCompare(key($1)) == .orderedAscending
         }
     }
 
@@ -85,14 +79,11 @@ public enum SetFlags {
 
     /// Flags for sets 1...count only (a manual session whose set count went down).
     public static func trimmed(_ flags: [String: [String]], toSetCount count: Int) -> [String: [String]] {
-        flags.filter { key, value in
+        flags.filter { key, _ in
             guard let index = Int(key) else { return false }
-            return index >= 1 && index <= count && !value.isEmpty
+            return index >= 1 && index <= count
         }
     }
-
-    /// Manifest key for a set (`SetSegmentStats.index`).
-    public static func key(forSet index: Int) -> String { String(index) }
 }
 
 /// Unsaved flag edits for one session, over what the manifest already holds.
@@ -101,30 +92,20 @@ public struct SetFlagDraft: Equatable, Sendable {
     public private(set) var draft: [String: [String]]
 
     public init(saved: [String: [String]]?) {
-        let clean = Self.clean(saved ?? [:])
-        base = clean
-        draft = clean
+        base = saved ?? [:]
+        draft = base
     }
 
     public var isDirty: Bool { draft != base }
 
-    /// Draft without empty sets: what gets stored on "Done".
-    public var result: [String: [String]] { draft }
-
-    public func flags(forSet index: Int) -> [String] { draft[SetFlags.key(forSet: index)] ?? [] }
+    public func flags(forSet index: Int) -> [String] { draft[String(index)] ?? [] }
 
     public mutating func toggle(_ flag: String, forSet index: Int) {
-        let key = SetFlags.key(forSet: index)
-        let updated = SetFlags.toggling(flag, in: draft[key] ?? [])
-        draft[key] = updated.isEmpty ? nil : updated
+        let updated = SetFlags.toggling(flag, in: flags(forSet: index))
+        draft[String(index)] = updated.isEmpty ? nil : updated
     }
 
     public mutating func discard() { draft = base }
-
-    /// Whether any set in the draft carries `flag`.
-    public func isUsed(_ flag: String) -> Bool {
-        draft.values.contains { SetFlags.contains(flag, in: $0) }
-    }
 
     /// Takes `flag` off every set (a deleted custom label).
     public mutating func removeEverywhere(_ flag: String) {
@@ -132,9 +113,5 @@ public struct SetFlagDraft: Equatable, Sendable {
             let kept = flags.filter { $0.caseInsensitiveCompare(flag) != .orderedSame }
             draft[key] = kept.isEmpty ? nil : kept
         }
-    }
-
-    private static func clean(_ flags: [String: [String]]) -> [String: [String]] {
-        flags.filter { !$0.value.isEmpty }
     }
 }

@@ -58,17 +58,15 @@ struct SetFlagsTests {
         draft.toggle("new_trick", forSet: 2)
         #expect(!draft.isDirty)
         draft.toggle("clean_exit", forSet: 1)
-        #expect(draft.result.isEmpty)
+        #expect(draft.draft.isEmpty)
         draft.discard()
         #expect(draft.flags(forSet: 1) == ["clean_exit"])
     }
 
     @Test func removeEverywhereTakesLabelOffAllSets() {
         var draft = SetFlagDraft(saved: ["1": ["Tail grab", "rail"], "2": ["tail grab"], "3": ["wipeout"]])
-        #expect(draft.isUsed("Tail grab"))
         draft.removeEverywhere("Tail grab")
-        #expect(!draft.isUsed("Tail grab"))
-        #expect(draft.result == ["1": ["rail"], "3": ["wipeout"]])
+        #expect(draft.draft == ["1": ["rail"], "3": ["wipeout"]])
         #expect(draft.isDirty)
     }
 
@@ -81,14 +79,14 @@ struct SetFlagsTests {
             testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "W", systemVersion: "26"
         )
         _ = try store.createSession(manifest: manifest)
-        try store.setSetFlags(["1": ["clean_exit", "mystery_code"], "2": []], sessionId: manifest.sessionId)
+        try store.setSetFlags(["1": ["clean_exit", "mystery_code"]], sessionId: manifest.sessionId)
         #expect(try store.readManifest(sessionId: manifest.sessionId).setFlags == ["1": ["clean_exit", "mystery_code"]])
         try store.setSetFlags([:], sessionId: manifest.sessionId)
         #expect(try store.readManifest(sessionId: manifest.sessionId).setFlags == nil)
     }
 
     @Test func trimmedKeepsOnlySetsWithinCount() {
-        let flags = ["1": ["wipeout"], "3": ["new_trick"], "4": ["rail"], "2": []]
+        let flags = ["1": ["wipeout"], "3": ["new_trick"], "4": ["rail"]]
         #expect(SetFlags.trimmed(flags, toSetCount: 3) == ["1": ["wipeout"], "3": ["new_trick"]])
         #expect(SetFlags.trimmed(flags, toSetCount: 0).isEmpty)
     }
