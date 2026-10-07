@@ -31,14 +31,14 @@ struct ManualEntryTests {
     // MARK: Distance estimate
 
     @Test func lapLengthLoopIsLengthAndTwoPointZeroIsThereAndBack() {
-        #expect(loop.lapLengthM == 1_000)
-        #expect(twoPointZero.lapLengthM == 800)
+        #expect(loop.lapLengthM == 1_000.0)
+        #expect(twoPointZero.lapLengthM == 800.0)
         #expect(unknown.lapLengthM == nil)
     }
 
     @Test func distanceSumsLapsPerCable() {
         let tallies = [ManualEntry.Tally(sets: 1, laps: 3), .init(sets: 2, laps: 2)]
-        #expect(ManualEntry.distanceM(tallies: tallies, cables: [loop, twoPointZero]) == 3 * 1_000 + 2 * 800)
+        #expect(ManualEntry.distanceM(tallies: tallies, cables: [loop, twoPointZero]) == 4_600.0)
     }
 
     @Test func distanceIsNilWithoutLengthOrLapsOrCable() {
@@ -47,7 +47,7 @@ struct ManualEntryTests {
         #expect(ManualEntry.distanceM(tallies: rode, cables: []) == nil)
         #expect(ManualEntry.distanceM(tallies: [.init(sets: 1, laps: 0)], cables: [loop]) == nil)
         // A cable that was not ridden may lack a length.
-        #expect(ManualEntry.distanceM(tallies: [.init(sets: 0, laps: 0), .init(sets: 1, laps: 1)], cables: [unknown, loop]) == 1_000)
+        #expect(ManualEntry.distanceM(tallies: [.init(sets: 0, laps: 0), .init(sets: 1, laps: 1)], cables: [unknown, loop]) == 1_000.0)
     }
 
     @Test func totalsSumTalliesAndLapsMayBeBelowSets() {
