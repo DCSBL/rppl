@@ -29,6 +29,10 @@ enum LogbookFormatting {
         DistanceFormat.kilometers(meters)
     }
 
+    static func approximateDistance(_ meters: Double) -> String {
+        DistanceFormat.approximateKilometers(meters)
+    }
+
     static func speedKilometersPerHour(_ kmh: Double) -> String {
         DistanceFormat.kilometersPerHour(kmh)
     }
@@ -68,6 +72,12 @@ enum LogbookFormatting {
 
     static func lapCount(_ count: Int) -> String {
         String(localized: "\(count) laps")
+    }
+
+    static func setsAndLaps(sets: Int, laps: Int) -> String {
+        let setsText = setCount(sets)
+        let lapsText = lapCount(laps)
+        return String(localized: "\(setsText) · \(lapsText)")
     }
 
     static func sessionCount(_ count: Int) -> String {

@@ -10,6 +10,7 @@ final class ParkPlaceResolver {
     static let shared = ParkPlaceResolver()
 
     private var zones: [String: TimeZone] = [:]
+    private var names: [String: String] = [:]
 
     private func key(_ coordinate: ParkCoordinate) -> String {
         String(format: "%.2f,%.2f", coordinate.lat, coordinate.lon)
@@ -18,6 +19,17 @@ final class ParkPlaceResolver {
     /// What was already resolved near this spot; nil when nothing is known yet.
     func timeZone(near coordinate: ParkCoordinate) -> TimeZone? {
         zones[key(coordinate)]
+    }
+
+    /// City (or place) name for a spot, for labelling an own location; nil when the lookup fails.
+    func placeName(at coordinate: ParkCoordinate) async -> String? {
+        if let known = names[key(coordinate)] { return known }
+        let location = CLLocation(latitude: coordinate.lat, longitude: coordinate.lon)
+        guard let request = MKReverseGeocodingRequest(location: location),
+              let item = try? await request.mapItems.first else { return nil }
+        let name = item.addressRepresentations?.cityName ?? item.name
+        names[key(coordinate)] = name
+        return name
     }
 
     func resolveTimeZone(at coordinate: ParkCoordinate) async -> TimeZone? {
@@ -41,15 +53,29 @@ final class ParkPlaceResolver {
 struct LocationPickerView: View {
     @Binding var coordinate: ParkCoordinate
     let userLocation: ParkCoordinate?
+    var title: LocalizedStringKey = "Park location"
+    /// Known places (parks) drawn as small dots, so you can see what is already there.
+    var knownSpots: [ParkCoordinate] = []
 
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = true
     @State private var position: MapCameraPosition
     @State private var viewCenter: CLLocationCoordinate2D
+    @State private var query = ""
+    @State private var searchFailed = false
+    @State private var here = ParksLocationProvider()
+    @State private var wantsHere = false
 
-    init(coordinate: Binding<ParkCoordinate>, userLocation: ParkCoordinate?) {
+    init(
+        coordinate: Binding<ParkCoordinate>,
+        userLocation: ParkCoordinate?,
+        title: LocalizedStringKey = "Park location",
+        knownSpots: [ParkCoordinate] = []
+    ) {
         _coordinate = coordinate
         self.userLocation = userLocation
+        self.title = title
+        self.knownSpots = knownSpots
         let start = Self.startingPoint(coordinate.wrappedValue, userLocation)
         let center = start.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
             ?? CLLocationCoordinate2D(latitude: 52.1, longitude: 5.3)
@@ -69,6 +95,15 @@ struct LocationPickerView: View {
     var body: some View {
         NavigationStack {
             Map(position: $position) {
+                ForEach(Array(knownSpots.enumerated()), id: \.offset) { _, spot in
+                    Annotation("", coordinate: CLLocationCoordinate2D(latitude: spot.lat, longitude: spot.lon)) {
+                        Circle()
+                            .fill(Color.rpplAccent)
+                            .frame(width: 9, height: 9)
+                            .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                            .accessibilityHidden(true)
+                    }
+                }
                 if ParkDraft.isValid(coordinate) {
                     Annotation("", coordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)) {
                         Image(systemName: "mappin.circle.fill")
@@ -84,10 +119,35 @@ struct LocationPickerView: View {
             }
             .overlay { MapCrosshair() }
             .safeAreaInset(edge: .bottom) { controls }
-            .navigationTitle("Park location")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $query, prompt: Text("Search for a place"))
+            .onSubmit(of: .search) { Task { await search() } }
+            .onChange(of: here.coordinate) { _, fix in
+                guard wantsHere, let fix else { return }
+                wantsHere = false
+                move(to: CLLocationCoordinate2D(latitude: fix.lat, longitude: fix.lon), meters: 700)
+            }
+            .alert("No place found", isPresented: $searchFailed) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Try another name, or pan the map to the spot.")
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        if let fix = here.coordinate {
+                            move(to: CLLocationCoordinate2D(latitude: fix.lat, longitude: fix.lon), meters: 700)
+                        } else {
+                            wantsHere = true
+                            here.requestAccess()
+                        }
+                    } label: {
+                        Image(systemName: "location")
+                    }
+                    .accessibilityLabel(Text("Use my current location"))
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         usesSatellite.toggle()
@@ -116,5 +176,22 @@ struct LocationPickerView: View {
         }
         .padding(12)
         .background(.regularMaterial)
+    }
+
+    private func move(to center: CLLocationCoordinate2D, meters: CLLocationDistance) {
+        viewCenter = center
+        position = .region(MKCoordinateRegion(center: center, latitudinalMeters: meters, longitudinalMeters: meters))
+    }
+
+    private func search() async {
+        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = text
+        guard let place = (try? await MKLocalSearch(request: request).start())?.mapItems.first else {
+            searchFailed = true
+            return
+        }
+        move(to: place.location.coordinate, meters: 1_500)
     }
 }

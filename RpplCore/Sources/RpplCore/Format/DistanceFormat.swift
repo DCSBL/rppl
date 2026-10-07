@@ -28,6 +28,14 @@ public enum DistanceFormat {
         return format(converted, fraction: fraction, locale: locale)
     }
 
+    /// An estimate, rounded to 0.1 of the shown unit so it does not look measured: "~1.2 km", "~1 mi".
+    public static func approximateKilometers(_ meters: Double, locale: Locale = .autoupdatingCurrent) -> String {
+        let unit: UnitLength = usesMiles(locale) ? .miles : .kilometers
+        let value = Measurement(value: meters, unit: UnitLength.meters).converted(to: unit).value
+        let rounded = Measurement(value: (value * 10).rounded() / 10, unit: unit)
+        return "~" + format(rounded, fraction: 0...1, locale: locale)
+    }
+
     /// Speed from km/h (detection / product unit); shown as km/h or mph per locale.
     public static func kilometersPerHour(_ kmh: Double, locale: Locale = .autoupdatingCurrent) -> String {
         format(speedMeasurement(kmh, locale: locale), fraction: 1...1, locale: locale)

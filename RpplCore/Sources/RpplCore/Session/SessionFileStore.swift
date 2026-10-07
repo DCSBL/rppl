@@ -249,6 +249,19 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
+    /// Creates or rewrites a manual session (see `ManualEntry`) and its derived view. `label` is the park
+    /// or place name shown in lists; nil clears it. An edit passes the existing manifest, changed.
+    public func saveManual(_ manifest: SessionManifest, label: String?) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        _ = try createSession(manifest: manifest)
+        var view = try reanalyzeSession(sessionId: manifest.sessionId)
+        view.cityName = label
+        try writeDerivedView(view, sessionId: manifest.sessionId)
+        try relocatePackageIfNeeded(sessionId: manifest.sessionId, startedAt: manifest.startedAt, cityName: label)
+    }
+
     private func syncParkLabel(_ name: String, sessionId: String, startedAt: Date) throws {
         guard var view = try readDerivedView(sessionId: sessionId), view.cityName != name else { return }
         view.cityName = name
@@ -308,7 +321,8 @@ public final class SessionFileStore: @unchecked Sendable {
             water: water
         )
         let coords = locations.map { (latitude: $0.latitude, longitude: $0.longitude) }
-        let mapFrame = MapTrackFitter.frame(locations: coords)
+        let mapFrame = manifest.manual?.location.map { MapTrackFitter.startFrame(latitude: $0.lat, longitude: $0.lon) }
+            ?? MapTrackFitter.frame(locations: coords)
         let mapTracks = SessionMapTrackBuilder.build(locations: locations, sets: stats.sets)
         return DerivedSessionView(
             analyzerVersion: SessionAnalyzer.version,

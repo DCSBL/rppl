@@ -28,7 +28,8 @@ _Only use linear issues when one is given by the user_
 
 **Data collector** for cable-park wakeboarding — Watch records; reliable checkpoints over flashy UX.
 
-- Watch records; iPhone views/exports; Mac analyzes.
+- Watch records (recommended); iPhone views, exports and logs sessions by hand; Mac analyzes.
+- Tracked sessions are never edited. Manual sessions (`manifest.manual`) can be, and never touch HealthKit.
 - Prefer reliable checkpoints over pretty UI.
 - Prefer extending opaque string detection codes over closed Swift enums.
 - Prefer pure logic in `RpplCore` so `swift test` covers it without device APIs.
@@ -83,10 +84,9 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 2. **Never delete Watch session files until phone ack** after WC transfer. Failed transfer = keep data.
 3. **One continuous session per park day** by default. **Product Pause** (Watch controls) is allowed: freezes timers, stops sensors (data gap), pauses HK, writes `inactive` with `detectorId` `product_pause` / `product_resume`. Distinct from detection `inactive` (still recording, not riding).
 4. **Detection codes are strings** (`riding`, `inactive`, `unsure`, …). Unknown codes must round-trip. No closed enum for taxonomy yet.
-5. **iPhone = view-only** — no label editor; no manual Action Button labeling.
-6. **OS floor:** iOS 26+ / watchOS 26+.
-7. **Water Lock** on session start.
-8. **Permission sheets are just-in-time** (iOS/watchOS 27 add stricter consent, e.g. a time-window step for Health reads). Ask only when the feature needing it is used: Watch at session Start, iPhone on the Nearby list / map recenter / editor "current location" action. Never at launch, first sync, or in a batch; status reads (`authorizationStatus`, `getRequestStatusForAuthorization`) are fine anywhere. Request only the types actually used.
+5. **OS floor:** iOS 26+ / watchOS 26+.
+6. **Water Lock** on session start.
+7. **Permission sheets are just-in-time** (iOS/watchOS 27 add stricter consent, e.g. a time-window step for Health reads). Ask only when the feature needing it is used: Watch at session Start, iPhone on the Nearby list / map recenter / editor "current location" action. Never at launch, first sync, or in a batch; status reads (`authorizationStatus`, `getRequestStatusForAuthorization`) are fine anywhere. Request only the types actually used.
 
 ## Testing
 
@@ -136,6 +136,7 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 | Sync status wording / branches | `SyncConnectionResolver.swift` + thin `SyncConnectionProbe.swift` in each app |
 | On-disk format / ack / pending transfer | `SessionFileStore.swift`, `Models.swift` |
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |
+| Manual sessions (add / edit on iPhone) | `RpplCore/Sources/RpplCore/Session/ManualEntry.swift`, `Rppl/Logbook/ManualSession/` |
 | Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |

@@ -79,6 +79,5 @@ Streams detail: [DataCollection.md](DataCollection.md). Thresholds: [RideDetecti
 2. Never delete Watch session files until phone ack.
 3. One continuous session per park day by default; product Pause allowed (sensor gap + frozen clock; ≠ detection `inactive`).
 4. Detection codes stay opaque strings.
-5. iPhone view-only — no label editor.
-6. OS floor iOS 26+ / watchOS 26+.
-7. Water Lock on session start.
+5. OS floor iOS 26+ / watchOS 26+.
+6. Water Lock on session start.
