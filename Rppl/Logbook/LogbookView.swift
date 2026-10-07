@@ -15,6 +15,7 @@ struct LogbookView: View {
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
+    @State private var showAddSession = false
     @State private var showActionError = false
     @State private var actionErrorText: String?
     @State private var detailRoute: SessionDetailRoute?
@@ -79,10 +80,17 @@ struct LogbookView: View {
                             }
                         } description: {
                             Text(
-                                "Record a park day on Apple Watch. Or browse the example session."
+                                "Add a session by hand, or record a park day with Apple Watch."
                             )
                         } actions: {
                             VStack(spacing: 12) {
+                                Button("Add session") {
+                                    showAddSession = true
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                                .tint(Color.rpplAccent)
+
                                 Button("Show example session") {
                                     showExampleSession = true
                                 }
@@ -91,7 +99,7 @@ struct LogbookView: View {
                                 .tint(Color.rpplAccent)
 
                                 Text(
-                                    "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby."
+                                    "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby."
                                 )
                                 .font(.footnote)
                                 .foregroundStyle(Color.rpplMuted)
@@ -157,6 +165,9 @@ struct LogbookView: View {
                     .onDisappear {
                         flashHighlight(route.id)
                     }
+            }
+            .sheet(isPresented: $showAddSession) {
+                ManualSessionEditorView(onSaved: flashHighlight)
             }
             .alert(
                 "Delete session?",
@@ -251,13 +262,26 @@ struct LogbookView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Logbook")
-                .font(.largeTitle.bold())
-                .foregroundStyle(Color.rpplText)
-            Text("Sessions and sets")
-                .font(.subheadline)
-                .foregroundStyle(Color.rpplMuted)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Logbook")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(Color.rpplText)
+                Text("Sessions and sets")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+            Spacer()
+            Button {
+                showAddSession = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 34, height: 34)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel(Text("Add session"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -507,6 +531,8 @@ private struct SessionCard: View {
                         .foregroundStyle(RpplDesign.secondaryText)
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
+
+                        if isManual { ManualBadge() }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -574,9 +600,16 @@ private struct SessionCard: View {
         return LogbookFormatting.duration(stats.totalDuration)
     }
 
+    private var isManual: Bool { entry.manifest.manual != nil }
+
+    /// A manual session without a cable length has no distance to show.
+    private var showsDistance: Bool { !isManual || (entry.stats?.totalDistanceMeters ?? 0) > 0 }
+
     private var distanceText: String {
         guard let stats = entry.stats else { return "-" }
-        return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
+        return isManual
+            ? LogbookFormatting.approximateDistance(stats.totalDistanceMeters)
+            : LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
     }
 
     private var setsText: String {
@@ -593,7 +626,7 @@ private struct SessionCard: View {
     private var sessionStatsSummary: some View {
         if useAccessibilityLayout {
             VStack(alignment: .leading, spacing: 8) {
-                StatChip(metric: .distance, value: distanceText)
+                if showsDistance { StatChip(metric: .distance, value: distanceText) }
                 StatChip(metric: .sets, value: setsText)
                 StatChip(metric: .laps, value: lapsText)
             }
@@ -608,7 +641,7 @@ private struct SessionCard: View {
 
     private func statsRow(includeDistance: Bool, includeLaps: Bool) -> some View {
         HStack(spacing: 16) {
-            if includeDistance {
+            if includeDistance, showsDistance {
                 StatChip(metric: .distance, value: distanceText)
             }
             StatChip(metric: .sets, value: setsText)

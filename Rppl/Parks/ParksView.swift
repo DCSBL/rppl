@@ -323,6 +323,9 @@ struct ParksView: View {
             store.reload()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
+        .onChange(of: connectivity.sessionsRevision) { _, _ in
+            catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
+        }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
         // Nearby list out from under the user while they're scrolling or tapping a park.
         .onAppear { refreshLocation() }

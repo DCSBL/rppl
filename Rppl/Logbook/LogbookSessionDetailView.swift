@@ -39,6 +39,8 @@ struct LogbookSessionDetailView: View {
     @State private var exportPurpose: ExportPurpose = .share
     @State private var pendingMail: SessionMail?
     @State private var weatherAttribution = WeatherAttributionProvider.shared
+    @State private var connectivity = PhoneConnectivityService.shared
+    @State private var showEditor = false
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -62,6 +64,9 @@ struct LogbookSessionDetailView: View {
         self.store = nil
     }
 
+    /// Typed in by hand: no map, speed, riding, calories or set list, and it can be edited.
+    private var isManual: Bool { manifest?.manual != nil }
+
     private var allowsExport: Bool {
         if case .store = source { return true }
         return false
@@ -82,10 +87,14 @@ struct LogbookSessionDetailView: View {
                     )
                     .frame(minHeight: 240)
                 case .ready:
-                    sessionMap
+                    if isManual {
+                        ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        sessionMap
+                    }
                     parkLink
                     sessionStatsCard
-                    setsSection
+                    if !isManual { setsSection }
                 }
             }
             .padding(.horizontal, 20)
@@ -103,7 +112,9 @@ struct LogbookSessionDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if allowsExport, loadPhase == .ready {
+                if isManual {
+                    Button("Edit") { showEditor = true }
+                } else if allowsExport, loadPhase == .ready {
                     if isExporting {
                         ProgressView()
                     } else if MailAvailability.canSend {
@@ -136,6 +147,14 @@ struct LogbookSessionDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Exports the full session file: raw sensor data, nothing filtered or anonymized.")
+        }
+        .sheet(isPresented: $showEditor) {
+            if case .store(let sessionId) = source {
+                ManualSessionEditorView(editing: sessionId, onSaved: { _ in reload() })
+            }
+        }
+        .onChange(of: connectivity.sessionsRevision) { _, _ in
+            if isManual { reload() }
         }
         .sheet(item: $pendingMail) { mail in
             SessionMailComposer(mail: mail) { pendingMail = nil }
@@ -365,8 +384,10 @@ struct LogbookSessionDetailView: View {
                 }
 
                 InfoTileGrid {
-                    speedTile(stats)
-                    ridingTile(stats)
+                    if !isManual {
+                        speedTile(stats)
+                        ridingTile(stats)
+                    }
                     distanceTile(stats)
                     if stats.waterTemperatureAvailable {
                         InfoTile("Water temperature", metric: .water) {
@@ -402,7 +423,7 @@ struct LogbookSessionDetailView: View {
                                 .task { await weatherAttribution.loadIfNeeded() }
                         }
                     }
-                    energyTile(stats)
+                    if !isManual { energyTile(stats) }
                 }
             }
         }
@@ -421,15 +442,19 @@ struct LogbookSessionDetailView: View {
             }
 
             LabeledContent("Location") {
-                Menu {
-                    Picker("Park", selection: parkSelection) {
-                        Text("No park").tag(String?.none)
-                        ForEach(parks) { park in
-                            Text(park.name).tag(String?.some(park.id))
-                        }
-                    }
-                } label: {
+                if isManual {
                     Text(cityName ?? "-")
+                } else {
+                    Menu {
+                        Picker("Park", selection: parkSelection) {
+                            Text("No park").tag(String?.none)
+                            ForEach(parks) { park in
+                                Text(park.name).tag(String?.some(park.id))
+                            }
+                        }
+                    } label: {
+                        Text(cityName ?? "-")
+                    }
                 }
             }
         }
@@ -514,6 +539,14 @@ struct LogbookSessionDetailView: View {
                 StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
                 Spacer(minLength: 0)
             }
+            if let tallies = manifest?.manual?.tallies, tallies.count > 1 {
+                ForEach(tallies.indices, id: \.self) { index in
+                    LabeledContent(cableName(index)) {
+                        Text(LogbookFormatting.setsAndLaps(sets: tallies[index].sets, laps: tallies[index].laps))
+                    }
+                    .font(.subheadline)
+                }
+            }
             if !stats.sets.isEmpty, end > start {
                 TimelineBar(
                     spans: stats.sets.map {
@@ -533,9 +566,19 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    private func distanceText(_ stats: SessionStats) -> String {
+        guard isManual else { return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters) }
+        return stats.totalDistanceMeters > 0 ? LogbookFormatting.approximateDistance(stats.totalDistanceMeters) : "-"
+    }
+
+    private func cableName(_ index: Int) -> String {
+        let cables = matchedPark?.cables ?? []
+        return (cables.indices.contains(index) ? cables[index].name : nil) ?? String(localized: "Cable \(index + 1)")
+    }
+
     private func distanceTile(_ stats: SessionStats) -> some View {
         InfoTile("Distance & duration", metric: .distance) {
-            MetricValue(LogbookFormatting.distanceKilometers(stats.totalDistanceMeters), caption: "Distance")
+            MetricValue(distanceText(stats), caption: "Distance")
             StatChip(
                 metric: .duration,
                 value: LogbookFormatting.compactDuration(stats.totalDuration),
@@ -622,6 +665,12 @@ struct LogbookSessionDetailView: View {
             .foregroundStyle(Color.rpplMuted)
             .frame(maxWidth: .infinity, minHeight: 120)
             .background(Color.rpplFill, in: .rect(cornerRadius: LogbookLayout.cardCornerRadius))
+    }
+
+    /// Re-reads the session after it was edited, keeping what is on screen meanwhile.
+    private func reload() {
+        guard loadTask == nil else { return }
+        loadTask = Task(priority: .userInitiated) { await loadSession() }
     }
 
     private func startLoadIfNeeded() {
