@@ -35,10 +35,11 @@ non-negotiable:
    `description`. Leave out anything not directly confirmed by the fetched pages. Write any free-text
    `description` (park, cable, `opening.note`) per
    [Docs/ParkDescriptions.md](../../../Docs/ParkDescriptions.md): no em-dash/hyphen-as-dash, direct
-   language, no hype words. Write free text in the park's main language. If the site is offered in more
-   than one language, list them in `languages` (main first) and give `per` / `note` a variant per
-   language the site itself uses ([Docs/Parks.md](../../../Docs/Parks.md#languages)); never translate
-   on the park's behalf.
+   language, no hype words. Write free text in the park's main language. List `languages` (main first):
+   English, Dutch and every other language the site is offered in, and give each free `per` / `note`
+   a variant per listed language ([Docs/Parks.md](../../../Docs/Parks.md#languages)). Copy the park's
+   own wording for a language its site offers; otherwise translate the text you collected faithfully,
+   adding nothing, and say so in the PR description.
 4. **Do not fill `water_temperature`** unless you have confirmed an appropriate official station for
    that park's water body — this is a separate, deliberate lookup, not something to infer from location.
    Use `scripts/find-water-temperature-station.py <lat> <lon>` (the park's `location`) to query the
