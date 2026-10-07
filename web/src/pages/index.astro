@@ -7,6 +7,7 @@ const showcase = [
   { before: "Analyse", after: "Progress", src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
   { before: "Find", after: "Spots", src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
 ];
+const betaURL = "https://testflight.apple.com/join/R2BymVaX";
 const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Export anytime", "No account", "No subscription", "No ads", "No tracking", "No Rppl server", "Open source"];
 ---
 <Base title="Rppl: Your Cablepark Buddy" description="Your Cablepark Buddy. The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.">
@@ -15,7 +16,13 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
     <h1>Rppl</h1>
     <p class="lead"><em>Your</em> Cablepark Buddy</p>
     <p class="caption">The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.</p>
-    <p class="cta"><span class="badge">Coming soon to the App Store</span></p>
+    <p class="cta">
+      <a class="btn" href={betaURL} rel="noopener">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4z" /></svg>
+        Join the beta on TestFlight
+      </a>
+    </p>
+    <p class="note">Coming soon to the App Store</p>
   </header>
 
   <main class="wrap">
@@ -73,8 +80,11 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
   .lead { font-size: clamp(28px, 6vw, 48px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 8px 0; }
   .lead em, .row h2 em { font-style: normal; color: var(--your); }
   .cta { margin-top: 24px; }
-  .badge { display: inline-block; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; }
-  @media (prefers-color-scheme: dark) { .badge { color: #02070e; } }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+  .note { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+  @media (prefers-color-scheme: dark) { .btn { color: #02070e; } }
   section { margin: 56px 0; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
