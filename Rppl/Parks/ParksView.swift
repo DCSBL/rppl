@@ -403,7 +403,7 @@ private struct ParksFilterBar: View {
     @Binding var favoritesOnly: Bool
     @State private var showOpenPicker = false
 
-    private static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoD]
+    private static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoPointZero]
 
     private var openLabel: String {
         guard let openDate else { return String(localized: "Open") }
@@ -423,7 +423,7 @@ private struct ParksFilterBar: View {
         switch direction {
         case .clockwise: String(localized: "CW")
         case .counterClockwise: String(localized: "CCW")
-        case .twoD: String(localized: "2.0")
+        case .twoPointZero: String(localized: "2.0")
         default: direction.rawValue.uppercased()
         }
     }
