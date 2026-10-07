@@ -249,6 +249,18 @@ public final class SessionFileStore: @unchecked Sendable {
         }
     }
 
+    /// Stores per-set flags (`SetFlags`) on the manifest; empty clears them. Only the sidecar field
+    /// changes, so a tracked session's recording stays as written.
+    public func setSetFlags(_ flags: [String: [String]], sessionId: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        var manifest = try readManifest(sessionId: sessionId)
+        let clean = flags.filter { !$0.value.isEmpty }
+        manifest.setFlags = clean.isEmpty ? nil : clean
+        try writeManifest(manifest)
+    }
+
     /// Creates or rewrites a manual session (see `ManualEntry`) and its derived view. `label` is the park
     /// or place name shown in lists; nil clears it. An edit passes the existing manifest, changed.
     public func saveManual(_ manifest: SessionManifest, label: String?) throws {
