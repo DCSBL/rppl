@@ -74,7 +74,7 @@ Again: none of this is sent to us, sold, or used for advertising.
 
 Some features request data from outside services. None of them receive your sessions.
 
-- **Apple WeatherKit:** your current location, to get weather and water temperature for your session. The Parks tab sends a park's location (not yours) to show its current temperature and wind.
+- **Apple WeatherKit:** your current location, to get weather and water temperature for your session. When you add a session by hand, the park or place you picked and the session date, to get that day's weather. The Parks tab sends a park's location (not yours) to show its current temperature and wind.
 - **Apple Maps:** route maps, park maps, and directions to a park.
 - **Rijkswaterstaat** (opt-in, off by default): for Dutch parks, the app asks the public Rijkswaterstaat water data service for the latest temperature at the measuring station nearest to the park. Only that station's code is sent, never your location. Turn it on or off in Rppl → Settings (Park water temperature).
 - **Vlaamse Waterweg and VMM (Flanders)** (opt-in, off by default, same setting): for Belgian parks, the app asks the public Flemish water data services (waterinfo.be, run by the Vlaamse Waterweg and the Vlaamse Milieumaatschappij) for the latest water temperature at the measuring station nearest to the park. Only that station's time-series ID is sent, never your location.

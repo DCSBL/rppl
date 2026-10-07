@@ -16,13 +16,13 @@ Automatic set and rest detection. Saved to Apple Health. No cloud. No subscripti
 
 ## What Rppl does
 
-Rppl is a native iPhone and Apple Watch app for cable-park sessions. You start on the Watch; it records GPS, motion, and heart rate for the whole park day as one continuous workout, and detects when you are riding versus waiting at the dock, swimming, or walking back.
+Rppl is a native iPhone and Apple Watch app for cable-park sessions. You start on the Watch; it records GPS, motion, and heart rate for the whole park day as one continuous workout, and detects when you are riding versus waiting at the dock, swimming, or walking back. No Watch? Add a session by hand on iPhone.
 
 Sessions are written through **HealthKit**, so they show up in the Fitness and Health apps like other workouts. Water Lock turns on when you start. After you stop, the Watch syncs to your iPhone, where you can browse sessions and see your route on a map.
 
 There is no account and no Rppl server. Your data stays on your devices (and in Apple Health / your backups when those are enabled).
 
-**Needs:** iPhone + Apple Watch · iOS 26+ · watchOS 26+.
+**Needs:** iPhone · iOS 26+. Apple Watch (watchOS 26+) is recommended: it records your sessions for you.
 
 ## A note from the developer
 
@@ -41,7 +41,7 @@ I hope that, like me, you enjoy tracking your sessions!
 - **One session per park day.** Start and stop on the Watch. Use Pause when you truly step away; that freezes timers and stops sensors until you resume.
 - **Set detection is automatic.** The Watch marks riding, rest, and unsure stretches from sensors. You do not label sets by hand.
 - **HealthKit is part of the product.** Workouts, heart rate, and energy land in Apple Health when you allow access.
-- **iPhone is for looking back.** After sync, browse sessions and maps on the phone. Recording stays on the Watch.
+- **iPhone is for looking back.** After sync, browse sessions and maps on the phone, or add a session by hand. Recording stays on the Watch.
 - **Ultra Action Button (optional):** Settings → Action Button → Workout → Rppl starts a session.
 
 ## Privacy & license
