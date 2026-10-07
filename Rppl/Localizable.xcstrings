@@ -1757,55 +1757,6 @@
         }
       }
     },
-    "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start your first session on Apple Watch. Rppl records your park day there and brings it here when your iPhone is nearby."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start je eerste session op Apple Watch. Rppl neemt je parkdag daar op en laat hem hier zien zodra je iPhone in de buurt is."
-          }
-        }
-      }
-    },
-    "Record a park day on Apple Watch. Or browse the example session." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record a park day on Apple Watch. Or browse the example session."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neem een parkdag op met Apple Watch. Of bekijk de voorbeeld-session."
-          }
-        }
-      }
-    },
-    "Record on Apple Watch, then bring your iPhone nearby." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record on Apple Watch, then bring your iPhone nearby."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neem op met Apple Watch en breng je iPhone in de buurt."
-          }
-        }
-      }
-    },
     "Refresh sync status" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2016,39 +1967,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl"
-          }
-        }
-      }
-    },
-    "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl collects cable-park wakeboarding sessions from Apple Watch for analysis on iPhone and Mac."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl verzamelt kabelpark-wakeboard sessions van Apple Watch voor analyse op iPhone en Mac."
-          }
-        }
-      }
-    },
-    "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl legt kabelpark-wakeboarden vast op Apple Watch. Het volgt sets en pauzes van een hele parkdag in één session. Gebruik iPhone om sessions, kaarten en exports te bekijken."
           }
         }
       }
@@ -10398,6 +10316,278 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dit verwijdert je wijzigingen definitief. De app-versie wordt weer getoond."
+          }
+        }
+      }
+    },
+    "Add session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session toevoegen"
+          }
+        }
+      }
+    },
+    "Edit session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session bewerken"
+          }
+        }
+      }
+    },
+    "Could not save session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not save session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session opslaan mislukt"
+          }
+        }
+      }
+    },
+    "Estimated distance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated distance"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschatte afstand"
+          }
+        }
+      }
+    },
+    "Laps times the cable length." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps times the cable length."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps maal de lengte van de cable."
+          }
+        }
+      }
+    },
+    "Own location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Own location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigen locatie"
+          }
+        }
+      }
+    },
+    "Your location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jouw locatie"
+          }
+        }
+      }
+    },
+    "Pick your own location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick your own location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies je eigen locatie"
+          }
+        }
+      }
+    },
+    "No location" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen locatie"
+          }
+        }
+      }
+    },
+    "Search parks" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search parks"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoek parks"
+          }
+        }
+      }
+    },
+    "Search for a place" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a place"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoek een plek"
+          }
+        }
+      }
+    },
+    "Try another name, or pan the map to the spot." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try another name, or pan the map to the spot."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probeer een andere naam, of schuif de kaart naar de plek."
+          }
+        }
+      }
+    },
+    "Manual" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handmatig"
+          }
+        }
+      }
+    },
+    "Add a session by hand, or record a park day with Apple Watch." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a session by hand, or record a park day with Apple Watch."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voeg een session handmatig toe, of neem een parkdag op met Apple Watch."
+          }
+        }
+      }
+    },
+    "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch wordt aanbevolen: die legt je sets, laps, snelheid en route vast en laat ze hier zien zodra je iPhone in de buurt is."
+          }
+        }
+      }
+    },
+    "Rppl logs cable-park wakeboarding sessions. Apple Watch records a full park day (sets, laps, speed, route); on iPhone you can also add a session by hand." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl logs cable-park wakeboarding sessions. Apple Watch records a full park day (sets, laps, speed, route); on iPhone you can also add a session by hand."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl houdt je kabelpark-wakeboard sessions bij. Apple Watch neemt een hele parkdag op (sets, laps, snelheid, route); op iPhone voeg je een session ook handmatig toe."
+          }
+        }
+      }
+    },
+    "New session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New session"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieuwe session"
           }
         }
       }

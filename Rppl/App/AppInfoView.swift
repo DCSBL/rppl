@@ -18,7 +18,7 @@ struct AppInfoView: View {
             List {
                 Section {
                     Text(
-                        "Rppl records cable-park wakeboarding on Apple Watch. It tracks sets and pauses across a full park day in one session. Use iPhone to view sessions, maps, and exports."
+                        "Rppl logs cable-park wakeboarding sessions. Apple Watch records a full park day (sets, laps, speed, route); on iPhone you can also add a session by hand."
                     )
                     .font(.subheadline)
                     .foregroundStyle(Color.rpplMuted)
