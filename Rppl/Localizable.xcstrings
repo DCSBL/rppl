@@ -10528,22 +10528,6 @@
         }
       }
     },
-    "Add a session by hand, or record a park day with Apple Watch." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a session by hand, or record a park day with Apple Watch."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voeg een session handmatig toe, of neem een parkdag op met Apple Watch."
-          }
-        }
-      }
-    },
     "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby." : {
       "localizations" : {
         "en" : {
@@ -10588,6 +10572,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nieuwe session"
+          }
+        }
+      }
+    },
+    "Record a park day with Apple Watch, or add a session by hand with the + button." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record a park day with Apple Watch, or add a session by hand with the + button."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neem een parkdag op met Apple Watch, of voeg een session handmatig toe met de + knop."
           }
         }
       }

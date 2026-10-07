@@ -80,17 +80,10 @@ struct LogbookView: View {
                             }
                         } description: {
                             Text(
-                                "Add a session by hand, or record a park day with Apple Watch."
+                                "Record a park day with Apple Watch, or add a session by hand with the + button."
                             )
                         } actions: {
                             VStack(spacing: 12) {
-                                Button("Add session") {
-                                    showAddSession = true
-                                }
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                                .tint(Color.rpplAccent)
-
                                 Button("Show example session") {
                                     showExampleSession = true
                                 }

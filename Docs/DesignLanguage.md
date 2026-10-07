@@ -98,7 +98,7 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 4. **Buttons start with a verb**: Export, Delete, Try again, Show example session. Cancel stays Cancel. Dutch buttons use the infinitive, like iOS itself: *Verwijderen*, *Opnieuw proberen*, *Alles selecteren*.
 5. **Errors: what happened, then what to do.** "Could not export. Try again from the logbook." No blame, no codes up front, no exclamation marks. Dutch alert titles use *… mislukt* ("Exporteren mislukt").
 6. **App Intent titles are the exception**: Shortcuts and the Action Button follow Apple's Title Case ("Start Cable Park Session").
-7. **Empty states: what's missing and how to get it.** "No sessions yet. Add a session by hand, or record a park day with Apple Watch."
+7. **Empty states: what's missing and how to get it.** "No sessions yet. Record a park day with Apple Watch, or add a session by hand with the + button."
 8. **Confirmations:** the question is the title ("Delete session?"), the consequence is the message, the destructive button repeats the verb ("Delete").
 9. **Numbers come from the Core formatters** (`DistanceFormat`, `DurationFormat`, `TemperatureFormat`, `EnergyFormat`). Never build units by hand. The locale decides decimal comma and km or mi.
 10. **Watch is shorter still.** Buttons at most two words. Metric captions short enough to fit under a number (DIST, LAPS).
