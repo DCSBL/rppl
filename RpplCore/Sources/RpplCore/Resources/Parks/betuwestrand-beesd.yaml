@@ -1,7 +1,7 @@
 version: 1
 id: betuwestrand-beesd
 created_at: 2026-09-28
-updated_at: 2026-10-05
+updated_at: 2026-10-07
 history:
   - date: 2026-09-28
     description: initial
@@ -13,8 +13,11 @@ history:
     description: merge prices that shared a name (1 uur, 2 uur, 1 dag, 2 dagen) into one entry each; remove author credit and source comments
   - date: 2026-10-05
     description: trace cable on the map, add direction
+  - date: 2026-10-07
+    description: add languages (nl, en) and English variants of per and note
 
 name: BetuweStrand
+languages: [nl, en]
 address: A. Kraalweg 40, 4153 XC Beesd
 timezone: Europe/Amsterdam
 # Business pin from the park's route page, not the dock.
@@ -49,60 +52,60 @@ cables:
 prices:
   - name: "1 uur"
     options:
-      - { amount: "17.50", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "23", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "20.50", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-      - { amount: "27", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+      - { amount: "17.50", currency: EUR, note: { nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "23", currency: EUR, note: { nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "20.50", currency: EUR, note: { nl: "t/m 12 jaar, 4 jul-30 aug 2026", en: "up to 12, 4 Jul-30 Aug 2026" } }
+      - { amount: "27", currency: EUR, note: { nl: "vanaf 13 jaar, 4 jul-30 aug 2026", en: "13 and older, 4 Jul-30 Aug 2026" } }
   - name: "2 uur"
     options:
-      - { amount: "23", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "29", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "27", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-      - { amount: "35", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+      - { amount: "23", currency: EUR, note: { nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "29", currency: EUR, note: { nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "27", currency: EUR, note: { nl: "t/m 12 jaar, 4 jul-30 aug 2026", en: "up to 12, 4 Jul-30 Aug 2026" } }
+      - { amount: "35", currency: EUR, note: { nl: "vanaf 13 jaar, 4 jul-30 aug 2026", en: "13 and older, 4 Jul-30 Aug 2026" } }
   - name: "1 dag"
     options:
-      - { amount: "38", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "51", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "45", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-      - { amount: "58", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+      - { amount: "38", currency: EUR, note: { nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "51", currency: EUR, note: { nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "45", currency: EUR, note: { nl: "t/m 12 jaar, 4 jul-30 aug 2026", en: "up to 12, 4 Jul-30 Aug 2026" } }
+      - { amount: "58", currency: EUR, note: { nl: "vanaf 13 jaar, 4 jul-30 aug 2026", en: "13 and older, 4 Jul-30 Aug 2026" } }
   - name: "2 dagen"
     options:
-      - { amount: "63", currency: EUR, note: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "84", currency: EUR, note: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026" }
-      - { amount: "75", currency: EUR, note: "t/m 12 jaar, 4 jul-30 aug 2026" }
-      - { amount: "96", currency: EUR, note: "vanaf 13 jaar, 4 jul-30 aug 2026" }
+      - { amount: "63", currency: EUR, note: { nl: "t/m 12 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "up to 12, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "84", currency: EUR, note: { nl: "vanaf 13 jaar, 28 mrt-3 jul & 31 aug-27 sep 2026", en: "13 and older, 28 Mar-3 Jul & 31 Aug-27 Sep 2026" } }
+      - { amount: "75", currency: EUR, note: { nl: "t/m 12 jaar, 4 jul-30 aug 2026", en: "up to 12, 4 Jul-30 Aug 2026" } }
+      - { amount: "96", currency: EUR, note: { nl: "vanaf 13 jaar, 4 jul-30 aug 2026", en: "13 and older, 4 Jul-30 Aug 2026" } }
   - name: "1 week"
     options:
-      - { amount: "130", currency: EUR, note: t/m 12 jaar }
-      - { amount: "181", currency: EUR, note: vanaf 13 jaar }
+      - { amount: "130", currency: EUR, note: { nl: t/m 12 jaar, en: up to 12 } }
+      - { amount: "181", currency: EUR, note: { nl: vanaf 13 jaar, en: 13 and older } }
   - name: "2 weken"
     options:
-      - { amount: "195", currency: EUR, note: t/m 12 jaar }
-      - { amount: "270", currency: EUR, note: vanaf 13 jaar }
+      - { amount: "195", currency: EUR, note: { nl: t/m 12 jaar, en: up to 12 } }
+      - { amount: "270", currency: EUR, note: { nl: vanaf 13 jaar, en: 13 and older } }
   - name: "3 weken"
     options:
-      - { amount: "294", currency: EUR, note: t/m 12 jaar }
-      - { amount: "407", currency: EUR, note: vanaf 13 jaar }
+      - { amount: "294", currency: EUR, note: { nl: t/m 12 jaar, en: up to 12 } }
+      - { amount: "407", currency: EUR, note: { nl: vanaf 13 jaar, en: 13 and older } }
   - name: "4 weken"
     options:
-      - { amount: "390", currency: EUR, note: t/m 12 jaar }
-      - { amount: "545", currency: EUR, note: vanaf 13 jaar }
+      - { amount: "390", currency: EUR, note: { nl: t/m 12 jaar, en: up to 12 } }
+      - { amount: "545", currency: EUR, note: { nl: vanaf 13 jaar, en: 13 and older } }
   - name: Geheel seizoen 2026
     options:
-      - { amount: "650", currency: EUR, note: t/m 12 jaar }
-      - { amount: "810", currency: EUR, note: vanaf 13 jaar }
+      - { amount: "650", currency: EUR, note: { nl: t/m 12 jaar, en: up to 12 } }
+      - { amount: "810", currency: EUR, note: { nl: vanaf 13 jaar, en: 13 and older } }
   - name: Wetsuit huur
     options:
-      - { amount: "6", currency: EUR, per: per uur }
-      - { amount: "8", currency: EUR, per: per 2 uur }
+      - { amount: "6", currency: EUR, per: { nl: per uur, en: per hour } }
+      - { amount: "8", currency: EUR, per: { nl: per 2 uur, en: per 2 hours } }
       - { amount: "12", currency: EUR, per: day }
-      - { amount: "18", currency: EUR, per: per 2 dagen }
+      - { amount: "18", currency: EUR, per: { nl: per 2 dagen, en: per 2 days } }
   - name: Wakeboard huur
     options:
-      - { amount: "10", currency: EUR, per: per uur }
-      - { amount: "15", currency: EUR, per: per 2 uur }
+      - { amount: "10", currency: EUR, per: { nl: per uur, en: per hour } }
+      - { amount: "15", currency: EUR, per: { nl: per 2 uur, en: per 2 hours } }
       - { amount: "25", currency: EUR, per: day }
-      - { amount: "37.50", currency: EUR, per: per 2 dagen }
+      - { amount: "37.50", currency: EUR, per: { nl: per 2 dagen, en: per 2 days } }
 
 links:
   - { kind: booking, url: "https://www.betuwestrand.nl/waterski/reserveren" }

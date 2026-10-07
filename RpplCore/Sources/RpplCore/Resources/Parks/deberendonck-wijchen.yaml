@@ -1,7 +1,7 @@
 version: 1
 id: deberendonck-wijchen
 created_at: 2026-09-27
-updated_at: 2026-09-28
+updated_at: 2026-10-07
 history:
   - date: 2026-09-27
     description: initial
@@ -13,8 +13,11 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels, author credit and source comments; neutral wording in description
+  - date: 2026-10-07
+    description: add languages (nl, en) and English variants of per and note
 
 name: De Berendonck
+languages: [nl, en]
 address: Weg door de berendonck 29, 6603 LP Wijchen
 timezone: Europe/Amsterdam
 location:
@@ -37,35 +40,35 @@ facilities:
 prices:
   - name: "1,5 uur"
     options:
-      - { amount: "18.50", currency: EUR, note: kids t/m 15 jr }
-      - { amount: "21.50", currency: EUR, note: student }
-      - { amount: "26.50", currency: EUR, note: volwassene 16+ }
+      - { amount: "18.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
+      - { amount: "21.50", currency: EUR, note: { nl: student, en: student } }
+      - { amount: "26.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
   - name: "3 uur"
     options:
-      - { amount: "28.50", currency: EUR, note: kids t/m 15 jr }
-      - { amount: "31.50", currency: EUR, note: student }
-      - { amount: "36.50", currency: EUR, note: volwassene 16+ }
+      - { amount: "28.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
+      - { amount: "31.50", currency: EUR, note: { nl: student, en: student } }
+      - { amount: "36.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
   - name: Hele dag
     options:
-      - { amount: "38.50", currency: EUR, note: kids t/m 15 jr }
-      - { amount: "39.50", currency: EUR, note: student }
-      - { amount: "49.50", currency: EUR, note: volwassene 16+ }
+      - { amount: "38.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
+      - { amount: "39.50", currency: EUR, note: { nl: student, en: student } }
+      - { amount: "49.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
   - name: Easyride
     options:
-      - { amount: "28.50", currency: EUR, note: kids t/m 15 jr }
-      - { amount: "34.50", currency: EUR, note: volwassene 16+ }
+      - { amount: "28.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
+      - { amount: "34.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
   - name: "12-Rittenkaart"
     options:
-      - { amount: "185", currency: EUR, note: kids t/m 15 jr }
-      - { amount: "265", currency: EUR, note: volwassene 16+ }
+      - { amount: "185", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
+      - { amount: "265", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
   - name: Wetsuit huur
     options:
-      - { amount: "5", currency: EUR, per: "per 1,5 uur" }
-      - { amount: "8", currency: EUR, per: per 3 uur }
+      - { amount: "5", currency: EUR, per: { nl: "per 1,5 uur", en: per 1.5 hours } }
+      - { amount: "8", currency: EUR, per: { nl: per 3 uur, en: per 3 hours } }
   - name: Wakeboard huur
     options:
-      - { amount: "10", currency: EUR, per: "per 1,5 uur" }
-      - { amount: "15", currency: EUR, per: per 3 uur }
+      - { amount: "10", currency: EUR, per: { nl: "per 1,5 uur", en: per 1.5 hours } }
+      - { amount: "15", currency: EUR, per: { nl: per 3 uur, en: per 3 hours } }
 
 cables:
   - name: Skibaan

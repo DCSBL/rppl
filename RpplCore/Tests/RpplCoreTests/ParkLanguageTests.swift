@@ -72,6 +72,20 @@ struct ParkLanguageTests {
         #expect(parsed.languages == ["nl-BE", "fr-BE", "en"])
     }
 
+    @Test func bundledDutchParksShowEnglishToEnglishReaders() throws {
+        for id in ["betuwestrand-beesd", "deberendonck-wijchen"] {
+            let park = try #require(ParkCatalog.loadBundled().first { $0.id == id })
+            #expect(park.languages == ["nl", "en"])
+            let options = (park.prices ?? []).flatMap(\.options)
+            let withVariants = options.filter { $0.perByLanguage != nil }
+            #expect(!withVariants.isEmpty)
+            for option in withVariants {
+                #expect(option.resolvedPer(readerLanguages: ["nl-NL"], parkLanguages: park.languages) == option.perByLanguage?["nl"])
+                #expect(option.resolvedPer(readerLanguages: ["en-GB"], parkLanguages: park.languages) == option.perByLanguage?["en"])
+            }
+        }
+    }
+
     @Test func finalizedDropsBlankVariantsAndBadTags() {
         var park = Park(id: "p", name: "P", location: ParkCoordinate(lat: 50.85, lon: 4.35))
         park.languages = ["nl", "en"]
