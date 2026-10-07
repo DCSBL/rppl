@@ -146,6 +146,10 @@ User-facing export / sharing policy: [LEGAL.md](../LEGAL.md) (Export / sharing).
 
 Session detail (iPhone): the toolbar Export button opens the share sheet with the raw JSON. When Mail is set up (`MFMailComposeViewController.canSendMail()`), it becomes a menu with **Send to Rppl**: the export is zipped, attached to a mail to rppl@dcsbl.nl with a "Why I'm sending this session" template, and capped at 20 MB. Larger sessions show a message pointing to Export; there is no base64 / plain-text fallback.
 
+## Set flags
+
+Rider self-notes per detected set (`manifest.setFlags`, see [SessionStorage.md](SessionStorage.md#set-flags)), added on the phone after the set. No timestamps: one flag list per set, meant as notes and as labels for later ML. Not a detection taxonomy; the strings stay opaque.
+
 ## Motion gives way first
 
 Nothing analyses device motion yet; it is kept for future event / trick analysis. `scripts/analyze-session.py` decodes it offline (airtime, impacts, spins next to GPS, per set); labelled examples live in the session fixtures. It is the first stream to stop so GPS, detection, health and water keep recording (`MotionRecordingPolicy` in Core, checked after each motion frame and at start):
