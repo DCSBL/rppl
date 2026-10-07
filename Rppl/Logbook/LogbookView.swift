@@ -384,7 +384,6 @@ struct LogbookView: View {
             do {
                 try await iCloud.deleteSessionPermanently(sessionId)
                 SessionCityResolver.shared.invalidate(sessionId: sessionId)
-                SetFlagStorage.clearDraft(sessionId: sessionId)
                 PhoneWatchViewSync.pushViewDelete(sessionId: sessionId)
                 WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
                 reloadCatalog()
@@ -399,7 +398,6 @@ struct LogbookView: View {
         do {
             try connectivity.store.deleteSession(sessionId: sessionId)
             SessionCityResolver.shared.invalidate(sessionId: sessionId)
-            SetFlagStorage.clearDraft(sessionId: sessionId)
             PhoneWatchViewSync.pushViewDelete(sessionId: sessionId)
             WakeLog.debug(.store, "deleted session \(sessionId.prefix(8))…")
             reloadCatalog()

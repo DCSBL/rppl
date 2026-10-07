@@ -10,8 +10,10 @@ public enum SetFlagKind: Int, Sendable, CaseIterable {
 /// Self-notes on a set: opaque strings, never a closed enum. Presets are known snake_case codes the
 /// UI localizes; any other string is a custom label shown verbatim and must round-trip untouched.
 public enum SetFlags {
-    public static let startFinish = ["cable_stop", "clean_exit", "clean_start", "failed_start", "wipeout"]
-    public static let tricks = ["failed_jump", "new_trick", "successful_jump"]
+    public static let startFinish = [
+        "cable_stop", "clean_exit", "clean_start", "cut_in", "failed_start", "late_exit", "rope_slip", "wipeout"
+    ]
+    public static let tricks = ["box", "failed_jump", "kicker", "new_trick", "rail", "successful_jump", "switch"]
     public static let maxLength = 24
 
     public static func kind(of flag: String) -> SetFlagKind {
@@ -62,20 +64,27 @@ public enum SetFlags {
         flags.contains { $0.caseInsensitiveCompare(flag) == .orderedSame }
     }
 
+    /// Flags for sets 1...count only (a manual session whose set count went down).
+    public static func trimmed(_ flags: [String: [String]], toSetCount count: Int) -> [String: [String]] {
+        flags.filter { key, value in
+            guard let index = Int(key) else { return false }
+            return index >= 1 && index <= count && !value.isEmpty
+        }
+    }
+
     /// Manifest key for a set (`SetSegmentStats.index`).
     public static func key(forSet index: Int) -> String { String(index) }
 }
 
-/// Unsaved flag edits for one session, over what the manifest already holds. Codable so the phone
-/// can keep it across backgrounding and force-quit.
-public struct SetFlagDraft: Codable, Equatable, Sendable {
+/// Unsaved flag edits for one session, over what the manifest already holds.
+public struct SetFlagDraft: Equatable, Sendable {
     public private(set) var base: [String: [String]]
     public private(set) var draft: [String: [String]]
 
-    public init(saved: [String: [String]]?, draft: [String: [String]]? = nil) {
+    public init(saved: [String: [String]]?) {
         let clean = Self.clean(saved ?? [:])
         base = clean
-        self.draft = draft.map(Self.clean) ?? clean
+        draft = clean
     }
 
     public var isDirty: Bool { draft != base }
@@ -90,9 +99,6 @@ public struct SetFlagDraft: Codable, Equatable, Sendable {
         let updated = SetFlags.toggling(flag, in: draft[key] ?? [])
         draft[key] = updated.isEmpty ? nil : updated
     }
-
-    /// Same draft re-based on freshly saved flags (e.g. after "Done"): no longer dirty.
-    public mutating func markSaved() { base = draft }
 
     public mutating func discard() { draft = base }
 

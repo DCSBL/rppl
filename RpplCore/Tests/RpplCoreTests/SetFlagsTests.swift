@@ -41,22 +41,6 @@ struct SetFlagsTests {
         #expect(draft.flags(forSet: 1) == ["clean_exit"])
     }
 
-    @Test func draftRestoresOverFreshSavedFlags() {
-        let draft = SetFlagDraft(saved: ["1": ["wipeout"]], draft: ["1": ["wipeout", "new_trick"], "2": []])
-        #expect(draft.isDirty)
-        #expect(draft.flags(forSet: 1) == ["wipeout", "new_trick"])
-        #expect(!SetFlagDraft(saved: ["1": ["wipeout"]], draft: ["1": ["wipeout"]]).isDirty)
-    }
-
-    @Test func draftSurvivesCodableRoundTrip() throws {
-        var draft = SetFlagDraft(saved: nil)
-        draft.toggle("Tail grab", forSet: 3)
-        let data = try JSONEncoder().encode(draft)
-        let back = try JSONDecoder().decode(SetFlagDraft.self, from: data)
-        #expect(back == draft)
-        #expect(back.isDirty)
-    }
-
     @Test func storePersistsFlagsAndUnknownCodesRoundTrip() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("RpplCoreTests-\(UUID().uuidString)", isDirectory: true)
@@ -72,10 +56,9 @@ struct SetFlagsTests {
         #expect(try store.readManifest(sessionId: manifest.sessionId).setFlags == nil)
     }
 
-    @Test func manualEntryFlagsRoundTrip() throws {
-        let entry = ManualEntry(flags: ["new_trick"])
-        let back = try JSONDecoder().decode(ManualEntry.self, from: JSONEncoder().encode(entry))
-        #expect(back.flags == ["new_trick"])
-        #expect(ManualEntry().flags == nil)
+    @Test func trimmedKeepsOnlySetsWithinCount() {
+        let flags = ["1": ["wipeout"], "3": ["new_trick"], "4": ["rail"], "2": []]
+        #expect(SetFlags.trimmed(flags, toSetCount: 3) == ["1": ["wipeout"], "3": ["new_trick"]])
+        #expect(SetFlags.trimmed(flags, toSetCount: 0).isEmpty)
     }
 }

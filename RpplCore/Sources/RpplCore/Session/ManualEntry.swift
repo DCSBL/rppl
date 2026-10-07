@@ -19,17 +19,11 @@ public struct ManualEntry: Codable, Equatable, Sendable {
     public var distanceM: Double?
     /// Park pin or picked spot. Centers the derived map frame, so park matching and visits work.
     public var location: ParkCoordinate?
-    /// Self-notes for the whole session (`SetFlags`); a manual session has no per-set rows.
-    public var flags: [String]?
 
-    public init(
-        tallies: [Tally] = [Tally()], distanceM: Double? = nil, location: ParkCoordinate? = nil,
-        flags: [String]? = nil
-    ) {
+    public init(tallies: [Tally] = [Tally()], distanceM: Double? = nil, location: ParkCoordinate? = nil) {
         self.tallies = tallies
         self.distanceM = distanceM
         self.location = location
-        self.flags = flags
     }
 
     public var setCount: Int { tallies.reduce(0) { $0 + $1.sets } }

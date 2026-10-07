@@ -27,7 +27,14 @@ enum SetFlagLabels {
         case "clean_exit": String(localized: "Clean exit")
         case "clean_start": String(localized: "Clean start")
         case "failed_start": String(localized: "Failed start")
+        case "cut_in": String(localized: "Cut in")
+        case "late_exit": String(localized: "Late exit")
+        case "rope_slip": String(localized: "Rope slip")
         case "wipeout": String(localized: "Wipeout")
+        case "box": String(localized: "Box")
+        case "kicker": String(localized: "Kicker")
+        case "rail": String(localized: "Rail")
+        case "switch": String(localized: "Switch")
         case "failed_jump": String(localized: "Failed jump")
         case "new_trick": String(localized: "New trick")
         case "successful_jump": String(localized: "Successful jump")
@@ -161,52 +168,82 @@ struct SetFlagSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationBackground(Color.rpplBackground)
     }
 }
 
-/// A set card's flag row: its badges (tap removes) and a trailing "+ Flag".
+/// A set card's flag row. Read mode: the saved badges, nothing when empty. Edit mode (`flagging`
+/// set): badges tap to remove, plus a trailing "+ Flag".
 struct SetFlagRow: View {
     let title: String
-    let flagging: SetFlagging
+    let flags: [String]
+    var flagging: SetFlagging?
     @State private var showsPicker = false
 
     var body: some View {
-        FlowLayout(spacing: 6) {
-            ForEach(flagging.selected, id: \.self) { flag in
-                SetFlagBadge(flag: flag) { flagging.toggle(flag) }
+        if flagging != nil || !flags.isEmpty {
+            FlowLayout(spacing: 6) {
+                ForEach(flags, id: \.self) { flag in
+                    let remove: (() -> Void)? = flagging.map { editing in { editing.toggle(flag) } }
+                    SetFlagBadge(flag: flag, action: remove)
+                }
+                if flagging != nil {
+                    Button { showsPicker = true } label: {
+                        Text("+ Flag")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.rpplMuted)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .overlay(Capsule().strokeBorder(Color.rpplMuted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                    }
+                    .buttonStyle(.borderless)
+                }
             }
-            Button { showsPicker = true } label: {
-                Text("+ Flag")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.rpplMuted)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .overlay(Capsule().strokeBorder(Color.rpplMuted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+            .sheet(isPresented: $showsPicker) {
+                if let flagging { SetFlagSheet(title: title, flagging: flagging) }
             }
-            .buttonStyle(.borderless)
         }
-        .sheet(isPresented: $showsPicker) { SetFlagSheet(title: title, flagging: flagging) }
     }
 }
 
-/// Phone-local persistence for flag drafts and the custom label list.
+/// "🏁 Set x" heading shared by tracked and manual set cards.
+struct SetCardTitle: View {
+    let index: Int
+
+    var body: some View {
+        Label {
+            Text("Set \(index)")
+        } icon: {
+            Image(systemName: MetricKind.sets.systemImage)
+                .foregroundStyle(MetricKind.sets.tint)
+        }
+        .foregroundStyle(Color.rpplText)
+        .font(.headline)
+        .lineLimit(2)
+        .minimumScaleFactor(0.75)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Manual sessions have no per-set data: just the heading and the flags.
+struct ManualSetCard: View {
+    let index: Int
+    let flags: [String]
+    var flagging: SetFlagging?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SetCardTitle(index: index)
+            SetFlagRow(title: String(localized: "Set \(index) flags"), flags: flags, flagging: flagging)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .rpplTileChrome()
+    }
+}
+
+/// Phone-local list of custom flag labels.
 enum SetFlagStorage {
-    private static func draftKey(_ sessionId: String) -> String { "rppl.setFlagDraft.\(sessionId)" }
     private static let customsKey = "rppl.customSetFlags"
-
-    static func loadDraft(sessionId: String) -> [String: [String]]? {
-        guard let data = UserDefaults.standard.data(forKey: draftKey(sessionId)) else { return nil }
-        return try? JSONDecoder().decode([String: [String]].self, from: data)
-    }
-
-    static func saveDraft(_ draft: [String: [String]], sessionId: String) {
-        guard let data = try? JSONEncoder().encode(draft) else { return }
-        UserDefaults.standard.set(data, forKey: draftKey(sessionId))
-    }
-
-    static func clearDraft(sessionId: String) {
-        UserDefaults.standard.removeObject(forKey: draftKey(sessionId))
-    }
 
     static func loadCustoms() -> [String] {
         UserDefaults.standard.stringArray(forKey: customsKey) ?? []

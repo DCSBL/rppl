@@ -60,7 +60,7 @@ Same folder shape after WC import. The import builds the package in tmp and swap
 
 ### Set flags
 
-Self-notes per set ("failed start", "new trick", custom text). `manifest.setFlags` maps a set index (`SetSegmentStats.index`, as a string) to opaque flag strings; preset codes are `SetFlags` in Core, anything else is a custom label and round-trips untouched. It is a phone-written sidecar like the park link: raw streams and `derived/view.json` are never changed, and a rebuild keeps the flags. Flags are keyed by index, so an analyzer change that renumbers sets would shift them. Manual sessions have no per-set rows; they carry session-level `manual.flags`. Export includes the manifest, so flags travel with the session. The phone edits flags as a draft kept in `UserDefaults` (survives backgrounding and force-quit) until Done / Store.
+Self-notes per set ("failed start", "new trick", custom text). `manifest.setFlags` maps a set index (`SetSegmentStats.index`, as a string) to opaque flag strings; preset codes are `SetFlags` in Core, anything else is a custom label and round-trips untouched. It is a phone-written sidecar like the park link: raw streams and `derived/view.json` are never changed, and a rebuild keeps the flags. Flags are keyed by index, so an analyzer change that renumbers sets would shift them. Manual sessions use the same field with indexes 1…`manual.setCount` (one spot per typed-in set); lowering the count in the editor drops flags above it. Export includes the manifest, so flags travel with the session. The phone edits flags in a pencil-activated edit mode (Done stores, ✕ discards); the draft lives in memory only.
 
 ## What is stored (raw)
 
