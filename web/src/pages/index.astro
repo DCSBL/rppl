@@ -7,6 +7,7 @@ const showcase = [
   { before: "Analyse", after: "Progress", src: "session", alt: "Session detail: sets and laps timeline, speed, riding share, distance and water temperature" },
   { before: "Find", after: "Spots", src: "parks", alt: "Parks tab: nearby cable parks with opening hours and distance" },
 ];
+const betaURL = "https://testflight.apple.com/join/R2BymVaX";
 const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Export anytime", "No account", "No subscription", "No ads", "No tracking", "No Rppl server", "Open source"];
 ---
 <Base title="Rppl: Your Cablepark Buddy" description="Your Cablepark Buddy. The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.">
@@ -15,7 +16,13 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
     <h1>Rppl</h1>
     <p class="lead"><em>Your</em> Cablepark Buddy</p>
     <p class="caption">The native Apple Watch app built for cable-parks. Automatically detects your sets, logs your rides straight to Apple Health, and keeps your data entirely on your device. No accounts. No subscriptions.</p>
-    <p class="cta"><span class="badge">Coming soon to the App Store</span></p>
+    <p class="cta">
+      <a class="btn" href={betaURL} rel="noopener">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4z" /></svg>
+        Join the beta on TestFlight
+      </a>
+    </p>
+    <p class="note">Coming soon to the App Store</p>
   </header>
 
   <main class="wrap">
@@ -60,7 +67,13 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
   </main>
 
   <footer class="wrap foot">
-    <a href={`${base}/privacy/`}>Terms &amp; privacy</a>
+    <span class="links">
+      <a href={`${base}/privacy/`}>Terms &amp; privacy</a>
+      <a class="gh" href="https://github.com/DCSBL/rppl" rel="noopener">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </span>
     <span>Made by <a href="https://github.com/dcsbl">@DCSBL</a> in the Netherlands</span>
   </footer>
 </Base>
@@ -73,8 +86,11 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
   .lead { font-size: clamp(28px, 6vw, 48px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; margin: 8px 0; }
   .lead em, .row h2 em { font-style: normal; color: var(--your); }
   .cta { margin-top: 24px; }
-  .badge { display: inline-block; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; }
-  @media (prefers-color-scheme: dark) { .badge { color: #02070e; } }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+  .note { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+  @media (prefers-color-scheme: dark) { .btn { color: #02070e; } }
   section { margin: 56px 0; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -111,5 +127,7 @@ const keep = ["On your phone", "In your iCloud", "Saved to Apple Health", "Expor
   .features .caption { margin: 0; font-size: 16px; }
   .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; list-style: none; margin: 0; padding: 0; }
   .chips li { padding: 6px 14px; border-radius: 999px; background: var(--track); font-size: 14px; font-weight: 600; color: var(--accent); }
+  .links { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
+  .gh { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
   .foot { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 24px 0 48px; border-top: 1px solid var(--hairline); color: var(--muted); font-size: 15px; }
 </style>
