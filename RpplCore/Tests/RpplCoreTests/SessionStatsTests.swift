@@ -367,10 +367,10 @@ struct SessionStatsBuilderTests {
     @Test func waterTemperatureWindowNeedsFiveSamplesAndFiveMinutes() {
         // Five samples within 40 s: count met, span not → keep widening to all samples.
         let quick = [28, 28, 17, 17, 17].enumerated().map { waterSample(at: Double($0.offset) * 10, celsius: Double($0.element)) }
-        #expect(WaterTemperatureSummary.make(from: quick)?.currentCelsius == (28 + 28 + 51) / 5)
+        #expect(WaterTemperatureSummary.make(from: quick)?.currentCelsius == 107.0 / 5.0)
         // Sparse: 6 samples 2 min apart → window of the last 4 would span 6 min but only 4 samples.
         let sparse = [30, 30, 18, 18, 18, 18].enumerated().map { waterSample(at: Double($0.offset) * 120, celsius: Double($0.element)) }
-        #expect(WaterTemperatureSummary.make(from: sparse)?.currentCelsius == (30 + 18 * 4) / 5)
+        #expect(WaterTemperatureSummary.make(from: sparse)?.currentCelsius == 102.0 / 5.0)
     }
 
     @Test func waterTemperatureRangeOnlyAboveThreeDegrees() {
