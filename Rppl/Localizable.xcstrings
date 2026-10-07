@@ -8155,7 +8155,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schuif en zoom tot de markering op de dock staat en zet daarna de locatie."
+            "value" : "Schuif en zoom tot de markering op de dock staat en markeer daarna de locatie."
           }
         }
       }
@@ -8331,7 +8331,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Locatie hier zetten"
+            "value" : "Markeer locatie"
           }
         }
       }
