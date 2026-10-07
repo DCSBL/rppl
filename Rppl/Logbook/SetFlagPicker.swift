@@ -4,7 +4,8 @@ import SwiftUI
 extension SetFlagKind {
     var tint: Color {
         switch self {
-        case .startFinish: Color.rpplMetricRiding
+        case .start: Color.rpplMetricRiding
+        case .exit: Color.rpplMetricSpeed
         case .trick: Color.rpplMetricLaps
         case .custom: Color.rpplMuted
         }
@@ -12,7 +13,8 @@ extension SetFlagKind {
 
     var title: String {
         switch self {
-        case .startFinish: String(localized: "Start & finish")
+        case .start: String(localized: "Start")
+        case .exit: String(localized: "Exit")
         case .trick: String(localized: "Tricks")
         case .custom: String(localized: "Yours")
         }
@@ -23,21 +25,31 @@ enum SetFlagLabels {
     /// Localized label for a preset code; any other flag is shown as typed.
     static func label(_ flag: String) -> String {
         switch flag {
-        case "cable_stop": String(localized: "Cable stop")
-        case "clean_exit": String(localized: "Clean exit")
         case "clean_start": String(localized: "Clean start")
         case "failed_start": String(localized: "Failed start")
-        case "cut_in": String(localized: "Cut in")
-        case "late_exit": String(localized: "Late exit")
-        case "rope_slip": String(localized: "Rope slip")
+        case "jump_start": String(localized: "Jumpstart")
+        case "nollie_start": String(localized: "Nollie start")
+        case "other_start": String(localized: "Other start")
+        case "sit_start": String(localized: "Sit start")
+        case "slide_start": String(localized: "Slide start")
+        case "cable_snap": String(localized: "Cable snap")
+        case "clean_exit": String(localized: "Clean exit")
+        case "dry_exit": String(localized: "Dry exit")
+        case "fall": String(localized: "Fall")
         case "wipeout": String(localized: "Wipeout")
+        case "180": "180"
+        case "360": "360"
+        case "backroll": String(localized: "Backroll")
         case "box": String(localized: "Box")
-        case "kicker": String(localized: "Kicker")
-        case "rail": String(localized: "Rail")
-        case "switch": String(localized: "Switch")
         case "failed_jump": String(localized: "Failed jump")
+        case "frontroll": String(localized: "Frontroll")
+        case "kicker": String(localized: "Kicker")
         case "new_trick": String(localized: "New trick")
-        case "successful_jump": String(localized: "Successful jump")
+        case "ollie": String(localized: "Ollie")
+        case "rail": String(localized: "Rail")
+        case "raley": String(localized: "Raley")
+        case "switch": String(localized: "Switch")
+        case "tantrum": String(localized: "Tantrum")
         default: flag
         }
     }
@@ -98,7 +110,7 @@ struct SetFlagCloud: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            ForEach([SetFlagKind.startFinish, .trick], id: \.self) { kind in
+            ForEach([SetFlagKind.start, .exit, .trick], id: \.self) { kind in
                 group(kind, flags: SetFlagLabels.sorted(SetFlags.presets(of: kind)))
             }
             group(.custom, flags: customFlags)

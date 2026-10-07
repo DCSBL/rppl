@@ -5,7 +5,8 @@ import Testing
 @Suite("Set flags", .serialized)
 struct SetFlagsTests {
     @Test func kindsGroupPresetsAndTreatUnknownAsCustom() {
-        #expect(SetFlags.kind(of: "clean_exit") == .startFinish)
+        #expect(SetFlags.kind(of: "clean_start") == .start)
+        #expect(SetFlags.kind(of: "clean_exit") == .exit)
         #expect(SetFlags.kind(of: "new_trick") == .trick)
         #expect(SetFlags.kind(of: "Switch raley") == .custom)
         #expect(SetFlags.kind(of: "future_code") == .custom)
@@ -25,6 +26,19 @@ struct SetFlagsTests {
         #expect(flags == ["clean_exit", "new_trick", "Tail grab"])
         flags = SetFlags.toggling("NEW_TRICK", in: flags)
         #expect(flags == ["clean_exit", "Tail grab"])
+    }
+
+    @Test func startAndExitAllowOnlyOneEachWhileTricksStack() {
+        var flags = SetFlags.toggling("clean_start", in: [])
+        flags = SetFlags.toggling("sit_start", in: flags)
+        #expect(flags == ["sit_start"])
+        flags = SetFlags.toggling("wipeout", in: flags)
+        flags = SetFlags.toggling("dry_exit", in: flags)
+        flags = SetFlags.toggling("rail", in: flags)
+        flags = SetFlags.toggling("backroll", in: flags)
+        #expect(flags == ["sit_start", "dry_exit", "backroll", "rail"])
+        flags = SetFlags.toggling("sit_start", in: flags)
+        #expect(flags == ["dry_exit", "backroll", "rail"])
     }
 
     @Test func draftIsDirtyOnlyWhenDifferentAndTogglingBackIsClean() {

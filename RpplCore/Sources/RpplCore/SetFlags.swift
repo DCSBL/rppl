@@ -1,23 +1,32 @@
 import Foundation
 
-/// Where a flag is grouped in the picker (and which tint it gets).
+/// Where a flag is grouped in the picker (and which tint it gets). Declaration order is display order.
 public enum SetFlagKind: Int, Sendable, CaseIterable {
-    case startFinish
+    case start
+    case exit
     case trick
     case custom
+
+    /// Start and exit hold at most one flag per set; tricks and custom flags stack.
+    public var isSingleChoice: Bool { self == .start || self == .exit }
 }
 
 /// Self-notes on a set: opaque strings, never a closed enum. Presets are known snake_case codes the
 /// UI localizes; any other string is a custom label shown verbatim and must round-trip untouched.
 public enum SetFlags {
-    public static let startFinish = [
-        "cable_stop", "clean_exit", "clean_start", "cut_in", "failed_start", "late_exit", "rope_slip", "wipeout"
+    public static let starts = [
+        "clean_start", "failed_start", "jump_start", "nollie_start", "other_start", "sit_start", "slide_start"
     ]
-    public static let tricks = ["box", "failed_jump", "kicker", "new_trick", "rail", "successful_jump", "switch"]
+    public static let exits = ["cable_snap", "clean_exit", "dry_exit", "fall", "wipeout"]
+    public static let tricks = [
+        "180", "360", "backroll", "box", "failed_jump", "frontroll", "kicker", "new_trick", "ollie", "rail",
+        "raley", "switch", "tantrum"
+    ]
     public static let maxLength = 24
 
     public static func kind(of flag: String) -> SetFlagKind {
-        if startFinish.contains(flag) { return .startFinish }
+        if starts.contains(flag) { return .start }
+        if exits.contains(flag) { return .exit }
         if tricks.contains(flag) { return .trick }
         return .custom
     }
@@ -25,7 +34,8 @@ public enum SetFlags {
     /// Presets of one kind (empty for `.custom`).
     public static func presets(of kind: SetFlagKind) -> [String] {
         switch kind {
-        case .startFinish: startFinish
+        case .start: starts
+        case .exit: exits
         case .trick: tricks
         case .custom: []
         }
@@ -43,11 +53,14 @@ public enum SetFlags {
     }
 
     /// Flags with `flag` toggled (case-insensitive match), grouped by kind, then alphabetical by code.
+    /// Switching on a start or exit flag replaces the one already chosen for that kind.
     public static func toggling(_ flag: String, in flags: [String]) -> [String] {
         var result = flags
         if let index = result.firstIndex(where: { $0.caseInsensitiveCompare(flag) == .orderedSame }) {
             result.remove(at: index)
         } else {
+            let kind = kind(of: flag)
+            if kind.isSingleChoice { result.removeAll { Self.kind(of: $0) == kind } }
             result.append(flag)
         }
         return ordered(result)
