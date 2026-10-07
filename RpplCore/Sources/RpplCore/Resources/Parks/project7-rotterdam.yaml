@@ -1,7 +1,7 @@
 version: 1
 id: project7-rotterdam
 created_at: 2026-09-24
-updated_at: 2026-09-26
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -21,24 +21,35 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels, author credit and source comments
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Project 7 Cablepark Rotterdam
+languages:
+  - en
+  - nl
 address: Kosboulevard 35, 3059 XZ Rotterdam
 timezone: Europe/Amsterdam
 location:
   lat: 51.979207
   lon: 4.573426
 
-water_temperature: { provider: rws_nl, station_id: krimpenaandeijssel.hollandscheijssel }
+water_temperature:
+  provider: rws_nl
+  station_id: krimpenaandeijssel.hollandscheijssel
 
 phone: 010 - 2600 110
 email: info@project7cablepark.nl
 website: https://www.project7cablepark.nl
 links:
-  - { kind: booking, url: "https://www.project7cablepark.nl/online-ticket/" }
-  - { kind: instagram, url: "https://www.instagram.com/project7cablepark/" }
-  - { kind: facebook, url: "https://www.facebook.com/project7cableparkrotterdam/" }
-  - { kind: restaurant, url: "https://nossa.nl" }
+  - kind: booking
+    url: "https://www.project7cablepark.nl/online-ticket/"
+  - kind: instagram
+    url: "https://www.instagram.com/project7cablepark/"
+  - kind: facebook
+    url: "https://www.facebook.com/project7cableparkrotterdam/"
+  - kind: restaurant
+    url: "https://nossa.nl"
 
 facilities:
   - Free parking
@@ -52,45 +63,92 @@ facilities:
 prices:
   - name: Online ticket
     options:
-      - { amount: "29", currency: EUR, per: "1.5h block" }
+      - amount: "29"
+        currency: EUR
+        per:
+          en: "1.5h block"
+          nl: "blok van 1,5 uur"
   - name: Counter ticket
     options:
-      - { amount: "31", currency: EUR, per: "1.5h block" }
+      - amount: "31"
+        currency: EUR
+        per:
+          en: "1.5h block"
+          nl: "blok van 1,5 uur"
   - name: "10x block card"
     options:
-      - { amount: "260", currency: EUR, note: "voordeelkaart, 1.5h blocks" }
+      - amount: "260"
+        currency: EUR
+        note:
+          en: "discount card, 1.5h blocks"
+          nl: "voordeelkaart, blokken van 1,5 uur"
   - name: Wetsuit rental
     options:
-      - { amount: "7.50", currency: EUR, per: per 1.5h }
+      - amount: "7.50"
+        currency: EUR
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Wakeboard rental
     options:
-      - { amount: "12.50", currency: EUR, per: per 1.5h }
+      - amount: "12.50"
+        currency: EUR
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Obstacle board rental
     options:
-      - { amount: "20", currency: EUR, per: per 1.5h }
+      - amount: "20"
+        currency: EUR
+        per:
+          en: per 1.5h
+          nl: "per 1,5 uur"
   - name: Monthly pass
     options:
-      - { amount: "345", currency: EUR, note: "May, June or September" }
-      - { amount: "395", currency: EUR, note: July or August }
+      - amount: "345"
+        currency: EUR
+        note:
+          en: "May, June or September"
+          nl: "mei, juni of september"
+      - amount: "395"
+        currency: EUR
+        note:
+          en: July or August
+          nl: juli of augustus
   - name: Season pass
     options:
-      - { amount: "995", currency: EUR }
+      - amount: "995"
+        currency: EUR
   - name: Gift voucher
     options:
-      - { amount: "29", currency: EUR, note: "belevenisbon, redeem for one online ticket" }
+      - amount: "29"
+        currency: EUR
+        note:
+          en: "experience voucher, redeem for one online ticket"
+          nl: "belevenisbon, in te wisselen voor één online ticket"
   - name: Group discount
     options:
-      - { amount: "-3", currency: EUR, per: person, note: "11+ people, paid as one group" }
+      - amount: "-3"
+        currency: EUR
+        per: person
+        note:
+          en: "11+ people, paid as one group"
+          nl: "vanaf 11 personen, als één groep betaald"
 
 cables:
   - name: Cable
     direction: cw
     points:
-      - { lat: 51.9792871834595, lon: 4.57415297727128 }
-      - { lat: 51.9802715418047, lon: 4.57762945411789 }
-      - { lat: 51.9799491057186, lon: 4.57845020518399 }
-      - { lat: 51.9793930743687, lon: 4.57832199054877 }
-      - { lat: 51.9785861824904, lon: 4.57461757152632 }
+      - lat: 51.9792871834595
+        lon: 4.57415297727128
+      - lat: 51.9802715418047
+        lon: 4.57762945411789
+      - lat: 51.9799491057186
+        lon: 4.57845020518399
+      - lat: 51.9793930743687
+        lon: 4.57832199054877
+      - lat: 51.9785861824904
+        lon: 4.57461757152632
 
 opening:
   booking: required
@@ -98,24 +156,88 @@ opening:
     Book a block online at least 3 hours in advance and check in at the desk 30 minutes
     before start. Easter, Ascension and Pentecost use weekend hours in April and May.
   rules:
-    - { months: [4], days: [weekend], open: "12:30", close: "17:00" }
-    - { months: [5], days: [weekdays], open: "14:00", close: "20:00" }
-    - { months: [5], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [6], days: [weekdays], open: "14:00", close: "21:30" }
-    - { months: [6], days: [weekend], open: "12:30", close: "21:30" }
-    - { months: [7], days: [daily], open: "11:00", close: "21:30" }
-    - { months: [8], days: [daily], open: "11:00", close: "20:00" }
-    - { months: [9], days: [weekdays], open: "14:00", close: "20:00" }
-    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [10], days: [weekend], open: "12:30", close: "17:00" }
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "12:30"
+      close: "17:00"
+    - months:
+        - 5
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - weekdays
+      open: "14:00"
+      close: "21:30"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:30"
+      close: "21:30"
+    - months:
+        - 7
+      days:
+        - daily
+      open: "11:00"
+      close: "21:30"
+    - months:
+        - 8
+      days:
+        - daily
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:30"
+      close: "17:00"
   slots:
-    - { id: "1", start: "11:00", end: "12:30" }
-    - { id: "2", start: "12:30", end: "14:00" }
-    - { id: "3", start: "14:00", end: "15:30" }
-    - { id: "4", start: "15:30", end: "17:00" }
-    - { id: "5", start: "17:00", end: "18:30" }
-    - { id: "6", start: "18:30", end: "20:00" }
-    - { id: "7", start: "20:00", end: "21:30" }
+    - id: "1"
+      start: "11:00"
+      end: "12:30"
+    - id: "2"
+      start: "12:30"
+      end: "14:00"
+    - id: "3"
+      start: "14:00"
+      end: "15:30"
+    - id: "4"
+      start: "15:30"
+      end: "17:00"
+    - id: "5"
+      start: "17:00"
+      end: "18:30"
+    - id: "6"
+      start: "18:30"
+      end: "20:00"
+    - id: "7"
+      start: "20:00"
+      end: "21:30"
 
 description: >-
   Swim diploma B required; riders should be able to swim to shore unassisted with

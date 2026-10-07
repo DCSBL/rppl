@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-09-26
+updated_at: 2026-10-07
 history:
   - date: 2026-09-24
     description: initial
@@ -19,8 +19,13 @@ history:
     description: group prices of the same name into options
   - date: 2026-10-05
     description: remove month-name labels and source comments; plain hyphen in the summer holiday note
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of per and note
 
 name: Cablepark de Wollebrand
+languages:
+  - en
+  - nl
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
 timezone: Europe/Amsterdam
 location:
@@ -28,26 +33,35 @@ location:
   lon: 4.239882979511977
 
 # Hoek van Holland is a tidal estuary station.
-water_temperature: { provider: rws_nl, station_id: hoekvanholland }
+water_temperature:
+  provider: rws_nl
+  station_id: hoekvanholland
 
 phone: 0174 - 64 11 44
 email: info@kabelskibaan.nl
 website: https://www.kabelskibaan.nl
 
 links:
-  - { kind: booking, url: "https://reserveren.kabelskibaan.nl/checkOut/954e89a6-1cf5-46ef-b48e-0d0cb642128d/dateSelect" }
-  - { kind: facebook, url: "https://www.facebook.com/people/Cablepark-Wollebrand/100063621169078/" }
+  - kind: booking
+    url: "https://reserveren.kabelskibaan.nl/checkOut/954e89a6-1cf5-46ef-b48e-0d0cb642128d/dateSelect"
+  - kind: facebook
+    url: "https://www.facebook.com/people/Cablepark-Wollebrand/100063621169078/"
 
 cables:
   - name: Cable
     direction: cw
     description: Full cable with 5 masts, running at 30 km/h; suitable for beginners and advanced riders.
     points:
-      - { lat: 51.9926590017478, lon: 4.23977079667694 }
-      - { lat: 51.9916976885167, lon: 4.24224285279007 }
-      - { lat: 51.9912370381953, lon: 4.24201052724854 }
-      - { lat: 51.9916478479643, lon: 4.2387817137021 }
-      - { lat: 51.9922605492233, lon: 4.23868536788128 }
+      - lat: 51.9926590017478
+        lon: 4.23977079667694
+      - lat: 51.9916976885167
+        lon: 4.24224285279007
+      - lat: 51.9912370381953
+        lon: 4.24201052724854
+      - lat: 51.9916478479643
+        lon: 4.2387817137021
+      - lat: 51.9922605492233
+        lon: 4.23868536788128
 
 opening:
   booking: required
@@ -57,42 +71,142 @@ opening:
     Thursday are by request only. Closed on Koningsdag. Hemelvaart and Pinksteren use
     weekend hours. During summer holiday (18 July-30 August) the park uses August hours.
   rules:
-    - { months: [4], days: [weekend], open: "14:00", close: "17:00" }
-    - { months: [5], days: [wed, thu, fri], open: "15:30", close: "20:00" }
-    - { months: [5], days: [weekend], open: "12:30", close: "18:30" }
-    - { months: [6], days: [wed, thu, fri], open: "15:30", close: "21:30" }
-    - { months: [6], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [7], days: [wed, thu, fri], open: "15:30", close: "21:30" }
-    - { months: [7], days: [sat], open: "12:30", close: "21:30" }
-    - { months: [7], days: [sun], open: "12:30", close: "20:00" }
-    - { months: [8], days: [wed, thu, fri, sat], open: "12:30", close: "21:30" }
-    - { months: [8], days: [sun], open: "12:30", close: "20:00" }
-    - { months: [9], days: [wed, fri], open: "15:30", close: "20:00" }
-    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "14:00"
+      close: "17:00"
+    - months:
+        - 5
+      days:
+        - wed
+        - thu
+        - fri
+      open: "15:30"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "12:30"
+      close: "18:30"
+    - months:
+        - 6
+      days:
+        - wed
+        - thu
+        - fri
+      open: "15:30"
+      close: "21:30"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 7
+      days:
+        - wed
+        - thu
+        - fri
+      open: "15:30"
+      close: "21:30"
+    - months:
+        - 7
+      days:
+        - sat
+      open: "12:30"
+      close: "21:30"
+    - months:
+        - 7
+      days:
+        - sun
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 8
+      days:
+        - wed
+        - thu
+        - fri
+        - sat
+      open: "12:30"
+      close: "21:30"
+    - months:
+        - 8
+      days:
+        - sun
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - wed
+        - fri
+      open: "15:30"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
   slots:
-    - { id: "1", start: "12:30", end: "13:50" }
-    - { id: "2", start: "14:00", end: "15:20" }
-    - { id: "3", start: "15:30", end: "16:50" }
-    - { id: "4", start: "17:00", end: "18:20" }
-    - { id: "5", start: "18:30", end: "19:50" }
-    - { id: "6", start: "20:00", end: "21:20" }
+    - id: "1"
+      start: "12:30"
+      end: "13:50"
+    - id: "2"
+      start: "14:00"
+      end: "15:20"
+    - id: "3"
+      start: "15:30"
+      end: "16:50"
+    - id: "4"
+      start: "17:00"
+      end: "18:20"
+    - id: "5"
+      start: "18:30"
+      end: "19:50"
+    - id: "6"
+      start: "20:00"
+      end: "21:20"
 
 prices:
   - name: Block (80 min)
     options:
-      - { amount: "25", currency: EUR, per: person }
+      - amount: "25"
+        currency: EUR
+        per: person
   - name: Wetsuit rental
     options:
-      - { amount: "5", currency: EUR, per: per 80 min }
+      - amount: "5"
+        currency: EUR
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: Wakeboard rental
     options:
-      - { amount: "10", currency: EUR, per: per 80 min }
+      - amount: "10"
+        currency: EUR
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: Obstacle board rental
     options:
-      - { amount: "20", currency: EUR, per: per 80 min }
+      - amount: "20"
+        currency: EUR
+        per:
+          en: per 80 min
+          nl: per 80 min
   - name: "10x block (80 min)"
     options:
-      - { amount: "220", currency: EUR, note: "€ 30,00 discount" }
+      - amount: "220"
+        currency: EUR
+        note:
+          en: "€ 30,00 discount"
+          nl: "€ 30,00 korting"
 
 facilities:
   - Rental (skis, wakeboard, wetsuit)

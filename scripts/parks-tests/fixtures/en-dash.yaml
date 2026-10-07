@@ -1,5 +1,7 @@
 version: 1
 id: en-dash
 name: Fixture Park
-location: { lat: 52.0, lon: 5.0 }
+location:
+  lat: 52.0
+  lon: 5.0
 description: Open May–September.

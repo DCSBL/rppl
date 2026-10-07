@@ -1,0 +1,7 @@
+version: 1
+id: flow-comment
+name: Fixture Park
+location: {
+  lat: 52.0,  # a comment inside the collection would be lost
+  lon: 5.0
+}

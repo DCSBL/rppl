@@ -396,8 +396,6 @@ extension WatchSessionController {
         lastPersistedWaterTempAt = nil
         lastLoggedWaterTempC = nil
         waterTempNeedsBoutSample = latestWaterState == "submerged"
-        waterTempSum = 0
-        waterTempCount = 0
         averageWaterTemperatureCelsius = nil
     }
 
@@ -551,14 +549,12 @@ extension WatchSessionController {
         sessionWaterSamples.append(sample)
         lastPersistedWaterTempAt = now
         waterTempNeedsBoutSample = false
-        waterTempSum += temp
-        waterTempCount += 1
-        averageWaterTemperatureCelsius = waterTempSum / Double(waterTempCount)
+        averageWaterTemperatureCelsius = WaterTemperatureSummary.make(from: sessionWaterSamples)?.currentCelsius
 
         let jumped = lastLoggedWaterTempC.map { abs($0 - temp) >= Self.waterTempLogDeltaC } ?? true
         if isBoutStart || jumped {
             lastLoggedWaterTempC = temp
-            WakeLog.debug(.water, String(format: "waterTemp %.1f C n=%d", temp, waterTempCount))
+            WakeLog.debug(.water, String(format: "waterTemp %.1f C n=%d", temp, sessionWaterSamples.count))
         }
     }
 

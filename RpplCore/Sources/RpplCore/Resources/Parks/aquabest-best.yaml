@@ -26,53 +26,122 @@ location:
   lon: 5.438156
 
 # Nearest station that still reports (~34 km); closer ones stopped reporting.
-water_temperature: { provider: rws_nl, station_id: lith.boven }
+water_temperature:
+  provider: rws_nl
+  station_id: lith.boven
 
 phone: +31 (0)499 392 121
 email: info@cableparkaquabest.nl
 website: https://www.cableparkaquabest.nl
 links:
-  - { kind: booking, url: "https://www.cableparkaquabest.nl/book-online" }
-  - { kind: instagram, url: "https://www.instagram.com/cableparkaquabest/" }
-  - { kind: facebook, url: "https://www.facebook.com/cableparkaquabest" }
-  - { kind: youtube, url: "https://www.youtube.com/channel/UCaFERwQH-UVJ8cVWgQnb8kg?view_as=subscriber" }
-  - { kind: tripadvisor, url: "https://www.tripadvisor.nl/Attraction_Review-g811097-d4550043-Reviews-Cablepark_Aquabest-Best_North_Brabant_Province.html" }
+  - kind: booking
+    url: "https://www.cableparkaquabest.nl/book-online"
+  - kind: instagram
+    url: "https://www.instagram.com/cableparkaquabest/"
+  - kind: facebook
+    url: "https://www.facebook.com/cableparkaquabest"
+  - kind: youtube
+    url: "https://www.youtube.com/channel/UCaFERwQH-UVJ8cVWgQnb8kg?view_as=subscriber"
+  - kind: tripadvisor
+    url: "https://www.tripadvisor.nl/Attraction_Review-g811097-d4550043-Reviews-Cablepark_Aquabest-Best_North_Brabant_Province.html"
 
 cables:
   - name: Cable
     direction: ccw
     length_m: 800
     points:
-      - { lat: 51.5001765898984, lon: 5.43920040715574 }
-      - { lat: 51.4988605085168, lon: 5.43528581219675 }
-      - { lat: 51.4980817041817, lon: 5.43606003723077 }
-      - { lat: 51.4994257510478, lon: 5.43984621561974 }
+      - lat: 51.5001765898984
+        lon: 5.43920040715574
+      - lat: 51.4988605085168
+        lon: 5.43528581219675
+      - lat: 51.4980817041817
+        lon: 5.43606003723077
+      - lat: 51.4994257510478
+        lon: 5.43984621561974
     description: >-
       4-mast cable ski/wakeboard loop with 10 tow points ("meenemers") and a course of
       obstacles (kickers, rails, boxes) for jumps and tricks.
   - name: Training cable
     direction: "2.0"
     points:
-      - { lat: 51.5002104282456, lon: 5.43815134575968 }
-      - { lat: 51.4995340688178, lon: 5.4361968047478 }
+      - lat: 51.5002104282456
+        lon: 5.43815134575968
+      - lat: 51.4995340688178
+        lon: 5.4361968047478
     description: >-
       2-mast cable trainer used for beginner instruction and the Saturday/Sunday morning
       wakeboard clinic. Opening hours depend on reservation volume. Call ahead to confirm.
 
 opening:
   booking: optional
-  booking_minutes: [120]
+  booking_minutes:
+    - 120
   note: >-
     Reserve online to secure a spot; standard blocks are 2 hours, with a 4-hour or day-pass
     upgrade payable on-site. The cable only runs with at least 1 paying customer or 3 season-pass
     holders present, closes early if that drops within 1.5h of closing, and always closes by
     sunset. Hours may change for weather (see Facebook/Instagram).
   rules:
-    - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [tue, thu], open: "16:00", close: "21:00" }
-    - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [wed, fri], open: "16:00", close: "20:00" }
-    - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [sat], open: "13:00", close: "19:00" }
-    - { label: Regular season, months: [3, 4, 5, 6, 7, 8, 9], days: [sun], open: "11:00", close: "19:00" }
-    - { months: [10], days: [weekend], open: "11:00", close: "13:00" }
+    - label: Regular season
+      months:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - tue
+        - thu
+      open: "16:00"
+      close: "21:00"
+    - label: Regular season
+      months:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - wed
+        - fri
+      open: "16:00"
+      close: "20:00"
+    - label: Regular season
+      months:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - sat
+      open: "13:00"
+      close: "19:00"
+    - label: Regular season
+      months:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - sun
+      open: "11:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "11:00"
+      close: "13:00"
 
 # No prices: the park publishes them as images.
 

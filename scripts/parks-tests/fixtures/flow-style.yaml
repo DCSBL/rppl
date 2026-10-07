@@ -1,0 +1,15 @@
+version: 1
+id: flow-style
+name: Fixture Park
+languages: [nl, en]
+# Kept as it is: comments outside a flow collection survive the conversion.
+location: { lat: 52.0, lon: 5.0 }
+opening:
+  rules:
+    - { months: [9], days: [weekdays, sat], open: "14:00", close: "20:00" }
+prices:
+  - name: Skis
+    options:
+      - { amount: "15", currency: EUR, per: { nl: "per 2 uur, incl. vest", en: per 2 hours, } }
+description: >-
+  Braces { like this } and [ these ] inside text are not collections.

@@ -28,13 +28,8 @@ private enum AppTabIcons {
 struct ContentView: View {
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
-    @State private var parksNavigation = ParksNavigationRequest()
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
-    #if PARK_ARRIVAL_NOTIFICATIONS
-    @State private var parkArrival = ParkArrivalController.shared
-    @State private var showParkArrivalExplainer = false
-    #endif
     @State private var showICloudImport = false
     @State private var isManualICloudImport = false
     @State private var manualImportSummaries: [RemoteSessionSummary] = []
@@ -52,7 +47,7 @@ struct ContentView: View {
             }
 
             Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
-                ParksView(navigation: $parksNavigation)
+                ParksView()
             }
 
             Tab(value: AppTab.app) {
@@ -149,21 +144,6 @@ struct ContentView: View {
         } message: {
             Text("This session is already in your logbook.")
         }
-        #if PARK_ARRIVAL_NOTIFICATIONS
-        // `initial: true` covers a cold launch from the tap, where the arrival is set before this view appears.
-        .onChange(of: parkArrival.pendingArrival, initial: true) { _, arrival in
-            guard let arrival else { return }
-            selectedTab = .parks
-            parksNavigation.openParkId = arrival.parkID
-            if arrival.isFirstTime {
-                showParkArrivalExplainer = true
-            }
-            parkArrival.consumePendingArrival()
-        }
-        .sheet(isPresented: $showParkArrivalExplainer) {
-            ParkArrivalExplainerView(onDismiss: { showParkArrivalExplainer = false })
-        }
-        #endif
     }
 
     private func presentManualImport() {

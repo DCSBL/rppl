@@ -1,36 +1,52 @@
 version: 1
 id: beavercreek-roermond
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl, de) and Dutch and German variants of per and note
 
 name: Beaver Creek Wake Park Roermond
+languages:
+  - en
+  - nl
+  - de
 address: De Weerd 52, 6041 TK Roermond
 timezone: Europe/Amsterdam
-location: { lat: 51.206912007, lon: 5.972829739 }
+location:
+  lat: 51.206912007
+  lon: 5.972829739
 
 email: info@wake-park.nl
 website: https://www.wake-park.nl
 wakesys: true
 
 links:
-  - { kind: booking, url: "https://wake-park.wakesys.com/browser/index.php?page=book_ride_select_boat_or_cable&event_type_ID=773&transportation_name=Full%20Size%20Cable" }
-  - { kind: instagram, url: "https://www.instagram.com/wakeparkroermond/" }
-  - { kind: facebook, url: "https://www.facebook.com/wakeparkroermond/" }
+  - kind: booking
+    url: "https://wake-park.wakesys.com/browser/index.php?page=book_ride_select_boat_or_cable&event_type_ID=773&transportation_name=Full%20Size%20Cable"
+  - kind: instagram
+    url: "https://www.instagram.com/wakeparkroermond/"
+  - kind: facebook
+    url: "https://www.facebook.com/wakeparkroermond/"
 
 cables:
   - name: Cable
     direction: ccw
     points:
-      - { lat: 51.207016626, lon: 5.972208024 }
-      - { lat: 51.208319831, lon: 5.9718247 }
-      - { lat: 51.208521512, lon: 5.97048271 }
-      - { lat: 51.20777533, lon: 5.969784096 }
-      - { lat: 51.206609903, lon: 5.971250944 }
+      - lat: 51.207016626
+        lon: 5.972208024
+      - lat: 51.208319831
+        lon: 5.9718247
+      - lat: 51.208521512
+        lon: 5.97048271
+      - lat: 51.20777533
+        lon: 5.969784096
+      - lat: 51.206609903
+        lon: 5.971250944
     description: Full size cable, runs at 30 km/h in regular operation.
 
 opening:
@@ -43,34 +59,103 @@ opening:
 prices:
   - name: Ticket
     options:
-      - { amount: "26", currency: EUR, per: hour, note: "from price, online booking up to 48 hours ahead" }
-      - { amount: "32", currency: EUR, per: 2 hours, note: "from price, online booking up to 48 hours ahead" }
-      - { amount: "42", currency: EUR, per: day, note: "from price, online booking up to 48 hours ahead" }
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
+      - amount: "32"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+          de: 2 Stunden
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
+      - amount: "42"
+        currency: EUR
+        per: day
+        note:
+          en: "from price, online booking up to 48 hours ahead"
+          nl: vanafprijs bij online boeken tot 48 uur vóór aanvang
+          de: ab-Preis bei Online-Buchung bis 48 Stunden vor Beginn
   - name: Booking within 48 hours
     options:
-      - { amount: "3", currency: EUR, note: surcharge per ticket }
+      - amount: "3"
+        currency: EUR
+        note:
+          en: surcharge per ticket
+          nl: toeslag per ticket
+          de: Aufpreis pro Ticket
   - name: RFID wristband
     options:
-      - { amount: "6", currency: EUR, note: one time }
+      - amount: "6"
+        currency: EUR
+        note:
+          en: one time
+          nl: eenmalig
+          de: einmalig
   - name: Wetsuit rental
     options:
-      - { amount: "6", currency: EUR, per: day, note: shorty }
-      - { amount: "12", currency: EUR, per: day, note: full suit }
+      - amount: "6"
+        currency: EUR
+        per: day
+        note:
+          en: shorty
+          nl: shorty
+          de: Shorty
+      - amount: "12"
+        currency: EUR
+        per: day
+        note:
+          en: full suit
+          nl: full suit
+          de: Fullsuit
   - name: Wakeboard rental
     options:
-      - { amount: "12", currency: EUR, per: day, note: Easy Up }
-      - { amount: "22", currency: EUR, per: day, note: Easy Ride }
+      - amount: "12"
+        currency: EUR
+        per: day
+        note:
+          en: Easy Up
+          nl: Easy Up
+          de: Easy Up
+      - amount: "22"
+        currency: EUR
+        per: day
+        note:
+          en: Easy Ride
+          nl: Easy Ride
+          de: Easy Ride
   - name: Obstacle board rental
     options:
-      - { amount: "22", currency: EUR, per: day }
-      - { amount: "32", currency: EUR, per: day }
+      - amount: "22"
+        currency: EUR
+        per: day
+      - amount: "32"
+        currency: EUR
+        per: day
   - name: Helmet rental
     options:
-      - { amount: "3", currency: EUR, per: day }
-      - { amount: "5", currency: EUR, per: day }
+      - amount: "3"
+        currency: EUR
+        per: day
+      - amount: "5"
+        currency: EUR
+        per: day
   - name: Coaching
     options:
-      - { amount: "39", currency: EUR, per: hour, note: plus ticket and equipment }
+      - amount: "39"
+        currency: EUR
+        per: hour
+        note:
+          en: plus ticket and equipment
+          nl: plus ticket en materiaal
+          de: zzgl. Ticket und Equipment
 
 facilities:
   - Rental (wetsuit, wakeboard, obstacle board, helmet)

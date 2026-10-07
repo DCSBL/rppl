@@ -113,10 +113,7 @@ public enum SessionStatsBuilder {
         }()
 
         let highlightedSets = HighlightAssigner.assignSetHighlights(sets)
-        let waterAverage: Double? = {
-            guard !water.isEmpty else { return nil }
-            return water.map(\.celsius).reduce(0, +) / Double(water.count)
-        }()
+        let waterSummary = WaterTemperatureSummary.make(from: water)
 
         return SessionStats(
             startedAt: sessionStart,
@@ -130,7 +127,8 @@ public enum SessionStatsBuilder {
             inactiveDuration: inactiveDuration,
             ridingInactiveRatio: ratio,
             sets: highlightedSets,
-            averageWaterTemperatureCelsius: waterAverage,
+            averageWaterTemperatureCelsius: waterSummary?.currentCelsius,
+            waterTemperatureRangeCelsius: waterSummary?.range,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
             cableSpeedKmh: sessionCableSpeedKmh
         )
@@ -145,12 +143,14 @@ public enum SessionStatsBuilder {
             totalDuration: max(0, end.timeIntervalSince(manifest.startedAt)),
             totalDistanceMeters: manual.distanceM ?? 0,
             activeEnergyKilocalories: nil,
-            setCount: manual.setCount,
+            setCount: manual.setCount ?? 0,
             ridingDuration: 0,
             inactiveDuration: 0,
             ridingInactiveRatio: 0,
             sets: [],
-            manualLapCount: manual.lapCount
+            manualLapCount: manual.lapCount ?? 0,
+            setCountUnknown: manual.setCount == nil,
+            lapCountUnknown: manual.lapCount == nil
         )
     }
 

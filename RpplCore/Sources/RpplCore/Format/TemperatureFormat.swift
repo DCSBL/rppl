@@ -18,5 +18,10 @@ public enum TemperatureFormat {
             .locale(locale)
         )
     }
+
+    /// "14° – 19°" (each end follows the device unit).
+    public static func celsiusRange(_ range: ClosedRange<Double>, locale: Locale = .autoupdatingCurrent) -> String {
+        "\(celsius(range.lowerBound, locale: locale)) – \(celsius(range.upperBound, locale: locale))"
+    }
 }
 #endif

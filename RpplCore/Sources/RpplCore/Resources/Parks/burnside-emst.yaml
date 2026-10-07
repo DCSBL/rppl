@@ -1,27 +1,39 @@
 version: 1
 id: burnside-emst
 created_at: 2026-10-05
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 history:
   - date: 2026-10-05
     description: initial, from burnsidecablepark.nl
   - date: 2026-10-06
     description: Park pin and cable layout traced on the map
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
 
 name: Burnside Cablepark
+languages:
+  - en
+  - nl
 address: Viskweekweg 3, 8166 KJ Emst
 timezone: Europe/Amsterdam
-location: { lat: 52.30984573, lon: 5.998621532 }
+location:
+  lat: 52.30984573
+  lon: 5.998621532
 
 cables:
   - name: Cable
     direction: ccw
     points:
-      - { lat: 52.31010921, lon: 5.999068967 }
-      - { lat: 52.308090296, lon: 6.000249723 }
-      - { lat: 52.307932288, lon: 6.002580796 }
-      - { lat: 52.309395715, lon: 6.003668965 }
-      - { lat: 52.31062162, lon: 6.001413274 }
+      - lat: 52.31010921
+        lon: 5.999068967
+      - lat: 52.308090296
+        lon: 6.000249723
+      - lat: 52.307932288
+        lon: 6.002580796
+      - lat: 52.309395715
+        lon: 6.003668965
+      - lat: 52.31062162
+        lon: 6.001413274
 
 # water_temperature left out: nearest still-reporting RWS station (eefde.sluis.beneden, ~23 km)
 # is on a river lock, not this water body.
@@ -30,7 +42,8 @@ phone: 0578 - 573 170
 email: info@burnsidecablepark.nl
 website: https://www.burnsidecablepark.nl
 links:
-  - { kind: facebook, url: "https://www.facebook.com/burnside.cablepark" }
+  - kind: facebook
+    url: "https://www.facebook.com/burnside.cablepark"
 
 opening:
   booking: optional
@@ -39,68 +52,228 @@ opening:
     cable can always be reserved by phone or email. Closed from November to March, except by
     reservation for groups.
   rules:
-    - { months: [4], days: [wed], open: "17:00", close: "20:00" }
-    - { months: [5], days: [tue, wed, thu, fri], open: "15:00", close: "20:00" }
-    - { months: [6], days: [tue, wed, thu, fri], open: "15:00", close: "21:00" }
-    - { label: July-August, months: [7, 8], days: [tue, wed, thu, fri], open: "12:00", close: "21:00" }
-    - { months: [9], days: [tue, wed, thu, fri], open: "15:00", close: "20:00" }
-    - { months: [4, 5, 6, 7, 8, 9], days: [sat, sun], open: "12:00", close: "20:00" }
-    - { months: [10], days: [sat, sun], open: "12:00", close: "17:00" }
+    - months:
+        - 4
+      days:
+        - wed
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "21:00"
+    - label: July-August
+      months:
+        - 7
+        - 8
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 10
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "17:00"
 
 prices:
   - name: "1.5 hours"
     options:
-      - { amount: "25", currency: EUR }
+      - amount: "25"
+        currency: EUR
   - name: "3 hours"
     options:
-      - { amount: "35", currency: EUR }
+      - amount: "35"
+        currency: EUR
   - name: Day pass
     options:
-      - { amount: "45", currency: EUR, note: "On very busy days a day pass can mean waiting when the dock is full" }
+      - amount: "45"
+        currency: EUR
+        note:
+          en: "On very busy days a day pass can mean waiting when the dock is full"
+          nl: Op superdrukke dagen moet je met een dagkaart wachten als de dock vol is
   - name: "Strip card 12 x 1.5 hours"
     options:
-      - { amount: "250", currency: EUR, note: "Can be shared with family or a group until used up" }
+      - amount: "250"
+        currency: EUR
+        note:
+          en: "Can be shared with family or a group until used up"
+          nl: "Te delen met familie of een groep, tot de kaart op is"
   - name: Season pass
     options:
-      - { amount: "850", currency: EUR, note: Adults }
-      - { amount: "650", currency: EUR, note: Kids up to 10 years }
+      - amount: "850"
+        currency: EUR
+        note:
+          en: Adults
+          nl: Volwassenen
+      - amount: "650"
+        currency: EUR
+        note:
+          en: Kids up to 10 years
+          nl: Kinderen t/m 10 jaar
   - name: Waterskis with life vest
     options:
-      - { amount: "0", currency: EUR, note: Free }
+      - amount: "0"
+        currency: EUR
+        note:
+          en: Free
+          nl: Gratis
   - name: Wakeboard with life vest
     options:
-      - { amount: "10", currency: EUR, note: "1.5 hours" }
-      - { amount: "15", currency: EUR, note: "3 hours" }
-      - { amount: "25", currency: EUR, note: Day }
+      - amount: "10"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "15"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "25"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Sliderboard with helmet and life vest
     options:
-      - { amount: "25", currency: EUR, note: "1.5 hours" }
-      - { amount: "35", currency: EUR, note: "3 hours" }
-      - { amount: "45", currency: EUR, note: Day }
+      - amount: "25"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "35"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "45"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Kneeboard with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "10", currency: EUR, note: "3 hours" }
-      - { amount: "15", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "10"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "15"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Wakeskate with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "10", currency: EUR, note: "3 hours" }
-      - { amount: "15", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "10"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "15"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Stand up paddle board
     options:
-      - { amount: "20", currency: EUR, note: "1.5 hours" }
-      - { amount: "30", currency: EUR, note: "3 hours" }
-      - { amount: "40", currency: EUR, note: Day }
+      - amount: "20"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "30"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "40"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Wetsuit with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "7.50", currency: EUR, note: "3 hours" }
-      - { amount: "10", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note:
+          en: "1.5 hours"
+          nl: "1,5 uur"
+      - amount: "7.50"
+        currency: EUR
+        note:
+          en: "3 hours"
+          nl: 3 uur
+      - amount: "10"
+        currency: EUR
+        note:
+          en: Day
+          nl: Dag
   - name: Parking
     options:
-      - { amount: "7", currency: EUR, per: day, note: "On the Leisurelands grounds, first 15 minutes free" }
-      - { amount: "6", currency: EUR, per: day, note: "Exit ticket at the park's cashier" }
+      - amount: "7"
+        currency: EUR
+        per: day
+        note:
+          en: "On the Leisurelands grounds, first 15 minutes free"
+          nl: "Op het terrein van Leisurelands, eerste 15 minuten gratis"
+      - amount: "6"
+        currency: EUR
+        per: day
+        note:
+          en: "Exit ticket at the park's cashier"
+          nl: Uitrijkaart bij de kassa van het park
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

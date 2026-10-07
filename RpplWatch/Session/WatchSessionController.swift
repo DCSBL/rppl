@@ -135,7 +135,7 @@ final class WatchSessionController: NSObject {
     var isSetOngoing: Bool { liveSetTracker.isSetOngoing }
     /// Ultra water-temp hardware present. Drives hide vs `- C` on inactive overview.
     var waterTemperatureAvailable = false
-    /// Running mean of persisted submerged samples this session.
+    /// Rolling mean of the latest persisted submerged samples (`WaterTemperatureSummary`).
     var averageWaterTemperatureCelsius: Double?
     /// Measured average when available, else the park-station estimate (flagged `isEstimate`).
     var waterTemperatureDisplay: WaterTemperatureDisplay? {
@@ -214,8 +214,6 @@ final class WatchSessionController: NSObject {
     var lastPersistedWaterTempAt: Date?
     var lastLoggedWaterTempC: Double?
     var waterTempNeedsBoutSample = false
-    var waterTempSum = 0.0
-    var waterTempCount = 0
     var detectionEngine = DetectionEngine()
     var locationBuffer: [LocationSample] = []
     var motionBuffer: [MotionSample] = []

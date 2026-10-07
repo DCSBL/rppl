@@ -7,6 +7,7 @@ struct AppInfoView: View {
 
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
+    @Environment(\.openURL) private var openURL
     @State private var showDisableDeleteConfirm = false
     @State private var showDebug = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
@@ -30,25 +31,15 @@ struct AppInfoView: View {
 
                 PhonePermissionsListSection(permissions: permissions)
 
-                #if PARK_ARRIVAL_NOTIFICATIONS
-                ParkArrivalNotificationsSection()
-                #endif
-
                 Section {
                     Toggle("Water temperature", isOn: $waterTemperatureEnabled)
                         .tint(Color.rpplAccent)
                 } header: {
                     Text("Park water temperature")
                 } footer: {
-                    #if PARK_ARRIVAL_NOTIFICATIONS
-                    Text(
-                        "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen and the arrival notification. The reading is an estimate."
-                    )
-                    #else
                     Text(
                         "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate."
                     )
-                    #endif
                 }
 
                 if AppReleaseChannel.allowsDebugTools {
@@ -72,6 +63,14 @@ struct AppInfoView: View {
 
                 Section {
                     iCloudDriveRow
+
+                    if let folderURL = iCloud.filesAppFolderURL {
+                        Button {
+                            openURL(folderURL)
+                        } label: {
+                            Label("Show folder", systemImage: "folder")
+                        }
+                    }
 
                     if let status = iCloud.statusMessage {
                         Text(status)

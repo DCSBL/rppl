@@ -149,15 +149,46 @@ public struct ParkPriceOption: Codable, Equatable, Sendable {
     public var per: String?
     /// Who or what this amount is for ("kids up to 15", "own gear").
     public var note: String?
+    /// Per-language variants of `per` / `note`, keyed by language tag (`nl`, `fr-BE`). When set, `per`
+    /// / `note` hold the English variant (else the first by tag) for code that wants one string;
+    /// show text through `resolvedPer` / `resolvedNote`. nil when the YAML is a plain string.
+    public var perByLanguage: [String: String]?
+    public var noteByLanguage: [String: String]?
 
-    public init(amount: String? = nil, currency: String? = nil, per: String? = nil, note: String? = nil) {
+    public init(
+        amount: String? = nil, currency: String? = nil, per: String? = nil, note: String? = nil,
+        perByLanguage: [String: String]? = nil, noteByLanguage: [String: String]? = nil
+    ) {
         self.amount = amount
         self.currency = currency
         self.per = per
         self.note = note
+        self.perByLanguage = perByLanguage
+        self.noteByLanguage = noteByLanguage
     }
 
     enum CodingKeys: String, CodingKey { case amount, currency, per, note }
+
+    /// `per` in the reader's language, else the park's main language, else as written.
+    public func resolvedPer(
+        readerLanguages: [String] = ParkLanguage.readerLanguages, parkLanguages: [String]? = nil
+    ) -> String? {
+        ParkLanguage.resolve(perByLanguage, fallback: per, readerLanguages: readerLanguages, parkLanguages: parkLanguages)
+    }
+
+    public func resolvedNote(
+        readerLanguages: [String] = ParkLanguage.readerLanguages, parkLanguages: [String]? = nil
+    ) -> String? {
+        ParkLanguage.resolve(noteByLanguage, fallback: note, readerLanguages: readerLanguages, parkLanguages: parkLanguages)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(amount, forKey: .amount)
+        try container.encodeIfPresent(currency, forKey: .currency)
+        try LocalizedField.encode(&container, text: per, variants: perByLanguage, forKey: .per)
+        try LocalizedField.encode(&container, text: note, variants: noteByLanguage, forKey: .note)
+    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -170,8 +201,8 @@ public struct ParkPriceOption: Codable, Equatable, Sendable {
             amount = nil
         }
         currency = try container.decodeIfPresent(String.self, forKey: .currency)
-        per = try container.decodeIfPresent(String.self, forKey: .per)
-        note = try container.decodeIfPresent(String.self, forKey: .note)
+        (per, perByLanguage) = try LocalizedField.decode(container, forKey: .per)
+        (note, noteByLanguage) = try LocalizedField.decode(container, forKey: .note)
     }
 }
 
@@ -259,6 +290,9 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var basedOnRevision: Int?
 
     public var name: String
+    /// Languages the park works in, main language first (BCP-47: `nl-BE`, `fr-BE`, `en`). Long text
+    /// is written in the first one; short text may carry a variant per language. nil = as written.
+    public var languages: [String]?
     public var location: ParkCoordinate
     public var address: String?
     /// IANA identifier used to resolve "today" (defaults to Europe/Amsterdam).
@@ -280,7 +314,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var wakesys: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case version, id, history, author, name, location, address, timezone, cables, opening
+        case version, id, history, author, name, languages, location, address, timezone, cables, opening
         case phone, email, website, prices, links, description, facilities, wakesys
         case createdAt = "created_at"
         case updatedAt = "updated_at"
@@ -293,6 +327,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         version: Int = Park.currentVersion,
         id: String,
         name: String,
+        languages: [String]? = nil,
         location: ParkCoordinate,
         address: String? = nil,
         timezone: String? = nil,
@@ -317,6 +352,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.version = version
         self.id = id
         self.name = name
+        self.languages = languages
         self.location = location
         self.address = address
         self.timezone = timezone
