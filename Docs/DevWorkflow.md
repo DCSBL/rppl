@@ -217,7 +217,7 @@ The real install (`nl.dcsbl.rppl`) holds real sessions. To test first-run onboar
 | App Group | `group.nl.dcsbl.rppl` | `group.nl.dcsbl.rppl.dev` |
 | iCloud container | `iCloud.nl.dcsbl.rppl` | `iCloud.nl.dcsbl.rppl.dev` |
 
-How it is wired: the `Dev` build configuration (copy of Debug, compile flag `RPPL_DEV`) sets `RPPL_APP_GROUP_ID` and `RPPL_ICLOUD_CONTAINER` at project level. Entitlements and `Info.plist` read those settings; `AppConstants.appGroupID` / `iCloudContainerIdentifier` read the Info.plist keys `RpplAppGroupID` / `RpplICloudContainerID` and fall back to prod when absent. The Watch Debug tab (detection simulation, screen size) and debug discard are compiled to show only under `RPPL_DEV`.
+How it is wired: the `Dev` build configuration (copy of Debug, compile flag `RPPL_DEV`) sets `RPPL_APP_GROUP_ID` and `RPPL_ICLOUD_CONTAINER` at project level. Entitlements and `Info.plist` read those settings; `AppConstants.appGroupID` / `iCloudContainerIdentifier` read the Info.plist keys `RpplAppGroupID` / `RpplICloudContainerID` and fall back to prod when absent. The Watch Debug tab (detection simulation, screen size) and debug discard are compiled to show only under `RPPL_DEV`. Plist keys do not take build settings, so the Dev iCloud folder name lives in `Rppl/Info-Dev.plist` (Dev uses it instead of `Rppl/Info.plist`); release builds declare only the prod container.
 
 **One-time setup** (Apple Developer portal, or let Xcode automatic signing create it on the first Dev build):
 

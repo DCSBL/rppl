@@ -68,6 +68,7 @@
 		CCF3D6B4302921A800AF3518 /* Exceptions for "Rppl" folder in "Rppl" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Info-Dev.plist,
 				Info.plist,
 			);
 			target = CCF3D690302921A400AF3518 /* Rppl */;
@@ -891,7 +892,7 @@
 				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Rppl/Info.plist;
+				INFOPLIST_FILE = Rppl/Info-Dev.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
