@@ -5480,38 +5480,6 @@
         }
       }
     },
-    "Park: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park: %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park: %@"
-          }
-        }
-      }
-    },
-    "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n\nNotes:\n" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hi Rppl,\n\nHere is a park I added or updated. The YAML file is attached.\n\nNotes:\n"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoi Rppl,\n\nHierbij een park dat ik heb toegevoegd of bijgewerkt. Het YAML-bestand zit in de bijlage.\n\nOpmerkingen:\n"
-          }
-        }
-      }
-    },
     "Add point" : {
       "localizations" : {
         "en" : {
@@ -10572,6 +10540,102 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Neem een parkdag op met Apple Watch, of voeg een session handmatig toe met de + knop."
+          }
+        }
+      }
+    },
+    "Edited park: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edited park: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewerkt park: %@"
+          }
+        }
+      }
+    },
+    "Hi there," : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi there,"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoi,"
+          }
+        }
+      }
+    },
+    "I edited some information about %@. The YAML file is attached. Can you review this so it can be shown to other riders?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I edited some information about %@. The YAML file is attached. Can you review this so it can be shown to other riders?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ik heb wat informatie over %@ aangepast. Het YAML-bestand zit in de bijlage. Kunnen jullie dit controleren zodat het aan andere riders getoond kan worden?"
+          }
+        }
+      }
+    },
+    "I edited some information about %@. This is sent as base64 below. Can you review this so it can be shown to other riders?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I edited some information about %@. This is sent as base64 below. Can you review this so it can be shown to other riders?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ik heb wat informatie over %@ aangepast. Dit is hieronder als base64 meegestuurd. Kunnen jullie dit controleren zodat het aan andere riders getoond kan worden?"
+          }
+        }
+      }
+    },
+    "The following data was changed: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The following data was changed: %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De volgende gegevens zijn aangepast: %@."
+          }
+        }
+      }
+    },
+    "Thanks!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thanks!"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedankt!"
           }
         }
       }
