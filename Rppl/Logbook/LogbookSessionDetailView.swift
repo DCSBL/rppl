@@ -75,7 +75,7 @@ struct LogbookSessionDetailView: View {
     /// Flags can be edited on a stored session that has sets to flag.
     private var canEditFlags: Bool {
         guard case .store = source, loadPhase == .ready else { return false }
-        return flagSetCount > 0
+        return isManual || flagSetCount > 0
     }
 
     /// Detected sets for a tracked session; the typed-in set total for a manual one.
@@ -105,10 +105,16 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     if isManual {
                         ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
+                    if isEditingFlags {
+                        Button("Edit session details", systemImage: "slider.horizontal.3") { showEditor = true }
+                            .buttonStyle(.bordered)
+                            .frame(maxWidth: .infinity)
+                    }
                     } else {
                         sessionMap
                     }
                     parkLink
+                        .disabled(isEditingFlags)
                     sessionStatsCard
                     if isManual { manualSetsSection } else { setsSection }
                 }
@@ -138,7 +144,7 @@ struct LogbookSessionDetailView: View {
         }
         .toolbar {
             if isEditingFlags {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Discard", systemImage: "xmark") {
                         if flagDraft.isDirty { showsDiscardDialog = true } else { endFlagEditing() }
                     }
@@ -674,16 +680,15 @@ struct LogbookSessionDetailView: View {
     /// Manual sessions: one flag spot per typed-in set, nothing else.
     @ViewBuilder
     private var manualSetsSection: some View {
-        if let count = manifest?.manual?.setCount, count > 0 {
+        // Read mode lists only the sets that carry flags; edit mode offers every set.
+        let count = manifest?.manual?.setCount ?? 0
+        let indexes = (1...max(count, 1)).filter { count > 0 && (isEditingFlags || !flags(forSet: $0).isEmpty) }
+        if !indexes.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Sets")
                     .font(.title3.bold())
                     .foregroundStyle(Color.rpplText)
-                if isEditingFlags {
-                    Button("Edit details", systemImage: "slider.horizontal.3") { showEditor = true }
-                        .font(.subheadline)
-                }
-                ForEach(1...count, id: \.self) { index in
+                ForEach(indexes, id: \.self) { index in
                     ManualSetCard(index: index, flags: flags(forSet: index), flagging: flagging(forSet: index))
                 }
             }

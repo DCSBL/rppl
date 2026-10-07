@@ -33,6 +33,7 @@ enum SetFlagLabels {
         case "sit_start": String(localized: "Sit start")
         case "slide_start": String(localized: "Slide start")
         case "cable_snap": String(localized: "Cable snap")
+        case "cable_stopped": String(localized: "Cable stopped")
         case "clean_exit": String(localized: "Clean exit")
         case "dry_exit": String(localized: "Dry exit")
         case "fall": String(localized: "Fall")
@@ -55,7 +56,11 @@ enum SetFlagLabels {
     }
 
     static func sorted(_ flags: [String]) -> [String] {
-        flags.sorted { label($0).localizedCaseInsensitiveCompare(label($1)) == .orderedAscending }
+        flags.sorted {
+            let (x, y) = (SetFlags.isCatchAll($0), SetFlags.isCatchAll($1))
+            if x != y { return y }
+            return label($0).localizedCaseInsensitiveCompare(label($1)) == .orderedAscending
+        }
     }
 }
 

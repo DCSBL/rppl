@@ -17,7 +17,7 @@ public enum SetFlags {
     public static let starts = [
         "clean_start", "failed_start", "jump_start", "nollie_start", "other_start", "sit_start", "slide_start"
     ]
-    public static let exits = ["cable_snap", "clean_exit", "dry_exit", "fall", "wipeout"]
+    public static let exits = ["cable_snap", "cable_stopped", "clean_exit", "dry_exit", "fall", "wipeout"]
     public static let tricks = [
         "180", "360", "backroll", "box", "failed_jump", "frontroll", "kicker", "new_trick", "ollie", "rail",
         "raley", "switch", "tantrum"
@@ -66,10 +66,16 @@ public enum SetFlags {
         return ordered(result)
     }
 
+    /// "Other" style flags (`other_start`) always sit last in their group, whatever the alphabet says.
+    public static func isCatchAll(_ flag: String) -> Bool { flag.hasPrefix("other_") }
+
     public static func ordered(_ flags: [String]) -> [String] {
         flags.sorted {
             let (a, b) = (kind(of: $0).rawValue, kind(of: $1).rawValue)
-            return a != b ? a < b : $0.localizedCaseInsensitiveCompare($1) == .orderedAscending
+            if a != b { return a < b }
+            let (x, y) = (isCatchAll($0), isCatchAll($1))
+            if x != y { return y }
+            return $0.localizedCaseInsensitiveCompare($1) == .orderedAscending
         }
     }
 

@@ -41,6 +41,14 @@ struct SetFlagsTests {
         #expect(flags == ["dry_exit", "backroll", "rail"])
     }
 
+    @Test func catchAllSortsLastAndCableStoppedIsAnExit() {
+        let ordered = SetFlags.ordered(["other_start", "slide_start", "clean_start", "tantrum"])
+        #expect(ordered == ["clean_start", "slide_start", "other_start", "tantrum"])
+        #expect(SetFlags.kind(of: "cable_stopped") == .exit)
+        let flags = SetFlags.toggling("cable_stopped", in: ["dry_exit"])
+        #expect(flags == ["cable_stopped"])
+    }
+
     @Test func draftIsDirtyOnlyWhenDifferentAndTogglingBackIsClean() {
         var draft = SetFlagDraft(saved: ["1": ["clean_exit"]])
         #expect(!draft.isDirty)

@@ -10864,22 +10864,6 @@
         }
       }
     },
-    "Edit details" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit details"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details aanpassen"
-          }
-        }
-      }
-    },
     "Exit" : {
       "localizations" : {
         "en" : {
@@ -11100,6 +11084,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tantrum"
+          }
+        }
+      }
+    },
+    "Cable stopped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable stopped"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable stopped"
+          }
+        }
+      }
+    },
+    "Edit session details" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit session details"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessiondetails aanpassen"
           }
         }
       }
