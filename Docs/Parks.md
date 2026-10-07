@@ -132,7 +132,7 @@ Rules and slots share optional selectors, all of which must match a date:
 - Today shows "Open from … to …", today's available blocks as chips and the current temperature and wind (WeatherKit at the park location; hidden when unavailable).
 - Recurring special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. Unplanned openings, closures and events use `exceptions` instead.
 - Today shows notices for the day's exceptions under the hours; a park detail with announced exceptions still ahead gets an "Upcoming changes" card. The list chip reads "Closed · <label>" when a labelled `closed` exception is the reason.
-- Cables are called "full size" (`cw`/`ccw`) or "2.0" (`"2.0"`). The map shows an arrow on each start point, pointing towards the next traced point.
+- Cables are called "full size" (`cw`/`ccw`) or "2.0". The map shows an arrow on each start point, pointing towards the next traced point.
 
 ### Exceptions
 
