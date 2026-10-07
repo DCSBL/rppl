@@ -6554,22 +6554,6 @@
         }
       }
     },
-    "Rppl asks only when a feature needs it." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl asks only when a feature needs it."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rppl vraagt alleen toestemming als een functie het nodig heeft."
-          }
-        }
-      }
-    },
     "Notification permission is needed for the park arrival notifications feature." : {
       "localizations" : {
         "en" : {
