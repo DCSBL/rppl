@@ -208,19 +208,29 @@ struct ManualSessionEditorView: View {
 /// A count with + / - buttons and a number you can type.
 private struct CountField: View {
     let title: LocalizedStringKey
-    @Binding var value: Int
+    @Binding var value: Int?
+
+    /// "-" (nil, no data) sits one step below 0: -, 0, 1, 2, ...
+    private var stepperValue: Binding<Int> {
+        Binding(
+            get: { value ?? -1 },
+            set: { value = $0 < 0 ? nil : min($0, 999) }
+        )
+    }
 
     var body: some View {
-        Stepper(value: $value, in: 0...999) {
+        Stepper(value: stepperValue, in: -1...999) {
             HStack {
                 Text(title)
                 Spacer()
-                TextField("0", value: $value, format: .number)
+                TextField("-", value: $value, format: .number)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 64)
             }
         }
-        .onChange(of: value) { _, new in value = min(max(new, 0), 999) }
+        .onChange(of: value) { _, new in
+            if let new, new < 0 || new > 999 { value = min(max(new, 0), 999) }
+        }
     }
 }

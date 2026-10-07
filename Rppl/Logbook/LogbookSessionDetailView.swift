@@ -538,8 +538,8 @@ struct LogbookSessionDetailView: View {
     private func setsTile(_ stats: SessionStats, start: Date, end: Date) -> some View {
         InfoTile("Sets & laps", metric: .sets) {
             HStack(alignment: .firstTextBaseline, spacing: 16) {
-                MetricValue("\(stats.setCount)", caption: "Sets")
-                StatChip(metric: .laps, value: "\(stats.totalLapCount)", caption: "Laps")
+                MetricValue(LogbookFormatting.countValue(stats.knownSetCount), caption: "Sets")
+                StatChip(metric: .laps, value: LogbookFormatting.countValue(stats.knownLapCount), caption: "Laps")
                 Spacer(minLength: 0)
             }
             if let tallies = manifest?.manual?.tallies, tallies.count > 1 {

@@ -4,10 +4,11 @@ import Foundation
 /// derived stats (`SessionStatsBuilder`). Tracked sessions leave `SessionManifest.manual` nil.
 public struct ManualEntry: Codable, Equatable, Sendable {
     public struct Tally: Codable, Equatable, Sendable {
-        public var sets: Int
-        public var laps: Int
+        /// Nil = not known (a session logged long after the fact); distinct from a real 0.
+        public var sets: Int?
+        public var laps: Int?
 
-        public init(sets: Int = 0, laps: Int = 0) {
+        public init(sets: Int? = nil, laps: Int? = nil) {
             self.sets = sets
             self.laps = laps
         }
@@ -26,16 +27,23 @@ public struct ManualEntry: Codable, Equatable, Sendable {
         self.location = location
     }
 
-    public var setCount: Int { tallies.reduce(0) { $0 + $1.sets } }
-    public var lapCount: Int { tallies.reduce(0) { $0 + $1.laps } }
+    /// Sum of the known sets; nil when no cable has a known value.
+    public var setCount: Int? { Self.sum(tallies.map(\.sets)) }
+    /// Sum of the known laps; nil when no cable has a known value.
+    public var lapCount: Int? { Self.sum(tallies.map(\.laps)) }
+
+    private static func sum(_ values: [Int?]) -> Int? {
+        let known = values.compactMap { $0 }
+        return known.isEmpty ? nil : known.reduce(0, +)
+    }
 
     /// `laps x lap length` per ridden cable, tallies matched to cables by index. Nil when a ridden
     /// cable has no known length, or nothing was ridden.
     public static func distanceM(tallies: [Tally], cables: [ParkCable]) -> Double? {
         var total = 0.0
-        for (index, tally) in tallies.enumerated() where tally.laps > 0 {
+        for (index, tally) in tallies.enumerated() where (tally.laps ?? 0) > 0 {
             guard cables.indices.contains(index), let lap = cables[index].lapLengthM else { return nil }
-            total += Double(tally.laps) * lap
+            total += Double(tally.laps ?? 0) * lap
         }
         return total > 0 ? total : nil
     }

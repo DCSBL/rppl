@@ -607,12 +607,12 @@ private struct SessionCard: View {
 
     private var setsText: String {
         guard let stats = entry.stats else { return "—" }
-        return LogbookFormatting.setCount(stats.setCount)
+        return stats.knownSetCount.map(LogbookFormatting.setCount) ?? LogbookFormatting.unknownCount
     }
 
     private var lapsText: String {
         guard let stats = entry.stats else { return "—" }
-        return LogbookFormatting.lapCount(stats.totalLapCount)
+        return stats.knownLapCount.map(LogbookFormatting.lapCount) ?? LogbookFormatting.unknownCount
     }
 
     @ViewBuilder
