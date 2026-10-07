@@ -358,6 +358,16 @@ struct ParksTests {
         #expect(decoded == park)
     }
 
+    @Test func appWritesNativeBlockYAML() throws {
+        // The editor's files and "Send to Rppl" mails reach scripts/validate_parks.py, which rejects
+        // JSON-like `{ }` / `[ ]` collections (empty ones excepted).
+        let flowCollection = "(?m)(^|: |- )[\\[{](?![\\]}]$)"
+        for park in ParkCatalog.loadBundled() {
+            let yaml = try ParkCatalog.encode(park)
+            #expect(yaml.range(of: flowCollection, options: .regularExpression) == nil, "\(park.id) was written with flow style")
+        }
+    }
+
     @Test func userFileOverridesBundledById() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("parks-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

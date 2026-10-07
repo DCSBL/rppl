@@ -1,6 +1,6 @@
 # Parks
 
-The Parks tab lists cable parks (nearby or most visited; the Favourites filter narrows to starred parks) with a detail screen per park. Each park is one YAML file.
+The Parks tab lists cable parks (nearby or most visited; the Favourites filter narrows to starred parks) with a detail screen per park. Each park is one YAML file, written as native block-style YAML (no JSON-like `{ }` or `[ ]`).
 
 ## Data sources and rules
 
@@ -31,6 +31,7 @@ The Parks tab lists cable parks (nearby or most visited; the Favourites filter n
 
 `scripts/validate_parks.py` enforces these in CI ([Docs/DevWorkflow.md](DevWorkflow.md#validate-parks-linux)).
 
+- **Native YAML, block style only.** Write mappings and lists out with indentation, never as JSON-like `{ lat: 52.0, lon: 5.0 }` or `[nl, en]`. `python3 scripts/format_parks.py <file>` rewrites a file in place (comments, quoting and block text stay as they are; `--check` only reports) and the validator fails on flow style. The in-app editor and Share already write block style.
 - **Comments** only where they stop a reader from getting something wrong: an approximate pin, a water station far away, a direction that did not come from the park's site. At most 3 lines in a row, no URLs, no restating the schema. Sources go in the PR description and the `history` entry.
 - **Leave out what the app ignores or hides:** `author: Rppl` (the default credit is not shown), `numbered` without `slots`, `hours_unknown`, and a rule `label` that only repeats its month ("September"; the month is already the heading).
 - **A price name appears once**, with one option per amount (audience, season, gear, duration). **One link per kind.**
@@ -51,13 +52,18 @@ based_on_revision: 1              # optional, set alongside based_on_updated_at 
 created_at: 2026-09-24
 updated_at: 2026-09-24
 history:
-  - { date: 2026-09-24, description: initial }
+  - date: 2026-09-24
+    description: initial
 
 name: Project 7 Cablepark Rotterdam
-languages: [nl, en]               # optional: languages the park works in, main first (BCP-47: nl-BE, fr-BE, en)
+languages:                        # optional: languages the park works in, main first (BCP-47: nl-BE, fr-BE, en)
+  - nl
+  - en
 address: Kosboulevard 35, 3059 XZ Rotterdam
 timezone: Europe/Amsterdam        # used to resolve "today"; default Europe/Amsterdam
-location: { lat: 51.979207, lon: 4.573426 }
+location:
+  lat: 51.979207
+  lon: 4.573426
 phone: 010 - 2600 110
 email: info@project7cablepark.nl
 website: https://www.project7cablepark.nl
@@ -68,40 +74,73 @@ cables:
     description: optional text
     length_m: 760                 # optional; wins over the length computed from points
     points:                       # optional; listed in travel order, first point is the start
-      - { lat: 51.97933, lon: 4.57403 }
-      - { lat: 51.98027, lon: 4.57763, start: true }   # explicit start(s) when needed
+      - lat: 51.97933
+        lon: 4.57403
+      - lat: 51.98027
+        lon: 4.57763
+        start: true               # explicit start(s) when needed
 
 opening:
   booking: required               # required | optional | none
   numbered: true                  # with slots: false = blocks are plain start times (hourly), not "Block 3" (not shown in the editor)
-  booking_minutes: [60, 120]      # optional: bookable per 1 or 2 hours
+  booking_minutes:                # optional: bookable per 1 or 2 hours
+    - 60
+    - 120
   note: free text
   rules:                          # drop-in / open windows
-    - { months: [9], days: [weekdays], open: "14:00", close: "20:00" }
+    - months:
+        - 9
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
   slots:                          # fixed-start blocks
-    - { id: "3", start: "14:00", end: "15:30" }
+    - id: "3"
+      start: "14:00"
+      end: "15:30"
   exceptions:                     # optional one-offs on top of `rules`, see "Exceptions" below
-    - { kind: closed, label: Wind, dates: ["2026-09-25"] }
+    - kind: closed
+      label: Wind
+      dates:
+        - "2026-09-25"
 
 prices:                           # a name with one or more amounts
   - name: Skis
     options:
-      - { amount: "10", currency: EUR, per: hour }
-      - { amount: "15", currency: EUR, per: "2 hours" }   # or per: { nl: per 2 uur, en: per 2 hours }
+      - amount: "10"
+        currency: EUR
+        per: hour
+      - amount: "15"
+        currency: EUR
+        per: 2 hours              # or a map per language, see "Languages"
   - name: Day pass
     options:
-      - { amount: "38.50", currency: EUR, note: kids up to 15 }
-      - { amount: "49.50", currency: EUR, note: adults }
+      - amount: "38.50"
+        currency: EUR
+        note: kids up to 15
+      - amount: "49.50"
+        currency: EUR
+        note: adults
   - name: Group discount
     options:
-      - { amount: "-3", currency: EUR, per: person }   # negative = discount
-links:   [{ kind: booking, url: "https://…" }, { kind: instagram, url: "https://…" }]   # `booking` shows a "Book online" button
-facilities: [rental, bar]
+      - amount: "-3"              # negative = discount
+        currency: EUR
+        per: person
+links:                            # `booking` shows a "Book online" button
+  - kind: booking
+    url: "https://…"
+  - kind: instagram
+    url: "https://…"
+facilities:
+  - rental
+  - bar
 description: optional text
-wakesys: true                     # optional, default false — this park's booking system is Wakesys (shared by several parks)
+wakesys: true                     # optional, default false: this park's booking system is Wakesys (shared by several parks)
 
 # Optional: source for the estimated water temperature feature (opt-in, off by default; see below).
-water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
+water_temperature:
+  provider: rws_nl
+  station_id: nieuwegein.lekkanaal
 ```
 
 ### Prices
@@ -152,10 +191,29 @@ Rules and slots share optional selectors, all of which must match a date:
 ```yaml
 opening:
   exceptions:
-    - { kind: hours, label: Extra opening hours, dates: ["2026-09-29"], open: "17:00", close: sunset }
-    - { kind: closed, label: Wind, dates: ["2026-10-02"], note: Reopens on Saturday }
-    - { kind: extra, label: Early start, from: "2026-10-05", until: "2026-10-09", days: [weekdays], open: "10:00", close: "12:00" }
-    - { kind: event, label: Wake Battle, dates: ["2026-10-10"] }
+    - kind: hours
+      label: Extra opening hours
+      dates:
+        - "2026-09-29"
+      open: "17:00"
+      close: sunset
+    - kind: closed
+      label: Wind
+      dates:
+        - "2026-10-02"
+      note: Reopens on Saturday
+    - kind: extra
+      label: Early start
+      from: "2026-10-05"
+      until: "2026-10-09"
+      days:
+        - weekdays
+      open: "10:00"
+      close: "12:00"
+    - kind: event
+      label: Wake Battle
+      dates:
+        - "2026-10-10"
 ```
 
 | Field | Meaning |

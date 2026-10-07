@@ -48,7 +48,8 @@ non-negotiable:
    far away because closer ones stopped reporting, add a one-line comment saying so (distance, closer ones stale)
    so nobody swaps it back for a stale one; a nearby station needs no comment.
 5. **Write or update** `RpplCore/Sources/RpplCore/Resources/Parks/<id>.yaml`, following the existing file
-   layout (see any current file as a formatting example).
+   layout (see any current file as a formatting example). Native block-style YAML only, no JSON-like
+   `{ }` or `[ ]`; run `python3 scripts/format_parks.py <file>` if any slipped in.
 6. **Record provenance in the PR description**: list each source URL fetched and today's date
    (`yyyy-MM-dd`). In the file, append a `history` entry describing what changed and set `updated_at` to today's
    date. Keep YAML comments for the rare non-obvious decision (an approximate pin, a direction that did not come
