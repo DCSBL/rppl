@@ -55,6 +55,6 @@ public enum MetricDisplay {
     }
 
     private static func isNumberCharacter(_ character: Character) -> Bool {
-        character.isNumber || character.isWhitespace || ".,'’+-−".contains(character)
+        character.isNumber || character.isWhitespace || ".,'’+-−~".contains(character)
     }
 }

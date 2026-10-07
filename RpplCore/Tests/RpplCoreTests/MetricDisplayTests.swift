@@ -9,6 +9,7 @@ struct MetricDisplayTests {
         #expect(MetricDisplay.split("398 kcal") == .init(value: "398", unit: "kcal"))
         #expect(MetricDisplay.split("19 °C") == .init(value: "19", unit: "°C"))
         #expect(MetricDisplay.split("10 sets") == .init(value: "10", unit: "sets"))
+        #expect(MetricDisplay.split("~1,2 km") == .init(value: "~1,2", unit: "km"))
     }
 
     @Test func splitsOnNonBreakingSpaces() {
