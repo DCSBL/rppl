@@ -9,44 +9,87 @@ history:
 name: Goodlife Cablepark
 address: Hoogeind 74b, 2321 Meer, Hoogstraten
 timezone: Europe/Brussels
-location: { lat: 51.4696858282, lon: 4.7373912944 }
+location:
+  lat: 51.4696858282
+  lon: 4.7373912944
 
 phone: "+32 (0)3 502 43 44"
 email: hello@goodlifecablepark.be
 website: https://www.goodlifecablepark.be
 links:
-  - { kind: booking, url: "https://goodlife.dewi-online.nl/iframe/club/780/reservations/activities" }
-  - { kind: instagram, url: "https://www.instagram.com/goodlifecablepark" }
+  - kind: booking
+    url: "https://goodlife.dewi-online.nl/iframe/club/780/reservations/activities"
+  - kind: instagram
+    url: "https://www.instagram.com/goodlifecablepark"
 
 cables:
   - name: Cable
     direction: cw
     points:
-      - { lat: 51.4696120124, lon: 4.7377136870 }
-      - { lat: 51.4710058924, lon: 4.7383344800 }
-      - { lat: 51.4707741624, lon: 4.7400418345 }
-      - { lat: 51.4697172445, lon: 4.7406309643 }
-      - { lat: 51.4690258269, lon: 4.7393182099 }
+      - lat: 51.4696120124
+        lon: 4.7377136870
+      - lat: 51.4710058924
+        lon: 4.7383344800
+      - lat: 51.4707741624
+        lon: 4.7400418345
+      - lat: 51.4697172445
+        lon: 4.7406309643
+      - lat: 51.4690258269
+        lon: 4.7393182099
 
 opening:
   booking: optional
   rules:
-    - { months: [10], days: [wed], open: "15:00", close: "19:00" }
-    - { months: [10], days: [weekend], open: "12:00", close: "19:00" }
+    - months:
+        - 10
+      days:
+        - wed
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
 
 prices:
   - name: Full package
     options:
-      - { amount: "30", currency: EUR, per: hour, note: under 16 }
-      - { amount: "42.60", currency: EUR, per: "2 hours", note: under 16 }
-      - { amount: "37.50", currency: EUR, per: hour, note: 16 and older }
-      - { amount: "53.50", currency: EUR, per: "2 hours", note: 16 and older }
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note: under 16
+      - amount: "42.60"
+        currency: EUR
+        per: "2 hours"
+        note: under 16
+      - amount: "37.50"
+        currency: EUR
+        per: hour
+        note: 16 and older
+      - amount: "53.50"
+        currency: EUR
+        per: "2 hours"
+        note: 16 and older
   - name: Own gear
     options:
-      - { amount: "23.50", currency: EUR, per: hour, note: under 16 }
-      - { amount: "30", currency: EUR, per: "2 hours", note: under 16 }
-      - { amount: "26.50", currency: EUR, per: hour, note: 16 and older }
-      - { amount: "37.50", currency: EUR, per: "2 hours", note: 16 and older }
+      - amount: "23.50"
+        currency: EUR
+        per: hour
+        note: under 16
+      - amount: "30"
+        currency: EUR
+        per: "2 hours"
+        note: under 16
+      - amount: "26.50"
+        currency: EUR
+        per: hour
+        note: 16 and older
+      - amount: "37.50"
+        currency: EUR
+        per: "2 hours"
+        note: 16 and older
 
 description: >-
   Cablepark op recreatiedomein De Mosten, met een strandbar aan het water.

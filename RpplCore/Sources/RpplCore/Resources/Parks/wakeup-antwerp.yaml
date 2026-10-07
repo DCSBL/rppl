@@ -11,90 +11,225 @@ history:
 name: WakeUp Cable Antwerpen
 address: Neel Dofflaan 50, 2050 Antwerpen
 timezone: Europe/Brussels
-location: { lat: 51.215826418, lon: 4.365119488 }
+location:
+  lat: 51.215826418
+  lon: 4.365119488
 
 phone: "+32 488 705 788"
 email: Info@wakeupcable.be
 website: https://www.wakeupcable.be/nl/
 links:
-  - { kind: booking, url: "https://www.wakeupcable.be/nl/reserveer-hier/" }
-  - { kind: instagram, url: "https://www.instagram.com/wakeupcable/" }
-  - { kind: facebook, url: "https://www.facebook.com/wakeupcable/" }
+  - kind: booking
+    url: "https://www.wakeupcable.be/nl/reserveer-hier/"
+  - kind: instagram
+    url: "https://www.instagram.com/wakeupcable/"
+  - kind: facebook
+    url: "https://www.facebook.com/wakeupcable/"
 
 cables:
   - name: Grote Kabel (6.0)
     direction: cw
     points:
-      - { lat: 51.215558413, lon: 4.365327992 }
-      - { lat: 51.214423024, lon: 4.366555716 }
-      - { lat: 51.214243336, lon: 4.366419953 }
-      - { lat: 51.214209157, lon: 4.366076425 }
-      - { lat: 51.215374046, lon: 4.364853796 }
-      - { lat: 51.21554997, lon: 4.365031985 }
+      - lat: 51.215558413
+        lon: 4.365327992
+      - lat: 51.214423024
+        lon: 4.366555716
+      - lat: 51.214243336
+        lon: 4.366419953
+      - lat: 51.214209157
+        lon: 4.366076425
+      - lat: 51.215374046
+        lon: 4.364853796
+      - lat: 51.21554997
+        lon: 4.365031985
   - name: Kleine Kabel (2.0)
     direction: "2.0"
     points:
-      - { lat: 51.214437932, lon: 4.36687892 }
-      - { lat: 51.213573089, lon: 4.366386561 }
+      - lat: 51.214437932
+        lon: 4.36687892
+      - lat: 51.213573089
+        lon: 4.366386561
 
 opening:
   booking: required
   rules:
-    - { months: [4], days: [wed], open: "13:00", close: "19:00" }
-    - { months: [4], days: [thu, fri], open: "16:00", close: "19:00" }
-    - { months: [4], days: [weekend], open: "12:00", close: "19:00" }
-    - { months: [5], days: [wed], open: "13:00", close: "19:00" }
-    - { months: [5], days: [thu], open: "17:00", close: "19:00" }
-    - { months: [5], days: [fri], open: "16:00", close: "19:00" }
-    - { months: [5], days: [weekend], open: "12:00", close: "19:00" }
-    - { months: [6], days: [mon, thu, fri], open: "16:00", close: "21:00" }
-    - { months: [6], days: [wed], open: "13:00", close: "21:00" }
-    - { months: [6], days: [weekend], open: "12:00", close: "21:00" }
-    - { months: [7, 8], days: [daily], open: "12:00", close: "21:00" }
-    - { months: [9], days: [mon, thu, fri], open: "16:00", close: "19:00" }
-    - { months: [9], days: [wed], open: "13:00", close: "19:00" }
-    - { months: [9], days: [weekend], open: "12:00", close: "19:00" }
-    - { months: [10], days: [wed], open: "13:00", close: "18:00" }
-    - { months: [10], days: [fri], open: "16:00", close: "18:00" }
-    - { months: [10], days: [weekend], open: "12:00", close: "18:00" }
+    - months:
+        - 4
+      days:
+        - wed
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - thu
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - wed
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - thu
+      open: "17:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 6
+      days:
+        - mon
+        - thu
+        - fri
+      open: "16:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - wed
+      open: "13:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - daily
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 9
+      days:
+        - mon
+        - thu
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - wed
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - wed
+      open: "13:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - fri
+      open: "16:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
 
 prices:
   - name: Grote Kabel, 1 hour ticket
     options:
-      - { amount: "30", currency: EUR, per: person, note: "min 2, max 4 people, includes helmet and life vest" }
+      - amount: "30"
+        currency: EUR
+        per: person
+        note: "min 2, max 4 people, includes helmet and life vest"
   - name: Grote Kabel, full cable with instructor
     options:
-      - { amount: "160", currency: EUR, per: hour }
+      - amount: "160"
+        currency: EUR
+        per: hour
   - name: Wetsuit
     options:
-      - { amount: "5", currency: EUR, per: hour }
-      - { amount: "8", currency: EUR, per: "2 hours" }
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "8"
+        currency: EUR
+        per: "2 hours"
   - name: Beginner board or skis
     options:
-      - { amount: "6", currency: EUR, per: hour }
-      - { amount: "10", currency: EUR, per: "2 hours" }
+      - amount: "6"
+        currency: EUR
+        per: hour
+      - amount: "10"
+        currency: EUR
+        per: "2 hours"
   - name: Pro wakeboard
     options:
-      - { amount: "14", currency: EUR, per: hour }
-      - { amount: "20", currency: EUR, per: "2 hours" }
+      - amount: "14"
+        currency: EUR
+        per: hour
+      - amount: "20"
+        currency: EUR
+        per: "2 hours"
   - name: Kleine Kabel, 1 hour
     options:
-      - { amount: "26", currency: EUR, note: own equipment }
-      - { amount: "37", currency: EUR, note: "full package (board, wetsuit, helmet)" }
+      - amount: "26"
+        currency: EUR
+        note: own equipment
+      - amount: "37"
+        currency: EUR
+        note: "full package (board, wetsuit, helmet)"
   - name: Kleine Kabel, 2 hours
     options:
-      - { amount: "36", currency: EUR, note: own equipment }
-      - { amount: "53", currency: EUR, note: "full package (board, wetsuit, helmet)" }
+      - amount: "36"
+        currency: EUR
+        note: own equipment
+      - amount: "53"
+        currency: EUR
+        note: "full package (board, wetsuit, helmet)"
   - name: Kleine Kabel, pass
     options:
-      - { amount: "250", currency: EUR, note: 12 x 1 hour }
-      - { amount: "350", currency: EUR, note: 12 x 2 hours }
+      - amount: "250"
+        currency: EUR
+        note: 12 x 1 hour
+      - amount: "350"
+        currency: EUR
+        note: 12 x 2 hours
   - name: Week member
     options:
-      - { amount: "650", currency: EUR }
+      - amount: "650"
+        currency: EUR
   - name: Diamond member
     options:
-      - { amount: "795", currency: EUR }
+      - amount: "795"
+        currency: EUR
 
 facilities:
   - Aquapark

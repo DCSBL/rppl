@@ -1,4 +1,6 @@
 version: 1
 id: duplicate-id
 name: Second Park With This Id
-location: { lat: 52.1, lon: 5.1 }
+location:
+  lat: 52.1
+  lon: 5.1

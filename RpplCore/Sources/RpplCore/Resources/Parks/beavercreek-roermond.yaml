@@ -11,26 +11,36 @@ history:
 name: Beaver Creek Wake Park Roermond
 address: De Weerd 52, 6041 TK Roermond
 timezone: Europe/Amsterdam
-location: { lat: 51.206912007, lon: 5.972829739 }
+location:
+  lat: 51.206912007
+  lon: 5.972829739
 
 email: info@wake-park.nl
 website: https://www.wake-park.nl
 wakesys: true
 
 links:
-  - { kind: booking, url: "https://wake-park.wakesys.com/browser/index.php?page=book_ride_select_boat_or_cable&event_type_ID=773&transportation_name=Full%20Size%20Cable" }
-  - { kind: instagram, url: "https://www.instagram.com/wakeparkroermond/" }
-  - { kind: facebook, url: "https://www.facebook.com/wakeparkroermond/" }
+  - kind: booking
+    url: "https://wake-park.wakesys.com/browser/index.php?page=book_ride_select_boat_or_cable&event_type_ID=773&transportation_name=Full%20Size%20Cable"
+  - kind: instagram
+    url: "https://www.instagram.com/wakeparkroermond/"
+  - kind: facebook
+    url: "https://www.facebook.com/wakeparkroermond/"
 
 cables:
   - name: Cable
     direction: ccw
     points:
-      - { lat: 51.207016626, lon: 5.972208024 }
-      - { lat: 51.208319831, lon: 5.9718247 }
-      - { lat: 51.208521512, lon: 5.97048271 }
-      - { lat: 51.20777533, lon: 5.969784096 }
-      - { lat: 51.206609903, lon: 5.971250944 }
+      - lat: 51.207016626
+        lon: 5.972208024
+      - lat: 51.208319831
+        lon: 5.9718247
+      - lat: 51.208521512
+        lon: 5.97048271
+      - lat: 51.20777533
+        lon: 5.969784096
+      - lat: 51.206609903
+        lon: 5.971250944
     description: Full size cable, runs at 30 km/h in regular operation.
 
 opening:
@@ -43,34 +53,70 @@ opening:
 prices:
   - name: Ticket
     options:
-      - { amount: "26", currency: EUR, per: hour, note: "from price, online booking up to 48 hours ahead" }
-      - { amount: "32", currency: EUR, per: 2 hours, note: "from price, online booking up to 48 hours ahead" }
-      - { amount: "42", currency: EUR, per: day, note: "from price, online booking up to 48 hours ahead" }
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note: "from price, online booking up to 48 hours ahead"
+      - amount: "32"
+        currency: EUR
+        per: 2 hours
+        note: "from price, online booking up to 48 hours ahead"
+      - amount: "42"
+        currency: EUR
+        per: day
+        note: "from price, online booking up to 48 hours ahead"
   - name: Booking within 48 hours
     options:
-      - { amount: "3", currency: EUR, note: surcharge per ticket }
+      - amount: "3"
+        currency: EUR
+        note: surcharge per ticket
   - name: RFID wristband
     options:
-      - { amount: "6", currency: EUR, note: one time }
+      - amount: "6"
+        currency: EUR
+        note: one time
   - name: Wetsuit rental
     options:
-      - { amount: "6", currency: EUR, per: day, note: shorty }
-      - { amount: "12", currency: EUR, per: day, note: full suit }
+      - amount: "6"
+        currency: EUR
+        per: day
+        note: shorty
+      - amount: "12"
+        currency: EUR
+        per: day
+        note: full suit
   - name: Wakeboard rental
     options:
-      - { amount: "12", currency: EUR, per: day, note: Easy Up }
-      - { amount: "22", currency: EUR, per: day, note: Easy Ride }
+      - amount: "12"
+        currency: EUR
+        per: day
+        note: Easy Up
+      - amount: "22"
+        currency: EUR
+        per: day
+        note: Easy Ride
   - name: Obstacle board rental
     options:
-      - { amount: "22", currency: EUR, per: day }
-      - { amount: "32", currency: EUR, per: day }
+      - amount: "22"
+        currency: EUR
+        per: day
+      - amount: "32"
+        currency: EUR
+        per: day
   - name: Helmet rental
     options:
-      - { amount: "3", currency: EUR, per: day }
-      - { amount: "5", currency: EUR, per: day }
+      - amount: "3"
+        currency: EUR
+        per: day
+      - amount: "5"
+        currency: EUR
+        per: day
   - name: Coaching
     options:
-      - { amount: "39", currency: EUR, per: hour, note: plus ticket and equipment }
+      - amount: "39"
+        currency: EUR
+        per: hour
+        note: plus ticket and equipment
 
 facilities:
   - Rental (wetsuit, wakeboard, obstacle board, helmet)

@@ -1,9 +1,17 @@
 version: 1
 id: languages-unlisted
 name: Fixture Park
-languages: [nl, en]
-location: { lat: 50.85, lon: 4.35 }
+languages:
+  - nl
+  - en
+location:
+  lat: 50.85
+  lon: 4.35
 prices:
   - name: Skis
     options:
-      - { amount: "15", currency: EUR, per: { nl: per 2 uur, de: pro 2 Stunden } }
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: per 2 uur
+          de: pro 2 Stunden

@@ -21,92 +21,241 @@ location:
   lat: 52.048428101966046
   lon: 5.124218887481674
 
-water_temperature: { provider: rws_nl, station_id: nieuwegein.lekkanaal }
+water_temperature:
+  provider: rws_nl
+  station_id: nieuwegein.lekkanaal
 
 phone: 030 287 7777
 email: info@downunder.nl
 website: https://downunder.nl/sports/sport/waterskien/
 
 links:
-  - { kind: booking, url: "https://bhg.smarteventmanager.com/book/?StandardReservationGroupCode=CABLE&CompanyCode=DU" }
-  - { kind: opening hours, url: "https://downunder.nl/sports/wp-content/uploads/2025/03/Cable-Park-Openingstijden-2025.pdf" }
-  - { kind: instagram, url: "https://www.instagram.com/downundernieuwegein/" }
-  - { kind: facebook, url: "https://www.facebook.com/downundernieuwegein" }
+  - kind: booking
+    url: "https://bhg.smarteventmanager.com/book/?StandardReservationGroupCode=CABLE&CompanyCode=DU"
+  - kind: opening hours
+    url: "https://downunder.nl/sports/wp-content/uploads/2025/03/Cable-Park-Openingstijden-2025.pdf"
+  - kind: instagram
+    url: "https://www.instagram.com/downundernieuwegein/"
+  - kind: facebook
+    url: "https://www.facebook.com/downundernieuwegein"
 
 cables:
   - name: Cable
     direction: ccw
     length_m: 720
     points:
-      - { lat: 52.0483002679678, lon: 5.12451678252681 }
-      - { lat: 52.0468762658451, lon: 5.12329772411925 }
-      - { lat: 52.0463889964493, lon: 5.12364836681196 }
-      - { lat: 52.046562682144, lon: 5.12613465170407 }
-      - { lat: 52.0475684466966, lon: 5.12699037836458 }
+      - lat: 52.0483002679678
+        lon: 5.12451678252681
+      - lat: 52.0468762658451
+        lon: 5.12329772411925
+      - lat: 52.0463889964493
+        lon: 5.12364836681196
+      - lat: 52.046562682144
+        lon: 5.12613465170407
+      - lat: 52.0475684466966
+        lon: 5.12699037836458
   - name: Short cable
     direction: "2.0"
     description: Short cable for improving your skills with guidance.
     points:
-      - { lat: 52.0487455425389, lon: 5.12379010152744 }
-      - { lat: 52.0471741376414, lon: 5.12284952868272 }
+      - lat: 52.0487455425389
+        lon: 5.12379010152744
+      - lat: 52.0471741376414
+        lon: 5.12284952868272
 
 opening:
   numbered: false
-  booking_minutes: [60, 120]
+  booking_minutes:
+    - 60
+    - 120
   note: >-
     Based on the 2025 schedule. The cable closes at the latest half an hour before sunset.
   rules:
-    - { months: [4], days: [wed, fri], open: "17:00", close: "20:00" }
-    - { months: [4], days: [weekend], open: "12:00", close: "19:00" }
-    - { months: [5], days: [wed, fri], open: "15:00", close: "21:00" }
-    - { months: [5], days: [thu], open: "17:00", close: "21:00" }
-    - { months: [5], days: [weekend], open: "12:00", close: "20:00" }
-    - { months: [6], days: [mon, tue], open: "17:00", close: "21:00" }
-    - { months: [6], days: [wed, thu, fri], open: "15:00", close: "21:00" }
-    - { months: [6], days: [weekend], open: "12:00", close: "21:00" }
-    - { months: [7], days: [weekdays], open: "13:00", close: "21:00" }
-    - { months: [7], days: [weekend], open: "12:00", close: "21:00" }
-    - { months: [8], days: [weekdays], open: "13:00", close: "21:00" }
-    - { months: [8], days: [weekend], open: "12:00", close: "21:00" }
-    - { months: [9], days: [wed, fri], open: "15:00", close: "20:00" }
-    - { months: [9], days: [thu], open: "17:00", close: "20:00" }
-    - { months: [9], days: [weekend], open: "12:00", close: "19:00" }
-    - { months: [10], days: [wed, fri], open: "15:00", close: "19:00" }
-    - { months: [10], days: [weekend], open: "12:00", close: "18:00" }
+    - months:
+        - 4
+      days:
+        - wed
+        - fri
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - wed
+        - fri
+      open: "15:00"
+      close: "21:00"
+    - months:
+        - 5
+      days:
+        - thu
+      open: "17:00"
+      close: "21:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - mon
+        - tue
+      open: "17:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 7
+      days:
+        - weekdays
+      open: "13:00"
+      close: "21:00"
+    - months:
+        - 7
+      days:
+        - weekend
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 8
+      days:
+        - weekdays
+      open: "13:00"
+      close: "21:00"
+    - months:
+        - 8
+      days:
+        - weekend
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 9
+      days:
+        - wed
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - thu
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - wed
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
   slots:
-    - { id: "12:00", start: "12:00", end: "13:00" }
-    - { id: "13:00", start: "13:00", end: "14:00" }
-    - { id: "14:00", start: "14:00", end: "15:00" }
-    - { id: "15:00", start: "15:00", end: "16:00" }
-    - { id: "16:00", start: "16:00", end: "17:00" }
-    - { id: "17:00", start: "17:00", end: "18:00" }
-    - { id: "18:00", start: "18:00", end: "19:00" }
-    - { id: "19:00", start: "19:00", end: "20:00" }
-    - { id: "20:00", start: "20:00", end: "21:00" }
+    - id: "12:00"
+      start: "12:00"
+      end: "13:00"
+    - id: "13:00"
+      start: "13:00"
+      end: "14:00"
+    - id: "14:00"
+      start: "14:00"
+      end: "15:00"
+    - id: "15:00"
+      start: "15:00"
+      end: "16:00"
+    - id: "16:00"
+      start: "16:00"
+      end: "17:00"
+    - id: "17:00"
+      start: "17:00"
+      end: "18:00"
+    - id: "18:00"
+      start: "18:00"
+      end: "19:00"
+    - id: "19:00"
+      start: "19:00"
+      end: "20:00"
+    - id: "20:00"
+      start: "20:00"
+      end: "21:00"
 
 prices:
   - name: "1 hour"
     options:
-      - { amount: "25", currency: EUR, note: "From 15 years. Life vest, helmet and instruction included" }
-      - { amount: "20", currency: EUR, note: "Up to 14 years. Life vest, helmet and instruction included" }
+      - amount: "25"
+        currency: EUR
+        note: "From 15 years. Life vest, helmet and instruction included"
+      - amount: "20"
+        currency: EUR
+        note: "Up to 14 years. Life vest, helmet and instruction included"
   - name: "2 hours"
     options:
-      - { amount: "35", currency: EUR, note: From 15 years }
-      - { amount: "30", currency: EUR, note: Up to 14 years }
+      - amount: "35"
+        currency: EUR
+        note: From 15 years
+      - amount: "30"
+        currency: EUR
+        note: Up to 14 years
   - name: Day
     options:
-      - { amount: "55", currency: EUR, note: From 15 years }
-      - { amount: "47.50", currency: EUR, note: Up to 14 years }
+      - amount: "55"
+        currency: EUR
+        note: From 15 years
+      - amount: "47.50"
+        currency: EUR
+        note: Up to 14 years
   - name: Wetsuit rental
     options:
-      - { amount: "5", currency: EUR, per: "1 hour" }
-      - { amount: "7.50", currency: EUR, per: "2 hours" }
-      - { amount: "10", currency: EUR, per: day }
+      - amount: "5"
+        currency: EUR
+        per: "1 hour"
+      - amount: "7.50"
+        currency: EUR
+        per: "2 hours"
+      - amount: "10"
+        currency: EUR
+        per: day
   - name: Water ski rental
     options:
-      - { amount: "5", currency: EUR, per: "1 hour" }
-      - { amount: "7.50", currency: EUR, per: "2 hours" }
-      - { amount: "10", currency: EUR, per: day }
+      - amount: "5"
+        currency: EUR
+        per: "1 hour"
+      - amount: "7.50"
+        currency: EUR
+        per: "2 hours"
+      - amount: "10"
+        currency: EUR
+        per: day
 
 facilities:
   - Changing rooms

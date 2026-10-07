@@ -29,32 +29,44 @@ location:
   lon: 5.2152087
 
 # Nearest station that still reports (~14 km); closer ones stopped reporting.
-water_temperature: { provider: rws_nl, station_id: diemen.muidenbrug }
+water_temperature:
+  provider: rws_nl
+  station_id: diemen.muidenbrug
 
 phone: 085 - 402 12 28
 email: info@cableparkviewalmere.nl
 website: https://www.cableparkviewalmere.nl
 links:
-  - { kind: booking, url: "https://cablepark-almere.recras.nl/bookprocess/?id=74" }
-  - { kind: instagram, url: "https://www.instagram.com/cableparkviewalmere/" }
-  - { kind: facebook, url: "https://www.facebook.com/cableparkviewalmere" }
+  - kind: booking
+    url: "https://cablepark-almere.recras.nl/bookprocess/?id=74"
+  - kind: instagram
+    url: "https://www.instagram.com/cableparkviewalmere/"
+  - kind: facebook
+    url: "https://www.facebook.com/cableparkviewalmere"
 
 cables:
   - name: Grote baan
     # Direction confirmed by a rider, not stated on the park's site.
     direction: ccw
     points:
-      - { lat: 52.3585546998476, lon: 5.21501871403023 }
-      - { lat: 52.358864713801, lon: 5.21908686853842 }
-      - { lat: 52.3599809561145, lon: 5.22001190227344 }
-      - { lat: 52.3604782564784, lon: 5.21877488269814 }
-      - { lat: 52.35914944718, lon: 5.21479179321656 }
+      - lat: 52.3585546998476
+        lon: 5.21501871403023
+      - lat: 52.358864713801
+        lon: 5.21908686853842
+      - lat: 52.3599809561145
+        lon: 5.22001190227344
+      - lat: 52.3604782564784
+        lon: 5.21877488269814
+      - lat: 52.35914944718
+        lon: 5.21479179321656
   - name: Alta Twin
     direction: "2.0"
     length_m: 200
     points:
-      - { lat: 52.3582029191082, lon: 5.21550000719344 }
-      - { lat: 52.358431785598, lon: 5.21836969075431 }
+      - lat: 52.3582029191082
+        lon: 5.21550000719344
+      - lat: 52.358431785598
+        lon: 5.21836969075431
     description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
 
 opening:
@@ -63,50 +75,147 @@ opening:
     Booking ahead is recommended, especially on weekends, holidays and sunny days when sessions
     can fill up.
   rules:
-    - { months: [4], days: [fri], open: "17:00", close: "19:00" }
-    - { months: [4], days: [sat, sun], open: "12:00", close: "18:00" }
-    - { months: [5], days: [thu, fri], open: "16:00", close: "20:00" }
-    - { months: [5], days: [sat, sun], open: "12:00", close: "18:00" }
-    - { months: [6], days: [wed, thu, fri], open: "15:00", close: "20:00" }
-    - { months: [6], days: [sat, sun], open: "12:00", close: "20:00" }
-    - { label: July-August, months: [7, 8], days: [tue, wed, thu, fri, sat, sun], open: "12:00", close: "20:00" }
-    - { months: [9], days: [wed, thu, fri], open: "16:00", close: "20:00" }
-    - { months: [9], days: [sat, sun], open: "12:00", close: "18:00" }
-    - { label: Post-season Sundays, dates: [2026-10-11], open: "13:00", close: "17:00" }
+    - months:
+        - 4
+      days:
+        - fri
+      open: "17:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 5
+      days:
+        - thu
+        - fri
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 6
+      days:
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "20:00"
+    - label: July-August
+      months:
+        - 7
+        - 8
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+        - sat
+        - sun
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - wed
+        - thu
+        - fri
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "18:00"
+    - label: Post-season Sundays
+      dates:
+        - 2026-10-11
+      open: "13:00"
+      close: "17:00"
 
 prices:
   - name: "1 hour"
     options:
-      - { amount: "27.50", currency: EUR, note: Adults }
-      - { amount: "22.50", currency: EUR, note: Kids up to 12 years }
+      - amount: "27.50"
+        currency: EUR
+        note: Adults
+      - amount: "22.50"
+        currency: EUR
+        note: Kids up to 12 years
   - name: "2 hours"
     options:
-      - { amount: "37.50", currency: EUR, note: Adults }
-      - { amount: "30", currency: EUR, note: Kids up to 12 years }
+      - amount: "37.50"
+        currency: EUR
+        note: Adults
+      - amount: "30"
+        currency: EUR
+        note: Kids up to 12 years
   - name: "3 hours"
     options:
-      - { amount: "45", currency: EUR, note: Adults }
-      - { amount: "37.50", currency: EUR, note: Kids up to 12 years }
+      - amount: "45"
+        currency: EUR
+        note: Adults
+      - amount: "37.50"
+        currency: EUR
+        note: Kids up to 12 years
   - name: "4 hours"
     options:
-      - { amount: "50", currency: EUR, note: Adults }
-      - { amount: "42.50", currency: EUR, note: Kids up to 12 years }
+      - amount: "50"
+        currency: EUR
+        note: Adults
+      - amount: "42.50"
+        currency: EUR
+        note: Kids up to 12 years
   - name: Day pass
     options:
-      - { amount: "55", currency: EUR, note: Adults }
-      - { amount: "47.50", currency: EUR, note: Kids up to 12 years }
+      - amount: "55"
+        currency: EUR
+        note: Adults
+      - amount: "47.50"
+        currency: EUR
+        note: Kids up to 12 years
   - name: Wakeboard set
     options:
-      - { amount: "25", currency: EUR, note: "Board, helmet, life vest and wetsuit" }
+      - amount: "25"
+        currency: EUR
+        note: "Board, helmet, life vest and wetsuit"
   - name: Waterski set
     options:
-      - { amount: "17.50", currency: EUR, note: "Skis, helmet, life vest and wetsuit" }
+      - amount: "17.50"
+        currency: EUR
+        note: "Skis, helmet, life vest and wetsuit"
   - name: Clinic
     options:
-      - { amount: "85", currency: EUR, note: "1 person, on the Alta Twin, 15-20 min effective lesson time" }
-      - { amount: "100", currency: EUR, note: 2 people }
-      - { amount: "120", currency: EUR, note: 3 people }
-      - { amount: "130", currency: EUR, note: 4 people }
+      - amount: "85"
+        currency: EUR
+        note: "1 person, on the Alta Twin, 15-20 min effective lesson time"
+      - amount: "100"
+        currency: EUR
+        note: 2 people
+      - amount: "120"
+        currency: EUR
+        note: 3 people
+      - amount: "130"
+        currency: EUR
+        note: 4 people
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

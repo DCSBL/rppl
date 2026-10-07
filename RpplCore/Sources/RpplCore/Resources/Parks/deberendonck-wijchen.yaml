@@ -17,14 +17,18 @@ history:
     description: add languages (nl, en) and English variants of per and note
 
 name: De Berendonck
-languages: [nl, en]
+languages:
+  - nl
+  - en
 address: Weg door de berendonck 29, 6603 LP Wijchen
 timezone: Europe/Amsterdam
 location:
   lat: 51.81116710326
   lon: 5.77213453579262
 
-water_temperature: { provider: rws_nl, station_id: grave.boven }
+water_temperature:
+  provider: rws_nl
+  station_id: grave.boven
 
 phone: 024-6411430
 email: info@deberendonck.nl
@@ -40,67 +44,208 @@ facilities:
 prices:
   - name: "1,5 uur"
     options:
-      - { amount: "18.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
-      - { amount: "21.50", currency: EUR, note: { nl: student, en: student } }
-      - { amount: "26.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
+      - amount: "18.50"
+        currency: EUR
+        note:
+          nl: kids t/m 15 jr
+          en: kids up to 15
+      - amount: "21.50"
+        currency: EUR
+        note:
+          nl: student
+          en: student
+      - amount: "26.50"
+        currency: EUR
+        note:
+          nl: volwassene 16+
+          en: adults 16+
   - name: "3 uur"
     options:
-      - { amount: "28.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
-      - { amount: "31.50", currency: EUR, note: { nl: student, en: student } }
-      - { amount: "36.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
+      - amount: "28.50"
+        currency: EUR
+        note:
+          nl: kids t/m 15 jr
+          en: kids up to 15
+      - amount: "31.50"
+        currency: EUR
+        note:
+          nl: student
+          en: student
+      - amount: "36.50"
+        currency: EUR
+        note:
+          nl: volwassene 16+
+          en: adults 16+
   - name: Hele dag
     options:
-      - { amount: "38.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
-      - { amount: "39.50", currency: EUR, note: { nl: student, en: student } }
-      - { amount: "49.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
+      - amount: "38.50"
+        currency: EUR
+        note:
+          nl: kids t/m 15 jr
+          en: kids up to 15
+      - amount: "39.50"
+        currency: EUR
+        note:
+          nl: student
+          en: student
+      - amount: "49.50"
+        currency: EUR
+        note:
+          nl: volwassene 16+
+          en: adults 16+
   - name: Easyride
     options:
-      - { amount: "28.50", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
-      - { amount: "34.50", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
+      - amount: "28.50"
+        currency: EUR
+        note:
+          nl: kids t/m 15 jr
+          en: kids up to 15
+      - amount: "34.50"
+        currency: EUR
+        note:
+          nl: volwassene 16+
+          en: adults 16+
   - name: "12-Rittenkaart"
     options:
-      - { amount: "185", currency: EUR, note: { nl: kids t/m 15 jr, en: kids up to 15 } }
-      - { amount: "265", currency: EUR, note: { nl: volwassene 16+, en: adults 16+ } }
+      - amount: "185"
+        currency: EUR
+        note:
+          nl: kids t/m 15 jr
+          en: kids up to 15
+      - amount: "265"
+        currency: EUR
+        note:
+          nl: volwassene 16+
+          en: adults 16+
   - name: Wetsuit huur
     options:
-      - { amount: "5", currency: EUR, per: { nl: "per 1,5 uur", en: per 1.5 hours } }
-      - { amount: "8", currency: EUR, per: { nl: per 3 uur, en: per 3 hours } }
+      - amount: "5"
+        currency: EUR
+        per:
+          nl: "per 1,5 uur"
+          en: per 1.5 hours
+      - amount: "8"
+        currency: EUR
+        per:
+          nl: per 3 uur
+          en: per 3 hours
   - name: Wakeboard huur
     options:
-      - { amount: "10", currency: EUR, per: { nl: "per 1,5 uur", en: per 1.5 hours } }
-      - { amount: "15", currency: EUR, per: { nl: per 3 uur, en: per 3 hours } }
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: "per 1,5 uur"
+          en: per 1.5 hours
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: per 3 uur
+          en: per 3 hours
 
 cables:
   - name: Skibaan
     direction: cw
     length_m: 834
     points:
-      - { lat: 51.8113489584493, lon: 5.77203034709951 }
-      - { lat: 51.8119159208552, lon: 5.77563958620648 }
-      - { lat: 51.8127633345759, lon: 5.77600515502736 }
-      - { lat: 51.8131999547377, lon: 5.77444555420045 }
-      - { lat: 51.8120378737484, lon: 5.77162364784075 }
+      - lat: 51.8113489584493
+        lon: 5.77203034709951
+      - lat: 51.8119159208552
+        lon: 5.77563958620648
+      - lat: 51.8127633345759
+        lon: 5.77600515502736
+      - lat: 51.8131999547377
+        lon: 5.77444555420045
+      - lat: 51.8120378737484
+        lon: 5.77162364784075
 
 opening:
   booking: required
-  booking_minutes: [90, 180]
+  booking_minutes:
+    - 90
+    - 180
   note: >-
     Reserveer je starttijd online. De baan draait bij minimaal 3 deelnemers; groepen vanaf 15
     personen kunnen ook buiten openingstijd reserveren. We stoppen uiterlijk bij zonsondergang.
     Tijdens feestdagen of bij besloten groepen kunnen openingstijden afwijken.
   rules:
-    - { months: [4], days: [weekend], open: "12:30", close: "17:00" }
-    - { months: [5], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
-    - { months: [5], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [6], days: [weekdays], open: "14:00", close: "21:30" }
-    - { months: [6], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [7], days: [weekdays], open: "12:30", close: "21:30" }
-    - { months: [7], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [8], days: [weekdays], open: "12:30", close: "21:30" }
-    - { months: [8], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [9], days: [tue, wed, thu, fri], open: "15:30", close: "20:00" }
-    - { months: [9], days: [weekend], open: "12:30", close: "20:00" }
-    - { months: [10], days: [weekend], open: "12:30", close: "17:00" }
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "12:30"
+      close: "17:00"
+    - months:
+        - 5
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:30"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - weekdays
+      open: "14:00"
+      close: "21:30"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 7
+      days:
+        - weekdays
+      open: "12:30"
+      close: "21:30"
+    - months:
+        - 7
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 8
+      days:
+        - weekdays
+      open: "12:30"
+      close: "21:30"
+    - months:
+        - 8
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:30"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:30"
+      close: "20:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:30"
+      close: "17:00"
 
 description: >-
   Waterskiën is inclusief instructie, waterski's en zwemvest; extra materiaal zoals een wetsuit

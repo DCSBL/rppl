@@ -1,5 +1,7 @@
 version: 1
 id: placeholder
 name: TODO fill in park name
-location: { lat: 52.0, lon: 5.0 }
+location:
+  lat: 52.0
+  lon: 5.0
 description: Lorem ipsum dolor sit amet.

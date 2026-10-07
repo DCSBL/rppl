@@ -11,17 +11,24 @@ history:
 name: Burnside Cablepark
 address: Viskweekweg 3, 8166 KJ Emst
 timezone: Europe/Amsterdam
-location: { lat: 52.30984573, lon: 5.998621532 }
+location:
+  lat: 52.30984573
+  lon: 5.998621532
 
 cables:
   - name: Cable
     direction: ccw
     points:
-      - { lat: 52.31010921, lon: 5.999068967 }
-      - { lat: 52.308090296, lon: 6.000249723 }
-      - { lat: 52.307932288, lon: 6.002580796 }
-      - { lat: 52.309395715, lon: 6.003668965 }
-      - { lat: 52.31062162, lon: 6.001413274 }
+      - lat: 52.31010921
+        lon: 5.999068967
+      - lat: 52.308090296
+        lon: 6.000249723
+      - lat: 52.307932288
+        lon: 6.002580796
+      - lat: 52.309395715
+        lon: 6.003668965
+      - lat: 52.31062162
+        lon: 6.001413274
 
 # water_temperature left out: nearest still-reporting RWS station (eefde.sluis.beneden, ~23 km)
 # is on a river lock, not this water body.
@@ -30,7 +37,8 @@ phone: 0578 - 573 170
 email: info@burnsidecablepark.nl
 website: https://www.burnsidecablepark.nl
 links:
-  - { kind: facebook, url: "https://www.facebook.com/burnside.cablepark" }
+  - kind: facebook
+    url: "https://www.facebook.com/burnside.cablepark"
 
 opening:
   booking: optional
@@ -39,68 +47,178 @@ opening:
     cable can always be reserved by phone or email. Closed from November to March, except by
     reservation for groups.
   rules:
-    - { months: [4], days: [wed], open: "17:00", close: "20:00" }
-    - { months: [5], days: [tue, wed, thu, fri], open: "15:00", close: "20:00" }
-    - { months: [6], days: [tue, wed, thu, fri], open: "15:00", close: "21:00" }
-    - { label: July-August, months: [7, 8], days: [tue, wed, thu, fri], open: "12:00", close: "21:00" }
-    - { months: [9], days: [tue, wed, thu, fri], open: "15:00", close: "20:00" }
-    - { months: [4, 5, 6, 7, 8, 9], days: [sat, sun], open: "12:00", close: "20:00" }
-    - { months: [10], days: [sat, sun], open: "12:00", close: "17:00" }
+    - months:
+        - 4
+      days:
+        - wed
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "21:00"
+    - label: July-August
+      months:
+        - 7
+        - 8
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 10
+      days:
+        - sat
+        - sun
+      open: "12:00"
+      close: "17:00"
 
 prices:
   - name: "1.5 hours"
     options:
-      - { amount: "25", currency: EUR }
+      - amount: "25"
+        currency: EUR
   - name: "3 hours"
     options:
-      - { amount: "35", currency: EUR }
+      - amount: "35"
+        currency: EUR
   - name: Day pass
     options:
-      - { amount: "45", currency: EUR, note: "On very busy days a day pass can mean waiting when the dock is full" }
+      - amount: "45"
+        currency: EUR
+        note: "On very busy days a day pass can mean waiting when the dock is full"
   - name: "Strip card 12 x 1.5 hours"
     options:
-      - { amount: "250", currency: EUR, note: "Can be shared with family or a group until used up" }
+      - amount: "250"
+        currency: EUR
+        note: "Can be shared with family or a group until used up"
   - name: Season pass
     options:
-      - { amount: "850", currency: EUR, note: Adults }
-      - { amount: "650", currency: EUR, note: Kids up to 10 years }
+      - amount: "850"
+        currency: EUR
+        note: Adults
+      - amount: "650"
+        currency: EUR
+        note: Kids up to 10 years
   - name: Waterskis with life vest
     options:
-      - { amount: "0", currency: EUR, note: Free }
+      - amount: "0"
+        currency: EUR
+        note: Free
   - name: Wakeboard with life vest
     options:
-      - { amount: "10", currency: EUR, note: "1.5 hours" }
-      - { amount: "15", currency: EUR, note: "3 hours" }
-      - { amount: "25", currency: EUR, note: Day }
+      - amount: "10"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "15"
+        currency: EUR
+        note: "3 hours"
+      - amount: "25"
+        currency: EUR
+        note: Day
   - name: Sliderboard with helmet and life vest
     options:
-      - { amount: "25", currency: EUR, note: "1.5 hours" }
-      - { amount: "35", currency: EUR, note: "3 hours" }
-      - { amount: "45", currency: EUR, note: Day }
+      - amount: "25"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "35"
+        currency: EUR
+        note: "3 hours"
+      - amount: "45"
+        currency: EUR
+        note: Day
   - name: Kneeboard with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "10", currency: EUR, note: "3 hours" }
-      - { amount: "15", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "10"
+        currency: EUR
+        note: "3 hours"
+      - amount: "15"
+        currency: EUR
+        note: Day
   - name: Wakeskate with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "10", currency: EUR, note: "3 hours" }
-      - { amount: "15", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "10"
+        currency: EUR
+        note: "3 hours"
+      - amount: "15"
+        currency: EUR
+        note: Day
   - name: Stand up paddle board
     options:
-      - { amount: "20", currency: EUR, note: "1.5 hours" }
-      - { amount: "30", currency: EUR, note: "3 hours" }
-      - { amount: "40", currency: EUR, note: Day }
+      - amount: "20"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "30"
+        currency: EUR
+        note: "3 hours"
+      - amount: "40"
+        currency: EUR
+        note: Day
   - name: Wetsuit with life vest
     options:
-      - { amount: "5", currency: EUR, note: "1.5 hours" }
-      - { amount: "7.50", currency: EUR, note: "3 hours" }
-      - { amount: "10", currency: EUR, note: Day }
+      - amount: "5"
+        currency: EUR
+        note: "1.5 hours"
+      - amount: "7.50"
+        currency: EUR
+        note: "3 hours"
+      - amount: "10"
+        currency: EUR
+        note: Day
   - name: Parking
     options:
-      - { amount: "7", currency: EUR, per: day, note: "On the Leisurelands grounds, first 15 minutes free" }
-      - { amount: "6", currency: EUR, per: day, note: "Exit ticket at the park's cashier" }
+      - amount: "7"
+        currency: EUR
+        per: day
+        note: "On the Leisurelands grounds, first 15 minutes free"
+      - amount: "6"
+        currency: EUR
+        per: day
+        note: "Exit ticket at the park's cashier"
 
 facilities:
   - Rental (skis, boards, wetsuits, helmets, life vests)

@@ -1,7 +1,11 @@
 version: 1
 id: duplicate-links
 name: Fixture Park
-location: { lat: 52.0, lon: 5.0 }
+location:
+  lat: 52.0
+  lon: 5.0
 links:
-  - { kind: instagram, url: "https://www.instagram.com/one/" }
-  - { kind: Instagram, url: "https://www.instagram.com/two/" }
+  - kind: instagram
+    url: "https://www.instagram.com/one/"
+  - kind: Instagram
+    url: "https://www.instagram.com/two/"

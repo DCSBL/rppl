@@ -30,68 +30,133 @@ location:
   lon: 4.6779432055000365
 
 # Nearest station that still reports (~25 km); closer ones stopped reporting.
-water_temperature: { provider: rws_nl, station_id: maarssen.kanaal }
+water_temperature:
+  provider: rws_nl
+  station_id: maarssen.kanaal
 
 phone: 0172 472 412
 email: info@wetnwild.nl
 website: https://wetnwild.nl/wakepark/
 links:
-  - { kind: booking, url: "https://booking.leisureking.eu/bm/fdcfe3be55aa4c1f9d5e2dc7630fcbfd/assortiment" }
+  - kind: booking
+    url: "https://booking.leisureking.eu/bm/fdcfe3be55aa4c1f9d5e2dc7630fcbfd/assortiment"
 
 cables:
   - name: Cable
     direction: ccw
     length_m: 780
     points:
-      - { lat: 52.13616893686612, lon: 4.67831871475394 }
-      - { lat: 52.13359404163105, lon: 4.679863667112853 }
-      - { lat: 52.133501843133814, lon: 4.680496668426576 }
-      - { lat: 52.13381795147282, lon: 4.680936550695433 }
-      - { lat: 52.13640600413686, lon: 4.679423784843997 }
+      - lat: 52.13616893686612
+        lon: 4.67831871475394
+      - lat: 52.13359404163105
+        lon: 4.679863667112853
+      - lat: 52.133501843133814
+        lon: 4.680496668426576
+      - lat: 52.13381795147282
+        lon: 4.680936550695433
+      - lat: 52.13640600413686
+        lon: 4.679423784843997
 
 opening:
   booking: optional
   numbered: false
-  booking_minutes: [60, 120]
+  booking_minutes:
+    - 60
+    - 120
   note: >-
     Booking ahead is recommended.
   rules:
-    - { months: [9], days: [wed], open: "16:00", close: "20:00" }
-    - { months: [9], days: [thu, fri], open: "17:00", close: "20:00" }
-    - { months: [9], days: [sat], open: "12:00", close: "18:00" }
-    - { months: [9], days: [sun], open: "13:00", close: "18:00" }
-    - { months: [10], days: [sat, sun], open: "13:00", close: "16:00" }
+    - months:
+        - 9
+      days:
+        - wed
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - thu
+        - fri
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - sat
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 9
+      days:
+        - sun
+      open: "13:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - sat
+        - sun
+      open: "13:00"
+      close: "16:00"
     - label: Beginner hour
-      months: [9]
-      days: [sat]
+      months:
+        - 9
+      days:
+        - sat
       open: "12:00"
       close: "13:00"
       note: Cable runs at 27 km/h
   slots:
-    - { id: "12:00", start: "12:00", end: "13:00" }
-    - { id: "13:00", start: "13:00", end: "14:00" }
-    - { id: "14:00", start: "14:00", end: "15:00" }
-    - { id: "15:00", start: "15:00", end: "16:00" }
-    - { id: "16:00", start: "16:00", end: "17:00" }
-    - { id: "17:00", start: "17:00", end: "18:00" }
-    - { id: "18:00", start: "18:00", end: "19:00" }
-    - { id: "19:00", start: "19:00", end: "20:00" }
+    - id: "12:00"
+      start: "12:00"
+      end: "13:00"
+    - id: "13:00"
+      start: "13:00"
+      end: "14:00"
+    - id: "14:00"
+      start: "14:00"
+      end: "15:00"
+    - id: "15:00"
+      start: "15:00"
+      end: "16:00"
+    - id: "16:00"
+      start: "16:00"
+      end: "17:00"
+    - id: "17:00"
+      start: "17:00"
+      end: "18:00"
+    - id: "18:00"
+      start: "18:00"
+      end: "19:00"
+    - id: "19:00"
+      start: "19:00"
+      end: "20:00"
 
 # Only 1-hour rates confirmed; 2-hour, day and rental prices are missing.
 prices:
   - name: "1 hour"
     options:
-      - { amount: "25", currency: EUR, note: "From 15 years. Skis/board, life vest, helmet and instruction included" }
-      - { amount: "20", currency: EUR, note: Up to 14 years }
+      - amount: "25"
+        currency: EUR
+        note: "From 15 years. Skis/board, life vest, helmet and instruction included"
+      - amount: "20"
+        currency: EUR
+        note: Up to 14 years
   - name: Kids Wake Club
     options:
-      - { amount: "175", currency: EUR, note: "8 lessons" }
+      - amount: "175"
+        currency: EUR
+        note: "8 lessons"
   - name: Kids Wake Club trial lesson
     options:
-      - { amount: "21.50", currency: EUR, per: person }
+      - amount: "21.50"
+        currency: EUR
+        per: person
   - name: Online booking discount
     options:
-      - { amount: "-2", currency: EUR, note: "per person, when booked online" }
+      - amount: "-2"
+        currency: EUR
+        note: "per person, when booked online"
 
 facilities:
   - Changing rooms (male/female)

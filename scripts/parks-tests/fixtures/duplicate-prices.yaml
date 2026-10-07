@@ -1,11 +1,17 @@
 version: 1
 id: duplicate-prices
 name: Fixture Park
-location: { lat: 52.0, lon: 5.0 }
+location:
+  lat: 52.0
+  lon: 5.0
 prices:
   - name: 1 hour
     options:
-      - { amount: "25", currency: EUR, note: adults }
+      - amount: "25"
+        currency: EUR
+        note: adults
   - name: 1 Hour
     options:
-      - { amount: "20", currency: EUR, note: kids }
+      - amount: "20"
+        currency: EUR
+        note: kids

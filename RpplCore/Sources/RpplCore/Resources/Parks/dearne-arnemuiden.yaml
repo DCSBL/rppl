@@ -29,18 +29,24 @@ phone: 0118-601419
 email: dearne@zeelandnet.nl
 website: https://watersportverhuurbedrijfdearne.nl/watersport/
 
-water_temperature: { provider: rws_nl, station_id: arnemuiden.oranjeplaat }
+water_temperature:
+  provider: rws_nl
+  station_id: arnemuiden.oranjeplaat
 
 links:
-  - { kind: facebook, url: "https://www.facebook.com/wsbdearne" }
-  - { kind: instagram, url: "https://www.instagram.com/wsbdearne/?hl=nl" }
+  - kind: facebook
+    url: "https://www.facebook.com/wsbdearne"
+  - kind: instagram
+    url: "https://www.instagram.com/wsbdearne/?hl=nl"
 
 cables:
   - name: Wakeboardbaan
     direction: "2.0"
     points:
-      - { lat: 51.5167443031719, lon: 3.69684368622684 }
-      - { lat: 51.5178986118266, lon: 3.69543275444531 }
+      - lat: 51.5167443031719
+        lon: 3.69684368622684
+      - lat: 51.5178986118266
+        lon: 3.69543275444531
     description: >-
       Two-mast cable. You're the only rider on the water for your session, no queue and no
       swimming back after a fall.
@@ -51,30 +57,58 @@ opening:
     The wakeboard/waterski cable runs May 1 through September 30 only (other De Arne facilities
     are open longer). Closed Saturdays. Evening hours by appointment.
   rules:
-    - { label: Season, months: [5, 6, 7, 8, 9], days: [sun, mon, tue, wed, thu, fri], open: "09:00", close: "17:30" }
+    - label: Season
+      months:
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+      days:
+        - sun
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "09:00"
+      close: "17:30"
 
 prices:
   - name: "15 min"
     options:
-      - { amount: "18", currency: EUR, note: Includes helmet and impact vest }
+      - amount: "18"
+        currency: EUR
+        note: Includes helmet and impact vest
   - name: "30 min"
     options:
-      - { amount: "36", currency: EUR, note: Includes helmet and impact vest }
+      - amount: "36"
+        currency: EUR
+        note: Includes helmet and impact vest
   - name: "60 min"
     options:
-      - { amount: "72", currency: EUR, note: Includes helmet and impact vest }
+      - amount: "72"
+        currency: EUR
+        note: Includes helmet and impact vest
   - name: Wakeboard/waterski rental
     options:
-      - { amount: "7", currency: EUR, per: person }
+      - amount: "7"
+        currency: EUR
+        per: person
   - name: Pro wakeboard rental
     options:
-      - { amount: "10", currency: EUR, per: person }
+      - amount: "10"
+        currency: EUR
+        per: person
   - name: Wetsuit rental
     options:
-      - { amount: "7", currency: EUR, per: person }
+      - amount: "7"
+        currency: EUR
+        per: person
   - name: "11-ride card"
     options:
-      - { amount: "180", currency: EUR }
+      - amount: "180"
+        currency: EUR
 
 facilities:
   - rental

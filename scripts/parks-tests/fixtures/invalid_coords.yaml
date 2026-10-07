@@ -1,4 +1,6 @@
 version: 1
 id: invalid-coords
 name: Bad Coordinates Park
-location: { lat: 200.0, lon: 5.0 }
+location:
+  lat: 200.0
+  lon: 5.0
