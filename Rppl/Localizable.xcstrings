@@ -241,6 +241,22 @@
         }
       }
     },
+    "Show folder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show folder"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toon map"
+          }
+        }
+      }
+    },
     "Speed" : {
       "localizations" : {
         "en" : {
