@@ -34,8 +34,8 @@ final class SessionCatalog {
         for entry in entries {
             if let stats = entry.stats {
                 summary.totalDistanceMeters += stats.totalDistanceMeters
-                summary.totalSets += stats.setCount
-                summary.totalLaps += stats.totalLapCount
+                summary.totalSets += stats.knownSetCount ?? 0
+                summary.totalLaps += stats.knownLapCount ?? 0
             }
             if let speed = entry.topSpeedKmh {
                 summary.topSpeedKmh = max(summary.topSpeedKmh, speed)
@@ -88,8 +88,8 @@ final class SessionCatalog {
                             id: manifest.sessionId,
                             totalDuration: 0,
                             ridingDuration: 0,
-                            lapCount: stats.totalLapCount,
-                            setCount: stats.setCount
+                            lapCount: stats.knownLapCount ?? 0,
+                            setCount: stats.knownSetCount
                         )
                     }
                     let minutes = SessionHighlightInput.minutesOfDay(

@@ -70,6 +70,13 @@ enum LogbookFormatting {
         return "\(value) mm/h"
     }
 
+    /// Shown for a manual set / lap total the rider does not know (nil), instead of 0.
+    static let unknownCount = "-"
+
+    static func countValue(_ count: Int?) -> String {
+        count.map(String.init) ?? unknownCount
+    }
+
     static func setCount(_ count: Int) -> String {
         String(localized: "\(count) sets")
     }
@@ -78,9 +85,9 @@ enum LogbookFormatting {
         String(localized: "\(count) laps")
     }
 
-    static func setsAndLaps(sets: Int, laps: Int) -> String {
-        let setsText = setCount(sets)
-        let lapsText = lapCount(laps)
+    static func setsAndLaps(sets: Int?, laps: Int?) -> String {
+        let setsText = sets.map(setCount) ?? unknownCount
+        let lapsText = laps.map(lapCount) ?? unknownCount
         return String(localized: "\(setsText) · \(lapsText)")
     }
 

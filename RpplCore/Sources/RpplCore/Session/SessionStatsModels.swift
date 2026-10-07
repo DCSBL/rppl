@@ -133,6 +133,14 @@ public struct SessionStats: Codable, Equatable, Sendable {
     public var cableSpeedKmh: Double?
     /// Typed-in lap total of a manual session; it has no sets to sum laps from.
     public var manualLapCount: Int?
+    /// A manual session whose set / lap total was left unknown (not a typed 0).
+    public var setCountUnknown: Bool
+    public var lapCountUnknown: Bool
+
+    /// Set total for display; nil when a manual session left it unknown.
+    public var knownSetCount: Int? { setCountUnknown ? nil : setCount }
+    /// Lap total for display; nil when a manual session left it unknown.
+    public var knownLapCount: Int? { lapCountUnknown ? nil : totalLapCount }
 
     /// Set meters / riding duration (km/h).
     public var averageSpeedKmh: Double? {
@@ -163,7 +171,9 @@ public struct SessionStats: Codable, Equatable, Sendable {
         waterTemperatureRangeCelsius: ClosedRange<Double>? = nil,
         waterTemperatureAvailable: Bool = false,
         cableSpeedKmh: Double? = nil,
-        manualLapCount: Int? = nil
+        manualLapCount: Int? = nil,
+        setCountUnknown: Bool = false,
+        lapCountUnknown: Bool = false
     ) {
         self.startedAt = startedAt
         self.endedAt = endedAt
@@ -182,6 +192,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         self.waterTemperatureAvailable = waterTemperatureAvailable
         self.cableSpeedKmh = cableSpeedKmh
         self.manualLapCount = manualLapCount
+        self.setCountUnknown = setCountUnknown
+        self.lapCountUnknown = lapCountUnknown
     }
 
     public init(from decoder: Decoder) throws {
@@ -206,6 +218,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         waterTemperatureAvailable = try container.decodeIfPresent(Bool.self, forKey: .waterTemperatureAvailable) ?? false
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
         manualLapCount = try container.decodeIfPresent(Int.self, forKey: .manualLapCount)
+        setCountUnknown = try container.decodeIfPresent(Bool.self, forKey: .setCountUnknown) ?? false
+        lapCountUnknown = try container.decodeIfPresent(Bool.self, forKey: .lapCountUnknown) ?? false
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -227,6 +241,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         try container.encode(waterTemperatureAvailable, forKey: .waterTemperatureAvailable)
         try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
         try container.encodeIfPresent(manualLapCount, forKey: .manualLapCount)
+        if setCountUnknown { try container.encode(true, forKey: .setCountUnknown) }
+        if lapCountUnknown { try container.encode(true, forKey: .lapCountUnknown) }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -236,5 +252,6 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case ridingDuration, inactiveDuration, ridingInactiveRatio
         case averageWaterTemperatureCelsius, waterTemperatureMinCelsius, waterTemperatureMaxCelsius
         case waterTemperatureAvailable, cableSpeedKmh, manualLapCount
+        case setCountUnknown, lapCountUnknown
     }
 }

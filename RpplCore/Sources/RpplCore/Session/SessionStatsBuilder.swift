@@ -143,12 +143,14 @@ public enum SessionStatsBuilder {
             totalDuration: max(0, end.timeIntervalSince(manifest.startedAt)),
             totalDistanceMeters: manual.distanceM ?? 0,
             activeEnergyKilocalories: nil,
-            setCount: manual.setCount,
+            setCount: manual.setCount ?? 0,
             ridingDuration: 0,
             inactiveDuration: 0,
             ridingInactiveRatio: 0,
             sets: [],
-            manualLapCount: manual.lapCount
+            manualLapCount: manual.lapCount ?? 0,
+            setCountUnknown: manual.setCount == nil,
+            lapCountUnknown: manual.lapCount == nil
         )
     }
 
