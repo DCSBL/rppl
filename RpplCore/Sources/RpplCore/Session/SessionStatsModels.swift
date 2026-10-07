@@ -124,6 +124,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
     /// value too; a set only overrides it when its own estimate clearly disagrees (see
     /// `CableSpeedEstimator`).
     public var cableSpeedKmh: Double?
+    /// Typed-in lap total of a manual session; it has no sets to sum laps from.
+    public var manualLapCount: Int?
 
     /// Set meters / riding duration (km/h).
     public var averageSpeedKmh: Double? {
@@ -133,9 +135,9 @@ public struct SessionStats: Codable, Equatable, Sendable {
         )
     }
 
-    /// Sum of per-set crossing counts.
+    /// Sum of per-set crossing counts (the typed-in total for a manual session).
     public var totalLapCount: Int {
-        sets.reduce(0) { $0 + $1.lapCount }
+        manualLapCount ?? sets.reduce(0) { $0 + $1.lapCount }
     }
 
     public init(
@@ -152,7 +154,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         sets: [SetSegmentStats],
         averageWaterTemperatureCelsius: Double? = nil,
         waterTemperatureAvailable: Bool = false,
-        cableSpeedKmh: Double? = nil
+        cableSpeedKmh: Double? = nil,
+        manualLapCount: Int? = nil
     ) {
         self.startedAt = startedAt
         self.endedAt = endedAt
@@ -168,6 +171,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         self.averageWaterTemperatureCelsius = averageWaterTemperatureCelsius
         self.waterTemperatureAvailable = waterTemperatureAvailable
         self.cableSpeedKmh = cableSpeedKmh
+        self.manualLapCount = manualLapCount
     }
 
     public init(from decoder: Decoder) throws {
@@ -189,6 +193,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         )
         waterTemperatureAvailable = try container.decodeIfPresent(Bool.self, forKey: .waterTemperatureAvailable) ?? false
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
+        manualLapCount = try container.decodeIfPresent(Int.self, forKey: .manualLapCount)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -207,6 +212,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         try container.encodeIfPresent(averageWaterTemperatureCelsius, forKey: .averageWaterTemperatureCelsius)
         try container.encode(waterTemperatureAvailable, forKey: .waterTemperatureAvailable)
         try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
+        try container.encodeIfPresent(manualLapCount, forKey: .manualLapCount)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -214,6 +220,6 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case activeEnergyKilocalories, totalEnergyKilocalories
         case setCount, sets
         case ridingDuration, inactiveDuration, ridingInactiveRatio
-        case averageWaterTemperatureCelsius, waterTemperatureAvailable, cableSpeedKmh
+        case averageWaterTemperatureCelsius, waterTemperatureAvailable, cableSpeedKmh, manualLapCount
     }
 }

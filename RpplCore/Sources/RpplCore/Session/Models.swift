@@ -40,6 +40,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
     public var transferAttempts: Int?
     public var nextTransferAttemptAt: Date?
     public var lastTransferError: String?
+    /// Set for a session typed in by hand (no sensor streams); nil for tracked sessions.
+    public var manual: ManualEntry?
 
     public enum TransferState: String, Codable, Equatable, Sendable {
         case recording
@@ -72,7 +74,8 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         motionStoppedReason: String? = nil,
         transferAttempts: Int? = nil,
         nextTransferAttemptAt: Date? = nil,
-        lastTransferError: String? = nil
+        lastTransferError: String? = nil,
+        manual: ManualEntry? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.sessionId = sessionId
@@ -98,7 +101,11 @@ public struct SessionManifest: Codable, Equatable, Sendable {
         self.transferAttempts = transferAttempts
         self.nextTransferAttemptAt = nextTransferAttemptAt
         self.lastTransferError = lastTransferError
+        self.manual = manual
     }
+
+    /// Whether the phone mirrors this session to the Watch logbook. Hand-entered sessions are not.
+    public var mirrorsToWatch: Bool { manual == nil }
 }
 
 /// Current weather captured once per session (Watch, via WeatherKit). Wind + precipitation are
