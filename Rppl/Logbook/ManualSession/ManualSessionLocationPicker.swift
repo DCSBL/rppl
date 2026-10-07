@@ -52,7 +52,12 @@ struct ManualSessionLocationPicker: View {
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $query, prompt: Text("Search parks"))
         .sheet(isPresented: $pickingOwn) {
-            LocationPickerView(coordinate: $ownSpot, userLocation: draft.spot, title: "Your location")
+            LocationPickerView(
+                coordinate: $ownSpot,
+                userLocation: draft.spot,
+                title: "Your location",
+                knownSpots: parks.map(\.location)
+            )
         }
         .onChange(of: ownSpot) { _, spot in
             Task {

@@ -54,6 +54,8 @@ struct LocationPickerView: View {
     @Binding var coordinate: ParkCoordinate
     let userLocation: ParkCoordinate?
     var title: LocalizedStringKey = "Park location"
+    /// Known places (parks) drawn as small dots, so you can see what is already there.
+    var knownSpots: [ParkCoordinate] = []
 
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = true
@@ -64,10 +66,16 @@ struct LocationPickerView: View {
     @State private var here = ParksLocationProvider()
     @State private var wantsHere = false
 
-    init(coordinate: Binding<ParkCoordinate>, userLocation: ParkCoordinate?, title: LocalizedStringKey = "Park location") {
+    init(
+        coordinate: Binding<ParkCoordinate>,
+        userLocation: ParkCoordinate?,
+        title: LocalizedStringKey = "Park location",
+        knownSpots: [ParkCoordinate] = []
+    ) {
         _coordinate = coordinate
         self.userLocation = userLocation
         self.title = title
+        self.knownSpots = knownSpots
         let start = Self.startingPoint(coordinate.wrappedValue, userLocation)
         let center = start.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
             ?? CLLocationCoordinate2D(latitude: 52.1, longitude: 5.3)
@@ -87,6 +95,15 @@ struct LocationPickerView: View {
     var body: some View {
         NavigationStack {
             Map(position: $position) {
+                ForEach(Array(knownSpots.enumerated()), id: \.offset) { _, spot in
+                    Annotation("", coordinate: CLLocationCoordinate2D(latitude: spot.lat, longitude: spot.lon)) {
+                        Circle()
+                            .fill(Color.rpplAccent)
+                            .frame(width: 9, height: 9)
+                            .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                            .accessibilityHidden(true)
+                    }
+                }
                 if ParkDraft.isValid(coordinate) {
                     Annotation("", coordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)) {
                         Image(systemName: "mappin.circle.fill")
