@@ -391,8 +391,11 @@ struct LogbookSessionDetailView: View {
                     distanceTile(stats)
                     if stats.waterTemperatureAvailable {
                         InfoTile("Water temperature", metric: .water) {
+                            // A wide spread means we can't tell which reading is right (Watch under the
+                            // suit vs on top), so show low–high instead of a single value.
                             MetricValue(
-                                stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
+                                stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
+                                    ?? stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
                                     ?? TemperatureFormat.placeholder
                             )
                         }

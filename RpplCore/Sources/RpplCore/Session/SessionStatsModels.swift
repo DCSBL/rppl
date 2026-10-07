@@ -104,8 +104,15 @@ public struct SessionStats: Codable, Equatable, Sendable {
     /// `ridingDuration / (ridingDuration + inactiveDuration)`; 0 when no active time.
     public var ridingInactiveRatio: Double
     public var sets: [SetSegmentStats]
-    /// Mean of persisted water-temp samples; nil when none.
+    /// Rolling mean of the latest persisted water-temp samples (`WaterTemperatureSummary`); nil when none.
     public var averageWaterTemperatureCelsius: Double?
+    /// Session min–max, set only when the spread exceeds `WaterTemperatureSummary.rangeThresholdCelsius`.
+    public var waterTemperatureRangeCelsius: ClosedRange<Double>? {
+        guard let low = waterTemperatureMinCelsius, let high = waterTemperatureMaxCelsius, low <= high else { return nil }
+        return low...high
+    }
+    private var waterTemperatureMinCelsius: Double?
+    private var waterTemperatureMaxCelsius: Double?
     /// Watch could measure (Ultra). Drives hide vs `- C`.
     public var waterTemperatureAvailable: Bool
 
@@ -153,6 +160,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         ridingInactiveRatio: Double,
         sets: [SetSegmentStats],
         averageWaterTemperatureCelsius: Double? = nil,
+        waterTemperatureRangeCelsius: ClosedRange<Double>? = nil,
         waterTemperatureAvailable: Bool = false,
         cableSpeedKmh: Double? = nil,
         manualLapCount: Int? = nil
@@ -169,6 +177,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         self.ridingInactiveRatio = ridingInactiveRatio
         self.sets = sets
         self.averageWaterTemperatureCelsius = averageWaterTemperatureCelsius
+        waterTemperatureMinCelsius = waterTemperatureRangeCelsius?.lowerBound
+        waterTemperatureMaxCelsius = waterTemperatureRangeCelsius?.upperBound
         self.waterTemperatureAvailable = waterTemperatureAvailable
         self.cableSpeedKmh = cableSpeedKmh
         self.manualLapCount = manualLapCount
@@ -191,6 +201,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
             Double.self,
             forKey: .averageWaterTemperatureCelsius
         )
+        waterTemperatureMinCelsius = try container.decodeIfPresent(Double.self, forKey: .waterTemperatureMinCelsius)
+        waterTemperatureMaxCelsius = try container.decodeIfPresent(Double.self, forKey: .waterTemperatureMaxCelsius)
         waterTemperatureAvailable = try container.decodeIfPresent(Bool.self, forKey: .waterTemperatureAvailable) ?? false
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
         manualLapCount = try container.decodeIfPresent(Int.self, forKey: .manualLapCount)
@@ -210,6 +222,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
         try container.encode(ridingInactiveRatio, forKey: .ridingInactiveRatio)
         try container.encode(sets, forKey: .sets)
         try container.encodeIfPresent(averageWaterTemperatureCelsius, forKey: .averageWaterTemperatureCelsius)
+        try container.encodeIfPresent(waterTemperatureMinCelsius, forKey: .waterTemperatureMinCelsius)
+        try container.encodeIfPresent(waterTemperatureMaxCelsius, forKey: .waterTemperatureMaxCelsius)
         try container.encode(waterTemperatureAvailable, forKey: .waterTemperatureAvailable)
         try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
         try container.encodeIfPresent(manualLapCount, forKey: .manualLapCount)
@@ -220,6 +234,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case activeEnergyKilocalories, totalEnergyKilocalories
         case setCount, sets
         case ridingDuration, inactiveDuration, ridingInactiveRatio
-        case averageWaterTemperatureCelsius, waterTemperatureAvailable, cableSpeedKmh, manualLapCount
+        case averageWaterTemperatureCelsius, waterTemperatureMinCelsius, waterTemperatureMaxCelsius
+        case waterTemperatureAvailable, cableSpeedKmh, manualLapCount
     }
 }

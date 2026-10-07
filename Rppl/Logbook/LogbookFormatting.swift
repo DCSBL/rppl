@@ -45,6 +45,10 @@ enum LogbookFormatting {
         TemperatureFormat.celsius(celsius)
     }
 
+    static func waterTemperatureRange(_ range: ClosedRange<Double>) -> String {
+        TemperatureFormat.celsiusRange(range)
+    }
+
     static func airTemperature(_ celsius: Double) -> String {
         TemperatureFormat.celsius(celsius)
     }
