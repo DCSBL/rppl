@@ -44,6 +44,6 @@ public struct ManualEntry: Codable, Equatable, Sendable {
 extension ParkCable {
     /// Distance of one lap: a loop cable is its length, a 2D cable is ridden there and back.
     public var lapLengthM: Double? {
-        effectiveLengthM.map { direction == .twoD ? $0 * 2 : $0 }
+        effectiveLengthM.map { direction == ParkCableDirection.twoD ? $0 * 2 : $0 }
     }
 }
