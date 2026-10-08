@@ -84,7 +84,7 @@ struct ManualSessionEditorView: View {
     private var longDuration: String {
         let seconds = max(0, draft.end.timeIntervalSince(draft.start))
         let whole = Duration.seconds(Int(seconds / 3_600) * 3_600)
-        return whole.formatted(.units(allowed: [.days, .hours], width: .wide))
+        return whole.formatted(.units(allowed: [.days, .hours], width: .wide, zeroValueUnits: .hide))
     }
     private var park: Park? { parks.first { $0.id == draft.parkId } }
     private var cables: [ParkCable] { park?.cables ?? [] }
