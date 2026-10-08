@@ -399,6 +399,11 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         ParkSchedule.day(for: opening, on: date, timeZone: resolvedTimeZone)
     }
 
+    /// When the park opens again after `date`, only if the schedule says so for certain.
+    public func nextOpening(after date: Date = Date()) -> ParkNextOpening? {
+        ParkSchedule.nextOpening(for: opening, after: date, timeZone: resolvedTimeZone)
+    }
+
     /// Whether the park is open right now (or opens later today), opens tomorrow, or is closed
     /// beyond that — accounting for the current time, not just today's date.
     public func openStatus(at date: Date = Date()) -> ParkOpenStatus {

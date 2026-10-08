@@ -45,6 +45,17 @@ enum LogbookFormatting {
         TemperatureFormat.celsius(celsius)
     }
 
+    /// Station reading for a session the Watch never measured: `~` marks it as an estimate.
+    static func estimatedWaterTemperature(_ celsius: Double) -> String {
+        "~" + TemperatureFormat.celsius(celsius)
+    }
+
+    /// Where and when the station took the reading, e.g. "Hoek van Holland (Rijkswaterstaat) · 8 Oct, 14:20".
+    static func waterEstimateSource(_ estimate: ParkWaterTemperature) -> String {
+        "\(estimate.stationName) (\(estimate.providerName)) · "
+            + estimate.observedAt.formatted(date: .abbreviated, time: .shortened)
+    }
+
     static func waterTemperatureRange(_ range: ClosedRange<Double>) -> String {
         TemperatureFormat.celsiusRange(range)
     }

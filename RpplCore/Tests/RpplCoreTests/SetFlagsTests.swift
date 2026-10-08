@@ -90,4 +90,26 @@ struct SetFlagsTests {
         #expect(SetFlags.trimmed(flags, toSetCount: 3) == ["1": ["wipeout"], "3": ["new_trick"]])
         #expect(SetFlags.trimmed(flags, toSetCount: 0).isEmpty)
     }
+
+    @Test func presetsAndContainsAreCaseInsensitiveByKind() {
+        #expect(SetFlags.presets(of: .exit).contains("wipeout"))
+        #expect(SetFlags.presets(of: .custom).isEmpty)
+        #expect(SetFlags.contains("WIPEOUT", in: ["wipeout"]))
+        #expect(!SetFlags.contains("rail", in: ["wipeout"]))
+    }
+
+    @Test func draftTogglesDiscardsAndRemovesEverywhere() {
+        var draft = SetFlagDraft(saved: nil)
+        #expect(!draft.isDirty)
+        draft.toggle("rail", forSet: 1)
+        draft.toggle("Rail", forSet: 2)
+        #expect(draft.isDirty)
+        #expect(draft.flags(forSet: 1) == ["rail"])
+        draft.removeEverywhere("RAIL")
+        #expect(draft.flags(forSet: 1).isEmpty && draft.flags(forSet: 2).isEmpty)
+        #expect(!draft.isDirty)
+        draft.toggle("fall", forSet: 1)
+        draft.discard()
+        #expect(!draft.isDirty)
+    }
 }

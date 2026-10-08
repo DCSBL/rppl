@@ -28,6 +28,7 @@ struct ParkDetailView: View {
     @State private var drafts = ParkDraftsController.shared
     @State private var showMail = false
     @State private var confirmRemove = false
+    @State private var showReopeningEvent = false
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -297,6 +298,9 @@ struct ParkDetailView: View {
                 Text("Closed today")
                     .font(.title3.bold())
                     .foregroundStyle(.red)
+                if let next = park.nextOpening() {
+                    reopeningText(next)
+                }
             }
 
             ForEach(Array(day.notices.enumerated()), id: \.offset) { _, notice in
@@ -312,6 +316,34 @@ struct ParkDetailView: View {
         .logbookCardChrome()
     }
 
+    /// "Opens again on Thursday 21 October from 15:00", with the day opening the add-to-calendar sheet.
+    private func reopeningText(_ next: ParkNextOpening) -> some View {
+        let zone = park.resolvedTimeZone
+        let tomorrow = String(localized: "tomorrow")
+        let day = next.isTomorrow
+            ? tomorrow
+            : next.start.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide).day().month(.wide))
+        let time = next.start.formatted(Date.FormatStyle(timeZone: zone).hour().minute())
+        var text = AttributedString(
+            next.isTomorrow
+                ? String(localized: "Opens again \(day) from \(time)")
+                : String(localized: "Opens again on \(day) from \(time)")
+        )
+        if let range = text.range(of: day), let url = URL(string: "rppl://add-reopening") {
+            text[range].link = url
+        }
+        return Text(text)
+            .font(.subheadline)
+            .foregroundStyle(Color.rpplMuted)
+            .environment(\.openURL, OpenURLAction { _ in
+                showReopeningEvent = true
+                return .handled
+            })
+            .sheet(isPresented: $showReopeningEvent) {
+                ParkReopeningEventSheet(park: park, opening: next, bookingURL: bookingURL)
+            }
+    }
+
     private var waterTemperaturePromptRow: some View {
         Button {
             showWaterTemperaturePrompt = true
@@ -325,8 +357,35 @@ struct ParkDetailView: View {
 
     private func conditionsSection(weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
-                if let weather {
+            if waterTemperature != nil || showsWaterTemperatureUnavailable || showsWaterTemperaturePromptRow {
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
+                    if let waterTemperature {
+                        conditionRow(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
+                    } else if showsWaterTemperatureUnavailable {
+                        conditionRow(String(localized: "Not available"), systemImage: "water.waves", tint: Color.rpplMuted)
+                    }
+                }
+                .font(.subheadline)
+
+                if waterTemperature == nil, showsWaterTemperaturePromptRow {
+                    waterTemperaturePromptRow
+                }
+
+                if let waterTemperature {
+                    Text(String(
+                        localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
+                    ))
+                    .font(.caption2)
+                    .foregroundStyle(Color.rpplMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if let weather {
+                if waterTemperature != nil || showsWaterTemperatureUnavailable || showsWaterTemperaturePromptRow {
+                    Divider().overlay(Color.rpplFill)
+                }
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
                     conditionRow(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
                     conditionRow(windSummary(weather), systemImage: "wind")
                     conditionRow(weather.rainForecast.label, systemImage: "cloud.rain")
@@ -338,28 +397,7 @@ struct ParkDetailView: View {
                         )
                     }
                 }
-                if let waterTemperature {
-                    conditionRow(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
-                } else if showsWaterTemperatureUnavailable {
-                    conditionRow(String(localized: "Not available"), systemImage: "water.waves", tint: Color.rpplMuted)
-                }
-            }
-            .font(.subheadline)
-
-            if waterTemperature == nil, showsWaterTemperaturePromptRow {
-                waterTemperaturePromptRow
-            }
-
-            if let waterTemperature {
-                Text(String(
-                    localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
-                ))
-                .font(.caption2)
-                .foregroundStyle(Color.rpplMuted)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if let weather {
+                .font(.subheadline)
                 AppleWeatherAttribution(info: weather.attribution)
             }
         }

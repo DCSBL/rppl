@@ -300,6 +300,13 @@ public struct ParkOpenStatusDetail: Equatable, Sendable {
     }
 }
 
+/// The first window of the next day the park is open, as real instants in the park's time zone.
+public struct ParkNextOpening: Equatable, Sendable {
+    public var start: Date
+    public var end: Date
+    public var isTomorrow: Bool
+}
+
 /// One exception on one concrete day, for an "upcoming changes" list.
 public struct ParkExceptionOccurrence: Equatable, Sendable, Identifiable {
     /// `yyyy-MM-dd` in the park's time zone.
@@ -459,6 +466,32 @@ public enum ParkSchedule {
         let tomorrowDay = day(for: opening, on: tomorrow, timeZone: timeZone)
         guard tomorrowDay.isScheduleKnown else { return ParkOpenStatusDetail(status: .unknown) }
         return ParkOpenStatusDetail(status: tomorrowDay.isOpen ? .opensTomorrow : .closed)
+    }
+
+    /// The next day after `date` with an opening window, or nil when that can't be said for certain:
+    /// an unknown day comes first, the park only has fixed slots (no window start), or it stays
+    /// closed for the whole `horizon`.
+    public static func nextOpening(
+        for opening: ParkOpening?,
+        after date: Date,
+        timeZone: TimeZone,
+        horizon: Int = 366
+    ) -> ParkNextOpening? {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        for offset in 1...horizon {
+            guard let candidate = calendar.date(byAdding: .day, value: offset, to: date) else { return nil }
+            let schedule = day(for: opening, on: candidate, timeZone: timeZone)
+            guard schedule.isScheduleKnown else { return nil }
+            guard schedule.isOpen else { continue }
+            guard let window = schedule.windows.first else { return nil }
+            let midnight = calendar.startOfDay(for: candidate)
+            guard let start = calendar.date(byAdding: .minute, value: window.startMinute, to: midnight),
+                  let end = calendar.date(byAdding: .minute, value: window.endMinute, to: midnight)
+            else { return nil }
+            return ParkNextOpening(start: start, end: end, isTomorrow: offset == 1)
+        }
+        return nil
     }
 
     public static func minutes(_ time: String) -> Int? {

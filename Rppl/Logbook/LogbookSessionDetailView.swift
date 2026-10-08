@@ -72,6 +72,12 @@ struct LogbookSessionDetailView: View {
     /// Typed in by hand: no map, speed, riding, calories or set list, and it can be edited.
     private var isManual: Bool { manifest?.manual != nil }
 
+    /// Changes when a station lookup for a past session should (re)run; `nil` until all inputs are loaded.
+    private var waterEstimateKey: String? {
+        guard loadPhase == .ready, !parks.isEmpty, let manifest else { return nil }
+        return "\(manifest.sessionId)|\(manifest.startedAt)|\(String(describing: manifest.endedAt))|\(matchedPark?.id ?? "")"
+    }
+
     /// Flags can be edited on a stored session that has sets to flag.
     private var canEditFlags: Bool {
         guard case .store = source, loadPhase == .ready else { return false }
@@ -134,6 +140,14 @@ struct LogbookSessionDetailView: View {
             Text(flagSaveError ?? "")
         }
         .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
+        .task(id: waterEstimateKey) {
+            guard waterEstimateKey != nil, let store, let manifest, let sessionStats else { return }
+            if let estimate = await SessionWaterEstimate.fetchIfNeeded(
+                store: store, manifest: manifest, stats: sessionStats, park: matchedPark
+            ) {
+                self.manifest?.waterTemperatureEstimate = estimate
+            }
+        }
         .onDisappear {
             cancelLoad()
             cancelExport()
@@ -433,15 +447,20 @@ struct LogbookSessionDetailView: View {
                         ridingTile(stats)
                     }
                     distanceTile(stats)
-                    if stats.waterTemperatureAvailable {
+                    let measured = stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
+                        ?? stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
+                    if let estimate = manifest?.waterTemperatureEstimate, measured == nil {
+                        InfoTile("Water temperature", metric: .water) {
+                            MetricValue(LogbookFormatting.estimatedWaterTemperature(estimate.celsius))
+                            Text(LogbookFormatting.waterEstimateSource(estimate))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if stats.waterTemperatureAvailable {
                         InfoTile("Water temperature", metric: .water) {
                             // A wide spread means we can't tell which reading is right (Watch under the
                             // suit vs on top), so show low–high instead of a single value.
-                            MetricValue(
-                                stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
-                                    ?? stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
-                                    ?? TemperatureFormat.placeholder
-                            )
+                            MetricValue(measured ?? TemperatureFormat.placeholder)
                         }
                     }
                     if let weather = manifest?.weather {

@@ -68,6 +68,7 @@
 		CCF3D6B4302921A800AF3518 /* Exceptions for "Rppl" folder in "Rppl" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Info-Dev.plist,
 				Info.plist,
 			);
 			target = CCF3D690302921A400AF3518 /* Rppl */;
@@ -525,7 +526,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl;
-				RPPL_ICLOUD_FOLDER_NAME = Rppl;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -589,7 +589,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl;
-				RPPL_ICLOUD_FOLDER_NAME = Rppl;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -824,7 +823,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				RPPL_APP_GROUP_ID = group.nl.dcsbl.rppl.dev;
 				RPPL_ICLOUD_CONTAINER = iCloud.nl.dcsbl.rppl.dev;
-				RPPL_ICLOUD_FOLDER_NAME = "Rppl Dev";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -894,7 +892,7 @@
 				DEVELOPMENT_TEAM = V5UBFX6V97;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Rppl/Info.plist;
+				INFOPLIST_FILE = Rppl/Info-Dev.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone.";
