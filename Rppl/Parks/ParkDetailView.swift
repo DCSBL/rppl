@@ -317,31 +317,35 @@ struct ParkDetailView: View {
     }
 
     /// "Opens again on Thursday 21 October from 15:00", with the day opening the add-to-calendar sheet.
+    @ViewBuilder
     private func reopeningText(_ next: ParkNextOpening) -> some View {
         let zone = park.resolvedTimeZone
-        let tomorrow = String(localized: "tomorrow")
-        let day = next.isTomorrow
-            ? tomorrow
-            : next.start.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide).day().month(.wide))
         let time = next.start.formatted(Date.FormatStyle(timeZone: zone).hour().minute())
-        var text = AttributedString(
-            next.isTomorrow
-                ? String(localized: "Opens again \(day) from \(time)")
-                : String(localized: "Opens again on \(day) from \(time)")
-        )
+        if next.isTomorrow {
+            Text("Opens again tomorrow from \(time)")
+                .font(.subheadline)
+                .foregroundStyle(Color.rpplMuted)
+        } else {
+            let day = next.start.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide).day().month(.wide))
+            Text(linkedDay(String(localized: "Opens again on \(day) from \(time)"), day: day))
+                .font(.subheadline)
+                .foregroundStyle(Color.rpplMuted)
+                .environment(\.openURL, OpenURLAction { _ in
+                    showReopeningEvent = true
+                    return .handled
+                })
+                .sheet(isPresented: $showReopeningEvent) {
+                    ParkReopeningEventSheet(park: park, opening: next, bookingURL: bookingURL)
+                }
+        }
+    }
+
+    private func linkedDay(_ sentence: String, day: String) -> AttributedString {
+        var text = AttributedString(sentence)
         if let range = text.range(of: day), let url = URL(string: "rppl://add-reopening") {
             text[range].link = url
         }
-        return Text(text)
-            .font(.subheadline)
-            .foregroundStyle(Color.rpplMuted)
-            .environment(\.openURL, OpenURLAction { _ in
-                showReopeningEvent = true
-                return .handled
-            })
-            .sheet(isPresented: $showReopeningEvent) {
-                ParkReopeningEventSheet(park: park, opening: next, bookingURL: bookingURL)
-            }
+        return text
     }
 
     private var waterTemperaturePromptRow: some View {

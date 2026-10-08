@@ -11008,38 +11008,6 @@
         }
       }
     },
-    "tomorrow" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tomorrow"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "morgen"
-          }
-        }
-      }
-    },
-    "Opens again %@ from %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens again %1$@ from %2$@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gaat weer open %1$@ vanaf %2$@"
-          }
-        }
-      }
-    },
     "Opens again on %@ from %@" : {
       "localizations" : {
         "en" : {
@@ -11068,6 +11036,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ geopend"
+          }
+        }
+      }
+    },
+    "Opens again tomorrow from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens again tomorrow from %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gaat weer open morgen vanaf %@"
           }
         }
       }
