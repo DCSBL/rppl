@@ -11087,6 +11087,70 @@
           }
         }
       }
+    },
+    "End is before start" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End is before start"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einde ligt voor start"
+          }
+        }
+      }
+    },
+    "Set an end time after the start time to save this session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set an end time after the start time to save this session."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies een eindtijd na de starttijd om deze session op te slaan."
+          }
+        }
+      }
+    },
+    "Save long session?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save long session?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange session opslaan?"
+          }
+        }
+      }
+    },
+    "Are you sure you want to save a session of %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to save a session of %@?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weet je zeker dat je een session van %@ wilt opslaan?"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
