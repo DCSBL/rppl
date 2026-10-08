@@ -261,6 +261,9 @@ final class WatchSessionController: NSObject {
     let distanceType = HKObjectType.quantityType(forIdentifier: .distancePaddleSports)!
     let waterTemperatureType = HKObjectType.quantityType(forIdentifier: .waterTemperature)!
     let workoutRouteType = HKSeriesType.workoutRoute()
+    let effortScoreType = HKQuantityType(.workoutEffortScore)
+    /// The workout Health just saved; kept until the rider leaves the summary so Effort can attach to it.
+    var savedWorkout: HKWorkout?
 
     /// Write access required to start HKWorkoutSession and save the workout/route.
     var typesToShare: Set<HKSampleType> {
@@ -271,7 +274,8 @@ final class WatchSessionController: NSObject {
             heartRateType,
             distanceType,
             waterTemperatureType,
-            workoutRouteType
+            workoutRouteType,
+            effortScoreType
         ]
     }
 

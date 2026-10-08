@@ -15,26 +15,32 @@ struct SessionControlsPage: View {
                 ProgressView(session.statusText)
                     .progressViewStyle(.circular)
             } else {
-                Button("Stop", role: .destructive) {
+                Button(role: .destructive) {
                     WakeLog.debug(.ui, "tap Stop session")
                     presentStopFlow()
+                } label: {
+                    Text("Stop").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
             }
 
             if session.isProductPaused {
-                Button("Resume") {
+                Button {
                     WakeLog.debug(.ui, "tap Resume session")
                     session.resumeSession()
+                } label: {
+                    Text("Resume").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
                 .disabled(session.isStopping)
             } else {
-                Button("Pause") {
+                Button {
                     WakeLog.debug(.ui, "tap Pause session")
                     Task { await session.pauseSession() }
+                } label: {
+                    Text("Pause").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .disabled(session.isStopping || session.isPausing)

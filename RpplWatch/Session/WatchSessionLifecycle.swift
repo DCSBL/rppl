@@ -759,7 +759,24 @@ extension WatchSessionController {
         guard endedSessionSummary != nil, !isFinalizing else { return }
         WakeLog.debug(.ui, "dismiss session summary")
         endedSessionSummary = nil
+        savedWorkout = nil
         statusText = String(localized: "Idle")
+    }
+
+    /// Attach the rider's 1–10 effort (Fitness "Effort") to the saved workout. Best effort.
+    func saveEffort(_ score: Int) async {
+        guard (1...10).contains(score), let workout = savedWorkout else { return }
+        let sample = HKQuantitySample(
+            type: effortScoreType,
+            quantity: HKQuantity(unit: .appleEffortScore(), doubleValue: Double(score)),
+            start: workout.startDate,
+            end: workout.endDate
+        )
+        do {
+            try await healthStore.relateWorkoutEffortSample(sample, with: workout, activity: nil)
+        } catch {
+            WakeLog.error(.workout, "effort score: \(error.localizedDescription)")
+        }
     }
 
     func captureSessionStartCoordinate(from sample: LocationSample) {

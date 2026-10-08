@@ -63,9 +63,11 @@ struct SessionSetUIPage: View {
                 )
                 .alwaysOnSecondaryChrome(isLuminanceReduced)
 
-                Button("Resume") {
+                Button {
                     WakeLog.debug(.ui, "tap Resume from paused metrics")
                     session.resumeSession()
+                } label: {
+                    Text("Resume").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
