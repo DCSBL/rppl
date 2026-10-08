@@ -26,6 +26,24 @@ public struct ParkWaterTemperature: Codable, Equatable, Sendable {
     public func isFresh(now: Date = Date()) -> Bool {
         now.timeIntervalSince(observedAt) <= Self.maxReadingAge
     }
+
+    /// A past session only accepts station readings this close before its start or after its end.
+    public static let maxHistoryOffset: TimeInterval = 24 * 60 * 60
+
+    /// Time range to ask a station for when looking up a past session's water temperature.
+    public static func historyWindow(from start: Date, to end: Date) -> ClosedRange<Date> {
+        start.addingTimeInterval(-maxHistoryOffset)...end.addingTimeInterval(maxHistoryOffset)
+    }
+
+    /// The latest sample, or with a `target` the one closest to it. `nil` when there are none.
+    static func pick(from samples: [WaterTemperatureSample], target: Date?) -> WaterTemperatureSample? {
+        guard let target else { return samples.max { $0.timestamp < $1.timestamp } }
+        return samples.min { abs($0.timestamp.timeIntervalSince(target)) < abs($1.timestamp.timeIntervalSince(target)) }
+    }
+}
+
+extension Date {
+    func midpoint(to other: Date) -> Date { addingTimeInterval(other.timeIntervalSince(self) / 2) }
 }
 
 /// Water temperature shown on the Watch: real submersion-sensor readings win; the park-station
@@ -47,4 +65,17 @@ public struct WaterTemperatureDisplay: Equatable, Sendable {
 /// URLSession or any specific API.
 public protocol ParkWaterTemperatureFetching: Sendable {
     func fetch(_ source: ParkWaterTemperatureSource) async -> ParkWaterTemperature?
+
+    /// Reading from the station closest to the middle of a past session, at most
+    /// `ParkWaterTemperature.maxHistoryOffset` outside it. `nil` when the station has none.
+    func fetchHistorical(_ source: ParkWaterTemperatureSource, from start: Date, to end: Date) async
+        -> ParkWaterTemperature?
+}
+
+extension ParkWaterTemperatureFetching {
+    public func fetchHistorical(
+        _ source: ParkWaterTemperatureSource, from start: Date, to end: Date
+    ) async -> ParkWaterTemperature? {
+        nil
+    }
 }
