@@ -43,16 +43,45 @@ public struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
         string: "https://ddapi20-waterwebservices.rijkswaterstaat.nl/ONLINEWAARNEMINGENSERVICES/OphalenLaatsteWaarnemingen"
     )!
 
+    private static let historyEndpoint = URL(
+        string: "https://ddapi20-waterwebservices.rijkswaterstaat.nl/ONLINEWAARNEMINGENSERVICES/OphalenWaarnemingen"
+    )!
+
     public func fetch(_ source: ParkWaterTemperatureSource) async -> ParkWaterTemperature? {
-        var request = URLRequest(url: Self.endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let body: [String: Any] = [
             "AquoPlusWaarnemingMetadataLijst": [
                 ["AquoMetadata": ["Compartiment": ["Code": "OW"], "Grootheid": ["Code": "T"]]]
             ],
             "LocatieLijst": [["Code": source.stationId]],
         ]
+        return await load(source, endpoint: Self.endpoint, body: body, target: nil)
+    }
+
+    public func fetchHistorical(
+        _ source: ParkWaterTemperatureSource, from start: Date, to end: Date
+    ) async -> ParkWaterTemperature? {
+        let window = ParkWaterTemperature.historyWindow(from: start, to: end)
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let body: [String: Any] = [
+            "AquoPlusWaarnemingMetadata": [
+                "AquoMetadata": ["Compartiment": ["Code": "OW"], "Grootheid": ["Code": "T"]]
+            ],
+            "Locatie": ["Code": source.stationId],
+            "Periode": [
+                "Begindatumtijd": formatter.string(from: window.lowerBound),
+                "Einddatumtijd": formatter.string(from: window.upperBound),
+            ],
+        ]
+        return await load(source, endpoint: Self.historyEndpoint, body: body, target: start.midpoint(to: end))
+    }
+
+    private func load(
+        _ source: ParkWaterTemperatureSource, endpoint: URL, body: [String: Any], target: Date?
+    ) async -> ParkWaterTemperature? {
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let payload = try? JSONSerialization.data(withJSONObject: body) else {
             WakeLog.error(.water, "RWS: failed to encode request body for station \(source.stationId)")
             return nil
@@ -73,7 +102,7 @@ public struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
                 )
                 return nil
             }
-            guard let reading = Self.parse(data) else {
+            guard let reading = Self.parse(data, target: target) else {
                 let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
                 WakeLog.warning(
                     .water,
@@ -93,19 +122,25 @@ public struct RWSWaterTemperatureClient: ParkWaterTemperatureFetching {
         }
     }
 
-    private static func parse(_ data: Data) -> ParkWaterTemperature? {
-        guard
-            let decoded = try? JSONDecoder().decode(ObservationResponse.self, from: data),
-            let observation = decoded.waarnemingenLijst?.first,
-            let latest = observation.metingenLijst.max(by: { $0.tijdstip < $1.tijdstip }),
-            let celsius = latest.meetwaarde.waardeNumeriek,
-            let observedAt = makeTimestampFormatter().date(from: latest.tijdstip)
-        else { return nil }
+    /// Latest reading, or the one closest to `target` when given.
+    static func parse(_ data: Data, target: Date?) -> ParkWaterTemperature? {
+        guard let decoded = try? JSONDecoder().decode(ObservationResponse.self, from: data) else { return nil }
+        let formatter = makeTimestampFormatter()
+        var samples: [WaterTemperatureSample] = []
+        var stationName: String?
+        for observation in decoded.waarnemingenLijst ?? [] {
+            for meting in observation.metingenLijst {
+                // RWS marks missing values with 999999999.
+                guard let celsius = meting.meetwaarde.waardeNumeriek, abs(celsius) < 100,
+                    let date = formatter.date(from: meting.tijdstip)
+                else { continue }
+                samples.append(WaterTemperatureSample(timestamp: date, celsius: celsius))
+                stationName = observation.locatie.naam ?? observation.locatie.code
+            }
+        }
+        guard let pick = ParkWaterTemperature.pick(from: samples, target: target), let stationName else { return nil }
         return ParkWaterTemperature(
-            celsius: celsius,
-            observedAt: observedAt,
-            stationName: observation.locatie.naam ?? observation.locatie.code,
-            providerName: "Rijkswaterstaat"
+            celsius: pick.celsius, observedAt: pick.timestamp, stationName: stationName, providerName: "Rijkswaterstaat"
         )
     }
 
@@ -173,6 +208,27 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
     }
 
     public func fetch(_ source: ParkWaterTemperatureSource) async -> ParkWaterTemperature? {
+        await load(source, range: [URLQueryItem(name: "period", value: "P1D")], target: nil)
+    }
+
+    public func fetchHistorical(
+        _ source: ParkWaterTemperatureSource, from start: Date, to end: Date
+    ) async -> ParkWaterTemperature? {
+        let window = ParkWaterTemperature.historyWindow(from: start, to: end)
+        let formatter = ISO8601DateFormatter()
+        return await load(
+            source,
+            range: [
+                URLQueryItem(name: "from", value: formatter.string(from: window.lowerBound)),
+                URLQueryItem(name: "to", value: formatter.string(from: window.upperBound)),
+            ],
+            target: start.midpoint(to: end)
+        )
+    }
+
+    private func load(
+        _ source: ParkWaterTemperatureSource, range: [URLQueryItem], target: Date?
+    ) async -> ParkWaterTemperature? {
         var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "service", value: "kisters"),
@@ -180,10 +236,9 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
             URLQueryItem(name: "request", value: "getTimeseriesValues"),
             URLQueryItem(name: "format", value: "json"),
             URLQueryItem(name: "metadata", value: "true"),
-            URLQueryItem(name: "period", value: "P1D"),
             URLQueryItem(name: "returnfields", value: "Timestamp,Value,Quality Code"),
             URLQueryItem(name: "ts_id", value: source.stationId),
-        ]
+        ] + range
         guard let url = components.url else {
             WakeLog.error(.water, "\(logPrefix): failed to build request URL for ts_id \(source.stationId)")
             return nil
@@ -203,7 +258,7 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
                 )
                 return nil
             }
-            guard let reading = parse(data) else {
+            guard let reading = parse(data, target: target) else {
                 let responseBody = String(data: data.prefix(200), encoding: .utf8) ?? "<non-utf8 body>"
                 WakeLog.warning(
                     .water,
@@ -223,16 +278,20 @@ public struct KiWISWaterTemperatureClient: ParkWaterTemperatureFetching {
         }
     }
 
-    private func parse(_ data: Data) -> ParkWaterTemperature? {
+    /// Latest reading, or the one closest to `target` when given.
+    func parse(_ data: Data, target: Date?) -> ParkWaterTemperature? {
         guard
             let decoded = try? JSONDecoder().decode([KiWISTimeseries].self, from: data),
-            let series = decoded.first,
-            let latest = series.data.max(by: { $0.timestamp < $1.timestamp }),
-            let observedAt = Self.makeTimestampFormatter().date(from: latest.timestamp)
+            let series = decoded.first
         else { return nil }
+        let formatter = Self.makeTimestampFormatter()
+        let samples = series.data.compactMap { point in
+            formatter.date(from: point.timestamp).map { WaterTemperatureSample(timestamp: $0, celsius: point.value) }
+        }
+        guard let pick = ParkWaterTemperature.pick(from: samples, target: target) else { return nil }
         return ParkWaterTemperature(
-            celsius: latest.value,
-            observedAt: observedAt,
+            celsius: pick.celsius,
+            observedAt: pick.timestamp,
             stationName: series.stationName ?? series.tsId,
             providerName: providerName
         )
