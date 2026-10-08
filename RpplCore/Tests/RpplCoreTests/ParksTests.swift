@@ -195,6 +195,32 @@ struct ParksTests {
         #expect(day.availableSlots.count == 7)
     }
 
+    @Test func nextOpeningFindsTheNextOpenDayOnlyWhenCertain() throws {
+        let park = try ParkCatalog.parse(yaml: """
+        version: 1
+        id: n
+        name: N
+        location: { lat: 52.0, lon: 4.0 }
+        opening:
+          rules:
+            - { days: [sat], open: "12:00", close: "18:00" }
+        """, fallbackId: "n")
+        // 2026-10-07 is a Wednesday; Saturday is the 10th.
+        let next = try #require(park.nextOpening(after: date("2026-10-07")))
+        #expect(next.start == date("2026-10-10", hour: 12))
+        #expect(next.end == date("2026-10-10", hour: 18))
+        #expect(next.isTomorrow == false)
+        #expect(try #require(park.nextOpening(after: date("2026-10-09"))).isTomorrow)
+
+        let unknown = try ParkCatalog.parse(yaml: """
+        version: 1
+        id: u
+        name: U
+        location: { lat: 52.0, lon: 4.0 }
+        """, fallbackId: "u")
+        #expect(unknown.nextOpening(after: date("2026-10-07")) == nil)
+    }
+
     @Test func dropInOnlyParkWithDatedRuleChange() throws {
         let yaml = """
         version: 1
