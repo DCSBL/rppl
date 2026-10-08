@@ -140,4 +140,25 @@ struct ManualEntryTests {
         #expect(manifest(entry: ManualEntry()).mirrorsToWatch == false)
         #expect(SessionManifest(testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "W", systemVersion: "26").mirrorsToWatch)
     }
+
+    @Test("Reversed and long ranges")
+    func timeRangeRules() {
+        #expect(ManualTimeRange.isReversed(start: t0.addingTimeInterval(1), end: t0))
+        #expect(!ManualTimeRange.isReversed(start: t0, end: t0))
+        #expect(!ManualTimeRange.isLong(start: t0, end: t0.addingTimeInterval(12 * 3_600)))
+        #expect(ManualTimeRange.isLong(start: t0, end: t0.addingTimeInterval(12 * 3_600 + 1)))
+    }
+
+    @Test("Moving to another day keeps time of day and never passes now")
+    func movedToDay() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let now = cal.date(from: DateComponents(year: 2026, month: 10, day: 8, hour: 12))!
+        let other = cal.date(from: DateComponents(year: 2026, month: 10, day: 8, hour: 9, minute: 30))!
+        let anchor = cal.date(from: DateComponents(year: 2025, month: 10, day: 10, hour: 18))!
+        let moved = ManualTimeRange.moved(other, toDayOf: anchor, now: now, calendar: cal)
+        #expect(moved == cal.date(from: DateComponents(year: 2025, month: 10, day: 10, hour: 9, minute: 30)))
+        let late = cal.date(from: DateComponents(year: 2026, month: 10, day: 8, hour: 20))!
+        #expect(ManualTimeRange.moved(late, toDayOf: now, now: now, calendar: cal) == now)
+    }
 }
