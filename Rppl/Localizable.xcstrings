@@ -3960,6 +3960,22 @@
         }
       }
     },
+    "Weather data sources" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather data sources"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weerdata-bronnen"
+          }
+        }
+      }
+    },
     "Apple Weather" : {
       "localizations" : {
         "en" : {

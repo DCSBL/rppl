@@ -41,28 +41,30 @@ final class WeatherAttributionProvider {
     }
 }
 
-/// Apple Weather mark that opens the legal page. Show it wherever WeatherKit data is on screen.
+/// Apple Weather mark plus a visible legal link. Show it wherever WeatherKit data is on screen.
 struct AppleWeatherAttribution: View {
     @Environment(\.colorScheme) private var colorScheme
     let info: WeatherAttributionInfo
 
     var body: some View {
-        Link(destination: info.legalURL) {
-            HStack(spacing: 4) {
+        VStack(alignment: .leading, spacing: 2) {
+            Link(destination: info.legalURL) {
                 if let mark = colorScheme == .dark ? info.markDarkURL : info.markLightURL {
                     AsyncImage(url: mark) { image in
                         image.resizable().scaledToFit()
                     } placeholder: {
                         Text("Apple Weather")
                     }
-                    .frame(height: 12)
+                    .frame(height: 14)
                 } else {
                     Text("Apple Weather")
                 }
             }
-            .font(.caption2)
-            .foregroundStyle(Color.rpplMuted)
+            .accessibilityLabel(Text("Apple Weather"))
+            Link("Weather data sources", destination: info.legalURL)
+                .underline()
         }
-        .accessibilityLabel(Text("Apple Weather"))
+        .font(.caption2)
+        .foregroundStyle(Color.rpplMuted)
     }
 }
