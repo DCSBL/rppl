@@ -357,8 +357,35 @@ struct ParkDetailView: View {
 
     private func conditionsSection(weather: ParkWeather?, waterTemperature: ParkWaterTemperature?) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
-                if let weather {
+            if waterTemperature != nil || showsWaterTemperatureUnavailable || showsWaterTemperaturePromptRow {
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
+                    if let waterTemperature {
+                        conditionRow(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
+                    } else if showsWaterTemperatureUnavailable {
+                        conditionRow(String(localized: "Not available"), systemImage: "water.waves", tint: Color.rpplMuted)
+                    }
+                }
+                .font(.subheadline)
+
+                if waterTemperature == nil, showsWaterTemperaturePromptRow {
+                    waterTemperaturePromptRow
+                }
+
+                if let waterTemperature {
+                    Text(String(
+                        localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
+                    ))
+                    .font(.caption2)
+                    .foregroundStyle(Color.rpplMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if let weather {
+                if waterTemperature != nil || showsWaterTemperatureUnavailable || showsWaterTemperaturePromptRow {
+                    Divider().overlay(Color.rpplFill)
+                }
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
                     conditionRow(TemperatureFormat.celsius(weather.temperatureCelsius), systemImage: "thermometer.medium")
                     conditionRow(windSummary(weather), systemImage: "wind")
                     conditionRow(weather.rainForecast.label, systemImage: "cloud.rain")
@@ -370,28 +397,7 @@ struct ParkDetailView: View {
                         )
                     }
                 }
-                if let waterTemperature {
-                    conditionRow(TemperatureFormat.celsius(waterTemperature.celsius), systemImage: "water.waves")
-                } else if showsWaterTemperatureUnavailable {
-                    conditionRow(String(localized: "Not available"), systemImage: "water.waves", tint: Color.rpplMuted)
-                }
-            }
-            .font(.subheadline)
-
-            if waterTemperature == nil, showsWaterTemperaturePromptRow {
-                waterTemperaturePromptRow
-            }
-
-            if let waterTemperature {
-                Text(String(
-                    localized: "Estimate near \(waterTemperature.stationName), via \(waterTemperature.providerName) · \(observedAtText(waterTemperature.observedAt))"
-                ))
-                .font(.caption2)
-                .foregroundStyle(Color.rpplMuted)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if let weather {
+                .font(.subheadline)
                 AppleWeatherAttribution(info: weather.attribution)
             }
         }
