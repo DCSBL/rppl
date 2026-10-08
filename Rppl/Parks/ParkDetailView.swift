@@ -28,6 +28,7 @@ struct ParkDetailView: View {
     @State private var drafts = ParkDraftsController.shared
     @State private var showMail = false
     @State private var confirmRemove = false
+    @State private var showReopeningEvent = false
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -297,6 +298,9 @@ struct ParkDetailView: View {
                 Text("Closed today")
                     .font(.title3.bold())
                     .foregroundStyle(.red)
+                if let next = park.nextOpening() {
+                    reopeningText(next)
+                }
             }
 
             ForEach(Array(day.notices.enumerated()), id: \.offset) { _, notice in
@@ -310,6 +314,34 @@ struct ParkDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .logbookCardChrome()
+    }
+
+    /// "Opens again on Thursday 21 October from 15:00", with the day opening the add-to-calendar sheet.
+    private func reopeningText(_ next: ParkNextOpening) -> some View {
+        let zone = park.resolvedTimeZone
+        let tomorrow = String(localized: "tomorrow")
+        let day = next.isTomorrow
+            ? tomorrow
+            : next.start.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide).day().month(.wide))
+        let time = next.start.formatted(Date.FormatStyle(timeZone: zone).hour().minute())
+        var text = AttributedString(
+            next.isTomorrow
+                ? String(localized: "Opens again \(day) from \(time)")
+                : String(localized: "Opens again on \(day) from \(time)")
+        )
+        if let range = text.range(of: day), let url = URL(string: "rppl://add-reopening") {
+            text[range].link = url
+        }
+        return Text(text)
+            .font(.subheadline)
+            .foregroundStyle(Color.rpplMuted)
+            .environment(\.openURL, OpenURLAction { _ in
+                showReopeningEvent = true
+                return .handled
+            })
+            .sheet(isPresented: $showReopeningEvent) {
+                ParkReopeningEventSheet(park: park, opening: next, bookingURL: bookingURL)
+            }
     }
 
     private var waterTemperaturePromptRow: some View {
