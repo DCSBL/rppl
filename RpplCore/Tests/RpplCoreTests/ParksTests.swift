@@ -210,6 +210,7 @@ struct ParksTests {
         #expect(next.start == date("2026-10-10", hour: 12))
         #expect(next.end == date("2026-10-10", hour: 18))
         #expect(next.isTomorrow == false)
+        #expect(next == park.nextOpening(after: date("2026-10-08")))
         #expect(try #require(park.nextOpening(after: date("2026-10-09"))).isTomorrow)
 
         let unknown = try ParkCatalog.parse(yaml: """
@@ -219,6 +220,13 @@ struct ParksTests {
         location: { lat: 52.0, lon: 4.0 }
         """, fallbackId: "u")
         #expect(unknown.nextOpening(after: date("2026-10-07")) == nil)
+        _ = park.nextOpening() // default `after: Date()`
+    }
+
+    @Test func scheduleRowsHaveStableIds() throws {
+        #expect(ParkSchedule.months(for: try project7().opening).map(\.id).contains(0) == false)
+        let occurrence = ParkExceptionOccurrence(date: "2026-10-10", kind: "closed", label: "Wind", note: nil, windows: [])
+        #expect(occurrence.id == "2026-10-10|closed|Wind|-1")
     }
 
     @Test func dropInOnlyParkWithDatedRuleChange() throws {
