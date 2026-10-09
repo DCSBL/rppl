@@ -1858,22 +1858,6 @@
         }
       }
     },
-    "Skip" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overslaan"
-          }
-        }
-      }
-    },
     "Easy" : {
       "localizations" : {
         "en" : {
@@ -1918,6 +1902,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zwaar"
+          }
+        }
+      }
+    },
+    "Add Effort" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Effort"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspanning toevoegen"
           }
         }
       }

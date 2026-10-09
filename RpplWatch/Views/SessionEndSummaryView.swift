@@ -67,7 +67,7 @@ struct SessionEndSummaryView: View {
                 .padding(.top, 4)
 
                 if !session.isFinalizing, session.savedWorkout != nil {
-                    effortPicker
+                    EffortButton(effort: $effort)
                 }
 
                 Button {
@@ -148,26 +148,6 @@ struct SessionEndSummaryView: View {
         if let built {
             mapTracks = built.0
             mapFrame = built.1
-        }
-    }
-
-    /// Digital Crown picker, same 1–10 scale and Easy/Moderate/Hard/All Out bands as Fitness.
-    private var effortPicker: some View {
-        Picker("Effort", selection: $effort) {
-            Text("Skip").tag(0)
-            ForEach(1...10, id: \.self) { score in
-                Text("\(score) \(Self.effortLabel(score))").tag(score)
-            }
-        }
-        .frame(height: 60)
-    }
-
-    private static func effortLabel(_ score: Int) -> String {
-        switch score {
-        case ...3: String(localized: "Easy")
-        case 4...6: String(localized: "Moderate")
-        case 7...8: String(localized: "Hard")
-        default: String(localized: "All Out")
         }
     }
 
