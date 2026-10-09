@@ -55,3 +55,31 @@ extension ParkCable {
         effectiveLengthM.map { direction == ParkCableDirection.twoPointZero ? $0 * 2 : $0 }
     }
 }
+
+/// Start / end rules for a hand-entered session.
+public enum ManualTimeRange {
+    /// Longer than this asks for confirmation before saving (still always allowed).
+    public static let longThreshold: TimeInterval = 12 * 3_600
+
+    /// End before start: cannot be stored.
+    public static func isReversed(start: Date, end: Date) -> Bool { end < start }
+
+    public static func isLong(start: Date, end: Date) -> Bool {
+        end.timeIntervalSince(start) > longThreshold
+    }
+
+    /// `other` moved onto the calendar day of `anchor`, time of day kept, never past `now`.
+    public static func moved(
+        _ other: Date, toDayOf anchor: Date, now: Date, calendar: Calendar = .current
+    ) -> Date {
+        let day = calendar.dateComponents([.year, .month, .day], from: anchor)
+        let time = calendar.dateComponents([.hour, .minute], from: other)
+        var parts = DateComponents()
+        parts.year = day.year
+        parts.month = day.month
+        parts.day = day.day
+        parts.hour = time.hour
+        parts.minute = time.minute
+        return min(calendar.date(from: parts) ?? other, now)
+    }
+}
