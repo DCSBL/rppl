@@ -21,9 +21,14 @@ struct EffortButton: View {
     /// 0 = not rated.
     @Binding var effort: Int
     @State private var isPickerPresented = false
+    /// Value before the picker opened: the X (cancel) puts it back, only the checkmark keeps changes.
+    @State private var previous = 0
+    @State private var isConfirmed = false
 
     var body: some View {
         Button {
+            previous = effort
+            isConfirmed = false
             if effort == 0 { effort = 5 }
             isPickerPresented = true
         } label: {
@@ -32,6 +37,8 @@ struct EffortButton: View {
                     Image(systemName: "plus.circle.fill")
                     Text("Add Effort")
                         .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                     Spacer(minLength: 0)
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
@@ -57,12 +64,15 @@ struct EffortButton: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 4)
+            .padding(.horizontal, 6)
         }
         .buttonStyle(.glass)
         .accessibilityValue(effort == 0 ? "" : "\(effort), \(EffortBands.label(effort))")
-        .sheet(isPresented: $isPickerPresented) {
-            EffortPickerView(effort: $effort)
-        }
+        .sheet(isPresented: $isPickerPresented, onDismiss: {
+            if !isConfirmed { effort = previous }
+        }, content: {
+            EffortPickerView(effort: $effort, isConfirmed: $isConfirmed)
+        })
     }
 }
 
@@ -70,6 +80,7 @@ struct EffortButton: View {
 /// 3/3/2/2 dots, the selected score as a white capsule, number and label underneath.
 struct EffortPickerView: View {
     @Binding var effort: Int
+    @Binding var isConfirmed: Bool
     @Environment(\.dismiss) private var dismiss
     @State private var crown = 5.0
 
@@ -102,7 +113,10 @@ struct EffortPickerView: View {
             )
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done", systemImage: "checkmark") { dismiss() }
+                    Button("Done", systemImage: "checkmark") {
+                        isConfirmed = true
+                        dismiss()
+                    }
                 }
             }
         }
@@ -208,5 +222,6 @@ private struct RampShape: Shape {
 
 #Preview {
     @Previewable @State var effort = 7
-    EffortPickerView(effort: $effort)
+    @Previewable @State var confirmed = false
+    EffortPickerView(effort: $effort, isConfirmed: $confirmed)
 }
