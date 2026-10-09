@@ -458,6 +458,7 @@ extension WatchSessionController {
             let workout = try await healthKitStep("finishWorkout", seconds: 30) {
                 UncheckedSendable(value: try await builder.finishWorkout())
             }.value
+            savedWorkout = workout
             await finishPendingRouteInserts()
             if let workout, let routeBuilder = workoutRouteBuilder {
                 do {

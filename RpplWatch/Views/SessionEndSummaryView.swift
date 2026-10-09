@@ -12,6 +12,8 @@ struct SessionEndSummaryView: View {
 
     @State private var mapTracks: SessionMapTrackData?
     @State private var mapFrame: MapTrackFrame?
+    /// 0 = not rated. Saved to Health on Done.
+    @State private var effort = 0
 
     var body: some View {
         ScrollView {
@@ -64,8 +66,18 @@ struct SessionEndSummaryView: View {
                 }
                 .padding(.top, 4)
 
-                Button("Done") {
-                    session.dismissSessionSummary()
+                if !session.isFinalizing, session.savedWorkout != nil {
+                    EffortButton(effort: $effort)
+                }
+
+                Button {
+                    let score = effort
+                    Task {
+                        if score > 0 { await session.saveEffort(score) }
+                        session.dismissSessionSummary()
+                    }
+                } label: {
+                    Text("Done").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.rpplIdleAccent)
