@@ -38,6 +38,14 @@ struct SessionControlsPage: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 4)
+        // Dismissing a dialog without confirming (Cancel, swipe) leaves the session untouched. Confirm
+        // buttons capture the tap time before this runs, so clearing here never shortens a stop.
+        .onChange(of: showStopConfirmation) { _, shown in
+            if !shown, !showDiscardConfirmation { session.cancelPendingStop() }
+        }
+        .onChange(of: showDiscardConfirmation) { _, shown in
+            if !shown, !showStopConfirmation { session.cancelPendingStop() }
+        }
         .task {
             session.refreshWaterLockState()
             while !Task.isCancelled {
@@ -52,7 +60,8 @@ struct SessionControlsPage: View {
         ) {
             Button("End session", role: .destructive) {
                 WakeLog.debug(.ui, "confirm Stop session")
-                Task { await session.stopSession() }
+                let requestedAt = session.pendingStopAt
+                Task { await session.stopSession(endingAt: requestedAt) }
             }
             if WatchDebugTools.isEnabled, offersDebugDiscard {
                 Button("Stop and discard data", role: .destructive) {
@@ -75,7 +84,8 @@ struct SessionControlsPage: View {
             }
             Button("Keep") {
                 WakeLog.debug(.ui, "confirm Keep tiny session (transfer)")
-                Task { await session.stopSession() }
+                let requestedAt = session.pendingStopAt
+                Task { await session.stopSession(endingAt: requestedAt) }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -149,6 +159,7 @@ struct SessionControlsPage: View {
     }
 
     private func presentStopFlow() {
+        session.beginPendingStop()
         let duration = session.computeElapsed(at: Date())
         offersDebugDiscard = TinySessionPolicy.shouldOfferDebugDiscard(duration: duration)
         if TinySessionPolicy.shouldOfferDiscard(duration: duration, setCount: session.setCount) {
