@@ -101,7 +101,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
     public var setCount: Int
     public var ridingDuration: TimeInterval
     public var inactiveDuration: TimeInterval
-    /// `ridingDuration / (ridingDuration + inactiveDuration)`; 0 when no active time.
+    /// `ridingDuration / (ridingDuration + inactive time between first set start and last set end)`;
+    /// 0 when no sets. `inactiveDuration` itself stays the whole logged session.
     public var ridingInactiveRatio: Double
     public var sets: [SetSegmentStats]
     /// Rolling mean of the latest persisted water-temp samples (`WaterTemperatureSummary`); nil when none.

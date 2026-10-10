@@ -215,7 +215,28 @@ struct SessionStatsBuilderTests {
         #expect(stats.averageSpeedKmh != nil)
         #expect(stats.ridingDuration == 90)
         #expect(stats.inactiveDuration == 110)
-        #expect(abs(stats.ridingInactiveRatio - 90.0 / 200.0) < 0.001)
+        // Ride % ignores docked time before the first and after the last set.
+        #expect(stats.ridingInactiveRatio == 1)
+        #expect(stats.totalDuration == 200)
+    }
+
+    @Test func rideRatioCountsInactiveBetweenSetsOnly() {
+        let detections = [
+            detection(code: DetectionCodes.inactive, at: 0, id: "s"),
+            detection(code: DetectionCodes.riding, at: 10, id: "r1"),
+            detection(code: DetectionCodes.inactive, at: 50, id: "p1"),
+            detection(code: DetectionCodes.riding, at: 90, id: "r2"),
+            detection(code: DetectionCodes.inactive, at: 130, id: "p2"),
+        ]
+        let stats = SessionStatsBuilder.build(
+            manifest: manifest(endedAt: t0.addingTimeInterval(200)),
+            detections: detections,
+            locations: [],
+            health: []
+        )
+        #expect(stats.ridingDuration == 80)
+        #expect(stats.inactiveDuration == 120)
+        #expect(abs(stats.ridingInactiveRatio - 80.0 / 120.0) < 0.001)
     }
 
     @Test func twoRidesFromInactiveBetween() {

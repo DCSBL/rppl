@@ -40,7 +40,7 @@ public struct SessionHighlightInput: Sendable, Equatable {
     public var totalDuration: TimeInterval
     public var ridingDuration: TimeInterval
     public var lapCount: Int
-    /// `ridingDuration / (ridingDuration + inactiveDuration)`; nil when no active time.
+    /// Riding share of first-set-start…last-set-end; nil when no sets.
     public var ridingInactiveRatio: Double?
     /// Active + basal when both available; falls back to active-only.
     public var totalEnergyKilocalories: Double?

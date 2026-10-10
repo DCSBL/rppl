@@ -33,10 +33,17 @@ public enum SessionStatsBuilder {
         let inactiveDuration = phases
             .filter { $0.attributedCode == DetectionCodes.inactive }
             .reduce(0) { $0 + $1.duration }
-        let activeDuration = ridingDuration + inactiveDuration
-        let ratio = activeDuration > 0 ? ridingDuration / activeDuration : 0
 
         let setWindows = Self.setWindows(from: phases)
+        // Ride % only counts the span from first set start to last set end; docking
+        // before/after is still logged in `inactiveDuration` / `totalDuration`.
+        let spanInactive = Self.inactiveDuration(
+            in: phases,
+            from: setWindows.first?.start,
+            to: setWindows.last?.end
+        )
+        let spanDuration = ridingDuration + spanInactive
+        let ratio = spanDuration > 0 ? ridingDuration / spanDuration : 0
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
         let sessionCableSpeedKmh = CableSpeedEstimator.cableSpeedKmh(
             setWindows: setWindows.map { (start: $0.start, end: $0.end) },
@@ -247,6 +254,16 @@ public enum SessionStatsBuilder {
         phases
             .filter { $0.attributedCode == DetectionCodes.riding }
             .map { TimeWindow(start: $0.start, end: $0.end) }
+    }
+
+    /// Inactive time clipped to `[start, end]`; 0 when there is no set (nil bounds).
+    static func inactiveDuration(in phases: [AttributedPhase], from start: Date?, to end: Date?) -> TimeInterval {
+        guard let start, let end, end > start else { return 0 }
+        return phases
+            .filter { $0.attributedCode == DetectionCodes.inactive }
+            .reduce(0) { total, phase in
+                total + max(0, min(phase.end, end).timeIntervalSince(max(phase.start, start)))
+            }
     }
 
     static func hasInactivePhase(_ phases: [AttributedPhase], before date: Date) -> Bool {
