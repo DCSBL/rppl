@@ -237,6 +237,9 @@ final class WatchSessionController: NSObject {
     /// The last HealthKit start was skipped because Health is denied; a denial is never retried.
     var lastHealthKitStartWasDenied = false
     var timerTask: Task<Void, Never>?
+    /// First Stop tap while the "End session?" confirmation is open; recording keeps running.
+    var pendingStopAt: Date?
+    var lastPendingStopReminderAt: Date?
     var startedAt: Date?
     /// Wall time excluded from `elapsed` while product-paused (completed pauses).
     var pausedAccumulated: TimeInterval = 0

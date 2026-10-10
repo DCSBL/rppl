@@ -22,6 +22,7 @@ struct LogbookSessionDetailView: View {
     @State private var soloSetIndex: Int?
     @State private var sessionMapTrackData: SessionMapTrackData?
     @State private var allLocations: [LocationSample] = []
+    @State private var setTelemetry: [Int: SetTelemetry] = [:]
     @State private var mapFrame: MapTrackFrame?
     @State private var parks: [Park] = []
     @State private var tracksLoading = false
@@ -47,6 +48,7 @@ struct LogbookSessionDetailView: View {
     @State private var showsDiscardDialog = false
     @State private var flagSaveError: String?
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
+    @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
 
     private nonisolated enum ExportPurpose: Sendable {
         case share
@@ -776,7 +778,8 @@ struct LogbookSessionDetailView: View {
                                 maxCount: Self.setMapPointBudget
                             ),
                             flags: flags(forSet: set.index),
-                            flagging: flagging(forSet: set.index)
+                            flagging: flagging(forSet: set.index),
+                            telemetry: setChartsEnabled ? setTelemetry[set.index] : nil
                         )
                     }
                 }
@@ -923,6 +926,16 @@ struct LogbookSessionDetailView: View {
             let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
             allLocations = sortedLocations
             applyTrackLayers(locations: sortedLocations, sets: sets)
+            if UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts) {
+                setTelemetry = try await StoreIO.runOffMain {
+                    let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
+                    return Dictionary(sets.map { set in
+                        (set.index, SetTelemetryBuilder.build(
+                            locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
+                        ))
+                    }, uniquingKeysWith: { first, _ in first })
+                }
+            }
             if sessionMapTrackData == nil {
                 sessionMapTrackData = SessionMapTrackBuilder.build(
                     locations: sortedLocations,
@@ -1087,6 +1100,7 @@ private struct SetDetailCard: View {
     var rendering: SessionMapRendering = .flat
     var flags: [String] = []
     var flagging: SetFlagging?
+    var telemetry: SetTelemetry?
 
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
@@ -1142,6 +1156,10 @@ private struct SetDetailCard: View {
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, minHeight: 80)
                     .logbookNestedBackground(Color.rpplFill)
+            }
+
+            if let telemetry, !telemetry.isEmpty {
+                SetTelemetryCharts(telemetry: telemetry)
             }
 
             FlowLayout(spacing: 16) {

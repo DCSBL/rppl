@@ -447,7 +447,9 @@ extension WatchSessionController {
     /// Stop recording, then show the summary at once while the Health save, derived view and
     /// transfer package finish behind it. Only the sensor stop and the last flush run before the
     /// summary appears; everything else used to hold the rider on a spinner for minutes.
-    func stopSession() async {
+    /// - Parameter requestedAt: time of the first Stop tap; the session ends there, not when the
+    ///   confirmation is answered. Nil ends it now.
+    func stopSession(endingAt requestedAt: Date? = nil) async {
         // A Pause that is still flushing finishes first (it is quick), so it never pauses the HK
         // session that this Stop is about to finalize.
         var waits = 0
@@ -461,18 +463,19 @@ extension WatchSessionController {
         }
         WakeLog.debug(.session, "stopSession begin \(manifest.sessionId.prefix(8))…")
         let stopBegan = Date()
+        let endDate = PendingStop.endDate(requestedAt: requestedAt, sessionStart: startedAt, now: stopBegan)
         beginSessionTeardown(status: String(localized: "Stopping…"))
 
         considerPersistingBattery(force: true)
         stopSensors()
-        liveSetTracker.closeOpenSet()
+        liveSetTracker.closeOpenSet(at: endDate)
         await flushBuffers(force: true)
         disableBatteryMonitoring()
 
         let stoppedSessionId = manifest.sessionId
         endedSessionSummary = EndedSessionSummary(
             sessionId: stoppedSessionId,
-            duration: computeElapsed(at: Date()),
+            duration: computeElapsed(at: endDate),
             setCount: liveSetTracker.setCount,
             distanceMeters: liveSetTracker.sessionSetMeters,
             lastSetDuration: liveSetTracker.lastSetDuration,
@@ -489,8 +492,8 @@ extension WatchSessionController {
 
         // Session files and Health are independent: build the derived view off the main actor
         // while HealthKit saves.
-        async let packagePrepared: Void = prepareStoppedPackage(store: store, sessionId: stoppedSessionId)
-        await finishAndSaveWorkout()
+        async let packagePrepared: Void = prepareStoppedPackage(store: store, sessionId: stoppedSessionId, endedAt: endDate)
+        await finishAndSaveWorkout(endingAt: endDate)
         await packagePrepared
         recordingMode = "none"
         motionRecordingEnabled = false
@@ -508,9 +511,8 @@ extension WatchSessionController {
     }
 
     /// Mark ready for transfer and write the derived view, off the main actor.
-    private func prepareStoppedPackage(store: SessionFileStore, sessionId: String) async {
+    private func prepareStoppedPackage(store: SessionFileStore, sessionId: String, endedAt: Date) async {
         do {
-            let endedAt = Date()
             try await StoreIO.runOffMain {
                 try store.markReadyToTransfer(sessionId: sessionId, endedAt: endedAt)
             }
@@ -571,7 +573,21 @@ extension WatchSessionController {
         clearSessionRuntimeState()
     }
 
+    /// First Stop tap: remember the moment and keep recording. Reminder haptics start from here.
+    func beginPendingStop() {
+        guard isRunning, !isStopping else { return }
+        pendingStopAt = Date()
+        lastPendingStopReminderAt = nil
+    }
+
+    /// The confirmation was dismissed: nothing happened, recording simply continues.
+    func cancelPendingStop() {
+        pendingStopAt = nil
+        lastPendingStopReminderAt = nil
+    }
+
     private func beginSessionTeardown(status: String) {
+        cancelPendingStop()
         isStopping = true
         statusText = status
         if isProductPaused {
@@ -648,6 +664,7 @@ extension WatchSessionController {
             WakeLog.debug(.session, "pauseSession ignored")
             return
         }
+        cancelPendingStop()
         // Set before the first await: a second tap during the flush would write a second
         // `product_pause` marker, and Stop waits for this pause to finish.
         isPausing = true

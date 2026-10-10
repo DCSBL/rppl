@@ -74,8 +74,23 @@ extension WatchSessionController {
                 // Detection ticks otherwise only arrive with GPS fixes, so a blackout froze the
                 // engine: no `gps_gap`, no `unsure_timeout`, set left open.
                 self.processDetectionHeartbeat()
+                self.remindPendingStop()
             }
         }
+    }
+
+    /// A Stop confirmation left open must not go unnoticed: one short tap per minute.
+    private func remindPendingStop() {
+        guard let requestedAt = pendingStopAt, !isStopping else { return }
+        let now = Date()
+        let due = PendingStop.reminderDue(
+            requestedAt: requestedAt,
+            lastReminderAt: lastPendingStopReminderAt,
+            now: now
+        )
+        guard due else { return }
+        lastPendingStopReminderAt = now
+        WKInterfaceDevice.current().play(.notification)
     }
 
     func computeElapsed(at date: Date) -> TimeInterval {
@@ -386,12 +401,12 @@ extension WatchSessionController {
         WakeLog.debug(.workout, "HK collection began (inactive — set metrics gated)")
     }
 
-    func finishAndSaveWorkout() async {
+    func finishAndSaveWorkout(endingAt endDate: Date = Date()) async {
         guard let session = workoutSession, let builder = workoutBuilder else { return }
         WakeLog.debug(.workout, "finishAndSaveWorkout begin")
         accumulateRideDistanceForHealthKit()
 
-        let requestEnd = Date()
+        let requestEnd = endDate
         recordFinishedHkRide(endedAt: requestEnd)
         endRideActivity(at: requestEnd)
         let stoppedDate = await stopWorkoutActivity(session, at: requestEnd)

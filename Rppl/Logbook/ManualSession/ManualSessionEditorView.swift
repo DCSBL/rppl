@@ -47,6 +47,10 @@ struct ManualSessionEditorView: View {
     @State private var isSaving = false
     @State private var showDiscard = false
     @State private var errorText: String?
+    @State private var showReversed = false
+    @State private var showLong = false
+    /// The other picker follows the first day change only; after that both are free.
+    @State private var didAlignDay = false
 
     init(editing sessionId: String? = nil, onSaved: @escaping (String) -> Void = { _ in }) {
         editing = sessionId
@@ -76,6 +80,12 @@ struct ManualSessionEditorView: View {
     }
 
     private var isDirty: Bool { draft != initial }
+    private var isReversed: Bool { ManualTimeRange.isReversed(start: draft.start, end: draft.end) }
+    private var longDuration: String {
+        let seconds = max(0, draft.end.timeIntervalSince(draft.start))
+        let whole = Duration.seconds(Int(seconds / 3_600) * 3_600)
+        return whole.formatted(.units(allowed: [.days, .hours], width: .wide, zeroValueUnits: .hide))
+    }
     private var park: Park? { parks.first { $0.id == draft.parkId } }
     private var cables: [ParkCable] { park?.cables ?? [] }
     private var distanceM: Double? { ManualEntry.distanceM(tallies: draft.tallies, cables: cables) }
@@ -98,7 +108,12 @@ struct ManualSessionEditorView: View {
                 }
                 Section("Time") {
                     DatePicker("Start", selection: $draft.start, in: ...Date.now)
-                    DatePicker("End", selection: $draft.end, in: draft.start...max(draft.start, .now))
+                        .foregroundStyle(isReversed ? Color.red : Color.primary)
+                        .tint(isReversed ? .red : nil)
+                    DatePicker("End", selection: $draft.end, in: ...Date.now)
+                        .foregroundStyle(isReversed ? Color.red : Color.primary)
+                        .tint(isReversed ? .red : nil)
+                    Button("Today", action: resetToToday)
                 }
                 if cables.count > 1 {
                     ForEach(cables.indices, id: \.self) { index in
@@ -120,8 +135,11 @@ struct ManualSessionEditorView: View {
             .navigationTitle(editing == nil ? "New session" : "Edit session")
             .navigationBarTitleDisplayMode(.inline)
             .interactiveDismissDisabled(isDirty)
-            .onChange(of: draft.start) { _, start in
-                if draft.end < start { draft.end = start }
+            .onChange(of: draft.start) { old, new in
+                if let moved = alignedDay(old: old, new: new, other: draft.end) { draft.end = moved }
+            }
+            .onChange(of: draft.end) { old, new in
+                if let moved = alignedDay(old: old, new: new, other: draft.start) { draft.start = moved }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -130,12 +148,23 @@ struct ManualSessionEditorView: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save", action: save).disabled(isSaving || (editing != nil && !isDirty))
+                    Button("Save", action: saveTapped).disabled(isSaving || (editing != nil && !isDirty))
                 }
             }
             .confirmationDialog("Discard changes?", isPresented: $showDiscard, titleVisibility: .visible) {
                 Button("Discard changes", role: .destructive) { dismiss() }
                 Button("Keep editing", role: .cancel) {}
+            }
+            .alert("End is before start", isPresented: $showReversed) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Set an end time after the start time to save this session.")
+            }
+            .alert("Save long session?", isPresented: $showLong) {
+                Button("Save", action: save)
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to save a session of \(longDuration)?")
             }
             .alert("Could not save session", isPresented: Binding(get: { errorText != nil }, set: { if !$0 { errorText = nil } })) {
                 Button("OK", role: .cancel) {}
@@ -149,6 +178,31 @@ struct ManualSessionEditorView: View {
     private func tallyRows(_ tally: Binding<ManualEntry.Tally>) -> some View {
         CountField(title: "Sets", value: tally.sets)
         CountField(title: "Laps", value: tally.laps)
+    }
+
+    /// First day change of either picker moves the other onto that day (time kept).
+    private func alignedDay(old: Date, new: Date, other: Date) -> Date? {
+        guard !didAlignDay, !Calendar.current.isDate(old, inSameDayAs: new) else { return nil }
+        didAlignDay = true
+        return ManualTimeRange.moved(other, toDayOf: new, now: .now)
+    }
+
+    private func resetToToday() {
+        // Both land on today already; the one-shot alignment has nothing left to do.
+        didAlignDay = true
+        let now = Date.now
+        draft.start = ManualTimeRange.moved(draft.start, toDayOf: now, now: now)
+        draft.end = ManualTimeRange.moved(draft.end, toDayOf: now, now: now)
+    }
+
+    private func saveTapped() {
+        if isReversed {
+            showReversed = true
+        } else if ManualTimeRange.isLong(start: draft.start, end: draft.end) {
+            showLong = true
+        } else {
+            save()
+        }
     }
 
     private func save() {

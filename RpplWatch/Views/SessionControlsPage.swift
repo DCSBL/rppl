@@ -10,37 +10,25 @@ struct SessionControlsPage: View {
 
     var body: some View {
         // Always On: keep every control visible and full-brightness (stable layout; don’t remove).
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             if session.isStopping {
                 ProgressView(session.statusText)
                     .progressViewStyle(.circular)
             } else {
-                Button("Stop", role: .destructive) {
-                    WakeLog.debug(.ui, "tap Stop session")
-                    presentStopFlow()
+                VStack(spacing: 6) {
+                    HStack(spacing: 6) {
+                        controlTile(
+                            "Stop", systemImage: "xmark", tint: .red,
+                            disabled: false
+                        ) {
+                            WakeLog.debug(.ui, "tap Stop session")
+                            presentStopFlow()
+                        }
+                        pauseResumeTile
+                    }
+                    waterLockTile
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
             }
-
-            if session.isProductPaused {
-                Button("Resume") {
-                    WakeLog.debug(.ui, "tap Resume session")
-                    session.resumeSession()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .disabled(session.isStopping)
-            } else {
-                Button("Pause") {
-                    WakeLog.debug(.ui, "tap Pause session")
-                    Task { await session.pauseSession() }
-                }
-                .buttonStyle(.bordered)
-                .disabled(session.isStopping || session.isPausing)
-            }
-
-            waterLockButton
 
             if let worst = session.recordingIssues.first {
                 Text(RecordingIssueText.label(for: worst.code))
@@ -48,8 +36,16 @@ struct SessionControlsPage: View {
                     .foregroundStyle(worst.severity == .critical ? .red : .orange)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 4)
+        // Dismissing a dialog without confirming (Cancel, swipe) leaves the session untouched. Confirm
+        // buttons capture the tap time before this runs, so clearing here never shortens a stop.
+        .onChange(of: showStopConfirmation) { _, shown in
+            if !shown, !showDiscardConfirmation { session.cancelPendingStop() }
+        }
+        .onChange(of: showDiscardConfirmation) { _, shown in
+            if !shown, !showStopConfirmation { session.cancelPendingStop() }
+        }
         .task {
             session.refreshWaterLockState()
             while !Task.isCancelled {
@@ -64,7 +60,8 @@ struct SessionControlsPage: View {
         ) {
             Button("End session", role: .destructive) {
                 WakeLog.debug(.ui, "confirm Stop session")
-                Task { await session.stopSession() }
+                let requestedAt = session.pendingStopAt
+                Task { await session.stopSession(endingAt: requestedAt) }
             }
             if WatchDebugTools.isEnabled, offersDebugDiscard {
                 Button("Stop and discard data", role: .destructive) {
@@ -87,7 +84,8 @@ struct SessionControlsPage: View {
             }
             Button("Keep") {
                 WakeLog.debug(.ui, "confirm Keep tiny session (transfer)")
-                Task { await session.stopSession() }
+                let requestedAt = session.pendingStopAt
+                Task { await session.stopSession(endingAt: requestedAt) }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -95,38 +93,64 @@ struct SessionControlsPage: View {
         }
     }
 
-    @ViewBuilder
-    private var waterLockButton: some View {
-        let label = Label {
-            Text(
-                session.isWaterLockEnabled
-                    ? String(localized: "Disable Water Lock")
-                    : String(localized: "Enable Water Lock")
-            )
-        } icon: {
-            Image(systemName: session.isWaterLockEnabled ? "drop.fill" : "drop")
-        }
-
-        Group {
-            if session.isWaterLockEnabled {
-                Button {
-                    WakeLog.debug(.ui, "tap Water Lock (locked)")
-                } label: {
-                    label
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.cyan)
-            } else {
-                Button {
-                    WakeLog.debug(.ui, "tap Enable Water Lock")
-                    Task { await session.enableWaterLock() }
-                } label: {
-                    label
-                }
-                .buttonStyle(.bordered)
+    /// Grid cell that fills the available width and height: tinted capsule with a symbol, label underneath. No scrolling.
+    private func controlTile(
+        _ title: LocalizedStringKey,
+        systemImage: String,
+        tint: Color,
+        disabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(tint)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(tint.opacity(0.25), in: Capsule())
+                Text(title)
+                    .font(.footnote)
+                    .foregroundStyle(.white)
             }
         }
-        .disabled(session.isStopping || session.isWaterLockEnabled || !session.canEnableWaterLock)
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? 0.5 : 1)
+    }
+
+    @ViewBuilder
+    private var pauseResumeTile: some View {
+        if session.isProductPaused {
+            controlTile("Resume", systemImage: "play.fill", tint: .green, disabled: session.isStopping) {
+                WakeLog.debug(.ui, "tap Resume session")
+                session.resumeSession()
+            }
+        } else {
+            controlTile(
+                "Pause", systemImage: "pause.fill", tint: .yellow,
+                disabled: session.isStopping || session.isPausing
+            ) {
+                WakeLog.debug(.ui, "tap Pause session")
+                Task { await session.pauseSession() }
+            }
+        }
+    }
+
+    private var waterLockTile: some View {
+        controlTile(
+            "Water",
+            systemImage: session.isWaterLockEnabled ? "drop.fill" : "drop",
+            tint: .blue,
+            disabled: session.isStopping || session.isWaterLockEnabled || !session.canEnableWaterLock
+        ) {
+            WakeLog.debug(.ui, "tap Enable Water Lock")
+            Task { await session.enableWaterLock() }
+        }
+        .accessibilityLabel(
+            session.isWaterLockEnabled
+                ? String(localized: "Disable Water Lock")
+                : String(localized: "Enable Water Lock")
+        )
         .accessibilityHint(
             session.isWaterLockEnabled
                 ? String(localized: "Turn Digital Crown to unlock")
@@ -135,6 +159,7 @@ struct SessionControlsPage: View {
     }
 
     private func presentStopFlow() {
+        session.beginPendingStop()
         let duration = session.computeElapsed(at: Date())
         offersDebugDiscard = TinySessionPolicy.shouldOfferDebugDiscard(duration: duration)
         if TinySessionPolicy.shouldOfferDiscard(duration: duration, setCount: session.setCount) {
