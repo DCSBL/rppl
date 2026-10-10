@@ -19,6 +19,8 @@ enum AppSettingsKey {
     static let iCloudDismissedImportSessionIDs = "rppl.iCloudDismissedImportSessionIds"
     /// Estimated ambient water temperature per park, from an open government API (opt-in; default off).
     static let parkWaterTemperatureEnabled = "rppl.parkWaterTemperatureEnabled"
+    /// Debug: show speed / altitude / g-force charts under each set (default off).
+    static let debugSetCharts = "rppl.debugSetCharts"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
 }

@@ -8,9 +8,17 @@ struct DebugLogView: View {
     @Environment(\.openURL) private var openURL
     @State private var entries: [WakeLog.Entry] = WakeLog.recentEntries()
     @State private var showMail = false
+    @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
 
     var body: some View {
         List {
+            Section {
+                Toggle("Set charts", isOn: $setChartsEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Speed, altitude and g-force charts under each set in the logbook.")
+            }
+
             Section {
                 NavigationLink {
                     ParkWaterTemperatureDebugView()
