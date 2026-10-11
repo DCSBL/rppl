@@ -450,7 +450,7 @@ struct LogbookSessionDetailView: View {
                     }
                     distanceTile(stats)
                     let measured = stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
-                        ?? stats.averageWaterTemperatureCelsius.map { LogbookFormatting.waterTemperature($0) }
+                        ?? stats.averageWaterTemperatureCelsius.map { TemperatureFormat.celsius($0) }
                     if let estimate = manifest?.waterTemperatureEstimate, measured == nil {
                         InfoTile("Water temperature", metric: .water) {
                             MetricValue(LogbookFormatting.estimatedWaterTemperature(estimate.celsius))
@@ -467,7 +467,7 @@ struct LogbookSessionDetailView: View {
                     }
                     if let weather = manifest?.weather {
                         InfoTile("Air temperature", metric: .air) {
-                            MetricValue(LogbookFormatting.airTemperature(weather.temperatureCelsius))
+                            MetricValue(TemperatureFormat.celsius(weather.temperatureCelsius))
                             StatChip(
                                 metric: .humidity,
                                 value: LogbookFormatting.humidityPercent(weather.humidityPercent),
@@ -532,7 +532,7 @@ struct LogbookSessionDetailView: View {
     private func speedTile(_ stats: SessionStats) -> some View {
         InfoTile("Speed", metric: .speed) {
             MetricValue(
-                displayedMaxSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
+                displayedMaxSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                 caption: "Max speed"
             )
             if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
@@ -547,7 +547,7 @@ struct LogbookSessionDetailView: View {
                         .font(.caption2)
                         .foregroundStyle(RpplDesign.secondaryText)
                     Spacer()
-                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(cable))
+                    Text(verbatim: DistanceFormat.kilometersPerHour(cable))
                         .font(.caption2.weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(Color.rpplText)
@@ -558,9 +558,9 @@ struct LogbookSessionDetailView: View {
                 .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
                 .accessibilityHidden(true)
                 HStack {
-                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(0))
+                    Text(verbatim: DistanceFormat.kilometersPerHour(0))
                     Spacer()
-                    Text(verbatim: LogbookFormatting.speedKilometersPerHour(max))
+                    Text(verbatim: DistanceFormat.kilometersPerHour(max))
                 }
                 .font(.caption2)
                 .monospacedDigit()
@@ -569,7 +569,7 @@ struct LogbookSessionDetailView: View {
             }
             StatChip(
                 metric: .speed,
-                value: stats.averageSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
+                value: stats.averageSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                 caption: "Average speed"
             )
         }
@@ -714,8 +714,8 @@ struct LogbookSessionDetailView: View {
     }
 
     private func distanceText(_ stats: SessionStats) -> String {
-        guard isManual else { return LogbookFormatting.distanceKilometers(stats.totalDistanceMeters) }
-        return stats.totalDistanceMeters > 0 ? LogbookFormatting.approximateDistance(stats.totalDistanceMeters) : "-"
+        guard isManual else { return DistanceFormat.kilometers(stats.totalDistanceMeters) }
+        return stats.totalDistanceMeters > 0 ? DistanceFormat.approximateKilometers(stats.totalDistanceMeters) : "-"
     }
 
     private func cableName(_ index: Int) -> String {
@@ -738,11 +738,11 @@ struct LogbookSessionDetailView: View {
     private func energyTile(_ stats: SessionStats) -> some View {
         if let total = stats.totalEnergyKilocalories {
             InfoTile("Calories", metric: .energy) {
-                MetricValue(LogbookFormatting.kilocalories(total), caption: "Total calories")
+                MetricValue(EnergyFormat.kilocalories(total), caption: "Total calories")
                 if let active = stats.activeEnergyKilocalories {
                     StatChip(
                         metric: .energy,
-                        value: LogbookFormatting.kilocalories(active),
+                        value: EnergyFormat.kilocalories(active),
                         caption: "Active calories"
                     )
                 }
@@ -1164,16 +1164,16 @@ private struct SetDetailCard: View {
 
             FlowLayout(spacing: 16) {
                 StatChip(metric: .duration, value: LogbookFormatting.compactDuration(set.duration), caption: "Duration")
-                StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(set.distanceMeters), caption: "Distance")
+                StatChip(metric: .distance, value: DistanceFormat.kilometers(set.distanceMeters), caption: "Distance")
                 StatChip(metric: .laps, value: "\(set.lapCount)", caption: "Laps")
                 StatChip(
                     metric: .speed,
-                    value: maxSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
+                    value: maxSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                     caption: "Max speed"
                 )
                 StatChip(
                     metric: .speed,
-                    value: cableSpeedKmh.map { LogbookFormatting.speedKilometersPerHour($0) } ?? "-",
+                    value: cableSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                     caption: "Cable speed"
                 )
             }

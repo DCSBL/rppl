@@ -38,10 +38,6 @@ enum SessionFormatters {
         return String(format: "%dm %ds", minutes, seconds)
     }
 
-    static func averageSpeed(_ kmh: Double) -> String {
-        DistanceFormat.kilometersPerHour(kmh)
-    }
-
     static func distance(_ meters: Double) -> String {
         if meters >= 1000 {
             return DistanceFormat.kilometers(meters)
@@ -55,7 +51,4 @@ enum SessionFormatters {
         return isEstimate ? "~" + text : text
     }
 
-    static func calories(_ kilocalories: Double) -> String {
-        EnergyFormat.kilocalories(kilocalories)
-    }
 }

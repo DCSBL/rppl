@@ -127,7 +127,7 @@ struct WatchSessionDetailView: View {
                 SessionMetricRow(
                     label: "Max speed",
                     metric: .speed,
-                    value: SessionFormatters.averageSpeed(maxSpeed)
+                    value: DistanceFormat.kilometersPerHour(maxSpeed)
                 )
             }
 
