@@ -125,6 +125,9 @@ extension WatchSessionController {
             currentInactiveDuration = 0
             return
         }
+        // Unsure mid-ride: hold the shown set time. If riding continues the clock catches up
+        // (segment start is unchanged); if it ends, the set closes as usual.
+        if isUnsure, lastConfidentCode == DetectionCodes.riding { return }
         let segmentElapsed = Date().timeIntervalSince(segmentStart)
         if lastConfidentCode == DetectionCodes.riding {
             currentSetDuration = segmentElapsed
