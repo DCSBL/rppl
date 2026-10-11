@@ -11,6 +11,7 @@ The model is Apple Weather: a calm backdrop, translucent tiles, one big number p
 3. **Native first.** SwiftUI, Swift Charts, `Gauge`, SF Symbols, materials. No third-party UI packages.
 4. **Capture beats chrome.** The [north star](../AGENTS.md#product-north-star) stands: UI work never touches session, HealthKit, detection or transfer logic.
 5. **Nothing gets lost.** A redesign keeps every action, state and piece of data the screen had.
+6. **Smallest complete view.** Reuse an existing building block before adding a new one. No one-off tile, wrapper or style for a single screen. Accessibility (Dynamic Type, VoiceOver labels, chart descriptors) is never the part to cut. See [Code economy](../AGENTS.md#code-economy-adapted-from-ponytail).
 
 ## Building blocks
 

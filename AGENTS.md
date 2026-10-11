@@ -68,6 +68,31 @@ Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webz
 
 Applies to UI strings (`.xcstrings`), Info.plist usage text, App Store / marketing copy, and agent-written prose — not to detection code identifiers in Core (those stay opaque English strings per hard constraint 4).
 
+## Code economy (adapted from ponytail)
+
+Principles adapted from [ponytail](https://github.com/dietrichgebert/ponytail) (lazy senior dev mode). The best code is the code never written. Laziness applies to the solution, never to reading, validation or the data-collection guarantees below.
+
+**Ponytail trigger:** this section is Rppl's standing ponytail mode. When the user says "ponytail" (e.g. "ponytail this", "check with ponytail"), apply it strictly: run the full ladder before writing anything, challenge whether the change needs to exist, prefer deleting code, and list every skipped item in the summary. For reviews, also flag code that could be cut, merged or replaced by an existing helper.
+
+**Before writing:** read the code you touch and trace the real flow. List every place the change must reach (callers, tests, fixtures, schema, `.xcstrings`, docs). Check what it could break for riders: data loss, exposure, broken callers.
+
+**Pick the smallest complete change, stop at the first rung that works:**
+1. Skip it: no features, options or settings nobody asked for.
+2. Reuse an existing `RpplCore` helper, design component or pattern.
+3. Use the Swift standard library or an Apple platform API.
+4. Use a dependency already in the project. Do not add new ones without asking.
+5. Write one obvious line.
+6. Otherwise write the minimum that works.
+
+**Rules:**
+- No unrequested abstractions, wrappers, protocols, config or "for later" code. Deleting beats adding.
+- Bug fix: grep every caller first, fix the root cause once in shared (Core) code, not per target.
+- When moving or merging code, keep its validation and error handling.
+- Comment only a *why* the code cannot express. Mark a known shortcut as `// shortcut: <limit>, <when to upgrade>`.
+- Branching, parsing, geo, detection or file-store logic gets a small Swift Testing test in `RpplCore`.
+- **Never cut:** validation at trust boundaries (WC payloads, imported files, manual entry), data-loss handling (hard constraint 2), HealthKit save order (hard constraint 1), permission just-in-time rules, accessibility (Dynamic Type, VoiceOver labels).
+- End every task summary with what was skipped or left unchecked, and any risk.
+
 ## Architecture rules
 
 | Layer | Own | Avoid |
