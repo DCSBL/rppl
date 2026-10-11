@@ -28,6 +28,7 @@ private enum AppTabIcons {
 struct ContentView: View {
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
+    @State private var openParkID: String?
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showICloudImport = false
@@ -47,7 +48,7 @@ struct ContentView: View {
             }
 
             Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
-                ParksView()
+                ParksView(openParkID: $openParkID)
             }
 
             Tab(value: AppTab.app) {
@@ -64,6 +65,11 @@ struct ContentView: View {
             }
         }
         .tint(Color.rpplAccent)
+        .onOpenURL { url in
+            guard let id = ParkDeepLink.parkID(from: url) else { return }
+            openParkID = id
+            selectedTab = .parks
+        }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $showICloudImport) {
             ICloudSessionImportView(

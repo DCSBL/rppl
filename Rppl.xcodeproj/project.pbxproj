@@ -15,6 +15,8 @@
 		CCF3D6D3302921A800AF3518 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCF3D6D0302921A800AF3518 /* RpplCore */; };
 		CCDE000000000000000001F2 /* AppIconDev.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCDE000000000000000001F1 /* AppIconDev.icon */; };
 		CCDE000000000000000001F3 /* AppIconDev.icon in Resources */ = {isa = PBXBuildFile; fileRef = CCDE000000000000000001F1 /* AppIconDev.icon */; };
+		CCDE00000000000000000201 /* RpplWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CCDE00000000000000000210 /* RpplWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CCDE00000000000000000202 /* RpplCore in Frameworks */ = {isa = PBXBuildFile; productRef = CCDE000000000000000002F2 /* RpplCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +41,13 @@
 			remoteGlobalIDString = CCF3D6C5302921A800AF3518;
 			remoteInfo = RpplWatch;
 		};
+		CCDE00000000000000000203 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CCF3D689302921A400AF3518 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CCDE00000000000000000216;
+			remoteInfo = RpplWidgets;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -53,6 +62,17 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCDE00000000000000000204 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CCDE00000000000000000201 /* RpplWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +82,7 @@
 		CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RpplUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCF3D6C0302921A800AF3518 /* RpplWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RpplWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCDE000000000000000001F1 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconDev.icon; sourceTree = "<group>"; };
+		CCDE00000000000000000210 /* RpplWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RpplWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -79,6 +100,13 @@
 				Info.plist,
 			);
 			target = CCF3D6C5302921A800AF3518 /* RpplWatch */;
+		};
+		CCDE00000000000000000211 /* Exceptions for "RpplWidgets" folder in "RpplWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CCDE00000000000000000216 /* RpplWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -107,6 +135,14 @@
 				CCF3D6D5302921A800AF3518 /* Exceptions for "RpplWatch" folder in "RpplWatch" target */,
 			);
 			path = RpplWatch;
+			sourceTree = "<group>";
+		};
+		CCDE00000000000000000212 /* RpplWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CCDE00000000000000000211 /* Exceptions for "RpplWidgets" folder in "RpplWidgets" target */,
+			);
+			path = RpplWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -143,6 +179,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCDE00000000000000000213 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCDE00000000000000000202 /* RpplCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -151,6 +195,7 @@
 			children = (
 				CCF3D693302921A500AF3518 /* Rppl */,
 				CCF3D6C1302921A800AF3518 /* RpplWatch */,
+				CCDE00000000000000000212 /* RpplWidgets */,
 				CCF3D6A5302921A800AF3518 /* RpplTests */,
 				CCF3D6AF302921A800AF3518 /* RpplUITests */,
 				CCF3D692302921A500AF3518 /* Products */,
@@ -164,6 +209,7 @@
 			children = (
 				CCF3D691302921A500AF3518 /* Rppl.app */,
 				CCF3D6C0302921A800AF3518 /* RpplWatch.app */,
+				CCDE00000000000000000210 /* RpplWidgets.appex */,
 				CCF3D6A2302921A800AF3518 /* RpplTests.xctest */,
 				CCF3D6AC302921A800AF3518 /* RpplUITests.xctest */,
 			);
@@ -181,11 +227,13 @@
 				CCF3D68E302921A400AF3518 /* Frameworks */,
 				CCF3D68F302921A400AF3518 /* Resources */,
 				CCF3D6C6302921A800AF3518 /* Embed Watch Content */,
+				CCDE00000000000000000204 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				CCF3D6C9302921A800AF3518 /* PBXTargetDependency */,
+				CCDE00000000000000000217 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CCF3D693302921A500AF3518 /* Rppl */,
@@ -268,6 +316,29 @@
 			productReference = CCF3D6C0302921A800AF3518 /* RpplWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CCDE00000000000000000216 /* RpplWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCDE00000000000000000218 /* Build configuration list for PBXNativeTarget "RpplWidgets" */;
+			buildPhases = (
+				CCDE00000000000000000214 /* Sources */,
+				CCDE00000000000000000213 /* Frameworks */,
+				CCDE00000000000000000215 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CCDE00000000000000000212 /* RpplWidgets */,
+			);
+			name = RpplWidgets;
+			packageProductDependencies = (
+				CCDE000000000000000002F2 /* RpplCore */,
+			);
+			productName = RpplWidgets;
+			productReference = CCDE00000000000000000210 /* RpplWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -292,6 +363,9 @@
 					CCF3D6C5302921A800AF3518 = {
 						CreatedOnToolsVersion = 26.3;
 					};
+					CCDE00000000000000000216 = {
+						CreatedOnToolsVersion = 26.3;
+					};
 				};
 			};
 			buildConfigurationList = CCF3D68C302921A400AF3518 /* Build configuration list for PBXProject "Rppl" */;
@@ -314,6 +388,7 @@
 			targets = (
 				CCF3D690302921A400AF3518 /* Rppl */,
 				CCF3D6C5302921A800AF3518 /* RpplWatch */,
+				CCDE00000000000000000216 /* RpplWidgets */,
 				CCF3D6A1302921A800AF3518 /* RpplTests */,
 				CCF3D6AB302921A800AF3518 /* RpplUITests */,
 			);
@@ -353,6 +428,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCDE00000000000000000215 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -384,6 +466,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCDE00000000000000000214 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -401,6 +490,11 @@
 			isa = PBXTargetDependency;
 			target = CCF3D6C5302921A800AF3518 /* RpplWatch */;
 			targetProxy = CCF3D6C8302921A800AF3518 /* PBXContainerItemProxy */;
+		};
+		CCDE00000000000000000217 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CCDE00000000000000000216 /* RpplWidgets */;
+			targetProxy = CCDE00000000000000000203 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1026,6 +1120,97 @@
 			};
 			name = Dev;
 		};
+		CCDE00000000000000000219 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RpplWidgets/RpplWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RpplWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		CCDE0000000000000000021A /* Dev */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RpplWidgets/RpplWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RpplWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.dev.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Dev;
+		};
+		CCDE0000000000000000021B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RpplWidgets/RpplWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V5UBFX6V97;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RpplWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rppl;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.dcsbl.rppl.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1079,6 +1264,16 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CCDE00000000000000000218 /* Build configuration list for PBXNativeTarget "RpplWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCDE00000000000000000219 /* Debug */,
+				CCDE0000000000000000021A /* Dev */,
+				CCDE0000000000000000021B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -1100,6 +1295,11 @@
 			productName = RpplCore;
 		};
 		CCF3D6D0302921A800AF3518 /* RpplCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
+			productName = RpplCore;
+		};
+		CCDE000000000000000002F2 /* RpplCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CCF3D6CD302921A800AF3518 /* XCLocalSwiftPackageReference "RpplCore" */;
 			productName = RpplCore;

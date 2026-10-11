@@ -3,6 +3,8 @@ import RpplCore
 import SwiftUI
 
 struct ParksView: View {
+    /// Park id from a widget tap; opened once, then cleared.
+    @Binding var openParkID: String?
     @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
@@ -116,6 +118,15 @@ struct ParksView: View {
     }
 
     private func reloadDrafts() { drafts.reload() }
+
+    private func openRequestedPark() {
+        guard let id = openParkID else { return }
+        if store.entries.isEmpty { store.reload() }
+        openParkID = nil
+        guard let park = store.entry(id: id)?.park else { return }
+        path = NavigationPath()
+        path.append(park)
+    }
 
     /// Unfinished parks, on top of the list until they are saved or deleted.
     @ViewBuilder
@@ -325,6 +336,7 @@ struct ParksView: View {
         .onChange(of: connectivity.sessionsRevision) { _, _ in
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
+        .onChange(of: openParkID, initial: true) { _, _ in openRequestedPark() }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
         // Nearby list out from under the user while they're scrolling or tapping a park.
         .onAppear { refreshLocation() }
