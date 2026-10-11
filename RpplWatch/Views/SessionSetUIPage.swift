@@ -169,15 +169,34 @@ struct SessionSetUIPage: View {
         return session.isUnsure ? Color.blue.mix(with: .black, by: 0.35) : .blue
     }
 
+    /// Segment time. While unsure mid-ride the clock is held, so it fades dark blue ↔ blue at
+    /// 2 Hz as a sign of life (static dark blue in Always-On, where animation is suspended).
+    @ViewBuilder
+    private func segmentTimeText(isRiding: Bool) -> some View {
+        let text = Text(
+            SessionFormatters.segmentDuration(
+                isRiding ? session.currentSetDuration : session.currentInactiveDuration
+            )
+        )
+        if isRiding && session.isUnsure {
+            if isLuminanceReduced {
+                text.foregroundStyle(segmentColor(isRiding: true)).italic()
+            } else {
+                TimelineView(.animation) { context in
+                    let phase = 0.5 + 0.5 * sin(context.date.timeIntervalSinceReferenceDate * 2 * 2 * .pi)
+                    text
+                        .foregroundStyle(Color.blue.mix(with: .black, by: 0.35 * (1 - phase)))
+                        .italic()
+                }
+            }
+        } else {
+            text.foregroundStyle(segmentColor(isRiding: isRiding))
+        }
+    }
+
     private func heroTimeRow(isRiding: Bool) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(
-                SessionFormatters.segmentDuration(
-                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
-                )
-            )
-            .foregroundStyle(segmentColor(isRiding: isRiding))
-            .italic(isRiding && session.isUnsure)
+            segmentTimeText(isRiding: isRiding)
 
             Text("/")
                 .font(.title2)
