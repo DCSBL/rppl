@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 import RpplCore
 
@@ -9,6 +10,7 @@ struct LogbookView: View {
     @Binding var navigation: LogbookNavigationRequest
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.requestReview) private var requestReview
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var catalog = SessionCatalog()
@@ -20,6 +22,7 @@ struct LogbookView: View {
     @State private var actionErrorText: String?
     @State private var detailRoute: SessionDetailRoute?
     @State private var highlightSessionId: String?
+    @State private var didOpenSession = false
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -113,6 +116,7 @@ struct LogbookView: View {
                                     store: connectivity.store
                                 )
                                 .onDisappear {
+                                    didOpenSession = true
                                     flashHighlight(entry.manifest.sessionId)
                                 }
                             } label: {
@@ -156,6 +160,7 @@ struct LogbookView: View {
             .navigationDestination(item: $detailRoute) { route in
                 LogbookSessionDetailView(sessionId: route.id, store: connectivity.store)
                     .onDisappear {
+                        didOpenSession = true
                         flashHighlight(route.id)
                     }
             }
@@ -206,6 +211,10 @@ struct LogbookView: View {
                 connectivity.refreshSyncState()
                 reloadCatalog()
                 consumeNavigationRequests()
+                requestReviewIfPending()
+            }
+            .onChange(of: catalog.isLoading) { _, loading in
+                if !loading { armReviewPrompt() }
             }
             .onChange(of: connectivity.sessionsRevision) { _, _ in
                 reloadCatalog()
@@ -245,6 +254,36 @@ struct LogbookView: View {
                 highlightSessionId = nil
             }
         }
+    }
+
+    /// Count good sessions; reaching a milestone only arms the prompt (shown on return to the list).
+    private func armReviewPrompt() {
+        let goodIDs = catalog.entries.compactMap { entry -> String? in
+            guard let stats = entry.stats,
+                  ReviewPromptState.isGoodSession(manifest: entry.manifest, stats: stats) else { return nil }
+            return entry.manifest.sessionId
+        }
+        var state = ReviewPromptStore.load()
+        if state.record(goodSessionIDs: goodIDs) {
+            WakeLog.debug(.ui, "review prompt armed good=\(state.countedSessionIDs.count) milestone=\(state.promptedMilestone)")
+        }
+        ReviewPromptStore.save(state)
+    }
+
+    /// Native review sheet right after the rider comes back from a session to the list.
+    private func requestReviewIfPending() {
+        guard didOpenSession else { return }
+        var state = ReviewPromptStore.load()
+        guard state.consumePending() else { return }
+        ReviewPromptStore.save(state)
+        if AppReleaseChannel.isTestFlight {
+            WakeLog.debug(.ui, "review prompt skipped (TestFlight) good=\(state.countedSessionIDs.count)")
+            return
+        }
+        WakeLog.debug(.ui, "review prompt requested good=\(state.countedSessionIDs.count) milestone=\(state.promptedMilestone)")
+        #if !DEBUG
+        requestReview()
+        #endif
     }
 
     private func reloadCatalog() {
