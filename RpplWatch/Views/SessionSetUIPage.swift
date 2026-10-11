@@ -110,8 +110,9 @@ struct SessionSetUIPage: View {
             // No wall-clock row — watchOS already shows the real time natively.
             statusLine(
                 primary: isRiding ? "Riding" : "Inactive",
-                color: isRiding ? .blue : .gray,
-                icon: isRiding ? "play.circle.fill" : "pause.circle.fill"
+                color: segmentColor(isRiding: isRiding),
+                icon: isRiding ? "play.circle.fill" : "pause.circle.fill",
+                isItalic: isRiding && session.isUnsure
             )
 
             heroTimeRow(isRiding: isRiding)
@@ -162,29 +163,50 @@ struct SessionSetUIPage: View {
         .padding(.vertical, 8)
     }
 
+    /// Riding blue; a darker blue while detection is unsure mid-ride (set time is held then).
+    private func segmentColor(isRiding: Bool) -> Color {
+        guard isRiding else { return .gray }
+        return session.isUnsure ? Color.blue.mix(with: .black, by: 0.35) : .blue
+    }
+
     private func heroTimeRow(isRiding: Bool) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(
-                SessionFormatters.segmentDuration(
-                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
-                )
-            )
-            .foregroundStyle(isRiding ? .blue : .gray)
-
-            Text("/")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-
-            // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
-            // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
-            Text(SessionFormatters.elapsed(session.elapsed))
-                .foregroundStyle(.yellow)
+        // One Text at a size that fits the normal range (`0:10 / 12:34`) without scaling. A larger
+        // font plus `minimumScaleFactor` fit only while the digits were narrow, so the hero was
+        // big for the first seconds of a segment and then shrank. Scaling remains only as a
+        // safety net for `h:mm:ss` values.
+        let segment = SessionFormatters.segmentDuration(
+            isRiding ? session.currentSetDuration : session.currentInactiveDuration
+        )
+        // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
+        // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
+        let total = SessionFormatters.elapsed(session.elapsed)
+        func hero(_ color: Color, _ italic: Bool) -> Text {
+            Text("\(Text(segment).foregroundStyle(color).italic(italic)) / \(Text(total).foregroundStyle(.yellow))")
         }
-        .font(.system(.largeTitle, design: .rounded).bold())
-        .monospacedDigit()
-        .minimumScaleFactor(0.5)
-        .lineLimit(1)
-        .alwaysOnSupportingMetric(isLuminanceReduced)
+        return heroContent(isRiding: isRiding, hero: hero)
+            .font(.system(.title2, design: .rounded).bold())
+            .monospacedDigit()
+            .minimumScaleFactor(0.7)
+            .lineLimit(1)
+            .alwaysOnSupportingMetric(isLuminanceReduced)
+    }
+
+    /// While unsure mid-ride the set clock is held, so the segment time fades dark blue ↔ blue at
+    /// 2 Hz as a sign of life (static dark blue in Always-On, where animation is suspended).
+    @ViewBuilder
+    private func heroContent(isRiding: Bool, hero: @escaping (Color, Bool) -> Text) -> some View {
+        if isRiding && session.isUnsure {
+            if isLuminanceReduced {
+                hero(segmentColor(isRiding: true), true)
+            } else {
+                TimelineView(.animation) { context in
+                    let phase = 0.5 + 0.5 * sin(context.date.timeIntervalSinceReferenceDate * 2 * 2 * .pi)
+                    hero(Color.blue.mix(with: .black, by: 0.35 * (1 - phase)), true)
+                }
+            }
+        } else {
+            hero(segmentColor(isRiding: isRiding), false)
+        }
     }
 
     private func metricTile(
@@ -290,21 +312,17 @@ struct SessionSetUIPage: View {
     }
 
     @ViewBuilder
-    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String) -> some View {
+    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String, isItalic: Bool) -> some View {
         VStack(spacing: 2) {
             HStack(spacing: 4) {
                 Text(primary)
                     .font(.subheadline.weight(.semibold))
+                    .italic(isItalic)
                     .foregroundStyle(color)
                 Image(systemName: icon)
                     .font(.subheadline)
                     .foregroundStyle(color)
                     .accessibilityHidden(true)
-            }
-            if session.isUnsure {
-                Text("Unsure")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.orange)
             }
         }
         .frame(maxWidth: .infinity)

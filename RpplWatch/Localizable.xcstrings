@@ -2018,22 +2018,6 @@
         }
       }
     },
-    "Unsure" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unsure"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Onzeker"
-          }
-        }
-      }
-    },
     "Unsure (raw: %@)" : {
       "extractionState" : "stale",
       "localizations" : {
