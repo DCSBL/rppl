@@ -163,26 +163,22 @@ struct SessionSetUIPage: View {
     }
 
     private func heroTimeRow(isRiding: Bool) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(
-                SessionFormatters.segmentDuration(
-                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
-                )
-            )
-            .foregroundStyle(isRiding ? .blue : .gray)
-
-            Text("/")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-
-            // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
-            // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
-            Text(SessionFormatters.elapsed(session.elapsed))
-                .foregroundStyle(.yellow)
-        }
-        .font(.system(.largeTitle, design: .rounded).bold())
+        // One Text at a size that fits the normal range (`0:10 / 12:34`) without scaling. A larger
+        // font plus `minimumScaleFactor` fit only while the digits were narrow, so the hero was
+        // big for the first seconds of a segment and then shrank. Scaling remains only as a
+        // safety net for `h:mm:ss` values.
+        let segment = SessionFormatters.segmentDuration(
+            isRiding ? session.currentSetDuration : session.currentInactiveDuration
+        )
+        // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
+        // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
+        let total = SessionFormatters.elapsed(session.elapsed)
+        return Text(
+            "\(Text(segment).foregroundStyle(isRiding ? .blue : .gray)) / \(Text(total).foregroundStyle(.yellow))"
+        )
+        .font(.system(.title2, design: .rounded).bold())
         .monospacedDigit()
-        .minimumScaleFactor(0.5)
+        .minimumScaleFactor(0.7)
         .lineLimit(1)
         .alwaysOnSupportingMetric(isLuminanceReduced)
     }
