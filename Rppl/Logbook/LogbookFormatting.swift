@@ -25,26 +25,6 @@ enum LogbookFormatting {
         fraction.formatted(.percent.precision(.fractionLength(0)))
     }
 
-    static func distanceKilometers(_ meters: Double) -> String {
-        DistanceFormat.kilometers(meters)
-    }
-
-    static func approximateDistance(_ meters: Double) -> String {
-        DistanceFormat.approximateKilometers(meters)
-    }
-
-    static func speedKilometersPerHour(_ kmh: Double) -> String {
-        DistanceFormat.kilometersPerHour(kmh)
-    }
-
-    static func kilocalories(_ value: Double) -> String {
-        EnergyFormat.kilocalories(value)
-    }
-
-    static func waterTemperature(_ celsius: Double) -> String {
-        TemperatureFormat.celsius(celsius)
-    }
-
     /// Station reading for a session the Watch never measured: `~` marks it as an estimate.
     static func estimatedWaterTemperature(_ celsius: Double) -> String {
         "~" + TemperatureFormat.celsius(celsius)
@@ -58,10 +38,6 @@ enum LogbookFormatting {
 
     static func waterTemperatureRange(_ range: ClosedRange<Double>) -> String {
         TemperatureFormat.celsiusRange(range)
-    }
-
-    static func airTemperature(_ celsius: Double) -> String {
-        TemperatureFormat.celsius(celsius)
     }
 
     static func humidityPercent(_ percent: Double) -> String {

@@ -126,7 +126,7 @@ struct ManualSessionEditorView: View {
                 }
                 if let distanceM {
                     Section {
-                        LabeledContent("Estimated distance", value: LogbookFormatting.approximateDistance(distanceM))
+                        LabeledContent("Estimated distance", value: DistanceFormat.approximateKilometers(distanceM))
                     } footer: {
                         Text("Laps times the cable length.")
                     }

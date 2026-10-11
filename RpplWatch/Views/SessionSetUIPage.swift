@@ -152,7 +152,7 @@ struct SessionSetUIPage: View {
                 heartRateRow
                     .frame(maxWidth: .infinity)
                 metricTile(
-                    value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                    value: session.totalEnergyKilocalories.map { EnergyFormat.kilocalories($0) } ?? "--",
                     label: "CAL",
                     metric: .energy
                 )
@@ -298,13 +298,13 @@ struct SessionSetUIPage: View {
             SessionMetricRow(
                 label: "Calories",
                 metric: .energy,
-                value: session.totalEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                value: session.totalEnergyKilocalories.map { EnergyFormat.kilocalories($0) } ?? "--",
                 isLarge: true
             )
             SessionMetricRow(
                 label: "Active calories",
                 metric: .energy,
-                value: session.activeEnergyKilocalories.map { SessionFormatters.calories($0) } ?? "--",
+                value: session.activeEnergyKilocalories.map { EnergyFormat.kilocalories($0) } ?? "--",
                 isLarge: true
             )
         }
