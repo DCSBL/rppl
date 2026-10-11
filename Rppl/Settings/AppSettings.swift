@@ -23,4 +23,6 @@ enum AppSettingsKey {
     static let debugSetCharts = "rppl.debugSetCharts"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
+    /// JSON `ReviewPromptState`: good-session count and pending App Store review prompt (local only).
+    static let reviewPromptState = "rppl.reviewPromptState"
 }
