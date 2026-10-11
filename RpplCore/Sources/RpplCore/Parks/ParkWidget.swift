@@ -94,12 +94,12 @@ public enum ParkDeepLink {
 
 /// When the widget text can change by itself, so the timeline has an entry for each moment.
 public enum ParkWidgetTimeline {
-    /// Window starts and ends plus midnights over today and the next `days - 1` days, after `date`, sorted.
+    /// Window starts and ends plus midnights over today and the next `days - 1` days (default a week, so the text stays right when iOS delays a reload), after `date`, sorted.
     public static func changeDates(
         for opening: ParkOpening?,
         after date: Date,
         timeZone: TimeZone,
-        days: Int = 2
+        days: Int = 7
     ) -> [Date] {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone

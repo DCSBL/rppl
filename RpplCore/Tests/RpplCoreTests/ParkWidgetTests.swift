@@ -95,7 +95,7 @@ struct ParkWidgetTests {
 
     @Test func changeDatesCoverWindowEdgesAndMidnights() {
         let now = date("2026-10-12", hour: 15)
-        let dates = ParkWidgetTimeline.changeDates(for: weekdaysOnly, after: now, timeZone: amsterdam)
+        let dates = ParkWidgetTimeline.changeDates(for: weekdaysOnly, after: now, timeZone: amsterdam, days: 2)
         #expect(dates == [
             date("2026-10-12", hour: 20),
             date("2026-10-13", hour: 0),
@@ -107,7 +107,7 @@ struct ParkWidgetTests {
 
     @Test func changeDatesForUnknownParkAreMidnightsOnly() {
         let now = date("2026-10-12", hour: 15)
-        let dates = ParkWidgetTimeline.changeDates(for: nil, after: now, timeZone: amsterdam)
+        let dates = ParkWidgetTimeline.changeDates(for: nil, after: now, timeZone: amsterdam, days: 2)
         #expect(dates == [date("2026-10-13", hour: 0), date("2026-10-14", hour: 0)])
     }
 }
