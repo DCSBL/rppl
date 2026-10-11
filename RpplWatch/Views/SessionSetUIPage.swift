@@ -163,25 +163,22 @@ struct SessionSetUIPage: View {
     }
 
     private func heroTimeRow(isRiding: Bool) -> some View {
-        // Two lines, not one "segment / total" line: on one line the text shrank
-        // (`minimumScaleFactor`) as digits were added, so the hero looked big right after a
-        // transition (segment time reset to 0:00) and small later. Each value now fits at full size.
-        VStack(spacing: 0) {
-            Text(
-                SessionFormatters.segmentDuration(
-                    isRiding ? session.currentSetDuration : session.currentInactiveDuration
-                )
-            )
-            .foregroundStyle(isRiding ? .blue : .gray)
-
-            // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
-            // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
-            Text(SessionFormatters.elapsed(session.elapsed))
-                .foregroundStyle(.yellow)
-        }
-        .font(.system(.largeTitle, design: .rounded).bold())
+        // One Text at a size that fits the normal range (`0:10 / 12:34`) without scaling. A larger
+        // font plus `minimumScaleFactor` fit only while the digits were narrow, so the hero was
+        // big for the first seconds of a segment and then shrank. Scaling remains only as a
+        // safety net for `h:mm:ss` values.
+        let segment = SessionFormatters.segmentDuration(
+            isRiding ? session.currentSetDuration : session.currentInactiveDuration
+        )
+        // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
+        // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
+        let total = SessionFormatters.elapsed(session.elapsed)
+        return Text(
+            "\(Text(segment).foregroundStyle(isRiding ? .blue : .gray)) / \(Text(total).foregroundStyle(.yellow))"
+        )
+        .font(.system(.title2, design: .rounded).bold())
         .monospacedDigit()
-        .minimumScaleFactor(0.8)
+        .minimumScaleFactor(0.7)
         .lineLimit(1)
         .alwaysOnSupportingMetric(isLuminanceReduced)
     }
