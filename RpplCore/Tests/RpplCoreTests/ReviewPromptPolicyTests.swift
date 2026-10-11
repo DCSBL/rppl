@@ -64,33 +64,43 @@ struct ReviewPromptPolicyTests {
         var armedAt: [Int] = []
         for n in 1...31 where state.record(goodSessionIDs: ["s\(n)"]) {
             armedAt.append(n)
-            #expect(state.consumePending())
+            let armed1 = state.consumePending()
+            #expect(armed1)
         }
         #expect(armedAt == [3, 10, 20, 30])
     }
 
     @Test func duplicateIDsDoNotCount() {
         var state = ReviewPromptState()
-        #expect(!state.record(goodSessionIDs: ["a", "b", "a", "b"]))
-        #expect(!state.record(goodSessionIDs: ["a", "b"]))
-        #expect(state.record(goodSessionIDs: ["c"]))
+        let armed1 = state.record(goodSessionIDs: ["a", "b", "a", "b"])
+        #expect(!armed1)
+        let armed2 = state.record(goodSessionIDs: ["a", "b"])
+        #expect(!armed2)
+        let armed3 = state.record(goodSessionIDs: ["c"])
+        #expect(armed3)
     }
 
     @Test func historicJumpArmsOnce() {
         var state = ReviewPromptState()
-        #expect(state.record(goodSessionIDs: (1...12).map { "s\($0)" }))
+        let armed1 = state.record(goodSessionIDs: (1...12).map { "s\($0)" })
+        #expect(armed1)
         #expect(state.promptedMilestone == 10)
-        #expect(state.consumePending())
-        #expect(!state.consumePending())
-        #expect(!state.record(goodSessionIDs: ["s13"]))
+        let armed2 = state.consumePending()
+        #expect(armed2)
+        let armed3 = state.consumePending()
+        #expect(!armed3)
+        let armed4 = state.record(goodSessionIDs: ["s13"])
+        #expect(!armed4)
     }
 
     @Test func pendingSurvivesUntilConsumed() {
         var state = ReviewPromptState()
         state.record(goodSessionIDs: ["a", "b", "c"])
-        #expect(!state.record(goodSessionIDs: ["d"]))
+        let armed1 = state.record(goodSessionIDs: ["d"])
+        #expect(!armed1)
         #expect(state.pending)
-        #expect(state.consumePending())
+        let armed2 = state.consumePending()
+        #expect(armed2)
     }
 
     @Test func codableRoundTrip() throws {
