@@ -110,8 +110,9 @@ struct SessionSetUIPage: View {
             // No wall-clock row — watchOS already shows the real time natively.
             statusLine(
                 primary: isRiding ? "Riding" : "Inactive",
-                color: isRiding ? .blue : .gray,
-                icon: isRiding ? "play.circle.fill" : "pause.circle.fill"
+                color: segmentColor(isRiding: isRiding),
+                icon: isRiding ? "play.circle.fill" : "pause.circle.fill",
+                isItalic: isRiding && session.isUnsure
             )
 
             heroTimeRow(isRiding: isRiding)
@@ -162,6 +163,12 @@ struct SessionSetUIPage: View {
         .padding(.vertical, 8)
     }
 
+    /// Riding blue; a darker blue while detection is unsure mid-ride (set time is held then).
+    private func segmentColor(isRiding: Bool) -> Color {
+        guard isRiding else { return .gray }
+        return session.isUnsure ? Color.blue.mix(with: .black, by: 0.35) : .blue
+    }
+
     private func heroTimeRow(isRiding: Bool) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text(
@@ -169,7 +176,8 @@ struct SessionSetUIPage: View {
                     isRiding ? session.currentSetDuration : session.currentInactiveDuration
                 )
             )
-            .foregroundStyle(isRiding ? .blue : .gray)
+            .foregroundStyle(segmentColor(isRiding: isRiding))
+            .italic(isRiding && session.isUnsure)
 
             Text("/")
                 .font(.title2)
@@ -290,21 +298,17 @@ struct SessionSetUIPage: View {
     }
 
     @ViewBuilder
-    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String) -> some View {
+    private func statusLine(primary: LocalizedStringKey, color: Color, icon: String, isItalic: Bool) -> some View {
         VStack(spacing: 2) {
             HStack(spacing: 4) {
                 Text(primary)
                     .font(.subheadline.weight(.semibold))
+                    .italic(isItalic)
                     .foregroundStyle(color)
                 Image(systemName: icon)
                     .font(.subheadline)
                     .foregroundStyle(color)
                     .accessibilityHidden(true)
-            }
-            if session.isUnsure {
-                Text("Unsure")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.orange)
             }
         }
         .frame(maxWidth: .infinity)
