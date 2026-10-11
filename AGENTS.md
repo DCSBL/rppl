@@ -72,6 +72,8 @@ Applies to UI strings (`.xcstrings`), Info.plist usage text, App Store / marketi
 
 Principles adapted from [ponytail](https://github.com/dietrichgebert/ponytail) (lazy senior dev mode). The best code is the code never written. Laziness applies to the solution, never to reading, validation or the data-collection guarantees below.
 
+**Ponytail trigger:** this section is Rppl's standing ponytail mode. When the user says "ponytail" (e.g. "ponytail this", "check with ponytail"), apply it strictly: run the full ladder before writing anything, challenge whether the change needs to exist, prefer deleting code, and list every skipped item in the summary. For reviews, also flag code that could be cut, merged or replaced by an existing helper.
+
 **Before writing:** read the code you touch and trace the real flow. List every place the change must reach (callers, tests, fixtures, schema, `.xcstrings`, docs). Check what it could break for riders: data loss, exposure, broken callers.
 
 **Pick the smallest complete change, stop at the first rung that works:**
