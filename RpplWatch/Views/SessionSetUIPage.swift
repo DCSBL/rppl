@@ -163,17 +163,16 @@ struct SessionSetUIPage: View {
     }
 
     private func heroTimeRow(isRiding: Bool) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
+        // Two lines, not one "segment / total" line: on one line the text shrank
+        // (`minimumScaleFactor`) as digits were added, so the hero looked big right after a
+        // transition (segment time reset to 0:00) and small later. Each value now fits at full size.
+        VStack(spacing: 0) {
             Text(
                 SessionFormatters.segmentDuration(
                     isRiding ? session.currentSetDuration : session.currentInactiveDuration
                 )
             )
             .foregroundStyle(isRiding ? .blue : .gray)
-
-            Text("/")
-                .font(.title2)
-                .foregroundStyle(.secondary)
 
             // Total elapsed session time — same "workout yellow" Apple's own Workout app uses
             // for its hero elapsed-time metric (also used for the Paused timer, see `pausedView`).
@@ -182,7 +181,7 @@ struct SessionSetUIPage: View {
         }
         .font(.system(.largeTitle, design: .rounded).bold())
         .monospacedDigit()
-        .minimumScaleFactor(0.5)
+        .minimumScaleFactor(0.8)
         .lineLimit(1)
         .alwaysOnSupportingMetric(isLuminanceReduced)
     }
