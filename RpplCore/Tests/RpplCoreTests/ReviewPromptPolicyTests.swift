@@ -62,11 +62,9 @@ struct ReviewPromptPolicyTests {
     @Test func armsAtThreeTenAndTwentyOnly() {
         var state = ReviewPromptState()
         var armedAt: [Int] = []
-        for n in 1...31 {
-            if state.record(goodSessionIDs: ["s\(n)"]) {
-                armedAt.append(n)
-                #expect(state.consumePending())
-            }
+        for n in 1...31 where state.record(goodSessionIDs: ["s\(n)"]) {
+            armedAt.append(n)
+            #expect(state.consumePending())
         }
         #expect(armedAt == [3, 10, 20, 30])
     }
