@@ -239,6 +239,14 @@ opening:
 - The in-app editor keeps exceptions when saving but cannot edit them yet; add them in the YAML.
 - Record the source (for example the park's Instagram story and the date you saw it) in the PR description. Exceptions from a story or post are announcements, not the park's regular schedule; do not fold them into `rules`.
 
+### Park hours widget
+
+`RpplWidgets` is an iPhone widget extension: **small** (2x2) and **medium** (4x2). Long-press the widget, Edit Widget, pick one park. Everything is local: it reads the bundled and user park files from the App Group, no network.
+
+- Text: `Closed`, `Open tomorrow`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown".
+- Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail`) and `ParkWidgetTimeline.changeDates` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
+- `ParkStore` calls `WidgetCenter.reloadAllTimelines()` after saving or removing a park, so an edited park shows right away.
+
 ### Water temperature (opt-in)
 
 - Off by default (Settings → "Park water temperature"). When on, a park with a `water_temperature` source shows an estimated reading next to the weather row.
