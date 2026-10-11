@@ -57,7 +57,7 @@ private struct WatchSetRow: View {
                 WatchSetMetricLine(
                     label: "Avg speed",
                     metric: .speed,
-                    value: SessionFormatters.averageSpeed(averageSpeed)
+                    value: DistanceFormat.kilometersPerHour(averageSpeed)
                 )
             }
         }

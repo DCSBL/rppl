@@ -323,10 +323,10 @@ struct LogbookView: View {
         let sessionsValue = catalog.isLoading ? "-" : "\(totals.sessionCount)"
         let distanceValue = catalog.isLoading
             ? "-"
-            : LogbookFormatting.distanceKilometers(totals.totalDistanceMeters)
+            : DistanceFormat.kilometers(totals.totalDistanceMeters)
         let maxSpeedValue = catalog.isLoading || totals.topSpeedKmh <= 0
             ? "-"
-            : LogbookFormatting.speedKilometersPerHour(totals.topSpeedKmh)
+            : DistanceFormat.kilometersPerHour(totals.topSpeedKmh)
 
         return InfoTile("Total", metric: .riding) {
             Group {
@@ -640,8 +640,8 @@ private struct SessionCard: View {
     private var distanceText: String {
         guard let stats = entry.stats else { return "-" }
         return isManual
-            ? LogbookFormatting.approximateDistance(stats.totalDistanceMeters)
-            : LogbookFormatting.distanceKilometers(stats.totalDistanceMeters)
+            ? DistanceFormat.approximateKilometers(stats.totalDistanceMeters)
+            : DistanceFormat.kilometers(stats.totalDistanceMeters)
     }
 
     private var setsText: String {

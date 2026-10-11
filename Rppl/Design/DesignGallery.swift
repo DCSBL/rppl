@@ -10,14 +10,14 @@ private struct DesignGallery: View {
 
                 InfoTileGrid {
                     InfoTile("Speed", metric: .speed) {
-                        MetricValue(LogbookFormatting.speedKilometersPerHour(42.2))
+                        MetricValue(DistanceFormat.kilometersPerHour(42.2))
                         Gauge(value: MetricDisplay.fraction(31.5, of: 42.2)) {
                             Text("Cable speed")
                         }
                         .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
                         StatChip(
                             metric: .speed,
-                            value: LogbookFormatting.speedKilometersPerHour(31.5),
+                            value: DistanceFormat.kilometersPerHour(31.5),
                             caption: "Cable speed"
                         )
                     }
@@ -39,13 +39,13 @@ private struct DesignGallery: View {
                     }
 
                     InfoTile("Distance", metric: .distance) {
-                        MetricValue(LogbookFormatting.distanceKilometers(14_000))
+                        MetricValue(DistanceFormat.kilometers(14_000))
                         StatChip(metric: .duration, value: LogbookFormatting.duration(6_585))
                     }
                 }
 
                 HStack(spacing: 20) {
-                    StatChip(metric: .distance, value: LogbookFormatting.distanceKilometers(14_000), caption: "Distance")
+                    StatChip(metric: .distance, value: DistanceFormat.kilometers(14_000), caption: "Distance")
                     StatChip(metric: .sets, value: "10", caption: "Sets")
                     StatChip(metric: .laps, value: "15", caption: "Laps")
                 }
@@ -62,8 +62,8 @@ private struct DesignGallery: View {
         InfoTile("Total", metric: .riding) {
             HStack(alignment: .firstTextBaseline) {
                 totalMetric(value: "4", label: "Sessions")
-                totalMetric(value: LogbookFormatting.distanceKilometers(61_000), label: "Distance")
-                totalMetric(value: LogbookFormatting.speedKilometersPerHour(45), label: "Max speed")
+                totalMetric(value: DistanceFormat.kilometers(61_000), label: "Distance")
+                totalMetric(value: DistanceFormat.kilometersPerHour(45), label: "Max speed")
             }
             Gauge(value: MetricDisplay.fraction(51, of: 66)) {
                 Text("Sets")
