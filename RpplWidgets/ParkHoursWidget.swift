@@ -6,7 +6,8 @@ struct ParkHoursEntry: TimelineEntry {
     let date: Date
     /// `nil` until a park is picked (or when the picked park no longer exists).
     let parkName: String?
-    let address: String?
+    let parkID: String?
+    let trace: ParkTrace?
     let state: ParkWidgetState
 }
 
@@ -15,7 +16,8 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
         ParkHoursEntry(
             date: Date(),
             parkName: "Cable Park",
-            address: nil,
+            parkID: nil,
+            trace: nil,
             state: .openUntil(ParkTimeWindow(label: nil, startMinute: 10 * 60, endMinute: 20 * 60, note: nil))
         )
     }
@@ -32,12 +34,13 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
     /// One entry now, one per moment the text changes (opening, closing, midnight).
     private func entries(for configuration: SelectParkIntent, from now: Date) -> [ParkHoursEntry] {
         guard let id = configuration.park?.id, let park = ParkWidgetStore.park(id: id) else {
-            return [ParkHoursEntry(date: now, parkName: nil, address: nil, state: .unknown)]
+            return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, trace: nil, state: .unknown)]
         }
         let zone = park.resolvedTimeZone
         let dates = [now] + ParkWidgetTimeline.changeDates(for: park.opening, after: now, timeZone: zone)
+        let trace = ParkTrace.make(for: park)
         return dates.map {
-            ParkHoursEntry(date: $0, parkName: park.name, address: park.address, state: .make(for: park, at: $0))
+            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, trace: trace, state: .make(for: park, at: $0))
         }
     }
 }
@@ -60,48 +63,70 @@ struct ParkHoursView: View {
     var body: some View {
         Group {
             if family == .systemMedium {
-                HStack(alignment: .center, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        parkName
-                        if let address = entry.address {
-                            Text(address)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(2)
-                        }
+                HStack(alignment: .center, spacing: 8) {
+                    text
+                    if let trace = entry.trace {
+                        ParkTraceArt(trace: trace)
+                            .frame(width: 130, height: 130)
                     }
-                    Spacer(minLength: 0)
-                    status
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             } else {
-                VStack(alignment: .leading, spacing: 6) {
-                    parkName
-                    Spacer(minLength: 0)
-                    status
-                }
+                text
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .widgetURL(entry.parkID.flatMap(ParkDeepLink.url(forParkID:)))
         .containerBackground(.fill.tertiary, for: .widget)
     }
 
-    private var parkName: some View {
-        Text(entry.parkName ?? String(localized: "Choose a park"))
-            .font(.headline)
-            .lineLimit(2)
-    }
-
-    private var status: some View {
-        VStack(alignment: family == .systemMedium ? .trailing : .leading, spacing: 4) {
-            Image(systemName: "circle.fill")
-                .font(.caption2)
-                .foregroundStyle(entry.state.tint)
-            Text(entry.parkName == nil ? "" : entry.state.text)
-                .font(family == .systemMedium ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
-                .minimumScaleFactor(0.8)
+    /// The park name is never cut off: it wraps and shrinks before it clips.
+    private var text: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(entry.parkName ?? String(localized: "Choose a park"))
+                .font(.headline)
+                .minimumScaleFactor(0.6)
+                .fixedSize(horizontal: false, vertical: true)
+                .layoutPriority(1)
+            Spacer(minLength: 0)
+            if entry.parkName != nil {
+                VStack(alignment: .leading, spacing: 4) {
+                    Image(systemName: "circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(entry.state.tint)
+                    Text(entry.state.text)
+                        .font(.subheadline.weight(.semibold))
+                        .minimumScaleFactor(0.8)
+                }
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+/// The cable as a single line in the Rppl accent colour, with a dot on the start.
+struct ParkTraceArt: View {
+    let trace: ParkTrace
+
+    var body: some View {
+        Canvas { context, size in
+            let side = min(size.width, size.height)
+            let origin = CGPoint(x: (size.width - side) / 2, y: (size.height - side) / 2)
+            let inset = side * 0.08
+            let drawSide = side - inset * 2
+            func point(_ p: ParkTrace.Point) -> CGPoint {
+                CGPoint(x: origin.x + inset + p.x * drawSide, y: origin.y + inset + p.y * drawSide)
+            }
+            guard let first = trace.points.first else { return }
+            var path = Path()
+            path.move(to: point(first))
+            for p in trace.points.dropFirst() { path.addLine(to: point(p)) }
+            if trace.isLoop { path.closeSubpath() }
+            let accent = Color("RpplAccent")
+            context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+            let start = point(first)
+            context.fill(Path(ellipseIn: CGRect(x: start.x - 5, y: start.y - 5, width: 10, height: 10)), with: .color(accent))
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -109,7 +134,7 @@ extension ParkWidgetState {
     var tint: Color {
         switch self {
         case .openUntil, .opensToday: .green
-        case .opensTomorrow: .yellow
+        case .opensTomorrow, .opensInDays: .yellow
         case .closed: .red
         case .unknown: .gray
         }
@@ -125,6 +150,7 @@ extension ParkWidgetState {
             let to = Self.end(window)
             return String(localized: "Open today from \(from) to \(to)")
         case .opensTomorrow: return String(localized: "Open tomorrow")
+        case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")
         case .unknown: return String(localized: "Opening hours unknown")
         }

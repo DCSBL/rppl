@@ -44,8 +44,49 @@ struct ParkWidgetTests {
     @Test func afterClosingTomorrowOpenOrClosed() {
         // Monday evening: Tuesday is open. Friday evening: the weekend is closed.
         #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-12", hour: 21), timeZone: amsterdam) == .opensTomorrow)
-        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-16", hour: 21), timeZone: amsterdam) == .closed)
-        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-17", hour: 12), timeZone: amsterdam) == .closed)
+    }
+
+    @Test func closedWithKnownNextOpeningCountsDays() {
+        // Friday evening: Saturday and Sunday closed, Monday open = in 3 days. Saturday noon = in 2 days.
+        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-16", hour: 21), timeZone: amsterdam) == .opensInDays(3))
+        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-17", hour: 12), timeZone: amsterdam) == .opensInDays(2))
+    }
+
+    @Test func farNextOpeningCountsDays() {
+        // Only September is scheduled: from mid October the next opening is 1 September.
+        let septemberOnly = ParkOpening(rules: [ParkOpeningRule(months: [9], days: ["daily"], open: "10:00", close: "18:00")])
+        #expect(ParkWidgetState.make(for: septemberOnly, at: date("2026-10-12", hour: 12), timeZone: amsterdam) == .opensInDays(324))
+    }
+
+    @Test func traceKeepsAspectAndLoopsFullSizeCables() throws {
+        let park = Park(
+            id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5),
+            cables: [ParkCable(direction: .clockwise, points: [
+                ParkCablePoint(lat: 52.0, lon: 5.0),
+                ParkCablePoint(lat: 52.0, lon: 5.001),
+                ParkCablePoint(lat: 52.001, lon: 5.001),
+            ])]
+        )
+        let trace = try #require(ParkTrace.make(for: park))
+        #expect(trace.isLoop)
+        #expect(trace.points.count == 3)
+        // North is up: the northern point has the smaller y.
+        #expect(trace.points[2].y < trace.points[0].y)
+        for point in trace.points {
+            #expect((0...1).contains(point.x) && (0...1).contains(point.y))
+        }
+    }
+
+    @Test func traceNeedsTwoPoints() {
+        let park = Park(id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5), cables: [ParkCable(points: [ParkCablePoint(lat: 52, lon: 5)])])
+        #expect(ParkTrace.make(for: park) == nil)
+    }
+
+    @Test func deepLinkRoundTrips() throws {
+        let url = try #require(ParkDeepLink.url(forParkID: "project7-rotterdam"))
+        #expect(url.absoluteString == "rppl://park/project7-rotterdam")
+        #expect(ParkDeepLink.parkID(from: url) == "project7-rotterdam")
+        #expect(ParkDeepLink.parkID(from: URL(string: "https://park/x")!) == nil)
     }
 
     @Test func noOpeningTimesIsUnknown() {

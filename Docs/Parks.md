@@ -243,8 +243,11 @@ opening:
 
 `RpplWidgets` is an iPhone widget extension: **small** (2x2) and **medium** (4x2). Long-press the widget, Edit Widget, pick one park. Everything is local: it reads the bundled and user park files from the App Group, no network.
 
-- Text: `Closed`, `Open tomorrow`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown".
-- Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail`) and `ParkWidgetTimeline.changeDates` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
+- Shows the park name only (never cut off: it wraps and shrinks), no address.
+- Text: `Closed`, `Open tomorrow`, `Open in 3 days`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown"; a park with no known next opening reads `Closed`.
+- The medium widget draws the first traced cable (`ParkTrace`) as one line in the Rppl accent, with a dot on the start; a full-size cable closes back to the start. No trace, no art.
+- Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`; the Parks tab handles it in `ParksView`).
+- Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail` and `nextOpening`), `ParkWidgetTimeline.changeDates`, `ParkTrace` and `ParkDeepLink` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
 - `ParkStore` calls `WidgetCenter.reloadAllTimelines()` after saving or removing a park, so an edited park shows right away.
 
 ### Water temperature (opt-in)
