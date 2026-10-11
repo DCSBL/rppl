@@ -41,6 +41,7 @@ Locked choices for product behavior. Prefer these over inventing UX. Full hard c
 | Transfer | Phone may be away · WC after Stop · never delete Watch data until phone ack |
 | Water Lock | On at session start |
 | Identity | Random install-scoped ID (`testerId`) in App Group / UserDefaults · reset on reinstall |
+| Review prompt | Native App Store sheet (`requestReview`) when the rider returns from a session to the logbook list, after the 3rd and 10th good session, then every 10th · good = tracked, ≥ 30 min, ≥ 3 sets with a lap · never on TestFlight · StoreKit reports nothing back, so no retry · reset by clearing `ReviewPromptState` when a new feature should ask again |
 | Core | Pure logic in `RpplCore` · unit-tested with `swift test` |
 
 Export exists so developers can share raw session data for analysis. It is not the main rider-facing story; keep it out of marketing copy unless you are talking about Share-Export deliberately.
