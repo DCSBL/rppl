@@ -44,7 +44,7 @@ struct TopParksProvider: TimelineProvider {
         let parks = parks ?? topParks(limit: 6)
         return TopParksEntry(
             date: date,
-            rows: parks.map { .init(id: $0.id, name: $0.name, state: .make(for: $0, at: date)) }
+            rows: parks.map { .init(id: $0.id, name: $0.compactName, state: .make(for: $0, at: date)) }
         )
     }
 }

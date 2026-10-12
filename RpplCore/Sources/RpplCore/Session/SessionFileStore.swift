@@ -205,7 +205,7 @@ public final class SessionFileStore: @unchecked Sendable {
         )
     }
 
-    /// Links the session to a park and syncs the derived location label (`cityName`) to the park name.
+    /// Links the session to a park and syncs the derived location label (`cityName`) to the park's short name.
     ///
     /// Manual links are kept as-is (including manual "no park"). Otherwise a stored `parkId` wins;
     /// unlinked sessions are matched on `center` and stored as `auto`.
@@ -227,7 +227,7 @@ public final class SessionFileStore: @unchecked Sendable {
         } else {
             park = nil
         }
-        if let park { try syncParkLabel(park.name, sessionId: sessionId, startedAt: manifest.startedAt) }
+        if let park { try syncParkLabel(park.compactName, sessionId: sessionId, startedAt: manifest.startedAt) }
         return park
     }
 
@@ -242,7 +242,7 @@ public final class SessionFileStore: @unchecked Sendable {
         manifest.parkIdSource = SessionParkSource.manual
         try writeManifest(manifest)
         if let park {
-            try syncParkLabel(park.name, sessionId: sessionId, startedAt: manifest.startedAt)
+            try syncParkLabel(park.compactName, sessionId: sessionId, startedAt: manifest.startedAt)
         } else if var view = try readDerivedView(sessionId: sessionId), view.cityName != nil {
             view.cityName = nil
             try writeDerivedView(view, sessionId: sessionId)

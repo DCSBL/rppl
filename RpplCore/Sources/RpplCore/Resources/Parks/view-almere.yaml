@@ -21,8 +21,11 @@ history:
     description: trace both cables on the map, add Alta Twin direction
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of note
+  - date: 2026-10-12
+    description: add short_name
 
 name: Cablepark VIEW Almere
+short_name: Cablepark VIEW
 languages:
   - en
   - nl

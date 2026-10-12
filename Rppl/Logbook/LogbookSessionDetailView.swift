@@ -328,7 +328,7 @@ struct LogbookSessionDetailView: View {
                         try store.setManualPark(park, sessionId: sessionId)
                     }
                     manifest = try? store.readManifest(sessionId: sessionId)
-                    cityName = park?.name
+                    cityName = park?.compactName
                     PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
                     if park == nil {
                         let peek = try? store.peekLocationSamples(sessionId: sessionId)
@@ -375,7 +375,7 @@ struct LogbookSessionDetailView: View {
                     Image(systemName: MetricKind.park.systemImage)
                         .foregroundStyle(MetricKind.park.tint)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(park.name)
+                        Text(park.compactName)
                             .font(.headline)
                             .foregroundStyle(Color.rpplText)
                         Text("View park")
@@ -867,7 +867,7 @@ struct LogbookSessionDetailView: View {
                 }
                 if let linkedPark {
                     manifest = (try? store.readManifest(sessionId: sessionId)) ?? summary.manifest
-                    cityName = linkedPark.name
+                    cityName = linkedPark.compactName
                     PhoneWatchViewSync.pushViewUpdate(store: store, sessionId: sessionId)
                 } else {
                     cityName = summary.cityName

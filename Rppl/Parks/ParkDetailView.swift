@@ -77,7 +77,7 @@ struct ParkDetailView: View {
             .padding(.vertical, 8)
         }
         .background(RpplBackdrop())
-        .navigationTitle(park.name)
+        .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

@@ -39,6 +39,10 @@ The Parks tab lists cable parks (nearby or most visited; the Favourites filter n
 - **Past opening dates** (`dates`, `from`, `until`, exceptions) are accepted by the validator. Remove them when you tidy a file.
 - **Tidying** without new information keeps `updated_at` (it is shown as "Last updated" and reads as freshness) but still adds a `history` entry, which is what makes overrides show "Update available".
 
+### Short name
+
+`short_name` is the park name without the place or the business type ("Watersportverhuurbedrijf", "Sportlocatie"). Words that say what you do there stay: cable park, kabelpark, waterski, wake park. Leave it out when `name` is already short. The app shows `Park.compactName` (`short_name`, else `name`) in park detail's title, the park widget, session lists and the label under a session map (also on the Watch). Park lists, search and pickers keep the full `name`.
+
 ## Schema (version 1)
 
 Only `version`, `id`, `name` and `location` are required. Everything else may be omitted.
@@ -56,6 +60,7 @@ history:
     description: initial
 
 name: Project 7 Cablepark Rotterdam
+short_name: Project 7 Cablepark   # optional: no place or business type; see "Short name"
 languages:                        # optional: languages the park works in, main first (BCP-47), see "Languages"
   - en
 address: Kosboulevard 35, 3059 XZ Rotterdam

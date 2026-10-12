@@ -21,7 +21,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
         let park = ParkWidgetStore.mostVisited()
         return ParkHoursEntry(
             date: Date(),
-            parkName: park?.name ?? "Cable Park",
+            parkName: park?.compactName ?? "Cable Park",
             parkID: park?.id,
             city: park?.cityName,
             timeZoneNote: nil,
@@ -50,7 +50,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
         let dates = [now] + ParkWidgetTimeline.changeDates(for: park.opening, after: now, timeZone: zone)
         let trace = ParkTrace.make(for: park)
         return dates.map {
-            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, city: park.cityName,
+            ParkHoursEntry(date: $0, parkName: park.compactName, parkID: park.id, city: park.cityName,
                 timeZoneNote: ParkTimeZoneNote.label(for: park, deviceZone: .current, at: $0),
                 trace: trace, state: .make(for: park, at: $0))
         }

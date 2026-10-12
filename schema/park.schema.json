@@ -39,6 +39,7 @@
       }
     },
     "name": { "type": "string", "minLength": 1 },
+    "short_name": { "type": "string", "minLength": 1, "description": "Name without place or business type; the app falls back to name." },
     "languages": {
       "description": "Languages the park works in, main first (BCP-47). Long text is in the first; short text may have a variant per language.",
       "type": "array",
