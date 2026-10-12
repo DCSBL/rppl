@@ -1,7 +1,7 @@
 version: 1
 id: wetnwild-alphen
 created_at: 2026-09-24
-updated_at: 2026-10-07
+updated_at: 2026-10-12
 history:
   - date: 2026-09-24
     description: initial
@@ -23,6 +23,8 @@ history:
     description: remove past extra opening hours (2026-09-29 to 2026-10-01), month-name labels, author credit and source comments
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of note
+  - date: 2026-10-12
+    description: add extra opening hours exception for 2026-10-14
 
 name: Wet 'n Wild
 languages:
@@ -70,6 +72,13 @@ opening:
     - 120
   note: >-
     Booking ahead is recommended.
+  exceptions:
+    - kind: hours
+      label: Extra opening hours
+      dates:
+        - "2026-10-14"
+      open: "17:00"
+      close: "19:00"
   rules:
     - months:
         - 9
