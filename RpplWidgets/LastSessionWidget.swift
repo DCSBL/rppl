@@ -79,40 +79,41 @@ struct LastSessionView: View {
                         Spacer(minLength: 4)
                         Text(percent(ratio)).foregroundStyle(Color("RpplMetricRiding"))
                     }
-                    .font(.footnote.weight(.semibold).monospacedDigit())
+                    .font(.caption.weight(.semibold).monospacedDigit())
                     WidgetBar(fraction: ratio, tint: "RpplMetricRiding")
                 }
             } else {
-                durationText(session).font(.footnote.weight(.semibold).monospacedDigit())
+                durationText(session).font(.caption.weight(.semibold).monospacedDigit())
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private func medium(_ session: LastSessionWidgetSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     header(session)
                     Spacer(minLength: 0)
-                    HStack(alignment: .firstTextBaseline, spacing: 18) {
+                    HStack(alignment: .firstTextBaseline, spacing: 16) {
                         count(session.setCount, symbol: "flag.checkered", tint: "RpplMetricSets", caption: "Sets", large: true)
                         count(session.lapCount, symbol: "arrow.triangle.2.circlepath", tint: "RpplMetricLaps", caption: "Laps", large: true)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if let ratio = session.ridingRatio {
-                    VStack(spacing: 3) {
+                    VStack(spacing: 1) {
                         WidgetRing(fraction: ratio, tint: "RpplMetricRiding")
-                            .frame(width: 72, height: 72)
+                            .frame(width: 56, height: 56)
                         durationText(session)
-                            .font(.subheadline.weight(.semibold).monospacedDigit())
+                            .font(.caption.weight(.semibold).monospacedDigit())
                         Text("Riding").font(.caption2).foregroundStyle(Color("RpplMuted"))
                     }
                 } else if session.duration != nil {
-                    durationText(session).font(.subheadline.weight(.semibold).monospacedDigit())
+                    durationText(session).font(.caption.weight(.semibold).monospacedDigit())
                 }
             }
+            Spacer(minLength: 0)
             if !session.setSpans.isEmpty {
                 VStack(spacing: 2) {
                     WidgetTimelineBar(spans: session.setSpans, tint: "RpplMetricSets")
@@ -126,6 +127,7 @@ struct LastSessionView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     // MARK: Pieces
@@ -134,12 +136,12 @@ struct LastSessionView: View {
     private func header(_ session: LastSessionWidgetSnapshot) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(session.place ?? String(localized: "Session"))
-                .font(.headline)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color("RpplText"))
                 .lineLimit(2)
                 .minimumScaleFactor(0.6)
             Text(session.startedAt, format: .dateTime.day().month(.abbreviated).hour().minute())
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(Color("RpplMuted"))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -154,7 +156,7 @@ struct LastSessionView: View {
             HStack(spacing: 4) {
                 Image(systemName: symbol).imageScale(.small).foregroundStyle(Color(tint))
                 Text(value.map(String.init) ?? "-")
-                    .font((large ? Font.title : .title2).bold().monospacedDigit())
+                    .font((large ? Font.title2 : .title3).bold().monospacedDigit())
                     .foregroundStyle(Color("RpplText"))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -202,16 +204,16 @@ private struct WidgetRing: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(Color(tint).opacity(0.2), lineWidth: 9)
+            Circle().stroke(Color(tint).opacity(0.2), lineWidth: 7)
             Circle()
                 .trim(from: 0, to: min(max(fraction, 0), 1))
-                .stroke(Color(tint), style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                .stroke(Color(tint), style: StrokeStyle(lineWidth: 7, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             Text(fraction.formatted(.percent.precision(.fractionLength(0))))
-                .font(.title3.bold().monospacedDigit())
+                .font(.footnote.bold().monospacedDigit())
                 .foregroundStyle(Color("RpplText"))
                 .minimumScaleFactor(0.6)
-                .padding(9)
+                .padding(7)
         }
     }
 }
@@ -233,8 +235,8 @@ private struct WidgetTimelineBar: View {
                 }
             }
         }
-        .frame(height: 14)
-        .clipShape(.rect(cornerRadius: 14 / 3, style: .continuous))
+        .frame(height: 10)
+        .clipShape(.rect(cornerRadius: 10 / 3, style: .continuous))
         .accessibilityHidden(true)
     }
 }
