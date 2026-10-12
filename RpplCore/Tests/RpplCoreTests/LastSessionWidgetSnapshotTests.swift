@@ -23,6 +23,15 @@ struct LastSessionWidgetSnapshotTests {
         #expect(LastSessionWidgetStore.save(snapshot(sets: 4), in: defaults))
     }
 
+    @Test func decodesSnapshotWithoutRidingDurations() throws {
+        let old = """
+        {"sessionId":"s1","startedAt":0,"endedAt":3600,"duration":3600,"ridingRatio":0.4,"setSpans":[]}
+        """
+        let decoded = try JSONDecoder().decode(LastSessionWidgetSnapshot.self, from: Data(old.utf8))
+        #expect(decoded.ridingDuration == nil)
+        #expect(decoded.inactiveDuration == nil)
+    }
+
     @Test func deepLinkRoundTripsSessionID() throws {
         let url = try #require(SessionDeepLink.url(forSessionID: "abc-123"))
         #expect(SessionDeepLink.sessionID(from: url) == "abc-123")
