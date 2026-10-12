@@ -163,6 +163,7 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 | Watch record loop | `RpplWatch/WatchSessionController.swift` |
 | Manual sessions (add / edit on iPhone) | `RpplCore/Sources/RpplCore/Session/ManualEntry.swift`, `Rppl/Logbook/ManualSession/` |
 | Parks, opening hours, widget | `RpplCore/Sources/RpplCore/Parks/` (`ParkWidget.swift`), `RpplWidgets/` · [Docs/Parks.md](Docs/Parks.md) |
+| Deep links (`rppl://`) | `ParkWidget.swift`, `LastSessionWidgetSnapshot.swift`, `TabDeepLink.swift`, `ContentView.onOpenURL` · [Docs/DeepLinks.md](Docs/DeepLinks.md) |
 | Start session Action Button | `RpplWatch/StartWorkoutIntent.swift` (StartWorkoutIntent only) |
 | Phone sync + export UI | `Rppl/PhoneConnectivityService.swift`, `ContentView.swift` |
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |

@@ -254,7 +254,7 @@ opening:
 - Widgets use the Rppl look: backdrop gradient with an accent glow, `RpplText` / `RpplMuted` text (copied colorsets in `RpplWidgets/Assets.xcassets`), no logo.
 - Text: `Closed`, `Open tomorrow`, `Open in 3 days`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown"; a park with no known next opening reads `Closed`.
 - The medium widget draws every traced cable (`ParkTrace`) in the Rppl accent, all on one scale so they stay in proportion, with the same line width everywhere and a dot on each start; a full-size cable closes back to its start. No trace, no art.
-- Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`; the Parks tab handles it in `ParksView`).
+- Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`, all links in [DeepLinks.md](DeepLinks.md); the Parks tab handles it in `ParksView`).
 - Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail` and `nextOpening`), `ParkWidgetTimeline.changeDates`, `ParkTrace` and `ParkDeepLink` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
 - `ParkStore` calls `WidgetCenter.reloadAllTimelines()` after saving or removing a park, so an edited park shows right away.
 
