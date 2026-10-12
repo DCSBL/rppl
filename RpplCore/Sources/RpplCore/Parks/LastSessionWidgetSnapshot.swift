@@ -12,6 +12,10 @@ public struct LastSessionWidgetSnapshot: Codable, Equatable, Sendable {
     public var duration: TimeInterval?
     /// Share of the session spent riding (0...1). Nil for a manual session.
     public var ridingRatio: Double?
+    /// Time spent riding / inactive (as the session detail's Riding tile). Nil for a manual session
+    /// and for snapshots written before these fields existed.
+    public var ridingDuration: TimeInterval?
+    public var inactiveDuration: TimeInterval?
     /// Nil when the rider did not fill it in (manual).
     public var setCount: Int?
     public var lapCount: Int?
@@ -25,6 +29,8 @@ public struct LastSessionWidgetSnapshot: Codable, Equatable, Sendable {
         endedAt: Date,
         duration: TimeInterval?,
         ridingRatio: Double?,
+        ridingDuration: TimeInterval? = nil,
+        inactiveDuration: TimeInterval? = nil,
         setCount: Int?,
         lapCount: Int?,
         setSpans: [ClosedRange<Double>]
@@ -35,6 +41,8 @@ public struct LastSessionWidgetSnapshot: Codable, Equatable, Sendable {
         self.endedAt = endedAt
         self.duration = duration
         self.ridingRatio = ridingRatio
+        self.ridingDuration = ridingDuration
+        self.inactiveDuration = inactiveDuration
         self.setCount = setCount
         self.lapCount = lapCount
         self.setSpans = setSpans
@@ -49,6 +57,8 @@ public struct LastSessionWidgetSnapshot: Codable, Equatable, Sendable {
             endedAt: stats.endedAt,
             duration: isManual ? nil : stats.totalDuration,
             ridingRatio: isManual ? nil : stats.ridingInactiveRatio,
+            ridingDuration: isManual ? nil : stats.ridingDuration,
+            inactiveDuration: isManual ? nil : stats.inactiveDuration,
             setCount: stats.knownSetCount,
             lapCount: stats.knownLapCount,
             setSpans: isManual ? [] : stats.sets.map {
