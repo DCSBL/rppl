@@ -21,7 +21,7 @@ public enum TabDeepLink: String, CaseIterable {
 
 /// Every link the app handles, for the Debug screen and `Docs/DeepLinks.md`.
 public enum DeepLinkCatalog {
-    public struct Entry: Equatable {
+    public struct Entry: Equatable, Sendable {
         public let url: String
         public let summary: String
     }
