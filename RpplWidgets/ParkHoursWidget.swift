@@ -12,18 +12,21 @@ struct ParkHoursEntry: TimelineEntry {
 }
 
 struct ParkHoursProvider: AppIntentTimelineProvider {
+    /// Gallery preview: the rider's most visited park with a fixed "Open today until 19:00".
     func placeholder(in context: Context) -> ParkHoursEntry {
-        ParkHoursEntry(
+        let park = ParkWidgetStore.mostVisited()
+        return ParkHoursEntry(
             date: Date(),
-            parkName: "Cable Park",
-            parkID: nil,
-            trace: nil,
-            state: .openUntil(ParkTimeWindow(label: nil, startMinute: 10 * 60, endMinute: 20 * 60, note: nil))
+            parkName: park?.name ?? "Cable Park",
+            parkID: park?.id,
+            trace: park.flatMap(ParkTrace.make(for:)),
+            state: .openUntil(ParkTimeWindow(label: nil, startMinute: 10 * 60, endMinute: 19 * 60, note: nil))
         )
     }
 
     func snapshot(for configuration: SelectParkIntent, in context: Context) async -> ParkHoursEntry {
-        entries(for: configuration, from: Date()).first ?? placeholder(in: context)
+        if context.isPreview { return placeholder(in: context) }
+        return entries(for: configuration, from: Date()).first ?? placeholder(in: context)
     }
 
     func timeline(for configuration: SelectParkIntent, in context: Context) async -> Timeline<ParkHoursEntry> {
@@ -33,7 +36,8 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
 
     /// One entry now, one per moment the text changes (opening, closing, midnight).
     private func entries(for configuration: SelectParkIntent, from now: Date) -> [ParkHoursEntry] {
-        guard let id = configuration.park?.id, let park = ParkWidgetStore.park(id: id) else {
+        let picked = configuration.park.flatMap { ParkWidgetStore.park(id: $0.id) }
+        guard let park = picked ?? ParkWidgetStore.mostVisited() else {
             return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, trace: nil, state: .unknown)]
         }
         let zone = park.resolvedTimeZone
@@ -76,7 +80,7 @@ struct ParkHoursView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .widgetURL(entry.parkID.flatMap(ParkDeepLink.url(forParkID:)))
-        .containerBackground(.fill.tertiary, for: .widget)
+        .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
     /// The park name is never cut off: it wraps and shrinks before it clips.
@@ -84,6 +88,7 @@ struct ParkHoursView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(entry.parkName ?? String(localized: "Choose a park"))
                 .font(.headline)
+                .foregroundStyle(Color("RpplText"))
                 .minimumScaleFactor(0.6)
                 .fixedSize(horizontal: false, vertical: true)
                 .layoutPriority(1)
@@ -95,6 +100,7 @@ struct ParkHoursView: View {
                         .foregroundStyle(entry.state.tint)
                     Text(entry.state.text)
                         .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color("RpplMuted"))
                         .minimumScaleFactor(0.8)
                 }
             }
@@ -122,7 +128,7 @@ struct ParkTraceArt: View {
             for p in trace.points.dropFirst() { path.addLine(to: point(p)) }
             if trace.isLoop { path.closeSubpath() }
             let accent = Color("RpplAccent")
-            context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+            context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
             let start = point(first)
             context.fill(Path(ellipseIn: CGRect(x: start.x - 5, y: start.y - 5, width: 10, height: 10)), with: .color(accent))
         }
@@ -157,7 +163,7 @@ extension ParkWidgetState {
     }
 
     /// `sunset` stays English in every locale and is not calculated (Docs/Parks.md).
-    private static func end(_ window: ParkTimeWindow) -> String {
+    static func end(_ window: ParkTimeWindow) -> String {
         window.endsAtSunset ? "sunset" : ParkSchedule.timeText(minutes: window.endMinute)
     }
 }

@@ -1,6 +1,7 @@
 import MapKit
 import RpplCore
 import SwiftUI
+import WidgetKit
 
 struct ParksView: View {
     /// Park id from a widget tap; opened once, then cleared.
@@ -335,6 +336,14 @@ struct ParksView: View {
         }
         .onChange(of: connectivity.sessionsRevision) { _, _ in
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
+        }
+        .onChange(of: visits, initial: true) { _, counts in
+            favorites.publishToWidgets()
+            // shortcut: an empty logbook never clears old counts (also guards the first pass before the catalog loads).
+            guard !catalog.entries.isEmpty else { return }
+            if ParkWidgetSnapshotStore.update({ $0.visits = counts }) {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
         }
         .onChange(of: openParkID, initial: true) { _, _ in openRequestedPark() }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
