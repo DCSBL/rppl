@@ -106,14 +106,14 @@ struct TopParksView: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Color("RpplText"))
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.7) // limit: past this the name is cut off with …
             HStack(spacing: 4) {
                 Circle().fill(row.state.tint).frame(width: 6, height: 6)
                 Text(row.state.shortText)
                     .font(.caption2)
                     .foregroundStyle(Color("RpplMuted"))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.7)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -121,7 +121,7 @@ struct TopParksView: View {
 }
 
 extension ParkWidgetState {
-    /// One short line for the list: "Open until 19:00", "Opens at 14:00", "Closed".
+    /// One short line for the list: "Open until 19:00", "Open from 12:00 to 21:00", "Closed".
     var shortText: String {
         switch self {
         case .openUntil(let window):
@@ -129,7 +129,8 @@ extension ParkWidgetState {
             return String(localized: "Open until \(to)")
         case .opensToday(let window):
             let from = ParkSchedule.timeText(minutes: window.startMinute)
-            return String(localized: "Opens at \(from)")
+            let to = Self.end(window)
+            return String(localized: "Open from \(from) to \(to)")
         case .opensTomorrow: return String(localized: "Open tomorrow")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")

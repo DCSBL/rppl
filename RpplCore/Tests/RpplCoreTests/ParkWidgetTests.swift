@@ -68,13 +68,36 @@ struct ParkWidgetTests {
             ])]
         )
         let trace = try #require(ParkTrace.make(for: park))
-        #expect(trace.isLoop)
-        #expect(trace.points.count == 3)
+        let line = try #require(trace.lines.first)
+        #expect(line.isLoop)
+        #expect(line.points.count == 3)
         // North is up: the northern point has the smaller y.
-        #expect(trace.points[2].y < trace.points[0].y)
-        for point in trace.points {
+        #expect(line.points[2].y < line.points[0].y)
+        for point in line.points {
             #expect((0...1).contains(point.x) && (0...1).contains(point.y))
         }
+    }
+
+    @Test func traceKeepsEveryCableOnOneScale() throws {
+        let park = Park(
+            id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5),
+            cables: [
+                ParkCable(direction: .clockwise, points: [
+                    ParkCablePoint(lat: 52.000, lon: 5.000),
+                    ParkCablePoint(lat: 52.002, lon: 5.000),
+                ]),
+                ParkCable(direction: .twoPointZero, points: [
+                    ParkCablePoint(lat: 52.000, lon: 5.001),
+                    ParkCablePoint(lat: 52.001, lon: 5.001),
+                ]),
+                ParkCable(points: [ParkCablePoint(lat: 52, lon: 5)]),
+            ]
+        )
+        let trace = try #require(ParkTrace.make(for: park))
+        #expect(trace.lines.count == 2)
+        let lengths = trace.lines.map { abs($0.points[1].y - $0.points[0].y) }
+        #expect(abs(lengths[0] - 2 * lengths[1]) < 1e-9)
+        #expect(trace.lines[0].isLoop && !trace.lines[1].isLoop)
     }
 
     @Test func traceNeedsTwoPoints() {

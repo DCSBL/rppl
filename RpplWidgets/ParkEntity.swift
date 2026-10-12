@@ -8,14 +8,18 @@ struct ParkEntity: AppEntity {
 
     var id: String
     var name: String
+    /// "Knokke-Heist, Belgium": shown under the name in the picker.
+    var place: String?
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(name)")
+        if let place { return DisplayRepresentation(title: "\(name)", subtitle: "\(place)") }
+        return DisplayRepresentation(title: "\(name)")
     }
 
     init(park: Park) {
         id = park.id
         name = park.name
+        place = park.placeSubtitle()
     }
 }
 

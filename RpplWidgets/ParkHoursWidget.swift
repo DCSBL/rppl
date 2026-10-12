@@ -7,6 +7,8 @@ struct ParkHoursEntry: TimelineEntry {
     /// `nil` until a park is picked (or when the picked park no longer exists).
     let parkName: String?
     let parkID: String?
+    /// Small line under the name; dropped when there is no room.
+    var city: String?
     let trace: ParkTrace?
     let state: ParkWidgetState
 }
@@ -19,6 +21,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
             date: Date(),
             parkName: park?.name ?? "Cable Park",
             parkID: park?.id,
+            city: park?.cityName,
             trace: park.flatMap(ParkTrace.make(for:)),
             state: .openUntil(ParkTimeWindow(label: nil, startMinute: 10 * 60, endMinute: 19 * 60, note: nil))
         )
@@ -38,13 +41,13 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
     private func entries(for configuration: SelectParkIntent, from now: Date) -> [ParkHoursEntry] {
         let picked = configuration.park.flatMap { ParkWidgetStore.park(id: $0.id) }
         guard let park = picked ?? ParkWidgetStore.mostVisited() else {
-            return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, trace: nil, state: .unknown)]
+            return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, city: nil, trace: nil, state: .unknown)]
         }
         let zone = park.resolvedTimeZone
         let dates = [now] + ParkWidgetTimeline.changeDates(for: park.opening, after: now, timeZone: zone)
         let trace = ParkTrace.make(for: park)
         return dates.map {
-            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, trace: trace, state: .make(for: park, at: $0))
+            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, city: park.cityName, trace: trace, state: .make(for: park, at: $0))
         }
     }
 }
@@ -83,15 +86,31 @@ struct ParkHoursView: View {
         .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
-    /// The park name is never cut off: it wraps and shrinks before it clips.
+    /// The park name is never cut off: it wraps and shrinks before it clips. The city only shows when it fits.
     private var text: some View {
+        ViewThatFits(in: .vertical) {
+            textStack(showCity: true)
+            textStack(showCity: false)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func textStack(showCity: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(entry.parkName ?? String(localized: "Choose a park"))
-                .font(.headline)
-                .foregroundStyle(Color("RpplText"))
-                .minimumScaleFactor(0.6)
-                .fixedSize(horizontal: false, vertical: true)
-                .layoutPriority(1)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.parkName ?? String(localized: "Choose a park"))
+                    .font(.headline)
+                    .foregroundStyle(Color("RpplText"))
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(1)
+                if showCity, let city = entry.city {
+                    Text(city)
+                        .font(.caption)
+                        .foregroundStyle(Color("RpplMuted"))
+                        .lineLimit(1)
+                }
+            }
             Spacer(minLength: 0)
             if entry.parkName != nil {
                 VStack(alignment: .leading, spacing: 4) {
@@ -109,7 +128,7 @@ struct ParkHoursView: View {
     }
 }
 
-/// The cable as a single line in the Rppl accent colour, with a dot on the start.
+/// Every cable as one line in the Rppl accent, with a dot on each start. All widgets use the same line width.
 struct ParkTraceArt: View {
     let trace: ParkTrace
 
@@ -122,15 +141,17 @@ struct ParkTraceArt: View {
             func point(_ p: ParkTrace.Point) -> CGPoint {
                 CGPoint(x: origin.x + inset + p.x * drawSide, y: origin.y + inset + p.y * drawSide)
             }
-            guard let first = trace.points.first else { return }
-            var path = Path()
-            path.move(to: point(first))
-            for p in trace.points.dropFirst() { path.addLine(to: point(p)) }
-            if trace.isLoop { path.closeSubpath() }
             let accent = Color("RpplAccent")
-            context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
-            let start = point(first)
-            context.fill(Path(ellipseIn: CGRect(x: start.x - 5, y: start.y - 5, width: 10, height: 10)), with: .color(accent))
+            for line in trace.lines {
+                guard let first = line.points.first else { continue }
+                var path = Path()
+                path.move(to: point(first))
+                for p in line.points.dropFirst() { path.addLine(to: point(p)) }
+                if line.isLoop { path.closeSubpath() }
+                context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                let start = point(first)
+                context.fill(Path(ellipseIn: CGRect(x: start.x - 4.5, y: start.y - 4.5, width: 9, height: 9)), with: .color(accent))
+            }
         }
         .accessibilityHidden(true)
     }

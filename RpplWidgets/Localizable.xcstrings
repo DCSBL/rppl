@@ -233,22 +233,6 @@
         }
       }
     },
-    "Opens at %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens at %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opent om %@"
-          }
-        }
-      }
-    },
     "Hours unknown" : {
       "localizations" : {
         "en" : {
@@ -309,6 +293,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geef parken een ster in Rppl om ze hier te zien."
+          }
+        }
+      }
+    },
+    "Open from %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open from %@ to %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open van %@ tot %@"
           }
         }
       }

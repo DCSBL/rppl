@@ -241,22 +241,23 @@ opening:
 
 ### Park hours widget
 
-`RpplWidgets` is an iPhone widget extension: **small** (2x2) and **medium** (4x2). Long-press the widget, Edit Widget, pick one park. Everything is local: it reads the bundled and user park files from the App Group, no network.
+`RpplWidgets` is an iPhone widget extension: **small** (2x2) and **medium** (4x2). Long-press the widget, Edit Widget, pick one park. The picker shows the town and country under each park (`Park.placeSubtitle`; the country comes from the time zone, as park files have no country field) and searches name and address, so the town is searchable, the country is not. Everything is local: it reads the bundled and user park files from the App Group, no network.
 
 - No park picked: the widget (and the gallery preview) shows the rider's most visited park. The preview always reads "Open today until 19:00". Without any visits it asks to choose a park.
-- Shows the park name only (never cut off: it wraps and shrinks), no address.
+- Shows the park name (never cut off: it wraps and shrinks) with the town in small type under it (`Park.cityName`, from the address); the town drops out when there is no room. No street address.
 - Widgets use the Rppl look: backdrop gradient with an accent glow, `RpplText` / `RpplMuted` text (copied colorsets in `RpplWidgets/Assets.xcassets`), no logo.
 - Text: `Closed`, `Open tomorrow`, `Open in 3 days`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown"; a park with no known next opening reads `Closed`.
-- The medium widget draws the first traced cable (`ParkTrace`) as one line in the Rppl accent, with a dot on the start; a full-size cable closes back to the start. No trace, no art.
+- The medium widget draws every traced cable (`ParkTrace`) in the Rppl accent, all on one scale so they stay in proportion, with the same line width everywhere and a dot on each start; a full-size cable closes back to its start. No trace, no art.
 - Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`; the Parks tab handles it in `ParksView`).
 - Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail` and `nextOpening`), `ParkWidgetTimeline.changeDates`, `ParkTrace` and `ParkDeepLink` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
 - `ParkStore` calls `WidgetCenter.reloadAllTimelines()` after saving or removing a park, so an edited park shows right away.
 
 ### Top parks widget
 
-Same extension, **small** (top 3) and **medium** (top 6, two columns). No configuration: it lists starred parks, most visited first (ties and unvisited by name), each as `name` plus one short line (`Open until 19:00`, `Opens at 14:00`, `Open tomorrow`, `Open in 3 days`, `Closed`, `Hours unknown`). Each row opens its park. No starred parks reads "Star parks in Rppl to see them here."
+Same extension, **small** (top 3) and **medium** (top 6, two columns). No configuration: it lists starred parks, most visited first (ties and unvisited by name), each as `name` plus one short line (`Open until 19:00`, `Open from 12:00 to 21:00` (not open yet today), `Open tomorrow`, `Open in 3 days`, `Closed`, `Hours unknown`). Each row opens its park. No starred parks reads "Star parks in Rppl to see them here."
 
 - The widget cannot read the app's favourites or the session logbook, so the Parks tab writes a `ParkWidgetSnapshot` (starred ids + visit counts) to the App Group (`ParkWidgetSnapshotStore`) and reloads the timelines when it changes. Starring a park updates it at once; visit counts refresh when the Parks tab loads. An empty logbook never clears old counts.
+- Name and status shrink to 70% and are then cut off with an ellipsis.
 - Ranking is `ParkWidgetSnapshot.topFavorites` / `mostVisited` in Core.
 
 ### Water temperature (opt-in)
