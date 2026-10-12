@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import RpplCore
+import WidgetKit
 
 struct SessionEntry: Identifiable, Sendable {
     let manifest: SessionManifest
@@ -131,6 +132,7 @@ final class SessionCatalog {
             }
             isLoading = false
             loadTask = nil
+            publishLastSessionToWidget()
             WakeLog.debug(.ui, "SessionCatalog loaded count=\(loaded.count)")
         } catch is CancellationError {
             loadTask = nil
@@ -139,6 +141,15 @@ final class SessionCatalog {
             isLoading = false
             loadTask = nil
             WakeLog.error(.store, "SessionCatalog load: \(error.localizedDescription)")
+        }
+    }
+
+    /// shortcut: an empty logbook never clears the widget (also guards a filtered or half-loaded first pass).
+    private func publishLastSessionToWidget() {
+        guard let entry = entries.first, let stats = entry.stats else { return }
+        let snapshot = LastSessionWidgetSnapshot(manifest: entry.manifest, stats: stats, place: entry.cityName)
+        if LastSessionWidgetStore.save(snapshot) {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 
