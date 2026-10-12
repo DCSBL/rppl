@@ -14,7 +14,8 @@ struct LastSessionProvider: TimelineProvider {
         let now = Date()
         return LastSessionEntry(date: now, session: LastSessionWidgetSnapshot(
             sessionId: "", place: "Cable Park", startedAt: now.addingTimeInterval(-9000), endedAt: now,
-            duration: 9000, ridingRatio: 0.42, setCount: 5, lapCount: 12,
+            duration: 9000, ridingRatio: 0.42, ridingDuration: 3300, inactiveDuration: 4500,
+            setCount: 5, lapCount: 12,
             setSpans: [0.04...0.14, 0.24...0.38, 0.48...0.58, 0.7...0.82, 0.9...0.97]
         ))
     }
@@ -35,7 +36,7 @@ struct LastSessionWidget: Widget {
             LastSessionView(entry: entry)
         }
         .configurationDisplayName("Last session")
-        .description("Place, sets, laps, duration and riding share of your latest session.")
+        .description("Place, sets, laps, riding and inactive time of your latest session.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -74,12 +75,15 @@ struct LastSessionView: View {
             }
             if let ratio = session.ridingRatio {
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack {
-                        durationText(session)
-                        Spacer(minLength: 4)
-                        Text(percent(ratio)).foregroundStyle(Color("RpplMetricRiding"))
+                    if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
+                        HStack(spacing: 6) {
+                            timeChip(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding")
+                            Spacer(minLength: 0)
+                            timeChip(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive")
+                        }
+                    } else {
+                        durationText(session).font(.caption.weight(.semibold).monospacedDigit())
                     }
-                    .font(.caption.weight(.semibold).monospacedDigit())
                     WidgetBar(fraction: ratio, tint: "RpplMetricRiding")
                 }
             } else {
@@ -102,13 +106,18 @@ struct LastSessionView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if let ratio = session.ridingRatio {
-                    VStack(spacing: 1) {
+                    VStack(alignment: .leading, spacing: 3) {
                         WidgetRing(fraction: ratio, tint: "RpplMetricRiding")
-                            .frame(width: 56, height: 56)
-                        durationText(session)
-                            .font(.caption.weight(.semibold).monospacedDigit())
-                        Text("Riding").font(.caption2).foregroundStyle(Color("RpplMuted"))
+                            .frame(width: 52, height: 52)
+                            .frame(maxWidth: .infinity)
+                        if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
+                            timeChip(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding")
+                            timeChip(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive")
+                        } else {
+                            durationText(session).font(.caption.weight(.semibold).monospacedDigit())
+                        }
                     }
+                    .fixedSize(horizontal: true, vertical: false)
                 } else if session.duration != nil {
                     durationText(session).font(.caption.weight(.semibold).monospacedDigit())
                 }
@@ -165,15 +174,29 @@ struct LastSessionView: View {
         }
     }
 
+    /// Symbol + time, like the app's Riding tile chips (Riding / Inactive).
+    private func timeChip(
+        _ interval: TimeInterval, symbol: String, tint: String, label: LocalizedStringKey
+    ) -> some View {
+        let time = DurationFormat.units(max(0, interval.rounded()), width: .narrow)
+        return HStack(spacing: 3) {
+            Image(systemName: symbol).imageScale(.small).foregroundStyle(Color(tint))
+            Text(time)
+                .font(.caption.weight(.semibold).monospacedDigit())
+                .foregroundStyle(Color("RpplText"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label)
+        .accessibilityValue(time)
+    }
+
     @ViewBuilder
     private func durationText(_ session: LastSessionWidgetSnapshot) -> some View {
         if let duration = session.duration {
             Text(DurationFormat.units(max(0, duration.rounded()), width: .narrow)).foregroundStyle(Color("RpplText"))
         }
-    }
-
-    private func percent(_ fraction: Double) -> String {
-        fraction.formatted(.percent.precision(.fractionLength(0)))
     }
 }
 

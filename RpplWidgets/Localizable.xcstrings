@@ -17,6 +17,22 @@
         }
       }
     },
+    "Inactive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactive"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactief"
+          }
+        }
+      }
+    },
     "Open today until %@" : {
       "localizations" : {
         "en" : {
@@ -393,18 +409,18 @@
         }
       }
     },
-    "Place, sets, laps, duration and riding share of your latest session." : {
+    "Place, sets, laps, riding and inactive time of your latest session." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Place, sets, laps, duration and riding share of your latest session."
+            "value" : "Place, sets, laps, riding and inactive time of your latest session."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Locatie, sets, laps, duur en riding-aandeel van je laatste session."
+            "value" : "Locatie, sets, laps, riding- en inactieve tijd van je laatste session."
           }
         }
       }
