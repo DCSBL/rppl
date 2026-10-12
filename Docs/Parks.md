@@ -254,7 +254,7 @@ opening:
 - Widgets use the Rppl look: backdrop gradient with an accent glow, `RpplText` / `RpplMuted` text (copied colorsets in `RpplWidgets/Assets.xcassets`), no logo.
 - Text: `Closed`, `Open tomorrow`, `Open in 3 days`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown"; a park with no known next opening reads `Closed`.
 - The medium widget draws every traced cable (`ParkTrace`) in the Rppl accent, all on one scale so they stay in proportion, with the same line width everywhere and a dot on each start; a full-size cable closes back to its start. No trace, no art.
-- Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`; the Parks tab handles it in `ParksView`).
+- Tapping the widget opens the park (`rppl://park/<id>`, `ParkDeepLink`, all links in [DeepLinks.md](DeepLinks.md); the Parks tab handles it in `ParksView`).
 - Logic is `ParkWidgetState` (wraps `ParkSchedule.statusDetail` and `nextOpening`), `ParkWidgetTimeline.changeDates`, `ParkTrace` and `ParkDeepLink` in Core. The timeline has one entry per window start, window end and midnight, so the text flips without the app running.
 - `ParkStore` calls `WidgetCenter.reloadAllTimelines()` after saving or removing a park, so an edited park shows right away.
 
@@ -286,3 +286,11 @@ Same extension, **small** (top 3) and **medium** (top 6, two columns). No config
 ### Visits
 
 A logbook session counts as a visit to a park when its track center is within 750 m of the park pin or any traced cable point (`ParkListing.visitRadiusMeters`).
+
+### Last session widget
+
+`LastSessionWidget` (same extension, **small** 2x2 and **medium** 2x4) shows the newest logbook session: place, start time, Sets and Laps, duration and riding share. The medium widget adds the riding ring and the brown sets bar from the session detail (every set at its real start and length, with start and end time under it). Bar, ring and timeline use the app's sizes (8 pt bar, 9 pt ring, 14 pt timeline). A manual session has no measured time, so it shows counts only; an unknown count reads "-".
+
+- The widget cannot read the logbook. `SessionCatalog` writes a `LastSessionWidgetSnapshot` to the App Group (`LastSessionWidgetStore`) after each load and reloads timelines when it changed. An empty logbook never clears the widget.
+- Tapping opens that session: `rppl://session/<id>` (`SessionDeepLink`, handled in `ContentView`).
+- Colors come from the copied `RpplMetric*` colorsets in `RpplWidgets/Assets.xcassets`.

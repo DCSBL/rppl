@@ -8,10 +8,6 @@ See contributions/agent.md for component/type tables.
 
 <!-- What changed and why, in 1-3 sentences. -->
 
-## Linear issue
-
-<!-- Link if one exists, otherwise delete this section. -->
-
 ## Testing
 
 <!-- e.g. `cd RpplCore && swift test`, `make lint`, manual check on device/simulator. -->

@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import RpplCore
 
-/// Regression guardrails for DCSBL-72 / DCSBL-73 / DCSBL-76 — malicious inputs must
+/// Regression guardrails — malicious inputs must
 /// reject before unbounded decode, decompression, or path escape.
 @Suite("SecurityRegression", .serialized)
 struct SecurityRegressionTests {
@@ -31,7 +31,7 @@ struct SecurityRegressionTests {
         return frame
     }
 
-    // MARK: - Path traversal (DCSBL-72)
+    // MARK: - Path traversal
 
     @Test func storeRejectsTraversalSessionIdOnCreate() {
         let root = tempRoot(label: "traversal-create")
@@ -129,7 +129,7 @@ struct SecurityRegressionTests {
         #expect(!ids.contains(orphanId))
     }
 
-    // MARK: - Oversize JSON import (DCSBL-76)
+    // MARK: - Oversize JSON import
 
     @Test func readBoundedFileRejectsSparseOversizeBeforeMapping() throws {
         let limit = 1024
@@ -155,7 +155,7 @@ struct SecurityRegressionTests {
         }
     }
 
-    // MARK: - Malicious zlib (DCSBL-73)
+    // MARK: - Malicious zlib
 
     @Test func decodeFramesRejectsOversizedLengthWithoutDecompressing() {
         let bomb = maliciousZlibFrame(claimedCompressedBytes: UInt32(CompressedJSONLFrames.maxCompressedBytesPerFrame + 1))

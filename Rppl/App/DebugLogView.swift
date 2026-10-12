@@ -1,5 +1,6 @@
 import RpplCore
 import SwiftUI
+import UIKit
 
 /// Hidden debug screen (press-and-hold the logo on the About page): debug links on top, then the last 100 warnings/failures logged (kept across restarts) via `WakeLog`, across every category
 /// (sync, transfer, water, …), newest first. Cheap throwaway list — this exists so a developer can
@@ -25,6 +26,16 @@ struct DebugLogView: View {
                 } label: {
                     Label("Debug water temperature", systemImage: "ladybug")
                 }
+            }
+
+            Section {
+                ForEach(DeepLinkCatalog.entries, id: \.url) { entry in
+                    deepLinkRow(entry)
+                }
+            } header: {
+                Text(verbatim: "Deep links")
+            } footer: {
+                Text(verbatim: "Tap to open, hold to copy. Links with <…> need a real id first.")
             }
 
             Section("Log") {
@@ -64,6 +75,24 @@ struct DebugLogView: View {
         } else {
             ForEach(entries) { entry in
                 row(entry)
+            }
+        }
+    }
+
+    private func deepLinkRow(_ entry: DeepLinkCatalog.Entry) -> some View {
+        Button {
+            if let url = URL(string: entry.url), !entry.url.contains("<") { openURL(url) }
+        } label: {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: entry.url).font(.footnote.monospaced())
+                Text(verbatim: entry.summary).font(.caption).foregroundStyle(Color.rpplMuted)
+            }
+        }
+        .contextMenu {
+            Button {
+                UIPasteboard.general.string = entry.url
+            } label: {
+                Label { Text(verbatim: "Copy") } icon: { Image(systemName: "doc.on.doc") }
             }
         }
     }
