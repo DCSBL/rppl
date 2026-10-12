@@ -1,10 +1,13 @@
 import MapKit
 import RpplCore
 import SwiftUI
+import WidgetKit
 
 struct ParksView: View {
     /// Park id from a widget tap; opened once, then cleared.
     @Binding var openParkID: String?
+    /// Top parks widget tap: nearby order with the Favourites filter on; cleared once applied.
+    @Binding var openFavorites: Bool
     @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
@@ -118,6 +121,19 @@ struct ParksView: View {
     }
 
     private func reloadDrafts() { drafts.reload() }
+
+    private func showRequestedFavorites() {
+        guard openFavorites else { return }
+        openFavorites = false
+        path = NavigationPath()
+        showMap = false
+        showSearch = false
+        searchText = ""
+        openFilterDate = nil
+        cableFilter = []
+        sort = .distance
+        favoritesOnly = true
+    }
 
     private func openRequestedPark() {
         guard let id = openParkID else { return }
@@ -336,7 +352,16 @@ struct ParksView: View {
         .onChange(of: connectivity.sessionsRevision) { _, _ in
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
+        .onChange(of: visits, initial: true) { _, counts in
+            favorites.publishToWidgets()
+            // shortcut: an empty logbook never clears old counts (also guards the first pass before the catalog loads).
+            guard !catalog.entries.isEmpty else { return }
+            if ParkWidgetSnapshotStore.update({ $0.visits = counts }) {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        }
         .onChange(of: openParkID, initial: true) { _, _ in openRequestedPark() }
+        .onChange(of: openFavorites, initial: true) { _, _ in showRequestedFavorites() }
         // Refresh only on appear / foreground return — a live-updating fix would reorder the
         // Nearby list out from under the user while they're scrolling or tapping a park.
         .onAppear { refreshLocation() }

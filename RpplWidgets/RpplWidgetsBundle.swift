@@ -5,5 +5,6 @@ import WidgetKit
 struct RpplWidgetsBundle: WidgetBundle {
     var body: some Widget {
         ParkHoursWidget()
+        TopParksWidget()
     }
 }

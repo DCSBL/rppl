@@ -29,6 +29,7 @@ struct ContentView: View {
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
     @State private var openParkID: String?
+    @State private var openFavorites = false
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showICloudImport = false
@@ -48,7 +49,7 @@ struct ContentView: View {
             }
 
             Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
-                ParksView(openParkID: $openParkID)
+                ParksView(openParkID: $openParkID, openFavorites: $openFavorites)
             }
 
             Tab(value: AppTab.app) {
@@ -66,9 +67,13 @@ struct ContentView: View {
         }
         .tint(Color.rpplAccent)
         .onOpenURL { url in
-            guard let id = ParkDeepLink.parkID(from: url) else { return }
-            openParkID = id
-            selectedTab = .parks
+            if ParkDeepLink.isFavorites(url) {
+                openFavorites = true
+                selectedTab = .parks
+            } else if let id = ParkDeepLink.parkID(from: url) {
+                openParkID = id
+                selectedTab = .parks
+            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $showICloudImport) {
