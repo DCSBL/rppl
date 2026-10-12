@@ -5,6 +5,7 @@ import RpplCore
 import SwiftUI
 import UIKit
 import WeatherKit
+import WidgetKit
 
 /// Whether the Nearby sort can use a location fix right now.
 enum ParksLocationAvailability: Equatable {
@@ -112,6 +113,15 @@ final class ParkFavorites {
     func toggle(_ id: String) {
         if !ids.insert(id).inserted { ids.remove(id) }
         UserDefaults.standard.set(ids.sorted(), forKey: Self.key)
+        publishToWidgets()
+    }
+
+    /// The Top parks widget lists starred parks; it cannot read the app's own defaults.
+    func publishToWidgets() {
+        let starred = ids.sorted()
+        if ParkWidgetSnapshotStore.update({ $0.favoriteIDs = starred }) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }
 

@@ -9,8 +9,11 @@ history:
     description: Park pin and cable layout traced on the map
   - date: 2026-10-07
     description: add languages (en, nl, de) and Dutch and German variants of per and note
+  - date: 2026-10-12
+    description: add short_name
 
 name: Beaver Creek Wake Park Roermond
+short_name: Beaver Creek Wake Park
 languages:
   - en
   - nl

@@ -23,8 +23,11 @@ history:
     description: remove month-name labels, author credit and source comments
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of per and note
+  - date: 2026-10-12
+    description: add short_name
 
 name: Project 7 Cablepark Rotterdam
+short_name: Project 7 Cablepark
 languages:
   - en
   - nl

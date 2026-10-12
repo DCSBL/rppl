@@ -68,13 +68,36 @@ struct ParkWidgetTests {
             ])]
         )
         let trace = try #require(ParkTrace.make(for: park))
-        #expect(trace.isLoop)
-        #expect(trace.points.count == 3)
+        let line = try #require(trace.lines.first)
+        #expect(line.isLoop)
+        #expect(line.points.count == 3)
         // North is up: the northern point has the smaller y.
-        #expect(trace.points[2].y < trace.points[0].y)
-        for point in trace.points {
+        #expect(line.points[2].y < line.points[0].y)
+        for point in line.points {
             #expect((0...1).contains(point.x) && (0...1).contains(point.y))
         }
+    }
+
+    @Test func traceKeepsEveryCableOnOneScale() throws {
+        let park = Park(
+            id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5),
+            cables: [
+                ParkCable(direction: .clockwise, points: [
+                    ParkCablePoint(lat: 52.000, lon: 5.000),
+                    ParkCablePoint(lat: 52.002, lon: 5.000),
+                ]),
+                ParkCable(direction: .twoPointZero, points: [
+                    ParkCablePoint(lat: 52.000, lon: 5.001),
+                    ParkCablePoint(lat: 52.001, lon: 5.001),
+                ]),
+                ParkCable(points: [ParkCablePoint(lat: 52, lon: 5)]),
+            ]
+        )
+        let trace = try #require(ParkTrace.make(for: park))
+        #expect(trace.lines.count == 2)
+        let lengths = trace.lines.map { abs($0.points[1].y - $0.points[0].y) }
+        #expect(abs(lengths[0] - 2 * lengths[1]) < 1e-9)
+        #expect(trace.lines[0].isLoop && !trace.lines[1].isLoop)
     }
 
     @Test func traceNeedsTwoPoints() {
@@ -87,6 +110,26 @@ struct ParkWidgetTests {
         #expect(url.absoluteString == "rppl://park/project7-rotterdam")
         #expect(ParkDeepLink.parkID(from: url) == "project7-rotterdam")
         #expect(ParkDeepLink.parkID(from: URL(string: "https://park/x")!) == nil)
+    }
+
+    @Test func favoritesLinkRoundTrips() throws {
+        let url = try #require(ParkDeepLink.favoritesURL)
+        #expect(url.absoluteString == "rppl://parks/favorites")
+        #expect(ParkDeepLink.isFavorites(url))
+        #expect(ParkDeepLink.parkID(from: url) == nil)
+        #expect(!ParkDeepLink.isFavorites(try #require(ParkDeepLink.url(forParkID: "favorites"))))
+        #expect(!ParkDeepLink.isFavorites(URL(string: "rppl://parks/other")!))
+    }
+
+    @Test func timeZoneNoteOnlyWhenTheClockDiffers() {
+        let park = Park(id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5), timezone: "Europe/Amsterdam")
+        let moment = date("2026-10-12", hour: 12)
+        let london = TimeZone(identifier: "Europe/London")!
+        let brussels = TimeZone(identifier: "Europe/Brussels")!
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: london, at: moment) == "Europe/Amsterdam")
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: amsterdam, at: moment) == nil)
+        // Same clock, other name: nothing to explain.
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: brussels, at: moment) == nil)
     }
 
     @Test func noOpeningTimesIsUnknown() {

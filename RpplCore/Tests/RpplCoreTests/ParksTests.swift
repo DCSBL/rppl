@@ -29,6 +29,7 @@ struct ParksTests {
     @Test func bundledProject7Decodes() throws {
         let park = try project7()
         #expect(park.name == "Project 7 Cablepark Rotterdam")
+        #expect(park.compactName == "Project 7 Cablepark")
         #expect(park.location.lat == 51.979207)
         #expect(park.cables?.count == 1)
         #expect(park.cables?.first?.direction == .clockwise)

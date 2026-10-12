@@ -151,12 +151,12 @@ final class SessionCatalog {
             try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
         }
 
-        // Park link: the label becomes the park name; unlinked sessions fall through to city geocoding.
+        // Park link: the label becomes the park's short name; unlinked sessions fall through to city geocoding.
         let center = summary.mapFrame.map { ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude) }
         let park = try? await StoreIO.runOffMain {
             try store.linkPark(sessionId: manifest.sessionId, center: center, parks: parks)
         }
-        if let park, park.name != summary.cityName {
+        if let park, park.compactName != summary.cityName {
             summary = try await StoreIO.runOffMain {
                 try SessionLoader.loadSummary(store: store, sessionId: manifest.sessionId)
             }
