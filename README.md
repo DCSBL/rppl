@@ -44,6 +44,20 @@ I hope that, like me, you enjoy tracking your sessions!
 - **iPhone is for looking back.** After sync, browse sessions and maps on the phone, or add a session by hand. Recording stays on the Watch.
 - **Ultra Action Button (optional):** Settings → Action Button → Workout → Rppl starts a session.
 
+## Deep links
+
+`rppl://` links open the app from widgets, Safari, Shortcuts or an NFC tag. Details and how to add one: [Docs/DeepLinks.md](Docs/DeepLinks.md).
+
+| Link | Opens |
+|------|-------|
+| `rppl://logbook` | Logbook tab |
+| `rppl://session/<session-id>` | Session detail |
+| `rppl://parks` | Parks tab |
+| `rppl://parks/favorites` | Parks tab, starred parks only |
+| `rppl://park/<park-id>` | Park detail, e.g. `rppl://park/project7-rotterdam` |
+| `rppl://about` | Rppl tab (about, settings) |
+| `rppl://debug` | Hidden Debug screen |
+
 ## Privacy & license
 
 Hobby project from the Netherlands. No Rppl cloud. Phone logbook can live in your iCloud Drive Documents when sync is on (default). We do not sell your data.

@@ -2,6 +2,7 @@ import SwiftUI
 import RpplCore
 
 struct AppInfoView: View {
+    @Binding var showDebug: Bool
     var isImporting: Bool
     var onImportSessionTapped: () -> Void
 
@@ -9,7 +10,6 @@ struct AppInfoView: View {
     @State private var iCloud = PhoneICloudDriveController.shared
     @Environment(\.openURL) private var openURL
     @State private var showDisableDeleteConfirm = false
-    @State private var showDebug = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
@@ -213,6 +213,7 @@ struct AppInfoView: View {
 
 #Preview {
     AppInfoView(
+        showDebug: .constant(false),
         isImporting: false,
         onImportSessionTapped: {}
     )
