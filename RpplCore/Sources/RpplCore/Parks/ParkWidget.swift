@@ -84,10 +84,12 @@ public struct ParkTrace: Equatable, Sendable {
     }
 }
 
-/// Link from the widget to a park in the app (`rppl://park/<id>`).
+/// Links from the widgets into the app: a park (`rppl://park/<id>`) or the favourites list (`rppl://parks/favorites`).
 public enum ParkDeepLink {
     public static let scheme = "rppl"
     private static let host = "park"
+    private static let listHost = "parks"
+    private static let favoritesPath = "favorites"
 
     public static func url(forParkID id: String) -> URL? {
         var components = URLComponents()
@@ -97,10 +99,33 @@ public enum ParkDeepLink {
         return components.url
     }
 
+    /// The Parks tab, nearby order, narrowed to starred parks.
+    public static var favoritesURL: URL? {
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = listHost
+        components.path = "/" + favoritesPath
+        return components.url
+    }
+
     public static func parkID(from url: URL) -> String? {
         guard url.scheme == scheme, url.host == host else { return nil }
         let id = url.path.split(separator: "/").first.map(String.init)
         return (id?.isEmpty ?? true) ? nil : id
+    }
+
+    public static func isFavorites(_ url: URL) -> Bool {
+        url.scheme == scheme && url.host == listHost && url.path.split(separator: "/").first.map(String.init) == favoritesPath
+    }
+}
+
+/// The park's time zone name, for a rider who is not in it ("Europe/Amsterdam", never "UTC+2").
+public enum ParkTimeZoneNote {
+    /// `nil` when the park's clock matches `deviceZone` at `date`.
+    public static func label(for park: Park, deviceZone: TimeZone, at date: Date) -> String? {
+        let zone = park.resolvedTimeZone
+        guard zone.secondsFromGMT(for: date) != deviceZone.secondsFromGMT(for: date) else { return nil }
+        return zone.identifier
     }
 }
 

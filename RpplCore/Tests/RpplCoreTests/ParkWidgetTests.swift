@@ -112,6 +112,26 @@ struct ParkWidgetTests {
         #expect(ParkDeepLink.parkID(from: URL(string: "https://park/x")!) == nil)
     }
 
+    @Test func favoritesLinkRoundTrips() throws {
+        let url = try #require(ParkDeepLink.favoritesURL)
+        #expect(url.absoluteString == "rppl://parks/favorites")
+        #expect(ParkDeepLink.isFavorites(url))
+        #expect(ParkDeepLink.parkID(from: url) == nil)
+        #expect(!ParkDeepLink.isFavorites(try #require(ParkDeepLink.url(forParkID: "favorites"))))
+        #expect(!ParkDeepLink.isFavorites(URL(string: "rppl://parks/other")!))
+    }
+
+    @Test func timeZoneNoteOnlyWhenTheClockDiffers() {
+        let park = Park(id: "t", name: "T", location: ParkCoordinate(lat: 52, lon: 5), timezone: "Europe/Amsterdam")
+        let moment = date("2026-10-12", hour: 12)
+        let london = TimeZone(identifier: "Europe/London")!
+        let brussels = TimeZone(identifier: "Europe/Brussels")!
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: london, at: moment) == "Europe/Amsterdam")
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: amsterdam, at: moment) == nil)
+        // Same clock, other name: nothing to explain.
+        #expect(ParkTimeZoneNote.label(for: park, deviceZone: brussels, at: moment) == nil)
+    }
+
     @Test func noOpeningTimesIsUnknown() {
         #expect(ParkWidgetState.make(for: nil, at: date("2026-10-12", hour: 12), timeZone: amsterdam) == .unknown)
     }

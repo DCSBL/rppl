@@ -18,3 +18,27 @@ struct RpplWidgetBackground: View {
         }
     }
 }
+
+/// Nothing to show yet: an accent symbol, a title and one hint line.
+struct WidgetEmptyState: View {
+    let symbol: String
+    let title: LocalizedStringKey
+    let hint: LocalizedStringKey
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: symbol)
+                .font(.title3)
+                .foregroundStyle(Color("RpplAccent"))
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(Color("RpplText"))
+                .minimumScaleFactor(0.7)
+            Text(hint)
+                .font(.caption)
+                .foregroundStyle(Color("RpplMuted"))
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}

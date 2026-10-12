@@ -9,6 +9,8 @@ struct ParkHoursEntry: TimelineEntry {
     let parkID: String?
     /// Small line under the name; dropped when there is no room.
     var city: String?
+    /// Park time zone name, only when the rider is in another one.
+    var timeZoneNote: String?
     let trace: ParkTrace?
     let state: ParkWidgetState
 }
@@ -22,6 +24,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
             parkName: park?.name ?? "Cable Park",
             parkID: park?.id,
             city: park?.cityName,
+            timeZoneNote: nil,
             trace: park.flatMap(ParkTrace.make(for:)),
             state: .openUntil(ParkTimeWindow(label: nil, startMinute: 10 * 60, endMinute: 19 * 60, note: nil))
         )
@@ -41,13 +44,15 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
     private func entries(for configuration: SelectParkIntent, from now: Date) -> [ParkHoursEntry] {
         let picked = configuration.park.flatMap { ParkWidgetStore.park(id: $0.id) }
         guard let park = picked ?? ParkWidgetStore.mostVisited() else {
-            return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, city: nil, trace: nil, state: .unknown)]
+            return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, city: nil, timeZoneNote: nil, trace: nil, state: .unknown)]
         }
         let zone = park.resolvedTimeZone
         let dates = [now] + ParkWidgetTimeline.changeDates(for: park.opening, after: now, timeZone: zone)
         let trace = ParkTrace.make(for: park)
         return dates.map {
-            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, city: park.cityName, trace: trace, state: .make(for: park, at: $0))
+            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, city: park.cityName,
+                timeZoneNote: ParkTimeZoneNote.label(for: park, deviceZone: .current, at: $0),
+                trace: trace, state: .make(for: park, at: $0))
         }
     }
 }
@@ -95,10 +100,25 @@ struct ParkHoursView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    @ViewBuilder
     private func textStack(showCity: Bool) -> some View {
+        if entry.parkName == nil {
+            WidgetEmptyState(
+                symbol: "mappin.and.ellipse",
+                title: "Choose a park",
+                hint: family == .systemMedium
+                    ? "Touch and hold the widget, then choose Edit Widget. Once you log sessions, your most visited park shows here."
+                    : "Touch and hold the widget, then choose Edit Widget."
+            )
+        } else {
+            filledStack(showCity: showCity)
+        }
+    }
+
+    private func filledStack(showCity: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(entry.parkName ?? String(localized: "Choose a park"))
+                Text(entry.parkName ?? "")
                     .font(.headline)
                     .foregroundStyle(Color("RpplText"))
                     .minimumScaleFactor(0.6)
@@ -121,6 +141,13 @@ struct ParkHoursView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color("RpplMuted"))
                         .minimumScaleFactor(0.8)
+                    if let note = entry.timeZoneNote {
+                        Text(note)
+                            .font(.caption2)
+                            .foregroundStyle(Color("RpplMuted").opacity(0.75))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
             }
         }

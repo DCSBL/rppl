@@ -64,17 +64,22 @@ struct TopParksView: View {
     @Environment(\.widgetFamily) private var family
     let entry: TopParksEntry
 
+    /// Up to 3 parks on the medium widget use the whole width, one per line.
+    private var isWide: Bool { family == .systemMedium && entry.rows.count <= 3 }
+
     var body: some View {
         Group {
             if entry.rows.isEmpty {
-                Text("Star parks in Rppl to see them here.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color("RpplMuted"))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            } else if family == .systemMedium {
-                let rows = Array(entry.rows.prefix(6))
-                let left = Array(rows.prefix(3))
-                let right = Array(rows.dropFirst(3))
+                WidgetEmptyState(
+                    symbol: "star",
+                    title: "No favourites yet",
+                    hint: family == .systemMedium
+                        ? "Star parks in Rppl and they show here with their opening hours."
+                        : "Star parks in Rppl."
+                )
+            } else if family == .systemMedium && !isWide {
+                let left = Array(entry.rows.prefix(3))
+                let right = Array(entry.rows.dropFirst(3).prefix(3))
                 HStack(alignment: .top, spacing: 12) {
                     column(left)
                     column(right)
@@ -83,36 +88,33 @@ struct TopParksView: View {
                 column(Array(entry.rows.prefix(3)))
             }
         }
+        // A tap opens the Parks tab on nearby parks with the Favourites filter on.
+        .widgetURL(ParkDeepLink.favoritesURL)
         .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
     private func column(_ rows: [TopParksEntry.Row]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(rows) { row in
-                if let url = ParkDeepLink.url(forParkID: row.id) {
-                    Link(destination: url) { rowView(row) }
-                } else {
-                    rowView(row)
-                }
-            }
+        VStack(alignment: .leading, spacing: isWide ? 9 : 8) {
+            ForEach(rows) { row in rowView(row) }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// Text shrinks to 70% before it is cut off. On the wide layout it may wrap to two lines first.
     private func rowView(_ row: TopParksEntry.Row) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(row.name)
-                .font(.footnote.weight(.semibold))
+                .font(isWide ? .subheadline.weight(.semibold) : .footnote.weight(.semibold))
                 .foregroundStyle(Color("RpplText"))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7) // limit: past this the name is cut off with …
+                .lineLimit(isWide ? 2 : 1)
+                .minimumScaleFactor(0.7)
             HStack(spacing: 4) {
-                Circle().fill(row.state.tint).frame(width: 6, height: 6)
+                Circle().fill(row.state.tint).frame(width: isWide ? 7 : 6, height: isWide ? 7 : 6)
                 Text(row.state.shortText)
-                    .font(.caption2)
+                    .font(isWide ? .caption : .caption2)
                     .foregroundStyle(Color("RpplMuted"))
-                    .lineLimit(1)
+                    .lineLimit(isWide ? 2 : 1)
                     .minimumScaleFactor(0.7)
             }
         }

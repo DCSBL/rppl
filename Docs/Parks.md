@@ -243,7 +243,8 @@ opening:
 
 `RpplWidgets` is an iPhone widget extension: **small** (2x2) and **medium** (4x2). Long-press the widget, Edit Widget, pick one park. The picker shows the town and country under each park (`Park.placeSubtitle`; the country comes from the time zone, as park files have no country field) and searches name and address, so the town is searchable, the country is not. Everything is local: it reads the bundled and user park files from the App Group, no network.
 
-- No park picked: the widget (and the gallery preview) shows the rider's most visited park. The preview always reads "Open today until 19:00". Without any visits it asks to choose a park.
+- A park in another time zone than the phone's shows its zone name (`Europe/Amsterdam`, never `UTC+2`) in small type under the time (`ParkTimeZoneNote`); a park with the same clock as the phone, even in another zone, shows nothing. The Top parks widget never shows it.
+- No park picked: the widget (and the gallery preview) shows the rider's most visited park. The preview always reads "Open today until 19:00". Without any visits it shows "Choose a park" with a hint to edit the widget.
 - Shows the park name (never cut off: it wraps and shrinks) with the town in small type under it (`Park.cityName`, from the address); the town drops out when there is no room. No street address.
 - Widgets use the Rppl look: backdrop gradient with an accent glow, `RpplText` / `RpplMuted` text (copied colorsets in `RpplWidgets/Assets.xcassets`), no logo.
 - Text: `Closed`, `Open tomorrow`, `Open in 3 days`, `Open today until 20:00`, `Open today from 14:00 to 20:00` (`sunset` stays English). A park with no opening times reads "Opening hours unknown"; a park with no known next opening reads `Closed`.
@@ -254,7 +255,7 @@ opening:
 
 ### Top parks widget
 
-Same extension, **small** (top 3) and **medium** (top 6, two columns). No configuration: it lists starred parks, most visited first (ties and unvisited by name), each as `name` plus one short line (`Open until 19:00`, `Open from 12:00 to 21:00` (not open yet today), `Open tomorrow`, `Open in 3 days`, `Closed`, `Hours unknown`). Each row opens its park. No starred parks reads "Star parks in Rppl to see them here."
+Same extension, **small** (top 3) and **medium** (top 6, two columns). No configuration: it lists starred parks, most visited first (ties and unvisited by name), each as `name` plus one short line (`Open until 19:00`, `Open from 12:00 to 21:00` (not open yet today), `Open tomorrow`, `Open in 3 days`, `Closed`, `Hours unknown`). Tapping the widget opens the Parks tab on nearby parks with the Favourites filter on (`rppl://parks/favorites`, `ParkDeepLink.favoritesURL`; `ParksView.openFavorites`). With 3 or fewer starred parks the medium widget uses one full-width line per park (larger text, up to two lines before it shrinks). No starred parks reads "No favourites yet".
 
 - The widget cannot read the app's favourites or the session logbook, so the Parks tab writes a `ParkWidgetSnapshot` (starred ids + visit counts) to the App Group (`ParkWidgetSnapshotStore`) and reloads the timelines when it changes. Starring a park updates it at once; visit counts refresh when the Parks tab loads. An empty logbook never clears old counts.
 - Name and status shrink to 70% and are then cut off with an ellipsis.
