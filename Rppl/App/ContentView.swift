@@ -73,6 +73,9 @@ struct ContentView: View {
             } else if let id = ParkDeepLink.parkID(from: url) {
                 openParkID = id
                 selectedTab = .parks
+            } else if let id = SessionDeepLink.sessionID(from: url) {
+                logbookNavigation.openSessionId = id
+                selectedTab = .logbook
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
