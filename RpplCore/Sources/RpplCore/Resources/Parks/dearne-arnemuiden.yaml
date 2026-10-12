@@ -19,8 +19,11 @@ history:
     description: move park pin to the cable, trace cable on the map
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of note
+  - date: 2026-10-12
+    description: add short_name
 
 name: Watersportverhuurbedrijf De Arne
+short_name: De Arne
 languages:
   - en
   - nl

@@ -16,7 +16,7 @@ public enum ParkDiff {
     /// Which editor sections differ between `original` and `edited`. Not a field-by-field diff.
     public static func changedSections(from original: Park, to edited: Park) -> [ParkSection] {
         var sections: [ParkSection] = []
-        if original.name != edited.name || original.author != edited.author || original.timezone != edited.timezone {
+        if original.name != edited.name || original.shortName != edited.shortName || original.author != edited.author || original.timezone != edited.timezone {
             sections.append(.basics)
         }
         if original.location != edited.location || original.address != edited.address {

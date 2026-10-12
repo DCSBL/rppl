@@ -290,6 +290,9 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var basedOnRevision: Int?
 
     public var name: String
+    /// Name without place or business type ("Project 7 Cablepark"); nil = `name` is already short.
+    /// Cable park, kabelpark, waterski and the like stay in it. Use `compactName` to read it.
+    public var shortName: String?
     /// Languages the park works in, main language first (BCP-47: `nl-BE`, `fr-BE`, `en`). Long text
     /// is written in the first one; short text may carry a variant per language. nil = as written.
     public var languages: [String]?
@@ -321,12 +324,14 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         case basedOnUpdatedAt = "based_on_updated_at"
         case basedOnRevision = "based_on_revision"
         case waterTemperature = "water_temperature"
+        case shortName = "short_name"
     }
 
     public init(
         version: Int = Park.currentVersion,
         id: String,
         name: String,
+        shortName: String? = nil,
         languages: [String]? = nil,
         location: ParkCoordinate,
         address: String? = nil,
@@ -352,6 +357,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.version = version
         self.id = id
         self.name = name
+        self.shortName = shortName
         self.languages = languages
         self.location = location
         self.address = address
@@ -378,6 +384,12 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     /// `id` alone: cheaper than hashing `cables`/`history`, and still consistent with `==`.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+
+    /// `shortName` when set, else `name`: for headers, widgets, session labels and tight spaces.
+    public var compactName: String {
+        let short = shortName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return short.isEmpty ? name : short
     }
 
     public var resolvedTimeZone: TimeZone {

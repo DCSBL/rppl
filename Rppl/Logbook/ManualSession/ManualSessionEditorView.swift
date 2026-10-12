@@ -211,7 +211,7 @@ struct ManualSessionEditorView: View {
         let (draft, editing) = (draft, editing)
         let entry = ManualEntry(tallies: draft.tallies, distanceM: distanceM, location: park?.location ?? draft.spot)
         let parkId = park?.id
-        let label = park?.name ?? (draft.spot == nil ? nil : (draft.spotName ?? String(localized: "Own location")))
+        let label = park?.compactName ?? (draft.spot == nil ? nil : (draft.spotName ?? String(localized: "Own location")))
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
         let system = UIDevice.current.systemVersion

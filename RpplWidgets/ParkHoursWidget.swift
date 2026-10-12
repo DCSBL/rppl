@@ -40,7 +40,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
         let dates = [now] + ParkWidgetTimeline.changeDates(for: park.opening, after: now, timeZone: zone)
         let trace = ParkTrace.make(for: park)
         return dates.map {
-            ParkHoursEntry(date: $0, parkName: park.name, parkID: park.id, trace: trace, state: .make(for: park, at: $0))
+            ParkHoursEntry(date: $0, parkName: park.compactName, parkID: park.id, trace: trace, state: .make(for: park, at: $0))
         }
     }
 }
