@@ -19,11 +19,6 @@ This project uses **caveman** mode for agent ↔ human chat.
 - **PR title** (not necessarily each commit): `<component>(<type>): <short description>` — e.g. `watch(feat): …`, `slang(fix): …`. See [contributions/agent.md](contributions/agent.md).
 - Each commit triggers light `pre-commit` hooks (hygiene, codespell, legal sync, `.xcstrings` format, SwiftLint); each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
 
-## Linear issues
-_Only use linear issues when one is given by the user_
-- When starting work on a Linear issue: set status **In Progress**.
-- When finished (merged, or ready on the branch when the user asked to ship): set status **Done**.
-
 ## Product north star
 
 **Data collector** for cable-park wakeboarding — Watch records; reliable checkpoints over flashy UX.
@@ -181,8 +176,8 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 - CloudKit sync (Documents in iCloud for the phone logbook is in scope; prefer native ubiquity APIs)
 - Auto-format rewriting **Swift** in hooks (lint-only; `.xcstrings` are an exception — Xcode-aligned via `scripts/format-xcstrings.py`)
 - Rewriting Docs or README into caveman
-- Park profiles / dock geofence hardcoding (Linear: DCSBL-56)
-- Mac timeline viz or inventing detector thresholds without an explicit ask (Linear: DCSBL-60)
+- Park profiles / dock geofence hardcoding
+- Mac timeline viz or inventing detector thresholds without an explicit ask
 
 ## When unsure
 
