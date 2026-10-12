@@ -8,14 +8,18 @@ struct ParkEntity: AppEntity {
 
     var id: String
     var name: String
+    /// "Knokke-Heist, Belgium": shown under the name in the picker.
+    var place: String?
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(name)")
+        if let place { return DisplayRepresentation(title: "\(name)", subtitle: "\(place)") }
+        return DisplayRepresentation(title: "\(name)")
     }
 
     init(park: Park) {
         id = park.id
         name = park.name
+        place = park.placeSubtitle()
     }
 }
 
@@ -41,11 +45,18 @@ enum ParkWidgetStore {
     static func park(id: String) -> Park? {
         parks().first { $0.id == id }
     }
+
+    static func snapshot() -> ParkWidgetSnapshot { ParkWidgetSnapshotStore.load() }
+
+    /// Fallback while no park is picked; `nil` until the app has written visit counts.
+    static func mostVisited() -> Park? {
+        snapshot().mostVisited(in: parks())
+    }
 }
 
 struct SelectParkIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Select park"
-    static let description = IntentDescription("Choose the cable park to show opening hours for.")
+    static let description = IntentDescription("Choose the cable park to show opening hours for. Empty shows your most visited park.")
 
     @Parameter(title: "Park")
     var park: ParkEntity?

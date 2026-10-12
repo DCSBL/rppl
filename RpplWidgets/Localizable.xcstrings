@@ -145,22 +145,6 @@
         }
       }
     },
-    "Choose the cable park to show opening hours for." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose the cable park to show opening hours for."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies het kabelpark waarvan je de openingstijden wilt zien."
-          }
-        }
-      }
-    },
     "Park" : {
       "localizations" : {
         "en" : {
@@ -213,6 +197,182 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Choose the cable park to show opening hours for. Empty shows your most visited park." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the cable park to show opening hours for. Empty shows your most visited park."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies het kabelpark waarvan je de openingstijden wilt zien. Leeg toont je meest bezochte park."
+          }
+        }
+      }
+    },
+    "Open until %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open until %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open tot %@"
+          }
+        }
+      }
+    },
+    "Hours unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hours unknown"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uren onbekend"
+          }
+        }
+      }
+    },
+    "Top parks" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top parks"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top parken"
+          }
+        }
+      }
+    },
+    "Your starred parks, most visited first, with open or closed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your starred parks, most visited first, with open or closed."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je favoriete parken, meest bezocht eerst, met open of gesloten."
+          }
+        }
+      }
+    },
+    "Open from %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open from %@ to %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open van %@ tot %@"
+          }
+        }
+      }
+    },
+    "Touch and hold the widget, then choose Edit Widget." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch and hold the widget, then choose Edit Widget."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd de widget ingedrukt en kies Pas widget aan."
+          }
+        }
+      }
+    },
+    "Touch and hold the widget, then choose Edit Widget. Once you log sessions, your most visited park shows here." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch and hold the widget, then choose Edit Widget. Once you log sessions, your most visited park shows here."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd de widget ingedrukt en kies Pas widget aan. Zodra je sessions logt, tonen we je meest bezochte park."
+          }
+        }
+      }
+    },
+    "No favourites yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No favourites yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen favorieten"
+          }
+        }
+      }
+    },
+    "Star parks in Rppl." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Star parks in Rppl."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef parken een ster in Rppl."
+          }
+        }
+      }
+    },
+    "Star parks in Rppl and they show here with their opening hours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Star parks in Rppl and they show here with their opening hours."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef parken een ster in Rppl, dan staan ze hier met hun openingstijden."
           }
         }
       }
