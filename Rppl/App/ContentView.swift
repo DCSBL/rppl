@@ -30,6 +30,7 @@ struct ContentView: View {
     @State private var logbookNavigation = LogbookNavigationRequest()
     @State private var openParkID: String?
     @State private var openFavorites = false
+    @State private var openDebug = false
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showICloudImport = false
@@ -54,6 +55,7 @@ struct ContentView: View {
 
             Tab(value: AppTab.app) {
                 AppInfoView(
+                    showDebug: $openDebug,
                     isImporting: isImporting,
                     onImportSessionTapped: presentManualImport
                 )
@@ -76,6 +78,15 @@ struct ContentView: View {
             } else if let id = SessionDeepLink.sessionID(from: url) {
                 logbookNavigation.openSessionId = id
                 selectedTab = .logbook
+            } else if let tab = TabDeepLink(url: url) {
+                switch tab {
+                case .logbook: selectedTab = .logbook
+                case .parks: selectedTab = .parks
+                case .about: selectedTab = .app
+                case .debug:
+                    openDebug = true
+                    selectedTab = .app
+                }
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
