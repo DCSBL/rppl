@@ -49,6 +49,7 @@ struct LogbookSessionDetailView: View {
     @State private var flagSaveError: String?
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
+    @AppStorage(AppSettingsKey.debugSetFlags) private var flagsEnabled = false
 
     private nonisolated enum ExportPurpose: Sendable {
         case share
@@ -80,9 +81,9 @@ struct LogbookSessionDetailView: View {
         return "\(manifest.sessionId)|\(manifest.startedAt)|\(String(describing: manifest.endedAt))|\(matchedPark?.id ?? "")"
     }
 
-    /// Flags can be edited on a stored session that has sets to flag.
+    /// Flags can be edited (debug toggle on) on a stored session that has sets to flag.
     private var canEditFlags: Bool {
-        guard case .store = source, loadPhase == .ready else { return false }
+        guard flagsEnabled, case .store = source, loadPhase == .ready else { return false }
         return isManual || sessionStats?.sets.isEmpty == false
     }
 
@@ -108,11 +109,6 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     if isManual {
                         ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
-                    if isEditingFlags {
-                        Button("Edit session details", systemImage: "slider.horizontal.3") { showEditor = true }
-                            .buttonStyle(.bordered)
-                            .frame(maxWidth: .infinity)
-                    }
                     } else {
                         sessionMap
                     }
@@ -166,9 +162,15 @@ struct LogbookSessionDetailView: View {
                     Button("Done") { if saveFlags() { isEditingFlags = false } }
                 }
             } else {
+                if isManual, case .store = source, loadPhase == .ready {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Edit session details", systemImage: "pencil") { showEditor = true }
+                            .labelStyle(.iconOnly)
+                    }
+                }
                 if canEditFlags {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Edit flags", systemImage: "pencil") { beginFlagEditing() }
+                        Button("Edit flags", systemImage: isManual ? "flag" : "pencil") { beginFlagEditing() }
                             .labelStyle(.iconOnly)
                     }
                 }
@@ -664,7 +666,8 @@ struct LogbookSessionDetailView: View {
 
     /// Draft while editing, what is stored otherwise.
     private func flags(forSet index: Int) -> [String] {
-        isEditingFlags
+        guard flagsEnabled else { return [] }
+        return isEditingFlags
             ? flagDraft.flags(forSet: index)
             : manifest?.setFlags?[String(index)] ?? []
     }
