@@ -110,8 +110,8 @@ struct TopParksView: View {
                 .lineLimit(isWide ? 2 : 1)
                 .minimumScaleFactor(0.7)
             HStack(spacing: 4) {
-                Circle().fill(row.state.tint).frame(width: isWide ? 7 : 6, height: isWide ? 7 : 6)
-                Text(row.state.shortText)
+                ParkStatusDot(state: row.state, size: isWide ? 7 : 6)
+                ParkStateLine(long: row.state.shortText, fallback: row.state.tomorrowFallback)
                     .font(isWide ? .caption : .caption2)
                     .foregroundStyle(Color("RpplMuted"))
                     .lineLimit(isWide ? 2 : 1)
@@ -133,7 +133,9 @@ extension ParkWidgetState {
             let from = ParkSchedule.timeText(minutes: window.startMinute)
             let to = Self.end(window)
             return String(localized: "Open from \(from) to \(to)")
-        case .opensTomorrow: return String(localized: "Open tomorrow")
+        case .opensTomorrow(let startMinute):
+            let from = ParkSchedule.timeText(minutes: startMinute)
+            return String(localized: "Open tomorrow from \(from)")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")
         case .unknown: return String(localized: "Hours unknown")

@@ -6,12 +6,15 @@ public enum ParkWidgetState: Equatable, Sendable {
     case openUntil(ParkTimeWindow)
     /// Opens later today.
     case opensToday(ParkTimeWindow)
-    case opensTomorrow
-    /// Closed, next opening in `days` (2 or more) days.
+    /// Opens tomorrow at `startMinute` (minutes after midnight, park time).
+    case opensTomorrow(startMinute: Int)
+    /// Closed, next opening in 2 to `maxCountedDays` days. Further out reads `.closed`.
     case opensInDays(Int)
     case closed
     /// No opening times filled in.
     case unknown
+
+    public static let maxCountedDays = 3
 
     public static func make(for park: Park, at date: Date) -> ParkWidgetState {
         make(for: park.opening, at: date, timeZone: park.resolvedTimeZone)
@@ -23,8 +26,7 @@ public enum ParkWidgetState: Equatable, Sendable {
         case .openToday:
             guard let window = detail.window else { return .unknown }
             return detail.windowHasStarted == true ? .openUntil(window) : .opensToday(window)
-        case .opensTomorrow: return .opensTomorrow
-        case .closed:
+        case .opensTomorrow, .closed:
             guard let next = ParkSchedule.nextOpening(for: opening, after: date, timeZone: timeZone) else { return .closed }
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = timeZone
@@ -33,8 +35,10 @@ public enum ParkWidgetState: Equatable, Sendable {
                 from: calendar.startOfDay(for: date),
                 to: calendar.startOfDay(for: next.start)
             ).day ?? 0
-            if days <= 0 { return .closed }
-            return days == 1 ? .opensTomorrow : .opensInDays(days)
+            if days <= 0 || days > maxCountedDays { return .closed }
+            if days > 1 { return .opensInDays(days) }
+            let parts = calendar.dateComponents([.hour, .minute], from: next.start)
+            return .opensTomorrow(startMinute: (parts.hour ?? 0) * 60 + (parts.minute ?? 0))
         case .unknown: return .unknown
         }
     }
