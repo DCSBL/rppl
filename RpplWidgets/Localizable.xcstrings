@@ -65,6 +65,22 @@
         }
       }
     },
+    "Open tomorrow from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open tomorrow from %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen geopend vanaf %@"
+          }
+        }
+      }
+    },
     "Open tomorrow" : {
       "localizations" : {
         "en" : {

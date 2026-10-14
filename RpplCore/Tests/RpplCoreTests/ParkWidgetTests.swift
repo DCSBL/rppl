@@ -43,7 +43,7 @@ struct ParkWidgetTests {
 
     @Test func afterClosingTomorrowOpenOrClosed() {
         // Monday evening: Tuesday is open. Friday evening: the weekend is closed.
-        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-12", hour: 21), timeZone: amsterdam) == .opensTomorrow)
+        #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-12", hour: 21), timeZone: amsterdam) == .opensTomorrow(startMinute: 14 * 60))
     }
 
     @Test func closedWithKnownNextOpeningCountsDays() {
@@ -52,10 +52,10 @@ struct ParkWidgetTests {
         #expect(ParkWidgetState.make(for: weekdaysOnly, at: date("2026-10-17", hour: 12), timeZone: amsterdam) == .opensInDays(2))
     }
 
-    @Test func farNextOpeningCountsDays() {
-        // Only September is scheduled: from mid October the next opening is 1 September.
+    @Test func farNextOpeningReadsClosed() {
+        // Only September is scheduled: beyond 3 days the widget just says closed.
         let septemberOnly = ParkOpening(rules: [ParkOpeningRule(months: [9], days: ["daily"], open: "10:00", close: "18:00")])
-        #expect(ParkWidgetState.make(for: septemberOnly, at: date("2026-10-12", hour: 12), timeZone: amsterdam) == .opensInDays(324))
+        #expect(ParkWidgetState.make(for: septemberOnly, at: date("2026-10-12", hour: 12), timeZone: amsterdam) == .closed)
     }
 
     @Test func traceKeepsAspectAndLoopsFullSizeCables() throws {

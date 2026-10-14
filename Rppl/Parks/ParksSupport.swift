@@ -505,9 +505,13 @@ extension ParkOpenStatus {
         }
     }
 
+}
+
+extension ParkOpenStatusDetail {
+    /// Green = open now, yellow = opens later today or tomorrow, red = closed (same as the widgets).
     var badgeColor: Color {
-        switch self {
-        case .openToday: .green
+        switch status {
+        case .openToday: windowHasStarted == false ? .yellow : .green
         case .opensTomorrow: .yellow
         case .closed: .red
         case .unknown: .gray
@@ -547,7 +551,7 @@ enum ParkStatusBadge {
                 return (String(localized: "Open until \(to)"), .green)
             }
             let from = ParkFormatting.time(window.startMinute)
-            return (String(localized: "Opens \(from)–\(to)"), .green)
+            return (String(localized: "Opens \(from)–\(to)"), .yellow)
         case .opensTomorrow:
             return (String(localized: "Opens tomorrow"), .yellow)
         case .closed:
