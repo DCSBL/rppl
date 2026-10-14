@@ -641,4 +641,12 @@ struct LocationSpeedStatsTests {
         #expect(LocationSpeedStats.averageSpeedMetersPerSecond(distanceMeters: 0, duration: 50) == nil)
         #expect(LocationSpeedStats.averageSpeedMetersPerSecond(distanceMeters: 1000, duration: 0) == nil)
     }
+
+    @Test func partsSplitAndRound() {
+        let split = DurationFormat.parts(2 * 3600 + 12 * 60 + 0.6)
+        #expect(split.hours == 2 && split.minutes == 12 && split.seconds == 1)
+        let short = DurationFormat.parts(44 * 60 + 12)
+        #expect(short.hours == 0 && short.minutes == 44 && short.seconds == 12)
+        #expect(DurationFormat.parts(-5).seconds == 0)
+    }
 }

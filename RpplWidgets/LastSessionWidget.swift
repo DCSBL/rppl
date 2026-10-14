@@ -76,11 +76,7 @@ struct LastSessionView: View {
             if let ratio = session.ridingRatio {
                 VStack(alignment: .leading, spacing: 3) {
                     if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
-                        HStack(spacing: 6) {
-                            timeChip(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding")
-                            Spacer(minLength: 0)
-                            timeChip(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive")
-                        }
+                        timesGrid(riding: riding, inactive: inactive)
                     } else {
                         durationText(session).font(.caption.weight(.semibold).monospacedDigit())
                     }
@@ -111,8 +107,7 @@ struct LastSessionView: View {
                             .frame(width: 52, height: 52)
                             .frame(maxWidth: .infinity)
                         if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
-                            timeChip(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding")
-                            timeChip(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive")
+                            timesGrid(riding: riding, inactive: inactive)
                         } else {
                             durationText(session).font(.caption.weight(.semibold).monospacedDigit())
                         }
@@ -174,22 +169,45 @@ struct LastSessionView: View {
         }
     }
 
-    /// Symbol + time, like the app's Riding tile chips (Riding / Inactive).
-    private func timeChip(
-        _ interval: TimeInterval, symbol: String, tint: String, label: LocalizedStringKey
-    ) -> some View {
-        let time = DurationFormat.units(max(0, interval.rounded()), width: .narrow)
-        return HStack(spacing: 3) {
-            Image(systemName: symbol).imageScale(.small).foregroundStyle(Color(tint))
-            Text(time)
-                .font(.caption.weight(.semibold).monospacedDigit())
-                .foregroundStyle(Color("RpplText"))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+    /// Riding and Inactive stacked: icons left, numbers right-aligned so h / m / s line up.
+    /// The hours column is dropped when neither time has hours.
+    private func timesGrid(riding: TimeInterval, inactive: TimeInterval) -> some View {
+        let showHours = DurationFormat.parts(riding).hours > 0 || DurationFormat.parts(inactive).hours > 0
+        return Grid(alignment: .firstTextBaseline, horizontalSpacing: 3, verticalSpacing: 2) {
+            timeRow(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding", showHours: showHours)
+            timeRow(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive", showHours: showHours)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(label)
-        .accessibilityValue(time)
+        .font(.caption.weight(.semibold).monospacedDigit())
+        .foregroundStyle(Color("RpplText"))
+        .lineLimit(1)
+    }
+
+    private func timeRow(
+        _ interval: TimeInterval, symbol: String, tint: String, label: LocalizedStringKey, showHours: Bool
+    ) -> some View {
+        let parts = DurationFormat.parts(interval)
+        return GridRow {
+            Image(systemName: symbol)
+                .imageScale(.small)
+                .foregroundStyle(Color(tint))
+                .gridColumnAlignment(.leading)
+                .accessibilityLabel(label)
+                .accessibilityValue(DurationFormat.units(interval.rounded(), width: .narrow))
+            if showHours { unitCells(parts.hours > 0 ? "\(parts.hours)" : "", "h") }
+            unitCells("\(parts.minutes)", "m")
+            unitCells(String(format: "%02d", parts.seconds), "s")
+        }
+    }
+
+    /// Number (right-aligned) and unit (left-aligned); an empty number leaves both cells blank.
+    @ViewBuilder
+    private func unitCells(_ number: String, _ unit: String) -> some View {
+        Text(number).gridColumnAlignment(.trailing).accessibilityHidden(true)
+        Text(number.isEmpty ? "" : unit)
+            .accessibilityHidden(true)
+            .font(.caption2)
+            .foregroundStyle(Color("RpplMuted"))
+            .gridColumnAlignment(.leading)
     }
 
     @ViewBuilder

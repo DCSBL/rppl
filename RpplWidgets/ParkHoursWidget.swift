@@ -137,7 +137,7 @@ struct ParkHoursView: View {
                     Image(systemName: "circle.fill")
                         .font(.caption2)
                         .foregroundStyle(entry.state.tint)
-                    Text(entry.state.text)
+                    ParkStateLine(long: entry.state.text, fallback: entry.state.tomorrowFallback)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color("RpplMuted"))
                         .minimumScaleFactor(0.8)
@@ -152,6 +152,23 @@ struct ParkHoursView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+/// One status line. With a `fallback` it shows the long text only when it fits on one line.
+struct ParkStateLine: View {
+    let long: String
+    let fallback: String?
+
+    var body: some View {
+        if let fallback {
+            ViewThatFits(in: .horizontal) {
+                Text(long).lineLimit(1).minimumScaleFactor(1)
+                Text(fallback)
+            }
+        } else {
+            Text(long)
+        }
     }
 }
 
@@ -187,8 +204,8 @@ struct ParkTraceArt: View {
 extension ParkWidgetState {
     var tint: Color {
         switch self {
-        case .openUntil, .opensToday: .green
-        case .opensTomorrow, .opensInDays: .yellow
+        case .openUntil: .green
+        case .opensToday, .opensTomorrow, .opensInDays: .yellow
         case .closed: .red
         case .unknown: .gray
         }
@@ -203,11 +220,18 @@ extension ParkWidgetState {
             let from = ParkSchedule.timeText(minutes: window.startMinute)
             let to = Self.end(window)
             return String(localized: "Open today from \(from) to \(to)")
-        case .opensTomorrow: return String(localized: "Open tomorrow")
+        case .opensTomorrow(let startMinute):
+            let from = ParkSchedule.timeText(minutes: startMinute)
+            return String(localized: "Open tomorrow from \(from)")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")
         case .unknown: return String(localized: "Opening hours unknown")
         }
+    }
+
+    /// Shorter line for when `text` / `shortText` does not fit. Only tomorrow has one.
+    var tomorrowFallback: String? {
+        if case .opensTomorrow = self { String(localized: "Open tomorrow") } else { nil }
     }
 
     /// `sunset` stays English in every locale and is not calculated (Docs/Parks.md).

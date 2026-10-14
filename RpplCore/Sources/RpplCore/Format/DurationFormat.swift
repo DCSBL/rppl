@@ -20,4 +20,10 @@ public enum DurationFormat {
             .locale(locale)
         )
     }
+
+    /// Whole hours, minutes and seconds of `interval` (rounded), for columns that line up.
+    public static func parts(_ interval: TimeInterval) -> (hours: Int, minutes: Int, seconds: Int) {
+        let total = Int(max(0, interval).rounded())
+        return (total / 3600, total % 3600 / 60, total % 60)
+    }
 }
