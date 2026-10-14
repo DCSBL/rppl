@@ -134,9 +134,7 @@ struct ParkHoursView: View {
             Spacer(minLength: 0)
             if entry.parkName != nil {
                 VStack(alignment: .leading, spacing: 4) {
-                    Image(systemName: "circle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(entry.state.tint)
+                    ParkStatusDot(state: entry.state, size: 9)
                     ParkStateLine(long: entry.state.text, fallback: entry.state.tomorrowFallback)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color("RpplMuted"))
@@ -152,6 +150,24 @@ struct ParkHoursView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+/// Open now is a filled dot; everything else is an open circle, so colour is not the only cue.
+struct ParkStatusDot: View {
+    let state: ParkWidgetState
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if state.isOpenNow {
+                Circle().fill(state.tint)
+            } else {
+                Circle().strokeBorder(state.tint, lineWidth: 1.5)
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }
 
@@ -202,6 +218,10 @@ struct ParkTraceArt: View {
 }
 
 extension ParkWidgetState {
+    var isOpenNow: Bool {
+        if case .openUntil = self { true } else { false }
+    }
+
     var tint: Color {
         switch self {
         case .openUntil: .green

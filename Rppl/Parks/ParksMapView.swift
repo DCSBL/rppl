@@ -101,11 +101,11 @@ struct ParksMapView: View {
         }
     }
 
-    /// Open (green) / opens tomorrow (yellow) / closed (red) / no opening-hours data (grey) — same
+    /// Open now (green) / opens later today or tomorrow (yellow) / closed (red) / no opening-hours data (grey) — same
     /// palette as the detail badge, so the map and the card agree. A favorite keeps its star glyph
     /// but is colored the same way, rather than always yellow, so status doesn't disappear on tap.
     private static func pinColor(for park: Park) -> Color {
-        return park.openStatus().badgeColor
+        return park.openStatusDetail().badgeColor
     }
 
     @MapContentBuilder

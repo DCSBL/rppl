@@ -110,7 +110,7 @@ struct TopParksView: View {
                 .lineLimit(isWide ? 2 : 1)
                 .minimumScaleFactor(0.7)
             HStack(spacing: 4) {
-                Circle().fill(row.state.tint).frame(width: isWide ? 7 : 6, height: isWide ? 7 : 6)
+                ParkStatusDot(state: row.state, size: isWide ? 7 : 6)
                 ParkStateLine(long: row.state.shortText, fallback: row.state.tomorrowFallback)
                     .font(isWide ? .caption : .caption2)
                     .foregroundStyle(Color("RpplMuted"))
