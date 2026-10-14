@@ -173,7 +173,7 @@ struct LastSessionView: View {
     /// The hours column is dropped when neither time has hours.
     private func timesGrid(riding: TimeInterval, inactive: TimeInterval) -> some View {
         let showHours = DurationFormat.parts(riding).hours > 0 || DurationFormat.parts(inactive).hours > 0
-        return Grid(alignment: .firstTextBaseline, horizontalSpacing: 3, verticalSpacing: 2) {
+        return Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 3, verticalSpacing: 2) {
             timeRow(riding, symbol: "figure.surfing", tint: "RpplMetricRiding", label: "Riding", showHours: showHours)
             timeRow(inactive, symbol: "pause.circle", tint: "RpplMuted", label: "Inactive", showHours: showHours)
         }
