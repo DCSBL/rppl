@@ -95,7 +95,11 @@ On every PR targeting `main`, a GitHub-hosted `ubuntu-24.04` runner runs:
 
 RpplCore `swift test` runs in its own workflow, see [Core tests (Linux)](#core-tests-linux).
 
-It does **not** run `xcode-gate` / `xcodebuild` on GitHub (macOS + Xcode only).
+`xcodebuild` runs in the separate [macOS CI](#macos-ci) workflow.
+
+### macOS CI
+
+`.github/workflows/macos-ci.yml` (free macOS runners while the repo is public) on every PR to `main` and push to `main`: **Tests** (release script tests, Core `swift test` with the coverage floor, `RpplTests` on an iOS Simulator) and **Build** (dry-run `xcodebuild build` of the `Rppl` scheme, embeds Watch + widgets, no signing). Compiler warnings and errors become PR annotations via `.github/xcode-problem-matcher.json` (GitHub shows at most 10 per step); full logs are `tests-log` / `build-log` artifacts. UI tests are not run. Release builds stay in Xcode Cloud. If the runners become paid, drop this workflow; nothing else depends on it.
 
 - Uses `fetch-depth: 0` so `--from-ref` can see base and head SHAs.
 - Caches `~/.cache/pre-commit` and the SwiftLint Linux binary.

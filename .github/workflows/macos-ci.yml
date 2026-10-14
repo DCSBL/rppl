@@ -1,0 +1,127 @@
+# macOS checks: full test run and a dry-run build of every app target (iOS + embedded Watch/widgets).
+# Public repo = free macOS runners. The Release build stays in Xcode Cloud (Docs/Release.md);
+# nothing here signs, archives or uploads.
+#
+# Warnings and errors from the compiler become inline PR annotations through
+# .github/xcode-problem-matcher.json (GitHub caps this at 10 per step, 50 per job; the full log is
+# the `*-log` artifact). The Linux core-tests.yml stays as the fast, container-based check.
+#
+# No `paths:` filter: the jobs always report a status, so they can be required checks.
+
+name: macOS CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: macos-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (macOS)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Release script tests
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
+
+      - name: RpplCore tests + coverage floor
+        shell: bash # pipefail: keep the script's exit code through tee
+        run: |
+          echo "::add-matcher::.github/xcode-problem-matcher.json"
+          python3 scripts/check-core-coverage.py 2>&1 | tee core-tests.log
+
+      - name: App unit tests (iOS Simulator)
+        shell: bash
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
+              for d in devices:
+                  if d["name"].startswith("iPhone") and d["isAvailable"]:
+                      print(d["udid"]); sys.exit()
+          sys.exit("no iPhone simulator available")')"
+          echo "::add-matcher::.github/xcode-problem-matcher.json"
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplTests \
+            -resultBundlePath RpplTests.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tee app-tests.log
+
+      - name: Upload logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-log
+          path: |
+            core-tests.log
+            app-tests.log
+            RpplTests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  build:
+    name: Build (dry run)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: xcodebuild -version
+
+      # Same invocation as scripts/git-hooks/xcode-gate.sh: the Rppl scheme embeds Watch + widgets.
+      - name: xcodebuild build (iOS + Watch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::add-matcher::.github/xcode-problem-matcher.json"
+          xcodebuild build \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            2>&1 | tee build.log
+
+      - name: Warning / error summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          {
+            echo "### Build"
+            echo "errors: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: error: ' || true)"
+            echo "warnings: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: warning: ' || true)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
