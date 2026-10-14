@@ -10,6 +10,7 @@ struct DebugLogView: View {
     @State private var entries: [WakeLog.Entry] = WakeLog.recentEntries()
     @State private var showMail = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
+    @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
 
     var body: some View {
         List {
@@ -18,6 +19,13 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Speed, altitude and g-force charts under each set in the logbook.")
+            }
+
+            Section {
+                Toggle("Set flags", isOn: $setFlagsEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Show and edit set flags in the logbook. Saved flags are kept when this is off.")
             }
 
             Section {

@@ -21,6 +21,8 @@ enum AppSettingsKey {
     static let parkWaterTemperatureEnabled = "rppl.parkWaterTemperatureEnabled"
     /// Debug: show speed / altitude / g-force charts under each set (default off).
     static let debugSetCharts = "rppl.debugSetCharts"
+    /// Debug: show and edit set flags/labels in the logbook (default off; stored flags are kept either way).
+    static let debugSetFlags = "rppl.debugSetFlags"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// JSON `ReviewPromptState`: good-session count and pending App Store review prompt (local only).
