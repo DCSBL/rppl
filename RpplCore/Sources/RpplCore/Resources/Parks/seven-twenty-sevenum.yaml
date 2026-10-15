@@ -1,331 +1,339 @@
 version: 1
 id: seven-twenty-sevenum
+created_at: 2026-10-15
+updated_at: 2026-10-15
 history:
-- date: '2026-10-15'
-  description: initial
-- date: '2026-10-15'
-  description: Edited in app (override)
+  - date: 2026-10-15
+    description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
+
 name: Seven-Twenty Cablepark
 languages:
-- nl
-- en
-- de
-location:
-  lat: 5.1382387721941e+1
-  lon: 5.97103325029639e+0
+  - nl
+  - en
+  - de
 address: Middenpeelweg 5, 5975 MZ Sevenum
 timezone: Europe/Amsterdam
-cables:
-- name: Kabelbaan
-  direction: cw
-  description: Een kabel met vijf masten, waar maximaal tien riders tegelijk op kunnen.
-  points:
-  - lat: 5.13824399413921e+1
-    lon: 5.97065637260054e+0
-  - lat: 5.13806454062154e+1
-    lon: 5.97012582557576e+0
-  - lat: 5.1380492116744e+1
-    lon: 5.96954786927587e+0
-  - lat: 5.13816759679865e+1
-    lon: 5.96716361404602e+0
-  - lat: 5.13828190899397e+1
-    lon: 5.96819943008612e+0
-opening:
-  rules:
-  - months:
-    - 10
-    days:
-    - weekend
-    open: '14:00'
-    close: '18:00'
-  note: In de herfst op werkdagen alleen op reservering, vanaf 3 deelnemers. Bij slecht
-    weer kunnen de tijden afwijken.
-phone: 077 467 01 78
-email: info@seven-twenty.nl
-website: https://www.seven-twenty.nl
-prices:
-- name: 1 uur
-  options:
-  - amount: '21'
-    currency: EUR
-    note:
-      en: Waterskiing, up to 15
-      de: Wasserski, bis 15 Jahre
-      nl: "Waterski\xEBn, t/m 15 jaar"
-  - amount: '31'
-    currency: EUR
-    note:
-      de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
-      nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
-      en: Wakeboarding (helmet and wakeboard included), up to 15
-  - amount: '25'
-    currency: EUR
-    note:
-      nl: Kneeboarden, t/m 15 jaar
-      de: Kneeboard, bis 15 Jahre
-      en: Kneeboarding, up to 15
-  - amount: '26'
-    currency: EUR
-    note:
-      en: Waterskiing, 16 and older
-      de: Wasserski, ab 16 Jahre
-      nl: "Waterski\xEBn, vanaf 16 jaar"
-  - amount: '37'
-    currency: EUR
-    note:
-      nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
-      de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
-      en: Wakeboarding (helmet and wakeboard included), 16 and older
-  - amount: '30'
-    currency: EUR
-    note:
-      en: Kneeboarding, 16 and older
-      nl: Kneeboarden, vanaf 16 jaar
-      de: Kneeboard, ab 16 Jahre
-- name: 2 uur
-  options:
-  - amount: '31'
-    currency: EUR
-    note:
-      nl: "Waterski\xEBn, t/m 15 jaar"
-      de: Wasserski, bis 15 Jahre
-      en: Waterskiing, up to 15
-  - amount: '36'
-    currency: EUR
-    note:
-      en: Wakeboarding (helmet and wakeboard included), up to 15
-      nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
-      de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
-  - amount: '33'
-    currency: EUR
-    note:
-      en: Kneeboarding, up to 15
-      nl: Kneeboarden, t/m 15 jaar
-      de: Kneeboard, bis 15 Jahre
-  - amount: '36'
-    currency: EUR
-    note:
-      nl: "Waterski\xEBn, vanaf 16 jaar"
-      en: Waterskiing, 16 and older
-      de: Wasserski, ab 16 Jahre
-  - amount: '47'
-    currency: EUR
-    note:
-      en: Wakeboarding (helmet and wakeboard included), 16 and older
-      nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
-      de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
-  - amount: '38'
-    currency: EUR
-    note:
-      nl: Kneeboarden, vanaf 16 jaar
-      de: Kneeboard, ab 16 Jahre
-      en: Kneeboarding, 16 and older
-- name: Dagpas
-  options:
-  - amount: '46'
-    currency: EUR
-    note:
-      en: Waterskiing, up to 15
-      nl: "Waterski\xEBn, t/m 15 jaar"
-      de: Wasserski, bis 15 Jahre
-  - amount: '51'
-    currency: EUR
-    note:
-      de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
-      nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
-      en: Wakeboarding (helmet and wakeboard included), up to 15
-  - amount: '48'
-    currency: EUR
-    note:
-      de: Kneeboard, bis 15 Jahre
-      nl: Kneeboarden, t/m 15 jaar
-      en: Kneeboarding, up to 15
-  - amount: '51'
-    currency: EUR
-    note:
-      en: Waterskiing, 16 and older
-      nl: "Waterski\xEBn, vanaf 16 jaar"
-      de: Wasserski, ab 16 Jahre
-  - amount: '69'
-    currency: EUR
-    note:
-      en: Wakeboarding (helmet and wakeboard included), 16 and older
-      de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
-      nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
-  - amount: '54'
-    currency: EUR
-    note:
-      de: Kneeboard, ab 16 Jahre
-      en: Kneeboarding, 16 and older
-      nl: Kneeboarden, vanaf 16 jaar
-- name: 10x 1 uur
-  options:
-  - amount: '185'
-    currency: EUR
-    note:
-      de: Wasserski, bis 15 Jahre
-      en: Waterskiing, up to 15
-      nl: "Waterski\xEBn, t/m 15 jaar"
-  - amount: '275'
-    currency: EUR
-    note:
-      en: Wakeboarding (helmet and wakeboard included), up to 15
-      de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
-      nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
-  - amount: '200'
-    currency: EUR
-    note:
-      de: Kneeboard, bis 15 Jahre
-      nl: Kneeboarden, t/m 15 jaar
-      en: Kneeboarding, up to 15
-  - amount: '230'
-    currency: EUR
-    note:
-      en: Waterskiing, 16 and older
-      de: Wasserski, ab 16 Jahre
-      nl: "Waterski\xEBn, vanaf 16 jaar"
-  - amount: '320'
-    currency: EUR
-    note:
-      nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
-      de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
-      en: Wakeboarding (helmet and wakeboard included), 16 and older
-  - amount: '270'
-    currency: EUR
-    note:
-      en: Kneeboarding, 16 and older
-      nl: Kneeboarden, vanaf 16 jaar
-      de: Kneeboard, ab 16 Jahre
-- name: 10x 2 uur
-  options:
-  - amount: '230'
-    currency: EUR
-    note:
-      de: bis 15 Jahre
-      en: up to 15
-      nl: t/m 15 jaar
-  - amount: '325'
-    currency: EUR
-    note:
-      nl: vanaf 16 jaar
-      en: 16 and older
-      de: ab 16 Jahre
-- name: Weekpas
-  options:
-  - amount: '195'
-    currency: EUR
-    note:
-      nl: t/m 15 jaar
-      en: up to 15
-      de: bis 15 Jahre
-  - amount: '240'
-    currency: EUR
-    note:
-      de: ab 16 Jahre
-      en: 16 and older
-      nl: vanaf 16 jaar
-- name: Tweeweken pas
-  options:
-  - amount: '280'
-    currency: EUR
-    note:
-      en: up to 15
-      de: bis 15 Jahre
-      nl: t/m 15 jaar
-  - amount: '325'
-    currency: EUR
-    note:
-      nl: vanaf 16 jaar
-      de: ab 16 Jahre
-      en: 16 and older
-- name: Maandpas
-  options:
-  - amount: '355'
-    currency: EUR
-    note:
-      en: up to 15
-      nl: t/m 15 jaar
-      de: bis 15 Jahre
-  - amount: '398'
-    currency: EUR
-    note:
-      nl: vanaf 16 jaar
-      en: 16 and older
-      de: ab 16 Jahre
-- name: Seizoenspas
-  options:
-  - amount: '570'
-    currency: EUR
-    note:
-      de: bis 15 Jahre
-      nl: t/m 15 jaar
-      en: up to 15
-  - amount: '680'
-    currency: EUR
-    note:
-      nl: vanaf 16 jaar
-      de: ab 16 Jahre
-      en: 16 and older
-- name: Wetsuit
-  options:
-  - amount: '7'
-    currency: EUR
-    per: hour
-  - amount: '9'
-    currency: EUR
-    per:
-      de: 2 Stunden
-      en: 2 hours
-      nl: 2 uur
-  - amount: '15'
-    currency: EUR
-    per: day
-  - amount: '69'
-    currency: EUR
-    per:
-      en: week
-      nl: week
-      de: Woche
-- name: Helm
-  options:
-  - amount: '2.50'
-    currency: EUR
-    per: hour
-  - amount: '4.50'
-    currency: EUR
-    per:
-      de: 2 Stunden
-      nl: 2 uur
-      en: 2 hours
-  - amount: '5.50'
-    currency: EUR
-    per: day
-  - amount: '25'
-    currency: EUR
-    per:
-      nl: week
-      de: Woche
-      en: week
-links:
-- kind: booking
-  url: https://www.seven-twenty.nl/directboeken/
-- kind: instagram
-  url: https://www.instagram.com/720cablepark/
-- kind: facebook
-  url: https://www.facebook.com/720CABLE
-- kind: youtube
-  url: https://www.youtube.com/channel/UC6QIV7YVbrdmRnrUyQhteiw
-facilities:
-- Materiaalverhuur
-- Obstakels
-- Instructeurs
-- Kleedruimten en douches
-- Kluisjes
-- Terras met bar
-created_at: '2026-10-15'
-updated_at: '2026-10-15'
-based_on_updated_at: '2026-10-15'
-based_on_revision: 1
+location:
+  lat: 51.382388
+  lon: 5.971033
+
+# Nearest station that still reports (~12 km).
 water_temperature:
   provider: rws_nl
   station_id: belfeld.boven
+
+phone: 077 467 01 78
+email: info@seven-twenty.nl
+website: https://www.seven-twenty.nl
+links:
+  - kind: booking
+    url: "https://www.seven-twenty.nl/directboeken/"
+  - kind: instagram
+    url: "https://www.instagram.com/720cablepark/"
+  - kind: facebook
+    url: "https://www.facebook.com/720CABLE"
+  - kind: youtube
+    url: "https://www.youtube.com/channel/UC6QIV7YVbrdmRnrUyQhteiw"
+
+facilities:
+  - Materiaalverhuur
+  - Obstakels
+  - Instructeurs
+  - Kleedruimten en douches
+  - Kluisjes
+  - Terras met bar
+
+cables:
+  - name: Kabelbaan
+    length_m: 783
+    description: Een kabel met vijf masten, waar maximaal tien riders tegelijk op kunnen.
+    direction: cw
+    points:
+      - lat: 51.38244
+        lon: 5.970656
+      - lat: 51.380645
+        lon: 5.970126
+      - lat: 51.380492
+        lon: 5.969548
+      - lat: 51.381676
+        lon: 5.967164
+      - lat: 51.382819
+        lon: 5.968199
+
+opening:
+  note: >-
+    In de herfst op werkdagen alleen op reservering, vanaf 3 deelnemers. Bij slecht weer kunnen de
+    tijden afwijken.
+  rules:
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "14:00"
+      close: "18:00"
+
+prices:
+  - name: 1 uur
+    options:
+      - amount: "21"
+        currency: EUR
+        note:
+          nl: Waterskiën, t/m 15 jaar
+          en: Waterskiing, up to 15
+          de: Wasserski, bis 15 Jahre
+      - amount: "31"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
+          en: Wakeboarding (helmet and wakeboard included), up to 15
+          de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
+      - amount: "25"
+        currency: EUR
+        note:
+          nl: Kneeboarden, t/m 15 jaar
+          en: Kneeboarding, up to 15
+          de: Kneeboard, bis 15 Jahre
+      - amount: "26"
+        currency: EUR
+        note:
+          nl: Waterskiën, vanaf 16 jaar
+          en: Waterskiing, 16 and older
+          de: Wasserski, ab 16 Jahre
+      - amount: "37"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
+          en: Wakeboarding (helmet and wakeboard included), 16 and older
+          de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
+      - amount: "30"
+        currency: EUR
+        note:
+          nl: Kneeboarden, vanaf 16 jaar
+          en: Kneeboarding, 16 and older
+          de: Kneeboard, ab 16 Jahre
+  - name: 2 uur
+    options:
+      - amount: "31"
+        currency: EUR
+        note:
+          nl: Waterskiën, t/m 15 jaar
+          en: Waterskiing, up to 15
+          de: Wasserski, bis 15 Jahre
+      - amount: "36"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
+          en: Wakeboarding (helmet and wakeboard included), up to 15
+          de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
+      - amount: "33"
+        currency: EUR
+        note:
+          nl: Kneeboarden, t/m 15 jaar
+          en: Kneeboarding, up to 15
+          de: Kneeboard, bis 15 Jahre
+      - amount: "36"
+        currency: EUR
+        note:
+          nl: Waterskiën, vanaf 16 jaar
+          en: Waterskiing, 16 and older
+          de: Wasserski, ab 16 Jahre
+      - amount: "47"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
+          en: Wakeboarding (helmet and wakeboard included), 16 and older
+          de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
+      - amount: "38"
+        currency: EUR
+        note:
+          nl: Kneeboarden, vanaf 16 jaar
+          en: Kneeboarding, 16 and older
+          de: Kneeboard, ab 16 Jahre
+  - name: Dagpas
+    options:
+      - amount: "46"
+        currency: EUR
+        note:
+          nl: Waterskiën, t/m 15 jaar
+          en: Waterskiing, up to 15
+          de: Wasserski, bis 15 Jahre
+      - amount: "51"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
+          en: Wakeboarding (helmet and wakeboard included), up to 15
+          de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
+      - amount: "48"
+        currency: EUR
+        note:
+          nl: Kneeboarden, t/m 15 jaar
+          en: Kneeboarding, up to 15
+          de: Kneeboard, bis 15 Jahre
+      - amount: "51"
+        currency: EUR
+        note:
+          nl: Waterskiën, vanaf 16 jaar
+          en: Waterskiing, 16 and older
+          de: Wasserski, ab 16 Jahre
+      - amount: "69"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
+          en: Wakeboarding (helmet and wakeboard included), 16 and older
+          de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
+      - amount: "54"
+        currency: EUR
+        note:
+          nl: Kneeboarden, vanaf 16 jaar
+          en: Kneeboarding, 16 and older
+          de: Kneeboard, ab 16 Jahre
+  - name: 10x 1 uur
+    options:
+      - amount: "185"
+        currency: EUR
+        note:
+          nl: Waterskiën, t/m 15 jaar
+          en: Waterskiing, up to 15
+          de: Wasserski, bis 15 Jahre
+      - amount: "275"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), t/m 15 jaar
+          en: Wakeboarding (helmet and wakeboard included), up to 15
+          de: Wakeboard (inklusive Helm und Board), bis 15 Jahre
+      - amount: "200"
+        currency: EUR
+        note:
+          nl: Kneeboarden, t/m 15 jaar
+          en: Kneeboarding, up to 15
+          de: Kneeboard, bis 15 Jahre
+      - amount: "230"
+        currency: EUR
+        note:
+          nl: Waterskiën, vanaf 16 jaar
+          en: Waterskiing, 16 and older
+          de: Wasserski, ab 16 Jahre
+      - amount: "320"
+        currency: EUR
+        note:
+          nl: Wakeboarden (inclusief helm en wakeboard), vanaf 16 jaar
+          en: Wakeboarding (helmet and wakeboard included), 16 and older
+          de: Wakeboard (inklusive Helm und Board), ab 16 Jahre
+      - amount: "270"
+        currency: EUR
+        note:
+          nl: Kneeboarden, vanaf 16 jaar
+          en: Kneeboarding, 16 and older
+          de: Kneeboard, ab 16 Jahre
+  - name: 10x 2 uur
+    options:
+      - amount: "230"
+        currency: EUR
+        note:
+          nl: t/m 15 jaar
+          en: up to 15
+          de: bis 15 Jahre
+      - amount: "325"
+        currency: EUR
+        note:
+          nl: vanaf 16 jaar
+          en: 16 and older
+          de: ab 16 Jahre
+  - name: Weekpas
+    options:
+      - amount: "195"
+        currency: EUR
+        note:
+          nl: t/m 15 jaar
+          en: up to 15
+          de: bis 15 Jahre
+      - amount: "240"
+        currency: EUR
+        note:
+          nl: vanaf 16 jaar
+          en: 16 and older
+          de: ab 16 Jahre
+  - name: Tweeweken pas
+    options:
+      - amount: "280"
+        currency: EUR
+        note:
+          nl: t/m 15 jaar
+          en: up to 15
+          de: bis 15 Jahre
+      - amount: "325"
+        currency: EUR
+        note:
+          nl: vanaf 16 jaar
+          en: 16 and older
+          de: ab 16 Jahre
+  - name: Maandpas
+    options:
+      - amount: "355"
+        currency: EUR
+        note:
+          nl: t/m 15 jaar
+          en: up to 15
+          de: bis 15 Jahre
+      - amount: "398"
+        currency: EUR
+        note:
+          nl: vanaf 16 jaar
+          en: 16 and older
+          de: ab 16 Jahre
+  - name: Seizoenspas
+    options:
+      - amount: "570"
+        currency: EUR
+        note:
+          nl: t/m 15 jaar
+          en: up to 15
+          de: bis 15 Jahre
+      - amount: "680"
+        currency: EUR
+        note:
+          nl: vanaf 16 jaar
+          en: 16 and older
+          de: ab 16 Jahre
+  - name: Wetsuit
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+      - amount: "9"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+          de: 2 Stunden
+      - amount: "15"
+        currency: EUR
+        per: day
+      - amount: "69"
+        currency: EUR
+        per:
+          nl: week
+          en: week
+          de: Woche
+  - name: Helm
+    options:
+      - amount: "2.50"
+        currency: EUR
+        per: hour
+      - amount: "4.50"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+          de: 2 Stunden
+      - amount: "5.50"
+        currency: EUR
+        per: day
+      - amount: "25"
+        currency: EUR
+        per:
+          nl: week
+          en: week
+          de: Woche
