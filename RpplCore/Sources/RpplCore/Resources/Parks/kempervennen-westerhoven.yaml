@@ -1,67 +1,75 @@
 version: 1
 id: kempervennen-westerhoven
-created_at: 2026-10-15
-updated_at: 2026-10-15
 history:
-  - date: 2026-10-15
-    description: initial
-
+- date: '2026-10-15'
+  description: initial
+- date: '2026-10-15'
+  description: Edited in app (override)
 name: Waterskicentrum De Kempervennen
-short_name: De Kempervennen
 languages:
-  - nl
-  - en
-  - fr
-  - de
+- nl
+- en
+- fr
+- de
+location:
+  lat: 5.13270835661919e+1
+  lon: 5.42347669621393e+0
 address: Kempervennendreef 8, 5563 VB Westerhoven
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
-location:
-  lat: 51.3259005
-  lon: 5.4287059
-
+cables:
+- name: Waterskibaan
+  direction: cw
+  description: Kabel met vijf masten en een snelheid van ongeveer 30 km/u.
+  points:
+  - lat: 5.13272419887815e+1
+    lon: 5.4236276925192e+0
+  - lat: 5.13287588122427e+1
+    lon: 5.42081465606831e+0
+  - lat: 5.13294935958887e+1
+    lon: 5.42113141841666e+0
+  - lat: 5.13295651530635e+1
+    lon: 5.42209350044789e+0
+  - lat: 5.13277854295212e+1
+    lon: 5.42453872367415e+0
 phone: +31 (0) 40 207 18 98
 email: info@hetwaterskicentrum.nl
 website: https://www.hetwaterskicentrum.nl
-links:
-  - kind: booking
-    url: "https://booking.hetwaterskicentrum.nl/book"
-  - kind: instagram
-    url: "https://www.instagram.com/waterskicentrumdekempervennen/"
-  - kind: facebook
-    url: "https://www.facebook.com/wsc.dekempervennen/"
-
-facilities:
-  - Aquapark
-  - Beachbar
-  - Materiaal en instructie inbegrepen
-
-cables:
-  - name: Waterskibaan
-    direction: cw
-    length_m: 770
-    description: Kabel met vijf masten en een snelheid van ongeveer 30 km/u.
-
 prices:
-  - name: 90 minuten
-    options:
-      - amount: "34.50"
-        currency: EUR
-        note:
-          nl: Vanaf 8 jaar, inclusief materiaal en instructie
-          en: Ages 8 and up, equipment and instruction included
-          fr: Dès 8 ans, matériel et instruction inclus
-          de: Ab 8 Jahren, Material und Anleitung inklusive
-  - name: Seizoenskaart
-    options:
-      - amount: "924"
-        currency: EUR
-        per:
-          nl: seizoen
-          en: season
-          fr: saison
-          de: Saison
-  - name: Obstacle board
-    options:
-      - amount: "15"
-        currency: EUR
+- name: 90 minuten
+  options:
+  - amount: '34.50'
+    currency: EUR
+    note:
+      en: Ages 8 and up, equipment and instruction included
+      fr: "D\xE8s 8 ans, mat\xE9riel et instruction inclus"
+      nl: Vanaf 8 jaar, inclusief materiaal en instructie
+      de: Ab 8 Jahren, Material und Anleitung inklusive
+- name: Seizoenskaart
+  options:
+  - amount: '924'
+    currency: EUR
+    per:
+      de: Saison
+      en: season
+      nl: seizoen
+      fr: saison
+- name: Obstacle board
+  options:
+  - amount: '15'
+    currency: EUR
+links:
+- kind: booking
+  url: https://booking.hetwaterskicentrum.nl/book
+- kind: instagram
+  url: https://www.instagram.com/waterskicentrumdekempervennen/
+- kind: facebook
+  url: https://www.facebook.com/wsc.dekempervennen/
+facilities:
+- Aquapark
+- Beachbar
+- Materiaal en instructie inbegrepen
+created_at: '2026-10-15'
+updated_at: '2026-10-15'
+based_on_updated_at: '2026-10-15'
+based_on_revision: 1
+short_name: De Kempervennen

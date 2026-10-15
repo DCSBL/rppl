@@ -1,86 +1,96 @@
 version: 1
 id: schotsman-kamperland
-created_at: 2026-10-15
-updated_at: 2026-10-15
 history:
-  - date: 2026-10-15
-    description: initial
-
+- date: '2026-10-15'
+  description: initial
+- date: '2026-10-15'
+  description: Edited in app (override)
 name: Schotsman Watersport Kamperland
-short_name: Schotsman Watersport
 languages:
-  - nl
-  - en
-  - de
+- nl
+- en
+- de
+location:
+  lat: 5.15716393e+1
+  lon: 3.6520692e+0
 address: Campensweg 3, 4493 MN Kamperland
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
-location:
-  lat: 51.5716393
-  lon: 3.6520692
-
-water_temperature:
-  provider: rws_nl
-  station_id: kamperland.schotsman
-
+cables:
+- name: Cable
+  direction: ccw
+  points:
+  - lat: 5.15714437955777e+1
+    lon: 3.65099269976537e+0
+  - lat: 5.1574086630809e+1
+    lon: 3.64960540233016e+0
+  - lat: 5.15737712576934e+1
+    lon: 3.64827222909175e+0
+  - lat: 5.1571116478828e+1
+    lon: 3.64978593482483e+0
 phone: 0113 - 370270
 email: info@schotsmanwatersport.nl
 website: https://www.schotsmanwatersport.nl
-links:
-  - kind: booking
-    url: "https://www.schotsmanwatersport.nl/waterski-wakeboard/reserveren-online-ticket/"
-
-facilities:
-  - Zwemvest en standaard waterski's inbegrepen
-  - Aquapark
-  - Winkel
-  - Restaurant met terras
-  - Gratis parkeren
-
 prices:
-  - name: 1 uur
-    options:
-      - amount: "24"
-        currency: EUR
-        per: person
-  - name: 2 uur
-    options:
-      - amount: "33"
-        currency: EUR
-        per: person
-  - name: Voordeelkaart
-    options:
-      - amount: "210"
-        currency: EUR
-        note:
-          nl: 10 x 1 uur, te delen door meerdere deelnemers
-          en: 10 x 1 hour, can be shared by several riders
-          de: 10 x 1 Stunde, von mehreren Teilnehmern nutzbar
-  - name: Seizoenskaart
-    options:
-      - amount: "895"
-        currency: EUR
-        note:
-          nl: Dagelijks 2 uur, persoonsgebonden
-          en: 2 hours daily, personal
-          de: Täglich 2 Stunden, personengebunden
-  - name: Wetsuit
-    options:
-      - amount: "5"
-        currency: EUR
-        per: hour
-  - name: Kneeboard
-    options:
-      - amount: "7"
-        currency: EUR
-        per: hour
-  - name: Wakeboard
-    options:
-      - amount: "8"
-        currency: EUR
-        per: hour
-  - name: Obstacle board
-    options:
-      - amount: "12"
-        currency: EUR
-        per: hour
+- name: 1 uur
+  options:
+  - amount: '24'
+    currency: EUR
+    per: person
+- name: 2 uur
+  options:
+  - amount: '33'
+    currency: EUR
+    per: person
+- name: Voordeelkaart
+  options:
+  - amount: '210'
+    currency: EUR
+    note:
+      en: 10 x 1 hour, can be shared by several riders
+      nl: 10 x 1 uur, te delen door meerdere deelnemers
+      de: 10 x 1 Stunde, von mehreren Teilnehmern nutzbar
+- name: Seizoenskaart
+  options:
+  - amount: '895'
+    currency: EUR
+    note:
+      en: 2 hours daily, personal
+      nl: Dagelijks 2 uur, persoonsgebonden
+      de: "T\xE4glich 2 Stunden, personengebunden"
+- name: Wetsuit
+  options:
+  - amount: '5'
+    currency: EUR
+    per: hour
+- name: Kneeboard
+  options:
+  - amount: '7'
+    currency: EUR
+    per: hour
+- name: Wakeboard
+  options:
+  - amount: '8'
+    currency: EUR
+    per: hour
+- name: Obstacle board
+  options:
+  - amount: '12'
+    currency: EUR
+    per: hour
+links:
+- kind: booking
+  url: https://www.schotsmanwatersport.nl/waterski-wakeboard/reserveren-online-ticket/
+facilities:
+- Zwemvest en standaard waterski's inbegrepen
+- Aquapark
+- Winkel
+- Restaurant met terras
+- Gratis parkeren
+created_at: '2026-10-15'
+updated_at: '2026-10-15'
+based_on_updated_at: '2026-10-15'
+based_on_revision: 1
+water_temperature:
+  provider: rws_nl
+  station_id: kamperland.schotsman
+short_name: Schotsman Watersport

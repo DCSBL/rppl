@@ -1,45 +1,54 @@
 version: 1
 id: stroombroek-braamt
-created_at: 2026-10-15
-updated_at: 2026-10-15
 history:
-  - date: 2026-10-15
-    description: initial
-
+- date: '2026-10-15'
+  description: initial
+- date: '2026-10-15'
+  description: Edited in app (override)
 name: Beachclub & Kabelwaterskibaan Stroombroek
-short_name: Kabelwaterskibaan Stroombroek
 languages:
-  - nl
+- nl
+location:
+  lat: 5.19373532e+1
+  lon: 6.271809e+0
 address: Wijnbergseweg 13, 7047 CZ Braamt
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
-location:
-  lat: 51.9373532
-  lon: 6.271809
-
-# Nearest station that still reports (~15 km).
-water_temperature:
-  provider: rws_nl
-  station_id: lobith.ponton
-
+cables:
+- name: Kabelwaterskibaan
+  direction: ccw
+  description: De baan is 1005 meter lang, heeft vier obstakels en een snelheid van
+    30 km/u.
+  points:
+  - lat: 5.19367810608403e+1
+    lon: 6.27208088144727e+0
+  - lat: 5.19369348702425e+1
+    lon: 6.26995242436078e+0
+  - lat: 5.19343632849393e+1
+    lon: 6.26815487009996e+0
+  - lat: 5.19336888372515e+1
+    lon: 6.26946337555888e+0
+  - lat: 5.19344745136211e+1
+    lon: 6.27164089650253e+0
 phone: 0314 - 395 283
 email: info@kabelwaterskibaan.nl
 website: https://kabelwaterskibaan.nl
 links:
-  - kind: booking
-    url: "https://kabelwaterskibaan.nl/reserveren-activiteit?type=watersport"
-  - kind: instagram
-    url: "https://www.instagram.com/beachclub.stroombroek/"
-
+- kind: booking
+  url: https://kabelwaterskibaan.nl/reserveren-activiteit?type=watersport
+- kind: instagram
+  url: https://www.instagram.com/beachclub.stroombroek/
 facilities:
-  - Zwemvest en waterski's inbegrepen
-  - Wakeboard en wetsuit te huur
-  - Restaurant
-  - Terras
-  - Curlingbaan
-  - Parkeren
-
-cables:
-  - name: Kabelwaterskibaan
-    length_m: 1005
-    description: De baan is 1005 meter lang, heeft vier obstakels en een snelheid van 30 km/u.
+- Zwemvest en waterski's inbegrepen
+- Wakeboard en wetsuit te huur
+- Restaurant
+- Terras
+- Curlingbaan
+- Parkeren
+created_at: '2026-10-15'
+updated_at: '2026-10-15'
+based_on_updated_at: '2026-10-15'
+based_on_revision: 1
+water_temperature:
+  provider: rws_nl
+  station_id: lobith.ponton
+short_name: Kabelwaterskibaan Stroombroek
