@@ -414,7 +414,7 @@ struct LogbookView: View {
         action: (() -> Void)? = nil
     ) -> some View {
         let content = VStack(spacing: 4) {
-            MetricValue(value, size: .medium)
+            MetricValue(value, size: .total)
             Text(label)
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
