@@ -1,0 +1,67 @@
+version: 1
+id: kempervennen-westerhoven
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+
+name: Waterskicentrum De Kempervennen
+short_name: De Kempervennen
+languages:
+  - nl
+  - en
+  - fr
+  - de
+address: Kempervennendreef 8, 5563 VB Westerhoven
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 51.3259005
+  lon: 5.4287059
+
+phone: +31 (0) 40 207 18 98
+email: info@hetwaterskicentrum.nl
+website: https://www.hetwaterskicentrum.nl
+links:
+  - kind: booking
+    url: "https://booking.hetwaterskicentrum.nl/book"
+  - kind: instagram
+    url: "https://www.instagram.com/waterskicentrumdekempervennen/"
+  - kind: facebook
+    url: "https://www.facebook.com/wsc.dekempervennen/"
+
+facilities:
+  - Aquapark
+  - Beachbar
+  - Materiaal en instructie inbegrepen
+
+cables:
+  - name: Waterskibaan
+    direction: cw
+    length_m: 770
+    description: Kabel met vijf masten en een snelheid van ongeveer 30 km/u.
+
+prices:
+  - name: 90 minuten
+    options:
+      - amount: "34.50"
+        currency: EUR
+        note:
+          nl: Vanaf 8 jaar, inclusief materiaal en instructie
+          en: Ages 8 and up, equipment and instruction included
+          fr: Dès 8 ans, matériel et instruction inclus
+          de: Ab 8 Jahren, Material und Anleitung inklusive
+  - name: Seizoenskaart
+    options:
+      - amount: "924"
+        currency: EUR
+        per:
+          nl: seizoen
+          en: season
+          fr: saison
+          de: Saison
+  - name: Obstacle board
+    options:
+      - amount: "15"
+        currency: EUR

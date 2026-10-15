@@ -1,7 +1,7 @@
 version: 1
 id: wetnwild-alphen
 created_at: 2026-09-24
-updated_at: 2026-10-12
+updated_at: 2026-10-15
 history:
   - date: 2026-09-24
     description: initial
@@ -25,6 +25,10 @@ history:
     description: add languages (en, nl) and Dutch variants of note
   - date: 2026-10-12
     description: add extra opening hours exception for 2026-10-14
+  - date: 2026-10-15
+    description: >-
+      remove past extra opening hours (2026-10-14), correct age limit (up to 15 / from 16), add 2-hour,
+      SUP and rental prices
 
 name: Wet 'n Wild
 languages:
@@ -72,13 +76,6 @@ opening:
     - 120
   note: >-
     Booking ahead is recommended.
-  exceptions:
-    - kind: hours
-      label: Extra opening hours
-      dates:
-        - "2026-10-14"
-      open: "17:00"
-      close: "19:00"
   rules:
     - months:
         - 9
@@ -146,20 +143,71 @@ opening:
       start: "19:00"
       end: "20:00"
 
-# Only 1-hour rates confirmed; 2-hour, day and rental prices are missing.
 prices:
   - name: "1 hour"
     options:
       - amount: "25"
         currency: EUR
         note:
-          en: "From 15 years. Skis/board, life vest, helmet and instruction included"
-          nl: "Vanaf 15 jaar. Waterski's/board, zwemvest, helm en instructie inbegrepen"
+          en: "From 16 years. Skis/board, life vest, helmet and instruction included"
+          nl: "Vanaf 16 jaar. Waterski's/board, zwemvest, helm en instructie inbegrepen"
       - amount: "20"
         currency: EUR
         note:
-          en: Up to 14 years
-          nl: T/m 14 jaar
+          en: Up to 15 years
+          nl: T/m 15 jaar
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        note:
+          en: From 16 years
+          nl: Vanaf 16 jaar
+      - amount: "30"
+        currency: EUR
+        note:
+          en: Up to 15 years
+          nl: T/m 15 jaar
+  - name: Stand up paddle
+    options:
+      - amount: "12.50"
+        currency: EUR
+        per: hour
+      - amount: "20"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Wetsuit and wakeskate
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "7.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Wakeboard
+    options:
+      - amount: "10"
+        currency: EUR
+        per: hour
+      - amount: "12.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Slider board
+    options:
+      - amount: "15"
+        currency: EUR
+        per: hour
+      - amount: "22.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
   - name: Kids Wake Club
     options:
       - amount: "175"

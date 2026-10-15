@@ -1,7 +1,7 @@
 version: 1
 id: beavercreek-roermond
 created_at: 2026-10-05
-updated_at: 2026-10-07
+updated_at: 2026-10-15
 history:
   - date: 2026-10-05
     description: initial
@@ -11,6 +11,8 @@ history:
     description: add languages (en, nl, de) and Dutch and German variants of per and note
   - date: 2026-10-12
     description: add short_name
+  - date: 2026-10-15
+    description: add water_temperature (Roermond stuw boven, still reporting)
 
 name: Beaver Creek Wake Park Roermond
 short_name: Beaver Creek Wake Park
@@ -23,6 +25,10 @@ timezone: Europe/Amsterdam
 location:
   lat: 51.206912007
   lon: 5.972829739
+
+water_temperature:
+  provider: rws_nl
+  station_id: roermond.stuw.boven
 
 email: info@wake-park.nl
 website: https://www.wake-park.nl

@@ -1,7 +1,7 @@
 version: 1
 id: zeumeren-voorthuizen
 created_at: 2026-10-05
-updated_at: 2026-10-07
+updated_at: 2026-10-15
 history:
   - date: 2026-10-05
     description: initial, from zeumerenwatersport.nl
@@ -9,6 +9,8 @@ history:
     description: Park pin and cable layout traced on the map
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of per and note
+  - date: 2026-10-15
+    description: remove past dated opening rules (2026-06-01 to 2026-09-30)
 
 name: Zeumeren Watersport
 languages:
@@ -84,29 +86,6 @@ opening:
         - fri
       open: "16:30"
       close: "21:00"
-    - from: "2026-06-01"
-      until: "2026-07-17"
-      days:
-        - tue
-        - wed
-        - thu
-        - fri
-      open: "14:00"
-      close: "21:30"
-    - from: "2026-07-18"
-      until: "2026-08-30"
-      days:
-        - weekdays
-      open: "12:30"
-      close: "21:30"
-    - from: "2026-08-31"
-      until: "2026-09-30"
-      days:
-        - tue
-        - wed
-        - fri
-      open: "15:30"
-      close: "20:00"
     - months:
         - 5
         - 6

@@ -1,0 +1,93 @@
+version: 1
+id: wakepark-groningen
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+
+name: Wakepark Groningen
+languages:
+  - nl
+  - en
+address: Zilvermeer, Kardinge, Groningen
+timezone: Europe/Amsterdam
+# Approximate pin on the Zilvermeer, the site gives no street address.
+location:
+  lat: 53.236356
+  lon: 6.6040862
+
+phone: 06 29 177 109
+email: info@wakeparkgroningen.nl
+website: https://www.wakeparkgroningen.nl
+links:
+  - kind: booking
+    url: "https://www.wakeparkgroningen.nl/book"
+  - kind: instagram
+    url: "https://instagram.com/wakeparkgroningen2.0"
+  - kind: facebook
+    url: "https://facebook.com/wakeparkgroningen"
+
+facilities:
+  - Obstakels
+  - Instructeurs
+  - Materiaal inbegrepen bij lessen
+  - Eten en drinken
+
+cables:
+  - name: Kabel
+    description: Kabel met 8 obstakels en een instelbare snelheid.
+
+prices:
+  - name: Introductieles wakeboarden
+    options:
+      - amount: "38"
+        currency: EUR
+        note:
+          nl: 1 persoon, 30 minuten, inclusief materiaal
+          en: 1 person, 30 minutes, equipment included
+      - amount: "72"
+        currency: EUR
+        note:
+          nl: 2 personen, 60 minuten, inclusief materiaal
+          en: 2 people, 60 minutes, equipment included
+  - name: Beginnerscursus wakeboarden
+    options:
+      - amount: "179"
+        currency: EUR
+        note:
+          nl: 5 lessen van 60 minuten
+          en: 5 lessons of 60 minutes
+  - name: Individuele sessie
+    options:
+      - amount: "34"
+        currency: EUR
+        note:
+          nl: Ervaren wakeboarders, 30 minuten
+          en: Experienced wakeboarders, 30 minutes
+  - name: Groepshuur
+    options:
+      - amount: "86"
+        currency: EUR
+        note:
+          nl: 1 tot 3 personen, 60 minuten
+          en: 1 to 3 people, 60 minutes
+      - amount: "132"
+        currency: EUR
+        note:
+          nl: 4 of 5 personen, 90 minuten
+          en: 4 or 5 people, 90 minutes
+  - name: Bodyboarden
+    options:
+      - amount: "36"
+        currency: EUR
+        note:
+          nl: 1 tot 4 kinderen, 30 minuten
+          en: 1 to 4 children, 30 minutes
+  - name: Lidmaatschap Brilliant Boarder
+    options:
+      - amount: "39.99"
+        currency: EUR
+        per:
+          nl: jaar
+          en: year
