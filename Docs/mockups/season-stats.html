@@ -33,23 +33,16 @@ svg{width:100%;height:auto;display:block;overflow:visible}
 <main>
 <h1>Logbook</h1>
 <p class="sub">Sessions and sets</p>
-<div class="ctl">Mock state: <button data-n="8" class="on">8 sessions</button><button data-n="3">3 sessions</button></div>
+<div class="ctl">Mock state: <button data-n="24" class="on">24 sessions</button><button data-n="3">3 sessions</button></div>
 
 <div class="tile">
   <div class="hd" style="--c:var(--accent)"><span>Total</span></div>
   <div class="row">
-    <div><div class="val" id="t-s">8</div><div class="foot">Sessions</div></div>
-    <div><div class="val">112<small>km</small></div><div class="foot">Distance</div></div>
+    <div><div class="val" id="t-s"></div><div class="foot">Sessions</div></div>
+    <div><div class="val" id="t-d"></div><div class="foot">Distance</div></div>
     <div><div class="val">41,6<small>km/h</small></div><div class="foot">Max speed</div></div>
   </div><hr>
-  <div class="foot">46 sets · 318 laps</div>
-</div>
-
-<div id="locked" class="tile lock" hidden style="margin-top:12px">
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;color:var(--muted)"><path d="M3 17l5-6 4 4 4-8 5 10"/></svg>
-  <b>Season stats</b>
-  <p>Ride 5 sessions to see your season. <span id="left">2</span> to go.</p>
-  <div class="bar"><b id="prog" style="width:60%"></b></div>
+  <div class="foot" id="t-f"></div>
 </div>
 
 <div id="stats" class="grid">
@@ -57,58 +50,65 @@ svg{width:100%;height:auto;display:block;overflow:visible}
   <div class="tile wide" style="--c:var(--dist)">
     <div class="hd"><span id="d-hd">Distance per session</span>
       <div class="seg"><button class="on" data-m="dist">km</button><button data-m="time">time</button></div></div>
-    <div class="val" id="d-val">14,0<small>km avg</small></div>
+    <div class="val" id="d-val"></div>
     <svg id="d-chart" viewBox="0 0 320 100"></svg>
-    <div class="foot" id="d-foot">Best: 19,2 km on 14 Aug</div>
+    <div class="foot" id="d-foot"></div>
   </div>
 
   <!-- Laps -->
   <div class="tile" style="--c:var(--laps)">
     <div class="hd"><span>Laps</span></div>
-    <div class="val">318<small>total</small></div>
+    <div class="val" id="l-val"></div>
     <svg id="l-chart" viewBox="0 0 150 60"></svg>
-    <div class="foot">Avg 40 per session</div>
+    <div class="foot" id="l-foot"></div>
   </div>
 
   <!-- Calories -->
   <div class="tile" style="--c:var(--energy)">
     <div class="hd"><span>Calories</span></div>
-    <div class="val">4.120<small>kcal</small></div>
+    <div class="val" id="e-val"></div>
     <svg id="e-chart" viewBox="0 0 150 60"></svg>
-    <div class="foot">Avg 515 per session</div>
+    <div class="foot" id="e-foot"></div>
   </div>
 
   <!-- Temperatures -->
   <div class="tile wide" style="--c:var(--water)">
     <div class="hd"><span>Water and air</span></div>
-    <div class="legend"><span><i style="background:var(--water)"></i>Water 17 °C avg</span><span><i style="background:var(--air)"></i>Air 21 °C avg</span></div>
+    <div class="legend"><span><i style="background:var(--water)"></i>Water 16 °C avg</span><span><i style="background:var(--air)"></i>Air 21 °C avg</span></div>
     <svg id="w-chart" viewBox="0 0 320 110"></svg>
-    <div class="foot">Warmest water: 21 °C on 14 Aug</div>
+    <div class="foot">Warmest water: 21 °C in Aug</div>
   </div>
 </div>
 </main>
 <script>
-const M=["Apr","May","Jun","Jul","Aug","Aug","Sep","Oct"];
-const D={dist:[9.5,11,12.4,14.8,19.2,15.1,16,13.5],time:[1.9,2.1,2.4,2.8,3.4,2.9,3.1,2.6],laps:[22,28,35,44,58,52,46,33],kcal:[320,400,480,560,720,610,580,450],water:[11,13,16,18,21,20,17,12],air:[12,17,20,24,27,24,19,13]};
-const S=(t,a)=>`<${t} ${a}`;
-function bars(id,d,w,h,col,labels){const m=Math.max(...d),bw=w/d.length;let s='';
- d.forEach((v,i)=>{const bh=v/m*(h-14);s+=`<rect x="${i*bw+bw*.15}" y="${h-14-bh}" width="${bw*.7}" height="${bh}" rx="3" fill="${col}"/>`;if(labels)s+=`<text class="ax" x="${i*bw+bw/2}" y="${h}" text-anchor="middle">${M[i]}</text>`});
+const MN=["Apr","May","Jun","Jul","Aug","Sep","Oct"],PER=[2,3,4,4,5,4,2]; // sessions per month; empty days never appear
+let r=7;const rnd=()=>(r=(r*16807)%2147483647)/2147483647;
+const ses=[];PER.forEach((c,m)=>{const peak=1-Math.abs(m-4)*.12;for(let i=0;i<c;i++){const t=(.6+rnd()*.8)*peak;ses.push({m,dist:+(15*t).toFixed(1),time:+(2.8*t).toFixed(1),laps:Math.round(45*t),kcal:Math.round(580*t)})}});
+const W=[11,13,16,18,21,17,12],A=[12,17,20,24,27,19,13];
+const sum=k=>ses.reduce((a,x)=>a+x[k],0),fmt=n=>n.toLocaleString('nl-NL',{maximumFractionDigits:1});
+function bars(id,k,w,h,col,labels){const d=ses.map(x=>x[k]),m=Math.max(...d),bw=w/d.length;let s='',last=-1;
+ d.forEach((v,i)=>{const bh=v/m*(h-14);s+=`<rect x="${i*bw+bw*.1}" y="${h-14-bh}" width="${bw*.8}" height="${bh}" rx="${Math.min(3,bw/2)}" fill="${col}"/>`;
+  if(labels&&ses[i].m!=last){last=ses[i].m;s+=`<text class="ax" x="${i*bw}" y="${h}">${MN[last]}</text>`}});
  document.getElementById(id).innerHTML=s}
 function lines(id,series,w,h){const all=series.flatMap(s=>s.d),lo=Math.min(...all)-2,hi=Math.max(...all)+2,n=series[0].d.length;let s='';
  for(const t of [0,.5,1]){const y=(h-14)*t;s+=`<line x1="0" x2="${w}" y1="${y}" y2="${y}" stroke="var(--fill)"/><text class="ax" x="${w}" y="${y-2}" text-anchor="end">${Math.round(hi-(hi-lo)*t)}°</text>`}
  series.forEach(se=>{const p=se.d.map((v,i)=>`${i*(w-20)/(n-1)+4},${(h-14)*(1-(v-lo)/(hi-lo))}`);s+=`<polyline points="${p.join(' ')}" fill="none" stroke="${se.c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;p.forEach(q=>{const[x,y]=q.split(',');s+=`<circle cx="${x}" cy="${y}" r="2.5" fill="${se.c}"/>`})});
- M.forEach((m,i)=>s+=`<text class="ax" x="${i*(w-20)/(n-1)+4}" y="${h}" text-anchor="middle">${m}</text>`);
+ MN.forEach((m,i)=>s+=`<text class="ax" x="${i*(w-20)/(n-1)+4}" y="${h}" text-anchor="middle">${m}</text>`);
  document.getElementById(id).innerHTML=s}
-function draw(mode){bars('d-chart',D[mode],320,100,'var(--dist)',true);
- document.getElementById('d-hd').textContent=mode=='dist'?'Distance per session':'Duration per session';
- document.getElementById('d-val').innerHTML=mode=='dist'?'14,0<small>km avg</small>':'2u 36<small>avg</small>';
- document.getElementById('d-foot').textContent=mode=='dist'?'Best: 19,2 km on 14 Aug':'Longest: 3u 24 on 14 Aug'}
-draw('dist');bars('l-chart',D.laps,150,60,'var(--laps)');bars('e-chart',D.kcal,150,60,'var(--energy)');
-lines('w-chart',[{d:D.air,c:'var(--air)'},{d:D.water,c:'var(--water)'}],320,110);
+const n=ses.length;
+function draw(k){bars('d-chart',k,320,100,'var(--dist)',true);const dist=k=='dist';
+ document.getElementById('d-hd').textContent=dist?'Distance per session':'Duration per session';
+ document.getElementById('d-val').innerHTML=dist?`${fmt(sum('dist')/n)}<small>km avg</small>`:`${fmt(sum('time')/n)}<small>u avg</small>`;
+ const best=Math.max(...ses.map(x=>x[k]));document.getElementById('d-foot').textContent=`Best: ${fmt(best)} ${dist?'km':'u'}`}
+document.getElementById('t-s').textContent=n;document.getElementById('t-d').innerHTML=`${Math.round(sum('dist'))}<small>km</small>`;
+document.getElementById('t-f').textContent=`${Math.round(n*1.9)} sets · ${sum('laps')} laps`;
+draw('dist');bars('l-chart','laps',150,60,'var(--laps)');bars('e-chart','kcal',150,60,'var(--energy)');
+document.getElementById('l-val').innerHTML=`${sum('laps')}<small>total</small>`;document.getElementById('l-foot').textContent=`Avg ${Math.round(sum('laps')/n)} per session`;
+document.getElementById('e-val').innerHTML=`${fmt(sum('kcal'))}<small>kcal</small>`;document.getElementById('e-foot').textContent=`Avg ${Math.round(sum('kcal')/n)} per session`;
+lines('w-chart',[{d:A,c:'var(--air)'},{d:W,c:'var(--water)'}],320,110);
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x==b));draw(b.dataset.m)});
-document.querySelectorAll('.ctl button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ctl button').forEach(x=>x.classList.toggle('on',x==b));const n=+b.dataset.n,ok=n>=5;
- document.getElementById('stats').hidden=!ok;document.getElementById('locked').hidden=ok;document.getElementById('t-s').textContent=n;
- document.getElementById('left').textContent=5-n;document.getElementById('prog').style.width=n/5*100+'%'});
+// season charts need 5+ sessions; below that show only Total
+document.querySelectorAll('.ctl button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ctl button').forEach(x=>x.classList.toggle('on',x==b));document.getElementById('stats').hidden=+b.dataset.n<5});
 </script>
 </body>
 </html>
