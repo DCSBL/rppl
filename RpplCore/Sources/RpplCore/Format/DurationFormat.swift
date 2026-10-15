@@ -21,6 +21,19 @@ public enum DurationFormat {
         )
     }
 
+    /// One rounded unit (`37 hr`, `40 min`) so a long total fits a narrow tile and splits into number + unit.
+    public static func total(_ interval: TimeInterval, locale: Locale = .current) -> String {
+        let unit: Duration.UnitsFormatStyle.Unit = interval >= 3600 ? .hours : .minutes
+        return Duration.seconds(max(0, interval)).formatted(
+            .units(
+                allowed: [unit],
+                width: .abbreviated,
+                fractionalPart: .hide(rounded: .toNearestOrAwayFromZero)
+            )
+            .locale(locale)
+        )
+    }
+
     public struct Parts: Equatable, Sendable {
         public let hours: Int
         public let minutes: Int
