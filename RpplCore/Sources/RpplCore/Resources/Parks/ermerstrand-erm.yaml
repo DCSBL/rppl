@@ -1,0 +1,128 @@
+version: 1
+id: ermerstrand-erm
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+
+name: Ermerstrand
+languages:
+  - nl
+  - en
+address: Steenbakkersweg 3, 7843 RM Erm
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 52.747311
+  lon: 6.7975064
+
+phone: 0591 - 56 40 14
+email: info@ermerstrand.nl
+website: https://ermerstrand.nl
+links:
+  - kind: facebook
+    url: "https://www.facebook.com/Ermerstrand/"
+
+facilities:
+  - Zwemvest, waterski's en helm inbegrepen
+  - Wakeboard en wetsuit te huur
+  - Horeca
+  - Camping
+
+cables:
+  - name: Waterskibaan
+    description: Kabel met vier bochten voor 8 riders tegelijk, met een kicker.
+
+opening:
+  note: >-
+    De baan start vanaf 3 reserveringen. Bij onweer is de baan dicht.
+
+prices:
+  - name: 1 uur
+    options:
+      - amount: "22"
+        currency: EUR
+        note:
+          nl: Volwassenen
+          en: Adults
+      - amount: "20"
+        currency: EUR
+        note:
+          nl: Jonger dan 16 jaar
+          en: Under 16
+  - name: 2 uur
+    options:
+      - amount: "33"
+        currency: EUR
+        note:
+          nl: Volwassenen
+          en: Adults
+      - amount: "29"
+        currency: EUR
+        note:
+          nl: Jonger dan 16 jaar
+          en: Under 16
+  - name: Dagkaart
+    options:
+      - amount: "50"
+        currency: EUR
+        note:
+          nl: Volwassenen
+          en: Adults
+      - amount: "45"
+        currency: EUR
+        note:
+          nl: Jonger dan 16 jaar
+          en: Under 16
+  - name: Wakeboard
+    options:
+      - amount: "7.50"
+        currency: EUR
+        per:
+          nl: 1 uur
+          en: 1 hour
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
+  - name: Wakeboard PRO
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: 1 uur
+          en: 1 hour
+      - amount: "12.50"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
+  - name: Wetsuit
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          nl: 1 uur
+          en: 1 hour
+      - amount: "7.50"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
