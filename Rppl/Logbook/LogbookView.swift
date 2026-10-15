@@ -14,6 +14,8 @@ struct LogbookView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var catalog = SessionCatalog()
+    @AppStorage(AppSettingsKey.speedTotal) private var speedTotal = SpeedTotal.max
+    @AppStorage(AppSettingsKey.distanceTotal) private var distanceTotal = DistanceTotal.distance
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
@@ -319,14 +321,27 @@ struct LogbookView: View {
     }
 
     private var totalsCard: some View {
-        let totals = catalog.totals
-        let sessionsValue = catalog.isLoading ? "-" : "\(totals.sessionCount)"
-        let distanceValue = catalog.isLoading
-            ? "-"
-            : DistanceFormat.kilometers(totals.totalDistanceMeters)
-        let maxSpeedValue = catalog.isLoading || totals.topSpeedKmh <= 0
-            ? "-"
-            : DistanceFormat.kilometersPerHour(totals.topSpeedKmh)
+        let season = catalog.season
+        let loading = catalog.isLoading
+        let sessionsValue = loading ? "-" : "\(season.sessionCount)"
+
+        let distanceLabel: LocalizedStringKey
+        let distanceValue: String
+        switch distanceTotal {
+        case .distance:
+            distanceLabel = "Distance"
+            distanceValue = DistanceFormat.kilometers(season.totalDistanceMeters)
+        case .duration:
+            distanceLabel = "Total time"
+            distanceValue = DurationFormat.total(season.totalDuration)
+        case .riding:
+            distanceLabel = "Total riding time"
+            distanceValue = DurationFormat.total(season.totalRidingDuration)
+        }
+
+        let speedLabel: LocalizedStringKey = speedTotal == .max ? "Max speed" : "Average speed"
+        let speed = speedTotal == .max ? season.topSpeedKmh : season.typicalSpeedKmh
+        let speedValue = if let speed, speed > 0 { DistanceFormat.kilometersPerHour(speed) } else { "-" }
 
         return InfoTile("Total", metric: .riding) {
             Group {
@@ -334,33 +349,43 @@ struct LogbookView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         totalMetric(value: sessionsValue, label: "Sessions")
                         totalDivider(horizontal: true)
-                        totalMetric(value: distanceValue, label: "Distance")
+                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel) {
+                            distanceTotal = distanceTotal.cycled()
+                        }
                         totalDivider(horizontal: true)
-                        totalMetric(value: maxSpeedValue, label: "Max speed")
+                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel) {
+                            speedTotal = speedTotal.cycled()
+                        }
                     }
                 } else {
                     HStack(spacing: 0) {
                         totalMetric(value: sessionsValue, label: "Sessions")
                         totalDivider(horizontal: false)
-                        totalMetric(value: distanceValue, label: "Distance")
+                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel) {
+                            distanceTotal = distanceTotal.cycled()
+                        }
                         totalDivider(horizontal: false)
-                        totalMetric(value: maxSpeedValue, label: "Max speed")
+                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel) {
+                            speedTotal = speedTotal.cycled()
+                        }
                     }
                 }
             }
+            .sensoryFeedback(.selection, trigger: speedTotal)
+            .sensoryFeedback(.selection, trigger: distanceTotal)
 
             Divider()
                 .overlay(Color.rpplFill)
 
             Text(
-                catalog.isLoading
+                loading
                     ? "—"
                     : LogbookFormatting.totalsFooter(
-                        sets: totals.totalSets,
-                        laps: totals.totalLaps
+                        sets: season.totalSets,
+                        laps: season.totalLaps
                     )
             )
-            .font(.caption)
+            .font(.subheadline)
             .foregroundStyle(RpplDesign.secondaryText)
         }
     }
@@ -372,15 +397,31 @@ struct LogbookView: View {
             .frame(maxWidth: horizontal ? .infinity : nil)
     }
 
-    private func totalMetric(value: String, label: LocalizedStringKey) -> some View {
-        VStack(spacing: 4) {
+    /// A tap on `action` cycles what the total shows (quiet easter egg, no visual affordance).
+    @ViewBuilder
+    private func totalMetric(
+        value: String,
+        label: LocalizedStringKey,
+        action: (() -> Void)? = nil
+    ) -> some View {
+        let content = VStack(spacing: 4) {
             MetricValue(value, size: .medium)
             Text(label)
-                .font(.caption)
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
                 .foregroundStyle(RpplDesign.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+
+        if let action {
+            Button(action: action) { content.contentShape(.rect) }
+                .buttonStyle(.plain)
+        } else {
+            content
+        }
     }
 
     private var sessionsHeader: some View {
@@ -578,7 +619,7 @@ private struct SessionCard: View {
                 }
 
                 Text(sessionMetaText)
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(Color.rpplMuted)
                     .lineLimit(2)
                     .minimumScaleFactor(0.85)
