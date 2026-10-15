@@ -11,7 +11,7 @@ struct RpplApp: App {
         }
         .onChange(of: scenePhase) { _, phase in
             WakeLog.debug(.lifecycle, "scenePhase → \(String(describing: phase))")
-            if phase == .active {
+            if phase == .active, !UITestFixtures.isActive {
                 PhoneConnectivityService.shared.refreshSyncState()
                 PhoneConnectivityService.shared.flushPendingAcks()
                 Task { @MainActor in
@@ -28,6 +28,10 @@ struct RpplApp: App {
         _ = TesterIdentity.resolve()
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
         _ = PhoneConnectivityService.shared
-        PhoneICloudDriveController.shared.start()
+        if UITestFixtures.isActive {
+            UITestFixtures.seed()
+        } else {
+            PhoneICloudDriveController.shared.start()
+        }
     }
 }

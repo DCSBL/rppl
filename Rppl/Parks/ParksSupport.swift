@@ -303,7 +303,7 @@ enum ParkFormatting {
         return english.standaloneMonthSymbols.contains { $0.caseInsensitiveCompare(label) == .orderedSame }
     }
 
-    static func currentMonth(in park: Park, now: Date = Date()) -> Int {
+    static func currentMonth(in park: Park, now: Date = AppClock.now) -> Int {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = park.resolvedTimeZone
         return calendar.component(.month, from: now)
@@ -525,7 +525,7 @@ extension ParkOpenStatusDetail {
 /// reads green when the filtered date is open. "Opens tomorrow" and "Closed" never gain a time,
 /// they're plain status, not a window.
 enum ParkStatusBadge {
-    static func text(for park: Park, filterDate: Date?, now: Date = Date()) -> (text: String, color: Color)? {
+    static func text(for park: Park, filterDate: Date?, now: Date = AppClock.now) -> (text: String, color: Color)? {
         if let filterDate {
             let day = park.schedule(on: filterDate)
             guard day.isScheduleKnown else {

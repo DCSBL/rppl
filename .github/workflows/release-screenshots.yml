@@ -1,0 +1,90 @@
+# Release screenshots: seeded mock data (UITestFixtures) on an iPhone Simulator, attached to the
+# release as assets and listed in its description. Re-running replaces the assets and the section.
+# Runs on publish; for an existing release use "Run workflow" with its tag.
+# The tag reaches the shell only through env, never interpolated.
+
+name: Release screenshots
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        required: true
+
+concurrency:
+  group: release-screenshots-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    name: screenshots
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Run screenshot test
+        shell: bash
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
+              for d in devices:
+                  if d["name"].startswith("iPhone") and d["isAvailable"]:
+                      print(d["udid"]); sys.exit()
+          sys.exit("no iPhone simulator available")')"
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplScreenshotTests \
+            -resultBundlePath Screenshots.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tail -40
+          python3 scripts/ci/export_screenshots.py Screenshots.xcresult screenshots
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/*.png
+          retention-days: 30
+
+      - name: Attach to release
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
+          gh release upload "$RELEASE_TAG" iphone-*.png --clobber
+          gh release view "$RELEASE_TAG" --json body -q .body > body.md
+          python3 - <<'PY'
+          import os, re, urllib.parse
+          from pathlib import Path
+          tag, repo = os.environ["RELEASE_TAG"], os.environ["GITHUB_REPOSITORY"]
+          start, end = "<!-- screenshots:start -->", "<!-- screenshots:end -->"
+          body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
+          rows = [
+              f'<img src="https://github.com/{repo}/releases/download/{urllib.parse.quote(tag)}/{p.name}" width="220" alt="{p.stem}">'
+              for p in sorted(Path(".").glob("iphone-*.png"))
+          ]
+          section = f"{start}\n### Screenshots (iPhone, mock data)\n\n" + "\n".join(rows) + f"\n{end}\n"
+          Path("body.md").write_text(body + "\n\n" + section)
+          PY
+          gh release edit "$RELEASE_TAG" --notes-file body.md
