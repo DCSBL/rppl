@@ -60,6 +60,15 @@ struct LogbookView: View {
                         .listRowSeparator(.hidden)
                 }
 
+                if catalog.season.showsCharts {
+                    Section {
+                        SeasonCharts(season: catalog.season)
+                            .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 12))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    }
+                }
+
                 if catalog.isLoading && catalog.entries.isEmpty {
                     Section {
                         HStack {
