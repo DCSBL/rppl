@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-10-07
+updated_at: 2026-10-15
 history:
   - date: 2026-09-24
     description: initial
@@ -21,8 +21,11 @@ history:
     description: remove month-name labels and source comments; plain hyphen in the summer holiday note
   - date: 2026-10-07
     description: add languages (en, nl) and Dutch variants of per and note
+  - date: 2026-10-15
+    description: rename to Wollebrand Cablepark, use the site's Facebook link, add Instagram
 
-name: Cablepark de Wollebrand
+name: Wollebrand Cablepark
+short_name: Wollebrand Cablepark
 languages:
   - en
   - nl
@@ -45,7 +48,9 @@ links:
   - kind: booking
     url: "https://reserveren.kabelskibaan.nl/checkOut/954e89a6-1cf5-46ef-b48e-0d0cb642128d/dateSelect"
   - kind: facebook
-    url: "https://www.facebook.com/people/Cablepark-Wollebrand/100063621169078/"
+    url: "https://www.facebook.com/Wollebrand"
+  - kind: instagram
+    url: "https://www.instagram.com/cableparkwollebrand/"
 
 cables:
   - name: Cable
