@@ -27,4 +27,8 @@ enum AppSettingsKey {
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// JSON `ReviewPromptState`: good-session count and pending App Store review prompt (local only).
     static let reviewPromptState = "rppl.reviewPromptState"
+    /// Logbook "Max speed" total: `SpeedTotal` raw value (tap cycles max / average).
+    static let speedTotal = "rppl.speedTotal"
+    /// Logbook "Distance" total: `DistanceTotal` raw value (tap cycles distance / total time / riding time).
+    static let distanceTotal = "rppl.distanceTotal"
 }

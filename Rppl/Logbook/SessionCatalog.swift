@@ -13,14 +13,22 @@ struct SessionEntry: Identifiable, Sendable {
     var center: ParkCoordinate?
 
     var id: String { manifest.sessionId }
-}
 
-struct TotalsSummary: Sendable {
-    var sessionCount = 0
-    var totalDistanceMeters = 0.0
-    var topSpeedKmh = 0.0
-    var totalSets = 0
-    var totalLaps = 0
+    var seasonSession: SeasonSession {
+        SeasonSession(
+            date: manifest.startedAt,
+            distanceMeters: stats?.totalDistanceMeters ?? 0,
+            duration: stats?.totalDuration ?? 0,
+            ridingDuration: stats?.ridingDuration ?? 0,
+            sets: stats?.knownSetCount,
+            laps: stats?.knownLapCount,
+            kilocalories: stats.flatMap { $0.totalEnergyKilocalories ?? $0.activeEnergyKilocalories },
+            topSpeedKmh: topSpeedKmh,
+            typicalSpeedKmh: stats?.cableSpeedKmh,
+            airCelsius: manifest.weather?.temperatureCelsius,
+            waterCelsius: stats?.averageWaterTemperatureCelsius ?? manifest.waterTemperatureEstimate?.celsius
+        )
+    }
 }
 
 @Observable
@@ -29,20 +37,8 @@ final class SessionCatalog {
     var entries: [SessionEntry] = []
     var isLoading = false
 
-    var totals: TotalsSummary {
-        var summary = TotalsSummary()
-        summary.sessionCount = entries.count
-        for entry in entries {
-            if let stats = entry.stats {
-                summary.totalDistanceMeters += stats.totalDistanceMeters
-                summary.totalSets += stats.knownSetCount ?? 0
-                summary.totalLaps += stats.knownLapCount ?? 0
-            }
-            if let speed = entry.topSpeedKmh {
-                summary.topSpeedKmh = max(summary.topSpeedKmh, speed)
-            }
-        }
-        return summary
+    var season: SeasonStats {
+        SeasonStats(sessions: entries.map(\.seasonSession))
     }
 
     private var loadTask: Task<Void, Never>?
