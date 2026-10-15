@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Waterski Twente
 languages:
@@ -36,6 +38,19 @@ facilities:
   - Wakeclub
 
 description: Waterskiën en wakeboarden met obstakels aan een terras op het water.
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 52.181141
+        lon: 6.841745
+      - lat: 52.178556
+        lon: 6.840213
+      - lat: 52.178347
+        lon: 6.841195
+      - lat: 52.180927
+        lon: 6.842716
 
 opening:
   rules:

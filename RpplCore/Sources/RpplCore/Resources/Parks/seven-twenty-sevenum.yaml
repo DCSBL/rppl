@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Seven-Twenty Cablepark
 languages:
@@ -13,10 +15,9 @@ languages:
   - de
 address: Middenpeelweg 5, 5975 MZ Sevenum
 timezone: Europe/Amsterdam
-# Approximate pin from a map search for the park name, not the dock.
 location:
-  lat: 51.382029
-  lon: 5.9711517
+  lat: 51.382388
+  lon: 5.971033
 
 # Nearest station that still reports (~12 km).
 water_temperature:
@@ -48,6 +49,18 @@ cables:
   - name: Kabelbaan
     length_m: 783
     description: Een kabel met vijf masten, waar maximaal tien riders tegelijk op kunnen.
+    direction: cw
+    points:
+      - lat: 51.38244
+        lon: 5.970656
+      - lat: 51.380645
+        lon: 5.970126
+      - lat: 51.380492
+        lon: 5.969548
+      - lat: 51.381676
+        lon: 5.967164
+      - lat: 51.382819
+        lon: 5.968199
 
 opening:
   note: >-

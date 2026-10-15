@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Ermerstrand
 languages:
@@ -12,10 +14,9 @@ languages:
   - en
 address: Steenbakkersweg 3, 7843 RM Erm
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
 location:
-  lat: 52.747311
-  lon: 6.7975064
+  lat: 52.750281
+  lon: 6.802005
 
 phone: 0591 - 56 40 14
 email: info@ermerstrand.nl
@@ -33,6 +34,16 @@ facilities:
 cables:
   - name: Waterskibaan
     description: Kabel met vier bochten voor 8 riders tegelijk, met een kicker.
+    direction: ccw
+    points:
+      - lat: 52.75018
+        lon: 6.802235
+      - lat: 52.747666
+        lon: 6.800878
+      - lat: 52.747432
+        lon: 6.80187
+      - lat: 52.750008
+        lon: 6.803225
 
 opening:
   note: >-

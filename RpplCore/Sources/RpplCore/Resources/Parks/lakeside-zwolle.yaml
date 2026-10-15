@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Lakeside Zwolle
 languages:
@@ -12,10 +14,9 @@ languages:
   - en
 address: Zalneweg 110, 8026 PZ Zwolle
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
 location:
-  lat: 52.497602
-  lon: 6.1514627
+  lat: 52.497422
+  lon: 6.152047
 
 # Nearest station that still reports (~16 km).
 water_temperature:
@@ -38,6 +39,18 @@ facilities:
 cables:
   - name: Waterskibaan
     description: Kabel met vijf masten. Obstakels zijn Kicker S, M en L, Flatbar S, M en L, Olliebox en Uprail.
+    direction: ccw
+    points:
+      - lat: 52.497602
+        lon: 6.152084
+      - lat: 52.496857
+        lon: 6.155634
+      - lat: 52.497366
+        lon: 6.156451
+      - lat: 52.497967
+        lon: 6.155585
+      - lat: 52.498244
+        lon: 6.152415
 
 opening:
   note: >-

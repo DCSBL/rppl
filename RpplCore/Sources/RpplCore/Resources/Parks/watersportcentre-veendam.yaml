@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Watersportcentre Veendam
 languages:
@@ -37,9 +39,26 @@ facilities:
 cables:
   - name: Waterskibaan
     description: De baan draait met 27 tot 31 km/u.
+    direction: ccw
+    points:
+      - lat: 53.104727
+        lon: 6.844099
+      - lat: 53.10432
+        lon: 6.848575
+      - lat: 53.104729
+        lon: 6.849178
+      - lat: 53.105236
+        lon: 6.848838
+      - lat: 53.105373
+        lon: 6.844199
   - name: A2 baan
     direction: "2.0"
     description: Kleine waterskibaan voor privélessen bij de eerste starts.
+    points:
+      - lat: 53.104401
+        lon: 6.843971
+      - lat: 53.103778
+        lon: 6.846996
 
 prices:
   - name: 1 uur

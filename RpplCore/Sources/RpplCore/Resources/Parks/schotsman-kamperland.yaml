@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Schotsman Watersport Kamperland
 short_name: Schotsman Watersport
@@ -36,6 +38,19 @@ facilities:
   - Winkel
   - Restaurant met terras
   - Gratis parkeren
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 51.571444
+        lon: 3.650993
+      - lat: 51.574087
+        lon: 3.649605
+      - lat: 51.573771
+        lon: 3.648272
+      - lat: 51.571116
+        lon: 3.649786
 
 prices:
   - name: 1 uur
