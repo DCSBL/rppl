@@ -1,0 +1,135 @@
+version: 1
+id: watersportcentre-veendam
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+
+name: Watersportcentre Veendam
+languages:
+  - nl
+  - en
+address: Bergweg 2, 9642 LV Veendam
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 53.1045211
+  lon: 6.8436139
+
+phone: 0598 - 433 733
+email: info@watersportcentre.nl
+website: https://www.watersportcentre.nl
+links:
+  - kind: booking
+    url: "https://www.watersportcentre.nl/tickets"
+  - kind: facebook
+    url: "https://www.facebook.com/wscveendam"
+
+facilities:
+  - Waterski's, kneeboards, zwemvesten en helm inbegrepen
+  - Aquapark
+  - Horeca
+  - Terras
+  - Kluisjes
+  - Gratis parkeren
+
+cables:
+  - name: Waterskibaan
+    description: De baan draait met 27 tot 31 km/u.
+  - name: A2 baan
+    direction: "2.0"
+    description: Kleine waterskibaan voor privélessen bij de eerste starts.
+
+prices:
+  - name: 1 uur
+    options:
+      - amount: "20"
+        currency: EUR
+        note:
+          nl: Online
+          en: Online
+      - amount: "22.50"
+        currency: EUR
+        note:
+          nl: Kassa
+          en: At the desk
+  - name: 2 uur
+    options:
+      - amount: "26"
+        currency: EUR
+        note:
+          nl: Online
+          en: Online
+      - amount: "28.50"
+        currency: EUR
+        note:
+          nl: Kassa
+          en: At the desk
+  - name: Dagkaart
+    options:
+      - amount: "50"
+        currency: EUR
+        note:
+          nl: Online en kassa, op tropische of drukke dagen met een maximum aantal
+          en: Online and at the desk, with a daily limit on tropical or busy days
+  - name: A2 baan
+    options:
+      - amount: "75"
+        currency: EUR
+        per: hour
+        note:
+          nl: Maximaal 3 personen, exclusief voor de groep
+          en: Up to 3 people, reserved for the group
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          nl: 4e persoon
+          en: 4th person
+  - name: 10-rittenkaart
+    options:
+      - amount: "160"
+        currency: EUR
+        per: hour
+        note:
+          nl: 1 uur, persoonsgebonden, 1 extra persoon mag mee
+          en: 1 hour, personal, 1 extra person may join
+      - amount: "208"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+        note:
+          nl: Persoonsgebonden, 1 extra persoon mag mee
+          en: Personal, 1 extra person may join
+  - name: Wetsuit
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "7"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+  - name: Wakeboard
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: 2 uur
+          en: 2 hours
+      - amount: "20"
+        currency: EUR
+        per: day
+  - name: Kluisje
+    options:
+      - amount: "2"
+        currency: EUR
+        note:
+          nl: Gaat 1 keer open, geld komt niet retour
+          en: Opens once, money is not refunded
