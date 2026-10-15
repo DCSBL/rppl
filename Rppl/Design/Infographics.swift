@@ -6,6 +6,8 @@ struct MetricValue: View {
     enum Size {
         case hero
         case large
+        /// Between `.medium` and `.large`: the logbook totals row.
+        case total
         case medium
         case small
 
@@ -13,6 +15,7 @@ struct MetricValue: View {
             switch self {
             case .hero: .largeTitle.bold().monospacedDigit()
             case .large: .title.bold().monospacedDigit()
+            case .total: .title2.bold().monospacedDigit() // replaced by a scaled 25 pt font in `MetricValue`
             case .medium: .title2.bold().monospacedDigit()
             case .small: .title3.bold().monospacedDigit()
             }
@@ -22,12 +25,15 @@ struct MetricValue: View {
             switch self {
             case .hero: .title3.weight(.semibold)
             case .large: .headline
+            case .total: .subheadline.weight(.semibold)
             case .medium: .subheadline.weight(.semibold)
             case .small: .footnote.weight(.semibold)
             }
         }
     }
 
+    /// `.total` size: 25 pt at default size (between `.title2` 22 and `.title` 28), scales with Dynamic Type.
+    @ScaledMetric(relativeTo: .title2) private var totalPointSize: CGFloat = 25
     private let parts: MetricDisplay.Parts
     private let size: Size
     private let caption: LocalizedStringKey?
@@ -56,7 +62,9 @@ struct MetricValue: View {
 
     private var attributed: AttributedString {
         var value = AttributedString(parts.value)
-        value.font = size.valueFont
+        value.font = size == .total
+            ? .system(size: totalPointSize, weight: .bold).monospacedDigit()
+            : size.valueFont
         guard let unit = parts.unit else { return value }
         var suffix = AttributedString("\u{00A0}" + unit)
         suffix.font = size.unitFont

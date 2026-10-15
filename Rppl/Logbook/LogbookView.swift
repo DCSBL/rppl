@@ -60,6 +60,15 @@ struct LogbookView: View {
                         .listRowSeparator(.hidden)
                 }
 
+                if catalog.season.showsCharts {
+                    Section {
+                        SeasonCharts(season: catalog.season)
+                            .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 12))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    }
+                }
+
                 if catalog.isLoading && catalog.entries.isEmpty {
                     Section {
                         HStack {
@@ -405,7 +414,7 @@ struct LogbookView: View {
         action: (() -> Void)? = nil
     ) -> some View {
         let content = VStack(spacing: 4) {
-            MetricValue(value, size: .medium)
+            MetricValue(value, size: .total)
             Text(label)
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
