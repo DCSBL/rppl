@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Wakepark Groningen
 languages:
@@ -12,10 +14,9 @@ languages:
   - en
 address: Zilvermeer, Kardinge, Groningen
 timezone: Europe/Amsterdam
-# Approximate pin on the Zilvermeer, the site gives no street address.
 location:
-  lat: 53.236356
-  lon: 6.6040862
+  lat: 53.238509
+  lon: 6.599684
 
 phone: 06 29 177 109
 email: info@wakeparkgroningen.nl
@@ -37,6 +38,12 @@ facilities:
 cables:
   - name: Kabel
     description: Kabel met 8 obstakels en een instelbare snelheid.
+    direction: '2.0'
+    points:
+      - lat: 53.238564
+        lon: 6.599701
+      - lat: 53.23761
+        lon: 6.601672
 
 prices:
   - name: Introductieles wakeboarden

@@ -5,6 +5,8 @@ updated_at: 2026-10-15
 history:
   - date: 2026-10-15
     description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
 
 name: Waterskicentrum De Kempervennen
 short_name: De Kempervennen
@@ -15,10 +17,9 @@ languages:
   - de
 address: Kempervennendreef 8, 5563 VB Westerhoven
 timezone: Europe/Amsterdam
-# Business pin for the official address, not the dock.
 location:
-  lat: 51.3259005
-  lon: 5.4287059
+  lat: 51.327084
+  lon: 5.423477
 
 phone: +31 (0) 40 207 18 98
 email: info@hetwaterskicentrum.nl
@@ -41,6 +42,17 @@ cables:
     direction: cw
     length_m: 770
     description: Kabel met vijf masten en een snelheid van ongeveer 30 km/u.
+    points:
+      - lat: 51.327242
+        lon: 5.423628
+      - lat: 51.328759
+        lon: 5.420815
+      - lat: 51.329494
+        lon: 5.421131
+      - lat: 51.329565
+        lon: 5.422094
+      - lat: 51.327785
+        lon: 5.424539
 
 prices:
   - name: 90 minuten
