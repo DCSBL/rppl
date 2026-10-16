@@ -76,6 +76,19 @@ jobs:
           sys.exit("no Apple Watch simulator available")')"
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
+          # Warm-up: the first launch on a cold watch simulator hung twice in CI; let a throwaway
+          # test absorb it (also builds), then run the real thing.
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme RpplWatch \
+            -destination "platform=watchOS Simulator,id=${udid}" \
+            -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            >/dev/null 2>&1 || true
           xcodebuild test \
             -project Rppl.xcodeproj \
             -scheme RpplWatch \
