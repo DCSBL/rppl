@@ -1,4 +1,4 @@
-# Release screenshots: seeded mock data (UITestFixtures) on an iPhone Simulator, attached to the
+# Release screenshots: seeded mock data (UITestFixtures) on an iPhone and an Apple Watch Simulator, attached to the
 # release as assets and listed in its description. Re-running replaces the assets and the section.
 # Runs on publish; for an existing release use "Run workflow" with its tag.
 # The tag reaches the shell only through env, never interpolated.
@@ -63,11 +63,55 @@ jobs:
             2>&1 | tail -40
           python3 scripts/ci/export_screenshots.py Screenshots.xcresult screenshots
 
+      - name: Run Watch screenshot test
+        shell: bash
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
+              for d in devices:
+                  if d["name"].startswith("Apple Watch") and d["isAvailable"]:
+                      print(d["udid"]); sys.exit()
+          sys.exit("no Apple Watch simulator available")')"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          # Warm-up: the first launch on a cold watch simulator hung twice in CI; let a throwaway
+          # test absorb it (also builds), then run the real thing.
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme RpplWatch \
+            -destination "platform=watchOS Simulator,id=${udid}" \
+            -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            >/dev/null 2>&1 || true
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme RpplWatch \
+            -destination "platform=watchOS Simulator,id=${udid}" \
+            -only-testing:RpplWatchUITests/RpplWatchScreenshotTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 180 \
+            -resultBundlePath WatchScreenshots.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tail -40
+          python3 scripts/ci/export_screenshots.py WatchScreenshots.xcresult screenshots-watch
+
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: screenshots/*.png
+          path: |
+            screenshots/*.png
+            screenshots-watch/*.png
           retention-days: 30
 
       - name: Attach to release
@@ -75,7 +119,8 @@ jobs:
         run: |
           set -euo pipefail
           for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
-          gh release upload "$RELEASE_TAG" iphone-*.png --clobber
+          for f in screenshots-watch/*.png; do cp "$f" "watch-$(basename "$f")"; done
+          gh release upload "$RELEASE_TAG" iphone-*.png watch-*.png --clobber
           gh release view "$RELEASE_TAG" --json body -q .body > body.md
           python3 - <<'PY'
           import os, re, urllib.parse
@@ -83,11 +128,15 @@ jobs:
           tag, repo = os.environ["RELEASE_TAG"], os.environ["GITHUB_REPOSITORY"]
           start, end = "<!-- screenshots:start -->", "<!-- screenshots:end -->"
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
-          rows = [
-              f'<img src="https://github.com/{repo}/releases/download/{urllib.parse.quote(tag)}/{p.name}" width="220" alt="{p.stem}">'
-              for p in sorted(Path(".").glob("iphone-*.png"))
-          ]
-          section = f"{start}\n### Screenshots (iPhone, mock data)\n\n" + "\n".join(rows) + f"\n{end}\n"
+          def rows(prefix, width):
+              return "\n".join(
+                  f'<img src="https://github.com/{repo}/releases/download/{urllib.parse.quote(tag)}/{p.name}" width="{width}" alt="{p.stem}">'
+                  for p in sorted(Path(".").glob(f"{prefix}-*.png"))
+              )
+          section = (
+              f"{start}\n### Screenshots (iPhone, mock data)\n\n{rows('iphone', 220)}\n\n"
+              f"### Screenshots (Apple Watch, mock data)\n\n{rows('watch', 160)}\n{end}\n"
+          )
           Path("body.md").write_text(body + "\n\n" + section)
           PY
           gh release edit "$RELEASE_TAG" --notes-file body.md

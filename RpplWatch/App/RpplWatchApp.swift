@@ -23,6 +23,7 @@ struct RpplWatchApp: App {
 
     init() {
         WakeLog.debug(.lifecycle, "RpplWatchApp init")
+        if UITestFixtures.isActive { UITestFixtures.seed() }
         _ = TesterIdentity.resolve()
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
         _ = WatchTransferService.shared
