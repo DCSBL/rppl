@@ -557,7 +557,7 @@ struct LogbookSessionDetailView: View {
                 Gauge(value: MetricDisplay.fraction(cable, of: max)) {
                     Text("Cable speed")
                 }
-                .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint))
+                .gaugeStyle(.rpplBar(tint: MetricKind.speed.tint, dot: true))
                 .accessibilityHidden(true)
                 HStack {
                     Text(verbatim: DistanceFormat.kilometersPerHour(0))
