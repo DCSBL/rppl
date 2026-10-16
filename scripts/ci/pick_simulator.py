@@ -3,6 +3,8 @@
 
 Usage: pick_simulator.py "iPhone SE (3rd generation)"
 """
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
