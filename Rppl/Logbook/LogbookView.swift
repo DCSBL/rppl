@@ -15,6 +15,7 @@ struct LogbookView: View {
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var catalog = SessionCatalog()
     @AppStorage(AppSettingsKey.speedTotal) private var speedTotal = SpeedTotal.max
+    @AppStorage(AppSettingsKey.countTotal) private var countTotal = CountTotal.sessions
     @AppStorage(AppSettingsKey.distanceTotal) private var distanceTotal = DistanceTotal.distance
     @State private var pendingDeleteSessionId: String?
     @State private var showDeleteConfirmation = false
@@ -332,23 +333,37 @@ struct LogbookView: View {
     private var totalsCard: some View {
         let season = catalog.season
         let loading = catalog.isLoading
-        let sessionsValue = loading ? "-" : "\(season.sessionCount)"
+        let countLabel: LocalizedStringKey
+        let countValue: Int
+        switch countTotal {
+        case .sessions:
+            countLabel = "Sessions"
+            countValue = season.sessionCount
+        case .sets:
+            countLabel = "Sets"
+            countValue = season.totalSets
+        case .laps:
+            countLabel = "Laps"
+            countValue = season.totalLaps
+        }
+        let sessionsValue = loading ? "-" : "\(countValue)"
 
         let distanceLabel: LocalizedStringKey
         let distanceValue: String
         switch distanceTotal {
         case .distance:
             distanceLabel = "Distance"
-            distanceValue = DistanceFormat.kilometers(season.totalDistanceMeters)
+            distanceValue = DistanceFormat.kilometers(season.totalDistanceMeters, fixedFraction: 1)
         case .duration:
             distanceLabel = "Total time"
-            distanceValue = DurationFormat.total(season.totalDuration)
+            distanceValue = DurationFormat.total(season.totalDuration, fractionDigits: 1)
         case .riding:
             distanceLabel = "Total riding time"
-            distanceValue = DurationFormat.total(season.totalRidingDuration)
+            distanceValue = DurationFormat.total(season.totalRidingDuration, fractionDigits: 1)
         }
 
-        let speedLabel: LocalizedStringKey = speedTotal == .max ? "Max speed" : "Average speed"
+        let speedLabel: LocalizedStringKey = speedTotal == .max ? "Maximum speed" : "Average speed"
+        let speedShortLabel: LocalizedStringKey = speedTotal == .max ? "Max speed" : "Avg speed"
         let speed = speedTotal == .max ? season.topSpeedKmh : season.typicalSpeedKmh
         let speedValue = if let speed, speed > 0 { DistanceFormat.kilometersPerHour(speed) } else { "-" }
 
@@ -356,46 +371,37 @@ struct LogbookView: View {
             Group {
                 if useAccessibilityLayout {
                     VStack(alignment: .leading, spacing: 12) {
-                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
+                            countTotal = countTotal.cycled()
+                        }
                         totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel) {
+                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
                             distanceTotal = distanceTotal.cycled()
                         }
                         totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel) {
+                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
                             speedTotal = speedTotal.cycled()
                         }
                     }
                 } else {
                     HStack(spacing: 0) {
-                        totalMetric(value: sessionsValue, label: "Sessions")
+                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
+                            countTotal = countTotal.cycled()
+                        }
                         totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel) {
+                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
                             distanceTotal = distanceTotal.cycled()
                         }
                         totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel) {
+                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
                             speedTotal = speedTotal.cycled()
                         }
                     }
                 }
             }
+            .sensoryFeedback(.selection, trigger: countTotal)
             .sensoryFeedback(.selection, trigger: speedTotal)
             .sensoryFeedback(.selection, trigger: distanceTotal)
-
-            Divider()
-                .overlay(Color.rpplFill)
-
-            Text(
-                loading
-                    ? "—"
-                    : LogbookFormatting.totalsFooter(
-                        sets: season.totalSets,
-                        laps: season.totalLaps
-                    )
-            )
-            .font(.subheadline)
-            .foregroundStyle(RpplDesign.secondaryText)
         }
     }
 
@@ -411,19 +417,25 @@ struct LogbookView: View {
     private func totalMetric(
         value: String,
         label: LocalizedStringKey,
+        shortLabel: LocalizedStringKey? = nil,
+        id: String? = nil,
         action: (() -> Void)? = nil
     ) -> some View {
+        // Full label when it fits on one line, else the abbreviation. Never scaled, so the text size
+        // stays the same when a tap swaps the metric.
         let content = VStack(spacing: 4) {
             MetricValue(value, size: .total)
-            Text(label)
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-                .foregroundStyle(RpplDesign.secondaryText)
+            ViewThatFits(in: .horizontal) {
+                if shortLabel != nil { Text(label).lineLimit(1) }
+                Text(shortLabel ?? label).lineLimit(2)
+            }
+            .font(.subheadline)
+            .multilineTextAlignment(.center)
+            .foregroundStyle(RpplDesign.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(id ?? "")
 
         if let action {
             Button(action: action) { content.contentShape(.rect) }
