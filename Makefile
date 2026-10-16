@@ -20,10 +20,10 @@ coverage-update:
 lint:
 	bash scripts/git-hooks/run-swiftlint.sh
 
-# Same as pre-push: skip unchanged steps; no analyze.
+# Optional local mirror of macOS CI: skip unchanged steps; no analyze.
 gate:
 	bash scripts/git-hooks/xcode-gate.sh
 
 install-hooks:
 	pre-commit install
-	@echo "Hooks installed. Commit: hygiene/codespell/SwiftLint. Push: xcode-gate when build files change."
+	@echo "Hooks installed. Commit: hygiene/codespell/SwiftLint. Push: no hook; CI runs the heavy checks."

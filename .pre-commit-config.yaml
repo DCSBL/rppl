@@ -1,8 +1,7 @@
-# Install both commit and push hooks:
+# Install the commit hook:
 #   pre-commit install
-# (default_install_hook_types below installs pre-commit + pre-push)
-default_install_hook_types: [pre-commit, pre-push]
-# Light hooks only on commit; xcode-gate opts into pre-push below.
+# Heavy checks (Core tests, xcodebuild) run in GitHub Actions, not as a push hook.
+default_install_hook_types: [pre-commit]
 default_stages: [pre-commit]
 
 repos:
@@ -63,18 +62,3 @@ repos:
         pass_filenames: false
         types: [swift]
         stages: [pre-commit]
-
-      - id: xcode-gate
-        name: Core tests + xcodebuild (skip unchanged; no analyze)
-        entry: bash scripts/git-hooks/xcode-gate.sh
-        language: system
-        pass_filenames: false
-        # Skip when the push is docs/YAML/unrelated scripts only.
-        files: |
-          (?x)(
-            \.(swift|plist|entitlements|pbxproj|xcscheme|xcconfig|xcprivacy|storyboard|xib|metal|intentdefinition)$
-            |Package\.(swift|resolved)$
-            |\.xcassets/
-            |scripts/git-hooks/xcode-gate\.sh$
-          )
-        stages: [pre-push]

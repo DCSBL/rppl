@@ -54,7 +54,7 @@ Use one primary component. Split unrelated work into separate PRs when possible.
 ## Workflow for agent PRs
 
 1. Run `pre-commit run` (commit-stage hooks) before committing. Fix what it reports.
-2. Skip `xcodebuild` (and the `xcode-gate` push hook's build step) when the environment has no Xcode toolchain, such as a Linux cloud agent. Do not bypass hooks with `--no-verify`.
+2. Skip `xcodebuild` when the environment has no Xcode toolchain, such as a Linux cloud agent. Do not bypass hooks with `--no-verify`.
 3. Running `swift test` locally is not required when a PR is opened. CI runs it with the proper toolchain and reports the result on the PR.
 4. Open the PR, then always subscribe to its activity (CI results, reviews). Fix failures and review comments that are in scope until the PR is green and mergeable.
 
