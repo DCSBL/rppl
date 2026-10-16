@@ -11,9 +11,10 @@ final class RpplUITests: XCTestCase {
     }
 
     /// `sessions`: generated logbook size (`-rpplUITestSessions`); nil = the default seeded logbook.
-    private func launch(sessions: Int? = nil) {
+    private func launch(sessions: Int? = nil, textSize: String? = nil) {
         app = XCUIApplication()
         app.launchArguments = ["-rpplUITest", "-AppleLanguages", "(en)", "-AppleLocale", "en_NL"]
+        if let textSize { app.launchArguments += ["-UIPreferredContentSizeCategoryName", textSize] }
         if let sessions { app.launchArguments += ["-rpplUITestSessions", String(sessions)] }
         app.launch()
     }
@@ -125,5 +126,63 @@ final class RpplUITests: XCTestCase {
         scrollTo(temperature)
         XCTAssertTrue(temperature.exists)
         XCTAssertGreaterThan(temperature.frame.height, 100)
+    }
+
+    private func total(_ id: String) -> XCUIElement {
+        app.descendants(matching: .any)[id].firstMatch
+    }
+
+    /// Swapping max <-> average speed (tap) must not resize the totals text: the tile keeps its
+    /// height, so the label neither wraps nor shrinks.
+    private func assertSpeedSwapKeepsTextSize() {
+        let speed = total("logbook-total-speed")
+        XCTAssertTrue(speed.waitForExistence(timeout: 30))
+        XCTAssertTrue(speed.label.contains("speed"))
+        let before = speed.frame.height
+        let labelBefore = speed.label
+        speed.tap()
+        XCTAssertNotEqual(speed.label, labelBefore, "tap should swap max/average")
+        XCTAssertEqual(speed.frame.height, before, accuracy: 0.5)
+        speed.tap()
+        XCTAssertEqual(speed.frame.height, before, accuracy: 0.5)
+    }
+
+    @MainActor
+    func testTotalsSpeedSwapKeepsTextSize() {
+        assertSpeedSwapKeepsTextSize()
+        let sessions = total("logbook-total-sessions")
+        XCTAssertEqual(total("logbook-total-speed").frame.height, sessions.frame.height, accuracy: 0.5)
+    }
+
+    @MainActor
+    func testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize() {
+        app.terminate()
+        launch(textSize: "UICTContentSizeCategoryAccessibilityL")
+        assertSpeedSwapKeepsTextSize()
+    }
+
+    @MainActor
+    func testTotalsSessionsTapCyclesSetsAndLaps() {
+        let sessions = total("logbook-total-sessions")
+        XCTAssertTrue(sessions.waitForExistence(timeout: 30))
+        XCTAssertTrue(sessions.label.contains("Sessions"), sessions.label)
+        sessions.tap()
+        XCTAssertTrue(sessions.label.contains("Sets"), sessions.label)
+        sessions.tap()
+        XCTAssertTrue(sessions.label.contains("Laps"), sessions.label)
+        sessions.tap()
+        XCTAssertTrue(sessions.label.contains("Sessions"), sessions.label)
+    }
+
+    @MainActor
+    func testTotalsShowOneDecimal() {
+        let distance = total("logbook-total-distance")
+        XCTAssertTrue(distance.waitForExistence(timeout: 30))
+        let oneDecimal = NSPredicate(format: "label MATCHES %@", ".*[0-9][.,][0-9].*")
+        XCTAssertTrue(oneDecimal.evaluate(with: distance), distance.label)
+        distance.tap() // total time
+        XCTAssertTrue(oneDecimal.evaluate(with: distance), distance.label)
+        distance.tap() // riding time
+        XCTAssertTrue(oneDecimal.evaluate(with: distance), distance.label)
     }
 }

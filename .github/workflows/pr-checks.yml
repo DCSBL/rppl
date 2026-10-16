@@ -98,7 +98,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="${GITHUB_WORKSPACE}/tools/bin:${HOME}/.local/bin:${PATH}"
-          # Commit-stage hooks only (excludes xcode-gate / pre-push).
+          # Commit-stage hooks only (heavy checks live in macos-ci.yml).
           # Hooks with no matching files in the PR range are skipped by pre-commit
           # (exit 0) — safe when this check is required on the branch.
           python -m pre_commit run \
