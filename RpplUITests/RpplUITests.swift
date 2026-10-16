@@ -112,10 +112,9 @@ final class RpplUITests: XCTestCase {
     func testSeasonChartsShownWithEighteenSessions() {
         app.terminate()
         launch(sessions: 18)
-        XCTAssertTrue(app.staticTexts["18 total"].waitForExistence(timeout: 60))
-
+        // The "18 total" header sits below the charts, so the lazy list never builds it on screen.
         let distance = chart("season-distance-chart")
-        XCTAssertTrue(distance.waitForExistence(timeout: 15))
+        XCTAssertTrue(distance.waitForExistence(timeout: 60))
         XCTAssertEqual(distance.value as? String, "18") // one bar per session
         XCTAssertGreaterThan(distance.frame.height, 50)
 
