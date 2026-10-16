@@ -13,6 +13,8 @@ struct ParkHoursEntry: TimelineEntry {
     var timeZoneNote: String?
     let trace: ParkTrace?
     let state: ParkWidgetState
+    /// Only for parks with a water station and the opt-in on; shown as the number alone.
+    var waterCelsius: Double?
 }
 
 struct ParkHoursProvider: AppIntentTimelineProvider {
@@ -36,14 +38,26 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: SelectParkIntent, in context: Context) async -> Timeline<ParkHoursEntry> {
-        let entries = entries(for: configuration, from: Date())
-        return Timeline(entries: entries, policy: .after(entries.last?.date ?? Date().addingTimeInterval(3600)))
+        let now = Date()
+        let water: ParkWidgetWater.Result?
+        if let park = park(for: configuration) {
+            water = await ParkWidgetWater.result(for: park, now: now)
+        } else {
+            water = nil
+        }
+        let entries = entries(for: configuration, from: now, water: water?.reading)
+        let end = entries.last?.date ?? now.addingTimeInterval(3600)
+        return Timeline(entries: entries, policy: .after(min(end, water?.nextFetch ?? end)))
+    }
+
+    private func park(for configuration: SelectParkIntent) -> Park? {
+        let picked = configuration.park.flatMap { ParkWidgetStore.park(id: $0.id) }
+        return picked ?? ParkWidgetStore.mostVisited()
     }
 
     /// One entry now, one per moment the text changes (opening, closing, midnight).
-    private func entries(for configuration: SelectParkIntent, from now: Date) -> [ParkHoursEntry] {
-        let picked = configuration.park.flatMap { ParkWidgetStore.park(id: $0.id) }
-        guard let park = picked ?? ParkWidgetStore.mostVisited() else {
+    private func entries(for configuration: SelectParkIntent, from now: Date, water: ParkWaterTemperature? = nil) -> [ParkHoursEntry] {
+        guard let park = park(for: configuration) else {
             return [ParkHoursEntry(date: now, parkName: nil, parkID: nil, city: nil, timeZoneNote: nil, trace: nil, state: .unknown)]
         }
         let zone = park.resolvedTimeZone
@@ -52,7 +66,7 @@ struct ParkHoursProvider: AppIntentTimelineProvider {
         return dates.map {
             ParkHoursEntry(date: $0, parkName: park.compactName, parkID: park.id, city: park.cityName,
                 timeZoneNote: ParkTimeZoneNote.label(for: park, deviceZone: .current, at: $0),
-                trace: trace, state: .make(for: park, at: $0))
+                trace: trace, state: .make(for: park, at: $0), waterCelsius: water?.celsius)
         }
     }
 }
@@ -139,6 +153,11 @@ struct ParkHoursView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color("RpplMuted"))
                         .minimumScaleFactor(0.8)
+                    if let celsius = entry.waterCelsius {
+                        Label(TemperatureFormat.celsius(celsius), systemImage: "water.waves")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color("RpplMuted"))
+                    }
                     if let note = entry.timeZoneNote {
                         Text(note)
                             .font(.caption2)
