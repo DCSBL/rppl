@@ -82,12 +82,6 @@ enum LogbookFormatting {
         String(localized: "\(count) total")
     }
 
-    static func totalsFooter(sets: Int, laps: Int) -> String {
-        let setsText = String(localized: "\(sets) total sets")
-        let lapsText = lapCount(laps)
-        return String(localized: "\(setsText) · \(lapsText)")
-    }
-
     static func sessionDate(_ date: Date) -> String {
         date.formatted(.dateTime.month(.abbreviated).day())
     }

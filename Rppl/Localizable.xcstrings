@@ -153,46 +153,6 @@
         }
       }
     },
-    "%lld total sets" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total set"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total sets"
-                }
-              }
-            }
-          }
-        },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld set totaal"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld sets totaal"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "All sets" : {
       "localizations" : {
         "en" : {
@@ -11276,6 +11236,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lucht"
+          }
+        }
+      }
+    },
+    "Maximum speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximale snelheid"
           }
         }
       }
