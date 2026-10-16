@@ -535,14 +535,14 @@ private struct ParksOpenDatePicker: View {
         VStack(spacing: 12) {
             DatePicker(
                 "Date",
-                selection: Binding(get: { date ?? Date() }, set: { date = $0 }),
+                selection: Binding(get: { date ?? AppClock.now }, set: { date = $0 }),
                 displayedComponents: .date
             )
             .datePickerStyle(.graphical)
             .labelsHidden()
 
             HStack {
-                Button(String(localized: "Today")) { date = Date() }
+                Button(String(localized: "Today")) { date = AppClock.now }
                 Spacer(minLength: 12)
                 Button(String(localized: "Clear"), role: .destructive) { date = nil }
             }
