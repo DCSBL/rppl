@@ -151,11 +151,17 @@ jobs:
                   if d["name"].startswith("iPhone") and d["isAvailable"]:
                       print(d["udid"]); sys.exit()
           sys.exit("no iPhone simulator available")')"
+          # Boot first: a cold simulator made the runner fail to launch and every wait time out.
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
           xcodebuild test \
             -project Rppl.xcodeproj \
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 180 \
             -resultBundlePath RpplUITests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \

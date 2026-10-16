@@ -54,6 +54,9 @@ jobs:
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests/RpplScreenshotTests \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 180 \
             -resultBundlePath Screenshots.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \

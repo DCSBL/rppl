@@ -26,18 +26,18 @@ final class RpplScreenshotTests: XCTestCase {
 
     @MainActor
     func testScreenshots() {
-        XCTAssertTrue(card("Example session").waitForExistence(timeout: 10))
+        XCTAssertTrue(card("Example session").waitForExistence(timeout: 30))
         shot("1-logbook")
 
         // right edge: the card centre can land on a highlight chip
         card("Example session").coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 30))
         sleep(2) // map tiles
         shot("2-session-detail")
         app.navigationBars.buttons.firstMatch.tap()
 
         card("Wakeboard, Lakeside Zwolle").tap()
-        XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         shot("3-manual-session")
         app.navigationBars.buttons.firstMatch.tap()
 
@@ -47,7 +47,7 @@ final class RpplScreenshotTests: XCTestCase {
         if app.buttons["Continue"].waitForExistence(timeout: 2) { app.buttons["Continue"].tap() } // keyboard tip sheet
         shot("4-parks-list")
         let result = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Burnside'")).firstMatch
-        XCTAssertTrue(result.waitForExistence(timeout: 5))
+        XCTAssertTrue(result.waitForExistence(timeout: 15))
         result.tap()
         sleep(1)
         shot("5-park-detail")
