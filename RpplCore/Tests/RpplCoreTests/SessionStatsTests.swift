@@ -118,6 +118,12 @@ struct DistanceFormatTests {
         #expect(nl.lowercased().contains("km"))
     }
 
+    @Test func kilometersFixedFractionKeepsOneDecimal() {
+        let nl = Locale(identifier: "nl_NL")
+        #expect(DistanceFormat.kilometers(61_000, fixedFraction: 1, locale: nl).contains("61,0"))
+        #expect(DistanceFormat.kilometers(2_540, fixedFraction: 1, locale: nl).contains("2,5"))
+    }
+
     @Test func usLocaleUsesImperialUnits() {
         let us = Locale(identifier: "en_US")
         #expect(DistanceFormat.meters(100, locale: us).contains("ft"))
@@ -142,6 +148,13 @@ struct DurationFormatTests {
         #expect(en.contains("minute"))
         let nl = DurationFormat.units(60, width: .wide, locale: Locale(identifier: "nl_NL"))
         #expect(nl.lowercased().contains("minuut") || nl.lowercased().contains("min"))
+    }
+
+    @Test func totalKeepsOneDecimalWhenAsked() {
+        let en = Locale(identifier: "en_US")
+        #expect(DurationFormat.total(37.5 * 3600, fractionDigits: 1, locale: en).contains("37.5"))
+        #expect(DurationFormat.total(40 * 60, fractionDigits: 1, locale: en).contains("40.0"))
+        #expect(!DurationFormat.total(37.5 * 3600, locale: en).contains("."))
     }
 
     @Test func zeroIsNonEmpty() {

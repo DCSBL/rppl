@@ -1,5 +1,13 @@
 # Dev workflow
 
+## Where to run checks: GitHub first
+
+The repo is public, so GitHub runners (Linux and macOS) are free. Do not burn local time on what CI already does.
+
+- **Already in a GitHub workflow** (Core tests, coverage floor, `RpplTests`, UI tests, `xcodebuild` build, pre-commit): push and let CI run it. Run locally only to debug a failure CI reported.
+- **Automatable but not covered yet** (a manual check you would repeat): turn it into a test (Core Swift Testing or a UI test) and/or a workflow, and commit that with the change. Do not leave it as a local ritual.
+- **Local only**: what needs a physical device or account (HealthKit, Watch Connectivity, real sensors) and the fast commit hooks.
+
 ## Install (once)
 
 Preferred (Homebrew):
@@ -20,7 +28,7 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 pre-commit install
 ```
 
-`pre-commit install` installs both git `pre-commit` and `pre-push` hooks (see `default_install_hook_types` in `.pre-commit-config.yaml`). Re-run after pulling this change if hooks were installed earlier.
+`pre-commit install` installs the git `pre-commit` hook. There is no pre-push hook; if you installed one earlier, remove it with `rm .git/hooks/pre-push` (in a worktree: the clone's `$(git rev-parse --git-common-dir)/hooks/pre-push`).
 
 ## What runs on commit
 
@@ -39,11 +47,9 @@ python3 scripts/format-xcstrings.py --check --all
 python3 scripts/format-xcstrings.py Rppl/Localizable.xcstrings
 ```
 
-## What runs on push
+## Local gate (optional)
 
-Heavy gate — **only if the push includes build-related files** (Swift, plist, entitlements, Xcode project/schemes, `Package.swift` / `Package.resolved`, `.xcassets`, or `scripts/git-hooks/xcode-gate.sh`). Docs, YAML, and other scripts/helpers skip this.
-
-When it runs, push is blocked if any fail. **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`) then:
+Nothing runs on push: [macOS CI](#macos-ci) already runs Core tests with the coverage floor, `RpplTests`, UI tests and `xcodebuild` on every PR. To mirror it locally (e.g. to debug a CI failure), **xcode-gate** (`scripts/git-hooks/xcode-gate.sh`, via `make gate` / `make check`):
 
 1. **`swift test` in `RpplCore` with the coverage floor** (`scripts/check-core-coverage.py`, see [Coverage floor](#coverage-floor)) — skipped if Core sources/tests/`Package.swift`, the coverage baseline and the local Swift/Xcode toolchain match the last successful run (content fingerprint of tracked files, not a time TTL). Dirty working-tree edits count, so `make gate` does not skip stale.
 2. **`xcodebuild build`** for `Rppl` (iOS Simulator; embeds Watch) — skipped if app/Watch/project/Core *sources* match the last successful build. Changing only `RpplCore/Tests` does not rebuild the apps.
@@ -54,13 +60,12 @@ Stamps live in `.git/rppl-xcode-gate/` (shared across worktrees of the same clon
 Manual gates:
 
 ```bash
-make gate          # same as pre-push (cache + no analyze)
+make gate          # cache + no analyze
 make check         # full: ignore cache, tests + build + analyze
 make test-core     # RpplCore swift test only
 make coverage      # Core tests + coverage floor (what the gate runs)
-# or
-pre-commit run --all-files --hook-stage pre-push
-# (also: pre-commit run --all-files for commit-stage hooks)
+# commit-stage hooks on everything:
+pre-commit run --all-files
 ```
 
 Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
@@ -76,12 +81,11 @@ Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
 
 The baseline only ratchets up. After improving coverage, run `make coverage-update` and commit the new file. Lowering a value needs `python3 scripts/check-core-coverage.py --update --allow-lower` and a reason in the PR. New code in a critical file needs tests in the same PR.
 
-It runs locally only: in the pre-push `xcode-gate` and in `make coverage`. Nothing on GitHub enforces it (branch protection is not available on this private repo), so a PR is green or red by eye; do not merge red. Coverage shows what code runs, not what is asserted: keep tests that fail when the behavior breaks (flip the fix back and watch the test go red).
+It runs in the [macOS CI](#macos-ci) Tests job, and locally via `make coverage` / `make gate`. Branch protection is not available on this private repo, so a PR is green or red by eye; do not merge red. Coverage shows what code runs, not what is asserted: keep tests that fail when the behavior breaks (flip the fix back and watch the test go red).
 
 ## Escape hatches (emergency only)
 
-- Skip heavy gate on push: `SKIP=xcode-gate git push ...`
-- Skip all hooks: `git commit --no-verify` / `git push --no-verify` (do not use as normal workflow)
+- Skip all hooks: `git commit --no-verify` (do not use as normal workflow)
 
 ## GitHub Actions
 
@@ -136,7 +140,7 @@ What this does **not** cover: the coverage floor (`make coverage`; Linux coverag
 | App Group `containerURL` | `nil` on Linux |
 | `URLSession` | `import FoundationNetworking` |
 
-Tests that need those Apple-only paths run only in Xcode / `xcode-gate`.
+Tests that need those Apple-only paths run only in Xcode / macOS CI.
 
 ### Validate parks (Linux)
 

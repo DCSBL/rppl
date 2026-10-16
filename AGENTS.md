@@ -17,7 +17,7 @@ This project uses **caveman** mode for agent ↔ human chat.
 - Commit changes, even small changes in increments. Keep title and description as small and concrete as possible.
 - A worktree will be squashed and merged via a GitHub PR by human.
 - **PR title** (not necessarily each commit): `<component>(<type>): <short description>` — e.g. `watch(feat): …`, `slang(fix): …`. See [contributions/agent.md](contributions/agent.md).
-- Each commit triggers light `pre-commit` hooks (hygiene, codespell, legal sync, `.xcstrings` format, SwiftLint); each push runs `xcode-gate` only when build-related files change (Swift, plist, Xcode project, Package.swift, …). Docs/YAML/unrelated scripts skip it. Pass all checks; resolve issues when needed.
+- Each commit triggers light `pre-commit` hooks (hygiene, codespell, legal sync, `.xcstrings` format, SwiftLint); there is no pre-push hook. Core tests, coverage floor and `xcodebuild` run in GitHub Actions ([macOS CI](Docs/DevWorkflow.md#macos-ci)). Pass all checks; resolve issues when needed.
 
 ## Product north star
 
@@ -110,12 +110,12 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Testing
 
+- **GitHub runners are free (public repo, macOS too): run checks there, not locally.** If a workflow already runs it, push and let CI do it. If you would test something by hand and it can be automated, add a test and/or a workflow in the same PR. See [Docs/DevWorkflow.md](Docs/DevWorkflow.md#where-to-run-checks-github-first).
 - Source of truth: `cd RpplCore && swift test` (Swift Testing). `make coverage` runs it with the coverage floor ([Docs/DevWorkflow.md](Docs/DevWorkflow.md#coverage-floor)): `RpplCore/coverage-baseline.json` must not go down; new code in a critical file needs tests in the same PR.
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.
 - Pre-commit (commit): hygiene → codespell → legal sync → `.xcstrings` format → SwiftLint.
-- Pre-push: `scripts/git-hooks/xcode-gate.sh` (Core tests; `xcodebuild` build if app/Core sources changed) when the push includes build-related files. Skips steps whose inputs match the last successful run. Analyze is `make check` / `XCODE_GATE_ANALYZE=1` only.
-- Manual full gate: `make check`. Escape hatch only in emergency: `SKIP=xcode-gate` or `--no-verify`.
+- No pre-push hook: macOS CI runs Core tests + coverage floor, `RpplTests`, UI tests and `xcodebuild` on every PR. Optional local run: `make gate` (cached) or `make check` (full, with analyze). Escape hatch only in emergency: `--no-verify`.
 
 ## Cloud Agents (Linux)
 
@@ -170,7 +170,6 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 
 ## Out of scope unless explicitly asked
 
-- GitHub Actions macOS / `xcode-gate` mirror (PR Linux pre-commit already in `.github/workflows/`)
 - UI tests in the push gate
 - Trick detection / full taxonomy
 - CloudKit sync (Documents in iCloud for the phone logbook is in scope; prefer native ubiquity APIs)

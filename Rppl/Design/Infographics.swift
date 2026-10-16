@@ -103,13 +103,22 @@ struct RingGaugeStyle: GaugeStyle {
 struct BarGaugeStyle: GaugeStyle {
     var tint: Color
     var height: CGFloat = 8
+    /// Full-width track with a dot at the value instead of a filled bar.
+    var dot = false
 
     func makeBody(configuration: Configuration) -> some View {
         Capsule()
             .fill(tint.opacity(0.2))
             .overlay(alignment: .leading) {
                 GeometryReader { proxy in
-                    if configuration.value > 0 {
+                    if dot {
+                        let d = height * 2
+                        Circle()
+                            .fill(tint)
+                            .frame(width: d, height: d)
+                            .offset(x: (proxy.size.width - d) * min(max(configuration.value, 0), 1),
+                                    y: (height - d) / 2)
+                    } else if configuration.value > 0 {
                         Capsule()
                             .fill(tint)
                             .frame(width: max(height, proxy.size.width * configuration.value))
@@ -127,8 +136,8 @@ extension GaugeStyle where Self == RingGaugeStyle {
 }
 
 extension GaugeStyle where Self == BarGaugeStyle {
-    static func rpplBar(tint: Color, height: CGFloat = 8) -> BarGaugeStyle {
-        BarGaugeStyle(tint: tint, height: height)
+    static func rpplBar(tint: Color, height: CGFloat = 8, dot: Bool = false) -> BarGaugeStyle {
+        BarGaugeStyle(tint: tint, height: height, dot: dot)
     }
 }
 

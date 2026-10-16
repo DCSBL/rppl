@@ -86,6 +86,8 @@ struct SeasonStatsTests {
     @Test func totalsCycleAndWrap() {
         #expect(SpeedTotal.max.cycled() == .typical)
         #expect(SpeedTotal.typical.cycled() == .max)
+        #expect(CountTotal.sessions.cycled() == .sets)
+        #expect(CountTotal.laps.cycled() == .sessions)
         #expect(DistanceTotal.distance.cycled() == .duration)
         #expect(DistanceTotal.riding.cycled() == .distance)
         #expect(DistanceTotal(rawValue: "gone") == nil)

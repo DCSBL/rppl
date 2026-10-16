@@ -153,46 +153,6 @@
         }
       }
     },
-    "%lld total sets" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total set"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld total sets"
-                }
-              }
-            }
-          }
-        },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld set totaal"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld sets totaal"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "All sets" : {
       "localizations" : {
         "en" : {
@@ -11276,6 +11236,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lucht"
+          }
+        }
+      }
+    },
+    "Maximum speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum speed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximale snelheid"
+          }
+        }
+      }
+    },
+    "Open from %1$@ to %2$@ on %3$@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open from %1$@ to %2$@ on %3$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open van %1$@ tot %2$@ op %3$@"
+          }
+        }
+      }
+    },
+    "Closed on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed on %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesloten op %@"
+          }
+        }
+      }
+    },
+    "Rain chance %lld%%" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain chance %lld%%"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenkans %lld%%"
           }
         }
       }
