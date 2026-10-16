@@ -6,7 +6,9 @@
 # .github/xcode-problem-matcher.json (GitHub caps this at 10 per step, 50 per job; the full log is
 # the `*-log` artifact). The Linux core-tests.yml stays as the fast, container-based check.
 #
-# No `paths:` filter: the jobs always report a status, so they can be required checks.
+# No `paths:` filter: the jobs always report a status, so they can be required checks. The two UI
+# jobs are the slow ones (~17 min of test run, build is ~3 min), so they skip when a PR touches
+# nothing they exercise. A job skipped by `if` still reports success.
 
 name: macOS CI
 
@@ -25,6 +27,44 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Changed paths
+    runs-on: ubuntu-24.04
+    outputs:
+      phone: ${{ steps.filter.outputs.phone }}
+      watch: ${{ steps.filter.outputs.watch }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI-test relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Anything but a PR (push to main, manual run) runs everything.
+          if [ "$EVENT" != pull_request ]; then
+            echo "phone=true" >> "$GITHUB_OUTPUT"; echo "watch=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
+          changed="$(git diff --name-only "$BASE" "$HEAD")"
+          shared='^(RpplCore/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/macos-ci\.yml$|\.github/xcode-problem-matcher\.json$)'
+          if printf '%s\n' "$changed" | grep -Eq "$shared|^(Rppl/|RpplWidgets/|RpplUITests/)"; then
+            echo "phone=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "phone=false" >> "$GITHUB_OUTPUT"
+          fi
+          if printf '%s\n' "$changed" | grep -Eq "$shared|^(RpplWatch/|RpplWatchUITests/)"; then
+            echo "watch=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "watch=false" >> "$GITHUB_OUTPUT"
+          fi
+
   tests:
     name: Tests (macOS)
     runs-on: macos-26
@@ -128,6 +168,8 @@ jobs:
 
   ui-tests:
     name: UI tests (iPhone Simulator)
+    needs: changes
+    if: needs.changes.outputs.phone == 'true'
     runs-on: macos-26
     timeout-minutes: 45
     permissions:
@@ -212,6 +254,8 @@ jobs:
 
   watch-ui-tests:
     name: UI tests (Apple Watch Simulator)
+    needs: changes
+    if: needs.changes.outputs.watch == 'true'
     runs-on: macos-26
     timeout-minutes: 45
     permissions:
