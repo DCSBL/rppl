@@ -41,8 +41,10 @@ struct WatchLogbookListView: View {
                 } description: {
                     Text("Record a park day on Apple Watch. Or browse the example session.")
                 } actions: {
-                    Button("Show example session") {
+                    Button {
                         showExampleSession = true
+                    } label: {
+                        Text("Show example session").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                     .tint(Color.rpplIdleAccent)
