@@ -129,6 +129,8 @@ final class SessionCatalog {
             isLoading = false
             loadTask = nil
             publishLastSessionToWidget()
+            let settled = entries
+            Task { await SessionBackfill.run(store: store, entries: settled, parks: parks) }
             WakeLog.debug(.ui, "SessionCatalog loaded count=\(loaded.count)")
         } catch is CancellationError {
             loadTask = nil

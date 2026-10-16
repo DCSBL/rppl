@@ -45,7 +45,8 @@ struct SeasonCharts: View {
                 tint: (showsDuration ? MetricKind.duration : .distance).tint,
                 showsMonths: true,
                 height: 110,
-                identifier: showsDuration ? "season-duration-chart" : "season-distance-chart"
+                identifier: showsDuration ? "season-duration-chart" : "season-distance-chart",
+                axisLabel: showsDuration ? { DurationFormat.total($0) } : { DistanceFormat.kilometers($0) }
             )
         }
     }
@@ -67,12 +68,14 @@ struct SeasonCharts: View {
         _ points: [SeasonStats.Point],
         identifier: String,
         tint: Color,
-        format: (Double) -> String
+        format: @escaping (Double) -> String
     ) -> some View {
         if let mean = Self.mean(points) {
             MetricValue(format(mean), size: .large, caption: "Average per session")
         }
-        SeasonBarChart(points: points, tint: tint, showsMonths: false, height: 70, identifier: identifier)
+        SeasonBarChart(
+            points: points, tint: tint, showsMonths: false, height: 70, identifier: identifier, axisLabel: format
+        )
     }
 
     @ViewBuilder
@@ -96,6 +99,7 @@ private struct SeasonBarChart: View {
     let showsMonths: Bool
     let height: CGFloat
     let identifier: String
+    let axisLabel: (Double) -> String
 
     /// Index of the first session of each month, where the axis gets its month label.
     private var monthStarts: [Int] {
@@ -120,7 +124,14 @@ private struct SeasonBarChart: View {
         }
         .chartXScale(domain: -1...Double(points.count))
         .chartYScale(domain: 0...(points.map(\.value).max() ?? 1))
-        .chartYAxis(.hidden)
+        .chartYAxis {
+            AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { value in
+                AxisGridLine().foregroundStyle(Color.rpplMuted.opacity(0.15))
+                AxisValueLabel {
+                    if let number = value.as(Double.self) { Text(verbatim: axisLabel(number)) }
+                }
+            }
+        }
         .chartXAxis {
             if showsMonths {
                 AxisMarks(values: monthStarts) { value in
