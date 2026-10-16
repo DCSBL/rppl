@@ -21,10 +21,15 @@ public enum DistanceFormat {
     }
 
     /// Long distance from meters (metric `km`, US/UK `mi`).
-    public static func kilometers(_ meters: Double, locale: Locale = .autoupdatingCurrent) -> String {
+    /// `fixedFraction` pins the decimals (logbook totals show one: `61,0 km`).
+    public static func kilometers(
+        _ meters: Double,
+        fixedFraction: Int? = nil,
+        locale: Locale = .autoupdatingCurrent
+    ) -> String {
         let unit: UnitLength = usesMiles(locale) ? .miles : .kilometers
         let converted = Measurement(value: meters, unit: UnitLength.meters).converted(to: unit)
-        let fraction: ClosedRange<Int> = converted.value >= 10 ? 0...0 : 0...2
+        let fraction: ClosedRange<Int> = fixedFraction.map { $0...$0 } ?? (converted.value >= 10 ? 0...0 : 0...2)
         return format(converted, fraction: fraction, locale: locale)
     }
 

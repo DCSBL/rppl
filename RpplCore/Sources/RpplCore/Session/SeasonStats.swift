@@ -133,6 +133,13 @@ public enum DistanceTotal: String, CaseIterable, Sendable {
     case riding
 }
 
+/// Easter egg: the "Sessions" total cycles to total sets and total laps.
+public enum CountTotal: String, CaseIterable, Sendable {
+    case sessions
+    case sets
+    case laps
+}
+
 extension CaseIterable where Self: Equatable {
     /// The next case, wrapping around.
     public func cycled() -> Self {

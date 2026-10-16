@@ -231,7 +231,7 @@ struct SessionMapSnapshotView: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
-                        if loadFailed {
+                        if loadFailed || UITestFixtures.isActive {
                             Image(systemName: "map")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.secondary)
@@ -257,6 +257,8 @@ struct SessionMapSnapshotView: View {
     private func loadSnapshot() async {
         image = nil
         loadFailed = false
+        // UI tests: MKMapSnapshotter needs network + tiles; the spinner/hang there blocked XCUITest idle.
+        if UITestFixtures.isActive { return }
         guard size.width >= 1, size.height >= 1 else {
             loadFailed = true
             return
