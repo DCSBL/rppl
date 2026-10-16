@@ -110,6 +110,7 @@ App probes read live `WCSession` / sensors, then call Core resolvers/engines. Do
 
 ## Testing
 
+- **GitHub runners are free (public repo, macOS too): run checks there, not locally.** If a workflow already runs it, push and let CI do it. If you would test something by hand and it can be automated, add a test and/or a workflow in the same PR. See [Docs/DevWorkflow.md](Docs/DevWorkflow.md#where-to-run-checks-github-first).
 - Source of truth: `cd RpplCore && swift test` (Swift Testing). `make coverage` runs it with the coverage floor ([Docs/DevWorkflow.md](Docs/DevWorkflow.md#coverage-floor)): `RpplCore/coverage-baseline.json` must not go down; new code in a critical file needs tests in the same PR.
 - Expand Core tests for pure logic; keep `RpplTests` thin.
 - Do **not** unit-test SwiftUI, real `HKWorkoutSession`, `CLLocationManager`, or `WCSession` in the gate.

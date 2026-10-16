@@ -1,5 +1,13 @@
 # Dev workflow
 
+## Where to run checks: GitHub first
+
+The repo is public, so GitHub runners (Linux and macOS) are free. Do not burn local time on what CI already does.
+
+- **Already in a GitHub workflow** (Core tests, coverage floor, `RpplTests`, UI tests, `xcodebuild` build, pre-commit): push and let CI run it. Run locally only to debug a failure CI reported.
+- **Automatable but not covered yet** (a manual check you would repeat): turn it into a test (Core Swift Testing or a UI test) and/or a workflow, and commit that with the change. Do not leave it as a local ritual.
+- **Local only**: what needs a physical device or account (HealthKit, Watch Connectivity, real sensors) and the fast commit hooks.
+
 ## Install (once)
 
 Preferred (Homebrew):
@@ -76,7 +84,7 @@ Force a rebuild without analyze: `XCODE_GATE_NO_CACHE=1 make gate`.
 
 The baseline only ratchets up. After improving coverage, run `make coverage-update` and commit the new file. Lowering a value needs `python3 scripts/check-core-coverage.py --update --allow-lower` and a reason in the PR. New code in a critical file needs tests in the same PR.
 
-It runs locally only: in the pre-push `xcode-gate` and in `make coverage`. Nothing on GitHub enforces it (branch protection is not available on this private repo), so a PR is green or red by eye; do not merge red. Coverage shows what code runs, not what is asserted: keep tests that fail when the behavior breaks (flip the fix back and watch the test go red).
+It runs in the [macOS CI](#macos-ci) Tests job, and locally in the pre-push `xcode-gate` and `make coverage`. Branch protection is not available on this private repo, so a PR is green or red by eye; do not merge red. Coverage shows what code runs, not what is asserted: keep tests that fail when the behavior breaks (flip the fix back and watch the test go red).
 
 ## Escape hatches (emergency only)
 
