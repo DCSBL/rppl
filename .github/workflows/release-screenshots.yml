@@ -81,6 +81,8 @@ jobs:
             -scheme RpplWatch \
             -destination "platform=watchOS Simulator,id=${udid}" \
             -only-testing:RpplWatchUITests/RpplWatchScreenshotTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 180 \
