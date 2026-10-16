@@ -52,7 +52,7 @@ public struct SeasonStats: Equatable, Sendable {
         public var value: Double
     }
 
-    public struct Month: Equatable, Sendable {
+    public struct Day: Equatable, Sendable {
         public var start: Date
         public var airCelsius: Double?
         public var waterCelsius: Double?
@@ -72,8 +72,8 @@ public struct SeasonStats: Equatable, Sendable {
     public let duration: [Point]
     public let laps: [Point]
     public let kilocalories: [Point]
-    /// Monthly averages, oldest first. Months with no temperature are skipped.
-    public let months: [Month]
+    /// Per-day averages (sessions of one calendar day merged), oldest first. Days with no temperature are skipped.
+    public let days: [Day]
 
     public var showsCharts: Bool { sessionCount >= Self.minSessionsForCharts }
 
@@ -100,14 +100,13 @@ public struct SeasonStats: Equatable, Sendable {
 
         var buckets: [Date: [SeasonSession]] = [:]
         for session in sorted {
-            let start = calendar.dateInterval(of: .month, for: session.date)?.start ?? session.date
-            buckets[start, default: []].append(session)
+            buckets[calendar.startOfDay(for: session.date), default: []].append(session)
         }
-        months = buckets.keys.sorted().compactMap { start in
+        days = buckets.keys.sorted().compactMap { start in
             let group = buckets[start] ?? []
             let air = Self.mean(group.compactMap(\.airCelsius))
             let water = Self.mean(group.compactMap(\.waterCelsius))
-            return air == nil && water == nil ? nil : Month(start: start, airCelsius: air, waterCelsius: water)
+            return air == nil && water == nil ? nil : Day(start: start, airCelsius: air, waterCelsius: water)
         }
     }
 

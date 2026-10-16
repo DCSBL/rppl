@@ -3,7 +3,7 @@ import RpplCore
 import SwiftUI
 
 /// Season tiles under "Total": one bar per session (days without a session never show up), plus
-/// monthly water and air temperature. The caller only shows this once `SeasonStats.showsCharts`.
+/// water and air temperature per day. The caller only shows this once `SeasonStats.showsCharts`.
 struct SeasonCharts: View {
     let season: SeasonStats
     @State private var showsDuration = false
@@ -44,40 +44,43 @@ struct SeasonCharts: View {
                 points: points,
                 tint: (showsDuration ? MetricKind.duration : .distance).tint,
                 showsMonths: true,
-                height: 110
+                height: 110,
+                identifier: showsDuration ? "season-duration-chart" : "season-distance-chart"
             )
         }
     }
 
     private var lapsTile: some View {
         InfoTile("Laps", metric: .laps) {
-            barsTile(season.laps, tint: MetricKind.laps.tint) { String(Int($0.rounded())) }
+            barsTile(season.laps, identifier: "season-laps-chart", tint: MetricKind.laps.tint) { String(Int($0.rounded())) }
         }
     }
 
     private var energyTile: some View {
         InfoTile("Calories", metric: .energy) {
-            barsTile(season.kilocalories, tint: MetricKind.energy.tint) { EnergyFormat.kilocalories($0) }
+            barsTile(season.kilocalories, identifier: "season-calories-chart", tint: MetricKind.energy.tint) { EnergyFormat.kilocalories($0) }
         }
     }
 
     @ViewBuilder
     private func barsTile(
         _ points: [SeasonStats.Point],
+        identifier: String,
         tint: Color,
         format: (Double) -> String
     ) -> some View {
         if let mean = Self.mean(points) {
             MetricValue(format(mean), size: .large, caption: "Average per session")
         }
-        SeasonBarChart(points: points, tint: tint, showsMonths: false, height: 70)
+        SeasonBarChart(points: points, tint: tint, showsMonths: false, height: 70, identifier: identifier)
     }
 
     @ViewBuilder
     private var temperatureTile: some View {
-        if !season.months.isEmpty {
+        if !season.days.isEmpty {
             InfoTile("Water and air", metric: .water) {
-                SeasonTemperatureChart(months: season.months)
+                SeasonTemperatureChart(days: season.days)
+                    .accessibilityIdentifier("season-temperature-chart")
             }
         }
     }
@@ -92,6 +95,7 @@ private struct SeasonBarChart: View {
     let tint: Color
     let showsMonths: Bool
     let height: CGFloat
+    let identifier: String
 
     /// Index of the first session of each month, where the axis gets its month label.
     private var monthStarts: [Int] {
@@ -104,11 +108,18 @@ private struct SeasonBarChart: View {
 
     var body: some View {
         Chart(Array(points.enumerated()), id: \.offset) { index, point in
-            BarMark(x: .value("Session", index), y: .value("Value", point.value), width: .ratio(0.8))
-                .cornerRadius(2)
+            // Explicit rectangle: a `BarMark` ratio width collapses to nothing on a numeric x axis.
+            RectangleMark(
+                xStart: .value("Start", Double(index) - 0.4),
+                xEnd: .value("End", Double(index) + 0.4),
+                yStart: .value("Base", 0),
+                yEnd: .value("Value", point.value)
+            )
+            .cornerRadius(2)
                 .foregroundStyle(tint)
         }
-        .chartXScale(domain: -1...points.count)
+        .chartXScale(domain: -1...Double(points.count))
+        .chartYScale(domain: 0...(points.map(\.value).max() ?? 1))
         .chartYAxis(.hidden)
         .chartXAxis {
             if showsMonths {
@@ -125,11 +136,12 @@ private struct SeasonBarChart: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Sessions"))
         .accessibilityValue(Text("\(points.count)"))
+        .accessibilityIdentifier(identifier)
     }
 }
 
 private struct SeasonTemperatureChart: View {
-    let months: [SeasonStats.Month]
+    let days: [SeasonStats.Day]
 
     private struct Reading: Identifiable {
         let id: String
@@ -142,13 +154,13 @@ private struct SeasonTemperatureChart: View {
     private static let air = String(localized: "Air")
 
     private var readings: [Reading] {
-        months.flatMap { month -> [Reading] in
+        days.flatMap { day -> [Reading] in
             var rows: [Reading] = []
-            if let water = month.waterCelsius {
-                rows.append(Reading(id: "w\(month.start)", name: Self.water, date: month.start, celsius: water))
+            if let water = day.waterCelsius {
+                rows.append(Reading(id: "w\(day.start)", name: Self.water, date: day.start, celsius: water))
             }
-            if let air = month.airCelsius {
-                rows.append(Reading(id: "a\(month.start)", name: Self.air, date: month.start, celsius: air))
+            if let air = day.airCelsius {
+                rows.append(Reading(id: "a\(day.start)", name: Self.air, date: day.start, celsius: air))
             }
             return rows
         }
@@ -157,16 +169,18 @@ private struct SeasonTemperatureChart: View {
     var body: some View {
         Chart(readings) { reading in
             LineMark(
-                x: .value("Month", reading.date, unit: .month),
+                x: .value("Day", reading.date, unit: .day),
                 y: .value("Temperature", reading.celsius),
                 series: .value("Series", reading.name)
             )
+            .interpolationMethod(.monotone)
             .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
             .foregroundStyle(by: .value("Series", reading.name))
             PointMark(
-                x: .value("Month", reading.date, unit: .month),
+                x: .value("Day", reading.date, unit: .day),
                 y: .value("Temperature", reading.celsius)
             )
+            .symbolSize(24)
             .foregroundStyle(by: .value("Series", reading.name))
         }
         .chartForegroundStyleScale([
@@ -175,8 +189,8 @@ private struct SeasonTemperatureChart: View {
         ])
         .chartLegend(position: .top, alignment: .leading)
         .chartXAxis {
-            AxisMarks(values: .stride(by: .month)) { _ in
-                AxisValueLabel(format: .dateTime.month(.abbreviated), centered: true)
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                AxisValueLabel(format: .dateTime.day().month(.abbreviated))
             }
         }
         .chartYAxis {

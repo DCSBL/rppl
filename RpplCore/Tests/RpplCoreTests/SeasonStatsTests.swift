@@ -56,21 +56,24 @@ struct SeasonStatsTests {
         #expect(stats([nil]).typicalSpeedKmh == nil)
     }
 
-    @Test func monthlyTemperatureAverages() {
+    @Test func dailyTemperatureAverages() {
         let stats = SeasonStats(
             sessions: [
                 SeasonSession(date: day(5, 1), airCelsius: 10, waterCelsius: 12),
-                SeasonSession(date: day(5, 9), airCelsius: 20),
+                SeasonSession(date: calendar.date(from: DateComponents(year: 2026, month: 5, day: 1, hour: 18))!, airCelsius: 20),
+                SeasonSession(date: day(5, 9), airCelsius: 16),
                 SeasonSession(date: day(6, 3)),
                 SeasonSession(date: day(7, 3), waterCelsius: 18),
             ],
             calendar: calendar
         )
-        #expect(stats.months.count == 2)
-        #expect(stats.months[0].airCelsius == 15)
-        #expect(stats.months[0].waterCelsius == 12)
-        #expect(stats.months[1].airCelsius == nil)
-        #expect(stats.months[1].waterCelsius == 18)
+        #expect(stats.days.count == 3)
+        #expect(stats.days[0].airCelsius == 15)
+        #expect(stats.days[0].waterCelsius == 12)
+        #expect(stats.days[1].airCelsius == 16)
+        #expect(stats.days[1].waterCelsius == nil)
+        #expect(stats.days[2].airCelsius == nil)
+        #expect(stats.days[2].waterCelsius == 18)
     }
 
     @Test func chartsNeedFiveSessions() {
