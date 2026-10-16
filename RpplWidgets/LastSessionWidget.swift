@@ -102,9 +102,9 @@ struct LastSessionView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if let ratio = session.ridingRatio {
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 6) {
                         WidgetRing(fraction: ratio, tint: "RpplMetricRiding")
-                            .frame(width: 52, height: 52)
+                            .frame(width: 44, height: 44)
                             .frame(maxWidth: .infinity)
                         if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
                             timesGrid(riding: riding, inactive: inactive)
