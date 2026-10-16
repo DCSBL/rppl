@@ -22,13 +22,16 @@ public enum DurationFormat {
     }
 
     /// One rounded unit (`37 hr`, `40 min`) so a long total fits a narrow tile and splits into number + unit.
-    public static func total(_ interval: TimeInterval, locale: Locale = .current) -> String {
+    /// `fractionDigits` > 0 keeps decimals (`37.5 hr`) for the logbook totals.
+    public static func total(_ interval: TimeInterval, fractionDigits: Int = 0, locale: Locale = .current) -> String {
         let unit: Duration.UnitsFormatStyle.Unit = interval >= 3600 ? .hours : .minutes
         return Duration.seconds(max(0, interval)).formatted(
             .units(
                 allowed: [unit],
                 width: .abbreviated,
-                fractionalPart: .hide(rounded: .toNearestOrAwayFromZero)
+                fractionalPart: fractionDigits > 0
+                    ? .show(length: fractionDigits, rounded: .toNearestOrAwayFromZero)
+                    : .hide(rounded: .toNearestOrAwayFromZero)
             )
             .locale(locale)
         )
