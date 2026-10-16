@@ -6,6 +6,8 @@ struct ParkDetailView: View {
     let park: Park
     let entry: ParkEntry?
     let isFavorite: Bool
+    /// Date from the Parks "Open" filter; nil for today or no filter.
+    var plannedDate: Date?
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -13,6 +15,7 @@ struct ParkDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var weatherProvider = ParksWeatherProvider.shared
     @State private var weather: ParkWeather?
+    @State private var plannedForecast: ParkDayForecast?
     @State private var waterTemperatureProvider = ParkWaterTemperatureProvider.shared
     @State private var waterTemperature: ParkWaterTemperature?
     /// Set once a water-temperature fetch attempt (successful or not) has completed, so "Not
@@ -60,6 +63,9 @@ struct ParkDetailView: View {
             VStack(spacing: 12) {
                 updateCard
                 mapCard
+                if let plannedDay {
+                    plannedDayCard(plannedDay)
+                }
                 todayCard(daySchedule)
                 upcomingChangesCard
                 openingTimesCard
@@ -126,6 +132,9 @@ struct ParkDetailView: View {
             async let weatherResult = weatherProvider.weather(for: park)
             async let waterTemperatureResult = waterTemperatureProvider.temperature(for: park)
             weather = await weatherResult
+            if let plannedDay {
+                plannedForecast = await weatherProvider.forecast(for: park, on: plannedDay)
+            }
             waterTemperature = await waterTemperatureResult
             waterTemperatureChecked = true
         }
@@ -251,6 +260,67 @@ struct ParkDetailView: View {
 
             if park.wakesys == true {
                 ParkChip(text: "Wakesys", systemImage: "ticket")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .logbookCardChrome()
+    }
+
+    /// The filter date when it is a day other than today.
+    private var plannedDay: Date? {
+        guard let plannedDate, !Calendar.current.isDateInToday(plannedDate) else { return nil }
+        return plannedDate
+    }
+
+    /// Opening hours and forecast for the day picked in the Parks filter. No water temperature (a
+    /// current reading says nothing about next week) and no "opens again": the day is the answer.
+    private func plannedDayCard(_ date: Date) -> some View {
+        let day = park.schedule(on: date)
+        let dayText = date.formatted(.dateTime.day().month(.wide))
+        return VStack(alignment: .leading, spacing: 12) {
+            Text(date.formatted(.dateTime.weekday(.wide).day().month(.wide)).capitalized)
+                .font(.headline)
+                .foregroundStyle(Color.rpplText)
+
+            if !day.isScheduleKnown {
+                Text("Opening hours unknown")
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.rpplMuted)
+            } else if day.isOpen {
+                ForEach(Array(day.windows.enumerated()), id: \.offset) { _, window in
+                    Text("Open from \(ParkFormatting.time(window.startMinute)) to \(ParkFormatting.end(window)) on \(dayText)")
+                        .font(.title3.bold())
+                        .foregroundStyle(.yellow)
+                }
+            } else {
+                Text("Closed on \(dayText)")
+                    .font(.title3.bold())
+                    .foregroundStyle(.red)
+            }
+
+            ForEach(Array(day.notices.enumerated()), id: \.offset) { _, notice in
+                noticeRow(kind: notice.kind, label: notice.label, note: notice.note)
+            }
+
+            if let forecast = plannedForecast {
+                Divider().overlay(Color.rpplFill)
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 8) {
+                    conditionRow(
+                        TemperatureFormat.celsiusRange(forecast.lowCelsius...forecast.highCelsius),
+                        systemImage: "thermometer.medium"
+                    )
+                    conditionRow(windSummary(directionDegrees: forecast.windDirectionDegrees, kmh: forecast.windKmh), systemImage: "wind")
+                    conditionRow(String(localized: "Rain chance \(Int((forecast.rainChance * 100).rounded()))%"), systemImage: "cloud.rain")
+                    if forecast.isHighUV {
+                        conditionRow(
+                            String(localized: "High UV"),
+                            systemImage: "sun.max.trianglebadge.exclamationmark",
+                            tint: .orange
+                        )
+                    }
+                }
+                .font(.subheadline)
+                AppleWeatherAttribution(info: forecast.attribution)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -416,9 +486,13 @@ struct ParkDetailView: View {
     }
 
     private func windSummary(_ weather: ParkWeather) -> String {
-        let direction = CompassDirection8(degrees: weather.windDirectionDegrees)
-        let speed = DistanceFormat.kilometersPerHour(weather.windKmh)
-        let beaufort = BeaufortScale.label(forKmh: weather.windKmh)
+        windSummary(directionDegrees: weather.windDirectionDegrees, kmh: weather.windKmh)
+    }
+
+    private func windSummary(directionDegrees: Double, kmh: Double) -> String {
+        let direction = CompassDirection8(degrees: directionDegrees)
+        let speed = DistanceFormat.kilometersPerHour(kmh)
+        let beaufort = BeaufortScale.label(forKmh: kmh)
         return "\(direction.name) · \(speed) · \(beaufort)"
     }
 
