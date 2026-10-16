@@ -201,9 +201,11 @@ jobs:
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 180 \
+            -default-test-execution-time-allowance 120 \
             -resultBundlePath RpplUITests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
@@ -304,7 +306,7 @@ jobs:
             -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 180 \
+            -default-test-execution-time-allowance 90 \
             -resultBundlePath RpplWatchUITests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
