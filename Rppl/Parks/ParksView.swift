@@ -24,6 +24,7 @@ struct ParksView: View {
     @State private var showMap = false
     @State private var showSearch = false
     @State private var searchText = ""
+    @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
     @State private var openFilterDate: Date?
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
@@ -324,7 +325,7 @@ struct ParksView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Park.self) { park in
-                ParkDetailContainer(park: park)
+                ParkDetailContainer(park: park, plannedDate: openFilterDate)
             }
         }
         .tint(Color.rpplAccent)
@@ -351,6 +352,9 @@ struct ParksView: View {
         }
         .onChange(of: connectivity.sessionsRevision) { _, _ in
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
+        }
+        .onChange(of: waterTemperatureEnabled, initial: true) { _, enabled in
+            if ParkWidgetWater.setEnabled(enabled) { WidgetCenter.shared.reloadAllTimelines() }
         }
         .onChange(of: visits, initial: true) { _, counts in
             favorites.publishToWidgets()

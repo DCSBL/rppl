@@ -11255,6 +11255,54 @@
           }
         }
       }
+    },
+    "Open from %1$@ to %2$@ on %3$@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open from %1$@ to %2$@ on %3$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open van %1$@ tot %2$@ op %3$@"
+          }
+        }
+      }
+    },
+    "Closed on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed on %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesloten op %@"
+          }
+        }
+      }
+    },
+    "Rain chance %lld%%" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain chance %lld%%"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenkans %lld%%"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

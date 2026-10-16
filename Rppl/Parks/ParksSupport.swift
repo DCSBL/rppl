@@ -348,6 +348,18 @@ struct ParkWeather: Equatable, Sendable {
     }
 }
 
+/// One day of WeatherKit's daily forecast (about ten days ahead) for the planned-day card.
+struct ParkDayForecast: Equatable, Sendable {
+    var date: Date
+    var lowCelsius: Double
+    var highCelsius: Double
+    var windKmh: Double
+    var windDirectionDegrees: Double
+    var rainChance: Double
+    var isHighUV: Bool
+    var attribution: WeatherAttributionInfo
+}
+
 /// Current air temperature and wind at a park via WeatherKit. Failures just hide the weather row.
 ///
 /// Shared (`.shared`) rather than per-view so the cache and rate limit below apply across
@@ -362,6 +374,8 @@ final class ParksWeatherProvider {
     private var cache: [String: ParkWeather] = [:]
     private var throttle = WeatherFetchThrottle()
     private var inFlight: [String: Task<ParkWeather?, Never>] = [:]
+    private var dailyCache: [String: [ParkDayForecast]] = [:]
+    private var dailyThrottle = WeatherFetchThrottle()
     private static let fetchTimeout: TimeInterval = 8
 
     func weather(for park: Park) async -> ParkWeather? {
@@ -380,6 +394,51 @@ final class ParksWeatherProvider {
         let result = await task.value
         inFlight[key] = nil
         return result
+    }
+
+    /// Forecast for one day, nil when WeatherKit has none that far ahead or the fetch failed. Shares the
+    /// hourly rate limit, with its own slot per location since this is a separate API call.
+    func forecast(for park: Park, on day: Date) async -> ParkDayForecast? {
+        let lat = park.location.lat
+        let lon = park.location.lon
+        let key = WeatherFetchThrottle.key(latitude: lat, longitude: lon)
+        if dailyThrottle.canFetch(latitude: lat, longitude: lon) {
+            dailyThrottle.recordAttempt(latitude: lat, longitude: lon)
+            dailyCache[key] = await fetchDaily(location: CLLocation(latitude: lat, longitude: lon))
+        }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = park.resolvedTimeZone
+        return dailyCache[key]?.first { calendar.isDate($0.date, inSameDayAs: day) }
+    }
+
+    private func fetchDaily(location: CLLocation) async -> [ParkDayForecast] {
+        do {
+            return try await Self.withTimeout(Self.fetchTimeout) {
+                let service = WeatherService.shared
+                let daily = try await service.weather(for: location, including: .daily)
+                let attribution = try? await service.attribution
+                let info = WeatherAttributionInfo(
+                    markLightURL: attribution?.combinedMarkLightURL,
+                    markDarkURL: attribution?.combinedMarkDarkURL,
+                    legalURL: attribution?.legalPageURL ?? WeatherAttributionInfo.fallbackLegalURL
+                )
+                return daily.map {
+                    ParkDayForecast(
+                        date: $0.date,
+                        lowCelsius: $0.lowTemperature.converted(to: .celsius).value,
+                        highCelsius: $0.highTemperature.converted(to: .celsius).value,
+                        windKmh: $0.wind.speed.converted(to: .kilometersPerHour).value,
+                        windDirectionDegrees: $0.wind.direction.converted(to: .degrees).value,
+                        rainChance: $0.precipitationChance,
+                        isHighUV: $0.uvIndex.category >= .high,
+                        attribution: info
+                    )
+                }
+            }
+        } catch {
+            WakeLog.error(.ui, "park day forecast: \(error)")
+            return []
+        }
     }
 
     private func fetch(location: CLLocation, key: String) async -> ParkWeather? {
@@ -577,6 +636,8 @@ enum ParkOriginBadge {
 /// Park detail wired to the shared favorites and park store; used from the Parks tab and the session page.
 struct ParkDetailContainer: View {
     let park: Park
+    /// The date picked in the Parks "Open" filter; the detail adds a card for that day.
+    var plannedDate: Date?
     @State private var favorites = ParkFavorites.shared
     @State private var store = ParkStore.shared
 
@@ -586,6 +647,7 @@ struct ParkDetailContainer: View {
             park: entry?.park ?? park,
             entry: entry,
             isFavorite: favorites.contains(park.id),
+            plannedDate: plannedDate,
             onToggleFavorite: { favorites.toggle(park.id) }
         )
     }
