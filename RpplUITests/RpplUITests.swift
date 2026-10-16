@@ -43,12 +43,12 @@ final class RpplUITests: XCTestCase {
         app.tabBars.buttons["Rppl"].tap()
         XCTAssertTrue(app.tabBars.buttons["Rppl"].isSelected)
         app.tabBars.buttons["Logbook"].tap()
-        XCTAssertTrue(card("Example session").waitForExistence(timeout: 30))
+        XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
     }
 
     @MainActor
     func testLogbookListsSeededSessions() {
-        XCTAssertTrue(card("Example session").waitForExistence(timeout: 30))
+        XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
         XCTAssertTrue(card("Wakeboard, Lakeside Zwolle").exists)
         XCTAssertTrue(card("Wakeboard, Wakepark Groningen").exists)
         XCTAssertTrue(app.staticTexts["4 total"].exists)
@@ -83,7 +83,7 @@ final class RpplUITests: XCTestCase {
         let save = app.buttons["Save"]
         XCTAssertTrue(save.waitForExistence(timeout: 15))
         save.tap()
-        XCTAssertTrue(app.staticTexts["5 total"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["5, Sessions"].waitForExistence(timeout: 15))
     }
 
     @MainActor
