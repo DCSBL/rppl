@@ -73,7 +73,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testTrackedSessionDetail() {
         launch()
         let tracked = card("Wakeboard, Project 7 Cablepark")
-        XCTAssertTrue(tracked.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToCard(tracked))
         // right edge: the card centre can land on a highlight chip
         tracked.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 30))
@@ -87,7 +87,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testManualSessionDetail() {
         launch()
         let manual = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(manual.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToCard(manual))
         manual.tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         scrollShots("05-session-manual", count: 2)
