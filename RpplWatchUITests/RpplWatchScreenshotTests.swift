@@ -67,7 +67,7 @@ final class RpplWatchScreenshotTests: XCTestCase {
 
     @MainActor
     func testSessionDetail() throws {
-        try XCTSkip("Disabled: hangs the Watch simulator (github.com/DCSBL/rppl/issues/498)")
+        try XCTSkipIf(true, "Disabled: hangs the Watch simulator (github.com/DCSBL/rppl/issues/498)")
         launch()
         openLogbook()
         app.buttons.matching(NSPredicate(format: "label CONTAINS 'Aug'")).firstMatch.tap()
@@ -78,7 +78,7 @@ final class RpplWatchScreenshotTests: XCTestCase {
 
     @MainActor
     func testEndSummary() throws {
-        try XCTSkip("Disabled: hangs the Watch simulator (github.com/DCSBL/rppl/issues/498)")
+        try XCTSkipIf(true, "Disabled: hangs the Watch simulator (github.com/DCSBL/rppl/issues/498)")
         launch(["-rpplUITestSummary"])
         XCTAssertTrue(app.staticTexts["SESSION COMPLETE"].waitForExistence(timeout: 30))
         sleep(3) // map snapshot
