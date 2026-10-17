@@ -50,8 +50,13 @@ final class RpplUITests: XCTestCase {
     @MainActor
     func testLogbookListsSeededSessions() {
         XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
-        XCTAssertTrue(card("Wakeboard, Lakeside Zwolle").exists)
-        XCTAssertTrue(card("Wakeboard, Wakepark Groningen").exists)
+        // Lazy list: on a small screen the lower cards are not built until scrolled into view.
+        let zwolle = card("Wakeboard, Lakeside Zwolle")
+        scrollTo(zwolle)
+        XCTAssertTrue(zwolle.exists)
+        let groningen = card("Wakeboard, Wakepark Groningen")
+        scrollTo(groningen)
+        XCTAssertTrue(groningen.exists)
         XCTAssertTrue(app.staticTexts["4 total"].exists)
     }
 
@@ -70,6 +75,7 @@ final class RpplUITests: XCTestCase {
     func testDeleteSessionBySwipe() {
         let groningen = card("Wakeboard, Lakeside Zwolle")
         XCTAssertTrue(groningen.waitForExistence(timeout: 30))
+        scrollTo(groningen) // a swipe on a card at the screen edge misses the row
         groningen.swipeLeft()
         app.buttons["Delete"].tap()
         app.alerts.buttons["Delete from Rppl"].tap()
@@ -84,7 +90,11 @@ final class RpplUITests: XCTestCase {
         let save = app.buttons["Save"]
         XCTAssertTrue(save.waitForExistence(timeout: 15))
         save.tap()
-        XCTAssertTrue(app.staticTexts["5, Sessions"].waitForExistence(timeout: 15))
+        // The totals tile is one combined button; its label reads "5, Sessions".
+        let sessions = total("logbook-total-sessions")
+        XCTAssertTrue(sessions.waitForExistence(timeout: 15))
+        expectation(for: NSPredicate(format: "label BEGINSWITH '5'"), evaluatedWith: sessions)
+        waitForExpectations(timeout: 15)
     }
 
     @MainActor
