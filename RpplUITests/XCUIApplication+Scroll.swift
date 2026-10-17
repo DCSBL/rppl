@@ -1,18 +1,34 @@
 import XCTest
 
 extension XCUIApplication {
-    /// Swipes up until `element` is hittable and in the upper part of the window. Lazy lists only build
-    /// rows near the viewport (a small screen or big text pushes the cards off it), and a swipe on a row
-    /// at the screen edge misses. Stops early once a swipe no longer moves the element.
-    func scrollTo(_ element: XCUIElement, maxSwipes: Int = 10) {
-        let height = windows.firstMatch.frame.height
+    /// Scrolls (short drags, so it cannot overshoot) until `element` is hittable in the upper part of the
+    /// window. Lazy lists only build rows near the viewport (a small screen or big text pushes the cards
+    /// off it), and a tap or swipe on a row at the screen edge misses. Stops once a drag no longer moves it.
+    func scrollTo(_ element: XCUIElement, maxDrags: Int = 20) {
+        let window = windows.firstMatch
+        let height = window.frame.height
+        func drag(up: Bool) {
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.7 : 0.35))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.4 : 0.65))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
         var previousMinY: CGFloat?
-        for _ in 0..<maxSwipes {
-            if element.isHittable {
-                if element.frame.midY < height * 0.7 || element.frame.minY == previousMinY { return }
-                previousMinY = element.frame.minY
+        for _ in 0..<maxDrags {
+            guard element.exists else {
+                drag(up: true)
+                continue
             }
-            swipeUp()
+            let frame = element.frame
+            if frame.maxY <= 0 {
+                drag(up: false) // overshot: it is above the window
+            } else if element.isHittable && frame.midY < height * 0.7 {
+                return
+            } else if frame.minY == previousMinY {
+                return // the list cannot scroll further
+            } else {
+                previousMinY = frame.minY
+                drag(up: true)
+            }
         }
     }
 
