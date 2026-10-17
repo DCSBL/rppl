@@ -32,14 +32,22 @@ extension XCUIApplication {
         }
     }
 
-    /// Scrolls to a session card (rows are only built near the viewport). Waits on the tab bar, which
+    /// Scrolls to a session card or chart (rows are only built near the viewport). Waits on the tab bar, which
     /// stays on screen, and retries because the logbook may still be loading when the first swipes land.
-    func scrollToCard(_ card: XCUIElement) -> Bool {
+    func scrollToElement(_ element: XCUIElement) -> Bool {
         guard tabBars.firstMatch.waitForExistence(timeout: 30) else { return false }
         for _ in 0..<3 {
-            scrollTo(card)
-            if card.waitForExistence(timeout: 10) { return true }
+            scrollTo(element)
+            if element.waitForExistence(timeout: 10) { return true }
         }
         return false
+    }
+
+    /// Waits until the logbook totals tile (always at the top, never lazily skipped) reads `count` sessions.
+    func waitForSessionCount(_ count: Int, timeout: TimeInterval = 60) -> Bool {
+        let tile = descendants(matching: .any)["logbook-total-sessions"].firstMatch
+        guard tile.waitForExistence(timeout: timeout) else { return false }
+        let reads = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label BEGINSWITH %@", String(count)), object: tile)
+        return XCTWaiter().wait(for: [reads], timeout: timeout) == .completed
     }
 }

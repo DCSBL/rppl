@@ -35,24 +35,24 @@ final class RpplUITests: XCTestCase {
         app.tabBars.buttons["Rppl"].tap()
         XCTAssertTrue(app.tabBars.buttons["Rppl"].isSelected)
         app.tabBars.buttons["Logbook"].tap()
-        XCTAssertTrue(app.scrollToCard(card("Wakeboard, Project 7 Cablepark")))
+        XCTAssertTrue(app.scrollToElement(card("Wakeboard, Project 7 Cablepark")))
     }
 
     @MainActor
     func testLogbookListsSeededSessions() {
-        XCTAssertTrue(app.scrollToCard(card("Wakeboard, Project 7 Cablepark")))
+        XCTAssertTrue(app.scrollToElement(card("Wakeboard, Project 7 Cablepark")))
         // Lazy list: on a small screen the lower cards are not built until scrolled into view.
         let zwolle = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(app.scrollToCard(zwolle))
+        XCTAssertTrue(app.scrollToElement(zwolle))
         let groningen = card("Wakeboard, Wakepark Groningen")
-        XCTAssertTrue(app.scrollToCard(groningen))
+        XCTAssertTrue(app.scrollToElement(groningen))
         XCTAssertTrue(app.staticTexts["4 total"].exists)
     }
 
     @MainActor
     func testOpenSessionDetailAndBack() {
         let zwolle = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(app.scrollToCard(zwolle))
+        XCTAssertTrue(app.scrollToElement(zwolle))
         zwolle.tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Zwolle'")).firstMatch.exists)
@@ -63,7 +63,7 @@ final class RpplUITests: XCTestCase {
     @MainActor
     func testDeleteSessionBySwipe() {
         let groningen = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(app.scrollToCard(groningen))
+        XCTAssertTrue(app.scrollToElement(groningen))
         groningen.swipeLeft()
         app.buttons["Delete"].tap()
         app.alerts.buttons["Delete from Rppl"].tap()
@@ -102,7 +102,7 @@ final class RpplUITests: XCTestCase {
     func testSeasonChartsHiddenUnderFiveSessions() {
         app.terminate()
         launch(sessions: 3)
-        XCTAssertTrue(app.staticTexts["3 total"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.waitForSessionCount(3))
         XCTAssertFalse(chart("season-distance-chart").exists)
         XCTAssertFalse(chart("season-temperature-chart").exists)
     }
@@ -113,7 +113,7 @@ final class RpplUITests: XCTestCase {
         launch(sessions: 18)
         // The "18 total" header sits below the charts, so the lazy list never builds it on screen.
         let distance = chart("season-distance-chart")
-        XCTAssertTrue(distance.waitForExistence(timeout: 60))
+        XCTAssertTrue(app.scrollToElement(distance))
         XCTAssertEqual(distance.value as? String, "18") // one bar per session
         XCTAssertGreaterThan(distance.frame.height, 50)
 
