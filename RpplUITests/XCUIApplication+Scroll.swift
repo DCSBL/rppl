@@ -44,10 +44,11 @@ extension XCUIApplication {
     }
 
     /// Waits until the logbook totals tile (always at the top, never lazily skipped) reads `count` sessions.
-    func waitForSessionCount(_ count: Int, timeout: TimeInterval = 60) -> Bool {
+    func waitForSessionCount(_ count: Int, timeout: TimeInterval = 45) -> Bool {
         let tile = descendants(matching: .any)["logbook-total-sessions"].firstMatch
+        let deadline = Date().addingTimeInterval(timeout) // one budget: the test allowance is 120 s in total
         guard tile.waitForExistence(timeout: timeout) else { return false }
         let reads = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label BEGINSWITH %@", String(count)), object: tile)
-        return XCTWaiter().wait(for: [reads], timeout: timeout) == .completed
+        return XCTWaiter().wait(for: [reads], timeout: max(1, deadline.timeIntervalSinceNow)) == .completed
     }
 }
