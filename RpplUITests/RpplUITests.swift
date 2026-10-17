@@ -135,6 +135,7 @@ final class RpplUITests: XCTestCase {
     private func assertSpeedSwapKeepsTextSize() {
         let speed = total("logbook-total-speed")
         XCTAssertTrue(speed.waitForExistence(timeout: 30))
+        app.scrollTo(speed) // big text stacks the tiles; a tap on an off-screen tile lands elsewhere
         XCTAssertTrue(speed.label.contains("speed"))
         let before = speed.frame.height
         let labelBefore = speed.label
@@ -163,6 +164,7 @@ final class RpplUITests: XCTestCase {
     func testTotalsSessionsTapCyclesSetsAndLaps() {
         let sessions = total("logbook-total-sessions")
         XCTAssertTrue(sessions.waitForExistence(timeout: 30))
+        app.scrollTo(sessions)
         XCTAssertTrue(sessions.label.contains("Sessions"), sessions.label)
         sessions.tap()
         XCTAssertTrue(sessions.label.contains("Sets"), sessions.label)
@@ -176,6 +178,7 @@ final class RpplUITests: XCTestCase {
     func testTotalsShowOneDecimal() {
         let distance = total("logbook-total-distance")
         XCTAssertTrue(distance.waitForExistence(timeout: 30))
+        app.scrollTo(distance)
         let oneDecimal = NSPredicate(format: "label MATCHES %@", ".*[0-9][.,][0-9].*")
         XCTAssertTrue(oneDecimal.evaluate(with: distance), distance.label)
         distance.tap() // total time

@@ -35,7 +35,7 @@ jobs:
   iphone:
     name: iPhone ${{ matrix.variant }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -110,7 +110,7 @@ jobs:
   watch:
     name: Watch ${{ matrix.variant }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
