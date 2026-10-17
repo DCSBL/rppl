@@ -16,10 +16,14 @@ extension XCUIApplication {
         }
     }
 
-    /// Waits for the logbook, then scrolls to a session card (it may not be built until scrolled to).
+    /// Scrolls to a session card (rows are only built near the viewport). Waits on the tab bar, which
+    /// stays on screen, and retries because the logbook may still be loading when the first swipes land.
     func scrollToCard(_ card: XCUIElement) -> Bool {
-        guard buttons["Add session"].waitForExistence(timeout: 30) else { return false }
-        scrollTo(card)
-        return card.waitForExistence(timeout: 5)
+        guard tabBars.firstMatch.waitForExistence(timeout: 30) else { return false }
+        for _ in 0..<3 {
+            scrollTo(card)
+            if card.waitForExistence(timeout: 10) { return true }
+        }
+        return false
     }
 }
