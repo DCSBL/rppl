@@ -42,7 +42,7 @@ jobs:
           head="${{ github.event.pull_request.head.sha }}"
           # Resolve outside `if` so a failed `git diff` (missing SHAs) aborts
           # under `set -e` instead of looking like "no changes".
-          changed_files="$(git diff --name-only "$base" "$head")"
+          changed_files="$(git diff --name-only "$base...$head")"
           if printf '%s\n' "$changed_files" \
             | grep -E '(^|/)(\.swiftlint\.yml|\.pre-commit-config\.yaml)$|\.swift$|scripts/git-hooks/run-swiftlint\.sh$' \
             >/dev/null; then
