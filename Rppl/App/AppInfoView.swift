@@ -10,6 +10,7 @@ struct AppInfoView: View {
     @State private var iCloud = PhoneICloudDriveController.shared
     @Environment(\.openURL) private var openURL
     @State private var showDisableDeleteConfirm = false
+    @State private var showSupportMail = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
 
     private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
@@ -86,7 +87,12 @@ struct AppInfoView: View {
                 }
 
                 Section {
+                    Button(action: sendSupportMail) {
+                        Label("Need help or report a bug?", systemImage: "lifepreserver")
+                    }
                     betaRow
+                } header: {
+                    Text("Support")
                 }
 
                 Section {
@@ -134,6 +140,10 @@ struct AppInfoView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)
             .navigationDestination(isPresented: $showDebug) { DebugLogView() }
+            .sheet(isPresented: $showSupportMail) {
+                SupportMailComposer { showSupportMail = false }
+                    .ignoresSafeArea()
+            }
             .alert(
                 "Turn off iCloud Drive?",
                 isPresented: $showDisableDeleteConfirm
@@ -150,6 +160,14 @@ struct AppInfoView: View {
                     "Stop syncing the logbook to iCloud Drive? You can delete the Drive copies now, or leave them in Files."
                 )
             }
+        }
+    }
+
+    private func sendSupportMail() {
+        if MailAvailability.canSend {
+            showSupportMail = true
+        } else if let url = SupportMail.mailtoURL() {
+            openURL(url)
         }
     }
 
