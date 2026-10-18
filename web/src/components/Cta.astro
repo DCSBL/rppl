@@ -1,0 +1,22 @@
+---
+const storeURL = "https://apps.apple.com/nl/app/rppl/id6805204540";
+const betaURL = "https://testflight.apple.com/join/R2BymVaX";
+const { beta = false } = Astro.props;
+---
+<p class="cta">
+  <a class="btn" href={storeURL} rel="noopener">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+    Get on the App Store
+  </a>
+</p>
+{beta && <p class="note">Or <a href={betaURL} rel="noopener">join the TestFlight beta</a></p>}
+
+<style>
+  .cta { margin: 24px 0 0; text-align: center; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+  .note { margin: 12px 0 0; color: var(--muted); font-size: 15px; text-align: center; }
+  .note a { text-decoration: underline; }
+  @media (prefers-color-scheme: dark) { .btn { color: #02070e; } }
+</style>
