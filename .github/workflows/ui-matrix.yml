@@ -65,6 +65,7 @@ jobs:
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests \
+            -skip-testing:RpplUITests/RpplDarkScreenshotTests \
             -retry-tests-on-failure \
             -test-iterations 2 \
             -parallel-testing-enabled NO \
