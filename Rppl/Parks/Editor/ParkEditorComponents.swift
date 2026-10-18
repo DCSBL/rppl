@@ -165,7 +165,7 @@ struct GhostList<Item: Equatable, Row: View>: View {
 
     private func removeIfBlank(_ id: UUID) {
         guard let index = index(of: id), rules.isBlank(items[index]) else { return }
-        withAnimation {
+        withRpplAnimation {
             ids.values.remove(at: index)
             items.remove(at: index)
         }
@@ -183,7 +183,7 @@ struct GhostList<Item: Equatable, Row: View>: View {
 
     private func delete(_ id: UUID) {
         guard let index = index(of: id) else { return }
-        withAnimation {
+        withRpplAnimation {
             ids.values.remove(at: index)
             items.remove(at: index)
         }

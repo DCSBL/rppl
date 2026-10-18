@@ -253,7 +253,7 @@ private struct ParkGuidedFlow: View {
                 .tint(Color.rpplAccent)
             HStack {
                 if session.step > 0 {
-                    Button("Back") { withAnimation { session.goToPrevious() } }
+                    Button("Back") { withRpplAnimation { session.goToPrevious() } }
                         .buttonStyle(.bordered)
                 }
                 Spacer()
@@ -262,7 +262,7 @@ private struct ParkGuidedFlow: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(!session.issues.isEmpty)
                 } else {
-                    Button(nextTitle) { withAnimation { session.goToNext() } }
+                    Button(nextTitle) { withRpplAnimation { session.goToNext() } }
                         .buttonStyle(.borderedProminent)
                 }
             }

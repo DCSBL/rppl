@@ -1,0 +1,14 @@
+{
+  "name": "rppl-marketing",
+  "private": true,
+  "type": "module",
+  "description": "App Store marketing stills (screenshots, product page header) rendered from marketing.yaml",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "@fontsource/poppins": "5.2.7",
+    "playwright": "1.56.1",
+    "yaml": "2.8.1"
+  }
+}

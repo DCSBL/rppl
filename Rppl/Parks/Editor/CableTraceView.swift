@@ -5,6 +5,7 @@ import SwiftUI
 /// Full-screen map to trace a cable: pan/zoom so the center marker sits on the spot, then press Add point.
 /// Tap an existing point to select it, pan to the new spot and press Move here.
 struct CableTraceView: View {
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @Binding var cable: ParkCable
     let center: ParkCoordinate
 
@@ -98,6 +99,13 @@ struct CableTraceView: View {
                 .fill(point.start == true ? Color.green : (isSelected ? Color.orange : Color.rpplAccent))
                 .frame(width: isSelected ? 22 : 14, height: isSelected ? 22 : 14)
                 .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                .overlay {
+                    if differentiateWithoutColor, point.start == true {
+                        Image(systemName: "flag.fill")
+                            .font(.system(size: 8))
+                            .foregroundStyle(.white)
+                    }
+                }
                 .frame(width: 44, height: 44)
                 .contentShape(Circle())
         }

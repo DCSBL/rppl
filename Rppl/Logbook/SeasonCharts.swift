@@ -192,11 +192,17 @@ private struct SeasonTemperatureChart: View {
                 y: .value("Temperature", reading.celsius)
             )
             .symbolSize(24)
+            .symbol(by: .value("Series", reading.name))
             .foregroundStyle(by: .value("Series", reading.name))
         }
         .chartForegroundStyleScale([
             Self.water: MetricKind.water.tint,
             Self.air: MetricKind.air.tint,
+        ])
+        // Distinct shapes so the two series don't rely on color alone.
+        .chartSymbolScale([
+            Self.water: BasicChartSymbolShape.circle,
+            Self.air: BasicChartSymbolShape.square,
         ])
         .chartLegend(position: .top, alignment: .leading)
         .chartXAxis {

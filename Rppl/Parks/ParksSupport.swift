@@ -75,7 +75,8 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     func requestAccess() {
-        if manager.authorizationStatus == .notDetermined {
+        // UI tests: the system alert and XCTest's auto-dismiss kept re-triggering each other and hung the run.
+        if manager.authorizationStatus == .notDetermined, !UITestFixtures.isActive {
             manager.requestWhenInUseAuthorization()
         }
         refresh()
@@ -574,6 +575,16 @@ extension ParkOpenStatusDetail {
         case .opensTomorrow: .yellow
         case .closed: .red
         case .unknown: .gray
+        }
+    }
+
+    /// Shape twin of `badgeColor` for Differentiate Without Color.
+    var badgeSymbol: String {
+        switch status {
+        case .openToday: windowHasStarted == false ? "clock" : "checkmark"
+        case .opensTomorrow: "clock"
+        case .closed: "xmark"
+        case .unknown: "questionmark"
         }
     }
 }
