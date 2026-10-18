@@ -138,3 +138,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ### Material Design Icons
 
 The wakeboarder symbol ("ski-water") comes from Material Design Icons by Pictogrammers and its contributors, and is used unchanged. Licensed under the Apache License, Version 2.0. You can read the license at [apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+### Poppins
+
+The headlines in the App Store pictures use Poppins, Copyright 2020 The Poppins Project Authors. Licensed under the SIL Open Font License, Version 1.1. You can read the license at [openfontlicense.org](https://openfontlicense.org).

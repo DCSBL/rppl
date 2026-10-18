@@ -1,6 +1,9 @@
 # Release screenshots: seeded mock data (UITestFixtures) on an iPhone and an Apple Watch Simulator, attached to the
 # release as assets and listed in its description. Re-running replaces the assets and the section.
 # Runs on publish; for an existing release use "Run workflow" with its tag.
+# The marketing job then renders the App Store assets (marketing/) from these screenshots and attaches one zip to
+# the release. It runs for full releases only (no -beta.N / -rc.N suffix) or when started manually; a manual run
+# renders with marketing/ from the branch you pick, so template changes can be tried before a release.
 # The tag reaches the shell only through env, never interpolated.
 
 name: Release screenshots
@@ -140,3 +143,60 @@ jobs:
           Path("body.md").write_text(body + "\n\n" + section)
           PY
           gh release edit "$RELEASE_TAG" --notes-file body.md
+
+  marketing:
+    name: marketing assets
+    needs: screenshots
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.release.tag_name, '-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: screenshots
+          path: shots
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: marketing/package-lock.json
+
+      - name: Install renderer
+        working-directory: marketing
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Render
+        working-directory: marketing
+        run: |
+          node --test
+          node render.mjs --shots ../shots --out ../marketing-out
+
+      - name: Check sizes and alpha
+        run: python3 scripts/ci/check_marketing_assets.py marketing-out
+
+      - name: Zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd marketing-out && zip -qr "../rppl-appstore-assets-${RELEASE_TAG}.zip" .)
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-assets
+          path: marketing-out
+          retention-days: 30
+
+      - name: Attach to release
+        run: gh release upload "$RELEASE_TAG" "rppl-appstore-assets-${RELEASE_TAG}.zip" --clobber
