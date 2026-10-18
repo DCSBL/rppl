@@ -74,7 +74,7 @@ struct ParksView: View {
     }
 
     private func clearFilters() {
-        withAnimation(.snappy(duration: 0.2)) {
+        withRpplAnimation(.snappy(duration: 0.2)) {
             openFilterDate = nil
             cableFilter = []
             favoritesOnly = false
@@ -108,13 +108,13 @@ struct ParksView: View {
 
     private func moveMap(to coordinate: ParkCoordinate) {
         let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
-        withAnimation {
+        withRpplAnimation {
             mapPosition = .camera(MapCamera(centerCoordinate: center, distance: Self.recenterCameraDistance))
         }
     }
 
     private func toggleSearch() {
-        withAnimation(.snappy(duration: 0.25)) {
+        withRpplAnimation(.snappy(duration: 0.25)) {
             showSearch.toggle()
             if !showSearch { searchText = "" }
         }
@@ -397,7 +397,7 @@ private struct MapStyleToggleButton: View {
 
     var body: some View {
         Button {
-            withAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
+            withRpplAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
         } label: {
             Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
                 .font(.system(size: 15, weight: .medium))

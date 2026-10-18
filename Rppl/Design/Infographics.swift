@@ -76,13 +76,14 @@ struct MetricValue: View {
 /// Ring for a share of a whole (riding vs inactive). Use with a native `Gauge`:
 /// `Gauge(value: fraction) { Text("Riding") } currentValueLabel: { Text("27%") }.gaugeStyle(.rpplRing(tint:))`
 struct RingGaugeStyle: GaugeStyle {
+    @Environment(\.colorSchemeContrast) private var contrast
     var tint: Color
     var lineWidth: CGFloat = 10
 
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
             Circle()
-                .stroke(tint.opacity(0.2), lineWidth: lineWidth)
+                .stroke(tint.opacity(contrast == .increased ? 0.4 : 0.2), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: configuration.value)
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
@@ -101,6 +102,7 @@ struct RingGaugeStyle: GaugeStyle {
 
 /// Horizontal bar for a value against a max (avg vs max speed, sets vs laps).
 struct BarGaugeStyle: GaugeStyle {
+    @Environment(\.colorSchemeContrast) private var contrast
     var tint: Color
     var height: CGFloat = 8
     /// Full-width track with a dot at the value instead of a filled bar.
@@ -108,7 +110,7 @@ struct BarGaugeStyle: GaugeStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         Capsule()
-            .fill(tint.opacity(0.2))
+            .fill(tint.opacity(contrast == .increased ? 0.4 : 0.2))
             .overlay(alignment: .leading) {
                 GeometryReader { proxy in
                     if dot {
@@ -142,6 +144,7 @@ extension GaugeStyle where Self == BarGaugeStyle {
 /// Horizontal timeline: one tinted segment per span (fractions of the whole, e.g. sets in a session).
 /// Decorative: pair it with the count and times as text.
 struct TimelineBar: View {
+    @Environment(\.colorSchemeContrast) private var contrast
     let spans: [ClosedRange<Double>]
     var tint: Color
     var height: CGFloat = 14
@@ -150,7 +153,7 @@ struct TimelineBar: View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
                 Rectangle()
-                    .fill(tint.opacity(0.15))
+                    .fill(tint.opacity(contrast == .increased ? 0.35 : 0.15))
                 ForEach(spans.indices, id: \.self) { index in
                     let span = spans[index]
                     Rectangle()

@@ -665,7 +665,7 @@ private struct SessionCard: View {
             RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
                 .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
         )
-        .animation(.easeOut(duration: 0.3), value: isHighlighted)
+        .rpplAnimation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 
     private var activityIcon: some View {

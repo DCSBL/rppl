@@ -577,6 +577,16 @@ extension ParkOpenStatusDetail {
         case .unknown: .gray
         }
     }
+
+    /// Shape twin of `badgeColor` for Differentiate Without Color.
+    var badgeSymbol: String {
+        switch status {
+        case .openToday: windowHasStarted == false ? "clock" : "checkmark"
+        case .opensTomorrow: "clock"
+        case .closed: "xmark"
+        case .unknown: "questionmark"
+        }
+    }
 }
 
 /// Park-list open/closed chip: no date filter shows today's status against the current time

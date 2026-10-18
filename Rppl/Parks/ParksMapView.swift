@@ -16,6 +16,7 @@ struct ParksMapView: View {
     /// (see ParksView), sharing this same camera so they can drive it directly.
     @Binding var position: MapCameraPosition
 
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var selectedID: String?
     @State private var detailPark: Park?
     @State private var query = ""
@@ -94,9 +95,15 @@ struct ParksMapView: View {
                     .tint(color)
                     .tag(park.id)
             } else {
-                Marker(park.name, coordinate: coordinate)
-                    .tint(color)
-                    .tag(park.id)
+                if differentiateWithoutColor {
+                    Marker(park.name, systemImage: park.openStatusDetail().badgeSymbol, coordinate: coordinate)
+                        .tint(color)
+                        .tag(park.id)
+                } else {
+                    Marker(park.name, coordinate: coordinate)
+                        .tint(color)
+                        .tag(park.id)
+                }
             }
         }
     }
@@ -152,7 +159,7 @@ struct ParksMapView: View {
         }
         let center = place.location.coordinate
         searchPin = ParksSearchPin(name: place.name ?? text, coordinate: center)
-        withAnimation {
+        withRpplAnimation {
             position = .camera(MapCamera(centerCoordinate: center, distance: Self.searchCameraDistance))
         }
     }

@@ -37,6 +37,7 @@ struct InfoTile<Content: View>: View {
 }
 
 struct TileHeader: View {
+    @Environment(\.colorSchemeContrast) private var contrast
     let title: LocalizedStringKey
     let systemImage: String
     var tint: Color = RpplDesign.headerColor
@@ -53,7 +54,7 @@ struct TileHeader: View {
                 .minimumScaleFactor(0.8)
         }
         .font(.caption.weight(.semibold))
-        .foregroundStyle(RpplDesign.headerColor)
+        .foregroundStyle(contrast == .increased ? Color.rpplMuted : RpplDesign.headerColor)
         .accessibilityElement(children: .ignore)
         // Read the sentence-case key; all-caps text can be spelled out letter by letter.
         .accessibilityLabel(Text(title))
@@ -92,6 +93,7 @@ struct InfoTileGrid<Content: View>: View {
 
 private struct TileChrome: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
@@ -108,7 +110,7 @@ private struct TileChrome: ViewModifier {
                 }
             }
             .overlay {
-                shape.strokeBorder(Color.rpplText.opacity(0.08), lineWidth: 1)
+                shape.strokeBorder(Color.rpplText.opacity(contrast == .increased ? 0.5 : 0.08), lineWidth: 1)
             }
             .containerShape(shape)
     }

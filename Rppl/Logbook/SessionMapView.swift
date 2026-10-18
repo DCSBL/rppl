@@ -53,6 +53,7 @@ enum SessionMapLayout {
 }
 
 struct SessionMapView: View {
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
     /// Session overview heatmap tracks.
@@ -196,7 +197,10 @@ struct SessionMapView: View {
     private var mapContent: some MapContent {
         ForEach(Array(cableOverlays.enumerated()), id: \.offset) { item in
             MapPolyline(coordinates: item.element)
-                .stroke(Color.rpplAccent, lineWidth: 1.5)
+                .stroke(
+                    Color.rpplAccent,
+                    style: StrokeStyle(lineWidth: 1.5, dash: differentiateWithoutColor ? [4, 3] : [])
+                )
         }
         if focusedTrack != nil {
             soloContent
@@ -415,7 +419,7 @@ struct SessionMapView: View {
         guard let fitted else { return }
         let next = MapCameraPosition.camera(camera(for: fitted))
         if animated {
-            withAnimation(.easeInOut(duration: 0.25)) {
+            withRpplAnimation(.easeInOut(duration: 0.25)) {
                 position = next
             }
         } else {

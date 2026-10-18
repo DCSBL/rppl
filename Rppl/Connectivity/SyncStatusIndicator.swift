@@ -2,16 +2,26 @@ import SwiftUI
 import RpplCore
 
 struct SyncStatusIndicator: View {
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     let state: SyncConnectionState
     var pendingCount: Int = 0
     var footnote: String? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            Circle()
-                .fill(color)
-                .frame(width: 10, height: 10)
-                .padding(.top, 4)
+            if differentiateWithoutColor {
+                Image(systemName: symbol)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(color)
+                    .frame(width: 10, height: 10)
+                    .padding(.top, 4)
+                    .accessibilityHidden(true)
+            } else {
+                Circle()
+                    .fill(color)
+                    .frame(width: 10, height: 10)
+                    .padding(.top, 4)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(state.title)
@@ -36,6 +46,15 @@ struct SyncStatusIndicator: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(String(localized: "Sync \(state.title)"))
         .accessibilityValue(state.detail)
+    }
+
+    /// Shape twin of `color` for Differentiate Without Color.
+    private var symbol: String {
+        switch state {
+        case .readyLive: "checkmark"
+        case .readyQueued: "clock"
+        case .unsupported, .notActivated, .inactive, .notPaired, .watchAppMissing, .companionMissing: "xmark"
+        }
     }
 
     private var color: Color {
