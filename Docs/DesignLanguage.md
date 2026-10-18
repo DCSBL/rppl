@@ -81,6 +81,10 @@ All tints reach at least 4.3:1 against light and dark tiles (graphics need 3:1).
 - Numbers shrink to 60 % at most, then wrap to a stacked layout at accessibility sizes.
 - Text 4.5:1, graphics 3:1, in light and dark.
 - Reduce Transparency: solid tiles.
+- Increased Contrast: the high-contrast variants of the brand and metric colors in the asset catalogs kick in, and hairlines, ring/bar tracks and tile headers get stronger. Add a high-contrast variant when you add a color asset.
+- Reduce Motion: use `withRpplAnimation` / `.rpplAnimation(_:value:)` (`Rppl/Design/RpplMotion.swift`) instead of `withAnimation` / `.animation`.
+- Differentiate Without Color: color never carries a state alone. Status dots (sync, park open/closed pins) swap to a symbol, chart series get distinct shapes, cable lines dash.
+- Larger Text: see [Larger Text plan](AccessibilityLargerText.md).
 - Watch Always On: chrome and supporting metrics dim, the primary metric stays bright.
 
 ## Watch
