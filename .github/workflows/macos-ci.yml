@@ -52,7 +52,7 @@ jobs:
             echo "phone=true" >> "$GITHUB_OUTPUT"; echo "watch=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
           # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
-          changed="$(git diff --name-only "$BASE" "$HEAD")"
+          changed="$(git diff --name-only "$BASE...$HEAD")"
           shared='^(RpplCore/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/macos-ci\.yml$|\.github/xcode-problem-matcher\.json$)'
           if printf '%s\n' "$changed" | grep -Eq "$shared|^(Rppl/|RpplWidgets/|RpplUITests/)"; then
             echo "phone=true" >> "$GITHUB_OUTPUT"
