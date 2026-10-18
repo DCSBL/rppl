@@ -112,12 +112,10 @@ struct BarGaugeStyle: GaugeStyle {
             .overlay(alignment: .leading) {
                 GeometryReader { proxy in
                     if dot {
-                        let d = height * 2
                         Circle()
                             .fill(tint)
-                            .frame(width: d, height: d)
-                            .offset(x: (proxy.size.width - d) * min(max(configuration.value, 0), 1),
-                                    y: (height - d) / 2)
+                            .frame(width: height, height: height)
+                            .offset(x: (proxy.size.width - height) * min(max(configuration.value, 0), 1))
                     } else if configuration.value > 0 {
                         Capsule()
                             .fill(tint)
