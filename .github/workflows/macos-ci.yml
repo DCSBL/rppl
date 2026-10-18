@@ -297,20 +297,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
             >/dev/null 2>&1 || true
-          xcodebuild test \
-            -project Rppl.xcodeproj \
-            -scheme RpplWatch \
-            -destination "platform=watchOS Simulator,id=${udid}" \
-            -only-testing:RpplWatchUITests \
-            -retry-tests-on-failure \
-            -test-iterations 2 \
-            -parallel-testing-enabled NO \
-            -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 240 \
-            -resultBundlePath RpplWatchUITests.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            2>&1 | tee watch-ui-tests.log
+          bash scripts/ci/run_watch_ui_tests.sh "$udid" RpplWatchUITests.xcresult watch-ui-tests.log
 
       - name: Export screenshots
         if: ${{ !cancelled() }}
