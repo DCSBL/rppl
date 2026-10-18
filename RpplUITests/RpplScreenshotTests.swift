@@ -56,14 +56,14 @@ final class RpplScreenshotTests: XCTestCase {
     @MainActor
     func testLogbookThreeSessions() {
         launch(["-rpplUITestSessions", "3"])
-        XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
+        XCTAssertTrue(app.waitForSessionCount(3))
         scrollShots("02-logbook-3", count: 2)
     }
 
     @MainActor
     func testLogbookEighteenSessions() {
         launch(["-rpplUITestSessions", "18"])
-        XCTAssertTrue(app.descendants(matching: .any)["season-distance-chart"].firstMatch.waitForExistence(timeout: 60))
+        XCTAssertTrue(app.waitForSessionCount(18))
         scrollShots("03-logbook-18", count: 4)
     }
 
@@ -73,7 +73,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testTrackedSessionDetail() {
         launch()
         let tracked = card("Wakeboard, Project 7 Cablepark")
-        XCTAssertTrue(tracked.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToElement(tracked))
         // right edge: the card centre can land on a highlight chip
         tracked.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 30))
@@ -87,7 +87,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testManualSessionDetail() {
         launch()
         let manual = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(manual.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToElement(manual))
         manual.tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         scrollShots("05-session-manual", count: 2)
