@@ -75,7 +75,8 @@ final class ParksLocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     func requestAccess() {
-        if manager.authorizationStatus == .notDetermined {
+        // UI tests: the system alert and XCTest's auto-dismiss kept re-triggering each other and hung the run.
+        if manager.authorizationStatus == .notDetermined, !UITestFixtures.isActive {
             manager.requestWhenInUseAuthorization()
         }
         refresh()
