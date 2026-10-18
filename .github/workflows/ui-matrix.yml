@@ -131,6 +131,7 @@ jobs:
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
           # Warm-up: the first launch on a cold watch simulator hangs; a throwaway test absorbs it.
+          # Allowance 240 s: a Watch app launch can sit ~100 s in "Waiting for system app quiescence" (LKLR-80, #498).
           xcodebuild test \
             -project Rppl.xcodeproj \
             -scheme RpplWatch \
@@ -138,7 +139,7 @@ jobs:
             -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 120 \
+            -default-test-execution-time-allowance 240 \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
             >/dev/null 2>&1 || true
@@ -151,7 +152,7 @@ jobs:
             -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 90 \
+            -default-test-execution-time-allowance 240 \
             -resultBundlePath RpplWatchUITests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
