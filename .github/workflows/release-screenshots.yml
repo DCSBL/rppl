@@ -54,6 +54,7 @@ jobs:
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests/RpplScreenshotTests \
+            -only-testing:RpplUITests/RpplDarkScreenshotTests \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 180 \
@@ -128,13 +129,15 @@ jobs:
           tag, repo = os.environ["RELEASE_TAG"], os.environ["GITHUB_REPOSITORY"]
           start, end = "<!-- screenshots:start -->", "<!-- screenshots:end -->"
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
-          def rows(prefix, width):
+          def rows(prefix, width, dark=False):
               return "\n".join(
                   f'<img src="https://github.com/{repo}/releases/download/{urllib.parse.quote(tag)}/{p.name}" width="{width}" alt="{p.stem}">'
                   for p in sorted(Path(".").glob(f"{prefix}-*.png"))
+                  if p.stem.endswith("-dark") == dark
               )
           section = (
               f"{start}\n### Screenshots (iPhone, mock data)\n\n{rows('iphone', 220)}\n\n"
+              f"### Screenshots (iPhone, dark mode)\n\n{rows('iphone', 220, dark=True)}\n\n"
               f"### Screenshots (Apple Watch, mock data)\n\n{rows('watch', 160)}\n{end}\n"
           )
           Path("body.md").write_text(body + "\n\n" + section)

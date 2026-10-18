@@ -3,8 +3,13 @@ import XCTest
 /// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30.
 /// CI exports the attachments (`scripts/ci/export_screenshots.py`) and adds them to the release.
 /// Each test is one scenario and doubles as a UI check: it fails when a screen does not render.
-final class RpplScreenshotTests: XCTestCase {
+/// `RpplDarkScreenshotTests` re-runs every scenario in dark mode (`<name>-dark.png`).
+/// The generated logbooks (`-rpplUITestSessions N`) mix tracked and manual sessions.
+class RpplScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
+
+    /// Overridden by the dark-mode subclass.
+    class var isDark: Bool { false }
 
     /// Tue 17 Nov 2026 12:00 Amsterdam: seasonal parks are closed.
     private static let winterNow = "1794913200"
@@ -17,13 +22,14 @@ final class RpplScreenshotTests: XCTestCase {
     private func launch(_ args: [String] = []) {
         app = XCUIApplication()
         app.launchArguments = ["-rpplUITest", "-AppleLanguages", "(en)", "-AppleLocale", "en_NL"] + args
+        if Self.isDark { app.launchArguments += ["-AppleInterfaceStyle", "Dark"] }
         app.launch()
     }
 
     private func shot(_ name: String) {
         sleep(1) // let scroll/animation settle
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
+        attachment.name = Self.isDark ? "\(name)-dark" : name
         attachment.lifetime = .keepAlways
         add(attachment)
     }
@@ -143,4 +149,8 @@ final class RpplScreenshotTests: XCTestCase {
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         scrollShots("12-park-detail", count: 3)
     }
+}
+
+final class RpplDarkScreenshotTests: RpplScreenshotTests {
+    override class var isDark: Bool { true }
 }
