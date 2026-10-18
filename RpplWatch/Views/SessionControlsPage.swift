@@ -46,13 +46,7 @@ struct SessionControlsPage: View {
         .onChange(of: showDiscardConfirmation) { _, shown in
             if !shown, !showStopConfirmation { session.cancelPendingStop() }
         }
-        .task {
-            session.refreshWaterLockState()
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                session.refreshWaterLockState()
-            }
-        }
+        .onAppear { session.refreshWaterLockState() }
         .confirmationDialog(
             "End session?",
             isPresented: $showStopConfirmation,
