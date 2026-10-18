@@ -658,6 +658,28 @@ private struct ParkCard: View {
         ParkStatusBadge.text(for: park, filterDate: filterDate)
     }
 
+    @ViewBuilder private var statusChips: some View {
+        if let statusBadge {
+            ParkChip(
+                text: statusBadge.text,
+                tint: statusBadge.color,
+                fill: statusBadge.color.opacity(0.14)
+            )
+        }
+        if let distanceMeters {
+            ParkChip(text: DistanceFormat.kilometers(distanceMeters))
+        }
+    }
+
+    @ViewBuilder private var countChips: some View {
+        if visitCount > 0 {
+            ParkChip(text: ParkFormatting.visits(visitCount))
+        }
+        if park.wakesys == true {
+            ParkChip(text: "Wakesys")
+        }
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             NavigationLink(value: park) {
@@ -687,22 +709,16 @@ private struct ParkCard: View {
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }
-                    FlowLayout(spacing: 6) {
-                        if let statusBadge {
-                            ParkChip(
-                                text: statusBadge.text,
-                                tint: statusBadge.color,
-                                fill: statusBadge.color.opacity(0.14)
-                            )
+                    // Two explicit rows when one row overflows: a wrapping Layout inside a List
+                    // row reported one row of height, so the card did not grow with the chips.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 6) {
+                            statusChips
+                            countChips
                         }
-                        if let distanceMeters {
-                            ParkChip(text: DistanceFormat.kilometers(distanceMeters))
-                        }
-                        if visitCount > 0 {
-                            ParkChip(text: ParkFormatting.visits(visitCount))
-                        }
-                        if park.wakesys == true {
-                            ParkChip(text: "Wakesys")
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 6) { statusChips }
+                            HStack(spacing: 6) { countChips }
                         }
                     }
                 }
