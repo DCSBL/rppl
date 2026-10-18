@@ -1,6 +1,7 @@
 # Release screenshots: seeded mock data (UITestFixtures) on an iPhone and an Apple Watch Simulator, attached to the
 # release as assets and listed in its description. Re-running replaces the assets and the section.
-# Runs on publish; for an existing release use "Run workflow" with its tag.
+# Runs on publish; for an existing release use "Run workflow" with its tag. A manual run only renders the marketing
+# assets from the screenshot assets already on that release; tick regenerate_screenshots to make them again.
 # The marketing job then renders the App Store assets (marketing/) from these screenshots and attaches one zip to
 # the release. It runs for full releases only (no -beta.N / -rc.N suffix) or when started manually; a manual run
 # renders with marketing/ from the branch you pick, so template changes can be tried before a release.
@@ -16,6 +17,10 @@ on:
       tag:
         description: Release tag
         required: true
+      regenerate_screenshots:
+        description: Run the simulator screenshots again (off = reuse the iphone-*/watch-* assets on the release)
+        type: boolean
+        default: false
 
 concurrency:
   group: release-screenshots-${{ github.event.release.tag_name || inputs.tag }}
@@ -27,6 +32,7 @@ permissions:
 jobs:
   screenshots:
     name: screenshots
+    if: github.event_name == 'release' || inputs.regenerate_screenshots
     runs-on: macos-26
     timeout-minutes: 45
     env:
@@ -150,7 +156,8 @@ jobs:
   marketing:
     name: marketing assets
     needs: screenshots
-    if: github.event_name == 'workflow_dispatch' || !contains(github.event.release.tag_name, '-')
+    # A skipped screenshots job (manual run reusing the release assets) is fine; a failed one is not.
+    if: ${{ !cancelled() && needs.screenshots.result != 'failure' && (github.event_name == 'workflow_dispatch' || !contains(github.event.release.tag_name, '-')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
@@ -160,11 +167,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download screenshots
+      - name: Download screenshots (this run)
+        if: needs.screenshots.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: screenshots
           path: shots
+
+      - name: Download screenshots (release assets)
+        if: needs.screenshots.result == 'skipped'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release download "$RELEASE_TAG" --pattern 'iphone-*.png' --pattern 'watch-*.png' --dir shots
+          ls shots/*.png >/dev/null || { echo "::error::release $RELEASE_TAG has no iphone-*/watch-* screenshot assets; run again with regenerate_screenshots"; exit 1; }
 
       - name: Set up Node
         uses: actions/setup-node@v4
