@@ -23,15 +23,6 @@ final class RpplUITests: XCTestCase {
         app.descendants(matching: .any)[id].firstMatch
     }
 
-    /// Scrolls the logbook up until the element is on screen (charts sit below the totals).
-    private func scrollTo(_ element: XCUIElement) {
-        var swipes = 0
-        while !element.isHittable, swipes < 6 {
-            app.swipeUp()
-            swipes += 1
-        }
-    }
-
     private func card(_ prefix: String) -> XCUIElement {
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", prefix)).firstMatch
     }
@@ -44,21 +35,24 @@ final class RpplUITests: XCTestCase {
         app.tabBars.buttons["Rppl"].tap()
         XCTAssertTrue(app.tabBars.buttons["Rppl"].isSelected)
         app.tabBars.buttons["Logbook"].tap()
-        XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToElement(card("Wakeboard, Project 7 Cablepark")))
     }
 
     @MainActor
     func testLogbookListsSeededSessions() {
-        XCTAssertTrue(card("Wakeboard, Project 7 Cablepark").waitForExistence(timeout: 30))
-        XCTAssertTrue(card("Wakeboard, Lakeside Zwolle").exists)
-        XCTAssertTrue(card("Wakeboard, Wakepark Groningen").exists)
+        XCTAssertTrue(app.scrollToElement(card("Wakeboard, Project 7 Cablepark")))
+        // Lazy list: on a small screen the lower cards are not built until scrolled into view.
+        let zwolle = card("Wakeboard, Lakeside Zwolle")
+        XCTAssertTrue(app.scrollToElement(zwolle))
+        let groningen = card("Wakeboard, Wakepark Groningen")
+        XCTAssertTrue(app.scrollToElement(groningen))
         XCTAssertTrue(app.staticTexts["4 total"].exists)
     }
 
     @MainActor
     func testOpenSessionDetailAndBack() {
         let zwolle = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(zwolle.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToElement(zwolle))
         zwolle.tap()
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Zwolle'")).firstMatch.exists)
@@ -69,7 +63,7 @@ final class RpplUITests: XCTestCase {
     @MainActor
     func testDeleteSessionBySwipe() {
         let groningen = card("Wakeboard, Lakeside Zwolle")
-        XCTAssertTrue(groningen.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.scrollToElement(groningen))
         groningen.swipeLeft()
         app.buttons["Delete"].tap()
         app.alerts.buttons["Delete from Rppl"].tap()
@@ -84,7 +78,11 @@ final class RpplUITests: XCTestCase {
         let save = app.buttons["Save"]
         XCTAssertTrue(save.waitForExistence(timeout: 15))
         save.tap()
-        XCTAssertTrue(app.staticTexts["5, Sessions"].waitForExistence(timeout: 15))
+        // The totals tile is one combined button; its label reads "5, Sessions".
+        let sessions = total("logbook-total-sessions")
+        XCTAssertTrue(sessions.waitForExistence(timeout: 15))
+        expectation(for: NSPredicate(format: "label BEGINSWITH '5'"), evaluatedWith: sessions)
+        waitForExpectations(timeout: 15)
     }
 
     @MainActor
@@ -104,7 +102,7 @@ final class RpplUITests: XCTestCase {
     func testSeasonChartsHiddenUnderFiveSessions() {
         app.terminate()
         launch(sessions: 3)
-        XCTAssertTrue(app.staticTexts["3 total"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.waitForSessionCount(3))
         XCTAssertFalse(chart("season-distance-chart").exists)
         XCTAssertFalse(chart("season-temperature-chart").exists)
     }
@@ -115,7 +113,7 @@ final class RpplUITests: XCTestCase {
         launch(sessions: 18)
         // The "18 total" header sits below the charts, so the lazy list never builds it on screen.
         let distance = chart("season-distance-chart")
-        XCTAssertTrue(distance.waitForExistence(timeout: 60))
+        XCTAssertTrue(app.scrollToElement(distance))
         XCTAssertEqual(distance.value as? String, "18") // one bar per session
         XCTAssertGreaterThan(distance.frame.height, 50)
 
@@ -123,7 +121,7 @@ final class RpplUITests: XCTestCase {
         XCTAssertEqual(chart("season-duration-chart").value as? String, "18")
 
         let temperature = chart("season-temperature-chart")
-        scrollTo(temperature)
+        app.scrollTo(temperature)
         XCTAssertTrue(temperature.exists)
         XCTAssertGreaterThan(temperature.frame.height, 100)
     }
@@ -137,6 +135,7 @@ final class RpplUITests: XCTestCase {
     private func assertSpeedSwapKeepsTextSize() {
         let speed = total("logbook-total-speed")
         XCTAssertTrue(speed.waitForExistence(timeout: 30))
+        app.scrollTo(speed) // big text stacks the tiles; a tap on an off-screen tile lands elsewhere
         XCTAssertTrue(speed.label.contains("speed"))
         let before = speed.frame.height
         let labelBefore = speed.label
@@ -165,6 +164,7 @@ final class RpplUITests: XCTestCase {
     func testTotalsSessionsTapCyclesSetsAndLaps() {
         let sessions = total("logbook-total-sessions")
         XCTAssertTrue(sessions.waitForExistence(timeout: 30))
+        app.scrollTo(sessions)
         XCTAssertTrue(sessions.label.contains("Sessions"), sessions.label)
         sessions.tap()
         XCTAssertTrue(sessions.label.contains("Sets"), sessions.label)
@@ -178,6 +178,7 @@ final class RpplUITests: XCTestCase {
     func testTotalsShowOneDecimal() {
         let distance = total("logbook-total-distance")
         XCTAssertTrue(distance.waitForExistence(timeout: 30))
+        app.scrollTo(distance)
         let oneDecimal = NSPredicate(format: "label MATCHES %@", ".*[0-9][.,][0-9].*")
         XCTAssertTrue(oneDecimal.evaluate(with: distance), distance.label)
         distance.tap() // total time
