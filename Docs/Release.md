@@ -27,6 +27,7 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
    - GitHub Actions → **Release branch** must be green. Red means no build started: a bad tag or a tag that is not on `main`. Green but no Xcode Cloud run within a minute or two: see [Pitfalls](#pitfalls).
    - App Store Connect → Xcode Cloud → the run, listed under the group `release/X.Y.Z`. The log of the *Post-Clone* step prints the tag it found for the commit, the version and the notes it used.
 7. Internal testers get the build as soon as processing finishes.
+8. For a full release (no `-beta.N` / `-rc.N`), **Release screenshots** also attaches `rppl-appstore-assets-<tag>.zip` with the App Store screenshots and product page header ([Marketing.md](Marketing.md)). Upload them in App Store Connect by hand.
 
 Tag rules (the **Release branch** workflow fails on anything else and no build starts):
 

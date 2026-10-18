@@ -155,6 +155,10 @@ This does not replace human review of park data (sourcing, accuracy) — see the
 
 Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_test.sh` asserts each fixture passes/fails as expected and that `format_parks.py` turns `fixtures/flow-style.yaml` into `expected/flow-style.yaml` — run it after touching the schema, the validator or the formatter).
 
+### Marketing assets (Linux)
+
+Workflows: [`.github/workflows/marketing-render.yml`](../.github/workflows/marketing-render.yml) (PRs touching `marketing/`) and the `marketing` job in [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) (full releases or manual). Both install the pinned Playwright Chromium, run `node --test` and `scripts/ci/check_marketing_assets.py` (exact sizes, no alpha) and upload the PNGs; the release job also zips them and attaches the zip to the release. Details, config and local use: [Marketing.md](Marketing.md).
+
 ## Xcode Cloud
 
 Xcode Cloud only builds **releases**: publishing a GitHub release creates a tag, the **Release branch** GitHub workflow pushes `release/X.Y.Z` to the tagged commit, and the **Release** workflow archives that branch and sends it to TestFlight internal (one Build Group per version). Merges to `main` and PRs build nothing there; tests run on GitHub ([PR checks](#pr-checks-linux), [Core tests](#core-tests-linux), also after each merge), in the local push gate, and once more on the tagged commit before a release archive. Setup, the release steps and promotion to external TestFlight / the App Store (manual, in App Store Connect): [Release.md](Release.md).

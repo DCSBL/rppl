@@ -1,0 +1,54 @@
+# App Store marketing stills. Rendered by `node render.mjs` (see Docs/Marketing.md).
+#
+# text:  one word per line; **bold** words get the accent colour.
+# screenshot / watch_screenshot: CI export name (e.g. `02-logbook-3-1`, see release-screenshots.yml).
+# Per slide you may override: formats, align, background, phone, watch, logo.
+
+formats:
+  # App Store screenshots (iPhone). 6.9" is the required set; 6.5" is the fallback set.
+  iphone-6.9: { w: 1320, h: 2868, folder: screenshots/iphone-6.9 }
+  iphone-6.5: { w: 1284, h: 2778, folder: screenshots/iphone-6.5 }
+  # Product page header (21:9 jpg/png, 16:9 png) and search results (3:2, 16:9 png).
+  header-21x9: { w: 3840, h: 1646, folder: product-page-header/21x9 }
+  header-16x9: { w: 5244, h: 2950, folder: product-page-header/16x9 }
+  search-3x2: { w: 3840, h: 2560, folder: search-results/3x2 }
+  search-16x9: { w: 5244, h: 2950, folder: search-results/16x9 }
+
+defaults:
+  align: left # left | center | right (text; devices go to the other side)
+  formats: [iphone-6.9, iphone-6.5, header-21x9, header-16x9, search-3x2, search-16x9]
+  background: { top: "#e4e6f0", bottom: "#5f8299" }
+  colors: { text: "#000000", accent: "#5aaec9", usp: "#245a78" }
+
+# Used only with --allow-fallback (PR preview): committed site shots instead of CI exports.
+fallbacks:
+  02-logbook-3-1: ../web/public/shots/logbook.webp
+  04-session-tracked-2: ../web/public/shots/session.webp
+  06-parks-open-1: ../web/public/shots/parks.webp
+  watch-01-start: ../web/public/shots/watch.webp
+  01-start: ../web/public/shots/watch.webp
+
+slides:
+  - id: buddy
+    text: "**YOUR** CABLEPARK BUDDY"
+    logo: true
+    screenshot: 02-logbook-3-1
+
+  - id: track
+    text: "TRACK **YOUR** SESSIONS"
+    align: right
+    screenshot: 04-session-tracked-2
+    watch_screenshot: 01-start
+    watch: { side: right }
+
+  - id: spots
+    text: "FIND **YOUR** SPOTS"
+    screenshot: 06-parks-open-1
+
+  - id: usp
+    layout: usp
+    title: Rppl
+    items:
+      - { icon: code, text: "Free and Open Source" }
+      - { icon: lock-phone, text: "Your data stays yours, there is no Rppl cloud." }
+      - { icon: no-dollar, text: "No subscriptions, ever." }

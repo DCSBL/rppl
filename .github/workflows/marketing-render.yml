@@ -1,0 +1,60 @@
+# Marketing preview: renders the App Store assets (marketing/) from the committed website screenshots and checks
+# sizes/alpha, so changes to marketing.yaml or the template are visible on the PR (download the artifact).
+# The real assets are rendered from CI screenshots in release-screenshots.yml.
+
+name: Marketing render
+
+on:
+  pull_request:
+    paths:
+      - marketing/**
+      - assets/rppl.svg
+      - web/public/shots/**
+      - scripts/ci/check_marketing_assets.py
+      - scripts/ci/test_check_marketing_assets.py
+      - .github/workflows/marketing-render.yml
+
+concurrency:
+  group: marketing-render-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: render
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: marketing/package-lock.json
+
+      - name: Install renderer
+        working-directory: marketing
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        run: |
+          (cd marketing && node --test)
+          python3 -m unittest discover -s scripts/ci -p 'test_check_marketing_assets.py'
+
+      - name: Render with site screenshots
+        working-directory: marketing
+        run: node render.mjs --allow-fallback --out ../marketing-out
+
+      - name: Check sizes and alpha
+        run: python3 scripts/ci/check_marketing_assets.py marketing-out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appstore-assets-preview
+          path: marketing-out
+          retention-days: 14
