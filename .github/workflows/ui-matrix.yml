@@ -1,0 +1,221 @@
+# UI tests across screen sizes and text sizes, one job per cell, in parallel:
+#   iPhone: smallest we support (SE 3rd gen) and largest (Pro Max), each at the default and at the
+#           largest accessibility text size. The whole RpplUITests target runs, so it checks the app
+#           still works (not just renders) with big text.
+#   Watch:  newest regular Watch and newest Ultra.
+# Every cell exports its screenshots; the last job merges them into ONE artifact, one folder per case
+# with one PNG per device: ui-screenshots.zip -> ios/<case>/<device>.png, watch/<case>/<device>.png.
+# Heavier than macos-ci.yml's single-device UI jobs, so it only runs on PRs touching app/UI code.
+
+name: UI matrix
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "Rppl/**"
+      - "RpplWatch/**"
+      - "RpplWidgets/**"
+      - "RpplCore/**"
+      - "RpplUITests/**"
+      - "RpplWatchUITests/**"
+      - "Rppl.xcodeproj/**"
+      - "scripts/ci/**"
+      - ".github/workflows/ui-matrix.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ui-matrix-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  iphone:
+    name: iPhone ${{ matrix.variant }}
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { variant: se-default, device: "iPhone SE (3rd generation)", text: large }
+          - { variant: se-ax5, device: "iPhone SE (3rd generation)", text: accessibility-extra-extra-extra-large }
+          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
+          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: xcodebuild test (RpplUITests)
+        shell: bash
+        env:
+          DEVICE: ${{ matrix.device }}
+          TEXT: ${{ matrix.text }}
+        run: |
+          set -euo pipefail
+          udid="$(python3 scripts/ci/pick_simulator.py "$DEVICE")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl ui "$udid" content_size "$TEXT"
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            -resultBundlePath RpplUITests.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tee ui-tests.log
+
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          python3 scripts/ci/export_screenshots.py RpplUITests.xcresult screenshots
+          for f in screenshots/*.png; do
+            case="$(basename "$f" .png)"
+            mkdir -p "out/ios/$case"
+            cp "$f" "out/ios/$case/$VARIANT.png"
+          done
+
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: shots-ios-${{ matrix.variant }}
+          path: out
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-ios-${{ matrix.variant }}
+          path: |
+            ui-tests.log
+            RpplUITests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  watch:
+    name: Watch ${{ matrix.variant }}
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { variant: series11, device: "Apple Watch Series 11 (46mm)" }
+          - { variant: ultra3, device: "Apple Watch Ultra 3 (49mm)" }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: xcodebuild test (RpplWatchUITests)
+        shell: bash
+        env:
+          DEVICE: ${{ matrix.device }}
+        run: |
+          set -euo pipefail
+          udid="$(python3 scripts/ci/pick_simulator.py "$DEVICE")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          # Warm-up: the first launch on a cold watch simulator hangs; a throwaway test absorbs it.
+          # Allowance 240 s: a Watch app launch can sit ~100 s in "Waiting for system app quiescence" (LKLR-80, #498).
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme RpplWatch \
+            -destination "platform=watchOS Simulator,id=${udid}" \
+            -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 240 \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            >/dev/null 2>&1 || true
+          bash scripts/ci/run_watch_ui_tests.sh "$udid" RpplWatchUITests.xcresult watch-ui-tests.log
+
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          python3 scripts/ci/export_screenshots.py RpplWatchUITests.xcresult screenshots
+          for f in screenshots/*.png; do
+            case="$(basename "$f" .png)"
+            mkdir -p "out/watch/$case"
+            cp "$f" "out/watch/$case/$VARIANT.png"
+          done
+
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: shots-watch-${{ matrix.variant }}
+          path: out
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-watch-${{ matrix.variant }}
+          path: |
+            watch-ui-tests.log
+            RpplWatchUITests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  merge:
+    name: Merge screenshots
+    needs: [iphone, watch]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download cell screenshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: shots-*
+          path: merged
+          merge-multiple: true
+
+      - name: Upload one screenshot bundle
+        id: bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: merged
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Fork PRs get a read-only token, so they only get the artifact.
+      - name: Comment screenshot link
+        if: ${{ steps.bundle.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          ARTIFACT_URL: ${{ steps.bundle.outputs.artifact-url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          marker='<!-- ui-matrix-screenshots -->'
+          printf '%s\n### UI matrix screenshots (mock data)\n\n[Download the zip](%s) · `%s`\n\nFolders: `ios/<case>/` and `watch/<case>/`, one PNG per device (`se`/`promax`, `default`/`ax5`; `series11`/`ultra3`).\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
+          else
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file comment.md
+          fi
