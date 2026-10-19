@@ -29,7 +29,13 @@ const defaults = { align: "left", background: {}, colors: {}, ...cfg.defaults };
 const configDir = path.dirname(args.config);
 
 const fontFile = (weight) => pathToFileURL(path.join(here, "node_modules/@fontsource/poppins/files", `poppins-latin-${weight}-normal.woff2`)).href;
-const css = fs.readFileSync(path.join(here, "template.css"), "utf8").replace("%FONT800%", fontFile(800)).replace("%FONT600%", fontFile(600));
+const frameFile = (name) => pathToFileURL(path.join(here, "device-frames", name)).href;
+const css = fs
+  .readFileSync(path.join(here, "template.css"), "utf8")
+  .replace("%FONT800%", fontFile(800))
+  .replace("%FONT600%", fontFile(600))
+  .replace("%PHONE_FRAME%", frameFile("iPhone 18 Pro - Black - Portrait.png"))
+  .replace("%WATCH_FRAME%", frameFile("AW Ultra 3 - Black - Ocean Band Black.png"));
 const layoutJs = fs.readFileSync(path.join(here, "layout.js"), "utf8");
 const logoSvg = fs.readFileSync(path.join(here, "../assets/rppl.svg"), "utf8");
 
@@ -44,7 +50,7 @@ function logo(colored, flat) {
 const ICONS = {
   code: '<path d="M9 8l-4 4 4 4M15 8l4 4-4 4M13 6l-2 12"/>',
   "lock-phone": '<rect x="9" y="3" width="10" height="18" rx="2"/><rect x="3" y="12" width="8" height="6" rx="1" fill="currentColor"/><path d="M5 12v-1.5a2 2 0 014 0V12"/>',
-  "no-dollar": '<path d="M15 8.5C14.5 7.5 13.4 7 12 7c-1.7 0-3 .8-3 2 0 3 6 1.5 6 4.500 0 1.200-1.300 2-3 2-1.500 0-2.700-.6-3.200-1.600M12 5v2M12 17v2"/><path d="M5 5l14 14"/>',
+  "no-euro": '<path d="M16.5 7.5C15.5 6.5 14.2 6 12.8 6 9.8 6 7.5 8.6 7.5 12s2.3 6 5.3 6c1.4 0 2.7-.5 3.7-1.5M5.5 10.5h8M5.5 13.5h8"/><path d="M5 5l14 14"/>',
 };
 const icon = (name) => {
   if (!ICONS[name]) throw new Error(`unknown icon ${name}`);
@@ -54,32 +60,39 @@ const icon = (name) => {
 const shotCtx = { dirs: args.shots, fallbacks: cfg.fallbacks, allowFallback: args.allowFallback, root: configDir };
 const shotUri = (name) => dataUri(resolveShot(name, shotCtx));
 
+const poppinsCss = (fmt) => css.replaceAll("%W%", fmt.w).replaceAll("%H%", fmt.h);
+const doc = (fmt, bodyClass, style, body, cfgJs) => `<!doctype html><html><head><meta charset="utf-8"><style>${poppinsCss(fmt)}</style></head>
+  <body class="${bodyClass}" style="${style}">${body}<script>window.CFG=${JSON.stringify({ w: fmt.w, h: fmt.h, ...cfgJs })};</script><script>${layoutJs}</script></body></html>`;
+const wordsHtml = (text) => parseText(text).map((l) => `<span${l.accent ? ' class="accent"' : ""}>${l.word}</span>`).join("");
+const photo = (slide) => dataUri(path.resolve(configDir, slide.image));
+const device = (id, kind, src) => `<div${id ? ` id="${id}"` : ""} class="dv ${kind}"><img src="${src}"></div>`;
+
 function html(slide, fmt) {
   const colors = { ...defaults.colors, ...slide.colors };
   const bg = { ...defaults.background, ...slide.background };
   const align = slide.align ?? defaults.align;
   const vars = `--bg-top:${bg.top};--bg-bottom:${bg.bottom};--text:${colors.text};--accent:${colors.accent};--usp:${colors.usp}`;
-  const cfgJs = { w: fmt.w, h: fmt.h, layout: slide.layout ?? "shot", align, logo: !!slide.logo, hasWatch: !!slide.watch_screenshot, watch: slide.watch ?? {} };
-  let body;
+  const k = `--k:${fmt.h / 2950}px;${vars}`; // the 16:9 layouts are designed at 5244x2950
   if (slide.layout === "header") {
-    // --u: the lockup scales with the shorter side so it keeps its size from 21:9 to 3:2.
-    const u = Math.min(fmt.w, fmt.h * 2.33) / 100;
-    return `<!doctype html><html><head><meta charset="utf-8"><style>${css.replaceAll("%W%", fmt.w).replaceAll("%H%", fmt.h)}</style></head>
-      <body class="header" style="--u:${u}px"><img class="header-bg" src="${dataUri(path.resolve(configDir, slide.image))}">
-      <div class="header-lockup">${logo(true)}<span>${slide.title}</span></div><script>window.CFG=${JSON.stringify({ w: fmt.w, h: fmt.h, layout: "header" })};</script><script>${layoutJs}</script></body></html>`;
+    // Tagline words split on ** like slide text, but stay on one line.
+    const tagline = parseText(slide.tagline).map((l) => (l.accent ? `<span class="accent">${l.word}</span>` : l.word)).join(" ");
+    return doc(fmt, "header", k, `<img class="photo-bg" src="${photo(slide)}" style="object-position:${slide.object_position ?? "center"}"><div class="tint"></div><div class="header-scrim"></div>
+      <div class="header-lockup"><div class="header-row"><div class="mark logo">${logo(true)}</div><div class="word">${slide.title}</div></div><div class="tag">${tagline}</div></div>`, { layout: "header" });
   }
+  if (slide.layout === "search") {
+    return doc(fmt, "search", k, `<img class="photo-bg" src="${photo(slide)}" style="object-position:${slide.object_position ?? "center 72%"}"><div class="tint"></div><div class="glow"></div>
+      <div class="abs mark logo">${logo(true)}</div><div class="abs word">${slide.title}</div><h1 class="abs">${wordsHtml(slide.text)}</h1>
+      ${device(null, "p", shotUri(slide.screenshot))}${device(null, "w", shotUri(slide.watch_screenshot))}`, { layout: "search" });
+  }
+  const cfgJs = { layout: slide.layout ?? "shot", align, logo: !!slide.logo, hasWatch: !!slide.watch_screenshot, watch: slide.watch ?? {} };
   if (slide.layout === "usp") {
-    body = `<div id="mark" class="abs logo">${logo(true)}</div><div id="usp-title" class="abs usp-title">${slide.title ?? ""}</div>
-      <div id="rows" class="abs">${slide.items.map((it) => `<div class="usp-row">${icon(it.icon)}<span>${it.text}</span></div>`).join("")}</div>`;
-  } else {
-    const lines = parseText(slide.text).map((l) => `<span${l.accent ? ' class="accent"' : ""}>${l.word}</span>`).join("");
-    body = `${slide.logo ? `<div id="logo" class="abs logo">${logo(false, colors.text)}</div>` : ""}
-      <h1 id="title" class="abs">${lines}</h1>
-      <div id="phone" class="device phone"><img src="${shotUri(slide.screenshot)}"></div>
-      ${slide.watch_screenshot ? `<div id="watch" class="device watch"><img src="${shotUri(slide.watch_screenshot)}"></div>` : ""}`;
+    const photoBg = slide.image ? `<img class="photo-bg" src="${photo(slide)}"><div class="shade"></div>` : "";
+    return doc(fmt, slide.image ? "usp-photo" : "", `${vars}${slide.image ? `;--pos:${slide.object_position ?? "50% 50%"}` : ""}`, `${photoBg}<div id="mark" class="abs logo">${logo(true)}</div><div id="usp-title" class="abs usp-title">${slide.title ?? ""}</div>
+      <div id="rows" class="abs">${slide.items.map((it) => `<div class="usp-row">${icon(it.icon)}<span>${it.text}</span></div>`).join("")}</div>`, cfgJs);
   }
-  return `<!doctype html><html><head><meta charset="utf-8"><style>${css.replaceAll("%W%", fmt.w).replaceAll("%H%", fmt.h)}</style></head>
-    <body style="${vars}">${body}<script>window.CFG=${JSON.stringify(cfgJs)};</script><script>${layoutJs}</script></body></html>`;
+  return doc(fmt, "", vars, `${slide.logo ? `<div id="logo" class="abs logo">${logo(true)}</div>` : ""}
+      <h1 id="title" class="abs">${wordsHtml(slide.text)}</h1>
+      ${device("phone", "p", shotUri(slide.screenshot))}${slide.watch_screenshot ? device("watch", "w", shotUri(slide.watch_screenshot)) : ""}`, cfgJs);
 }
 
 const browser = await chromium.launch();

@@ -2,22 +2,22 @@
 #
 # text:  one word per line; **bold** words get the accent colour.
 # screenshot / watch_screenshot: CI export name (e.g. `02-logbook-3-1`, see release-screenshots.yml).
-# Per slide you may override: formats, align, background, phone, watch, logo.
-# layout: header is one photo + logo + name (image relative to this file), no screenshots.
+# Per slide you may override: formats, align, background, watch, logo.
+# Devices are the Apple frames in device-frames/ (see its README); photos live in photos/ (paths relative to this file).
+# layout: header = photo + logo + name + tagline, no devices, placed in the safe area Apple leaves uncropped (template.css).
+# layout: search = photo, logo, headline, phone and watch (needs image, screenshot, watch_screenshot).
+# layout: usp = logo, title and icon rows (icons: code, lock-phone, no-euro); with `image` they sit on a photo.
 
 formats:
-  # App Store screenshots (iPhone). 6.9" is the required set; 6.5" is the fallback set.
-  iphone-6.9: { w: 1320, h: 2868, folder: screenshots/iphone-6.9 }
-  iphone-6.5: { w: 1284, h: 2778, folder: screenshots/iphone-6.5 }
-  # Product page header (21:9 jpg/png, 16:9 png) and search results (3:2, 16:9 png): one `header` slide fills all four.
-  header-21x9: { w: 3840, h: 1646, folder: product-page-header/21x9 }
+  # App Store screenshots (iPhone, medium): 1206x2622 only; App Store Connect rejects other sizes for this slot.
+  iphone-6.3: { w: 1206, h: 2622, folder: screenshots/iphone-6.3 }
+  # Product page header and search results: 16:9 only.
   header-16x9: { w: 5244, h: 2950, folder: product-page-header/16x9 }
-  search-3x2: { w: 3840, h: 2560, folder: search-results/3x2 }
   search-16x9: { w: 5244, h: 2950, folder: search-results/16x9 }
 
 defaults:
-  align: left # left | center | right (text; devices go to the other side)
-  formats: [iphone-6.9, iphone-6.5]
+  align: left # left | center | right (text edge lines up with the phone edge)
+  formats: [iphone-6.3]
   background: { top: "#e4e6f0", bottom: "#5f8299" }
   colors: { text: "#000000", accent: "#5aaec9", usp: "#245a78" }
 
@@ -49,14 +49,26 @@ slides:
 
   - id: usp
     layout: usp
+    image: photos/last-slide.jpg
+    object_position: "50% 50%"
     title: Rppl
     items:
       - { icon: code, text: "Free and Open Source" }
       - { icon: lock-phone, text: "Your data stays yours, there is no Rppl cloud." }
-      - { icon: no-dollar, text: "No subscriptions, ever." }
+      - { icon: no-euro, text: "No subscriptions, ever." }
 
   - id: header
     layout: header
-    image: header.jpg
+    image: photos/header.jpg
     title: rppl
-    formats: [header-21x9, header-16x9, search-3x2, search-16x9]
+    tagline: "YOUR **CABLEPARK** BUDDY"
+    formats: [header-16x9]
+
+  - id: search
+    layout: search
+    image: photos/search.jpg
+    title: rppl
+    text: "**YOUR** CABLEPARK BUDDY"
+    screenshot: 04-session-tracked-2
+    watch_screenshot: 06-live-riding
+    formats: [search-16x9]

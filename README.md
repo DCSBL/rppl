@@ -1,3 +1,5 @@
+
+
 <p align="center">
   <img src="assets/rppl.svg" alt="Rppl" width="140">
 </p>
@@ -9,10 +11,19 @@
   <img src="https://img.shields.io/badge/watchOS-26%2B-black?logo=apple&logoColor=white" alt="watchOS 26+">
   <img src="https://img.shields.io/badge/privacy-on%20device-0B6E4F" alt="Privacy: on device">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20NC-blue" alt="PolyForm Noncommercial"></a>
+  <a href="https://github.com/DCSBL/rppl/actions/workflows/macos-ci.yml"><img src="https://github.com/DCSBL/rppl/actions/workflows/macos-ci.yml/badge.svg"></a>
+  <a href="https://github.com/DCSBL/rppl/actions/workflows/core-tests.yml"><img src="https://github.com/DCSBL/rppl/actions/workflows/core-tests.yml/badge.svg"></a>
+</p>
+
+<p align="center">
+    <a href="https://apps.apple.com/nl/app/rppl/id6805204540"><img width="119" height="40" alt="Download Rppl on the App Store" src="https://github.com/user-attachments/assets/d58415bc-b243-46f8-96ae-86a60ee3b500" /></a><br />
+    <i>Or join the beta on <a href="https://testflight.apple.com/join/R2BymVaX">TestFlight</a>.</i>
 </p>
 
 <p align="center"><strong>Cable-park wakeboarding, recorded on Apple Watch.</strong><br>
-Automatic set and rest detection. Saved to Apple Health. No cloud. No subscription.</p>
+Automatic set and rest detection. Saved to Apple Health. Free, No cloud. No subscription.</p>
+
+<hr />
 
 ## What Rppl does
 
