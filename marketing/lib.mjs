@@ -147,6 +147,10 @@ export function validateConfig(cfg) {
     ids.add(s.id);
     if (s.layout === "header") {
       if (!s.image || !s.title) fail(`slides[${i}] (header) needs image and title`);
+      parseText(s.tagline);
+    } else if (s.layout === "search") {
+      if (!s.image || !s.title || !s.screenshot || !s.watch_screenshot) fail(`slides[${i}] (search) needs image, title, screenshot and watch_screenshot`);
+      parseText(s.text);
     } else if (s.layout === "usp") {
       if (!Array.isArray(s.items) || !s.items.length) fail(`slides[${i}] (usp) needs items`);
     } else {

@@ -43,6 +43,14 @@ test("validateConfig catches unknown format and duplicate ids", () => {
 
 test("validateConfig header layout needs image and title", () => {
   const base = { formats: { a: { w: 1, h: 1, folder: "a" } }, defaults: { formats: ["a"] } };
-  validateConfig({ ...base, slides: [{ id: "h", layout: "header", image: "h.jpg", title: "rppl" }] });
-  assert.throws(() => validateConfig({ ...base, slides: [{ id: "h", layout: "header", title: "rppl" }] }), /header/);
+  validateConfig({ ...base, slides: [{ id: "h", layout: "header", image: "h.jpg", title: "rppl", tagline: "YOUR **CABLEPARK** BUDDY" }] });
+  assert.throws(() => validateConfig({ ...base, slides: [{ id: "h", layout: "header", title: "rppl", tagline: "HI" }] }), /header/);
+  assert.throws(() => validateConfig({ ...base, slides: [{ id: "h", layout: "header", image: "h.jpg", title: "rppl" }] }), /text/);
+});
+
+test("validateConfig search layout needs image, title, screenshot and watch_screenshot", () => {
+  const base = { formats: { a: { w: 1, h: 1, folder: "a" } }, defaults: { formats: ["a"] } };
+  const search = { id: "s", layout: "search", image: "s.jpg", title: "rppl", text: "**YOUR** CABLEPARK BUDDY", screenshot: "n", watch_screenshot: "w" };
+  validateConfig({ ...base, slides: [search] });
+  assert.throws(() => validateConfig({ ...base, slides: [{ ...search, watch_screenshot: undefined }] }), /search/);
 });
