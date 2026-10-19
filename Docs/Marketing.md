@@ -4,11 +4,11 @@ Stills for the App Store product page, rendered from HTML: Poppins headlines, Ap
 
 | Output | Size | Folder in the zip |
 |--------|------|-------------------|
-| iPhone screenshots | 1242x2688 (the only size we ship) | `screenshots/iphone-6.5/` |
+| iPhone screenshots | 1206x2622 (the only size we ship; Apple accepts 1206x2622, 2622x1206, 1179x2556 and 2556x1179 for this slot) | `screenshots/iphone-6.3/` |
 | Product page header | 16:9 5244x2950 | `product-page-header/16x9/` |
 | Search results | 16:9 5244x2950 | `search-results/16x9/` |
 
-The header is the `header` slide (photo, logo, name and tagline, no devices) and the search results are the `search` slide (photo, logo, headline, phone and watch). Photos live in [`marketing/photos/`](../marketing/photos). Swap one (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it. The phone and watch frames are scaled to the real size ratio of the devices.
+The header is the `header` slide (photo, logo, name and tagline, no devices; Apple crops the header image heavily, so the lockup sits in the uncropped safe area, 1400x962 at (1922, 664) of the 5244x2950 image) and the search results are the `search` slide (photo, logo, headline, phone and watch). Photos live in [`marketing/photos/`](../marketing/photos). Swap one (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it. The phone and watch frames are scaled to the real size ratio of the devices.
 
 Files are `<NN>-<slide id>.png`, numbered in `slides` order. PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). Check the specs page before adding formats.
 
@@ -23,7 +23,7 @@ slides:
     watch_screenshot: 06-live-riding   # optional
     watch: { side: right, y: 0.7 }     # optional: left | right, vertical position as a fraction of the height, scale
     logo: true                         # optional, small logo above the text
-    formats: [iphone-6.5]              # optional, default `defaults.formats`
+    formats: [iphone-6.3]              # optional, default `defaults.formats`
     background: { top: "#e4e6f0", bottom: "#5f8299" }
   - id: header
     layout: header                     # photo + logo + name + tagline, no devices
@@ -54,7 +54,7 @@ The release run only guarantees the shots the slides use: `screenshots-required`
 ```sh
 cd marketing && npm ci && npx playwright install chromium
 node render.mjs --allow-fallback --out /tmp/rppl-assets        # website screenshots as stand-ins
-node render.mjs --shots path/to/exported-pngs --out /tmp/rppl-assets --only track --formats iphone-6.5
+node render.mjs --shots path/to/exported-pngs --out /tmp/rppl-assets --only track --formats iphone-6.3
 python3 scripts/ci/check_marketing_assets.py /tmp/rppl-assets  # exact sizes, no alpha, nothing missing
 ```
 

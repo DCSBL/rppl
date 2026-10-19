@@ -22,7 +22,8 @@ repos:
         stages: [pre-commit]
       - id: check-added-large-files
         args: ["--maxkb=1000"]
-        exclude: ^Rppl(?:Watch)?/Resources/Exports/
+        # marketing/photos: full-size photos, the 16:9 renders need 5244 px wide.
+        exclude: ^Rppl(?:Watch)?/Resources/Exports/|^marketing/photos/
         stages: [pre-commit]
 
   - repo: https://github.com/codespell-project/codespell
