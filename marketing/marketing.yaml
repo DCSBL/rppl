@@ -27,6 +27,7 @@ fallbacks:
   06-parks-open-1: ../web/public/shots/parks.webp
   watch-01-start: ../web/public/shots/watch.webp
   01-start: ../web/public/shots/watch.webp
+  06-live-riding: ../web/public/shots/watch.webp
 
 slides:
   - id: buddy
@@ -38,7 +39,7 @@ slides:
     text: "TRACK **YOUR** SESSIONS"
     align: right
     screenshot: 04-session-tracked-2
-    watch_screenshot: 01-start
+    watch_screenshot: 06-live-riding
     watch: { side: right }
 
   - id: spots
