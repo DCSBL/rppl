@@ -3,12 +3,13 @@
 # text:  one word per line; **bold** words get the accent colour.
 # screenshot / watch_screenshot: CI export name (e.g. `02-logbook-3-1`, see release-screenshots.yml).
 # Per slide you may override: formats, align, background, phone, watch, logo.
+# layout: header is one photo + logo + name (image relative to this file), no screenshots.
 
 formats:
   # App Store screenshots (iPhone). 6.9" is the required set; 6.5" is the fallback set.
   iphone-6.9: { w: 1320, h: 2868, folder: screenshots/iphone-6.9 }
   iphone-6.5: { w: 1284, h: 2778, folder: screenshots/iphone-6.5 }
-  # Product page header (21:9 jpg/png, 16:9 png) and search results (3:2, 16:9 png).
+  # Product page header (21:9 jpg/png, 16:9 png) and search results (3:2, 16:9 png): one `header` slide fills all four.
   header-21x9: { w: 3840, h: 1646, folder: product-page-header/21x9 }
   header-16x9: { w: 5244, h: 2950, folder: product-page-header/16x9 }
   search-3x2: { w: 3840, h: 2560, folder: search-results/3x2 }
@@ -16,7 +17,7 @@ formats:
 
 defaults:
   align: left # left | center | right (text; devices go to the other side)
-  formats: [iphone-6.9, iphone-6.5, header-21x9, header-16x9, search-3x2, search-16x9]
+  formats: [iphone-6.9, iphone-6.5]
   background: { top: "#e4e6f0", bottom: "#5f8299" }
   colors: { text: "#000000", accent: "#5aaec9", usp: "#245a78" }
 
@@ -52,3 +53,9 @@ slides:
       - { icon: code, text: "Free and Open Source" }
       - { icon: lock-phone, text: "Your data stays yours, there is no Rppl cloud." }
       - { icon: no-dollar, text: "No subscriptions, ever." }
+
+  - id: header
+    layout: header
+    image: header.jpg
+    title: rppl
+    formats: [header-21x9, header-16x9, search-3x2, search-16x9]
