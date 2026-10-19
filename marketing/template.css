@@ -28,7 +28,8 @@ h1 span { display: block; }
 /* Photo backgrounds (header, search, last slide). --k = height / 2950, so the 16:9 layouts scale from one design. */
 .photo-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .header, .search, .usp-photo { background: #033b4f; color: #fff; }
-.header { --tint: radial-gradient(ellipse at center, rgb(3 59 79 / 0.45), rgb(3 59 79 / 0.8)); }
+/* Apple crops the header heavily: only this safe area (1400x962 at 1922,664 of 5244x2950) is guaranteed visible. */
+.header-scrim { position: absolute; left: calc(var(--k) * 1622); top: calc(var(--k) * 464); width: calc(var(--k) * 2000); height: calc(var(--k) * 1362); background: radial-gradient(ellipse at center, rgb(3 59 79 / 0.5), rgb(3 59 79 / 0) 70%); }
 .search { --tint: linear-gradient(100deg, rgb(3 59 79 / 0.88) 0%, rgb(3 59 79 / 0.62) 45%, rgb(3 59 79 / 0.42) 100%); }
 .tint { position: absolute; inset: 0; background: var(--tint); }
 .word { font-weight: 800; letter-spacing: -0.03em; line-height: 1; text-shadow: 0 calc(var(--k) * 30) calc(var(--k) * 80) rgb(0 0 0 / 0.45); }
@@ -36,11 +37,11 @@ h1 span { display: block; }
 .tag .accent { color: var(--accent); }
 .mark svg { filter: drop-shadow(0 calc(var(--k) * 30) calc(var(--k) * 60) rgb(0 0 0 / 0.45)); }
 
-.header-lockup { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--k) * 150); }
-.header-row { display: flex; align-items: center; gap: calc(var(--k) * 150); }
-.header-row .mark { width: calc(var(--k) * 760); height: calc(var(--k) * 760); }
-.header-row .word { font-size: calc(var(--k) * 820); transform: translateY(calc(var(--k) * -70)); }
-.header .tag { font-size: calc(var(--k) * 190); letter-spacing: 0.06em; }
+.header-lockup { position: absolute; left: calc(var(--k) * 1922); top: calc(var(--k) * 664); width: calc(var(--k) * 1400); height: calc(var(--k) * 962); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--k) * 80); }
+.header-row { display: flex; align-items: center; gap: calc(var(--k) * 74); }
+.header-row .mark { width: calc(var(--k) * 381); height: calc(var(--k) * 381); }
+.header-row .word { font-size: calc(var(--k) * 410); transform: translateY(calc(var(--k) * -34)); }
+.header .tag { font-size: calc(var(--k) * 90); letter-spacing: 0.06em; }
 
 .search .glow { position: absolute; left: calc(var(--k) * 3300); top: calc(var(--k) * 700); width: calc(var(--k) * 1800); height: calc(var(--k) * 1800); border-radius: 50%; filter: blur(calc(var(--k) * 160)); background: rgb(90 174 201 / 0.35); }
 .search .mark { left: calc(var(--k) * 330); top: calc(var(--k) * 400); width: calc(var(--k) * 520); height: calc(var(--k) * 520); }
