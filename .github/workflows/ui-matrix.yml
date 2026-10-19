@@ -5,23 +5,15 @@
 #   Watch:  newest regular Watch and newest Ultra.
 # Every cell exports its screenshots; the last job merges them into ONE artifact, one folder per case
 # with one PNG per device: ui-screenshots.zip -> ios/<case>/<device>.png, watch/<case>/<device>.png.
-# Heavier than macos-ci.yml's single-device UI jobs, so it only runs on PRs touching app/UI code.
+# Heavier than macos-ci.yml's single-device UI jobs, so the cells skip on PRs touching no app/UI code.
+# No `paths:` filter: the workflow always starts, so "Merge screenshots" can be a required check.
+# A skipped job reports success; when the cells ran, "Merge screenshots" fails if any cell failed.
 
 name: UI matrix
 
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "Rppl/**"
-      - "RpplWatch/**"
-      - "RpplWidgets/**"
-      - "RpplCore/**"
-      - "RpplUITests/**"
-      - "RpplWatchUITests/**"
-      - "Rppl.xcodeproj/**"
-      - "scripts/ci/**"
-      - ".github/workflows/ui-matrix.yml"
   workflow_dispatch:
 
 concurrency:
@@ -32,8 +24,40 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Changed paths
+    runs-on: ubuntu-24.04
+    outputs:
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplWatch/|RpplWidgets/|RpplCore/|RpplUITests/|RpplWatchUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/ui-matrix\.yml$)'; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ui=false" >> "$GITHUB_OUTPUT"
+          fi
+
   iphone:
     name: iPhone ${{ matrix.variant }}
+    needs: changes
+    if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26
     timeout-minutes: 40
     strategy:
@@ -110,6 +134,8 @@ jobs:
 
   watch:
     name: Watch ${{ matrix.variant }}
+    needs: changes
+    if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26
     timeout-minutes: 40
     strategy:
@@ -180,14 +206,19 @@ jobs:
 
   merge:
     name: Merge screenshots
-    needs: [iphone, watch]
+    needs: [changes, iphone, watch]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: write
     steps:
+      - name: Skipped (no UI changes)
+        if: ${{ needs.changes.outputs.ui != 'true' }}
+        run: echo "No UI-relevant changes; UI matrix skipped."
+
       - name: Download cell screenshots
+        if: ${{ needs.changes.outputs.ui == 'true' }}
         uses: actions/download-artifact@v4
         with:
           pattern: shots-*
@@ -195,6 +226,7 @@ jobs:
           merge-multiple: true
 
       - name: Upload one screenshot bundle
+        if: ${{ needs.changes.outputs.ui == 'true' }}
         id: bundle
         uses: actions/upload-artifact@v4
         with:
@@ -205,7 +237,7 @@ jobs:
 
       # Fork PRs get a read-only token, so they only get the artifact.
       - name: Comment screenshot link
-        if: ${{ steps.bundle.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        if: ${{ needs.changes.outputs.ui == 'true' && steps.bundle.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
@@ -220,3 +252,10 @@ jobs:
           else
             gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file comment.md
           fi
+
+      # Last step so screenshots still upload when a cell failed, but the required check goes red.
+      - name: Fail if any cell failed
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "A UI matrix cell failed (see the iPhone/Watch jobs)."
+          exit 1

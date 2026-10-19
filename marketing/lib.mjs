@@ -145,7 +145,9 @@ export function validateConfig(cfg) {
   cfg.slides.forEach((s, i) => {
     if (!s.id || ids.has(s.id)) fail(`slides[${i}].id missing or duplicate`);
     ids.add(s.id);
-    if (s.layout === "usp") {
+    if (s.layout === "header") {
+      if (!s.image || !s.title) fail(`slides[${i}] (header) needs image and title`);
+    } else if (s.layout === "usp") {
       if (!Array.isArray(s.items) || !s.items.length) fail(`slides[${i}] (usp) needs items`);
     } else {
       parseText(s.text);
