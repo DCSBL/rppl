@@ -396,6 +396,8 @@ jobs:
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # No checkout in this job, so gh cannot find the repository from a .git directory.
+      GH_REPO: ${{ github.repository }}
     steps:
       - name: List the screenshots in the release description
         shell: bash
