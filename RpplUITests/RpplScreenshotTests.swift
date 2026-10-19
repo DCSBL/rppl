@@ -1,6 +1,6 @@
 import XCTest
 
-/// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30.
+/// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30 (Parks: Sat 5 Sep 14:00).
 /// CI exports the attachments (`scripts/ci/export_screenshots.py`) and adds them to the release.
 /// Each test is one scenario and doubles as a UI check: it fails when a screen does not render.
 /// `RpplDarkScreenshotTests` re-runs every scenario in dark mode (`<name>-dark.png`).
@@ -10,6 +10,9 @@ class RpplScreenshotTests: XCTestCase {
 
     /// Overridden by the dark-mode subclass.
     class var isDark: Bool { false }
+
+    /// Sat 5 Sep 2026 14:00 Amsterdam: every mocked park is within its opening hours.
+    private static let summerNow = "1788609600"
 
     /// Tue 17 Nov 2026 12:00 Amsterdam: seasonal parks are closed.
     private static let winterNow = "1794913200"
@@ -102,7 +105,8 @@ class RpplScreenshotTests: XCTestCase {
     // MARK: Parks
 
     private func openParks(args: [String] = []) {
-        launch(args)
+        // Visit counts mocked so Project 7, Wet 'n Wild, Wollebrand and Down Under lead the list.
+        launch(["-rpplUITestParkVisits"] + (args.contains("-rpplUITestNow") ? [] : ["-rpplUITestNow", Self.summerNow]) + args)
         XCTAssertTrue(app.tabBars.buttons["Parks"].waitForExistence(timeout: 30))
         app.tabBars.buttons["Parks"].tap()
         // Nearby needs a location permission; the visit-sorted list works without one.

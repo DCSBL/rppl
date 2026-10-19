@@ -35,6 +35,20 @@ enum UITestFixtures {
         GeneratedRide(ride: Ride(parkId: "project7-rotterdam", daysAgo: 21, hour: 11, sets: 6, laps: 12), minutes: 110, airCelsius: 26, waterCelsius: 21),
     ]
 
+    /// `-rpplUITestParkVisits`: the Parks screenshots' visit counts (the tracked demo counts as one Project 7 visit),
+    /// as manual sessions spread over the weeks before `now`.
+    private static let parkVisits = [("project7-rotterdam", 11), ("wetnwild-alphen", 8), ("wollebrand-honselersdijk", 2), ("downunder-nieuwegein", 1)]
+
+    private static func parkVisitRides() -> [GeneratedRide] {
+        let parkIds = parkVisits.flatMap { id, n in Array(repeating: id, count: n) }
+        return parkIds.enumerated().map { i, parkId in
+            GeneratedRide(
+                ride: Ride(parkId: parkId, daysAgo: 2 + i * 2 + i % 2, hour: i % 2 == 0 ? 18 : 11, sets: 4, laps: 8),
+                minutes: 90, airCelsius: 22, waterCelsius: 20
+            )
+        }
+    }
+
     /// `-rpplUITestSessions N`: a logbook of N sessions (the tracked demo session plus N-1 generated ones, every other one
     /// tracked) instead of the default (0 = empty).
     private static var generatedCount: Int? {
@@ -105,7 +119,8 @@ enum UITestFixtures {
         if count != 0 { importTrackedDemo(into: store) }
 
         let parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
-        let rides = count.map(generatedRides) ?? manualRides
+        let rides = ProcessInfo.processInfo.arguments.contains("-rpplUITestParkVisits")
+            ? parkVisitRides() : count.map(generatedRides) ?? manualRides
         for item in rides {
             let ride = item.ride
             guard let park = parks.first(where: { $0.id == ride.parkId }) else { continue }
