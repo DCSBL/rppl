@@ -20,7 +20,7 @@ slides:
     text: "TRACK **YOUR** SESSIONS"   # one word per line, **bold** = accent colour
     align: right                       # text side: left | center | right; devices go to the other side
     screenshot: 04-session-tracked-2   # CI export name, see below
-    watch_screenshot: 01-start         # optional
+    watch_screenshot: 06-live-riding   # optional
     watch: { side: right, y: 0.7 }     # optional: left | right, vertical position as a fraction of the height, scale
     logo: true                         # optional, small logo above the text
     formats: [iphone-6.9]              # optional, default `defaults.formats`
