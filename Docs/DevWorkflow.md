@@ -157,7 +157,7 @@ Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_t
 
 ### Marketing assets (Linux)
 
-Workflows: [`.github/workflows/marketing-render.yml`](../.github/workflows/marketing-render.yml) (PRs touching `marketing/`) and the `marketing` job in [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) (full releases or manual). Both install the pinned Playwright Chromium, run `node --test` and `scripts/ci/check_marketing_assets.py` (exact sizes, no alpha) and upload the PNGs; the release job also zips them and attaches the zip to the release. A manual run reuses the screenshot assets already on the release unless `regenerate_screenshots` is ticked. Details, config and local use: [Marketing.md](Marketing.md).
+Workflows: [`.github/workflows/marketing-render.yml`](../.github/workflows/marketing-render.yml) (PRs touching `marketing/`) and the `marketing` job in [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) (every release or manual). Both install the pinned Playwright Chromium, run `node --test` and `scripts/ci/check_marketing_assets.py` (exact sizes, no alpha) and upload the PNGs; the release job also zips them and attaches the zip to the release. A manual run reuses the screenshot assets already on the release unless `regenerate_screenshots` is ticked. Details, config and local use: [Marketing.md](Marketing.md).
 
 ## Xcode Cloud
 

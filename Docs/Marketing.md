@@ -52,7 +52,7 @@ python3 scripts/ci/check_marketing_assets.py /tmp/rppl-assets  # exact sizes, no
 ## When it runs
 
 - **PRs** touching `marketing/`: [`marketing-render.yml`](../.github/workflows/marketing-render.yml) renders with the site screenshots, checks sizes/alpha and uploads `appstore-assets-preview`.
-- **Releases**: the `marketing` job of [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) runs after the screenshots and attaches `rppl-appstore-assets-<tag>.zip` to the release. It only runs for **full releases** (tag without `-beta.N` / `-rc.N`).
+- **Releases**: the `marketing` job of [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) runs after the screenshots and attaches `rppl-appstore-assets-<tag>.zip` to the release. It runs for every release, betas and release candidates included.
 - **Manually**: Actions, **Release screenshots**, **Run workflow**: pick the branch (its `marketing/` is used) and enter an existing release tag. The zip is uploaded to that release, also for a beta tag. By default the simulator screenshots are not made again: the `iphone-*` / `watch-*` assets already on that release are used, so only the marketing job runs (ubuntu, a few minutes). Tick `regenerate_screenshots` to run the simulators first; a release without screenshot assets fails with a message saying so.
 
 The zip is uploaded to App Store Connect by hand.
