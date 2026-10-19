@@ -30,6 +30,7 @@ h1 span { display: block; }
 .header, .search, .usp-photo { background: #033b4f; color: #fff; }
 /* Apple crops the header heavily: only this safe area (1400x962 at 1922,664 of 5244x2950) is guaranteed visible. */
 .header-scrim { position: absolute; left: calc(var(--k) * 1622); top: calc(var(--k) * 464); width: calc(var(--k) * 2000); height: calc(var(--k) * 1362); background: radial-gradient(ellipse at center, rgb(3 59 79 / 0.5), rgb(3 59 79 / 0) 70%); }
+.header { --tint: linear-gradient(100deg, rgb(3 59 79 / 0.62) 0%, rgb(3 59 79 / 0.45) 100%); }
 .search { --tint: linear-gradient(100deg, rgb(3 59 79 / 0.88) 0%, rgb(3 59 79 / 0.62) 45%, rgb(3 59 79 / 0.42) 100%); }
 .tint { position: absolute; inset: 0; background: var(--tint); }
 .word { font-weight: 800; letter-spacing: -0.03em; line-height: 1; text-shadow: 0 calc(var(--k) * 30) calc(var(--k) * 80) rgb(0 0 0 / 0.45); }
