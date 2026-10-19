@@ -70,7 +70,11 @@ jobs:
             -resultBundlePath Screenshots.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
-            2>&1 | tail -40
+            > xcodebuild.log 2>&1 || status=$?
+          # The full log is huge; keep the failure reasons visible instead of only the last lines.
+          grep -E "error:|failed|XCTAssert|Failing tests" xcodebuild.log | head -60 || true
+          tail -20 xcodebuild.log
+          [ "${status:-0}" -eq 0 ] || exit "$status"
           python3 scripts/ci/export_screenshots.py Screenshots.xcresult screenshots
 
       - name: Run Watch screenshot test
