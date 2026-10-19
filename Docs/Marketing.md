@@ -38,6 +38,8 @@ slides:
 
 `screenshot` names are the XCUITest attachment names from `RpplScreenshotTests` / `RpplWatchScreenshotTests`, which `release-screenshots.yml` exports (the files are `iphone-<name>.png` / `watch-<name>.png` on the release). A missing name fails the render. Pick shots without Apple Maps imagery where you can.
 
+The release run only guarantees the shots the slides use: `screenshots-required` in `release-screenshots.yml` runs just those tests (`testLogbookThreeSessions`, `testTrackedSessionDetail`, `testParksOpen`, Watch `testLiveRiding`) and fails when one of the PNGs is missing. When you point a slide at another shot, add its test to that job's `-only-testing` list and to the check step, and add it to `-skip-testing` in `screenshots-extra`. Everything else runs in `screenshots-extra`, which may fail without blocking marketing.
+
 ## Render locally
 
 ```sh
