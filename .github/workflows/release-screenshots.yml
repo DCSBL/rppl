@@ -3,7 +3,7 @@
 # Runs on publish; for an existing release use "Run workflow" with its tag. A manual run only renders the marketing
 # assets from the screenshot assets already on that release; tick regenerate_screenshots to make them again.
 # The marketing job then renders the App Store assets (marketing/) from these screenshots and attaches one zip to
-# the release. It runs for full releases only (no -beta.N / -rc.N suffix) or when started manually; a manual run
+# the release. It runs for every release (betas and release candidates too) and on manual runs; a manual run
 # renders with marketing/ from the branch you pick, so template changes can be tried before a release.
 # The tag reaches the shell only through env, never interpolated.
 
@@ -157,7 +157,7 @@ jobs:
     name: marketing assets
     needs: screenshots
     # A skipped screenshots job (manual run reusing the release assets) is fine; a failed one is not.
-    if: ${{ !cancelled() && needs.screenshots.result != 'failure' && (github.event_name == 'workflow_dispatch' || !contains(github.event.release.tag_name, '-')) }}
+    if: ${{ !cancelled() && needs.screenshots.result != 'failure' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
