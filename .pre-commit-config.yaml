@@ -30,7 +30,7 @@ repos:
     hooks:
       - id: codespell
         additional_dependencies: ["tomli"]
-        exclude: ^Rppl(?:Watch)?/Resources/Exports/|package-lock\.json$
+        exclude: ^Rppl(?:Watch)?/Resources/Exports/|package-lock\.json$|^marketing/device-frames/.*\.rtf$
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplWatch/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
           - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin,weerd,periode"

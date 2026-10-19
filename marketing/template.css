@@ -10,25 +10,51 @@ h1 span { display: block; }
 .logo svg { width: 100%; height: 100%; display: block; }
 .usp-title { font-weight: 800; color: var(--usp); line-height: 1; }
 .usp-row { display: flex; align-items: center; gap: 0.35em; color: var(--usp); font-weight: 800; line-height: 1.12; }
-.usp-row svg { flex: none; width: 1.9em; height: 1.9em; }
+.usp-row svg { flex: none; width: 2.27em; height: 2.27em; }
 
-/* Device frames: same CSS as rppl.nl (web/src/pages/index.astro), scaled by --s (= device width / base width). */
-.device { position: absolute; background: #000; box-shadow: 0 0 0 calc(1px * var(--s)) #3a3a3c, 0 calc(12px * var(--s)) calc(36px * var(--s)) rgb(3 59 79 / 0.25); }
-.device img { display: block; width: 100%; }
-.device::before, .device::after { content: ""; position: absolute; background: #2a2a2c; border-radius: calc(2px * var(--s)); }
-.phone { padding: calc(8px * var(--s)); border-radius: calc(44px * var(--s)); }
-.phone img { border-radius: calc(36px * var(--s)); }
-.phone::before { left: calc(-3px * var(--s)); top: 14%; width: calc(3px * var(--s)); height: calc(22px * var(--s)); box-shadow: 0 calc(46px * var(--s)) 0 #2a2a2c, 0 calc(86px * var(--s)) 0 #2a2a2c; border-radius: calc(2px * var(--s)) 0 0 calc(2px * var(--s)); }
-.phone::after { right: calc(-3px * var(--s)); top: 26%; width: calc(3px * var(--s)); height: calc(64px * var(--s)); border-radius: 0 calc(2px * var(--s)) calc(2px * var(--s)) 0; }
-.watch { padding: calc(7px * var(--s)); border-radius: calc(42px * var(--s)); }
-.watch img { border-radius: calc(35px * var(--s)); }
-.watch::before { right: calc(-5px * var(--s)); top: 24%; width: calc(5px * var(--s)); height: calc(30px * var(--s)); border-radius: 0 calc(3px * var(--s)) calc(3px * var(--s)) 0; }
-.watch::after { right: calc(-3px * var(--s)); top: 52%; width: calc(3px * var(--s)); height: calc(20px * var(--s)); border-radius: 0 calc(2px * var(--s)) calc(2px * var(--s)) 0; }
+/* Device frames: the real Apple frames (marketing/device-frames, see its README) with the screenshot behind the
+   transparent screen opening. Geometry = opening position/size within each frame PNG: phone 1350x2760 with a
+   1206x2622 opening at (72,69), watch 600x960 with a 422x514 opening at (89,223). Corner radii follow the openings. */
+.dv { position: absolute; --sh: rgb(3 59 79 / 0.4); filter: drop-shadow(0 calc(var(--w) * 0.044) calc(var(--w) * 0.066) var(--sh)) drop-shadow(0 calc(var(--w) * 0.013) calc(var(--w) * 0.02) rgb(0 0 0 / 0.28)); }
+.dv.p { aspect-ratio: 1350 / 2760; }
+.dv.w { aspect-ratio: 600 / 960; }
+.dv img { position: absolute; display: block; max-width: none; object-fit: cover; }
+.dv.p img { left: 5.333%; top: 2.5%; width: 89.333%; height: 95%; border-radius: 9.5% / 4.4%; }
+.dv.w img { left: 14.833%; top: 23.229%; width: 70.333%; height: 53.542%; border-radius: 16.6% / 13.6%; }
+.dv::after { content: ""; position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; }
+.dv.p::after { background-image: url("%PHONE_FRAME%"); }
+.dv.w::after { background-image: url("%WATCH_FRAME%"); }
 
-/* Header layout (product page header, search results): photo + logo + name, one design for every ratio. */
-.header { background: #033b4f; }
-.header-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
-.header-lockup { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 3.4); color: #fff; font-weight: 800; font-size: calc(var(--u) * 9); line-height: 1; letter-spacing: -0.02em; }
-.header-lockup svg { width: calc(var(--u) * 12); height: calc(var(--u) * 12); filter: drop-shadow(0 calc(var(--u) * 0.4) var(--u) rgb(0 0 0 / 0.35)); }
-/* Raised so the descenders balance the empty lower right of the logo. */
-.header-lockup span { transform: translateY(calc(var(--u) * -1.1)); text-shadow: 0 calc(var(--u) * 0.4) calc(var(--u) * 1.2) rgb(0 0 0 / 0.35); }
+/* Photo backgrounds (header, search, last slide). --k = height / 2950, so the 16:9 layouts scale from one design. */
+.photo-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.header, .search, .usp-photo { background: #033b4f; color: #fff; }
+.header { --tint: radial-gradient(ellipse at center, rgb(3 59 79 / 0.45), rgb(3 59 79 / 0.8)); }
+.search { --tint: linear-gradient(100deg, rgb(3 59 79 / 0.88) 0%, rgb(3 59 79 / 0.62) 45%, rgb(3 59 79 / 0.42) 100%); }
+.tint { position: absolute; inset: 0; background: var(--tint); }
+.word { font-weight: 800; letter-spacing: -0.03em; line-height: 1; text-shadow: 0 calc(var(--k) * 30) calc(var(--k) * 80) rgb(0 0 0 / 0.45); }
+.tag { font-weight: 800; white-space: nowrap; text-shadow: 0 calc(var(--k) * 30) calc(var(--k) * 80) rgb(0 0 0 / 0.5); }
+.tag .accent { color: var(--accent); }
+.mark svg { filter: drop-shadow(0 calc(var(--k) * 30) calc(var(--k) * 60) rgb(0 0 0 / 0.45)); }
+
+.header-lockup { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--k) * 150); }
+.header-row { display: flex; align-items: center; gap: calc(var(--k) * 150); }
+.header-row .mark { width: calc(var(--k) * 760); height: calc(var(--k) * 760); }
+.header-row .word { font-size: calc(var(--k) * 820); transform: translateY(calc(var(--k) * -70)); }
+.header .tag { font-size: calc(var(--k) * 190); letter-spacing: 0.06em; }
+
+.search .glow { position: absolute; left: calc(var(--k) * 3300); top: calc(var(--k) * 700); width: calc(var(--k) * 1800); height: calc(var(--k) * 1800); border-radius: 50%; filter: blur(calc(var(--k) * 160)); background: rgb(90 174 201 / 0.35); }
+.search .mark { left: calc(var(--k) * 330); top: calc(var(--k) * 400); width: calc(var(--k) * 520); height: calc(var(--k) * 520); }
+.search .word { left: calc(var(--k) * 930); top: calc(var(--k) * 400); height: calc(var(--k) * 520); display: flex; align-items: center; font-size: calc(var(--k) * 560); transform: translateY(calc(var(--k) * -50)); }
+.search h1 { left: calc(var(--k) * 330); top: calc(var(--k) * 1100); font-size: calc(var(--k) * 300); color: #fff; text-shadow: 0 calc(var(--k) * 30) calc(var(--k) * 80) rgb(0 0 0 / 0.5); }
+.search h1 .accent { color: var(--accent); }
+.search .dv.p { --w: calc(var(--k) * 1300); width: var(--w); left: calc(var(--k) * 3000); top: calc(var(--k) * 200); --sh: rgb(0 0 0 / 0.5); }
+/* Watch 0.605x the phone frame width = real size ratio (screen widths 31.7 mm vs 66.6 mm). */
+.search .dv.w { --w: calc(var(--k) * 786); width: var(--w); left: calc(var(--k) * 4200); top: calc(var(--k) * 1480); --sh: rgb(0 0 0 / 0.5); }
+
+/* Last slide on a photo: light text with a soft shadow. */
+.usp-photo .photo-bg { object-position: var(--pos, 50% 50%); }
+.usp-photo .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(3 59 79 / 0.5), rgb(3 59 79 / 0.3) 45%, rgb(3 59 79 / 0.65)); }
+.usp-photo .usp-title { font-weight: 600; color: #fff; text-shadow: 0 4px 18px rgb(0 0 0 / 0.3); }
+.usp-photo .usp-row { gap: 0.76em; font-weight: 600; color: rgb(255 255 255 / 0.94); text-shadow: 0 4px 18px rgb(0 0 0 / 0.3); }
+.usp-photo svg { filter: drop-shadow(0 4px 12px rgb(0 0 0 / 0.3)); }
+.usp-photo .abs { z-index: 1; }
