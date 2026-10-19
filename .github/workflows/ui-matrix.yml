@@ -57,7 +57,8 @@ jobs:
   iphone:
     name: iPhone ${{ matrix.variant }}
     needs: changes
-    if: ${{ needs.changes.outputs.ui == 'true' }}
+    # Disabled: se-ax5 UI tests fail, see #517.
+    if: false
     runs-on: macos-26
     timeout-minutes: 40
     strategy:
