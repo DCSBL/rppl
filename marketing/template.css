@@ -24,3 +24,11 @@ h1 span { display: block; }
 .watch img { border-radius: calc(35px * var(--s)); }
 .watch::before { right: calc(-5px * var(--s)); top: 24%; width: calc(5px * var(--s)); height: calc(30px * var(--s)); border-radius: 0 calc(3px * var(--s)) calc(3px * var(--s)) 0; }
 .watch::after { right: calc(-3px * var(--s)); top: 52%; width: calc(3px * var(--s)); height: calc(20px * var(--s)); border-radius: 0 calc(2px * var(--s)) calc(2px * var(--s)) 0; }
+
+/* Header layout (product page header, search results): photo + logo + name, one design for every ratio. */
+.header { background: #033b4f; }
+.header-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
+.header-lockup { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 3.4); color: #fff; font-weight: 800; font-size: calc(var(--u) * 9); line-height: 1; letter-spacing: -0.02em; }
+.header-lockup svg { width: calc(var(--u) * 12); height: calc(var(--u) * 12); filter: drop-shadow(0 calc(var(--u) * 0.4) var(--u) rgb(0 0 0 / 0.35)); }
+/* Raised so the descenders balance the empty lower right of the logo. */
+.header-lockup span { transform: translateY(calc(var(--u) * -1.1)); text-shadow: 0 calc(var(--u) * 0.4) calc(var(--u) * 1.2) rgb(0 0 0 / 0.35); }

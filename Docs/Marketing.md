@@ -8,6 +8,8 @@ Stills for the App Store product page, rendered from HTML with the same look as 
 | Product page header | 21:9 3840x1646, 16:9 5244x2950 | `product-page-header/21x9/`, `product-page-header/16x9/` |
 | Search results | 3:2 3840x2560, 16:9 5244x2950 | `search-results/3x2/`, `search-results/16x9/` |
 
+The header and search results are one design, the `header` slide: [`marketing/header.jpg`](../marketing/header.jpg) with the logo and name centered, rendered to all four sizes. Swap the photo (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it.
+
 Files are `<NN>-<slide id>.png`, numbered in `slides` order. PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). The 6.9" set is the required one; check the specs page before adding formats.
 
 ## What gets rendered: `marketing/marketing.yaml`
@@ -23,6 +25,11 @@ slides:
     logo: true                         # optional, small logo above the text
     formats: [iphone-6.9]              # optional, default `defaults.formats`
     background: { top: "#e4e6f0", bottom: "#5f8299" }
+  - id: header
+    layout: header                     # photo + logo + name, no screenshots
+    image: header.jpg                  # relative to marketing.yaml
+    title: rppl
+    formats: [header-21x9, header-16x9, search-3x2, search-16x9]
   - id: usp
     layout: usp                        # logo, title and icon rows (icons: code, lock-phone, no-dollar)
 ```

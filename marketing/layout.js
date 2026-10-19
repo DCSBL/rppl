@@ -17,6 +17,12 @@
   };
   const alignX = (el, left, right, w) => (align === "right" ? right - w : align === "center" ? (left + right - w) / 2 : left);
 
+  if (layout === "header") {
+    // CSS only (template.css, sized by --u); nothing to place.
+    window.__ready = true;
+    return;
+  }
+
   if (layout === "usp") {
     const rows = $("rows"), mark = $("mark"), title = $("usp-title");
     const gap = portrait ? H * 0.02 : H * 0.03;
