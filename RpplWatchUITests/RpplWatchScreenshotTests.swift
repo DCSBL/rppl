@@ -65,6 +65,21 @@ final class RpplWatchScreenshotTests: XCTestCase {
         scrollShots("03-logbook", count: 3)
     }
 
+    /// Live recording screen, ~1 h into a park day (`UITestFixtures.seedLiveSession`).
+    @MainActor
+    func testLiveRiding() {
+        launch(["-rpplUITestSession", "riding"])
+        XCTAssertTrue(app.staticTexts["Riding"].waitForExistence(timeout: 30))
+        shot("06-live-riding")
+    }
+
+    @MainActor
+    func testLiveInactive() {
+        launch(["-rpplUITestSession", "inactive"])
+        XCTAssertTrue(app.staticTexts["Inactive"].waitForExistence(timeout: 30))
+        shot("07-live-inactive")
+    }
+
     @MainActor
     func testSessionDetail() throws {
         try XCTSkipIf(true, "Disabled: hangs the Watch simulator (github.com/DCSBL/rppl/issues/498)")

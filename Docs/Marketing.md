@@ -8,6 +8,8 @@ Stills for the App Store product page, rendered from HTML with the same look as 
 | Product page header | 21:9 3840x1646, 16:9 5244x2950 | `product-page-header/21x9/`, `product-page-header/16x9/` |
 | Search results | 3:2 3840x2560, 16:9 5244x2950 | `search-results/3x2/`, `search-results/16x9/` |
 
+The header and search results are one design, the `header` slide: [`marketing/header.jpg`](../marketing/header.jpg) with the logo and name centered, rendered to all four sizes. Swap the photo (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it.
+
 Files are `<NN>-<slide id>.png`, numbered in `slides` order. PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). The 6.9" set is the required one; check the specs page before adding formats.
 
 ## What gets rendered: `marketing/marketing.yaml`
@@ -18,11 +20,16 @@ slides:
     text: "TRACK **YOUR** SESSIONS"   # one word per line, **bold** = accent colour
     align: right                       # text side: left | center | right; devices go to the other side
     screenshot: 04-session-tracked-2   # CI export name, see below
-    watch_screenshot: 01-start         # optional
+    watch_screenshot: 06-live-riding   # optional
     watch: { side: right, y: 0.7 }     # optional: left | right, vertical position as a fraction of the height, scale
     logo: true                         # optional, small logo above the text
     formats: [iphone-6.9]              # optional, default `defaults.formats`
     background: { top: "#e4e6f0", bottom: "#5f8299" }
+  - id: header
+    layout: header                     # photo + logo + name, no screenshots
+    image: header.jpg                  # relative to marketing.yaml
+    title: rppl
+    formats: [header-21x9, header-16x9, search-3x2, search-16x9]
   - id: usp
     layout: usp                        # logo, title and icon rows (icons: code, lock-phone, no-dollar)
 ```
@@ -45,8 +52,8 @@ python3 scripts/ci/check_marketing_assets.py /tmp/rppl-assets  # exact sizes, no
 ## When it runs
 
 - **PRs** touching `marketing/`: [`marketing-render.yml`](../.github/workflows/marketing-render.yml) renders with the site screenshots, checks sizes/alpha and uploads `appstore-assets-preview`.
-- **Releases**: the `marketing` job of [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) runs after the screenshots and attaches `rppl-appstore-assets-<tag>.zip` to the release. It only runs for **full releases** (tag without `-beta.N` / `-rc.N`).
-- **Manually**: Actions, **Release screenshots**, **Run workflow**: pick the branch (its `marketing/` is used) and enter an existing release tag. The zip is uploaded to that release, also for a beta tag.
+- **Releases**: the `marketing` job of [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) runs after the screenshots and attaches `rppl-appstore-assets-<tag>.zip` to the release. It runs for every release, betas and release candidates included.
+- **Manually**: Actions, **Release screenshots**, **Run workflow**: pick the branch (its `marketing/` is used) and enter an existing release tag. The zip is uploaded to that release, also for a beta tag. By default the simulator screenshots are not made again: the `iphone-*` / `watch-*` assets already on that release are used, so only the marketing job runs (ubuntu, a few minutes). Tick `regenerate_screenshots` to run the simulators first; a release without screenshot assets fails with a message saying so.
 
 The zip is uploaded to App Store Connect by hand.
 

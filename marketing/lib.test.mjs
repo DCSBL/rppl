@@ -40,3 +40,9 @@ test("validateConfig catches unknown format and duplicate ids", () => {
   assert.throws(() => validateConfig({ ...base, slides: [{ ...base.slides[0], formats: ["zzz"] }] }), /unknown format/);
   assert.throws(() => validateConfig({ ...base, slides: [base.slides[0], base.slides[0]] }), /duplicate/);
 });
+
+test("validateConfig header layout needs image and title", () => {
+  const base = { formats: { a: { w: 1, h: 1, folder: "a" } }, defaults: { formats: ["a"] } };
+  validateConfig({ ...base, slides: [{ id: "h", layout: "header", image: "h.jpg", title: "rppl" }] });
+  assert.throws(() => validateConfig({ ...base, slides: [{ id: "h", layout: "header", title: "rppl" }] }), /header/);
+});

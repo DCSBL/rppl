@@ -61,6 +61,13 @@ function html(slide, fmt) {
   const vars = `--bg-top:${bg.top};--bg-bottom:${bg.bottom};--text:${colors.text};--accent:${colors.accent};--usp:${colors.usp}`;
   const cfgJs = { w: fmt.w, h: fmt.h, layout: slide.layout ?? "shot", align, logo: !!slide.logo, hasWatch: !!slide.watch_screenshot, watch: slide.watch ?? {} };
   let body;
+  if (slide.layout === "header") {
+    // --u: the lockup scales with the shorter side so it keeps its size from 21:9 to 3:2.
+    const u = Math.min(fmt.w, fmt.h * 2.33) / 100;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>${css.replaceAll("%W%", fmt.w).replaceAll("%H%", fmt.h)}</style></head>
+      <body class="header" style="--u:${u}px"><img class="header-bg" src="${dataUri(path.resolve(configDir, slide.image))}">
+      <div class="header-lockup">${logo(true)}<span>${slide.title}</span></div><script>window.CFG=${JSON.stringify({ w: fmt.w, h: fmt.h, layout: "header" })};</script><script>${layoutJs}</script></body></html>`;
+  }
   if (slide.layout === "usp") {
     body = `<div id="mark" class="abs logo">${logo(true)}</div><div id="usp-title" class="abs usp-title">${slide.title ?? ""}</div>
       <div id="rows" class="abs">${slide.items.map((it) => `<div class="usp-row">${icon(it.icon)}<span>${it.text}</span></div>`).join("")}</div>`;

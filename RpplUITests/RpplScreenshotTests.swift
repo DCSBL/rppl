@@ -1,10 +1,18 @@
 import XCTest
 
-/// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30.
+/// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30 (Parks: Sat 5 Sep 14:00).
 /// CI exports the attachments (`scripts/ci/export_screenshots.py`) and adds them to the release.
 /// Each test is one scenario and doubles as a UI check: it fails when a screen does not render.
-final class RpplScreenshotTests: XCTestCase {
+/// `RpplDarkScreenshotTests` re-runs every scenario in dark mode (`<name>-dark.png`).
+/// The generated logbooks (`-rpplUITestSessions N`) mix tracked and manual sessions.
+class RpplScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
+
+    /// Overridden by the dark-mode subclass.
+    class var isDark: Bool { false }
+
+    /// Sat 5 Sep 2026 14:00 Amsterdam: every mocked park is within its opening hours.
+    private static let summerNow = "1788609600"
 
     /// Tue 17 Nov 2026 12:00 Amsterdam: seasonal parks are closed.
     private static let winterNow = "1794913200"
@@ -17,13 +25,14 @@ final class RpplScreenshotTests: XCTestCase {
     private func launch(_ args: [String] = []) {
         app = XCUIApplication()
         app.launchArguments = ["-rpplUITest", "-AppleLanguages", "(en)", "-AppleLocale", "en_NL"] + args
+        if Self.isDark { app.launchArguments += ["-AppleInterfaceStyle", "Dark"] }
         app.launch()
     }
 
     private func shot(_ name: String) {
         sleep(1) // let scroll/animation settle
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
+        attachment.name = Self.isDark ? "\(name)-dark" : name
         attachment.lifetime = .keepAlways
         add(attachment)
     }
@@ -96,12 +105,15 @@ final class RpplScreenshotTests: XCTestCase {
     // MARK: Parks
 
     private func openParks(args: [String] = []) {
-        launch(args)
+        // Visit counts mocked so Project 7, Wet 'n Wild, Wollebrand and Down Under lead the list.
+        launch(["-rpplUITestParkVisits"] + (args.contains("-rpplUITestNow") ? [] : ["-rpplUITestNow", Self.summerNow]) + args)
         XCTAssertTrue(app.tabBars.buttons["Parks"].waitForExistence(timeout: 30))
         app.tabBars.buttons["Parks"].tap()
         // Nearby needs a location permission; the visit-sorted list works without one.
         app.buttons["Most visited"].tap()
-        XCTAssertTrue(card("Project 7").waitForExistence(timeout: 15))
+        let found = card("Project 7").waitForExistence(timeout: 15)
+        if !found { print("PARKS-DIAG-BEGIN\n\(app.debugDescription)\nPARKS-DIAG-END") }
+        XCTAssertTrue(found)
     }
 
     @MainActor
@@ -143,4 +155,8 @@ final class RpplScreenshotTests: XCTestCase {
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         scrollShots("12-park-detail", count: 3)
     }
+}
+
+final class RpplDarkScreenshotTests: RpplScreenshotTests {
+    override class var isDark: Bool { true }
 }
