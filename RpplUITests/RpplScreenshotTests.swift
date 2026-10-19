@@ -150,7 +150,8 @@ class RpplScreenshotTests: XCTestCase {
 
     @MainActor
     func testParksMap() {
-        openParks(args: ["-rppl.favoriteParkIDs", "(project7-rotterdam, lakeside-zwolle)"])
+        // The satellite choice persists in UserDefaults; the dark class runs first and leaves it on.
+        openParks(args: ["-rppl.favoriteParkIDs", "(project7-rotterdam, lakeside-zwolle)", "-rppl.mapUsesSatellite", "NO"])
         app.buttons["View on map"].tap()
         sleep(4) // map tiles
         shot("10-parks-map")
