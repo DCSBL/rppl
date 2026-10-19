@@ -64,7 +64,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { variant: se-default, device: "iPhone SE (3rd generation)", text: large }
           - { variant: se-ax5, device: "iPhone SE (3rd generation)", text: accessibility-extra-extra-extra-large }
+          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
+          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -85,7 +88,7 @@ jobs:
             -project Rppl.xcodeproj \
             -scheme Rppl \
             -destination "platform=iOS Simulator,id=${udid}" \
-            -only-testing:RpplUITests/RpplScreenshotTests/testParksClosed \
+            -only-testing:RpplUITests \
             -skip-testing:RpplUITests/RpplDarkScreenshotTests \
             -retry-tests-on-failure \
             -test-iterations 2 \
@@ -132,7 +135,7 @@ jobs:
   watch:
     name: Watch ${{ matrix.variant }}
     needs: changes
-    if: false
+    if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26
     timeout-minutes: 40
     strategy:
