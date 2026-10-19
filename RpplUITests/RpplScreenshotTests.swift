@@ -118,7 +118,8 @@ class RpplScreenshotTests: XCTestCase {
         app.tabBars.buttons["Parks"].tap()
         // Nearby needs a location permission; the visit-sorted list works without one.
         app.buttons["Most visited"].tap()
-        let found = card("Project 7").waitForExistence(timeout: 15)
+        // The list can build late on a slow runner or sit below a tall header at large text: wait, then scroll to it.
+        let found = card("Project 7").waitForExistence(timeout: 15) || app.scrollToElement(card("Project 7"))
         if !found {
             let labels = app.buttons.allElementsBoundByIndex.prefix(25).map { "\($0.label)@\($0.frame.integral)" }
             Self.diagnostics.append("PARKS-DIAG window=\(app.windows.firstMatch.frame) buttons=\(labels)")
