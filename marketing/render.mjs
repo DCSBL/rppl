@@ -76,7 +76,7 @@ function html(slide, fmt) {
   if (slide.layout === "header") {
     // Tagline words split on ** like slide text, but stay on one line.
     const tagline = parseText(slide.tagline).map((l) => (l.accent ? `<span class="accent">${l.word}</span>` : l.word)).join(" ");
-    return doc(fmt, "header", k, `<img class="photo-bg" src="${photo(slide)}" style="object-position:${slide.object_position ?? "center"}"><div class="header-scrim"></div>
+    return doc(fmt, "header", k, `<img class="photo-bg" src="${photo(slide)}" style="object-position:${slide.object_position ?? "center"}"><div class="tint"></div><div class="header-scrim"></div>
       <div class="header-lockup"><div class="header-row"><div class="mark logo">${logo(true)}</div><div class="word">${slide.title}</div></div><div class="tag">${tagline}</div></div>`, { layout: "header" });
   }
   if (slide.layout === "search") {
