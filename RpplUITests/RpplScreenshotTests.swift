@@ -8,6 +8,13 @@ import XCTest
 class RpplScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
 
+    nonisolated(unsafe) static var diagnostics: [String] = []
+
+    override class func tearDown() {
+        diagnostics.forEach { print($0) }
+        super.tearDown()
+    }
+
     /// Overridden by the dark-mode subclass.
     class var isDark: Bool { false }
 
@@ -112,7 +119,10 @@ class RpplScreenshotTests: XCTestCase {
         // Nearby needs a location permission; the visit-sorted list works without one.
         app.buttons["Most visited"].tap()
         let found = card("Project 7").waitForExistence(timeout: 15)
-        if !found { print("PARKS-DIAG-BEGIN\n\(app.debugDescription)\nPARKS-DIAG-END") }
+        if !found {
+            let labels = app.buttons.allElementsBoundByIndex.prefix(25).map { "\($0.label)@\($0.frame.integral)" }
+            Self.diagnostics.append("PARKS-DIAG window=\(app.windows.firstMatch.frame) buttons=\(labels)")
+        }
         XCTAssertTrue(found)
     }
 
