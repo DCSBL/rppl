@@ -107,7 +107,9 @@ class RpplScreenshotTests: XCTestCase {
         app.tabBars.buttons["Parks"].tap()
         // Nearby needs a location permission; the visit-sorted list works without one.
         app.buttons["Most visited"].tap()
-        XCTAssertTrue(card("Project 7").waitForExistence(timeout: 15))
+        let found = card("Project 7").waitForExistence(timeout: 15)
+        if !found { print("PARKS-DIAG-BEGIN\n\(app.debugDescription)\nPARKS-DIAG-END") }
+        XCTAssertTrue(found)
     }
 
     @MainActor
