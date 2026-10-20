@@ -872,6 +872,7 @@ private struct ParkMap: View {
     let weather: ParkWeather?
 
     @State private var mapHeading: Double = 0
+    @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
         Map(initialPosition: .region(region)) {
@@ -880,9 +881,9 @@ private struct ParkMap: View {
             ForEach(startMarkers, id: \.id) { marker in
                 Annotation("", coordinate: marker.coordinate, anchor: .center) {
                     Image(systemName: "location.north.fill")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: markerSize / 2, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 18, height: 18)
+                        .frame(width: markerSize, height: markerSize)
                         .background(Color.rpplAccent, in: Circle())
                         .overlay(Circle().strokeBorder(.white, lineWidth: 1.5))
                         .rotationEffect(.degrees((marker.bearing ?? 0) - mapHeading))

@@ -428,8 +428,8 @@ private struct MapStyleToggleButton: View {
             withRpplAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
         } label: {
             Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 34, height: 34)
+                .font(.subheadline.weight(.medium))
+                .frame(minWidth: 34, minHeight: 34)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
@@ -449,8 +449,8 @@ private struct MapRecenterButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "location.fill")
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 34, height: 34)
+                .font(.subheadline.weight(.medium))
+                .frame(minWidth: 34, minHeight: 34)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
