@@ -120,6 +120,7 @@ struct LogbookSessionDetailView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
+            .readableWidth()
         }
         .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
