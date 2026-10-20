@@ -67,6 +67,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: xcodebuild test (RpplLayoutScreenshotTests)
+        # Screenshots are collected from the xcresult even when a test fails (e.g. a
+        # simulator terminate timeout), so a red test must not hide them.
+        continue-on-error: true
         shell: bash
         env:
           DEVICE: ${{ matrix.device }}
