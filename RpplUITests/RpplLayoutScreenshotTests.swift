@@ -13,6 +13,8 @@ final class RpplLayoutScreenshotTests: XCTestCase {
     }
 
     override func tearDown() {
+        // Quit before the next test: terminating a still-running app at the next launch timed out once on CI.
+        app?.terminate()
         XCUIDevice.shared.orientation = .portrait
         super.tearDown()
     }
