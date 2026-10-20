@@ -26,6 +26,7 @@ private enum AppTabIcons {
 }
 
 struct ContentView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
     @State private var openParkID: String?
@@ -68,6 +69,15 @@ struct ContentView: View {
             }
         }
         .tint(Color.rpplAccent)
+        // Bug reports from a Duo or iPad say which layout was active; logs only when the layout changes.
+        .onGeometryChange(for: WindowLayout.self) {
+            WindowLayout.resolve(
+                width: Double($0.size.width),
+                isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize
+            )
+        } action: { layout in
+            WakeLog.debug(.ui, "window layout=\(layout) textSize=\(dynamicTypeSize)")
+        }
         .onOpenURL { url in
             if ParkDeepLink.isFavorites(url) {
                 openFavorites = true
