@@ -6,9 +6,9 @@ Stills for the App Store product page, rendered from HTML: Poppins headlines, Ap
 |--------|------|-------------------|
 | iPhone screenshots | 1206x2622 (the only size we ship; Apple accepts 1206x2622, 2622x1206, 1179x2556 and 2556x1179 for this slot) | `screenshots/iphone-6.3/` |
 | Product page header | 16:9 5244x2950 | `product-page-header/16x9/` |
-| Search results | 16:9 5244x2950 | `search-results/16x9/` |
+| Search results | 3:2 3840x2560 (Apple's max for this ratio) | `search-results/3x2/` |
 
-The search card on iPhone crops the 16:9 image to about 3:2 (roughly 9% off each side), so the `search` slide keeps everything between x=480 and x=4764. The header is the `header` slide (photo, logo, name and tagline, no devices; Apple crops the header image heavily, so the lockup sits in the uncropped safe area, 1400x962 at (1922, 664) of the 5244x2950 image) and the search results are the `search` slide (photo, logo, headline, phone and watch). Photos live in [`marketing/photos/`](../marketing/photos). Swap one (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it. The phone and watch frames are scaled to the real size ratio of the devices.
+The search results use 3:2 because the App Store crops a 16:9 image to about 3:2 and cut off the sides. The header is the `header` slide (photo, logo, name and tagline, no devices; Apple crops the header image heavily, so the lockup sits in the uncropped safe area, 1400x962 at (1922, 664) of the 5244x2950 image) and the search results are the `search` slide (photo, logo, headline, phone and watch). Photos live in [`marketing/photos/`](../marketing/photos). Swap one (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it. The phone and watch frames are scaled to the real size ratio of the devices.
 
 Files are `<NN>-<slide id>.png`, numbered in `slides` order. PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). Check the specs page before adding formats.
 
@@ -38,7 +38,7 @@ slides:
     text: "**YOUR** CABLEPARK BUDDY"
     screenshot: 04-session-tracked-2
     watch_screenshot: 06-live-riding
-    formats: [search-16x9]
+    formats: [search-3x2]
   - id: usp
     layout: usp                        # logo, title and icon rows (icons: code, lock-phone, no-euro); `image:` puts them on a photo
 ```
