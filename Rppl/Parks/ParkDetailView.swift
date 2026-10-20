@@ -81,6 +81,7 @@ struct ParkDetailView: View {
             }
             .padding(.horizontal, LogbookLayout.horizontalInset)
             .padding(.vertical, 8)
+            .readableWidth()
         }
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
