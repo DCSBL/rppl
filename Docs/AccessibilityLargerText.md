@@ -14,12 +14,9 @@ These do not scale with Dynamic Type today. Move each to a text style or `@Scale
 |------|------|-----|
 | `RpplWatch/Views/SessionControlsPage.swift` | 28 pt | Controls glyph |
 | `RpplWatch/Views/SessionSetUIPage.swift` | 9 pt | Riding view caption |
-| `Rppl/Logbook/SessionMapView.swift` | 9 pt | Start/End annotation glyph (inside a fixed 20 pt circle) |
-| `Rppl/Parks/ParkDetailView.swift` | 9 pt | Map pin glyph (inside a fixed circle) |
-| `Rppl/Parks/ParksView.swift` | 15 pt (x2) | Map style / recenter buttons (fixed 34 pt frame) |
-| `Rppl/Parks/WindRoseView.swift` | 6 pt | Compass letters |
-| `Rppl/Parks/Editor/ParkEditorView.swift` | 44 pt | Decorative icon |
 | `Rppl/Parks/Editor/CableTraceView.swift` | 8 pt | Start flag in the point marker |
+
+Done on the phone for the Parks and map glyphs (text styles and `@ScaledMetric`, the iPhone Duo work); the Watch rows and the cable trace flag remain.
 
 Rule of thumb: glyphs inside a fixed-size circle or pin scale with `@ScaledMetric` on both glyph and container; text never goes below `.caption2`.
 

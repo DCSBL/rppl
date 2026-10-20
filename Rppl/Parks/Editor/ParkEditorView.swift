@@ -284,11 +284,13 @@ private struct ParkGuidedFlow: View {
 }
 
 private struct ParkWelcomeStep: View {
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 44
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Image(systemName: "figure.waterskiing")
-                    .font(.system(size: 44))
+                    .font(.system(size: iconSize))
                     .foregroundStyle(Color.rpplAccent)
                     .accessibilityHidden(true)
                 Text("Add a cable park")
