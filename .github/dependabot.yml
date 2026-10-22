@@ -1,0 +1,33 @@
+# Monthly dependency updates, one combined PR per ecosystem (and per directory).
+# Auto-merge is handled by .github/workflows/dependabot-auto-merge.yml (minor/patch only).
+# The Xcode project's own Package.resolved (Rppl.xcodeproj) is not supported by Dependabot.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: swift
+    directories:
+      - /RpplCore
+      - /tools/example-session-compiler
+    schedule:
+      interval: monthly
+    groups:
+      swift-packages:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories:
+      - /web
+      - /marketing
+      - /tools/session-viewer
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ["*"]
