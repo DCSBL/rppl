@@ -33,7 +33,7 @@ public struct ParkDataStore: Sendable {
 
     /// Directory holding the installed files, whether or not the kill switch is on.
     public func installedDirectory() -> URL? {
-        guard let pointer else { return nil }
+        guard let pointer = pointer() else { return nil }
         let url = root.appendingPathComponent(pointer.directory, isDirectory: true)
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
