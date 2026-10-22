@@ -1,6 +1,6 @@
 # Terms & Privacy Policy
 
-**Last updated:** 5 October 2026
+**Last updated:** 22 October 2026
 
 ## Your data stays with you
 
@@ -78,6 +78,7 @@ Some features request data from outside services. None of them receive your sess
 - **Apple Maps:** route maps, park maps, and directions to a park.
 - **Rijkswaterstaat** (opt-in, off by default): for Dutch parks, the app asks the public Rijkswaterstaat water data service for the latest temperature at the measuring station nearest to the park. Only that station's code is sent, never your location. Turn it on or off in Rppl → Settings (Park water temperature).
 - **Vlaamse Waterweg and VMM (Flanders)** (opt-in, off by default, same setting): for Belgian parks, the app asks the public Flemish water data services (waterinfo.be, run by the Vlaamse Waterweg and the Vlaamse Milieumaatschappij) for the latest water temperature at the measuring station nearest to the park. Only that station's time-series ID is sent, never your location.
+- **GitHub** (opt-in, off by default): when you turn on "Update park data" in Rppl → Info, the app downloads the latest park files from the Rppl repository on GitHub (raw.githubusercontent.com). Only a plain file request is sent: no account, no identifiers and no location. GitHub, like any web host, can see technical request data such as your IP address. We do not receive it. Without this setting the app uses the parks that came with it.
 
 Before adding any new third-party service that handles your data, we will ask your permission.
 

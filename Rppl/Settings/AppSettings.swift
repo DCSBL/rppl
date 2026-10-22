@@ -25,6 +25,12 @@ enum AppSettingsKey {
     static let debugSetFlags = "rppl.debugSetFlags"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
+    /// Download park updates from GitHub (opt-in; default off).
+    static let parkDataUpdatesEnabled = "rppl.parkDataUpdatesEnabled"
+    /// The first-time "Update park data?" question was answered (either way); don't ask again.
+    static let didAskParkDataConsent = "rppl.didAskParkDataConsent"
+    /// JSON `ParkDataUpdateState`: last attempts and successes (local only).
+    static let parkDataUpdateState = "rppl.parkDataUpdateState"
     /// JSON `ReviewPromptState`: good-session count and pending App Store review prompt (local only).
     static let reviewPromptState = "rppl.reviewPromptState"
     /// Logbook "Max speed" total: `SpeedTotal` raw value (tap cycles max / average).

@@ -37,8 +37,13 @@
 	<string>$(RPPL_ICLOUD_CONTAINER)</string>
 	<key>RpplReleaseTag</key>
 	<string></string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>nl.dcsbl.rppl.parkDataRefresh</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
 </dict>
