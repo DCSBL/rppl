@@ -1,0 +1,238 @@
+version: 1
+id: wetnwild-alphen
+created_at: 2026-09-24
+updated_at: 2026-10-15
+history:
+  - date: 2026-09-24
+    description: initial
+  - date: 2026-09-24
+    description: add prices, facilities and description from wetnwild.nl
+  - date: 2026-09-28
+    description: >-
+      water_temperature: gouda.voorhaven had stopped reporting (stale since 2026-08-13) - switch
+      to maarssen.kanaal, the nearest still-reporting station
+  - date: 2026-09-29
+    description: add October opening hours from the park's Instagram post
+  - date: 2026-09-29
+    description: add extra opening hours exceptions for 2026-09-29 to 2026-10-04
+  - date: 2026-10-04
+    description: store prices as numbers (amount, currency), same values
+  - date: 2026-10-04
+    description: group prices of the same name into options
+  - date: 2026-10-05
+    description: remove past extra opening hours (2026-09-29 to 2026-10-01), month-name labels, author credit and source comments
+  - date: 2026-10-07
+    description: add languages (en, nl) and Dutch variants of note
+  - date: 2026-10-12
+    description: add extra opening hours exception for 2026-10-14
+  - date: 2026-10-15
+    description: >-
+      remove past extra opening hours (2026-10-14), correct age limit (up to 15 / from 16), add 2-hour,
+      SUP and rental prices
+
+name: Wet 'n Wild
+languages:
+  - en
+  - nl
+address: Sportlaan 5, 2406 LD Alphen aan den Rijn
+timezone: Europe/Amsterdam
+location:
+  lat: 52.13616235164614
+  lon: 4.6779432055000365
+
+# Nearest station that still reports (~25 km); closer ones stopped reporting.
+water_temperature:
+  provider: rws_nl
+  station_id: maarssen.kanaal
+
+phone: 0172 472 412
+email: info@wetnwild.nl
+website: https://wetnwild.nl/wakepark/
+links:
+  - kind: booking
+    url: "https://booking.leisureking.eu/bm/fdcfe3be55aa4c1f9d5e2dc7630fcbfd/assortiment"
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 780
+    points:
+      - lat: 52.13616893686612
+        lon: 4.67831871475394
+      - lat: 52.13359404163105
+        lon: 4.679863667112853
+      - lat: 52.133501843133814
+        lon: 4.680496668426576
+      - lat: 52.13381795147282
+        lon: 4.680936550695433
+      - lat: 52.13640600413686
+        lon: 4.679423784843997
+
+opening:
+  booking: optional
+  numbered: false
+  booking_minutes:
+    - 60
+    - 120
+  note: >-
+    Booking ahead is recommended.
+  rules:
+    - months:
+        - 9
+      days:
+        - wed
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - thu
+        - fri
+      open: "17:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - sat
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 9
+      days:
+        - sun
+      open: "13:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - sat
+        - sun
+      open: "13:00"
+      close: "16:00"
+    - label: Beginner hour
+      months:
+        - 9
+      days:
+        - sat
+      open: "12:00"
+      close: "13:00"
+      note: Cable runs at 27 km/h
+  slots:
+    - id: "12:00"
+      start: "12:00"
+      end: "13:00"
+    - id: "13:00"
+      start: "13:00"
+      end: "14:00"
+    - id: "14:00"
+      start: "14:00"
+      end: "15:00"
+    - id: "15:00"
+      start: "15:00"
+      end: "16:00"
+    - id: "16:00"
+      start: "16:00"
+      end: "17:00"
+    - id: "17:00"
+      start: "17:00"
+      end: "18:00"
+    - id: "18:00"
+      start: "18:00"
+      end: "19:00"
+    - id: "19:00"
+      start: "19:00"
+      end: "20:00"
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        note:
+          en: "From 16 years. Skis/board, life vest, helmet and instruction included"
+          nl: "Vanaf 16 jaar. Waterski's/board, zwemvest, helm en instructie inbegrepen"
+      - amount: "20"
+        currency: EUR
+        note:
+          en: Up to 15 years
+          nl: T/m 15 jaar
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        note:
+          en: From 16 years
+          nl: Vanaf 16 jaar
+      - amount: "30"
+        currency: EUR
+        note:
+          en: Up to 15 years
+          nl: T/m 15 jaar
+  - name: Stand up paddle
+    options:
+      - amount: "12.50"
+        currency: EUR
+        per: hour
+      - amount: "20"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Wetsuit and wakeskate
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "7.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Wakeboard
+    options:
+      - amount: "10"
+        currency: EUR
+        per: hour
+      - amount: "12.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Slider board
+    options:
+      - amount: "15"
+        currency: EUR
+        per: hour
+      - amount: "22.50"
+        currency: EUR
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Kids Wake Club
+    options:
+      - amount: "175"
+        currency: EUR
+        note:
+          en: "8 lessons"
+          nl: 8 lessen
+  - name: Kids Wake Club trial lesson
+    options:
+      - amount: "21.50"
+        currency: EUR
+        per: person
+  - name: Online booking discount
+    options:
+      - amount: "-2"
+        currency: EUR
+        note:
+          en: "per person, when booked online"
+          nl: "per persoon, bij online boeken"
+
+facilities:
+  - Changing rooms (male/female)
+  - Showers
+  - Restaurant / Social Club beach club
+
+description: >-
+  Cable ski/wakeboard run on the Alphense Zegerplas, running counter-clockwise since 1998.
+  Normal cable speed is 30 km/h (27 km/h during the Saturday beginner hour, see opening rules).

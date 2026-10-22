@@ -1,0 +1,101 @@
+version: 1
+id: schotsman-kamperland
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
+
+name: Schotsman Watersport Kamperland
+short_name: Schotsman Watersport
+languages:
+  - nl
+  - en
+  - de
+address: Campensweg 3, 4493 MN Kamperland
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 51.5716393
+  lon: 3.6520692
+
+water_temperature:
+  provider: rws_nl
+  station_id: kamperland.schotsman
+
+phone: 0113 - 370270
+email: info@schotsmanwatersport.nl
+website: https://www.schotsmanwatersport.nl
+links:
+  - kind: booking
+    url: "https://www.schotsmanwatersport.nl/waterski-wakeboard/reserveren-online-ticket/"
+
+facilities:
+  - Zwemvest en standaard waterski's inbegrepen
+  - Aquapark
+  - Winkel
+  - Restaurant met terras
+  - Gratis parkeren
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 51.571444
+        lon: 3.650993
+      - lat: 51.574087
+        lon: 3.649605
+      - lat: 51.573771
+        lon: 3.648272
+      - lat: 51.571116
+        lon: 3.649786
+
+prices:
+  - name: 1 uur
+    options:
+      - amount: "24"
+        currency: EUR
+        per: person
+  - name: 2 uur
+    options:
+      - amount: "33"
+        currency: EUR
+        per: person
+  - name: Voordeelkaart
+    options:
+      - amount: "210"
+        currency: EUR
+        note:
+          nl: 10 x 1 uur, te delen door meerdere deelnemers
+          en: 10 x 1 hour, can be shared by several riders
+          de: 10 x 1 Stunde, von mehreren Teilnehmern nutzbar
+  - name: Seizoenskaart
+    options:
+      - amount: "895"
+        currency: EUR
+        note:
+          nl: Dagelijks 2 uur, persoonsgebonden
+          en: 2 hours daily, personal
+          de: Täglich 2 Stunden, personengebunden
+  - name: Wetsuit
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+  - name: Kneeboard
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+  - name: Wakeboard
+    options:
+      - amount: "8"
+        currency: EUR
+        per: hour
+  - name: Obstacle board
+    options:
+      - amount: "12"
+        currency: EUR
+        per: hour

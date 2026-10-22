@@ -1,0 +1,97 @@
+version: 1
+id: lakeside-zwolle
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
+
+name: Lakeside Zwolle
+languages:
+  - nl
+  - en
+address: Zalneweg 110, 8026 PZ Zwolle
+timezone: Europe/Amsterdam
+location:
+  lat: 52.497422
+  lon: 6.152047
+
+# Nearest station that still reports (~16 km).
+water_temperature:
+  provider: rws_nl
+  station_id: zwartsluis.zwartewater
+
+phone: 038 454 84 95
+email: info@lakesidezwolle.nl
+website: https://lakesidezwolle.nl
+links:
+  - kind: booking
+    url: "https://lakesidezwolle.nl/boeking/"
+
+facilities:
+  - Strand en ligweide
+  - Terras
+  - Obstakels
+  - Zwemvest en waterski's inbegrepen
+
+cables:
+  - name: Waterskibaan
+    description: Kabel met vijf masten. Obstakels zijn Kicker S, M en L, Flatbar S, M en L, Olliebox en Uprail.
+    direction: ccw
+    points:
+      - lat: 52.497602
+        lon: 6.152084
+      - lat: 52.496857
+        lon: 6.155634
+      - lat: 52.497366
+        lon: 6.156451
+      - lat: 52.497967
+        lon: 6.155585
+      - lat: 52.498244
+        lon: 6.152415
+
+opening:
+  note: >-
+    De baan start vanaf 3 deelnemers. Bij slecht weer kunnen de tijden afwijken.
+  rules:
+    - months:
+        - 10
+        - 11
+        - 12
+      days:
+        - weekdays
+      open: "14:00"
+      close: "18:00"
+    - months:
+        - 10
+        - 11
+        - 12
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
+
+prices:
+  - name: 1 uur
+    options:
+      - amount: "20"
+        currency: EUR
+        note:
+          nl: Waterski's en zwemvest inbegrepen
+          en: Waterskis and life vest included
+  - name: 2 uur
+    options:
+      - amount: "30"
+        currency: EUR
+        note:
+          nl: Waterski's en zwemvest inbegrepen
+          en: Waterskis and life vest included
+  - name: Middagkaart
+    options:
+      - amount: "50"
+        currency: EUR
+        note:
+          nl: Waterski's en zwemvest inbegrepen
+          en: Waterskis and life vest included

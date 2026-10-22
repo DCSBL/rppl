@@ -1,0 +1,149 @@
+version: 1
+id: waterskitwente-enschede
+created_at: 2026-10-15
+updated_at: 2026-10-15
+history:
+  - date: 2026-10-15
+    description: initial
+  - date: 2026-10-15
+    description: Add GPS points for cable
+
+name: Waterski Twente
+languages:
+  - nl
+  - en
+address: Jacobsrietweg 175, 7546 RG Enschede
+timezone: Europe/Amsterdam
+# Business pin for the official address, not the dock.
+location:
+  lat: 52.1813404
+  lon: 6.8410869
+
+phone: +31 85 024 0038
+email: info@waterskitwente.nl
+website: https://www.waterskitwente.nl
+links:
+  - kind: booking
+    url: "https://www.waterskitwente.nl/tickets/"
+  - kind: instagram
+    url: "https://www.instagram.com/waterskitwente/"
+  - kind: facebook
+    url: "https://www.facebook.com/waterskitwente/"
+
+facilities:
+  - Obstakels
+  - Horeca
+  - Terras
+  - Wakeschool
+  - Wakeclub
+
+description: Waterskiën en wakeboarden met obstakels aan een terras op het water.
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 52.181141
+        lon: 6.841745
+      - lat: 52.178556
+        lon: 6.840213
+      - lat: 52.178347
+        lon: 6.841195
+      - lat: 52.180927
+        lon: 6.842716
+
+opening:
+  rules:
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
+
+prices:
+  - name: 1,5 uur
+    options:
+      - amount: "22.50"
+        currency: EUR
+        note:
+          nl: Jeugd (jonger dan 16), inclusief waterski's en zwemvest
+          en: Youth (under 16), waterskis and life vest included
+      - amount: "29.50"
+        currency: EUR
+        note:
+          nl: Volwassenen (vanaf 16), inclusief waterski's en zwemvest
+          en: Adults (16 and older), waterskis and life vest included
+  - name: 3 uur
+    options:
+      - amount: "35"
+        currency: EUR
+        note:
+          nl: Jeugd (jonger dan 16), inclusief waterski's en zwemvest
+          en: Youth (under 16), waterskis and life vest included
+      - amount: "42.50"
+        currency: EUR
+        note:
+          nl: Volwassenen (vanaf 16), inclusief waterski's en zwemvest
+          en: Adults (16 and older), waterskis and life vest included
+  - name: Dag
+    options:
+      - amount: "45"
+        currency: EUR
+        note:
+          nl: Jeugd (jonger dan 16), inclusief waterski's en zwemvest
+          en: Youth (under 16), waterskis and life vest included
+      - amount: "57.50"
+        currency: EUR
+        note:
+          nl: Volwassenen (vanaf 16), inclusief waterski's en zwemvest
+          en: Adults (16 and older), waterskis and life vest included
+  - name: Wetsuit
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          nl: 1,5 uur
+          en: 1.5 hours
+      - amount: "10"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
+      - amount: "15"
+        currency: EUR
+        per: day
+  - name: Wakeboard
+    options:
+      - amount: "7.50"
+        currency: EUR
+        per:
+          nl: 1,5 uur
+          en: 1.5 hours
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
+      - amount: "22.50"
+        currency: EUR
+        per: day
+  - name: Kicker wakeboard met helm
+    options:
+      - amount: "15"
+        currency: EUR
+        per:
+          nl: 1,5 uur
+          en: 1.5 hours
+      - amount: "25"
+        currency: EUR
+        per:
+          nl: 3 uur
+          en: 3 hours
+      - amount: "29.50"
+        currency: EUR
+        per: day
+  - name: Helm
+    options:
+      - amount: "5"
+        currency: EUR
