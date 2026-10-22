@@ -175,7 +175,7 @@ struct ParkDataTests {
         let updater = ParkDataUpdater(store: store)
 
         #expect(try await updater.update(using: fake) == .updated(dataVersion: 3))
-        #expect(try await updater.update(using: fake) == .upToDate(dataVersion: 3))
+        #expect(try await updater.update(using: fake) == .alreadyCurrent(dataVersion: 3))
         #expect(await fake.requested.filter { $0 == "a.yaml" }.count == 1)
     }
 
@@ -217,7 +217,7 @@ struct ParkDataTests {
         #expect(store.activeDirectory() == nil)
 
         let on = try fetcher(makeManifest(version: 1, parks: [("a", a)]), [("a", a)])
-        #expect(try await updater.update(using: on) == .upToDate(dataVersion: 1))
+        #expect(try await updater.update(using: on) == .alreadyCurrent(dataVersion: 1))
         #expect(store.activeDirectory() != nil)
     }
 

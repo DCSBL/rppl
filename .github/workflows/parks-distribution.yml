@@ -1,0 +1,93 @@
+# Over-the-air park data. When park files change on main, open (or update) a PR from
+# `parks-distribution-auto` into `parks-distribution` with the park YAMLs plus a regenerated
+# manifest.json. A human merges that PR; the app reads the branch through raw.githubusercontent.com.
+#
+# Kill switch: edit `"enabled": false` in manifest.json on `parks-distribution`. The build keeps it.
+# Needs repo setting: Actions > General > "Allow GitHub Actions to create and approve pull requests".
+
+name: Parks distribution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'RpplCore/Sources/RpplCore/Resources/Parks/*.yaml'
+      - 'scripts/ci/build_parks_distribution.py'
+      - '.github/workflows/parks-distribution.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: parks-distribution
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  DIST_BRANCH: parks-distribution
+  AUTO_BRANCH: parks-distribution-auto
+
+jobs:
+  distribute:
+    name: distribute
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Fetch distribution branch
+        id: dist
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "$DIST_BRANCH" >/dev/null; then
+            git fetch --depth=1 origin "$DIST_BRANCH"
+            mkdir -p "$RUNNER_TEMP/previous"
+            git show "FETCH_HEAD:manifest.json" > "$RUNNER_TEMP/previous/manifest.json" || rm -f "$RUNNER_TEMP/previous/manifest.json"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build park data
+        id: build
+        run: |
+          set -euo pipefail
+          args=()
+          if [ -f "$RUNNER_TEMP/previous/manifest.json" ]; then args=(--previous "$RUNNER_TEMP/previous/manifest.json"); fi
+          python3 scripts/ci/build_parks_distribution.py \
+            RpplCore/Sources/RpplCore/Resources/Parks "$RUNNER_TEMP/out" "${args[@]}"
+
+      - name: Bootstrap the distribution branch
+        if: steps.build.outputs.changed == 'true' && steps.dist.outputs.exists == 'false'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$DIST_BRANCH"
+          git rm -rf --quiet .
+          cp "$RUNNER_TEMP"/out/* .
+          git add manifest.json ./*.yaml
+          git commit -q -m "parks-distribution: initial park data"
+          git push origin "$DIST_BRANCH"
+
+      - name: Open or update the distribution PR
+        if: steps.build.outputs.changed == 'true' && steps.dist.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q -B "$AUTO_BRANCH" FETCH_HEAD
+          git rm -rf --quiet .
+          cp "$RUNNER_TEMP"/out/* .
+          git add manifest.json ./*.yaml
+          version="$(python3 -c "import json; print(json.load(open('manifest.json'))['dataVersion'])")"
+          git commit -q -m "parks-distribution: data version $version" -m "Source: main @ ${GITHUB_SHA}"
+          git push --force origin "$AUTO_BRANCH"
+          if [ -z "$(gh pr list --head "$AUTO_BRANCH" --base "$DIST_BRANCH" --state open --json number --jq '.[0].number')" ]; then
+            gh pr create --head "$AUTO_BRANCH" --base "$DIST_BRANCH" \
+              --title "parks-distribution: data version $version" \
+              --body "Automatic update of the over-the-air park data from main @ ${GITHUB_SHA}. Merge to publish to the app."
+          fi
