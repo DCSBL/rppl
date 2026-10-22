@@ -126,6 +126,10 @@
     "wakesys": {
       "type": "boolean",
       "description": "Whether this park's booking system is Wakesys. Optional, defaults to false."
+    },
+    "permanently_closed": {
+      "type": "boolean",
+      "description": "Set instead of deleting a park that closed for good. It is hidden from the list and map, but old sessions can still reference it. Optional, defaults to false."
     }
   },
   "$defs": {

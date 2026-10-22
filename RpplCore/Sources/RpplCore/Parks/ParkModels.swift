@@ -315,10 +315,14 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     /// Whether this park's booking system is Wakesys (shared across several parks). Absent/`nil`
     /// means unknown/not Wakesys; defaults to `false` at call sites, not on decode.
     public var wakesys: Bool?
+    /// The park is gone for good. It is kept (not deleted) so old sessions can still reference it,
+    /// but it is left out of the list and map. Use `isListed`.
+    public var permanentlyClosed: Bool?
 
     enum CodingKeys: String, CodingKey {
         case version, id, history, author, name, languages, location, address, timezone, cables, opening
         case phone, email, website, prices, links, description, facilities, wakesys
+        case permanentlyClosed = "permanently_closed"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case basedOnUpdatedAt = "based_on_updated_at"
@@ -347,6 +351,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         facilities: [String]? = nil,
         waterTemperature: ParkWaterTemperatureSource? = nil,
         wakesys: Bool? = nil,
+        permanentlyClosed: Bool? = nil,
         createdAt: String? = nil,
         updatedAt: String? = nil,
         history: [ParkHistoryEntry]? = nil,
@@ -373,12 +378,23 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.facilities = facilities
         self.waterTemperature = waterTemperature
         self.wakesys = wakesys
+        self.permanentlyClosed = permanentlyClosed
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.history = history
         self.author = author
         self.basedOnUpdatedAt = basedOnUpdatedAt
         self.basedOnRevision = basedOnRevision
+    }
+
+    /// False for a permanently closed park: hidden from the list and map, still resolvable by id.
+    public var isListed: Bool { permanentlyClosed != true }
+
+    /// Whether this file is a later revision than `other` (same park): `updated_at`, then history length.
+    public func isRevisionNewer(than other: Park) -> Bool {
+        let mine = updatedAt ?? "", theirs = other.updatedAt ?? ""
+        if mine != theirs { return mine > theirs }
+        return (history?.count ?? 0) > (other.history?.count ?? 0)
     }
 
     /// `id` alone: cheaper than hashing `cables`/`history`, and still consistent with `==`.

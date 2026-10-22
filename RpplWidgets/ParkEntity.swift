@@ -39,7 +39,7 @@ struct ParkEntityQuery: EntityStringQuery {
 
 enum ParkWidgetStore {
     static func parks() -> [Park] {
-        ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
+        ParkCatalog.loadApp()
     }
 
     static func park(id: String) -> Park? {
