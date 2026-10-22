@@ -11335,6 +11335,214 @@
           }
         }
       }
+    },
+    "Couldn’t update park data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t update park data"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kon parkdata niet bijwerken"
+          }
+        }
+      }
+    },
+    "Update the app to get new park data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update the app to get new park data"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werk de app bij voor nieuwe parkdata"
+          }
+        }
+      }
+    },
+    "Checked %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checked %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gecontroleerd %@"
+          }
+        }
+      }
+    },
+    "last attempt failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "last attempt failed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laatste poging mislukt"
+          }
+        }
+      }
+    },
+    "Not checked yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not checked yet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog niet gecontroleerd"
+          }
+        }
+      }
+    },
+    "Data from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data from %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gegevens van %@"
+          }
+        }
+      }
+    },
+    "less than a minute ago" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "less than a minute ago"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minder dan een minuut geleden"
+          }
+        }
+      }
+    },
+    "Update park data?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update park data?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkdata bijwerken?"
+          }
+        }
+      }
+    },
+    "Turn on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aanzetten"
+          }
+        }
+      }
+    },
+    "Rppl can fetch the latest park info from GitHub. GitHub can see your IP address; nothing else is sent. You can change this in Info." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl can fetch the latest park info from GitHub. GitHub can see your IP address; nothing else is sent. You can change this in Info."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl kan de nieuwste parkinfo bij GitHub ophalen. GitHub ziet je IP-adres; er wordt verder niets verstuurd. Je kunt dit aanpassen bij Info."
+          }
+        }
+      }
+    },
+    "Update park data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update park data"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkdata bijwerken"
+          }
+        }
+      }
+    },
+    "Park data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park data"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkdata"
+          }
+        }
+      }
+    },
+    "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haalt nieuwe en gewijzigde parks op bij GitHub, ongeveer één keer per dag en als je in Parks omlaag trekt. GitHub ziet je IP-adres; er wordt verder niets verstuurd. Uit: Rppl gebruikt de parks die met de app zijn meegekomen."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

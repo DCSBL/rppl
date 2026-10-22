@@ -29,11 +29,11 @@ struct ParkEntityQuery: EntityStringQuery {
     }
 
     func entities(matching string: String) async throws -> [ParkEntity] {
-        ParkSearch.filter(ParkWidgetStore.parks(), query: string).map(ParkEntity.init)
+        ParkSearch.filter(ParkWidgetStore.parks().filter(\.isListed), query: string).map(ParkEntity.init)
     }
 
     func suggestedEntities() async throws -> [ParkEntity] {
-        ParkWidgetStore.parks().map(ParkEntity.init)
+        ParkWidgetStore.parks().filter(\.isListed).map(ParkEntity.init)
     }
 }
 
