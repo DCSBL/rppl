@@ -35,6 +35,12 @@ struct ParkDataRefreshPolicyTests {
         #expect(ParkDataRefreshPolicy.isDailyCheckDue(state: state(success: true, secondsAgo: -100), now: now))
     }
 
+    @Test func backgroundCheckUsesAShorterMinimumAge() {
+        let age = ParkDataRefreshPolicy.backgroundMinimumAge
+        #expect(!ParkDataRefreshPolicy.isDailyCheckDue(state: state(success: true, secondsAgo: 19 * 3600), now: now, minimumAge: age))
+        #expect(ParkDataRefreshPolicy.isDailyCheckDue(state: state(success: true, secondsAgo: 21 * 3600), now: now, minimumAge: age))
+    }
+
     @Test func nextDailyCheckLandsOnTheInstallationOffset() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "UTC")!
