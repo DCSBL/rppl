@@ -11448,6 +11448,22 @@
         }
       }
     },
+    "Updating park data…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updating park data…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkdata bijwerken…"
+          }
+        }
+      }
+    },
     "Update park data?" : {
       "localizations" : {
         "en" : {
@@ -11480,18 +11496,18 @@
         }
       }
     },
-    "Rppl can fetch the latest park info from GitHub. GitHub can see your IP address; nothing else is sent. You can change this in Info." : {
+    "Rppl fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent. You can change this in Info." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl can fetch the latest park info from GitHub. GitHub can see your IP address; nothing else is sent. You can change this in Info."
+            "value" : "Rppl fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent. You can change this in Info."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl kan de nieuwste parkinfo bij GitHub ophalen. GitHub ziet je IP-adres; er wordt verder niets verstuurd. Je kunt dit aanpassen bij Info."
+            "value" : "Rppl haalt nieuwe parkinfo op bij GitHub, een website waar ontwikkelaars bestanden delen. GitHub ziet je IP-adres; er wordt verder niets verstuurd. Je kunt dit aanpassen bij Info."
           }
         }
       }
@@ -11528,18 +11544,18 @@
         }
       }
     },
-    "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app." : {
+    "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app."
+            "value" : "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Haalt nieuwe en gewijzigde parks op bij GitHub, ongeveer één keer per dag en als je in Parks omlaag trekt. GitHub ziet je IP-adres; er wordt verder niets verstuurd. Uit: Rppl gebruikt de parks die met de app zijn meegekomen."
+            "value" : "Haalt nieuwe parkinfo op bij GitHub, een website waar ontwikkelaars bestanden delen. GitHub ziet je IP-adres; er wordt verder niets verstuurd."
           }
         }
       }
