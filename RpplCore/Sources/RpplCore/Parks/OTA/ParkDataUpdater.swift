@@ -7,7 +7,7 @@ public protocol ParkDataFetching: Sendable {
 
 public enum ParkDataUpdateOutcome: Equatable, Sendable {
     case updated(dataVersion: Int)
-    case upToDate(dataVersion: Int)
+    case alreadyCurrent(dataVersion: Int)
     /// The manifest's kill switch is on: bundled parks are shown.
     case disabled
     /// The data needs a newer app than this one.
@@ -41,7 +41,7 @@ public struct ParkDataUpdater: Sendable {
 
         if let pointer = store.pointer(), pointer.dataVersion == manifest.dataVersion, store.installedDirectory() != nil {
             try store.setEnabled(true)
-            return .upToDate(dataVersion: manifest.dataVersion)
+            return .alreadyCurrent(dataVersion: manifest.dataVersion)
         }
 
         var files: [String: Data] = [:]
