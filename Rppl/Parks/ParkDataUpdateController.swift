@@ -47,6 +47,25 @@ final class ParkDataUpdateController {
         await run(manual: false)
     }
 
+    /// Fixed per installation, so riders spread over the 24 hours instead of all asking at once.
+    func dailyOffsetFraction() -> Double {
+        if let fraction = state.dailyOffsetFraction { return fraction }
+        let fraction = Double.random(in: 0..<1)
+        state.dailyOffsetFraction = fraction
+        saveState()
+        return fraction
+    }
+
+    /// Background refresh: only when updates are on and the last success is old enough.
+    func backgroundRefresh() async -> Bool {
+        guard isEnabled, !isRefreshing,
+              ParkDataRefreshPolicy.isDailyCheckDue(
+                  state: state, now: Date(), minimumAge: ParkDataRefreshPolicy.backgroundMinimumAge
+              ) else { return true }
+        await run(manual: false)
+        return state.lastRealAttemptSucceeded
+    }
+
     private func run(manual: Bool) async {
         isRefreshing = true
         clearError()

@@ -37,10 +37,19 @@ public enum ParkDataRefreshPolicy {
     }
 
     /// The in-app check at most once a day, for riders without a park widget (no background refresh).
-    public static func isDailyCheckDue(state: ParkDataUpdateState, now: Date) -> Bool {
+    /// `minimumAge` is shorter for the background check, which fires near its planned time rather
+    /// than exactly 24 hours after an in-app check.
+    public static func isDailyCheckDue(
+        state: ParkDataUpdateState,
+        now: Date,
+        minimumAge: TimeInterval = dailyInterval
+    ) -> Bool {
         guard let last = state.lastSuccess else { return true }
-        return now.timeIntervalSince(last) >= dailyInterval || now < last
+        return now.timeIntervalSince(last) >= minimumAge || now < last
     }
+
+    /// Background check runs when the last success is at least this old.
+    public static let backgroundMinimumAge: TimeInterval = 20 * 60 * 60
 
     /// Next background check: the installation's fixed moment of the day, at least `minimumGap`
     /// from now, so installations spread out over 24 hours instead of all hitting GitHub at once.
