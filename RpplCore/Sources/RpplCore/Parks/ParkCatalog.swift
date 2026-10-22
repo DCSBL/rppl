@@ -43,9 +43,23 @@ public enum ParkCatalog {
         return loadFiles(urls.filter { ["yaml", "yml"].contains($0.pathExtension.lowercased()) })
     }
 
-    public static func load(userRoot: URL?) -> [Park] {
-        var byId: [String: Park] = [:]
-        for park in loadBundled() { byId[park.id] = park }
+    /// Bundled parks, with downloaded (OTA) parks layered over them. OTA wins unless the bundled
+    /// file is a later revision (a newer app than the last download).
+    private static func baseLayer(otaDirectory: URL?) -> [String: ParkEntry] {
+        var base: [String: ParkEntry] = [:]
+        for park in loadBundled() where base[park.id] == nil {
+            base[park.id] = ParkEntry(park: park, origin: .bundled)
+        }
+        guard let otaDirectory else { return base }
+        for park in loadDirectory(otaDirectory) {
+            if let bundled = base[park.id]?.park, bundled.isRevisionNewer(than: park) { continue }
+            base[park.id] = ParkEntry(park: park, origin: .ota)
+        }
+        return base
+    }
+
+    public static func load(userRoot: URL?, otaDirectory: URL? = nil) -> [Park] {
+        var byId = baseLayer(otaDirectory: otaDirectory).mapValues(\.park)
         if let userRoot {
             for park in loadDirectory(userRoot) {
                 var park = park
@@ -56,25 +70,31 @@ public enum ParkCatalog {
         return byId.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
+    /// `load` with the app's own user parks and downloaded park data.
+    public static func loadApp() -> [Park] {
+        load(userRoot: AppConstants.localPhoneParksRoot, otaDirectory: ParkDataStore.app.activeDirectory())
+    }
+
     // MARK: - User parks (custom + edited overrides)
 
-    /// Every park with where it came from. A user file wins over a bundled park with the same `id`.
-    public static func loadWithOrigin(userRoot: URL?) -> [ParkEntry] {
-        let bundled = Dictionary(loadBundled().map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        var entries: [String: ParkEntry] = bundled.mapValues { ParkEntry(park: $0, origin: .bundled) }
+    /// Every park with where it came from. A user file wins over a bundled or downloaded park with
+    /// the same `id`; for those, `bundledPark` is the park they were based on.
+    public static func loadWithOrigin(userRoot: URL?, otaDirectory: URL? = nil) -> [ParkEntry] {
+        let base = baseLayer(otaDirectory: otaDirectory)
+        var entries = base
         if let userRoot {
             for park in loadDirectory(userRoot) {
-                guard let base = bundled[park.id] else {
+                guard let baseEntry = base[park.id] else {
                     entries[park.id] = ParkEntry(park: park, origin: .custom)
                     continue
                 }
                 var park = park
-                // `updatedAt` is day granularity, so a same-day bundled content change (a new
+                // `updatedAt` is day granularity, so a same-day content change (a new
                 // history entry with no date bump) wouldn't otherwise register as newer.
-                let newer = (base.updatedAt ?? "") > (park.basedOnUpdatedAt ?? "")
-                    || (base.history?.count ?? 0) > (park.basedOnRevision ?? 0)
-                inheritWaterTemperatureIfMissing(&park, bundled: base)
-                entries[park.id] = ParkEntry(park: park, origin: .edited, bundledPark: base, hasNewerBundled: newer)
+                let newer = (baseEntry.park.updatedAt ?? "") > (park.basedOnUpdatedAt ?? "")
+                    || (baseEntry.park.history?.count ?? 0) > (park.basedOnRevision ?? 0)
+                inheritWaterTemperatureIfMissing(&park, bundled: baseEntry.park)
+                entries[park.id] = ParkEntry(park: park, origin: .edited, bundledPark: baseEntry.park, hasNewerBundled: newer)
             }
         }
         return entries.values.sorted { $0.park.name.localizedCaseInsensitiveCompare($1.park.name) == .orderedAscending }
@@ -184,16 +204,18 @@ public enum ParkCatalog {
 
 public enum ParkOrigin: String, Sendable {
     case bundled
+    /// Downloaded park data (see `ParkDataStore`), replacing the bundled park of the same `id` or adding a new one.
+    case ota
     /// Only exists as a user file.
     case custom
-    /// A user file overriding a bundled park.
+    /// A user file overriding a bundled or downloaded park.
     case edited
 }
 
 public struct ParkEntry: Equatable, Sendable, Identifiable {
     public var park: Park
     public var origin: ParkOrigin
-    /// The bundled version when `origin == .edited`.
+    /// The bundled or downloaded version the edit was based on, when `origin == .edited`.
     public var bundledPark: Park?
     /// The app ships a newer version than the one the override was based on.
     public var hasNewerBundled: Bool

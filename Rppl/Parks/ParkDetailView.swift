@@ -188,7 +188,7 @@ struct ParkDetailView: View {
         Menu {
             Button("Edit", systemImage: "pencil") { startEditing() }
             Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
-            if let origin = entry?.origin, origin != .bundled {
+            if let origin = entry?.origin, origin == .custom || origin == .edited {
                 Button("Send to Rppl", systemImage: "envelope") {
                     if MailAvailability.canSend {
                         showMail = true
