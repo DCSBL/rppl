@@ -36,7 +36,7 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -75,7 +75,7 @@ jobs:
     steps:
       - name: Checkout
         if: needs.changes.outputs.code == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Swift version
         if: needs.changes.outputs.code == 'true'
@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload test log
         if: ${{ !cancelled() && needs.changes.outputs.code == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: swift-test-log
           path: RpplCore/swift-test.log
@@ -108,10 +108,10 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download test log
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         continue-on-error: true # missing when the test job died before `swift test`
         with:
           name: swift-test-log
