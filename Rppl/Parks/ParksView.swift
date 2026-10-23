@@ -75,6 +75,12 @@ struct ParksView: View {
         return ((windowWidth + sidebarWidth) / 2).rounded()
     }
 
+    /// Beside the map a tapped card selects the park there instead of pushing it.
+    private var cardSelection: ((Park) -> Void)? {
+        guard layout == .twoPane else { return nil }
+        return { selectedPark = $0 }
+    }
+
     private var showsNearby: Bool {
         !showsMapInList && !isSearching && sort == .distance
     }
@@ -280,7 +286,7 @@ struct ParksView: View {
                                         isFavorite: favorites.contains(park.id),
                                         entry: store.entry(id: park.id),
                                         filterDate: openFilterDate,
-                                        selection: layout == .twoPane ? { selectedPark = $0 } : nil,
+                                        selection: cardSelection,
                                         isSelected: layout == .twoPane && selectedPark?.id == park.id
                                     )
                                     .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
