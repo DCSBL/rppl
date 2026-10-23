@@ -21,17 +21,6 @@ enum UITestFixtures {
         return Date(timeIntervalSince1970: 1_786_789_800)
     }()
 
-    /// `-rpplUITestWindow WxH` (points) shrinks the app to a centered window of that size, the stand-in for a
-    /// folded or half-open Duo until the Duo simulator is on the runners.
-    static let windowSize: CGSize? = {
-        guard isActive else { return nil }
-        let args = ProcessInfo.processInfo.arguments
-        guard let flag = args.firstIndex(of: "-rpplUITestWindow"), args.indices.contains(flag + 1) else { return nil }
-        let parts = args[flag + 1].split(separator: "x").compactMap { Double($0) }
-        guard parts.count == 2, parts.allSatisfy({ $0 > 0 }) else { return nil }
-        return CGSize(width: parts[0], height: parts[1])
-    }()
-
     private struct Ride {
         let parkId: String
         let daysAgo: Int

@@ -7,14 +7,7 @@ struct RpplApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let size = UITestFixtures.windowSize {
-                ContentView()
-                    .frame(width: size.width, height: size.height)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black)
-            } else {
-                ContentView()
-            }
+            ContentView()
         }
         .onChange(of: scenePhase) { _, phase in
             WakeLog.debug(.lifecycle, "scenePhase → \(String(describing: phase))")

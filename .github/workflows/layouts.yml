@@ -1,8 +1,8 @@
-# Layout screenshots for iPhone Duo (closed, half open, open), the stand-in until the Duo simulator is on
-# the runners: centered windows of Duo size on an iPad, cropped to the window, at the default and the
-# largest accessibility text size.
+# Layout screenshots for wide and rotated windows, the stand-in for iPhone Duo until a real device or
+# the Duo simulator is on the runners: iPad (regular width, live window resizing) and iPhone landscape,
+# portrait and landscape, at the default and the largest accessibility text size.
 # Runs RpplLayoutScreenshotTests only (it skips itself without RPPL_LAYOUT_SHOTS, so the other UI jobs never run it).
-# Output: one artifact `layout-screenshots` with duo-<text>/<screenshot>.png, linked in a PR comment.
+# Output: one artifact `layout-screenshots` with <device>-<text>/<screenshot>.png, linked in a PR comment.
 
 name: Layouts
 
@@ -58,16 +58,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { variant: duo-default, device: "iPad Pro 13-inch (M5)", text: large }
-          - { variant: duo-ax5, device: "iPad Pro 13-inch (M5)", text: accessibility-extra-extra-extra-large }
+          - { variant: ipad-default, device: "iPad Pro 13-inch (M5)", text: large }
+          - { variant: ipad-ax5, device: "iPad Pro 13-inch (M5)", text: accessibility-extra-extra-extra-large }
+          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
+          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: xcodebuild test (RpplLayoutScreenshotTests)
-        # Screenshots are collected from the xcresult even when a test fails (e.g. a
-        # simulator terminate timeout), so a red test must not hide them.
-        continue-on-error: true
         shell: bash
         env:
           DEVICE: ${{ matrix.device }}
@@ -159,7 +158,7 @@ jobs:
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           marker='<!-- layout-screenshots -->'
-          printf '%s\n### Duo layout screenshots (closed, half open, open)\n\n[Download the zip](%s) · `%s`\n\nFolders: `duo-<text>/<screen>-<state>.png` (`default`/`ax5`; parks, sessions, session-detail; closed, half-open, open).\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
+          printf '%s\n### Layout screenshots (iPad and iPhone, portrait and landscape)\n\n[Download the zip](%s) · `%s`\n\nFolders: `<device>-<text>/layout-<screen>-<orientation>.png` (`ipad`/`promax`, `default`/`ax5`).\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
           id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
