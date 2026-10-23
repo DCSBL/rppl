@@ -12,13 +12,15 @@ struct ParksMapView: View {
     /// Height of the floating header above this view, so its own controls sit below it
     /// instead of hiding underneath.
     var topInset: CGFloat = 0
-    /// Owned by the parent: the style-toggle/recenter buttons live in its header overlay
-    /// (see ParksView), sharing this same camera so they can drive it directly.
+    /// Owned by the parent: the style-toggle/recenter buttons live in its navigation bar
+    /// (see `MapScreenToolbar`), sharing this same camera so they can drive it directly.
     @Binding var position: MapCameraPosition
     /// The place search is off beside the list, whose own header already searches.
     var showsSearch = true
     /// Beside the list a tapped pin selects the park there; otherwise it pushes the detail.
     var onSelectPark: ((Park) -> Void)?
+    /// The compass lives in the navigation bar (`MapScreenToolbar`), tied to this map by the shared scope.
+    var scope: Namespace.ID?
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var selectedID: String?
@@ -42,7 +44,7 @@ struct ParksMapView: View {
     }
 
     private var map: some View {
-        Map(position: $position, selection: $selectedID) {
+        Map(position: $position, selection: $selectedID, scope: scope) {
             parkMarkers
             if showsCableLines {
                 cableLines
@@ -57,7 +59,6 @@ struct ParksMapView: View {
             cameraDistance = context.camera.distance
         }
         .mapControls {
-            MapCompass()
             MapScaleView()
         }
         .safeAreaInset(edge: .top, spacing: 0) {
