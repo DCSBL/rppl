@@ -28,7 +28,6 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
-    @Environment(\.sidebarWidth) private var sidebarWidth
     @Environment(\.openSettings) private var openSettings
 
     private var useAccessibilityLayout: Bool {
@@ -39,12 +38,7 @@ struct LogbookView: View {
         WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
     }
 
-    /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
-    private var listColumn: ClosedRange<CGFloat> {
-        guard sidebarWidth > 0, windowWidth > 0 else { return 300...420 }
-        let half = ((windowWidth + sidebarWidth) / 2).rounded()
-        return half...half
-    }
+    private var listColumn: ClosedRange<CGFloat> { 300...420 }
 
     var body: some View {
         Group {
@@ -64,11 +58,6 @@ struct LogbookView: View {
             }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
-        .sidebarItems(
-            primary: SidebarAction(id: "add-session", label: "Add session", systemImage: "plus") {
-                showAddSession = true
-            }
-        )
         .sheet(isPresented: $showAddSession) {
             ManualSessionEditorView(onSaved: flashHighlight)
         }
@@ -394,26 +383,24 @@ struct LogbookView: View {
                     .foregroundStyle(Color.rpplMuted)
             }
             Spacer()
-            if sidebarWidth == 0 {
-                Button(action: openSettings) {
-                    Image(systemName: "gearshape")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel(Text("Settings"))
-                Button {
-                    showAddSession = true
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel(Text("Add session"))
+            Button(action: openSettings) {
+                Image(systemName: "gearshape")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 34, height: 34)
             }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel(Text("Settings"))
+            Button {
+                showAddSession = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 34, height: 34)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel(Text("Add session"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

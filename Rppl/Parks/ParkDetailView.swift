@@ -35,7 +35,6 @@ struct ParkDetailView: View {
     @State private var confirmRemove = false
     @State private var showReopeningEvent = false
     @State private var showShareWithRppl = false
-    @Environment(\.sidebarWidth) private var sidebarWidth
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -91,45 +90,21 @@ struct ParkDetailView: View {
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if sidebarWidth == 0, let onClose {
+            if let onClose {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(role: .close, action: onClose)
                 }
             }
-            if sidebarWidth == 0 {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: onToggleFavorite) {
-                        Image(systemName: isFavorite ? "star.fill" : "star")
-                    }
-                    .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: onToggleFavorite) {
+                    Image(systemName: isFavorite ? "star.fill" : "star")
                 }
-                if editorEnabled {
-                    ToolbarItem(placement: .primaryAction) { editMenu }
-                }
+                .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
+            }
+            if editorEnabled {
+                ToolbarItem(placement: .primaryAction) { editMenu }
             }
         }
-        .navigationBarBackButtonHidden(sidebarWidth > 0)
-        .sidebarItems(
-            key: "\(isFavorite)|\(onClose == nil)|\(editorEnabled)|\(String(describing: entry?.origin))",
-            back: SidebarAction(
-                id: "back",
-                label: onClose == nil ? "Back" : "Close",
-                systemImage: onClose == nil ? "chevron.left" : "xmark"
-            ) {
-                if let onClose { onClose() } else { dismiss() }
-            },
-            actions: [
-                SidebarAction(
-                    id: "favorite",
-                    label: isFavorite ? "Remove favorite" : "Add favorite",
-                    systemImage: isFavorite ? "star.fill" : "star",
-                    isActive: isFavorite,
-                    perform: onToggleFavorite
-                ),
-            ],
-            more: moreActions,
-            keepsNavigation: onClose != nil
-        )
         .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
             Button("Share with Rppl") { sendToRppl() }
             Button("Other app or file") { ParkShare.share(park) }
@@ -247,17 +222,6 @@ struct ParkDetailView: View {
         } else {
             ParkShare.share(park)
         }
-    }
-
-    /// Share first, then Edit; reverting or deleting last.
-    private var moreActions: [SidebarAction] {
-        var actions = [SidebarAction(id: "share", label: "Share", systemImage: "square.and.arrow.up", perform: shareTapped)]
-        guard editorEnabled else { return actions }
-        actions.append(SidebarAction(id: "edit", label: "Edit", systemImage: "pencil", perform: startEditing))
-        if canShareWithRppl {
-            actions.append(SidebarAction(id: "remove", label: LocalizedStringKey(removeTitle), systemImage: "arrow.uturn.backward") { confirmRemove = true })
-        }
-        return actions
     }
 
     private var editMenu: some View {
