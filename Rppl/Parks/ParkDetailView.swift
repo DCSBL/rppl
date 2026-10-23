@@ -95,14 +95,17 @@ struct ParkDetailView: View {
                     Button(role: .close, action: onClose)
                 }
             }
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: onToggleFavorite) {
-                    Image(systemName: isFavorite ? "star.fill" : "star")
+            // One group with titled buttons: the bar can lay them out, or move them into its overflow,
+            // as one stable item instead of rebuilding loose icon-only items.
+            ToolbarItemGroup(placement: .primaryAction) {
+                if isFavorite {
+                    Button("Remove favorite", systemImage: "star.fill", action: onToggleFavorite)
+                } else {
+                    Button("Add favorite", systemImage: "star", action: onToggleFavorite)
                 }
-                .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
-            }
-            if editorEnabled {
-                ToolbarItem(placement: .primaryAction) { editMenu }
+                if editorEnabled {
+                    editMenu
+                }
             }
         }
         .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
@@ -232,9 +235,8 @@ struct ParkDetailView: View {
                 Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
             }
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Label("Edit park", systemImage: "ellipsis.circle")
         }
-        .accessibilityLabel(Text("Edit park"))
     }
 
     @ViewBuilder
@@ -951,7 +953,6 @@ private struct ParkMapScreen: View {
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
         }

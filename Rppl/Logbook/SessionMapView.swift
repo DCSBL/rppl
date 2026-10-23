@@ -626,7 +626,6 @@ struct SessionMapFullscreenView: View {
         }
         .mapScreen()
         .background(DisableNavigationSwipeBack())
-        .toolbar(.hidden, for: .tabBar)
         // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
