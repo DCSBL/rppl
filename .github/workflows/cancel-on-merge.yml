@@ -1,0 +1,53 @@
+# Cancel a PR's still-running CI when the PR is merged: the merge commit gets its own runs on main,
+# so finishing the PR's runs only occupies macOS runners. Skipped for "scary" PRs, which keep running
+# to completion:
+#   - label `full-ci`
+#   - base branch release/**
+#   - changes to the project file, Info.plist, CI scripts, release workflows or Xcode Cloud scripts
+# Pushes to main are never cancelled by this workflow (and macos-ci.yml only cancels PR runs).
+#
+# pull_request_target runs the workflow from the base branch and checks out no PR code; the PR head
+# SHA and file list are only read through the API.
+
+name: Cancel CI on merge
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  actions: write
+  pull-requests: read
+  contents: read
+
+jobs:
+  cancel:
+    name: Cancel running CI
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Cancel runs of the merged PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -euo pipefail
+          scary='^(Rppl\.xcodeproj/|Rppl/Info\.plist$|ci_scripts/|scripts/ci/|\.github/workflows/(release|macos-ci|cancel-on-merge))'
+          if printf ',%s,' "$LABELS" | grep -q ',full-ci,'; then
+            echo "Label full-ci: runs keep going."; exit 0
+          fi
+          case "$BASE" in release/*) echo "Release branch: runs keep going."; exit 0;; esac
+          files="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate -q '.[].filename')"
+          if printf '%s\n' "$files" | grep -Eq "$scary"; then
+            echo "Scary paths changed: runs keep going."; exit 0
+          fi
+          ids="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$SHA&event=pull_request&per_page=100" \
+            -q '.workflow_runs[] | select(.status != "completed") | .id')"
+          for id in $ids; do
+            echo "Cancelling run $id"
+            gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/cancel" >/dev/null || true
+          done
