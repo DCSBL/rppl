@@ -66,7 +66,7 @@ I hope that, like me, you enjoy tracking your sessions!
 | `rppl://parks` | Parks tab |
 | `rppl://parks/favorites` | Parks tab, starred parks only |
 | `rppl://park/<park-id>` | Park detail, e.g. `rppl://park/project7-rotterdam` |
-| `rppl://about` | Rppl tab (about, settings) |
+| `rppl://about` | Settings, opens the Rppl modal |
 | `rppl://debug` | Hidden Debug screen |
 
 ## Privacy & license

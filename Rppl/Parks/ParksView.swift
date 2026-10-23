@@ -41,6 +41,8 @@ struct ParksView: View {
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @Environment(\.sidebarWidth) private var sidebarWidth
+    @Environment(\.openSettings) private var openSettings
 
     private var parks: [Park] { store.entries.map(\.park).filter(\.isListed) }
 
@@ -304,17 +306,27 @@ struct ParksView: View {
                                 .buttonBorderShape(.circle)
                                 .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
                             }
-                            if editorEnabled {
-                                Button {
-                                    showEditor = true
-                                } label: {
-                                    Image(systemName: "plus")
+                            if sidebarWidth == 0 {
+                                Button(action: openSettings) {
+                                    Image(systemName: "gearshape")
                                         .font(.subheadline.weight(.semibold))
                                         .frame(width: 34, height: 34)
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text("Add park"))
+                                .accessibilityLabel(Text("Settings"))
+                                if editorEnabled {
+                                    Button {
+                                        showEditor = true
+                                    } label: {
+                                        Image(systemName: "plus")
+                                            .font(.subheadline.weight(.semibold))
+                                            .frame(width: 34, height: 34)
+                                    }
+                                    .buttonStyle(.glass)
+                                    .buttonBorderShape(.circle)
+                                    .accessibilityLabel(Text("Add park"))
+                                }
                             }
                         }
                         if showSearch {
@@ -400,6 +412,12 @@ struct ParksView: View {
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
+        .sidebarItems(
+            key: editorEnabled,
+            primary: editorEnabled
+                ? SidebarAction(id: "add-park", label: "Add park", systemImage: "plus") { showEditor = true }
+                : nil
+        )
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
             ParkEditorView(original: nil)
         }

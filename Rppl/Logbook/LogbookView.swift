@@ -28,6 +28,8 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
+    @Environment(\.sidebarWidth) private var sidebarWidth
+    @Environment(\.openSettings) private var openSettings
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -51,6 +53,11 @@ struct LogbookView: View {
             }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
+        .sidebarItems(
+            primary: SidebarAction(id: "add-session", label: "Add session", systemImage: "plus") {
+                showAddSession = true
+            }
+        )
         .sheet(isPresented: $showAddSession) {
             ManualSessionEditorView(onSaved: flashHighlight)
         }
@@ -386,16 +393,26 @@ struct LogbookView: View {
                     .foregroundStyle(Color.rpplMuted)
             }
             Spacer()
-            Button {
-                showAddSession = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 34, height: 34)
+            if sidebarWidth == 0 {
+                Button(action: openSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Settings"))
+                Button {
+                    showAddSession = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Add session"))
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .accessibilityLabel(Text("Add session"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

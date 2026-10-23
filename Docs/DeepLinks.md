@@ -9,7 +9,7 @@ Custom scheme `rppl://`, registered in `Rppl/Info.plist` and `Info-Dev.plist` (`
 | `rppl://parks` | Parks tab | `TabDeepLink` |
 | `rppl://parks/favorites` | Parks tab, nearby order, starred parks only | `ParkDeepLink.isFavorites` |
 | `rppl://park/<park-id>` | Park detail | `ParkDeepLink` |
-| `rppl://about` | Rppl tab (about, settings, iCloud) | `TabDeepLink` |
+| `rppl://about` | Settings (about, iCloud), opens the Rppl modal | `TabDeepLink` |
 | `rppl://debug` | Hidden Debug screen | `TabDeepLink` |
 
 Examples:
