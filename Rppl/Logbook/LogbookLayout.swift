@@ -3,6 +3,9 @@ import SwiftUI
 enum LogbookLayout {
     static let horizontalInset: CGFloat = 16
 
+    /// Side margin in a wide window, where the cards should use more of the width.
+    static let wideInset: CGFloat = 8
+
     /// Widest a detail column of cards gets before it is centered; wider lines of tiles and text read worse.
     static let readableMaxWidth: CGFloat = 720
 

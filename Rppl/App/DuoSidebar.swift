@@ -28,6 +28,8 @@ final class SidebarModel {
         var actions: [SidebarAction] = []
         /// Folded into one More menu after `actions`.
         var more: [SidebarAction] = []
+        /// Keeps the navigation buttons next to `back` (a close beside a list, not a pushed detail).
+        var keepsNavigation = false
     }
 
     private var registrations: [(owner: UUID, items: Items)] = []
@@ -39,6 +41,7 @@ final class SidebarModel {
             merged.back = merged.back ?? registration.items.back
             if merged.actions.isEmpty { merged.actions = registration.items.actions }
             if merged.more.isEmpty { merged.more = registration.items.more }
+            merged.keepsNavigation = merged.keepsNavigation || registration.items.keepsNavigation
         }
         return merged
     }
@@ -75,12 +78,15 @@ extension View {
         primary: SidebarAction? = nil,
         back: SidebarAction? = nil,
         actions: [SidebarAction] = [],
-        more: [SidebarAction] = []
+        more: [SidebarAction] = [],
+        keepsNavigation: Bool = false
     ) -> some View {
         modifier(
             SidebarItemsModifier(
                 key: key,
-                items: SidebarModel.Items(primary: primary, back: back, actions: actions, more: more)
+                items: SidebarModel.Items(
+                    primary: primary, back: back, actions: actions, more: more, keepsNavigation: keepsNavigation
+                )
             )
         )
     }
@@ -113,7 +119,7 @@ struct DuoSidebar: View {
                 if !items.actions.isEmpty || !items.more.isEmpty {
                     actionsGroup(items)
                 }
-                if items.back == nil {
+                if items.back == nil || items.keepsNavigation {
                     navigationGroup
                 }
             }

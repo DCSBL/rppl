@@ -8,6 +8,8 @@ struct ParkDetailView: View {
     let isFavorite: Bool
     /// Date from the Parks "Open" filter; nil for today or no filter.
     var plannedDate: Date?
+    /// Beside the list in a wide window: closes the detail back to the map (a cross, not a back arrow).
+    var onClose: (() -> Void)?
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -81,7 +83,7 @@ struct ParkDetailView: View {
                 linksCard
                 footer
             }
-            .padding(.horizontal, LogbookLayout.horizontalInset)
+            .padding(.horizontal, onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
             .padding(.vertical, 8)
             .readableWidth()
         }
@@ -89,6 +91,11 @@ struct ParkDetailView: View {
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if sidebarWidth == 0, let onClose {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close, action: onClose)
+                }
+            }
             if sidebarWidth == 0 {
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: onToggleFavorite) {
@@ -103,8 +110,14 @@ struct ParkDetailView: View {
         }
         .navigationBarBackButtonHidden(sidebarWidth > 0)
         .sidebarItems(
-            key: "\(isFavorite)|\(editorEnabled)|\(String(describing: entry?.origin))",
-            back: SidebarAction(id: "back", label: "Back", systemImage: "chevron.left") { dismiss() },
+            key: "\(isFavorite)|\(onClose == nil)|\(editorEnabled)|\(String(describing: entry?.origin))",
+            back: SidebarAction(
+                id: "back",
+                label: onClose == nil ? "Back" : "Close",
+                systemImage: onClose == nil ? "chevron.left" : "xmark"
+            ) {
+                if let onClose { onClose() } else { dismiss() }
+            },
             actions: [
                 SidebarAction(
                     id: "favorite",
@@ -114,7 +127,8 @@ struct ParkDetailView: View {
                     perform: onToggleFavorite
                 ),
             ],
-            more: moreActions
+            more: moreActions,
+            keepsNavigation: onClose != nil
         )
         .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
             Button("Share with Rppl") { sendToRppl() }

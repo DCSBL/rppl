@@ -5056,6 +5056,22 @@
         }
       }
     },
+    "No session selected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No session selected"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen sessie geselecteerd"
+          }
+        }
+      }
+    },
     "None" : {
       "localizations" : {
         "en" : {

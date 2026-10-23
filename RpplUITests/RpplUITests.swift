@@ -32,8 +32,9 @@ final class RpplUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Logbook"].waitForExistence(timeout: 30))
         app.tabBars.buttons["Parks"].tap()
         XCTAssertTrue(app.staticTexts["Parks"].waitForExistence(timeout: 15))
-        app.tabBars.buttons["Rppl"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Rppl"].isSelected)
+        app.buttons["Settings"].firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Rppl"].waitForExistence(timeout: 15))
+        app.navigationBars["Rppl"].buttons["Close"].tap()
         app.tabBars.buttons["Logbook"].tap()
         XCTAssertTrue(app.scrollToElement(card("Wakeboard, Project 7 Cablepark")))
     }

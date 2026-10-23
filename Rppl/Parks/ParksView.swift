@@ -37,6 +37,8 @@ struct ParksView: View {
     @State private var headerHeight: CGFloat = 0
     @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.netherlands)
     @State private var mapPendingRecenter = false
+    /// Two-pane only: the park shown on the right instead of the map.
+    @State private var selectedPark: Park?
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -66,6 +68,12 @@ struct ParksView: View {
 
     /// The map replaces the list only in a narrow window; a wide window shows it beside the list.
     private var showsMapInList: Bool { showMap && layout == .stack }
+
+    /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
+    private var listColumnWidth: CGFloat {
+        guard sidebarWidth > 0, windowWidth > 0 else { return 380 }
+        return ((windowWidth + sidebarWidth) / 2).rounded()
+    }
 
     private var showsNearby: Bool {
         !showsMapInList && !isSearching && sort == .distance
@@ -173,7 +181,11 @@ struct ParksView: View {
         openParkID = nil
         guard let park = store.entry(id: id)?.park else { return }
         path = NavigationPath()
-        path.append(park)
+        if layout == .twoPane {
+            selectedPark = park
+        } else {
+            path.append(park)
+        }
     }
 
     /// Unfinished parks, on top of the list until they are saved or deleted.
@@ -267,7 +279,9 @@ struct ParksView: View {
                                         distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
                                         isFavorite: favorites.contains(park.id),
                                         entry: store.entry(id: park.id),
-                                        filterDate: openFilterDate
+                                        filterDate: openFilterDate,
+                                        selection: layout == .twoPane ? { selectedPark = $0 } : nil,
+                                        isSelected: layout == .twoPane && selectedPark?.id == park.id
                                     )
                                     .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                                     .listRowBackground(Color.clear)
@@ -395,18 +409,32 @@ struct ParksView: View {
                     ParkDetailContainer(park: park, plannedDate: openFilterDate)
                 }
             }
-            .frame(maxWidth: layout == .twoPane ? 380 : .infinity)
+            .frame(maxWidth: layout == .twoPane ? listColumnWidth : .infinity)
 
             if layout == .twoPane {
-                NavigationStack {
-                    ParksMapView(parks: visibleParks, location: location, position: $mapPosition)
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    VStack(spacing: 8) {
-                        MapStyleToggleButton(usesSatellite: $mapUsesSatellite)
-                        MapRecenterButton(action: recenterOnUser)
+                if let park = selectedPark {
+                    NavigationStack {
+                        ParkDetailContainer(park: park, plannedDate: openFilterDate, onClose: { selectedPark = nil })
                     }
-                    .padding(12)
+                    .id(park.id)
+                } else {
+                    NavigationStack {
+                        ParksMapView(
+                            parks: visibleParks,
+                            location: location,
+                            position: $mapPosition,
+                            showsSearch: false,
+                            onSelectPark: { selectedPark = $0 }
+                        )
+                        .toolbar(.hidden, for: .navigationBar)
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        VStack(spacing: 8) {
+                            MapStyleToggleButton(usesSatellite: $mapUsesSatellite)
+                            MapRecenterButton(action: recenterOnUser)
+                        }
+                        .padding(12)
+                    }
                 }
             }
         }
@@ -500,7 +528,7 @@ private struct MapStyleToggleButton: View {
             withRpplAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
         } label: {
             Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
-                .font(.subheadline.weight(.medium))
+                .font(.subheadline.weight(.semibold))
                 .frame(minWidth: 34, minHeight: 34)
         }
         .buttonStyle(.glass)
@@ -521,7 +549,7 @@ private struct MapRecenterButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "location.fill")
-                .font(.subheadline.weight(.medium))
+                .font(.subheadline.weight(.semibold))
                 .frame(minWidth: 34, minHeight: 34)
         }
         .buttonStyle(.glass)
@@ -753,6 +781,9 @@ private struct ParkCard: View {
     let isFavorite: Bool
     let entry: ParkEntry?
     let filterDate: Date?
+    /// Two-pane: tapping selects the park (shown beside the list) instead of pushing it.
+    var selection: ((Park) -> Void)?
+    var isSelected = false
 
     private var statusBadge: (text: String, color: Color)? {
         ParkStatusBadge.text(for: park, filterDate: filterDate)
@@ -780,52 +811,59 @@ private struct ParkCard: View {
         }
     }
 
+    private var cardContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(park.name)
+                    .font(.headline)
+                    .foregroundStyle(Color.rpplText)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                if isFavorite {
+                    Image(systemName: "star.fill")
+                        .font(.caption)
+                        .foregroundStyle(Color.rpplAccent)
+                        .accessibilityLabel(Text("Favorite"))
+                }
+                if let badge = ParkOriginBadge.text(for: entry) {
+                    Text(badge)
+                        .font(.caption)
+                        .foregroundStyle(Color.rpplMuted)
+                }
+            }
+            if let address = park.address {
+                Text(address)
+                    .font(.caption)
+                    .foregroundStyle(Color.rpplMuted)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
+            // Two explicit rows when one row overflows: a wrapping Layout inside a List
+            // row reported one row of height, so the card did not grow with the chips.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 6) {
+                    statusChips
+                    countChips
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) { statusChips }
+                    HStack(spacing: 6) { countChips }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            NavigationLink(value: park) {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(park.name)
-                            .font(.headline)
-                            .foregroundStyle(Color.rpplText)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if isFavorite {
-                            Image(systemName: "star.fill")
-                                .font(.caption)
-                                .foregroundStyle(Color.rpplAccent)
-                                .accessibilityLabel(Text("Favorite"))
-                        }
-                        if let badge = ParkOriginBadge.text(for: entry) {
-                            Text(badge)
-                                .font(.caption)
-                                .foregroundStyle(Color.rpplMuted)
-                        }
-                    }
-                    if let address = park.address {
-                        Text(address)
-                            .font(.caption)
-                            .foregroundStyle(Color.rpplMuted)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-                    }
-                    // Two explicit rows when one row overflows: a wrapping Layout inside a List
-                    // row reported one row of height, so the card did not grow with the chips.
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: 6) {
-                            statusChips
-                            countChips
-                        }
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 6) { statusChips }
-                            HStack(spacing: 6) { countChips }
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+            if let selection {
+                Button { selection(park) } label: { cardContent }
+                    .buttonStyle(.plain)
+            } else {
+                NavigationLink(value: park) { cardContent }
+                    .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
 
             Button {
                 ParkNavigation.openDirections(to: park)
@@ -840,5 +878,11 @@ private struct ParkCard: View {
             .accessibilityLabel(Text("Navigate"))
         }
         .logbookCardChrome()
+        .overlay {
+            RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
+                .stroke(Color.rpplAccent, lineWidth: 2)
+                .opacity(isSelected ? 1 : 0)
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

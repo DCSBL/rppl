@@ -129,7 +129,7 @@ struct LogbookSessionDetailView: View {
                     if isManual { manualSetsSection } else { setsSection }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, isEmbeddedInSplit ? LogbookLayout.wideInset : 20)
             .padding(.bottom, 24)
             .readableWidth()
         }
