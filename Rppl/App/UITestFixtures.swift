@@ -118,7 +118,7 @@ enum UITestFixtures {
         let count = generatedCount
         if count != 0 { importTrackedDemo(into: store) }
 
-        let parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
+        let parks = ParkCatalog.loadApp()
         let rides = ProcessInfo.processInfo.arguments.contains("-rpplUITestParkVisits")
             ? parkVisitRides() : count.map(generatedRides) ?? manualRides
         for item in rides {

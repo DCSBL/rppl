@@ -25,6 +25,7 @@ The build number is left alone: Xcode Cloud assigns it (CI_BUILD_NUMBER).
 prints the What to Test preview (also to $GITHUB_STEP_SUMMARY when set).
 
 --release-branch does steps 1-2, writes nothing and reports the branch name release/X.Y.Z
+(release/duo/X.Y.Z for a -duo.N tag)
 ("branch=..." in $GITHUB_OUTPUT when set).
 
 Environment:
@@ -54,9 +55,10 @@ NOTES_LOCALE = "en-US"
 NOTES_LIMIT = 4000
 TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
 BRANCH_PREFIX = "release/"
-BRANCH_RE = re.compile(r"^release/(\d+\.\d+\.\d+)$")
+BRANCH_RE = re.compile(r"^release/(?:duo/)?(\d+\.\d+\.\d+)$")
 DUO_BRANCH = "wip/iphone-duo"
 DUO_SUFFIX_PREFIX = "duo."
+DUO_BRANCH_DIR = "duo/"
 MARKER_FILE = Path("ci_scripts/release-marker.txt")
 TAGS_PER_PAGE = 100
 TAGS_MAX_PAGES = 5
@@ -90,16 +92,19 @@ def parse_tag(tag: str) -> Tuple[str, Optional[str]]:
     return match.group(1), match.group(2)
 
 
-def release_branch(version: str) -> str:
-    """The branch Xcode Cloud builds for a marketing version: every build of X.Y.Z shares it."""
-    return BRANCH_PREFIX + version
+def release_branch(version: str, suffix: Optional[str] = None) -> str:
+    """The branch Xcode Cloud builds for a marketing version: every build of X.Y.Z shares it.
+
+    -duo.N test builds get release/duo/X.Y.Z, their own Build Group next to the real release.
+    """
+    return BRANCH_PREFIX + (DUO_BRANCH_DIR if base_branch(suffix) == DUO_BRANCH else "") + version
 
 
 def parse_release_branch(branch: str) -> str:
-    """Return the marketing version of release/X.Y.Z or raise ReleaseError."""
+    """Return the marketing version of release/X.Y.Z or release/duo/X.Y.Z, or raise ReleaseError."""
     match = BRANCH_RE.fullmatch(branch)
     if not match:
-        raise ReleaseError("Branch %r is not a release branch. Expected release/X.Y.Z." % branch)
+        raise ReleaseError("Branch %r is not a release branch. Expected release/X.Y.Z or release/duo/X.Y.Z." % branch)
     return match.group(1)
 
 
@@ -350,7 +355,7 @@ def run(args: argparse.Namespace) -> None:
         marker = read_release_marker(root)
         if marker:
             tag, tagged_commit = marker
-            if parse_tag(tag)[0] != branch_version:
+            if parse_tag(tag)[0] != branch_version or release_branch(*parse_tag(tag)) != args.branch:
                 raise ReleaseError("Marker tag %s is not a %s release (branch %s)." % (tag, branch_version, args.branch))
             print("Branch %s at %s: marker for release tag %s" % (args.branch, built[:SHORT_SHA_LENGTH], tag))
         else:
@@ -364,7 +369,7 @@ def run(args: argparse.Namespace) -> None:
         check_on_main(repo, tag, token, base_branch(suffix))
 
     if args.release_branch:
-        branch = release_branch(version)
+        branch = release_branch(version, suffix)
         print("Release branch for %s: %s" % (tag, branch))
         output = os.environ.get("GITHUB_OUTPUT")
         if output:

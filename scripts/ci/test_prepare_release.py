@@ -367,6 +367,11 @@ class ReleaseBranchTests(unittest.TestCase):
     def test_release_branch(self):
         self.assertEqual(pr.release_branch("2026.10.4"), "release/2026.10.4")
 
+    def test_duo_release_branch_has_its_own_group(self):
+        self.assertEqual(pr.release_branch("2026.10.8", "duo.1"), "release/duo/2026.10.8")
+        self.assertEqual(pr.release_branch("2026.10.8", "beta.1"), "release/2026.10.8")
+        self.assertEqual(pr.parse_release_branch("release/duo/2026.10.8"), "2026.10.8")
+
     def test_parse_release_branch(self):
         self.assertEqual(pr.parse_release_branch("release/2026.10.4"), "2026.10.4")
         self.assertEqual(pr.parse_release_branch("release/1.0.0"), "1.0.0")

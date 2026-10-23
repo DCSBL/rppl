@@ -637,7 +637,7 @@ enum ParkOriginBadge {
         guard let entry else { return nil }
         if entry.hasNewerBundled { return String(localized: "Update available") }
         switch entry.origin {
-        case .bundled: return nil
+        case .bundled, .ota: return nil
         case .custom: return String(localized: "Custom")
         case .edited: return String(localized: "Edited")
         }
@@ -649,6 +649,8 @@ struct ParkDetailContainer: View {
     let park: Park
     /// The date picked in the Parks "Open" filter; the detail adds a card for that day.
     var plannedDate: Date?
+    /// Set when the detail sits beside the list: closes it back to the map instead of popping a stack.
+    var onClose: (() -> Void)?
     @State private var favorites = ParkFavorites.shared
     @State private var store = ParkStore.shared
 
@@ -659,6 +661,7 @@ struct ParkDetailContainer: View {
             entry: entry,
             isFavorite: favorites.contains(park.id),
             plannedDate: plannedDate,
+            onClose: onClose,
             onToggleFavorite: { favorites.toggle(park.id) }
         )
     }

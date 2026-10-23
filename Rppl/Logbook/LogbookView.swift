@@ -28,6 +28,8 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
+    @Environment(\.sidebarWidth) private var sidebarWidth
+    @Environment(\.openSettings) private var openSettings
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -37,12 +39,23 @@ struct LogbookView: View {
         WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
     }
 
+    /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
+    private var listColumn: ClosedRange<CGFloat> {
+        guard sidebarWidth > 0, windowWidth > 0 else { return 300...420 }
+        let half = ((windowWidth + sidebarWidth) / 2).rounded()
+        return half...half
+    }
+
     var body: some View {
         Group {
             if layout == .twoPane {
                 NavigationSplitView {
                     listContent
-                        .navigationSplitViewColumnWidth(min: 300, ideal: 360, max: 420)
+                        .navigationSplitViewColumnWidth(
+                            min: listColumn.lowerBound,
+                            ideal: min(max(360, listColumn.lowerBound), listColumn.upperBound),
+                            max: listColumn.upperBound
+                        )
                 } detail: {
                     splitDetail
                 }
@@ -51,6 +64,11 @@ struct LogbookView: View {
             }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
+        .sidebarItems(
+            primary: SidebarAction(id: "add-session", label: "Add session", systemImage: "plus") {
+                showAddSession = true
+            }
+        )
         .sheet(isPresented: $showAddSession) {
             ManualSessionEditorView(onSaved: flashHighlight)
         }
@@ -152,7 +170,7 @@ struct LogbookView: View {
                     .listRowSeparator(.hidden)
             }
 
-            if catalog.season.showsCharts, layout == .stack {
+            if catalog.season.showsCharts {
                 Section {
                     SeasonCharts(season: catalog.season)
                         .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 12))
@@ -234,7 +252,7 @@ struct LogbookView: View {
         }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+            .contentMargins(.horizontal, layout == .twoPane ? LogbookLayout.wideInset : LogbookLayout.horizontalInset, for: .scrollContent)
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
             .navigationBarTitleDisplayMode(.inline)
@@ -263,7 +281,9 @@ struct LogbookView: View {
             } label: {
                 SessionCard(
                     entry: entry,
-                    isHighlighted: highlightSessionId == sessionId || selectedSessionId == sessionId
+                    isHighlighted: highlightSessionId == sessionId,
+                    isSelected: selectedSessionId == sessionId,
+                    showsChevron: false
                 )
             }
             .buttonStyle(.plain)
@@ -288,27 +308,15 @@ struct LogbookView: View {
         if let sessionId = selectedSessionId {
             NavigationStack {
                 LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
+                    .embeddedInSplit()
                     .toolbar(.visible, for: .navigationBar)
             }
             .id(sessionId)
         } else {
-            ScrollView {
-                if catalog.season.showsCharts {
-                    SeasonCharts(season: catalog.season)
-                        .padding(LogbookLayout.horizontalInset)
-                } else {
-                    Image("icon-simple")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .foregroundStyle(Color.rpplMuted.opacity(0.45))
-                        .padding(.top, 80)
-                        .accessibilityHidden(true)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(RpplBackdrop())
+            ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
+                .foregroundStyle(Color.rpplMuted)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(RpplBackdrop())
         }
     }
 
@@ -386,16 +394,26 @@ struct LogbookView: View {
                     .foregroundStyle(Color.rpplMuted)
             }
             Spacer()
-            Button {
-                showAddSession = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 34, height: 34)
+            if sidebarWidth == 0 {
+                Button(action: openSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Settings"))
+                Button {
+                    showAddSession = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Add session"))
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .accessibilityLabel(Text("Add session"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -666,6 +684,9 @@ private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
     var isHighlighted = false
+    /// Two-pane: the row whose session is open on the right.
+    var isSelected = false
+    var showsChevron = true
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -724,17 +745,25 @@ private struct SessionCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Color.rpplMuted)
-                .accessibilityHidden(true)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.rpplMuted)
+                    .accessibilityHidden(true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .rpplTileChrome()
         .background(
             RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
-                .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
+                .fill(isHighlighted || isSelected ? Color.rpplAccent.opacity(isSelected ? 0.2 : 0.12) : Color.clear)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
+                .stroke(Color.rpplAccent, lineWidth: 2)
+                .opacity(isSelected ? 1 : 0)
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .rpplAnimation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 

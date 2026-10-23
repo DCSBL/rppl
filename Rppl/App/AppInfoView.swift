@@ -9,9 +9,13 @@ struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
     @State private var showDisableDeleteConfirm = false
     @State private var showSupportMail = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
+    @AppStorage(AppSettingsKey.parkDataUpdatesEnabled) private var parkDataUpdatesEnabled = false
+    @AppStorage(AppSettingsKey.didAskParkDataConsent) private var didAskParkDataConsent = false
+    @State private var parkDataUpdates = ParkDataUpdateController.shared
 
     private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
 
@@ -41,6 +45,39 @@ struct AppInfoView: View {
                     Text(
                         "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate."
                     )
+                }
+
+                Section {
+                    Toggle("Update park data", isOn: $parkDataUpdatesEnabled)
+                        .tint(Color.rpplAccent)
+                    if parkDataUpdatesEnabled {
+                        HStack(spacing: 12) {
+                            ParkDataStatusLine(controller: parkDataUpdates, alignment: .leading)
+                            if parkDataUpdates.isRefreshing {
+                                ProgressView()
+                            } else {
+                                Button {
+                                    Task { await parkDataUpdates.manualRefresh() }
+                                } label: {
+                                    Image(systemName: "arrow.clockwise")
+                                }
+                                .buttonStyle(.borderless)
+                                .tint(Color.rpplAccent)
+                                .accessibilityLabel(Text("Update park data"))
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Park data")
+                } footer: {
+                    Text(
+                        "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent."
+                    )
+                }
+                .onChange(of: parkDataUpdatesEnabled) { _, enabled in
+                    guard enabled else { return }
+                    didAskParkDataConsent = true
+                    Task { await parkDataUpdates.manualRefresh() }
                 }
 
                 if AppReleaseChannel.allowsDebugTools {
@@ -136,6 +173,11 @@ struct AppInfoView: View {
             .background(RpplBackdrop())
             .navigationTitle("Rppl")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close) { dismiss() }
+                }
+            }
             .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)

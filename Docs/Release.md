@@ -59,7 +59,7 @@ Consequences:
 
 ## Duo test builds
 
-For trying a branch on a physical device before it reaches `main` (iPhone Duo work on `wip/iphone-duo`): publish a GitHub release with a `-duo.N` tag targeting `wip/iphone-duo`, for example `2026.10.2-duo.1`. The tag check requires the tagged commit to be on `wip/iphone-duo` instead of `main`; everything else is the normal flow (release branch, Xcode Cloud, TestFlight internal). Use a version number that no real release will use, because all builds of one version share the Build Group `release/X.Y.Z`. Mark the GitHub release as a pre-release and never promote a `-duo` build to external testers or the App Store.
+For trying a branch on a physical device before it reaches `main` (iPhone Duo work on `wip/iphone-duo`): publish a GitHub release with a `-duo.N` tag targeting `wip/iphone-duo`, for example `2026.10.2-duo.1`. The tag check requires the tagged commit to be on `wip/iphone-duo` instead of `main`; everything else is the normal flow (Xcode Cloud, TestFlight internal). The release branch is `release/duo/X.Y.Z`, so Duo builds get their own Build Group and never mix with the real release of the same version. Pick a version above the one on the App Store (a live version is closed for new builds). Mark the GitHub release as a pre-release and never promote a `-duo` build to external testers or the App Store.
 
 ## Versions, betas and Beta App Review
 
