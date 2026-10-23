@@ -499,7 +499,7 @@ struct ParksView: View {
                 )
                 .mapScreen()
                 .toolbar {
-                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser))
+                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
                 }
             }
         }
@@ -509,7 +509,7 @@ struct ParksView: View {
     @ToolbarContentBuilder
     private func listToolbar(hasParks: Bool) -> some ToolbarContent {
         if showsMapInList {
-            MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser))
+            MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if hasParks {
@@ -826,22 +826,8 @@ private struct ParkCard: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            cardContent
-
-            Button {
-                ParkNavigation.openDirections(to: park)
-            } label: {
-                Image(systemName: "location.fill")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 52, height: 52)
-                    .background(Color.rpplAccent, in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("Navigate"))
-        }
-        .logbookCardChrome()
+        cardContent
+            .logbookCardChrome()
         .overlay {
             RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
                 .stroke(Color.rpplAccent, lineWidth: 2)

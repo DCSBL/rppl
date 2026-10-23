@@ -920,6 +920,8 @@ private struct ParkMapScreen: View {
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition
+    @State private var viewport = MapViewport()
+    @State private var hasFramedPark = false
     @State private var location = ParksLocationProvider()
     @State private var pendingRecenter = false
 
@@ -929,37 +931,64 @@ private struct ParkMapScreen: View {
         _position = State(initialValue: .region(ParkMap.region(for: park)))
     }
 
-    var body: some View {
-        ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: $position)
-            .mapScreen()
-            .navigationTitle(park.compactName)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(removing: .title)
-            .toolbar(.hidden, for: .tabBar)
-            .toolbar {
-                MapScreenToolbar(usesSatellite: $usesSatellite, action: .here(recenterOnUser))
-            }
-            .onChange(of: location.coordinate) { _, coordinate in
-                guard pendingRecenter, let coordinate else { return }
-                pendingRecenter = false
-                move(to: coordinate)
-            }
+    /// Only once location access is on: this map never asks for it.
+    private var locateAction: (() -> Void)? {
+        guard location.availability == .available else { return nil }
+        return recenterOnUser
     }
 
-    /// Same as the parks map: a tap is what asks for location access, opening the map never does.
+    var body: some View {
+        ParkMap(
+            park: park,
+            usesSatellite: usesSatellite,
+            weather: weather,
+            position: $position,
+            showsUserLocation: location.availability == .available,
+            // The compass takes the top corner once the map turns.
+            windRoseAlignment: .bottomTrailing
+        )
+        .mapScreen(viewport: $viewport)
+        .navigationTitle(park.compactName)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
+        .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
+        }
+        .onAppear { location.refresh() }
+        .onChange(of: viewport) { _, _ in
+            // The first frame that knows what bars and a sidebar cover; after that the map is the rider's.
+            guard !hasFramedPark, let camera = viewport.camera(fitting: ParkMap.region(for: park)) else { return }
+            hasFramedPark = true
+            position = .camera(camera)
+        }
+        .onChange(of: location.coordinate) { _, coordinate in
+            guard pendingRecenter, let coordinate else { return }
+            pendingRecenter = false
+            move(to: coordinate)
+        }
+    }
+
+    private func reset() {
+        guard let camera = viewport.camera(fitting: ParkMap.region(for: park)) else { return }
+        withRpplAnimation {
+            position = .camera(camera)
+        }
+    }
+
     private func recenterOnUser() {
         if let coordinate = location.coordinate {
             move(to: coordinate)
         } else {
             pendingRecenter = true
-            location.requestAccess()
+            location.refresh()
         }
     }
 
     private func move(to coordinate: ParkCoordinate) {
         let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
         withRpplAnimation {
-            position = .camera(MapCamera(centerCoordinate: center, distance: 5_000))
+            position = .camera(viewport.camera(centeredOn: center, distance: 5_000))
         }
     }
 }
@@ -969,6 +998,8 @@ private struct ParkMap: View {
     let usesSatellite: Bool
     let weather: ParkWeather?
     @Binding var position: MapCameraPosition
+    var showsUserLocation = false
+    var windRoseAlignment: Alignment = .topTrailing
 
     @State private var mapHeading: Double = 0
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
@@ -996,6 +1027,9 @@ private struct ParkMap: View {
                         .stroke(Color.rpplAccent, lineWidth: 3)
                 }
             }
+            if showsUserLocation {
+                UserAnnotation()
+            }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .mapControls {
@@ -1005,7 +1039,7 @@ private struct ParkMap: View {
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }
-        .overlay(alignment: .topTrailing) {
+        .overlay(alignment: windRoseAlignment) {
             if let weather {
                 WindRoseView(
                     directionDegrees: weather.windDirectionDegrees,
