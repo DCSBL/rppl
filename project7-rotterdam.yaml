@@ -1,7 +1,7 @@
 version: 1
 id: project7-rotterdam
 created_at: 2026-09-24
-updated_at: 2026-10-07
+updated_at: 2026-10-22
 history:
   - date: 2026-09-24
     description: initial
@@ -25,6 +25,8 @@ history:
     description: add languages (en, nl) and Dutch variants of per and note
   - date: 2026-10-12
     description: add short_name
+  - date: 2026-10-22
+    description: closed for the rest of 2026, add closed days 2026-10-24, 2026-10-25 and 2026-10-31
 
 name: Project 7 Cablepark Rotterdam
 short_name: Project 7 Cablepark
@@ -219,6 +221,14 @@ opening:
         - weekend
       open: "12:30"
       close: "17:00"
+  exceptions:
+    - kind: closed
+      dates:
+        - "2026-10-24"
+        - "2026-10-25"
+        - "2026-10-31"
+      label: Closed for the season
+      note: Closed for the rest of 2026, reopens in April 2027.
   slots:
     - id: "1"
       start: "11:00"

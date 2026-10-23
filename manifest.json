@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "dataVersion": 1,
-  "publishedAt": "2026-10-22T16:27:14Z",
+  "dataVersion": 2,
+  "publishedAt": "2026-10-23T06:31:26Z",
   "enabled": true,
   "minAppSchema": 1,
   "maxAppSchema": 1,
@@ -79,7 +79,7 @@
     {
       "id": "project7-rotterdam",
       "file": "project7-rotterdam.yaml",
-      "sha256": "22607209a5e2a6eed1c778a730637c513d8fc2860d3475c2d8c732aed3278aad"
+      "sha256": "a7ed95a5e173a5c05fe67301f589dd522c607b7abd528b4d3948cf30a11cdd76"
     },
     {
       "id": "schotsman-kamperland",
