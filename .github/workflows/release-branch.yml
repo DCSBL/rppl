@@ -1,7 +1,7 @@
 # Release branch. Xcode Cloud builds the branch release/X.Y.Z (Docs/Release.md), so every
 # build of a version (betas, release candidates, final) lands in one Build Group.
 #
-# release published: validate the tag (format, on main, or wip/iphone-duo for -duo.N tags), then push a marker commit to
+# release published: validate the tag (format, on main, or wip/iphone-duo for -duo.N tags; branch release/duo/X.Y.Z for those), then push a marker commit to
 # release/X.Y.Z: the tagged commit's files plus ci_scripts/release-marker.txt (tag, tagged
 # commit, run id). That push starts the Xcode Cloud Release workflow.
 #
