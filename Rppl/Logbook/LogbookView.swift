@@ -40,10 +40,10 @@ struct LogbookView: View {
     }
 
     /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
-    private var listColumn: (min: CGFloat, ideal: CGFloat, max: CGFloat) {
-        guard sidebarWidth > 0, windowWidth > 0 else { return (300, 360, 420) }
+    private var listColumn: ClosedRange<CGFloat> {
+        guard sidebarWidth > 0, windowWidth > 0 else { return 300...420 }
         let half = ((windowWidth + sidebarWidth) / 2).rounded()
-        return (half, half, half)
+        return half...half
     }
 
     var body: some View {
@@ -51,7 +51,11 @@ struct LogbookView: View {
             if layout == .twoPane {
                 NavigationSplitView {
                     listContent
-                        .navigationSplitViewColumnWidth(min: listColumn.min, ideal: listColumn.ideal, max: listColumn.max)
+                        .navigationSplitViewColumnWidth(
+                            min: listColumn.lowerBound,
+                            ideal: min(max(360, listColumn.lowerBound), listColumn.upperBound),
+                            max: listColumn.upperBound
+                        )
                 } detail: {
                     splitDetail
                 }

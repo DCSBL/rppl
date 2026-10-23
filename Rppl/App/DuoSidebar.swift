@@ -101,9 +101,15 @@ struct DuoSidebar: View {
 
     @Environment(\.openSettings) private var openSettings
 
-    private static let tabs: [(tab: AppTab, title: LocalizedStringKey, systemImage: String)] = [
-        (.logbook, "Logbook", "book.fill"),
-        (.parks, "Parks", "mappin.and.ellipse"),
+    private struct TabEntry {
+        let tab: AppTab
+        let title: LocalizedStringKey
+        let systemImage: String
+    }
+
+    private static let tabs = [
+        TabEntry(tab: .logbook, title: "Logbook", systemImage: "book.fill"),
+        TabEntry(tab: .parks, title: "Parks", systemImage: "mappin.and.ellipse"),
     ]
 
     var body: some View {
