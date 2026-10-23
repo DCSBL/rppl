@@ -338,11 +338,20 @@ struct ParksView: View {
                     action: { headerHeight = $0 }
                 )
 
-                if let message = updates.errorMessage, !showMap {
-                    ParkDataErrorBanner(message: message)
-                        .padding(.top, headerHeight + 8)
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .transition(.opacity)
+                // The system pull-to-refresh spinner sits at the top of the list, which the opaque
+                // header above covers, so the progress and the error get their own spot below it.
+                if !showMap {
+                    if let message = updates.errorMessage {
+                        ParkDataErrorBanner(message: message)
+                            .padding(.top, headerHeight + 8)
+                            .frame(maxWidth: .infinity, alignment: .top)
+                            .transition(.opacity)
+                    } else if updates.isRefreshing {
+                        ParkDataProgressBanner()
+                            .padding(.top, headerHeight + 8)
+                            .frame(maxWidth: .infinity, alignment: .top)
+                            .transition(.opacity)
+                    }
                 }
 
                 // Pinned to the header's own measured height, in this same layer, so it always
@@ -379,11 +388,11 @@ struct ParksView: View {
         } message: { _ in
             Text("The unsaved park and everything you filled in will be gone.")
         }
-        .confirmationDialog("Update park data?", isPresented: $showParkDataConsent, titleVisibility: .visible) {
+        .alert("Update park data?", isPresented: $showParkDataConsent) {
             Button("Turn on") { answerParkDataConsent(allow: true) }
             Button("Not now", role: .cancel) { answerParkDataConsent(allow: false) }
         } message: {
-            Text("Rppl can fetch the latest park info from GitHub. GitHub can see your IP address; nothing else is sent. You can change this in Info.")
+            Text("Rppl fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent. You can change this in Info.")
         }
         .sensoryFeedback(.impact(weight: .light), trigger: updates.startedCount)
         .sensoryFeedback(.success, trigger: updates.successCount)

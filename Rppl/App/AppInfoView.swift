@@ -56,7 +56,7 @@ struct AppInfoView: View {
                     Text("Park data")
                 } footer: {
                     Text(
-                        "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app."
+                        "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent."
                     )
                 }
                 .onChange(of: parkDataUpdatesEnabled) { _, enabled in
