@@ -12,7 +12,7 @@ enum LogbookSessionDetailSource: Equatable {
 struct LogbookSessionDetailView: View {
     let source: LogbookSessionDetailSource
     var store: SessionFileStore?
-    /// Root of the split view's detail column: nothing to go back to, so the sidebar shows no back button.
+    /// Root of the split view's detail column: nothing to go back to.
     private var isEmbeddedInSplit = false
 
     private static let setMapPointBudget = 200
@@ -45,7 +45,6 @@ struct LogbookSessionDetailView: View {
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showEditor = false
     @State private var showShareWithRppl = false
-    @Environment(\.sidebarWidth) private var sidebarWidth
     @Environment(\.dismiss) private var dismiss
     @State private var flagDraft = SetFlagDraft(saved: nil)
     @State private var customFlags = UserDefaults.standard.stringArray(forKey: AppSettingsKey.customSetFlags) ?? []
@@ -172,7 +171,7 @@ struct LogbookSessionDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { if saveFlags() { isEditingFlags = false } }
                 }
-            } else if sidebarWidth == 0 {
+            } else {
                 if isManual, case .store = source, loadPhase == .ready {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Edit session details", systemImage: "pencil") { showEditor = true }
@@ -197,12 +196,7 @@ struct LogbookSessionDetailView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(isEditingFlags || sidebarWidth > 0)
-        .sidebarItems(
-            key: "\(isEditingFlags)|\(isEmbeddedInSplit)|\(isExporting)|\(showsShare)|\(isManual)|\(canEditFlags)|\(loadPhase)",
-            back: (isEditingFlags || isEmbeddedInSplit) ? nil : SidebarAction(id: "back", label: "Back", systemImage: "chevron.left") { dismiss() },
-            actions: isEditingFlags ? [] : sidebarActions
-        )
+        .navigationBarBackButtonHidden(isEditingFlags)
         .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
             Button("Share with Rppl") { requestExport(.mail) }
             Button("Other app or file") { requestExport(.share) }
@@ -1001,20 +995,6 @@ struct LogbookSessionDetailView: View {
         } else {
             requestExport(.share)
         }
-    }
-
-    private var sidebarActions: [SidebarAction] {
-        var actions: [SidebarAction] = []
-        if isManual, case .store = source, loadPhase == .ready {
-            actions.append(SidebarAction(id: "edit", label: "Edit session details", systemImage: "pencil") { showEditor = true })
-        }
-        if canEditFlags {
-            actions.append(SidebarAction(id: "flags", label: "Edit flags", systemImage: isManual ? "flag" : "pencil") { beginFlagEditing() })
-        }
-        if showsShare, !isExporting {
-            actions.append(SidebarAction(id: "share", label: "Share", systemImage: "square.and.arrow.up", perform: shareTapped))
-        }
-        return actions
     }
 
     private func requestExport(_ purpose: ExportPurpose) {

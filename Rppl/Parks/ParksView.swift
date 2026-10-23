@@ -45,7 +45,6 @@ struct ParksView: View {
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    @Environment(\.sidebarWidth) private var sidebarWidth
     @Environment(\.openSettings) private var openSettings
 
     private var parks: [Park] { store.entries.map(\.park).filter(\.isListed) }
@@ -71,11 +70,7 @@ struct ParksView: View {
     /// The map replaces the list only in a narrow window; a wide window shows it beside the list.
     private var showsMapInList: Bool { showMap && layout == .stack }
 
-    /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
-    private var listColumnWidth: CGFloat {
-        guard sidebarWidth > 0, windowWidth > 0 else { return 380 }
-        return ((windowWidth + sidebarWidth) / 2).rounded()
-    }
+    private var listColumnWidth: CGFloat { 380 }
 
     /// Beside the map a tapped card selects the park there instead of pushing it.
     private var cardSelection: ((Park) -> Void)? {
@@ -347,27 +342,25 @@ struct ParksView: View {
                                 .buttonBorderShape(.circle)
                                 .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
                             }
-                            if sidebarWidth == 0 {
-                                Button(action: openSettings) {
-                                    Image(systemName: "gearshape")
+                            Button(action: openSettings) {
+                                Image(systemName: "gearshape")
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 34, height: 34)
+                            }
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.circle)
+                            .accessibilityLabel(Text("Settings"))
+                            if editorEnabled {
+                                Button {
+                                    showEditor = true
+                                } label: {
+                                    Image(systemName: "plus")
                                         .font(.subheadline.weight(.semibold))
                                         .frame(width: 34, height: 34)
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text("Settings"))
-                                if editorEnabled {
-                                    Button {
-                                        showEditor = true
-                                    } label: {
-                                        Image(systemName: "plus")
-                                            .font(.subheadline.weight(.semibold))
-                                            .frame(width: 34, height: 34)
-                                    }
-                                    .buttonStyle(.glass)
-                                    .buttonBorderShape(.circle)
-                                    .accessibilityLabel(Text("Add park"))
-                                }
+                                .accessibilityLabel(Text("Add park"))
                             }
                         }
                         if showSearch {
@@ -471,12 +464,6 @@ struct ParksView: View {
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
-        .sidebarItems(
-            key: editorEnabled,
-            primary: editorEnabled
-                ? SidebarAction(id: "add-park", label: "Add park", systemImage: "plus") { showEditor = true }
-                : nil
-        )
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
             ParkEditorView(original: nil)
         }
