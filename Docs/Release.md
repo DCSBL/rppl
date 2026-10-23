@@ -35,6 +35,7 @@ Tag rules (the **Release branch** workflow fails on anything else and no build s
 |-----|--------|
 | `2026.9.1`, `v2026.9.1` | version `2026.9.1` |
 | `2026.9.1-beta.2`, `v2026.9.1-beta.2` | version `2026.9.1` (suffix only labels the release) |
+| `2026.10.2-duo.1`, `v2026.10.2-duo.1` | version `2026.10.2`; a device test build from `wip/iphone-duo` (see [Duo test builds](#duo-test-builds)) |
 | `2026.9`, `v1.2`, `latest`, `vNext` | rejected; App Store versions are three integers |
 
 Build numbers are not set by the repo. Xcode Cloud assigns an integer per app and increments it for every build.
@@ -55,6 +56,10 @@ Consequences:
 - `release/*` branches are build triggers, not development branches. Do not push work to them by hand; a push without a marker or a matching release tag fails in the Post-Clone step.
 - The branch history is a chain of marker snapshots, not `main`'s history. Never merge it back.
 - TestFlight → **Versions** is still the per-version overview of builds. **Build Groups** now shows one entry per version too.
+
+## Duo test builds
+
+For trying a branch on a physical device before it reaches `main` (iPhone Duo work on `wip/iphone-duo`): publish a GitHub release with a `-duo.N` tag targeting `wip/iphone-duo`, for example `2026.10.2-duo.1`. The tag check requires the tagged commit to be on `wip/iphone-duo` instead of `main`; everything else is the normal flow (Xcode Cloud, TestFlight internal). The release branch is `release/duo/X.Y.Z`, so Duo builds get their own Build Group and never mix with the real release of the same version. Pick a version above the one on the App Store (a live version is closed for new builds). Mark the GitHub release as a pre-release and never promote a `-duo` build to external testers or the App Store.
 
 ## Versions, betas and Beta App Review
 

@@ -14,7 +14,7 @@ name: macOS CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 'wip/**']
   push:
     branches: [main]
   workflow_dispatch:

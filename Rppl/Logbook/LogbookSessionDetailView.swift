@@ -12,6 +12,8 @@ enum LogbookSessionDetailSource: Equatable {
 struct LogbookSessionDetailView: View {
     let source: LogbookSessionDetailSource
     var store: SessionFileStore?
+    /// Root of the split view's detail column: nothing to go back to, so the sidebar shows no back button.
+    private var isEmbeddedInSplit = false
 
     private static let setMapPointBudget = 200
 
@@ -42,6 +44,9 @@ struct LogbookSessionDetailView: View {
     @State private var weatherAttribution = WeatherAttributionProvider.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showEditor = false
+    @State private var showShareWithRppl = false
+    @Environment(\.sidebarWidth) private var sidebarWidth
+    @Environment(\.dismiss) private var dismiss
     @State private var flagDraft = SetFlagDraft(saved: nil)
     @State private var customFlags = UserDefaults.standard.stringArray(forKey: AppSettingsKey.customSetFlags) ?? []
     @State private var isEditingFlags = false
@@ -70,6 +75,12 @@ struct LogbookSessionDetailView: View {
     init(source: LogbookSessionDetailSource) {
         self.source = source
         self.store = nil
+    }
+
+    func embeddedInSplit() -> Self {
+        var copy = self
+        copy.isEmbeddedInSplit = true
+        return copy
     }
 
     /// Typed in by hand: no map, speed, riding, calories or set list, and it can be edited.
@@ -118,8 +129,9 @@ struct LogbookSessionDetailView: View {
                     if isManual { manualSetsSection } else { setsSection }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, isEmbeddedInSplit ? LogbookLayout.wideInset : 20)
             .padding(.bottom, 24)
+            .readableWidth()
         }
         .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
@@ -127,7 +139,6 @@ struct LogbookSessionDetailView: View {
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
         .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
-        .navigationBarBackButtonHidden(isEditingFlags)
         .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { endFlagEditing() }
             Button("Keep editing", role: .cancel) {}
@@ -161,7 +172,7 @@ struct LogbookSessionDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { if saveFlags() { isEditingFlags = false } }
                 }
-            } else {
+            } else if sidebarWidth == 0 {
                 if isManual, case .store = source, loadPhase == .ready {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Edit session details", systemImage: "pencil") { showEditor = true }
@@ -174,29 +185,30 @@ struct LogbookSessionDetailView: View {
                             .labelStyle(.iconOnly)
                     }
                 }
-                if !isManual, allowsExport, loadPhase == .ready {
+                if showsShare {
                     ToolbarItem(placement: .topBarTrailing) {
                         if isExporting {
                             ProgressView()
-                        } else if MailAvailability.canSend {
-                            Menu {
-                                Button("Export", systemImage: "square.and.arrow.up") { requestExport(.share) }
-                                Button("Send to Rppl", systemImage: "envelope") { requestExport(.mail) }
-                            } label: {
-                                Image(systemName: "square.and.arrow.up")
-                            }
-                            .accessibilityLabel(Text("Export"))
                         } else {
-                            Button {
-                                requestExport(.share)
-                            } label: {
-                                Image(systemName: "square.and.arrow.up")
-                            }
-                            .accessibilityLabel(Text("Export"))
+                            Button("Share", systemImage: "square.and.arrow.up", action: shareTapped)
+                                .labelStyle(.iconOnly)
                         }
                     }
                 }
             }
+        }
+        .navigationBarBackButtonHidden(isEditingFlags || sidebarWidth > 0)
+        .sidebarItems(
+            key: "\(isEditingFlags)|\(isEmbeddedInSplit)|\(isExporting)|\(showsShare)|\(isManual)|\(canEditFlags)|\(loadPhase)",
+            back: (isEditingFlags || isEmbeddedInSplit) ? nil : SidebarAction(id: "back", label: "Back", systemImage: "chevron.left") { dismiss() },
+            actions: isEditingFlags ? [] : sidebarActions
+        )
+        .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
+            Button("Share with Rppl") { requestExport(.mail) }
+            Button("Other app or file") { requestExport(.share) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Rppl can send this session to the developers. Otherwise pick any app.")
         }
         .alert(
             "Export session?",
@@ -978,6 +990,31 @@ struct LogbookSessionDetailView: View {
         if let index = soloSetIndex, !tracks.contains(where: { $0.setIndex == index }) {
             soloSetIndex = nil
         }
+    }
+
+    private var showsShare: Bool { !isManual && allowsExport && loadPhase == .ready }
+
+    /// With mail set up the person can share with Rppl or elsewhere; without it there is only the share sheet.
+    private func shareTapped() {
+        if MailAvailability.canSend {
+            showShareWithRppl = true
+        } else {
+            requestExport(.share)
+        }
+    }
+
+    private var sidebarActions: [SidebarAction] {
+        var actions: [SidebarAction] = []
+        if isManual, case .store = source, loadPhase == .ready {
+            actions.append(SidebarAction(id: "edit", label: "Edit session details", systemImage: "pencil") { showEditor = true })
+        }
+        if canEditFlags {
+            actions.append(SidebarAction(id: "flags", label: "Edit flags", systemImage: isManual ? "flag" : "pencil") { beginFlagEditing() })
+        }
+        if showsShare, !isExporting {
+            actions.append(SidebarAction(id: "share", label: "Share", systemImage: "square.and.arrow.up", perform: shareTapped))
+        }
+        return actions
     }
 
     private func requestExport(_ purpose: ExportPurpose) {

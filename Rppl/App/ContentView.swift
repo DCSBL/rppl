@@ -6,31 +6,18 @@ import RpplCore
 enum AppTab: Hashable {
     case logbook
     case parks
-    case app
-}
-
-private enum AppTabIcons {
-    /// Tab bar needs a ~25pt template image. Large SVG assets stretch across liquid glass.
-    static let rppl = Image(uiImage: resizedTemplate(named: "icon-simple", pointSize: 25))
-
-    private static func resizedTemplate(named name: String, pointSize: CGFloat) -> UIImage {
-        let size = CGSize(width: pointSize, height: pointSize)
-        let base = UIImage(named: name) ?? UIImage()
-        let format = UIGraphicsImageRendererFormat.default()
-        format.opaque = false
-        let rendered = UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            base.draw(in: CGRect(origin: .zero, size: size))
-        }
-        return rendered.withRenderingMode(.alwaysTemplate)
-    }
 }
 
 struct ContentView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
     @State private var openParkID: String?
     @State private var openFavorites = false
     @State private var openDebug = false
+    @State private var showSettings = false
+    @State private var safeInsets = EdgeInsets()
+    @State private var sidebarModel = SidebarModel()
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var showICloudImport = false
@@ -43,31 +30,62 @@ struct ContentView: View {
     @State private var showAlreadyImportedAlert = false
     @State private var pendingDuplicateSessionId: String?
 
+    private var sidebarWidth: CGFloat {
+        CGFloat(SidebarInset.width(leading: Double(safeInsets.leading), trailing: Double(safeInsets.trailing)))
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Logbook", systemImage: "book.fill", value: AppTab.logbook) {
                 LogbookView(navigation: $logbookNavigation)
+                    .toolbarVisibility(sidebarWidth > 0 ? .hidden : .automatic, for: .tabBar)
             }
 
             Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
                 ParksView(openParkID: $openParkID, openFavorites: $openFavorites)
-            }
-
-            Tab(value: AppTab.app) {
-                AppInfoView(
-                    showDebug: $openDebug,
-                    isImporting: isImporting,
-                    onImportSessionTapped: presentManualImport
-                )
-            } label: {
-                Label {
-                    Text("Rppl")
-                } icon: {
-                    AppTabIcons.rppl
-                }
+                    .toolbarVisibility(sidebarWidth > 0 ? .hidden : .automatic, for: .tabBar)
             }
         }
+        .environment(sidebarModel)
+        .environment(\.sidebarWidth, sidebarWidth)
+        .environment(\.openSettings, { showSettings = true })
+        .background { RpplBackdrop() }
+        .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { safeInsets = $0 }
+        // The strip beside the app on iPhone Duo: the app's own colors run through it, the buttons sit on it.
+        .overlay {
+            if sidebarWidth > 0 {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    DuoSidebar(selectedTab: $selectedTab, model: sidebarModel, topInset: safeInsets.top)
+                        .frame(width: sidebarWidth)
+                }
+                .ignoresSafeArea()
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            AppInfoView(
+                showDebug: $openDebug,
+                isImporting: isImporting,
+                onImportSessionTapped: {
+                    showSettings = false
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(400))
+                        presentManualImport()
+                    }
+                }
+            )
+            .presentationSizing(.form)
+        }
         .tint(Color.rpplAccent)
+        // Bug reports from a Duo or iPad say which layout was active; logs only when the layout changes.
+        .onGeometryChange(for: WindowLayout.self) {
+            WindowLayout.resolve(
+                width: Double($0.size.width),
+                isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize
+            )
+        } action: { layout in
+            WakeLog.debug(.ui, "window layout=\(layout) textSize=\(dynamicTypeSize)")
+        }
         .onOpenURL { url in
             if ParkDeepLink.isFavorites(url) {
                 openFavorites = true
@@ -82,10 +100,10 @@ struct ContentView: View {
                 switch tab {
                 case .logbook: selectedTab = .logbook
                 case .parks: selectedTab = .parks
-                case .about: selectedTab = .app
+                case .about: showSettings = true
                 case .debug:
                     openDebug = true
-                    selectedTab = .app
+                    showSettings = true
                 }
             }
         }

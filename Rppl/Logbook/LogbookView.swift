@@ -26,140 +26,233 @@ struct LogbookView: View {
     @State private var detailRoute: SessionDetailRoute?
     @State private var highlightSessionId: String?
     @State private var didOpenSession = false
+    @State private var windowWidth: CGFloat = 0
+    @State private var selectedSessionId: String?
+    @Environment(\.sidebarWidth) private var sidebarWidth
+    @Environment(\.openSettings) private var openSettings
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
     }
 
+    private var layout: WindowLayout {
+        WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
+    }
+
+    /// On a Duo the divider sits on the fold, the middle of the whole screen including the sidebar strip.
+    private var listColumn: ClosedRange<CGFloat> {
+        guard sidebarWidth > 0, windowWidth > 0 else { return 300...420 }
+        let half = ((windowWidth + sidebarWidth) / 2).rounded()
+        return half...half
+    }
+
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    header
-                        .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                }
-
-                if connectivity.pendingAckCount > 0 {
-                    Section {
-                        SyncStatusIndicator(
-                            state: connectivity.syncState,
-                            pendingCount: connectivity.pendingAckCount
+        Group {
+            if layout == .twoPane {
+                NavigationSplitView {
+                    listContent
+                        .navigationSplitViewColumnWidth(
+                            min: listColumn.lowerBound,
+                            ideal: min(max(360, listColumn.lowerBound), listColumn.upperBound),
+                            max: listColumn.upperBound
                         )
-                        .rpplTileChrome()
-                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    }
+                } detail: {
+                    splitDetail
                 }
-
-                Section {
-                    totalsCard
-                        .listRowInsets(LogbookLayout.rowInsets(top: 4, bottom: 12))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+            } else {
+                NavigationStack { listContent }
+            }
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
+        .sidebarItems(
+            primary: SidebarAction(id: "add-session", label: "Add session", systemImage: "plus") {
+                showAddSession = true
+            }
+        )
+        .sheet(isPresented: $showAddSession) {
+            ManualSessionEditorView(onSaved: flashHighlight)
+        }
+        .alert(
+            "Delete session?",
+            isPresented: $showDeleteConfirmation
+        ) {
+            if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
+                Button("Delete from this iPhone", role: .destructive) {
+                    if let sessionId = pendingDeleteSessionId {
+                        hideSessionFromLogbook(sessionId)
+                    }
+                    pendingDeleteSessionId = nil
                 }
-
-                if catalog.season.showsCharts {
-                    Section {
-                        SeasonCharts(season: catalog.season)
-                            .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 12))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
+                Button("Delete from iPhone and iCloud", role: .destructive) {
+                    if let sessionId = pendingDeleteSessionId {
+                        deleteSessionPermanently(sessionId)
                     }
+                    pendingDeleteSessionId = nil
                 }
-
-                if catalog.isLoading && catalog.entries.isEmpty {
-                    Section {
-                        HStack {
-                            Spacer()
-                            ProgressView("Loading sessions…")
-                            Spacer()
-                        }
-                        .listRowInsets(LogbookLayout.rowInsets())
-                        .listRowBackground(Color.clear)
+            } else {
+                Button("Delete from Rppl", role: .destructive) {
+                    if let sessionId = pendingDeleteSessionId {
+                        deleteSessionLocally(sessionId)
                     }
-                } else if catalog.entries.isEmpty {
-                    Section {
-                        ContentUnavailableView {
-                            Label {
-                                Text("No sessions yet")
-                            } icon: {
-                                Image("icon-simple")
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 48, height: 48)
-                                    .foregroundStyle(Color.rpplMuted.opacity(0.45))
-                            }
-                        } description: {
-                            Text(
-                                "Record a park day with Apple Watch, or add a session by hand with the + button."
-                            )
-                        } actions: {
-                            VStack(spacing: 12) {
-                                Button("Show example session") {
-                                    showExampleSession = true
-                                }
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                                .tint(Color.rpplAccent)
-
-                                Text(
-                                    "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby."
-                                )
-                                .font(.footnote)
-                                .foregroundStyle(Color.rpplMuted)
-                                .multilineTextAlignment(.center)
-                            }
-                        }
-                        .foregroundStyle(Color.rpplText)
-                        .onAppear { ExampleSessionPreload.warmUp() }
-                        .listRowInsets(LogbookLayout.rowInsets())
-                        .listRowBackground(Color.clear)
-                    }
-                } else {
-                    Section {
-                        ForEach(catalog.entries) { entry in
-                            NavigationLink {
-                                LogbookSessionDetailView(
-                                    sessionId: entry.manifest.sessionId,
-                                    store: connectivity.store
-                                )
-                                .onDisappear {
-                                    didOpenSession = true
-                                    flashHighlight(entry.manifest.sessionId)
-                                }
-                            } label: {
-                                SessionCard(
-                                    entry: entry,
-                                    isHighlighted: highlightSessionId == entry.manifest.sessionId
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .navigationLinkIndicatorVisibility(.hidden)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    WakeLog.debug(.ui, "swipe delete \(entry.manifest.sessionId.prefix(8))…")
-                                    pendingDeleteSessionId = entry.manifest.sessionId
-                                    showDeleteConfirmation = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
-                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                        }
-                    } header: {
-                        sessionsHeader
-                    }
+                    pendingDeleteSessionId = nil
                 }
             }
+            Button("Cancel", role: .cancel) {
+                pendingDeleteSessionId = nil
+            }
+        } message: {
+            Text(deleteConfirmationMessage)
+        }
+        .alert(
+            "Could not delete session",
+            isPresented: $showActionError,
+            presenting: actionErrorText
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
+        .onAppear {
+            connectivity.refreshSyncState()
+            reloadCatalog()
+            consumeNavigationRequests()
+            requestReviewIfPending()
+        }
+        .onChange(of: catalog.isLoading) { _, loading in
+            if !loading { armReviewPrompt() }
+        }
+        .onChange(of: connectivity.sessionsRevision) { _, _ in
+            reloadCatalog()
+        }
+        .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
+            reloadCatalog()
+        }
+        .onChange(of: catalog.entries.map(\.manifest.sessionId)) { _, ids in
+            if let selected = selectedSessionId, !ids.contains(selected) { selectedSessionId = nil }
+        }
+        .onChange(of: navigation.openSessionId) { _, _ in
+            consumeNavigationRequests()
+        }
+        .onChange(of: navigation.highlightSessionId) { _, sessionId in
+            if let sessionId {
+                flashHighlight(sessionId)
+                navigation.highlightSessionId = nil
+            }
+        }
+    }
+
+    private var listContent: some View {
+        List {
+            Section {
+                header
+                    .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+
+            if connectivity.pendingAckCount > 0 {
+                Section {
+                    SyncStatusIndicator(
+                        state: connectivity.syncState,
+                        pendingCount: connectivity.pendingAckCount
+                    )
+                    .rpplTileChrome()
+                    .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+            }
+
+            Section {
+                totalsCard
+                    .listRowInsets(LogbookLayout.rowInsets(top: 4, bottom: 12))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+
+            if catalog.season.showsCharts {
+                Section {
+                    SeasonCharts(season: catalog.season)
+                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 12))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+            }
+
+            if catalog.isLoading && catalog.entries.isEmpty {
+                Section {
+                    HStack {
+                        Spacer()
+                        ProgressView("Loading sessions…")
+                        Spacer()
+                    }
+                    .listRowInsets(LogbookLayout.rowInsets())
+                    .listRowBackground(Color.clear)
+                }
+            } else if catalog.entries.isEmpty {
+                Section {
+                    ContentUnavailableView {
+                        Label {
+                            Text("No sessions yet")
+                        } icon: {
+                            Image("icon-simple")
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 48, height: 48)
+                                .foregroundStyle(Color.rpplMuted.opacity(0.45))
+                        }
+                    } description: {
+                        Text(
+                            "Record a park day with Apple Watch, or add a session by hand with the + button."
+                        )
+                    } actions: {
+                        VStack(spacing: 12) {
+                            Button("Show example session") {
+                                showExampleSession = true
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .tint(Color.rpplAccent)
+
+                            Text(
+                                "Apple Watch is recommended: it records your sets, laps, speed and route, and brings them here when your iPhone is nearby."
+                            )
+                            .font(.footnote)
+                            .foregroundStyle(Color.rpplMuted)
+                            .multilineTextAlignment(.center)
+                        }
+                    }
+                    .foregroundStyle(Color.rpplText)
+                    .onAppear { ExampleSessionPreload.warmUp() }
+                    .listRowInsets(LogbookLayout.rowInsets())
+                    .listRowBackground(Color.clear)
+                }
+            } else {
+                Section {
+                    ForEach(catalog.entries) { entry in
+                        sessionRow(entry)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                WakeLog.debug(.ui, "swipe delete \(entry.manifest.sessionId.prefix(8))…")
+                                pendingDeleteSessionId = entry.manifest.sessionId
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
+                } header: {
+                    sessionsHeader
+                }
+            }
+        }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+            .contentMargins(.horizontal, layout == .twoPane ? LogbookLayout.wideInset : LogbookLayout.horizontalInset, for: .scrollContent)
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
             .navigationBarTitleDisplayMode(.inline)
@@ -176,79 +269,64 @@ struct LogbookView: View {
                         flashHighlight(route.id)
                     }
             }
-            .sheet(isPresented: $showAddSession) {
-                ManualSessionEditorView(onSaved: flashHighlight)
+    }
+
+    /// Stack: push the detail. Two-pane: select the row, the detail column shows it.
+    @ViewBuilder
+    private func sessionRow(_ entry: SessionEntry) -> some View {
+        let sessionId = entry.manifest.sessionId
+        if layout == .twoPane {
+            Button {
+                selectedSessionId = sessionId
+            } label: {
+                SessionCard(
+                    entry: entry,
+                    isHighlighted: highlightSessionId == sessionId,
+                    isSelected: selectedSessionId == sessionId,
+                    showsChevron: false
+                )
             }
-            .alert(
-                "Delete session?",
-                isPresented: $showDeleteConfirmation
-            ) {
-                if iCloud.isSyncEnabled, iCloud.isICloudAvailable {
-                    Button("Delete from this iPhone", role: .destructive) {
-                        if let sessionId = pendingDeleteSessionId {
-                            hideSessionFromLogbook(sessionId)
-                        }
-                        pendingDeleteSessionId = nil
+            .buttonStyle(.plain)
+        } else {
+            NavigationLink {
+                LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
+                    .onDisappear {
+                        didOpenSession = true
+                        flashHighlight(sessionId)
                     }
-                    Button("Delete from iPhone and iCloud", role: .destructive) {
-                        if let sessionId = pendingDeleteSessionId {
-                            deleteSessionPermanently(sessionId)
-                        }
-                        pendingDeleteSessionId = nil
-                    }
-                } else {
-                    Button("Delete from Rppl", role: .destructive) {
-                        if let sessionId = pendingDeleteSessionId {
-                            deleteSessionLocally(sessionId)
-                        }
-                        pendingDeleteSessionId = nil
-                    }
-                }
-                Button("Cancel", role: .cancel) {
-                    pendingDeleteSessionId = nil
-                }
-            } message: {
-                Text(deleteConfirmationMessage)
+            } label: {
+                SessionCard(entry: entry, isHighlighted: highlightSessionId == sessionId)
             }
-            .alert(
-                "Could not delete session",
-                isPresented: $showActionError,
-                presenting: actionErrorText
-            ) { _ in
-                Button("OK", role: .cancel) {}
-            } message: { message in
-                Text(message)
+            .buttonStyle(.plain)
+            .navigationLinkIndicatorVisibility(.hidden)
+        }
+    }
+
+    /// Detail column: the selected session, or the season charts when nothing is selected.
+    @ViewBuilder
+    private var splitDetail: some View {
+        if let sessionId = selectedSessionId {
+            NavigationStack {
+                LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
+                    .embeddedInSplit()
+                    .toolbar(.visible, for: .navigationBar)
             }
-            .onAppear {
-                connectivity.refreshSyncState()
-                reloadCatalog()
-                consumeNavigationRequests()
-                requestReviewIfPending()
-            }
-            .onChange(of: catalog.isLoading) { _, loading in
-                if !loading { armReviewPrompt() }
-            }
-            .onChange(of: connectivity.sessionsRevision) { _, _ in
-                reloadCatalog()
-            }
-            .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
-                reloadCatalog()
-            }
-            .onChange(of: navigation.openSessionId) { _, _ in
-                consumeNavigationRequests()
-            }
-            .onChange(of: navigation.highlightSessionId) { _, sessionId in
-                if let sessionId {
-                    flashHighlight(sessionId)
-                    navigation.highlightSessionId = nil
-                }
-            }
+            .id(sessionId)
+        } else {
+            ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
+                .foregroundStyle(Color.rpplMuted)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(RpplBackdrop())
         }
     }
 
     private func consumeNavigationRequests() {
         if let sessionId = navigation.openSessionId {
-            detailRoute = SessionDetailRoute(id: sessionId)
+            if layout == .twoPane {
+                selectedSessionId = sessionId
+            } else {
+                detailRoute = SessionDetailRoute(id: sessionId)
+            }
             navigation.openSessionId = nil
             flashHighlight(sessionId)
         }
@@ -316,16 +394,26 @@ struct LogbookView: View {
                     .foregroundStyle(Color.rpplMuted)
             }
             Spacer()
-            Button {
-                showAddSession = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 34, height: 34)
+            if sidebarWidth == 0 {
+                Button(action: openSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Settings"))
+                Button {
+                    showAddSession = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(Text("Add session"))
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .accessibilityLabel(Text("Add session"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -596,6 +684,9 @@ private struct SessionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let entry: SessionEntry
     var isHighlighted = false
+    /// Two-pane: the row whose session is open on the right.
+    var isSelected = false
+    var showsChevron = true
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -654,17 +745,25 @@ private struct SessionCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Color.rpplMuted)
-                .accessibilityHidden(true)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.rpplMuted)
+                    .accessibilityHidden(true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .rpplTileChrome()
         .background(
             RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
-                .fill(isHighlighted ? Color.rpplAccent.opacity(0.12) : Color.clear)
+                .fill(isHighlighted || isSelected ? Color.rpplAccent.opacity(isSelected ? 0.2 : 0.12) : Color.clear)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: RpplDesign.tileCornerRadius, style: .continuous)
+                .stroke(Color.rpplAccent, lineWidth: 2)
+                .opacity(isSelected ? 1 : 0)
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .rpplAnimation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 

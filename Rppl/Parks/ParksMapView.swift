@@ -15,6 +15,10 @@ struct ParksMapView: View {
     /// Owned by the parent: the style-toggle/recenter buttons live in its header overlay
     /// (see ParksView), sharing this same camera so they can drive it directly.
     @Binding var position: MapCameraPosition
+    /// The place search is off beside the list, whose own header already searches.
+    var showsSearch = true
+    /// Beside the list a tapped pin selects the park there; otherwise it pushes the detail.
+    var onSelectPark: ((Park) -> Void)?
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var selectedID: String?
@@ -37,7 +41,7 @@ struct ParksMapView: View {
         return parks.filter { $0.name.localizedCaseInsensitiveContains(needle) }.prefix(5).map { $0 }
     }
 
-    var body: some View {
+    private var map: some View {
         Map(position: $position, selection: $selectedID) {
             parkMarkers
             if showsCableLines {
@@ -60,22 +64,40 @@ struct ParksMapView: View {
             Color.clear.frame(height: topInset)
         }
         .ignoresSafeArea()
-        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
-        .searchSuggestions {
-            ForEach(parkMatches) { park in
-                Button {
-                    query = ""
-                    detailPark = park
-                } label: {
-                    Label(park.name, systemImage: "mappin")
-                }
+    }
+
+    private func open(_ park: Park) {
+        if let onSelectPark {
+            onSelectPark(park)
+        } else {
+            detailPark = park
+        }
+    }
+
+    var body: some View {
+        Group {
+            if showsSearch {
+                map
+                    .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
+                    .searchSuggestions {
+                        ForEach(parkMatches) { park in
+                            Button {
+                                query = ""
+                                open(park)
+                            } label: {
+                                Label(park.name, systemImage: "mappin")
+                            }
+                        }
+                    }
+                    .onSubmit(of: .search) { Task { await search() } }
+            } else {
+                map
             }
         }
-        .onSubmit(of: .search) { Task { await search() } }
         .onChange(of: selectedID) { _, id in
             guard let id, let park = parks.first(where: { $0.id == id }) else { return }
             selectedID = nil
-            detailPark = park
+            open(park)
         }
         .navigationDestination(item: $detailPark) { park in
             ParkDetailContainer(park: park)

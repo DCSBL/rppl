@@ -54,6 +54,7 @@ enum SessionMapLayout {
 
 struct SessionMapView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    @ScaledMetric(relativeTo: .caption2) private var endpointSize: CGFloat = 20
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
     /// Session overview heatmap tracks.
@@ -259,9 +260,9 @@ struct SessionMapView: View {
     ) -> some MapContent {
         Annotation(title, coordinate: coordinate) {
             Image(systemName: symbol)
-                .font(.system(size: 9, weight: .heavy))
+                .font(.system(size: endpointSize * 0.45, weight: .heavy))
                 .foregroundStyle(.white)
-                .frame(width: 20, height: 20)
+                .frame(width: endpointSize, height: endpointSize)
                 .background(Color.rpplHighlight, in: Circle())
                 .overlay {
                     Circle().strokeBorder(.white.opacity(0.85), lineWidth: 1.5)

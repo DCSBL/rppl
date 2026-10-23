@@ -8,6 +8,8 @@ struct ParkDetailView: View {
     let isFavorite: Bool
     /// Date from the Parks "Open" filter; nil for today or no filter.
     var plannedDate: Date?
+    /// Beside the list in a wide window: closes the detail back to the map (a cross, not a back arrow).
+    var onClose: (() -> Void)?
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -32,6 +34,8 @@ struct ParkDetailView: View {
     @State private var showMail = false
     @State private var confirmRemove = false
     @State private var showReopeningEvent = false
+    @State private var showShareWithRppl = false
+    @Environment(\.sidebarWidth) private var sidebarWidth
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -79,22 +83,59 @@ struct ParkDetailView: View {
                 linksCard
                 footer
             }
-            .padding(.horizontal, LogbookLayout.horizontalInset)
+            .padding(.horizontal, onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
             .padding(.vertical, 8)
+            .readableWidth()
         }
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: onToggleFavorite) {
-                    Image(systemName: isFavorite ? "star.fill" : "star")
+            if sidebarWidth == 0, let onClose {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close, action: onClose)
                 }
-                .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
             }
-            if editorEnabled {
-                ToolbarItem(placement: .primaryAction) { editMenu }
+            if sidebarWidth == 0 {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: onToggleFavorite) {
+                        Image(systemName: isFavorite ? "star.fill" : "star")
+                    }
+                    .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
+                }
+                if editorEnabled {
+                    ToolbarItem(placement: .primaryAction) { editMenu }
+                }
             }
+        }
+        .navigationBarBackButtonHidden(sidebarWidth > 0)
+        .sidebarItems(
+            key: "\(isFavorite)|\(onClose == nil)|\(editorEnabled)|\(String(describing: entry?.origin))",
+            back: SidebarAction(
+                id: "back",
+                label: onClose == nil ? "Back" : "Close",
+                systemImage: onClose == nil ? "chevron.left" : "xmark"
+            ) {
+                if let onClose { onClose() } else { dismiss() }
+            },
+            actions: [
+                SidebarAction(
+                    id: "favorite",
+                    label: isFavorite ? "Remove favorite" : "Add favorite",
+                    systemImage: isFavorite ? "star.fill" : "star",
+                    isActive: isFavorite,
+                    perform: onToggleFavorite
+                ),
+            ],
+            more: moreActions,
+            keepsNavigation: onClose != nil
+        )
+        .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
+            Button("Share with Rppl") { sendToRppl() }
+            Button("Other app or file") { ParkShare.share(park) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your changes to this park can go to the developers. Otherwise pick any app.")
         }
         .sheet(isPresented: $showEditor) {
             ParkEditorView(original: park, resuming: resumeDraft)
@@ -184,20 +225,46 @@ struct ParkDetailView: View {
         }
     }
 
+    /// Parks you changed or made can go to Rppl; for the rest Share is the plain share sheet.
+    private var canShareWithRppl: Bool {
+        guard let origin = entry?.origin else { return false }
+        return origin == .custom || origin == .edited
+    }
+
+    private func shareTapped() {
+        if canShareWithRppl {
+            showShareWithRppl = true
+        } else {
+            ParkShare.share(park)
+        }
+    }
+
+    private func sendToRppl() {
+        if MailAvailability.canSend {
+            showMail = true
+        } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
+            openURL(url)
+        } else {
+            ParkShare.share(park)
+        }
+    }
+
+    /// Share first, then Edit; reverting or deleting last.
+    private var moreActions: [SidebarAction] {
+        var actions = [SidebarAction(id: "share", label: "Share", systemImage: "square.and.arrow.up", perform: shareTapped)]
+        guard editorEnabled else { return actions }
+        actions.append(SidebarAction(id: "edit", label: "Edit", systemImage: "pencil", perform: startEditing))
+        if canShareWithRppl {
+            actions.append(SidebarAction(id: "remove", label: LocalizedStringKey(removeTitle), systemImage: "arrow.uturn.backward") { confirmRemove = true })
+        }
+        return actions
+    }
+
     private var editMenu: some View {
         Menu {
             Button("Edit", systemImage: "pencil") { startEditing() }
-            Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
-            if let origin = entry?.origin, origin == .custom || origin == .edited {
-                Button("Send to Rppl", systemImage: "envelope") {
-                    if MailAvailability.canSend {
-                        showMail = true
-                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
-                        openURL(url)
-                    } else {
-                        ParkShare.share(park)
-                    }
-                }
+            Button("Share", systemImage: "square.and.arrow.up", action: shareTapped)
+            if canShareWithRppl {
                 Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
             }
         } label: {
@@ -872,6 +939,7 @@ private struct ParkMap: View {
     let weather: ParkWeather?
 
     @State private var mapHeading: Double = 0
+    @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
         Map(initialPosition: .region(region)) {
@@ -880,9 +948,9 @@ private struct ParkMap: View {
             ForEach(startMarkers, id: \.id) { marker in
                 Annotation("", coordinate: marker.coordinate, anchor: .center) {
                     Image(systemName: "location.north.fill")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: markerSize / 2, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 18, height: 18)
+                        .frame(width: markerSize, height: markerSize)
                         .background(Color.rpplAccent, in: Circle())
                         .overlay(Circle().strokeBorder(.white, lineWidth: 1.5))
                         .rotationEffect(.degrees((marker.bearing ?? 0) - mapHeading))
