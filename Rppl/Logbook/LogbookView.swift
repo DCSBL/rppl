@@ -38,18 +38,12 @@ struct LogbookView: View {
         WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
     }
 
-    private var listColumn: ClosedRange<CGFloat> { 300...420 }
-
     var body: some View {
         Group {
             if layout == .twoPane {
+                // Column widths are the system's: on iPhone Duo it puts the divider on the fold.
                 NavigationSplitView {
                     listContent
-                        .navigationSplitViewColumnWidth(
-                            min: listColumn.lowerBound,
-                            ideal: min(max(360, listColumn.lowerBound), listColumn.upperBound),
-                            max: listColumn.upperBound
-                        )
                 } detail: {
                     splitDetail
                 }
@@ -132,13 +126,6 @@ struct LogbookView: View {
 
     private var listContent: some View {
         List {
-            Section {
-                header
-                    .listRowInsets(LogbookLayout.rowInsets(top: 8, bottom: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
-
             if connectivity.pendingAckCount > 0 {
                 Section {
                     SyncStatusIndicator(
@@ -244,8 +231,16 @@ struct LogbookView: View {
             .contentMargins(.horizontal, layout == .twoPane ? LogbookLayout.wideInset : LogbookLayout.horizontalInset, for: .scrollContent)
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationTitle("Logbook")
+            .navigationSubtitle("Sessions and sets")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                // Settings above add in the vertical bar of iPhone Duo, settings left of add elsewhere.
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("Settings", systemImage: "gearshape", action: showAppSettings)
+                    Button("Add session", systemImage: "plus") { showAddSession = true }
+                }
+            }
             .tint(Color.rpplAccent)
             .navigationDestination(isPresented: $showExampleSession) {
                 LogbookSessionDetailView(source: .bundledExample)
@@ -370,39 +365,6 @@ struct LogbookView: View {
             store: connectivity.store,
             acceptedSessionIDs: iCloud.logbookFilterIDs
         )
-    }
-
-    private var header: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Logbook")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(Color.rpplText)
-                Text("Sessions and sets")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.rpplMuted)
-            }
-            Spacer()
-            Button(action: showAppSettings) {
-                Image(systemName: "gearshape")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 34, height: 34)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .accessibilityLabel(Text("Settings"))
-            Button {
-                showAddSession = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 34, height: 34)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .accessibilityLabel(Text("Add session"))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var totalsCard: some View {

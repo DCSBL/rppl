@@ -67,6 +67,10 @@ struct SessionMapView: View {
     var layout: SessionMapLayout = .embedded
     /// Park cable outlines drawn as a thin line beneath the tracks.
     var cableOverlays: [[CLLocationCoordinate2D]] = []
+    /// Set on a full-screen map: its compass and reset live in the navigation bar (`MapScreenToolbar`).
+    var mapScope: Namespace.ID?
+    /// Bumped by the bar's reset button: back to the fitted frame.
+    var resetToken = 0
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
@@ -146,7 +150,7 @@ struct SessionMapView: View {
         ZStack(alignment: .topLeading) {
             interactiveMap
 
-            if showsStyleToggle {
+            if showsStyleToggle, mapScope == nil {
                 SessionMapControlCluster(
                     showsStyleToggle: true,
                     layout: layout
@@ -156,7 +160,7 @@ struct SessionMapView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if allowsInteraction, showReset {
+            if allowsInteraction, showReset, mapScope == nil {
                 resetButton
                     .padding(layout.resetPadding)
                     .safeAreaPadding(.bottom, layout == .fullscreen ? 4 : 0)
@@ -182,6 +186,10 @@ struct SessionMapView: View {
                         }
                     }
             }
+        }
+        .onChange(of: resetToken) { _, _ in
+            applyFittedCamera(animated: true)
+            showReset = false
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             guard allowsInteraction else { return }
@@ -273,15 +281,21 @@ struct SessionMapView: View {
 
     @ViewBuilder
     private var interactiveMap: some View {
-        let map = Map(position: $position, interactionModes: interactionModes) {
+        let map = Map(position: $position, interactionModes: interactionModes, scope: mapScope) {
             mapContent
         }
         .mapStyle(mapStyle)
 
-        if allowsInteraction {
+        // No 3D button: tilting stays a two-finger gesture.
+        if allowsInteraction, mapScope != nil {
             map
                 .mapControls {
-                    MapPitchToggle()
+                    MapScaleView()
+                }
+                .safeAreaPadding(layout.attributionSafeAreaPadding)
+        } else if allowsInteraction {
+            map
+                .mapControls {
                     MapCompass()
                 }
                 .safeAreaPadding(layout.attributionSafeAreaPadding)
@@ -554,6 +568,10 @@ struct SessionMapFullscreenView: View {
         self.preferredFrame = preferredFrame
     }
 
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @Namespace private var mapScope
+    @State private var resetToken = 0
+
     var body: some View {
         Group {
             if let sessionMapData {
@@ -561,30 +579,46 @@ struct SessionMapFullscreenView: View {
                     sessionMapData: sessionMapData,
                     rendering: rendering,
                     allowsInteraction: true,
-                    showsStyleToggle: true,
                     preferredFrame: preferredFrame,
                     layout: .fullscreen,
                     cableOverlays: cableOverlays
                 )
+                .scoped(mapScope, resetToken: resetToken)
             } else {
                 SessionMapView(
                     tracks: tracks,
                     rendering: rendering,
                     allowsInteraction: true,
-                    showsStyleToggle: true,
                     preferredFrame: preferredFrame,
                     layout: .fullscreen
                 )
+                .scoped(mapScope, resetToken: resetToken)
             }
         }
-        .ignoresSafeArea(edges: .bottom)
+        .ignoresSafeArea()
         .background(DisableNavigationSwipeBack())
         .toolbar(.hidden, for: .tabBar)
+        // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+        .toolbar {
+            MapScreenToolbar(usesSatellite: $usesSatellite, action: .reset({ resetToken += 1 }), scope: mapScope)
+        }
+        .mapScope(mapScope)
         .background(Color.rpplBackground)
         .tint(Color.rpplAccent)
         .accessibilityLabel(title)
+    }
+}
+
+private extension SessionMapView {
+    func scoped(_ scope: Namespace.ID, resetToken: Int) -> SessionMapView {
+        var copy = self
+        copy.mapScope = scope
+        copy.resetToken = resetToken
+        return copy
     }
 }
 

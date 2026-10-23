@@ -43,6 +43,7 @@ struct ParksView: View {
     @State private var selectedPark: Park?
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
+    @Namespace private var mapScope
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
     @Environment(\.showAppSettings) private var showAppSettings
@@ -69,8 +70,6 @@ struct ParksView: View {
 
     /// The map replaces the list only in a narrow window; a wide window shows it beside the list.
     private var showsMapInList: Bool { showMap && layout == .stack }
-
-    private var listColumnWidth: CGFloat { 380 }
 
     /// Beside the map a tapped card selects the park there instead of pushing it.
     private var cardSelection: ((Park) -> Void)? {
@@ -240,228 +239,21 @@ struct ParksView: View {
         let visibleParks = filteredParks(allParks)
         let orderedParks = sortedParks(visibleParks, visitCounts: visitCounts)
 
-        HStack(spacing: 0) {
-            NavigationStack(path: $path) {
-                ZStack(alignment: .top) {
-                    RpplBackdrop()
-
-                    // The map is full height, bleeding under the translucent header below.
-                    if showsMapInList {
-                        ParksMapView(parks: visibleParks, location: location, topInset: headerHeight, position: $mapPosition)
-                            .ignoresSafeArea()
-                    } else {
-                        List {
-                            if editorEnabled, !isSearching {
-                                draftRows
-                            }
-                            if !isSearching, sort == .distance, location.availability != .available {
-                                ParksLocationNeededCard(
-                                    availability: location.availability,
-                                    onRequestAccess: { location.requestAccess() },
-                                    onOpenSettings: {
-                                        if let url = ParkNavigation.appSettingsURL { openURL(url) }
-                                    }
-                                )
-                                .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                            } else if allParks.isEmpty {
-                                Text("No parks yet")
-                                    .foregroundStyle(Color.rpplMuted)
-                                    .listRowBackground(Color.clear)
-                            } else if filters.isActive, visibleParks.isEmpty {
-                                ParksNoMatchCard(onClear: clearFilters)
-                                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                            } else if orderedParks.isEmpty {
-                                Text("No parks found")
-                                    .foregroundStyle(Color.rpplMuted)
-                                    .listRowBackground(Color.clear)
-                            } else {
-                                ForEach(orderedParks) { park in
-                                    ParkCard(
-                                        park: park,
-                                        visitCount: visitCounts[park.id] ?? 0,
-                                        distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
-                                        isFavorite: favorites.contains(park.id),
-                                        entry: store.entry(id: park.id),
-                                        filterDate: openFilterDate,
-                                        selection: cardSelection,
-                                        isSelected: layout == .twoPane && selectedPark?.id == park.id
-                                    )
-                                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                                }
-                            }
-                            if !isSearching, parkDataUpdatesEnabled {
-                                ParkDataStatusLine(controller: updates)
-                                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 12))
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                            }
-                        }
-                        // Own pull-to-refresh: the system spinner sits at the top of the scroll
-                        // content, behind the pinned header, and only shows after a long pull.
-                        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
-                        } action: { _, pull in
-                            pullDistance = pull
-                        }
-                        .onScrollPhaseChange { oldPhase, newPhase in
-                            guard oldPhase == .interacting, newPhase != .interacting,
-                                  pullDistance >= Self.pullThreshold else { return }
-                            Task { await pullToRefresh() }
-                        }
-                        .listStyle(.plain)
-                        .scrollContentBackground(.hidden)
-                        .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
-                        .contentMargins(
-                            .top,
-                            headerHeight + 8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
-                            for: .scrollContent
-                        )
-                    }
-
-                    // Floats on top always: title, search/add, sort picker, filter bar. Translucent
-                    // over the map so it reads as an overlay rather than a second opaque bar.
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Parks")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(Color.rpplText)
-                            Spacer()
-                            if !allParks.isEmpty {
-                                Button(action: toggleSearch) {
-                                    Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
-                                        .font(.subheadline.weight(.semibold))
-                                        .frame(width: 34, height: 34)
-                                }
-                                .buttonStyle(.glass)
-                                .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
-                            }
-                            Button(action: showAppSettings) {
-                                Image(systemName: "gearshape")
-                                    .font(.subheadline.weight(.semibold))
-                                    .frame(width: 34, height: 34)
-                            }
-                            .buttonStyle(.glass)
-                            .buttonBorderShape(.circle)
-                            .accessibilityLabel(Text("Settings"))
-                            if editorEnabled {
-                                Button {
-                                    showEditor = true
-                                } label: {
-                                    Image(systemName: "plus")
-                                        .font(.subheadline.weight(.semibold))
-                                        .frame(width: 34, height: 34)
-                                }
-                                .buttonStyle(.glass)
-                                .buttonBorderShape(.circle)
-                                .accessibilityLabel(Text("Add park"))
-                            }
-                        }
-                        if showSearch {
-                            ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
-                                .transition(.move(edge: .top).combined(with: .opacity))
-                        } else {
-                            Picker("Sort", selection: sortChoice) {
-                                Text("Nearby").tag(SortChoice.sort(.distance))
-                                Text("Most visited").tag(SortChoice.sort(.visits))
-                                if layout == .stack {
-                                Text("View on map").tag(SortChoice.map)
-                            }
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                        if !allParks.isEmpty {
-                            ParksFilterBar(
-                                openDate: $openFilterDate,
-                                cableDirections: $cableFilter,
-                                favoritesOnly: $favoritesOnly
-                            )
-                        }
-                    }
-                    .padding(.horizontal, LogbookLayout.horizontalInset)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
-                    // `.regularMaterial` (not `.ultraThinMaterial`): the header sits over map/satellite
-                    // imagery of any color, so it needs enough opacity to keep its text and pills legible.
-                    .background(showsMapInList ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
-                    .onGeometryChange(
-                        for: CGFloat.self,
-                        of: { $0.size.height },
-                        action: { headerHeight = $0 }
-                    )
-
-                    // Pull indicator and error sit right below the pinned header, in the gap the list
-                    // leaves when it is pulled down.
-                    if !showsMapInList {
-                        if let message = updates.errorMessage {
-                            ParkDataErrorBanner(message: message)
-                                .padding(.top, headerHeight + 8)
-                                .frame(maxWidth: .infinity, alignment: .top)
-                                .transition(.opacity)
-                        } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
-                            ParkDataPullIndicator(
-                                controller: updates,
-                                progress: min(1, pullDistance / Self.pullThreshold)
-                            )
-                            .frame(height: Self.pullIndicatorHeight)
-                            .padding(.top, headerHeight + 4)
-                            .frame(maxWidth: .infinity, alignment: .top)
-                            .allowsHitTesting(false)
-                        }
-                    }
-
-                    // Pinned to the header's own measured height, in this same layer, so it always
-                    // draws above the map and never lags the header by a layout pass.
-                    if showsMapInList {
-                        VStack(spacing: 8) {
-                            MapStyleToggleButton(usesSatellite: $mapUsesSatellite)
-                            MapRecenterButton(action: recenterOnUser)
-                        }
-                        .padding(.top, headerHeight + 8)
-                        .padding(.trailing, 12)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                }
-                .toolbar(.hidden, for: .navigationBar)
-                .navigationDestination(for: Park.self) { park in
-                    ParkDetailContainer(park: park, plannedDate: openFilterDate)
-                }
-            }
-            .frame(maxWidth: layout == .twoPane ? listColumnWidth : .infinity)
-
+        Group {
             if layout == .twoPane {
-                if let park = selectedPark {
-                    NavigationStack {
-                        ParkDetailContainer(park: park, plannedDate: openFilterDate, onClose: { selectedPark = nil })
-                    }
-                    .id(park.id)
-                } else {
-                    NavigationStack {
-                        ParksMapView(
-                            parks: visibleParks,
-                            location: location,
-                            position: $mapPosition,
-                            showsSearch: false,
-                            onSelectPark: { selectedPark = $0 }
-                        )
-                        .toolbar(.hidden, for: .navigationBar)
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        VStack(spacing: 8) {
-                            MapStyleToggleButton(usesSatellite: $mapUsesSatellite)
-                            MapRecenterButton(action: recenterOnUser)
-                        }
-                        .padding(12)
-                    }
+                // Column widths are the system's: on iPhone Duo it puts the divider on the fold.
+                NavigationSplitView {
+                    listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
+                } detail: {
+                    detailColumn(visibleParks: visibleParks)
+                }
+            } else {
+                NavigationStack(path: $path) {
+                    listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
                 }
             }
         }
+        .mapScope(mapScope)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
@@ -534,46 +326,204 @@ struct ParksView: View {
             mapPendingRecenter = false
         }
     }
-}
 
-/// Standard/satellite toggle for the map, using the same native Liquid Glass chrome as the
-/// search/add buttons above.
-private struct MapStyleToggleButton: View {
-    @Binding var usesSatellite: Bool
+    /// The list with its pinned sort and filter header; in a narrow window "View on map" swaps the list for the map.
+    @ViewBuilder
+    private func listColumn(allParks: [Park], visitCounts: [String: Int], visibleParks: [Park], orderedParks: [Park]) -> some View {
+        ZStack(alignment: .top) {
+            RpplBackdrop()
 
-    var body: some View {
-        Button {
-            withRpplAnimation(.snappy(duration: 0.2)) { usesSatellite.toggle() }
-        } label: {
-            Image(systemName: usesSatellite ? "map.fill" : "globe.europe.africa.fill")
-                .font(.subheadline.weight(.semibold))
-                .frame(minWidth: 34, minHeight: 34)
+            // The map is full height, bleeding under the translucent header below.
+            if showsMapInList {
+                ParksMapView(parks: visibleParks, location: location, topInset: headerHeight, position: $mapPosition, scope: mapScope)
+                    .ignoresSafeArea()
+            } else {
+                List {
+                    if editorEnabled, !isSearching {
+                        draftRows
+                    }
+                    if !isSearching, sort == .distance, location.availability != .available {
+                        ParksLocationNeededCard(
+                            availability: location.availability,
+                            onRequestAccess: { location.requestAccess() },
+                            onOpenSettings: {
+                                if let url = ParkNavigation.appSettingsURL { openURL(url) }
+                            }
+                        )
+                        .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    } else if allParks.isEmpty {
+                        Text("No parks yet")
+                            .foregroundStyle(Color.rpplMuted)
+                            .listRowBackground(Color.clear)
+                    } else if filters.isActive, visibleParks.isEmpty {
+                        ParksNoMatchCard(onClear: clearFilters)
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    } else if orderedParks.isEmpty {
+                        Text("No parks found")
+                            .foregroundStyle(Color.rpplMuted)
+                            .listRowBackground(Color.clear)
+                    } else {
+                        ForEach(orderedParks) { park in
+                            ParkCard(
+                                park: park,
+                                visitCount: visitCounts[park.id] ?? 0,
+                                distanceMeters: location.coordinate.map { park.location.meters(to: $0) },
+                                isFavorite: favorites.contains(park.id),
+                                entry: store.entry(id: park.id),
+                                filterDate: openFilterDate,
+                                selection: cardSelection,
+                                isSelected: layout == .twoPane && selectedPark?.id == park.id
+                            )
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+                    }
+                    if !isSearching, parkDataUpdatesEnabled {
+                        ParkDataStatusLine(controller: updates)
+                            .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 12))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    }
+                }
+                // Own pull-to-refresh: the system spinner sits at the top of the scroll
+                // content, behind the pinned header, and only shows after a long pull.
+                .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                    max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
+                } action: { _, pull in
+                    pullDistance = pull
+                }
+                .onScrollPhaseChange { oldPhase, newPhase in
+                    guard oldPhase == .interacting, newPhase != .interacting,
+                          pullDistance >= Self.pullThreshold else { return }
+                    Task { await pullToRefresh() }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
+                .contentMargins(
+                    .top,
+                    headerHeight + 8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
+                    for: .scrollContent
+                )
+            }
+
+            // Floats on top always: title, search/add, sort picker, filter bar. Translucent
+            // over the map so it reads as an overlay rather than a second opaque bar.
+            VStack(alignment: .leading, spacing: 12) {
+                if showSearch {
+                    ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                } else {
+                    Picker("Sort", selection: sortChoice) {
+                        Text("Nearby").tag(SortChoice.sort(.distance))
+                        Text("Most visited").tag(SortChoice.sort(.visits))
+                        if layout == .stack {
+                        Text("View on map").tag(SortChoice.map)
+                    }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                if !allParks.isEmpty {
+                    ParksFilterBar(
+                        openDate: $openFilterDate,
+                        cableDirections: $cableFilter,
+                        favoritesOnly: $favoritesOnly
+                    )
+                }
+            }
+            .padding(.horizontal, LogbookLayout.horizontalInset)
+            .padding(.top, 8)
+            .padding(.bottom, 8)
+            // `.regularMaterial` (not `.ultraThinMaterial`): the header sits over map/satellite
+            // imagery of any color, so it needs enough opacity to keep its text and pills legible.
+            .background(showsMapInList ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
+            .onGeometryChange(
+                for: CGFloat.self,
+                of: { $0.size.height },
+                action: { headerHeight = $0 }
+            )
+
+            // Pull indicator and error sit right below the pinned header, in the gap the list
+            // leaves when it is pulled down.
+            if !showsMapInList {
+                if let message = updates.errorMessage {
+                    ParkDataErrorBanner(message: message)
+                        .padding(.top, headerHeight + 8)
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        .transition(.opacity)
+                } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
+                    ParkDataPullIndicator(
+                        controller: updates,
+                        progress: min(1, pullDistance / Self.pullThreshold)
+                    )
+                    .frame(height: Self.pullIndicatorHeight)
+                    .padding(.top, headerHeight + 4)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .allowsHitTesting(false)
+                }
+            }
         }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .accessibilityLabel(
-            usesSatellite
-                ? Text("Show standard map")
-                : Text("Show satellite map")
-        )
-    }
-}
-
-/// Recenters the map on the user's current location at a fixed, useful zoom — unlike MapKit's own
-/// user-location button, which recenters without changing the current zoom level.
-private struct MapRecenterButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "location.fill")
-                .font(.subheadline.weight(.semibold))
-                .frame(minWidth: 34, minHeight: 34)
+        .navigationTitle("Parks")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
+        .navigationDestination(for: Park.self) { park in
+            ParkDetailContainer(park: park, plannedDate: openFilterDate)
         }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .accessibilityLabel(Text("Center on my location"))
     }
+
+    /// Two-pane right side: the selected park, or the map of the listed parks.
+    @ViewBuilder
+    private func detailColumn(visibleParks: [Park]) -> some View {
+        if let park = selectedPark {
+            NavigationStack {
+                ParkDetailContainer(park: park, plannedDate: openFilterDate, onClose: { selectedPark = nil })
+            }
+            .id(park.id)
+        } else {
+            NavigationStack {
+                ParksMapView(
+                    parks: visibleParks,
+                    location: location,
+                    position: $mapPosition,
+                    showsSearch: false,
+                    onSelectPark: { selectedPark = $0 },
+                    scope: mapScope
+                )
+                .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+                .toolbar {
+                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser), scope: mapScope)
+                }
+            }
+        }
+    }
+
+    /// Settings above add, like the Logbook; search on top. On the map: the map buttons instead.
+    @ToolbarContentBuilder
+    private func listToolbar(hasParks: Bool) -> some ToolbarContent {
+        if showsMapInList {
+            MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser), scope: mapScope)
+        } else {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if hasParks {
+                    if showSearch {
+                        Button("Close search", systemImage: "xmark", action: toggleSearch)
+                    } else {
+                        Button("Search parks", systemImage: "magnifyingglass", action: toggleSearch)
+                    }
+                }
+                Button("Settings", systemImage: "gearshape", action: showAppSettings)
+                if editorEnabled {
+                    Button("Add park", systemImage: "plus") { showEditor = true }
+                }
+            }
+        }
+    }
+
 }
 
 /// Filter pills row: Open (datepicker), Cable (multi-pick), Favourites only (toggle).
