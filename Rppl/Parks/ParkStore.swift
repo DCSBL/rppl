@@ -14,7 +14,7 @@ final class ParkStore {
     private var root: URL { AppConstants.localPhoneParksRoot }
 
     func reload() {
-        entries = ParkCatalog.loadWithOrigin(userRoot: root, otaDirectory: ParkDataStore.app.activeDirectory())
+        entries = ParkCatalog.loadWithOrigin(userRoot: root)
     }
 
     /// The Park hours widget reads the same park files; tell it after an edit.
@@ -29,7 +29,7 @@ final class ParkStore {
     func save(_ park: Park) throws {
         let existing = entry(id: park.id)
         let base: Park? = switch existing?.origin {
-        case .bundled, .ota: existing?.park
+        case .bundled: existing?.park
         case .edited: existing?.bundledPark
         default: nil
         }

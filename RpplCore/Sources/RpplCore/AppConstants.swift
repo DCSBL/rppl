@@ -37,8 +37,6 @@ public enum AppConstants {
     public static let sessionsDirectoryName = "Sessions"
     /// User-added or edited park YAML files (override bundled parks with the same `id`).
     public static let parksDirectoryName = "Parks"
-    /// Park YAML files downloaded over the air (see `ParkDataStore`). Not user files: never edited in app.
-    public static let parkDataDirectoryName = "ParkData"
     /// Park editor work in progress, one JSON file per draft. Not park YAML: never read as a park.
     public static let parkDraftsDirectoryName = "ParkDrafts"
     public static let wcSessionFileMetaSessionID = "sessionId"
@@ -92,12 +90,6 @@ public enum AppConstants {
         let base = appGroupContainerURL
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent(parksDirectoryName, isDirectory: true)
-    }
-
-    public static var localPhoneParkDataRoot: URL {
-        let base = appGroupContainerURL
-            ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent(parkDataDirectoryName, isDirectory: true)
     }
 
     public static var localPhoneParkDraftsRoot: URL {

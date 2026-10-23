@@ -7,8 +7,8 @@
     "render": "node render.mjs"
   },
   "dependencies": {
-    "@fontsource/poppins": "5.3.0",
-    "playwright": "1.64.1",
-    "yaml": "2.9.1"
+    "@fontsource/poppins": "5.2.7",
+    "playwright": "1.56.1",
+    "yaml": "2.8.1"
   }
 }

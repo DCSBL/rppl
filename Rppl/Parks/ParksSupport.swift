@@ -637,7 +637,7 @@ enum ParkOriginBadge {
         guard let entry else { return nil }
         if entry.hasNewerBundled { return String(localized: "Update available") }
         switch entry.origin {
-        case .bundled, .ota: return nil
+        case .bundled: return nil
         case .custom: return String(localized: "Custom")
         case .edited: return String(localized: "Edited")
         }

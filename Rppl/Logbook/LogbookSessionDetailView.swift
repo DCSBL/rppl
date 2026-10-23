@@ -120,6 +120,7 @@ struct LogbookSessionDetailView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
+            .readableWidth()
         }
         .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
@@ -137,7 +138,7 @@ struct LogbookSessionDetailView: View {
         } message: {
             Text(flagSaveError ?? "")
         }
-        .task { parks = ParkCatalog.loadApp() }
+        .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
         .task(id: waterEstimateKey) {
             guard waterEstimateKey != nil, let store, let manifest, let sessionStats else { return }
             if let estimate = await SessionWaterEstimate.fetchIfNeeded(
@@ -865,7 +866,7 @@ struct LogbookSessionDetailView: View {
                         center: summary.mapFrame.map {
                             ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude)
                         },
-                        parks: ParkCatalog.loadApp()
+                        parks: ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
                     )
                 }
                 if let linkedPark {

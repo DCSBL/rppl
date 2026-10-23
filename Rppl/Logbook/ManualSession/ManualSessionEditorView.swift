@@ -55,7 +55,7 @@ struct ManualSessionEditorView: View {
     init(editing sessionId: String? = nil, onSaved: @escaping (String) -> Void = { _ in }) {
         editing = sessionId
         self.onSaved = onSaved
-        let parks = ParkCatalog.loadApp()
+        let parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
         var loaded = sessionId.flatMap { Self.load($0) } ?? .new()
         loaded.fitTallies(to: parks)
         _parks = State(initialValue: parks)

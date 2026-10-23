@@ -65,7 +65,7 @@ final class SessionCatalog {
                     .sorted { $0.startedAt > $1.startedAt }
             }
 
-            let parks = ParkCatalog.loadApp()
+            let parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
             var loaded: [SessionEntry] = []
             loaded.reserveCapacity(manifests.count)
 

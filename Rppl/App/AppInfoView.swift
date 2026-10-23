@@ -12,9 +12,6 @@ struct AppInfoView: View {
     @State private var showDisableDeleteConfirm = false
     @State private var showSupportMail = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
-    @AppStorage(AppSettingsKey.parkDataUpdatesEnabled) private var parkDataUpdatesEnabled = false
-    @AppStorage(AppSettingsKey.didAskParkDataConsent) private var didAskParkDataConsent = false
-    @State private var parkDataUpdates = ParkDataUpdateController.shared
 
     private let versionInfo = AppVersionInfo(infoDictionary: Bundle.main.infoDictionary)
 
@@ -44,25 +41,6 @@ struct AppInfoView: View {
                     Text(
                         "Uses an external, official water-monitoring service on parks with a nearby source, for the park screen. The reading is an estimate."
                     )
-                }
-
-                Section {
-                    Toggle("Update park data", isOn: $parkDataUpdatesEnabled)
-                        .tint(Color.rpplAccent)
-                    if parkDataUpdatesEnabled {
-                        ParkDataStatusLine(controller: parkDataUpdates)
-                    }
-                } header: {
-                    Text("Park data")
-                } footer: {
-                    Text(
-                        "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent."
-                    )
-                }
-                .onChange(of: parkDataUpdatesEnabled) { _, enabled in
-                    guard enabled else { return }
-                    didAskParkDataConsent = true
-                    Task { await parkDataUpdates.manualRefresh() }
                 }
 
                 if AppReleaseChannel.allowsDebugTools {
