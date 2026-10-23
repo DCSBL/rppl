@@ -4976,6 +4976,86 @@
         }
       }
     },
+    "Share with Rppl?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share with Rppl?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delen met Rppl?"
+          }
+        }
+      }
+    },
+    "Share with Rppl" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share with Rppl"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delen met Rppl"
+          }
+        }
+      }
+    },
+    "Other app or file" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other app or file"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andere app of bestand"
+          }
+        }
+      }
+    },
+    "Rppl can send this session to the developers. Otherwise pick any app." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl can send this session to the developers. Otherwise pick any app."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl kan deze session naar de ontwikkelaars sturen. Anders kies je zelf een app."
+          }
+        }
+      }
+    },
+    "Your changes to this park can go to the developers. Otherwise pick any app." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your changes to this park can go to the developers. Otherwise pick any app."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je wijzigingen aan dit park kunnen naar de ontwikkelaars. Anders kies je zelf een app."
+          }
+        }
+      }
+    },
     "None" : {
       "localizations" : {
         "en" : {

@@ -295,6 +295,7 @@ struct LogbookView: View {
         if let sessionId = selectedSessionId {
             NavigationStack {
                 LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
+                    .embeddedInSplit()
                     .toolbar(.visible, for: .navigationBar)
             }
             .id(sessionId)
