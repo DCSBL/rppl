@@ -128,10 +128,10 @@ struct LogbookSessionDetailView: View {
                     if isManual { manualSetsSection } else { setsSection }
                 }
             }
-            .padding(.horizontal, isEmbeddedInSplit ? LogbookLayout.wideInset : 20)
             .padding(.bottom, 24)
             .readableWidth()
         }
+        .detailMargins(isEmbeddedInSplit ? LogbookLayout.wideInset : 20)
         .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -294,16 +294,6 @@ struct LogbookSessionDetailView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-
-                SessionMapControlCluster(
-                    showsStyleToggle: true,
-                    layout: .embedded
-                )
-                .padding(10)
-
-                setSelectionMenu
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .padding(10)
             }
             .frame(height: 300)
             .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
@@ -404,42 +394,6 @@ struct LogbookSessionDetailView: View {
 
     private var sessionRendering: SessionMapRendering {
         SessionMapRendering(setTracks: setTracks, soloSetIndex: soloSetIndex)
-    }
-
-    /// Native menu over the map: the session's own sets are the only options.
-    @ViewBuilder
-    private var setSelectionMenu: some View {
-        if setTracks.count > 1 {
-            Menu {
-                Picker("Set", selection: $soloSetIndex) {
-                    Text("All sets").tag(Int?.none)
-                    ForEach(setTracks, id: \.setIndex) { track in
-                        Text("Set \(track.setNumber)").tag(Int?.some(track.setIndex))
-                    }
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Text(selectedSetTitle)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
-                }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.rpplText)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(.ultraThinMaterial, in: Capsule())
-            }
-            .accessibilityLabel("Set")
-        }
-    }
-
-    private var selectedSetTitle: String {
-        guard let index = soloSetIndex,
-              let track = setTracks.first(where: { $0.setIndex == index })
-        else {
-            return String(localized: "All sets")
-        }
-        return String(localized: "Set \(track.setNumber)")
     }
 
     @ViewBuilder

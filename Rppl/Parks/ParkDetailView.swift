@@ -82,10 +82,10 @@ struct ParkDetailView: View {
                 linksCard
                 footer
             }
-            .padding(.horizontal, onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
             .padding(.vertical, 8)
             .readableWidth()
         }
+        .detailMargins(onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
@@ -261,9 +261,25 @@ struct ParkDetailView: View {
 
     private var mapCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ParkMap(park: park, usesSatellite: usesSatellite, weather: weather)
-                .frame(height: 220)
-                .logbookNestedClip()
+            // A preview: tapping it opens the full-screen map (the whole window when folded, the detail column beside a list).
+            ZStack {
+                ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: .constant(.region(ParkMap.region(for: park))))
+                    .allowsHitTesting(false)
+                NavigationLink {
+                    ParkMapScreen(park: park, weather: weather)
+                } label: {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(height: 220)
+            .logbookNestedClip()
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(Text("Map"))
+            .accessibilityHint(Text("Shows full-screen map"))
 
             if let address = park.address {
                 Text(address)
@@ -897,16 +913,73 @@ struct ParkDetailView: View {
     }
 }
 
+/// One park on the map, interactive and full screen, with the map buttons in the navigation bar.
+private struct ParkMapScreen: View {
+    let park: Park
+    let weather: ParkWeather?
+
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @State private var position: MapCameraPosition
+    @State private var location = ParksLocationProvider()
+    @State private var pendingRecenter = false
+    @Namespace private var mapScope
+
+    init(park: Park, weather: ParkWeather?) {
+        self.park = park
+        self.weather = weather
+        _position = State(initialValue: .region(ParkMap.region(for: park)))
+    }
+
+    var body: some View {
+        ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: $position, scope: mapScope)
+            .ignoresSafeArea()
+            .navigationTitle(park.compactName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(removing: .title)
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+            .toolbar(.hidden, for: .tabBar)
+            .toolbar {
+                MapScreenToolbar(usesSatellite: $usesSatellite, action: .here(recenterOnUser), scope: mapScope)
+            }
+            .mapScope(mapScope)
+            .onChange(of: location.coordinate) { _, coordinate in
+                guard pendingRecenter, let coordinate else { return }
+                pendingRecenter = false
+                move(to: coordinate)
+            }
+    }
+
+    /// Same as the parks map: a tap is what asks for location access, opening the map never does.
+    private func recenterOnUser() {
+        if let coordinate = location.coordinate {
+            move(to: coordinate)
+        } else {
+            pendingRecenter = true
+            location.requestAccess()
+        }
+    }
+
+    private func move(to coordinate: ParkCoordinate) {
+        let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
+        withRpplAnimation {
+            position = .camera(MapCamera(centerCoordinate: center, distance: 5_000))
+        }
+    }
+}
+
 private struct ParkMap: View {
     let park: Park
     let usesSatellite: Bool
     let weather: ParkWeather?
+    @Binding var position: MapCameraPosition
+    /// Set on the full-screen map: the compass lives in its navigation bar.
+    var scope: Namespace.ID?
 
     @State private var mapHeading: Double = 0
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
-        Map(initialPosition: .region(region)) {
+        Map(position: $position, scope: scope) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
             ForEach(startMarkers, id: \.id) { marker in
@@ -930,6 +1003,9 @@ private struct ParkMap: View {
             }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
+        .mapControls {
+            MapScaleView()
+        }
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }
@@ -963,7 +1039,7 @@ private struct ParkMap: View {
         }
     }
 
-    private var region: MKCoordinateRegion {
+    static func region(for park: Park) -> MKCoordinateRegion {
         let all = [park.location]
             + (park.cables ?? []).flatMap { ($0.points ?? []).map(\.coordinate) }
         let lats = all.map(\.lat)
