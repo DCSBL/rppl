@@ -138,7 +138,7 @@ struct LogbookSessionDetailView: View {
         } message: {
             Text(flagSaveError ?? "")
         }
-        .task { parks = ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot) }
+        .task { parks = ParkCatalog.loadApp() }
         .task(id: waterEstimateKey) {
             guard waterEstimateKey != nil, let store, let manifest, let sessionStats else { return }
             if let estimate = await SessionWaterEstimate.fetchIfNeeded(
@@ -866,7 +866,7 @@ struct LogbookSessionDetailView: View {
                         center: summary.mapFrame.map {
                             ParkCoordinate(lat: $0.centerLatitude, lon: $0.centerLongitude)
                         },
-                        parks: ParkCatalog.load(userRoot: AppConstants.localPhoneParksRoot)
+                        parks: ParkCatalog.loadApp()
                     )
                 }
                 if let linkedPark {

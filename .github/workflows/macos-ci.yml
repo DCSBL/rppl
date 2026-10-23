@@ -35,7 +35,7 @@ jobs:
       watch: ${{ steps.filter.outputs.watch }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -71,7 +71,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Toolchain
         run: |
@@ -111,7 +111,7 @@ jobs:
 
       - name: Upload logs
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tests-log
           path: |
@@ -127,7 +127,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Toolchain
         run: xcodebuild -version
@@ -159,7 +159,7 @@ jobs:
 
       - name: Upload log
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-log
           path: build.log
@@ -177,7 +177,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
       # Rppl/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
@@ -218,7 +218,7 @@ jobs:
       - name: Upload screenshots
         id: screenshots
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: screenshots
           path: screenshots/*.png
@@ -245,7 +245,7 @@ jobs:
 
       - name: Upload result
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ui-tests-result
           path: |
@@ -265,7 +265,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
       # RpplWatch/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
@@ -306,7 +306,7 @@ jobs:
       - name: Upload screenshots
         id: screenshots
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: watch-screenshots
           path: screenshots/*.png
@@ -333,7 +333,7 @@ jobs:
 
       - name: Upload result
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: watch-ui-tests-result
           path: |

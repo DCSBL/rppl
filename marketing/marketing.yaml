@@ -11,9 +11,9 @@
 formats:
   # App Store screenshots (iPhone, medium): 1206x2622 only; App Store Connect rejects other sizes for this slot.
   iphone-6.3: { w: 1206, h: 2622, folder: screenshots/iphone-6.3 }
-  # Product page header and search results: 16:9 only.
+  # Product page header: 16:9. Search results: 3:2, because the App Store crops a 16:9 image to 3:2 and cuts the sides.
   header-16x9: { w: 5244, h: 2950, folder: product-page-header/16x9 }
-  search-16x9: { w: 5244, h: 2950, folder: search-results/16x9 }
+  search-3x2: { w: 3840, h: 2560, folder: search-results/3x2 }
 
 defaults:
   align: left # left | center | right (text edge lines up with the phone edge)
@@ -53,7 +53,7 @@ slides:
     object_position: "50% 50%"
     title: Rppl
     items:
-      - { icon: code, text: "Free and Open Source" }
+      - { icon: code, text: "Free and Open Source." }
       - { icon: lock-phone, text: "Your data stays yours, there is no Rppl cloud." }
       - { icon: no-euro, text: "No subscriptions, ever." }
 
@@ -71,4 +71,4 @@ slides:
     text: "**YOUR** CABLEPARK BUDDY"
     screenshot: 04-session-tracked-2
     watch_screenshot: 06-live-riding
-    formats: [search-16x9]
+    formats: [search-3x2]

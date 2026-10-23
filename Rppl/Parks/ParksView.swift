@@ -27,6 +27,10 @@ struct ParksView: View {
     @State private var showSearch = false
     @State private var searchText = ""
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
+    @AppStorage(AppSettingsKey.parkDataUpdatesEnabled) private var parkDataUpdatesEnabled = false
+    @AppStorage(AppSettingsKey.didAskParkDataConsent) private var didAskParkDataConsent = false
+    @State private var updates = ParkDataUpdateController.shared
+    @State private var showParkDataConsent = false
     @State private var openFilterDate: Date?
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
@@ -38,7 +42,7 @@ struct ParksView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
 
-    private var parks: [Park] { store.entries.map(\.park) }
+    private var parks: [Park] { store.entries.map(\.park).filter(\.isListed) }
 
     private var isSearching: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -131,6 +135,22 @@ struct ParksView: View {
     }
 
     private func reloadDrafts() { drafts.reload() }
+
+    /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
+    private func pullToRefresh() async {
+        guard parkDataUpdatesEnabled else {
+            if !didAskParkDataConsent { showParkDataConsent = true }
+            return
+        }
+        await updates.manualRefresh()
+    }
+
+    private func answerParkDataConsent(allow: Bool) {
+        didAskParkDataConsent = true
+        guard allow else { return }
+        parkDataUpdatesEnabled = true
+        Task { await updates.manualRefresh() }
+    }
 
     private func showRequestedFavorites() {
         guard openFavorites else { return }
@@ -252,7 +272,14 @@ struct ParksView: View {
                                     .listRowSeparator(.hidden)
                                 }
                             }
+                            if !isSearching, parkDataUpdatesEnabled {
+                                ParkDataStatusLine(controller: updates)
+                                    .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 12))
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
+                            }
                         }
+                        .refreshable { await pullToRefresh() }
                         .listStyle(.plain)
                         .scrollContentBackground(.hidden)
                         .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
@@ -323,6 +350,22 @@ struct ParksView: View {
                         action: { headerHeight = $0 }
                     )
 
+                    // The system pull-to-refresh spinner sits at the top of the list, which the opaque
+                    // header above covers, so the progress and the error get their own spot below it.
+                    if !showsMapInList {
+                        if let message = updates.errorMessage {
+                            ParkDataErrorBanner(message: message)
+                                .padding(.top, headerHeight + 8)
+                                .frame(maxWidth: .infinity, alignment: .top)
+                                .transition(.opacity)
+                        } else if updates.isRefreshing {
+                            ParkDataProgressBanner()
+                                .padding(.top, headerHeight + 8)
+                                .frame(maxWidth: .infinity, alignment: .top)
+                                .transition(.opacity)
+                        }
+                    }
+
                     // Pinned to the header's own measured height, in this same layer, so it always
                     // draws above the map and never lags the header by a layout pass.
                     if showsMapInList {
@@ -373,9 +416,19 @@ struct ParksView: View {
         } message: { _ in
             Text("The unsaved park and everything you filled in will be gone.")
         }
+        .alert("Update park data?", isPresented: $showParkDataConsent) {
+            Button("Turn on") { answerParkDataConsent(allow: true) }
+            Button("Not now", role: .cancel) { answerParkDataConsent(allow: false) }
+        } message: {
+            Text("Rppl fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent. You can change this in Info.")
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: updates.startedCount)
+        .sensoryFeedback(.success, trigger: updates.successCount)
+        .sensoryFeedback(.error, trigger: updates.failureCount)
         .task {
             drafts.reload()
             store.reload()
+            await updates.refreshIfDue()
             catalog.reload(store: connectivity.store, acceptedSessionIDs: iCloud.logbookFilterIDs)
         }
         .onChange(of: connectivity.sessionsRevision) { _, _ in
@@ -400,6 +453,7 @@ struct ParksView: View {
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
             refreshLocation()
+            Task { await updates.refreshIfDue() }
         }
         .onChange(of: showsNearby) { _, shows in
             if shows { location.requestAccess() }
