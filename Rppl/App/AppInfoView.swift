@@ -51,7 +51,21 @@ struct AppInfoView: View {
                     Toggle("Update park data", isOn: $parkDataUpdatesEnabled)
                         .tint(Color.rpplAccent)
                     if parkDataUpdatesEnabled {
-                        ParkDataStatusLine(controller: parkDataUpdates)
+                        HStack(spacing: 12) {
+                            ParkDataStatusLine(controller: parkDataUpdates, alignment: .leading)
+                            if parkDataUpdates.isRefreshing {
+                                ProgressView()
+                            } else {
+                                Button {
+                                    Task { await parkDataUpdates.manualRefresh() }
+                                } label: {
+                                    Image(systemName: "arrow.clockwise")
+                                }
+                                .buttonStyle(.borderless)
+                                .tint(Color.rpplAccent)
+                                .accessibilityLabel(Text("Update park data"))
+                            }
+                        }
                     }
                 } header: {
                     Text("Park data")

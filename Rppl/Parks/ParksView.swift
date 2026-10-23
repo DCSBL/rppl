@@ -35,6 +35,8 @@ struct ParksView: View {
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
     @State private var headerHeight: CGFloat = 0
+    /// How far the list is pulled down past its resting position, for the pull-to-refresh indicator.
+    @State private var pullDistance: CGFloat = 0
     @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.netherlands)
     @State private var mapPendingRecenter = false
     /// Two-pane only: the park shown on the right instead of the map.
@@ -151,6 +153,10 @@ struct ParksView: View {
     }
 
     private func reloadDrafts() { drafts.reload() }
+
+    /// Pull distance (pt) that counts as a refresh when the finger lets go.
+    private static let pullThreshold: CGFloat = 70
+    private static let pullIndicatorHeight: CGFloat = 64
 
     /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
     private func pullToRefresh() async {
@@ -301,11 +307,26 @@ struct ParksView: View {
                                     .listRowSeparator(.hidden)
                             }
                         }
-                        .refreshable { await pullToRefresh() }
+                        // Own pull-to-refresh: the system spinner sits at the top of the scroll
+                        // content, behind the pinned header, and only shows after a long pull.
+                        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
+                        } action: { _, pull in
+                            pullDistance = pull
+                        }
+                        .onScrollPhaseChange { oldPhase, newPhase in
+                            guard oldPhase == .interacting, newPhase != .interacting,
+                                  pullDistance >= Self.pullThreshold else { return }
+                            Task { await pullToRefresh() }
+                        }
                         .listStyle(.plain)
                         .scrollContentBackground(.hidden)
                         .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
-                        .contentMargins(.top, headerHeight + 8, for: .scrollContent)
+                        .contentMargins(
+                            .top,
+                            headerHeight + 8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
+                            for: .scrollContent
+                        )
                     }
 
                     // Floats on top always: title, search/add, sort picker, filter bar. Translucent
@@ -382,19 +403,23 @@ struct ParksView: View {
                         action: { headerHeight = $0 }
                     )
 
-                    // The system pull-to-refresh spinner sits at the top of the list, which the opaque
-                    // header above covers, so the progress and the error get their own spot below it.
+                    // Pull indicator and error sit right below the pinned header, in the gap the list
+                    // leaves when it is pulled down.
                     if !showsMapInList {
                         if let message = updates.errorMessage {
                             ParkDataErrorBanner(message: message)
                                 .padding(.top, headerHeight + 8)
                                 .frame(maxWidth: .infinity, alignment: .top)
                                 .transition(.opacity)
-                        } else if updates.isRefreshing {
-                            ParkDataProgressBanner()
-                                .padding(.top, headerHeight + 8)
-                                .frame(maxWidth: .infinity, alignment: .top)
-                                .transition(.opacity)
+                        } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
+                            ParkDataPullIndicator(
+                                controller: updates,
+                                progress: min(1, pullDistance / Self.pullThreshold)
+                            )
+                            .frame(height: Self.pullIndicatorHeight)
+                            .padding(.top, headerHeight + 4)
+                            .frame(maxWidth: .infinity, alignment: .top)
+                            .allowsHitTesting(false)
                         }
                     }
 
