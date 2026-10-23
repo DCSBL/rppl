@@ -209,3 +209,19 @@ struct ParkDataErrorBanner: View {
             .accessibilityAddTraits(.updatesFrequently)
     }
 }
+
+/// Spinner shown below the header while park data is being fetched.
+struct ParkDataProgressBanner: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            ProgressView()
+            Text("Updating park data…")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color.rpplText)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: Capsule())
+        .accessibilityElement(children: .combine)
+    }
+}
