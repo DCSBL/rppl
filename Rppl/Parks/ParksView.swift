@@ -45,7 +45,7 @@ struct ParksView: View {
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.showAppSettings) private var showAppSettings
 
     private var parks: [Park] { store.entries.map(\.park).filter(\.isListed) }
 
@@ -342,7 +342,7 @@ struct ParksView: View {
                                 .buttonBorderShape(.circle)
                                 .accessibilityLabel(Text(showSearch ? "Close search" : "Search parks"))
                             }
-                            Button(action: openSettings) {
+                            Button(action: showAppSettings) {
                                 Image(systemName: "gearshape")
                                     .font(.subheadline.weight(.semibold))
                                     .frame(width: 34, height: 34)

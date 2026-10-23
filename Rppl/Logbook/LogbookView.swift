@@ -28,7 +28,7 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.showAppSettings) private var showAppSettings
 
     private var useAccessibilityLayout: Bool {
         dynamicTypeSize.isAccessibilitySize
@@ -383,7 +383,7 @@ struct LogbookView: View {
                     .foregroundStyle(Color.rpplMuted)
             }
             Spacer()
-            Button(action: openSettings) {
+            Button(action: showAppSettings) {
                 Image(systemName: "gearshape")
                     .font(.subheadline.weight(.semibold))
                     .frame(width: 34, height: 34)

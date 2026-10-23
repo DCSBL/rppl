@@ -38,7 +38,7 @@ struct ContentView: View {
                 ParksView(openParkID: $openParkID, openFavorites: $openFavorites)
             }
         }
-        .environment(\.openSettings, { showSettings = true })
+        .environment(\.showAppSettings, { showSettings = true })
         .background { RpplBackdrop() }
         .sheet(isPresented: $showSettings) {
             AppInfoView(
@@ -215,4 +215,9 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+extension EnvironmentValues {
+    /// Opens the Rppl settings modal. Not `openSettings`: SwiftUI already has one (macOS only).
+    @Entry var showAppSettings: () -> Void = {}
 }
