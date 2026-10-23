@@ -8,7 +8,6 @@ struct ParksView: View {
     @Binding var openParkID: String?
     /// Top parks widget tap: nearby order with the Favourites filter on; cleared once applied.
     @Binding var openFavorites: Bool
-    @State private var path = NavigationPath()
     @State private var store = ParkStore.shared
     @State private var showEditor = false
     @State private var drafts = ParkDraftsController.shared
@@ -40,10 +39,11 @@ struct ParksView: View {
     @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.netherlands)
     @State private var mapPendingRecenter = false
     /// Two-pane only: the park shown on the right instead of the map.
-    @State private var selectedPark: Park?
+    @State private var selectedParkID: String?
+    /// Collapsed (narrow), the list is the root; opening a park shows the detail on top.
+    @State private var compactColumn = NavigationSplitViewColumn.sidebar
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
-    @Namespace private var mapScope
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
     @Environment(\.showAppSettings) private var showAppSettings
@@ -71,10 +71,15 @@ struct ParksView: View {
     /// The map replaces the list only in a narrow window; a wide window shows it beside the list.
     private var showsMapInList: Bool { showMap && layout == .stack }
 
-    /// Beside the map a tapped card selects the park there instead of pushing it.
-    private var cardSelection: ((Park) -> Void)? {
+    /// The park open in the detail column (pushed when the split view is collapsed).
+    private var selectedPark: Park? {
+        selectedParkID.flatMap { store.entry(id: $0)?.park }
+    }
+
+    /// Beside the list a cross closes the park, back to the map; collapsed, the back button does.
+    private var detailClose: (() -> Void)? {
         guard layout == .twoPane else { return nil }
-        return { selectedPark = $0 }
+        return { selectedParkID = nil }
     }
 
     private var showsNearby: Bool {
@@ -171,7 +176,7 @@ struct ParksView: View {
     private func showRequestedFavorites() {
         guard openFavorites else { return }
         openFavorites = false
-        path = NavigationPath()
+        selectedParkID = nil
         showMap = false
         showSearch = false
         searchText = ""
@@ -185,13 +190,9 @@ struct ParksView: View {
         guard let id = openParkID else { return }
         if store.entries.isEmpty { store.reload() }
         openParkID = nil
-        guard let park = store.entry(id: id)?.park else { return }
-        path = NavigationPath()
-        if layout == .twoPane {
-            selectedPark = park
-        } else {
-            path.append(park)
-        }
+        guard store.entry(id: id) != nil else { return }
+        selectedParkID = id
+        compactColumn = .detail
     }
 
     /// Unfinished parks, on top of the list until they are saved or deleted.
@@ -239,21 +240,14 @@ struct ParksView: View {
         let visibleParks = filteredParks(allParks)
         let orderedParks = sortedParks(visibleParks, visitCounts: visitCounts)
 
-        Group {
-            if layout == .twoPane {
-                // Column widths are the system's: on iPhone Duo it puts the divider on the fold.
-                NavigationSplitView {
-                    listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
-                } detail: {
-                    detailColumn(visibleParks: visibleParks)
-                }
-            } else {
-                NavigationStack(path: $path) {
-                    listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
-                }
-            }
+        // Always a split view, also when narrow: there it collapses into one stack, so folding or unfolding
+        // keeps the open park (and what was pushed on it). Column widths are the system's: on iPhone Duo it
+        // puts the divider on the fold.
+        NavigationSplitView(preferredCompactColumn: $compactColumn) {
+            listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
+        } detail: {
+            detailColumn(visibleParks: visibleParks)
         }
-        .mapScope(mapScope)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
@@ -333,12 +327,18 @@ struct ParksView: View {
         ZStack(alignment: .top) {
             RpplBackdrop()
 
-            // The map is full height, bleeding under the translucent header below.
+            // The map is full height, bleeding under the translucent header bar.
             if showsMapInList {
-                ParksMapView(parks: visibleParks, location: location, topInset: headerHeight, position: $mapPosition, scope: mapScope)
+                ParksMapView(
+                    parks: visibleParks,
+                    location: location,
+                    topInset: headerHeight,
+                    position: $mapPosition,
+                    onSelectPark: { selectedParkID = $0.id }
+                )
                     .ignoresSafeArea()
             } else {
-                List {
+                List(selection: $selectedParkID) {
                     if editorEnabled, !isSearching {
                         draftRows
                     }
@@ -375,9 +375,9 @@ struct ParksView: View {
                                 isFavorite: favorites.contains(park.id),
                                 entry: store.entry(id: park.id),
                                 filterDate: openFilterDate,
-                                selection: cardSelection,
-                                isSelected: layout == .twoPane && selectedPark?.id == park.id
+                                isSelected: layout == .twoPane && selectedParkID == park.id
                             )
+                            .tag(park.id)
                             .listRowInsets(LogbookLayout.rowInsets(top: 6, bottom: 6))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
@@ -407,53 +407,17 @@ struct ParksView: View {
                 .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
                 .contentMargins(
                     .top,
-                    headerHeight + 8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
+                    8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
                     for: .scrollContent
                 )
             }
-
-            // Floats on top always: title, search/add, sort picker, filter bar. Translucent
-            // over the map so it reads as an overlay rather than a second opaque bar.
-            VStack(alignment: .leading, spacing: 12) {
-                if showSearch {
-                    ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                } else {
-                    Picker("Sort", selection: sortChoice) {
-                        Text("Nearby").tag(SortChoice.sort(.distance))
-                        Text("Most visited").tag(SortChoice.sort(.visits))
-                        if layout == .stack {
-                        Text("View on map").tag(SortChoice.map)
-                    }
-                    }
-                    .pickerStyle(.segmented)
-                }
-                if !allParks.isEmpty {
-                    ParksFilterBar(
-                        openDate: $openFilterDate,
-                        cableDirections: $cableFilter,
-                        favoritesOnly: $favoritesOnly
-                    )
-                }
-            }
-            .padding(.horizontal, LogbookLayout.horizontalInset)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
-            // `.regularMaterial` (not `.ultraThinMaterial`): the header sits over map/satellite
-            // imagery of any color, so it needs enough opacity to keep its text and pills legible.
-            .background(showsMapInList ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.rpplBackdropTop))
-            .onGeometryChange(
-                for: CGFloat.self,
-                of: { $0.size.height },
-                action: { headerHeight = $0 }
-            )
 
             // Pull indicator and error sit right below the pinned header, in the gap the list
             // leaves when it is pulled down.
             if !showsMapInList {
                 if let message = updates.errorMessage {
                     ParkDataErrorBanner(message: message)
-                        .padding(.top, headerHeight + 8)
+                        .padding(.top, 8)
                         .frame(maxWidth: .infinity, alignment: .top)
                         .transition(.opacity)
                 } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
@@ -462,18 +426,54 @@ struct ParksView: View {
                         progress: min(1, pullDistance / Self.pullThreshold)
                     )
                     .frame(height: Self.pullIndicatorHeight)
-                    .padding(.top, headerHeight + 4)
+                    .padding(.top, 4)
                     .frame(maxWidth: .infinity, alignment: .top)
                     .allowsHitTesting(false)
                 }
             }
         }
+        .safeAreaBar(edge: .top, spacing: 0) { filterHeader(hasParks: !allParks.isEmpty) }
         .navigationTitle("Parks")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
-        .navigationDestination(for: Park.self) { park in
-            ParkDetailContainer(park: park, plannedDate: openFilterDate)
+    }
+
+    /// Sort picker (or the search field) and filters, in a bar under the navigation bar: the list scrolls under it
+    /// with the system's edge effect, and the large title collapses as with any list.
+    private func filterHeader(hasParks: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if showSearch {
+                ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            } else {
+                Picker("Sort", selection: sortChoice) {
+                    Text("Nearby").tag(SortChoice.sort(.distance))
+                    Text("Most visited").tag(SortChoice.sort(.visits))
+                    if layout == .stack {
+                        Text("View on map").tag(SortChoice.map)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            if hasParks {
+                ParksFilterBar(
+                    openDate: $openFilterDate,
+                    cableDirections: $cableFilter,
+                    favoritesOnly: $favoritesOnly
+                )
+            }
         }
+        .padding(.horizontal, LogbookLayout.horizontalInset)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        // Over the list the bar's own scroll edge effect is the background. Over the map: `.regularMaterial`
+        // (not `.ultraThinMaterial`), enough opacity to keep the text and pills legible on any imagery.
+        .background(showsMapInList ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.clear))
+        .onGeometryChange(
+            for: CGFloat.self,
+            of: { $0.size.height },
+            action: { headerHeight = $0 }
+        )
     }
 
     /// Two-pane right side: the selected park, or the map of the listed parks.
@@ -481,7 +481,11 @@ struct ParksView: View {
     private func detailColumn(visibleParks: [Park]) -> some View {
         if let park = selectedPark {
             NavigationStack {
-                ParkDetailContainer(park: park, plannedDate: openFilterDate, onClose: { selectedPark = nil })
+                ParkDetailContainer(
+                    park: park,
+                    plannedDate: openFilterDate,
+                    onClose: detailClose
+                )
             }
             .id(park.id)
         } else {
@@ -491,12 +495,11 @@ struct ParksView: View {
                     location: location,
                     position: $mapPosition,
                     showsSearch: false,
-                    onSelectPark: { selectedPark = $0 },
-                    scope: mapScope
+                    onSelectPark: { selectedParkID = $0.id }
                 )
-                .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+                .mapScreen()
                 .toolbar {
-                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser), scope: mapScope)
+                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser))
                 }
             }
         }
@@ -506,7 +509,7 @@ struct ParksView: View {
     @ToolbarContentBuilder
     private func listToolbar(hasParks: Bool) -> some ToolbarContent {
         if showsMapInList {
-            MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser), scope: mapScope)
+            MapScreenToolbar(usesSatellite: $mapUsesSatellite, action: .here(recenterOnUser))
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if hasParks {
@@ -749,8 +752,7 @@ private struct ParkCard: View {
     let isFavorite: Bool
     let entry: ParkEntry?
     let filterDate: Date?
-    /// Two-pane: tapping selects the park (shown beside the list) instead of pushing it.
-    var selection: ((Park) -> Void)?
+    /// Two-pane: the park open beside the list. Tapping the card selects its list row, which opens it.
     var isSelected = false
 
     private var statusBadge: (text: String, color: Color)? {
@@ -825,13 +827,7 @@ private struct ParkCard: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            if let selection {
-                Button { selection(park) } label: { cardContent }
-                    .buttonStyle(.plain)
-            } else {
-                NavigationLink(value: park) { cardContent }
-                    .buttonStyle(.plain)
-            }
+            cardContent
 
             Button {
                 ParkNavigation.openDirections(to: park)

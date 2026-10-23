@@ -67,8 +67,8 @@ struct SessionMapView: View {
     var layout: SessionMapLayout = .embedded
     /// Park cable outlines drawn as a thin line beneath the tracks.
     var cableOverlays: [[CLLocationCoordinate2D]] = []
-    /// Set on a full-screen map: its compass and reset live in the navigation bar (`MapScreenToolbar`).
-    var mapScope: Namespace.ID?
+    /// Set on a full-screen map: style and reset live in the navigation bar (`MapScreenToolbar`).
+    var usesBarButtons = false
     /// Bumped by the bar's reset button: back to the fitted frame.
     var resetToken = 0
 
@@ -150,7 +150,7 @@ struct SessionMapView: View {
         ZStack(alignment: .topLeading) {
             interactiveMap
 
-            if showsStyleToggle, mapScope == nil {
+            if showsStyleToggle, !usesBarButtons {
                 SessionMapControlCluster(
                     showsStyleToggle: true,
                     layout: layout
@@ -160,7 +160,7 @@ struct SessionMapView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if allowsInteraction, showReset, mapScope == nil {
+            if allowsInteraction, showReset, !usesBarButtons {
                 resetButton
                     .padding(layout.resetPadding)
                     .safeAreaPadding(.bottom, layout == .fullscreen ? 4 : 0)
@@ -281,22 +281,17 @@ struct SessionMapView: View {
 
     @ViewBuilder
     private var interactiveMap: some View {
-        let map = Map(position: $position, interactionModes: interactionModes, scope: mapScope) {
+        let map = Map(position: $position, interactionModes: interactionModes) {
             mapContent
         }
         .mapStyle(mapStyle)
 
         // No 3D button: tilting stays a two-finger gesture.
-        if allowsInteraction, mapScope != nil {
-            map
-                .mapControls {
-                    MapScaleView()
-                }
-                .safeAreaPadding(layout.attributionSafeAreaPadding)
-        } else if allowsInteraction {
+        if allowsInteraction {
             map
                 .mapControls {
                     MapCompass()
+                    MapScaleView()
                 }
                 .safeAreaPadding(layout.attributionSafeAreaPadding)
         } else {
@@ -569,7 +564,6 @@ struct SessionMapFullscreenView: View {
     }
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
-    @Namespace private var mapScope
     @State private var resetToken = 0
 
     var body: some View {
@@ -583,7 +577,7 @@ struct SessionMapFullscreenView: View {
                     layout: .fullscreen,
                     cableOverlays: cableOverlays
                 )
-                .scoped(mapScope, resetToken: resetToken)
+                .barButtons(resetToken: resetToken)
             } else {
                 SessionMapView(
                     tracks: tracks,
@@ -592,21 +586,19 @@ struct SessionMapFullscreenView: View {
                     preferredFrame: preferredFrame,
                     layout: .fullscreen
                 )
-                .scoped(mapScope, resetToken: resetToken)
+                .barButtons(resetToken: resetToken)
             }
         }
-        .ignoresSafeArea()
+        .mapScreen()
         .background(DisableNavigationSwipeBack())
         .toolbar(.hidden, for: .tabBar)
         // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         .toolbar {
-            MapScreenToolbar(usesSatellite: $usesSatellite, action: .reset({ resetToken += 1 }), scope: mapScope)
+            MapScreenToolbar(usesSatellite: $usesSatellite, action: .reset({ resetToken += 1 }))
         }
-        .mapScope(mapScope)
         .background(Color.rpplBackground)
         .tint(Color.rpplAccent)
         .accessibilityLabel(title)
@@ -614,9 +606,9 @@ struct SessionMapFullscreenView: View {
 }
 
 private extension SessionMapView {
-    func scoped(_ scope: Namespace.ID, resetToken: Int) -> SessionMapView {
+    func barButtons(resetToken: Int) -> SessionMapView {
         var copy = self
-        copy.mapScope = scope
+        copy.usesBarButtons = true
         copy.resetToken = resetToken
         return copy
     }
