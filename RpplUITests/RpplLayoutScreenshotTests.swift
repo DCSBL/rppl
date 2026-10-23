@@ -10,6 +10,9 @@ final class RpplLayoutScreenshotTests: XCTestCase {
     override func setUpWithError() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["RPPL_LAYOUT_SHOTS"] != nil)
         continueAfterFailure = false
+        // Landscape at the largest text size, the list column shows about one card, so reaching one takes
+        // many short drags: more than the job's two-minute default.
+        executionTimeAllowance = 300
     }
 
     override func tearDown() {
