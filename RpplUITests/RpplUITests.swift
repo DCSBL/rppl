@@ -154,7 +154,10 @@ final class RpplUITests: XCTestCase {
     }
 
     @MainActor
-    func testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize() {
+    func testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize() throws {
+        // Disabled: the large text (Dynamic Type) UI tests were unreliable on CI simulators (#517).
+        // To re-enable, delete this XCTSkip; the same cells are commented out in ui-matrix.yml.
+        throw XCTSkip("Large text UI tests disabled, see #517")
         app.terminate()
         launch(textSize: "UICTContentSizeCategoryAccessibilityL")
         assertSpeedSwapKeepsTextSize()

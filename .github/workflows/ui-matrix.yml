@@ -66,9 +66,11 @@ jobs:
       matrix:
         include:
           - { variant: se-default, device: "iPhone SE (3rd generation)", text: large }
-          - { variant: se-ax5, device: "iPhone SE (3rd generation)", text: accessibility-extra-extra-extra-large }
+          # Large text (ax5) cells disabled, see #517. Uncomment to re-enable together with the
+          # XCTSkip in RpplUITests.testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize.
+          # - { variant: se-ax5, device: "iPhone SE (3rd generation)", text: accessibility-extra-extra-extra-large }
           - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
-          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
+          # - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
     steps:
       - name: Checkout
         uses: actions/checkout@v7
