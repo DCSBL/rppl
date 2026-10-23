@@ -31,7 +31,7 @@ struct MapScreenToolbar: ToolbarContent {
 
 /// Size of a full-screen map and the part of it that bars or a split view's sidebar cover, so a camera
 /// can frame what matters in the part that stays visible.
-struct MapViewport: Equatable {
+nonisolated struct MapViewport: Equatable, Sendable {
     var size: CGSize = .zero
     var insets: MapViewInsets = .zero
 
