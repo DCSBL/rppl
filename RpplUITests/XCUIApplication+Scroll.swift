@@ -43,11 +43,18 @@ extension XCUIApplication {
         return false
     }
 
-    /// Waits until the logbook totals tile (always at the top, never lazily skipped) reads `count` sessions.
+    /// Waits until the logbook totals tile reads `count` sessions. In a short, narrow list column (landscape at
+    /// the largest text size) the header can push the tile off the viewport, so the list scrolls to it.
     func waitForSessionCount(_ count: Int, timeout: TimeInterval = 45) -> Bool {
         let tile = descendants(matching: .any)["logbook-total-sessions"].firstMatch
         let deadline = Date().addingTimeInterval(timeout) // one budget: the test allowance is 120 s in total
-        guard tile.waitForExistence(timeout: timeout) else { return false }
+        if !tile.waitForExistence(timeout: 10) {
+            let list = collectionViews.firstMatch
+            for _ in 0..<4 where !tile.exists && list.exists {
+                list.swipeUp()
+            }
+        }
+        guard tile.waitForExistence(timeout: max(1, deadline.timeIntervalSinceNow)) else { return false }
         let reads = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label BEGINSWITH %@", String(count)), object: tile)
         return XCTWaiter().wait(for: [reads], timeout: max(1, deadline.timeIntervalSinceNow)) == .completed
     }
