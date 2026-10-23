@@ -39,7 +39,8 @@ final class RpplLayoutScreenshotTests: XCTestCase {
         XCTAssertTrue(app.waitForSessionCount(18))
         shot("logbook", orientation)
         let card = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Wakeboard, Project 7")).firstMatch
-        XCTAssertTrue(app.scrollToElement(card))
+        // Two-pane, the middle of the window is the detail column: drag the list itself.
+        XCTAssertTrue(app.scrollToElement(card, in: app.collectionViews.firstMatch))
         card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         sleep(4) // detail and map tiles
         shot("logbook-session", orientation)
