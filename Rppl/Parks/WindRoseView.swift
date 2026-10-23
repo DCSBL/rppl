@@ -10,7 +10,7 @@ struct WindRoseView: View {
     var mapHeading: Double = 0
 
     private static let calmThresholdKmh = 1.0
-    private static let dialSize: CGFloat = 22
+    @ScaledMetric(relativeTo: .caption2) private var dialSize: CGFloat = 22
 
     private var direction: CompassDirection8 { CompassDirection8(degrees: directionDegrees) }
     private var isCalm: Bool { speedKmh < Self.calmThresholdKmh }
@@ -20,18 +20,18 @@ struct WindRoseView: View {
             ZStack {
                 Circle().fill(.regularMaterial)
                 Text(verbatim: "N")
-                    .font(.system(size: 6, weight: .bold))
+                    .font(.system(size: dialSize * 0.3, weight: .bold))
                     .foregroundStyle(.primary)
-                    .offset(y: -(Self.dialSize / 2 - 4))
+                    .offset(y: -(dialSize / 2 - 4))
                     .rotationEffect(.degrees(-mapHeading))
                 if !isCalm {
                     WindNeedle()
                         .fill(Color.rpplAccent)
-                        .frame(width: 4, height: Self.dialSize * 0.5)
+                        .frame(width: 4, height: dialSize * 0.5)
                         .rotationEffect(.degrees(directionDegrees - mapHeading))
                 }
             }
-            .frame(width: Self.dialSize, height: Self.dialSize)
+            .frame(width: dialSize, height: dialSize)
             .overlay(Circle().strokeBorder(.primary.opacity(0.2), lineWidth: 1))
 
             if !isCalm {

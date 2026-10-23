@@ -10,7 +10,7 @@ name: PR checks
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 'wip/**']
 
 concurrency:
   group: pr-checks-${{ github.event.pull_request.number || github.ref }}
