@@ -828,11 +828,13 @@ private struct ParkCard: View {
     var body: some View {
         cardContent
             .logbookCardChrome()
-        .overlay {
-            RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
-                .stroke(Color.rpplAccent, lineWidth: 2)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .overlay {
+                RoundedRectangle(cornerRadius: LogbookLayout.cardCornerRadius, style: .continuous)
+                    .stroke(Color.rpplAccent, lineWidth: 2)
+                    .opacity(isSelected ? 1 : 0)
+            }
+            // One element that opens the park, as the NavigationLink row was (see SessionCard).
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
