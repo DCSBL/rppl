@@ -922,7 +922,6 @@ private struct ParkMapScreen: View {
     @State private var position: MapCameraPosition
     @State private var location = ParksLocationProvider()
     @State private var pendingRecenter = false
-    @Namespace private var mapScope
 
     init(park: Park, weather: ParkWeather?) {
         self.park = park
@@ -931,17 +930,15 @@ private struct ParkMapScreen: View {
     }
 
     var body: some View {
-        ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: $position, scope: mapScope)
-            .ignoresSafeArea()
+        ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: $position)
+            .mapScreen()
             .navigationTitle(park.compactName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(removing: .title)
-            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
             .toolbar(.hidden, for: .tabBar)
             .toolbar {
-                MapScreenToolbar(usesSatellite: $usesSatellite, action: .here(recenterOnUser), scope: mapScope)
+                MapScreenToolbar(usesSatellite: $usesSatellite, action: .here(recenterOnUser))
             }
-            .mapScope(mapScope)
             .onChange(of: location.coordinate) { _, coordinate in
                 guard pendingRecenter, let coordinate else { return }
                 pendingRecenter = false
@@ -972,14 +969,12 @@ private struct ParkMap: View {
     let usesSatellite: Bool
     let weather: ParkWeather?
     @Binding var position: MapCameraPosition
-    /// Set on the full-screen map: the compass lives in its navigation bar.
-    var scope: Namespace.ID?
 
     @State private var mapHeading: Double = 0
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
-        Map(position: $position, scope: scope) {
+        Map(position: $position) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
             ForEach(startMarkers, id: \.id) { marker in
@@ -1004,6 +999,7 @@ private struct ParkMap: View {
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
         .mapControls {
+            MapCompass()
             MapScaleView()
         }
         .onMapCameraChange(frequency: .continuous) { context in

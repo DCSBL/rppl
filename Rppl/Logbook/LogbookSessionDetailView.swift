@@ -76,9 +76,9 @@ struct LogbookSessionDetailView: View {
         self.store = nil
     }
 
-    func embeddedInSplit() -> Self {
+    func embeddedInSplit(_ embedded: Bool = true) -> Self {
         var copy = self
-        copy.isEmbeddedInSplit = true
+        copy.isEmbeddedInSplit = embedded
         return copy
     }
 

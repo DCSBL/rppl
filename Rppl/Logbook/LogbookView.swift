@@ -2,10 +2,6 @@ import StoreKit
 import SwiftUI
 import RpplCore
 
-private struct SessionDetailRoute: Identifiable, Hashable {
-    let id: String
-}
-
 struct LogbookView: View {
     @Binding var navigation: LogbookNavigationRequest
 
@@ -23,11 +19,12 @@ struct LogbookView: View {
     @State private var showAddSession = false
     @State private var showActionError = false
     @State private var actionErrorText: String?
-    @State private var detailRoute: SessionDetailRoute?
     @State private var highlightSessionId: String?
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
+    /// Collapsed (narrow), the list is the root; opening a session shows the detail on top.
+    @State private var compactColumn = NavigationSplitViewColumn.sidebar
     @Environment(\.showAppSettings) private var showAppSettings
 
     private var useAccessibilityLayout: Bool {
@@ -39,17 +36,13 @@ struct LogbookView: View {
     }
 
     var body: some View {
-        Group {
-            if layout == .twoPane {
-                // Column widths are the system's: on iPhone Duo it puts the divider on the fold.
-                NavigationSplitView {
-                    listContent
-                } detail: {
-                    splitDetail
-                }
-            } else {
-                NavigationStack { listContent }
-            }
+        // Always a split view, also when narrow: there it collapses into one stack, so folding or unfolding
+        // keeps the open session (and what was pushed on it). Column widths are the system's: on iPhone Duo
+        // it puts the divider on the fold.
+        NavigationSplitView(preferredCompactColumn: $compactColumn) {
+            listContent
+        } detail: {
+            splitDetail
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .sheet(isPresented: $showAddSession) {
@@ -110,6 +103,13 @@ struct LogbookView: View {
         .onChange(of: iCloud.acceptedSessionIDs) { _, _ in
             reloadCatalog()
         }
+        // Back from a session (narrow) or deselected: flash its row, maybe ask for a review.
+        .onChange(of: selectedSessionId) { old, new in
+            guard let old, new == nil else { return }
+            didOpenSession = true
+            flashHighlight(old)
+            requestReviewIfPending()
+        }
         .onChange(of: catalog.entries.map(\.manifest.sessionId)) { _, ids in
             if let selected = selectedSessionId, !ids.contains(selected) { selectedSessionId = nil }
         }
@@ -125,7 +125,7 @@ struct LogbookView: View {
     }
 
     private var listContent: some View {
-        List {
+        List(selection: $selectedSessionId) {
             if connectivity.pendingAckCount > 0 {
                 Section {
                     SyncStatusIndicator(
@@ -246,44 +246,18 @@ struct LogbookView: View {
                 LogbookSessionDetailView(source: .bundledExample)
                     .toolbar(.visible, for: .navigationBar)
             }
-            .navigationDestination(item: $detailRoute) { route in
-                LogbookSessionDetailView(sessionId: route.id, store: connectivity.store)
-                    .onDisappear {
-                        didOpenSession = true
-                        flashHighlight(route.id)
-                    }
-            }
     }
 
-    /// Stack: push the detail. Two-pane: select the row, the detail column shows it.
-    @ViewBuilder
+    /// Selecting the row opens the session: beside the list when wide, pushed when the split view is collapsed.
     private func sessionRow(_ entry: SessionEntry) -> some View {
         let sessionId = entry.manifest.sessionId
-        if layout == .twoPane {
-            Button {
-                selectedSessionId = sessionId
-            } label: {
-                SessionCard(
-                    entry: entry,
-                    isHighlighted: highlightSessionId == sessionId,
-                    isSelected: selectedSessionId == sessionId,
-                    showsChevron: false
-                )
-            }
-            .buttonStyle(.plain)
-        } else {
-            NavigationLink {
-                LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
-                    .onDisappear {
-                        didOpenSession = true
-                        flashHighlight(sessionId)
-                    }
-            } label: {
-                SessionCard(entry: entry, isHighlighted: highlightSessionId == sessionId)
-            }
-            .buttonStyle(.plain)
-            .navigationLinkIndicatorVisibility(.hidden)
-        }
+        return SessionCard(
+            entry: entry,
+            isHighlighted: highlightSessionId == sessionId,
+            isSelected: layout == .twoPane && selectedSessionId == sessionId,
+            showsChevron: layout == .stack
+        )
+        .tag(sessionId)
     }
 
     /// Detail column: the selected session, or the season charts when nothing is selected.
@@ -292,7 +266,7 @@ struct LogbookView: View {
         if let sessionId = selectedSessionId {
             NavigationStack {
                 LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
-                    .embeddedInSplit()
+                    .embeddedInSplit(layout == .twoPane)
                     .toolbar(.visible, for: .navigationBar)
             }
             .id(sessionId)
@@ -306,11 +280,8 @@ struct LogbookView: View {
 
     private func consumeNavigationRequests() {
         if let sessionId = navigation.openSessionId {
-            if layout == .twoPane {
-                selectedSessionId = sessionId
-            } else {
-                detailRoute = SessionDetailRoute(id: sessionId)
-            }
+            selectedSessionId = sessionId
+            compactColumn = .detail
             navigation.openSessionId = nil
             flashHighlight(sessionId)
         }

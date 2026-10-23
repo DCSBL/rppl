@@ -9,13 +9,11 @@ enum MapScreenAction {
 }
 
 /// The buttons of every full-screen map, in the navigation bar so they sit with the other bar buttons
-/// (vertically under the status bar on iPhone Duo): map style, here or reset, then the compass.
-/// Back is the navigation bar's own. The compass needs `.mapScope(scope)` on a view around both the map
-/// and this toolbar, and the map built with the same `scope`.
+/// (vertically under the status bar on iPhone Duo): map style, then here or reset. Back is the navigation
+/// bar's own; the compass is the map's own control (`.mapControls`), placed by MapKit.
 struct MapScreenToolbar: ToolbarContent {
     @Binding var usesSatellite: Bool
     let action: MapScreenAction
-    let scope: Namespace.ID
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
@@ -31,7 +29,17 @@ struct MapScreenToolbar: ToolbarContent {
             case .reset(let perform):
                 Button("Reset map", systemImage: "arrow.counterclockwise", action: perform)
             }
-            MapCompass(scope: scope)
         }
+    }
+}
+
+extension View {
+    /// Lays out a full-screen map: it keeps to the safe area sideways, so the map's own framing (fit, reset,
+    /// centering) sees only the part not covered by a split view's sidebar or the vertical bar of iPhone Duo;
+    /// the background extension effect still draws it to the edges. Top and bottom it runs under the bars.
+    func mapScreen() -> some View {
+        ignoresSafeArea(edges: .vertical)
+            .backgroundExtensionEffect()
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
     }
 }

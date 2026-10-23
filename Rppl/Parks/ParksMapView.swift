@@ -19,8 +19,6 @@ struct ParksMapView: View {
     var showsSearch = true
     /// Beside the list a tapped pin selects the park there; otherwise it pushes the detail.
     var onSelectPark: ((Park) -> Void)?
-    /// The compass lives in the navigation bar (`MapScreenToolbar`), tied to this map by the shared scope.
-    var scope: Namespace.ID?
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var selectedID: String?
@@ -44,7 +42,7 @@ struct ParksMapView: View {
     }
 
     private var map: some View {
-        Map(position: $position, selection: $selectedID, scope: scope) {
+        Map(position: $position, selection: $selectedID) {
             parkMarkers
             if showsCableLines {
                 cableLines
@@ -59,12 +57,12 @@ struct ParksMapView: View {
             cameraDistance = context.camera.distance
         }
         .mapControls {
+            MapCompass()
             MapScaleView()
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }
-        .ignoresSafeArea()
     }
 
     private func open(_ park: Park) {
