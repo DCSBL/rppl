@@ -100,6 +100,9 @@ def fetch(url: str, entry: dict) -> tuple[str, str]:
                 errors.append(f"{method}: {type(error).__name__}")
             else:
                 text = normalize(raw)
+                if entry.get("href"):  # hours live in a linked file (PDF): watch its URL
+                    links = re.findall(r'href=["\']([^"\']*)', raw)
+                    text += " " + " ".join(sorted({u.lower() for u in links if re.search(entry["href"], u, re.I)}))
                 if len(text) >= MIN_TEXT_CHARS:
                     return text, method
                 errors.append(f"{method}: page too short ({len(text)} chars)")
@@ -107,7 +110,7 @@ def fetch(url: str, entry: dict) -> tuple[str, str]:
     raise RuntimeError("; ".join(dict.fromkeys(errors)) or "no result")
 
 
-def check_park(park_id: str, url: str, overrides: dict, state: dict, next_year: int) -> dict:
+def check_park(park_id: str, url: str, overrides: dict, state: dict) -> dict:
     entry = overrides.get(park_id) or {}
     result: dict = {"id": park_id, "url": url}
     try:
@@ -116,7 +119,7 @@ def check_park(park_id: str, url: str, overrides: dict, state: dict, next_year: 
         result.update(status="unreachable", detail=str(error))
         return result
 
-    absent = [str(m).lower() for m in entry.get("absent", [str(next_year)])]
+    absent = [str(m).lower() for m in entry.get("absent", [])]
     present = [str(m).lower() for m in entry.get("present", [])]
     fired = [f"`{m}` now on the page" for m in absent if m in text]
     fired += [f"`{m}` missing from the page" for m in present if m not in text]
@@ -180,9 +183,8 @@ def main() -> int:
     overrides = yaml.safe_load(MARKERS_PATH.read_text()) or {}
     urls = {k: v for k, v in load_urls().items() if not args.only or k in args.only}
     state = json.loads(args.state.read_text()) if args.state and args.state.exists() else {}
-    next_year = datetime.date.today().year + 1
 
-    results = [check_park(pid, url, overrides, state, next_year) for pid, url in urls.items()]
+    results = [check_park(pid, url, overrides, state) for pid, url in urls.items()]
     report = render(results)
     print(report)
     if args.summary:

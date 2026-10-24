@@ -73,7 +73,7 @@ cables:
       wakeboard clinic. Opening hours depend on reservation volume. Call ahead to confirm.
 
 opening:
-  source_url: "https://www.cableparkaquabest.nl"
+  source_url: "https://www.cableparkaquabest.nl/openingstijden"
   booking: optional
   booking_minutes:
     - 120
