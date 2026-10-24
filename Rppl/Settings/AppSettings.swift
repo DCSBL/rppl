@@ -23,6 +23,8 @@ enum AppSettingsKey {
     static let debugSetCharts = "rppl.debugSetCharts"
     /// Debug: show and edit set flags/labels in the logbook (default off; stored flags are kept either way).
     static let debugSetFlags = "rppl.debugSetFlags"
+    /// Debug: where full-screen maps put the compass (`MapCompassLayout` raw value).
+    static let debugMapCompassLayout = "rppl.debugMapCompassLayout"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).

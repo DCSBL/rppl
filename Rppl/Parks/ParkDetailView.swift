@@ -1031,7 +1031,7 @@ private struct ParkMap: View {
             }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
-        .mapScreenControls(scope: mapScreenScope)
+        .mapScreenControls(scope: mapScreenScope, position: $position)
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }

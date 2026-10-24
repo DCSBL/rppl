@@ -52,7 +52,7 @@ struct ParksMapView: View {
         .onMapCameraChange(frequency: .onEnd) { context in
             cameraDistance = context.camera.distance
         }
-        .mapScreenControls(scope: mapScreenScope)
+        .mapScreenControls(scope: mapScreenScope, position: $position)
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }

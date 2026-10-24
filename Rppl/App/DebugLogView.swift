@@ -11,6 +11,7 @@ struct DebugLogView: View {
     @State private var showMail = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
+    @AppStorage(AppSettingsKey.debugMapCompassLayout) private var mapCompassLayout = MapCompassLayout.defaultLayout.rawValue
 
     var body: some View {
         List {
@@ -26,6 +27,21 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Show and edit set flags in the logbook. Saved flags are kept when this is off.")
+            }
+
+            Section {
+                Picker(selection: $mapCompassLayout) {
+                    ForEach(MapCompassLayout.allCases) { layout in
+                        Text(verbatim: layout.title).tag(layout.rawValue)
+                    }
+                } label: {
+                    Text(verbatim: "Map compass")
+                }
+                .pickerStyle(.inline)
+            } header: {
+                Text(verbatim: "Map compass")
+            } footer: {
+                Text(verbatim: "Where full-screen maps put the compass. Open a map to try it; the compass shows once the map is turned.")
             }
 
             Section {
