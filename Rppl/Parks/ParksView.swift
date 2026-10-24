@@ -158,8 +158,6 @@ struct ParksView: View {
     /// Pull distance (pt) that counts as a refresh when the finger lets go.
     private static let pullThreshold: CGFloat = 70
     private static let pullIndicatorHeight: CGFloat = 64
-    /// Pull distance (pt) over which the large title fades out.
-    private static let titleFadeDistance: CGFloat = 16
 
     /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
     private func pullToRefresh() async {
@@ -441,15 +439,7 @@ struct ParksView: View {
         .safeAreaBar(edge: .top, spacing: 0) { filterHeader(hasParks: !allParks.isEmpty) }
         .navigationTitle("Parks")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            // A pull drags the large title down with the list, under the pinned header: it fades out instead.
-            ToolbarItem(placement: .largeTitle) {
-                Text("Parks")
-                    .font(.largeTitle.bold())
-                    .opacity(max(0, 1 - pullDistance / Self.titleFadeDistance))
-            }
-            listToolbar(hasParks: !allParks.isEmpty)
-        }
+        .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
     }
 
     /// Sort picker (or the search field) and filters, in a bar under the navigation bar: the list scrolls under it
