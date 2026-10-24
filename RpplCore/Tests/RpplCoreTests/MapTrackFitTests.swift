@@ -88,6 +88,49 @@ struct MapTrackFitTests {
         #expect(phone.cameraDistanceMeters != tall.cameraDistanceMeters)
     }
 
+    @Test func insetsFrameTheUncoveredPart() {
+        let frame = MapTrackFrame(
+            centerLatitude: 52.1, centerLongitude: 5.1, headingDegrees: 0,
+            spanWidthMeters: 400, spanHeightMeters: 200
+        )
+        // A 300 pt sidebar over the left of a 700 pt map leaves 400 pt: as wide as a 400 pt map.
+        let covered = MapTrackFitter.fit(
+            frame: frame, viewWidth: 700, viewHeight: 300,
+            insets: MapViewInsets(top: 0, left: 300, bottom: 0, right: 0)
+        )
+        let narrow = MapTrackFitter.fit(frame: frame, viewWidth: 400, viewHeight: 300)
+        #expect(covered != nil && narrow != nil)
+        guard let covered, let narrow else { return }
+        #expect(abs(covered.cameraDistanceMeters - narrow.cameraDistanceMeters) < 0.001)
+        // The camera moves west, so the track shows right of the middle, beside the sidebar.
+        #expect(covered.centerLongitude < frame.centerLongitude)
+        #expect(abs(covered.centerLatitude - frame.centerLatitude) < 1e-9)
+    }
+
+    @Test func insetsFollowTheHeading() {
+        // Map top points east: the left of the screen is north, so a left inset moves the camera north.
+        let shifted = MapTrackFitter.center(
+            latitude: 52.1, longitude: 5.1, headingDegrees: 90, cameraDistanceMeters: 1_000,
+            viewHeight: 600, insets: MapViewInsets(top: 0, left: 200, bottom: 0, right: 0)
+        )
+        #expect(shifted.latitude > 52.1)
+        #expect(abs(shifted.longitude - 5.1) < 1e-9)
+        // A taller top bar than bottom bar moves the camera north at heading 0.
+        let below = MapTrackFitter.center(
+            latitude: 52.1, longitude: 5.1, headingDegrees: 0, cameraDistanceMeters: 1_000,
+            viewHeight: 600, insets: MapViewInsets(top: 100, left: 0, bottom: 20, right: 0)
+        )
+        #expect(below.latitude > 52.1)
+    }
+
+    @Test func noInsetsKeepTheCenter() {
+        let center = MapTrackFitter.center(
+            latitude: 52.1, longitude: 5.1, headingDegrees: 30, cameraDistanceMeters: 1_000,
+            viewHeight: 600, insets: .zero
+        )
+        #expect(center.latitude == 52.1 && center.longitude == 5.1)
+    }
+
     @Test func startFrameFromSingleLocation() {
         let frame = MapTrackFitter.frame(locations: [(latitude: 52.1, longitude: 5.1)])
         #expect(frame != nil)
