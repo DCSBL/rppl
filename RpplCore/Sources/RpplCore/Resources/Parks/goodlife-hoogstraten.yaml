@@ -43,6 +43,7 @@ cables:
         lon: 4.7393182099
 
 opening:
+  source_url: "https://www.goodlifecablepark.be"
   booking: optional
   rules:
     - months:

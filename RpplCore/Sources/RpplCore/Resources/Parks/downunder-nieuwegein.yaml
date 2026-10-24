@@ -69,6 +69,7 @@ cables:
         lon: 5.12284952868272
 
 opening:
+  source_url: "https://downunder.nl/sports/sport/waterskien/"
   numbered: false
   booking_minutes:
     - 60

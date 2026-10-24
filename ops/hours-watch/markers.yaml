@@ -1,0 +1,10 @@
+# Optional per-park overrides for scripts/hours_watch.py. The page URL comes from
+# `opening.source_url` in the park YAML. Without an entry a park only gets the default
+# marker: the text of next year (e.g. "2027") must not appear on the page yet.
+#
+# parkid:
+#   present: ["2026"]        # every text must occur on the page
+#   absent: ["2027"]         # no text may occur (replaces the default)
+#   selector: "main"         # CSS selector for the hash (browser fetch only)
+#   fetch: browser           # skip curl, go straight to Playwright
+{}

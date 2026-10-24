@@ -53,6 +53,7 @@ cables:
         lon: 6.842716
 
 opening:
+  source_url: "https://www.waterskitwente.nl"
   rules:
     - months:
         - 10

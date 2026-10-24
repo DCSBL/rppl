@@ -36,6 +36,8 @@ cables:
 phone: 050 - 541 17 06
 email: info@breakout-grunopark.nl
 website: https://breakout-grunopark.nl
+opening:
+  source_url: "https://breakout-grunopark.nl"
 links:
   - kind: instagram
     url: "https://www.instagram.com/breakoutgrunopark/"

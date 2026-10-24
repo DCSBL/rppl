@@ -156,6 +156,7 @@ cables:
         lon: 4.57461757152632
 
 opening:
+  source_url: "https://www.project7cablepark.nl"
   booking: required
   note: >-
     Book a block online at least 3 hours in advance and check in at the desk 30 minutes

@@ -22,6 +22,8 @@ location:
 phone: 0598 - 433 733
 email: info@watersportcentre.nl
 website: https://www.watersportcentre.nl
+opening:
+  source_url: "https://www.watersportcentre.nl"
 links:
   - kind: booking
     url: "https://www.watersportcentre.nl/tickets"
