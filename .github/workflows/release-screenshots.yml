@@ -8,7 +8,8 @@
 #   is a warning and blocks nothing.
 # - marketing: renders the App Store assets from the required shots and attaches one zip. Needs only
 #   screenshots-required.
-# - release-notes: rebuilds the Screenshots section of the release description from the assets on the release.
+# - release-notes: rebuilds the Screenshots section of the release description from the assets on the release,
+#   embedding at most 3 per device type (iPhone, Duo, Watch) and attaching the rest as one zip.
 # Runs on publish; for an existing release use "Run workflow" with its tag. A manual run only renders the
 # marketing assets from the screenshot assets already on that release; tick regenerate_screenshots to make
 # them again. A manual run renders with marketing/ from the branch you pick.
@@ -414,19 +415,37 @@ jobs:
           from pathlib import Path
           tag, repo = os.environ["RELEASE_TAG"], os.environ["GITHUB_REPOSITORY"]
           start, end = "<!-- screenshots:start -->", "<!-- screenshots:end -->"
+          # At most this many shots per device type go in the description; the rest go in one zip.
+          per_device = 3
+          # The shots marketing/marketing.yaml uses come first; the rest follow in name order.
+          preferred = ["02-logbook-3-1", "04-session-tracked-2", "06-parks-open-1", "06-live-riding"]
           names = sorted(n for n in Path("assets.txt").read_text().split() if n.endswith(".png"))
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
-          def rows(prefix, width, dark=False):
+          def pick(prefix):
+              mine = [n for n in names if n.startswith(prefix + "-") and not n[:-4].endswith("-dark")]
+              rank = lambda n: (0, preferred.index(n[len(prefix) + 1:-4])) if n[len(prefix) + 1:-4] in preferred else (1, 0)
+              return sorted(mine, key=rank)[:per_device]
+          def rows(files, width):
               return "\n".join(
                   f'<img src="https://github.com/{repo}/releases/download/{urllib.parse.quote(tag)}/{n}" width="{width}" alt="{n[:-4]}">'
-                  for n in names
-                  if n.startswith(prefix + "-") and n[:-4].endswith("-dark") == dark
+                  for n in files
               )
-          section = (
-              f"{start}\n### Screenshots (iPhone, mock data)\n\n{rows('iphone', 220)}\n\n"
-              f"### Screenshots (iPhone, dark mode)\n\n{rows('iphone', 220, dark=True)}\n\n"
-              f"### Screenshots (Apple Watch, mock data)\n\n{rows('watch', 160)}\n{end}\n"
-          )
+          groups = [("iphone", "iPhone", 220), ("duo", "iPhone Duo", 220), ("watch", "Apple Watch", 160)]
+          shown = {prefix: pick(prefix) for prefix, _, _ in groups}
+          parts = [f"### Screenshots ({label}, mock data)\n\n{rows(shown[prefix], width)}" for prefix, label, width in groups if shown[prefix]]
+          parts.append(f"The remaining screenshots (other scenarios and dark mode) are in `rppl-screenshots-{tag}.zip` attached to this release.")
+          section = f"{start}\n" + "\n\n".join(parts) + f"\n{end}\n"
           Path("body.md").write_text(body + "\n\n" + section)
+          Path("rest.txt").write_text("\n".join(n for n in names if n not in {f for fs in shown.values() for f in fs}))
           PY
           gh release edit "$RELEASE_TAG" --notes-file body.md
+
+      - name: Zip the remaining screenshots and attach them
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -s rest.txt ] || { echo "No remaining screenshots; no zip."; exit 0; }
+          mkdir rest
+          while read -r n; do gh release download "$RELEASE_TAG" --pattern "$n" --dir rest; done < rest.txt
+          (cd rest && zip -q "../rppl-screenshots-${RELEASE_TAG}.zip" *.png)
+          gh release upload "$RELEASE_TAG" "rppl-screenshots-${RELEASE_TAG}.zip" --clobber
