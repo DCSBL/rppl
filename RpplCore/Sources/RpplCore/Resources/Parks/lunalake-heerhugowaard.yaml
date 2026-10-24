@@ -41,7 +41,7 @@ email: info@lunalake.nl
 website: https://lunalake.nl
 
 opening:
-  source_url: "https://lunalake.nl"
+  source_url: "https://lunalake.nl/openingstijden/"
   booking: required
   rules:
     - months:

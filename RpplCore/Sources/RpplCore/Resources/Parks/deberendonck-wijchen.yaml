@@ -159,7 +159,7 @@ cables:
         lon: 5.77162364784075
 
 opening:
-  source_url: "https://deberendonck.nl"
+  source_url: "https://deberendonck.nl/skibaan/"
   booking: required
   booking_minutes:
     - 90
