@@ -1,27 +1,62 @@
-# Optional per-park overrides for scripts/hours_watch.py. The page URL comes from
-# `opening.source_url` in the park YAML. Without an entry a park only gets the default
-# marker: the text of next year (e.g. "2027") must not appear on the page yet.
+# Per-park markers for scripts/hours_watch.py. The page URL comes from `opening.source_url`
+# in the park YAML. There is no generic marker (a year on the page says nothing for parks that
+# are open all year, or for a restaurant line on the same page). Pick a sentence or heading that
+# the park rewrites when the hours change: a season heading ("Openingstijden 2026"), a date
+# range or a reopening date. Without an entry a park is only reported when its page text changed.
 #
 # parkid:
-#   present: ["2026"]        # every text must occur on the page
-#   absent: ["2027"]         # no text may occur (replaces the default)
-#   selector: "main"         # CSS selector for the hash (browser fetch only)
-#   fetch: browser           # skip curl, go straight to Playwright
-#   href: "openings.*\\.pdf"   # regex; matching link URLs are added to the page text, so a new
-#                            # PDF URL changes the hash and can be used in present/absent
-kempervennen-westerhoven:
-  present: ["gesloten tot april 2027"]   # closure notice; fires when it is lifted or reworded
-  absent: ["2028"]                       # the page already names 2027
-wetnwild-alphen:
-  present: ["t/m maart 2027"]            # winter hours line
-  absent: ["2028"]
+#   present: ["openingstijden 2026"]   # every text must occur on the page; reported when one is gone
+#   absent: ["gesloten"]               # no text may occur; reported when one shows up
+#   selector: "main"                   # CSS selector for the hash (browser fetch only)
+#   fetch: browser                     # skip curl, go straight to Playwright
+#   href: "openings.*\\.pdf"           # regex; matching link URLs are added to the page text, so a
+#                                      # new PDF URL changes the hash and can be used in present/absent
+#
+# Texts are matched lowercase on the page text with tags stripped.
+aquabest-best:
+  present: ["openingstijden 2026"]
+beavercreek-roermond:
+  fetch: browser                         # single-page JS site, curl gets an empty shell
+betuwestrand-beesd:
+  present: ["28 mrt t/m 3 jul & 31 aug t/m 27 sep 2026", "4 jul t/m 30 aug 2026"]
+burnside-emst:
+  present: ["november t/m maart gesloten op reservering"]
+dearne-arnemuiden:
+  present: ["zondag t/m vrijdag van 9:00 uur tot 17:30 uur"]
+deberendonck-wijchen:
+  present: ["april gesloten 12.30 – 17.00 mei 15.30 – 20.00"]
+downunder-nieuwegein:
+  href: "openingstijden.*\\.pdf"         # hours are a PDF, the link changes with each new version
+  present: ["openingstijden-cablepark-2026.pdf"]
 ermerstrand-erm:
-  present: ["vanaf 22 mei 2026"]         # reopening date of the season
+  present: ["vanaf 22 mei 2026 zal de waterskibaan weer geopend zijn"]
+goodlife-hoogstraten:
+  present: ["openingsuren 2026"]
+kempervennen-westerhoven:
+  present: ["25 september 2026 t/m april 2027", "gesloten tot april 2027"]
+lakeside-paradise-knokke:
+  present: ["vanaf 30 maart t.e.m. de herfstvakantie, elke dag open"]
+lunalake-heerhugowaard:
+  present: ["zomervakantie: 6 juli t/m 16 augustus 2026"]
+project7-rotterdam:
+  present: ["april* – 12:30-17:00 u mei* 14:00-20:00 u"]
+schotsman-kamperland:
+  present: ["april – v/a 25 april mei* 14:00 – 20:00 uur"]
+seven-twenty-sevenum:
+  present: ["geopend van maart t/m oktober", "meivakantie van 25 april tot en met 3 mei 2026"]
 stroombroek-braamt:
   fetch: browser                         # JS-rendered site, curl gets an empty shell
 wakepark-groningen:
   fetch: browser                         # curl gets HTTP 500
-downunder-nieuwegein:
-  href: "openingstijden.*\\.pdf"         # hours are a PDF; the link changes with each new version
-beavercreek-roermond:
-  fetch: browser                         # single-page JS site, curl gets an empty shell
+wakeup-antwerp:
+  present: ["openingsuren 2026 openingsuren kabelbaan"]
+waterskitwente-enschede:
+  present: ["openingstijden 2026"]
+watersportcentre-veendam:
+  present: ["openingstijden vanaf 3 april tot en met 31 oktober"]
+wetnwild-alphen:
+  present: ["openingstijden wakepark oktober 2026"]   # monthly heading of the wake park block, not the restaurant line
+wollebrand-honselersdijk:
+  present: ["za 18 juli t/m zo 30 augustus gelden de openingstijden van augustus"]
+zeumeren-voorthuizen:
+  present: ["1 juni t/m 17 juli"]
