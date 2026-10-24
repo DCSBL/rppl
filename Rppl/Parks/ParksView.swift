@@ -159,6 +159,17 @@ struct ParksView: View {
     private static let pullThreshold: CGFloat = 70
     private static let pullIndicatorHeight: CGFloat = 64
 
+    private var showsRefreshIndicator: Bool {
+        !showsMapInList && parkDataUpdatesEnabled && updates.errorMessage == nil && updates.isRefreshing
+    }
+
+    /// A pull drags the large title down with the list; the header goes along instead of letting the
+    /// title slide under it. While refreshing it stays lower, making room for the indicator above it.
+    private var headerShift: CGFloat {
+        guard !showsMapInList else { return 0 }
+        return pullDistance + (showsRefreshIndicator ? Self.pullIndicatorHeight : 0)
+    }
+
     /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
     private func pullToRefresh() async {
         guard parkDataUpdatesEnabled else {
@@ -411,32 +422,34 @@ struct ParksView: View {
                 .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
                 .contentMargins(
                     .top,
-                    8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
+                    8 + (showsRefreshIndicator ? Self.pullIndicatorHeight : 0),
                     for: .scrollContent
                 )
             }
 
-            // Pull indicator and error sit right below the pinned header, in the gap the list
-            // leaves when it is pulled down.
-            if !showsMapInList {
-                if let message = updates.errorMessage {
-                    ParkDataErrorBanner(message: message)
-                        .padding(.top, 8)
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .transition(.opacity)
-                } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
-                    ParkDataPullIndicator(
-                        controller: updates,
-                        progress: min(1, pullDistance / Self.pullThreshold)
-                    )
-                    .frame(height: Self.pullIndicatorHeight)
-                    .padding(.top, 4)
+            // The error sits right below the pinned header.
+            if !showsMapInList, let message = updates.errorMessage {
+                ParkDataErrorBanner(message: message)
+                    .padding(.top, 8)
                     .frame(maxWidth: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-                }
+                    .transition(.opacity)
             }
         }
-        .safeAreaBar(edge: .top, spacing: 0) { filterHeader(hasParks: !allParks.isEmpty) }
+        .safeAreaBar(edge: .top, spacing: 0) {
+            filterHeader(hasParks: !allParks.isEmpty)
+                // While refreshing, the indicator takes the place the header moved away from.
+                .overlay(alignment: .top) {
+                    if showsRefreshIndicator {
+                        ParkDataPullIndicator(controller: updates, progress: 1)
+                            .frame(height: Self.pullIndicatorHeight)
+                            .offset(y: -Self.pullIndicatorHeight)
+                            .allowsHitTesting(false)
+                            .transition(.opacity)
+                    }
+                }
+                .offset(y: headerShift)
+                .animation(.snappy(duration: 0.25), value: showsRefreshIndicator)
+        }
         .navigationTitle("Parks")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
