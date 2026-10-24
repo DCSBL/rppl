@@ -4,12 +4,13 @@ import SwiftUI
 
 /// The buttons of every full-screen map, in the navigation bar so they sit with the other bar buttons
 /// (vertically under the status bar on iPhone Duo): map style, reset (back to the framed track or park),
-/// then my location. Each shows only when its action is given. Back is the navigation bar's own; the
-/// compass is placed by `mapScreen()`.
+/// then my location. Each shows only when its action is given. Back is the navigation bar's own. With
+/// `compassScope` (set by `mapScreen`) the compass is a bar item too, under the buttons as in Apple Maps.
 struct MapScreenToolbar: ToolbarContent {
     @Binding var usesSatellite: Bool
     var reset: (() -> Void)?
     var locate: (() -> Void)?
+    var compassScope: Namespace.ID?
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
@@ -25,6 +26,13 @@ struct MapScreenToolbar: ToolbarContent {
             if let locate {
                 Button("Center on my location", systemImage: "location", action: locate)
             }
+        }
+        if let compassScope {
+            // Its own round control, shown once the map turns.
+            ToolbarItem(placement: .topBarTrailing) {
+                MapCompass(scope: compassScope)
+            }
+            .sharedBackgroundVisibility(.hidden)
         }
     }
 }
@@ -91,15 +99,15 @@ nonisolated struct MapViewport: Equatable, Sendable {
     }
 }
 
-/// See `mapScreen(viewport:)`.
+/// See `mapScreen(viewport:usesSatellite:reset:locate:)`.
 private struct MapScreenLayout: ViewModifier {
     @Binding var viewport: MapViewport
+    @Binding var usesSatellite: Bool
+    let reset: (() -> Void)?
+    let locate: (() -> Void)?
     @Environment(\.layoutDirection) private var layoutDirection
     @Namespace private var scope
     @State private var safeArea = EdgeInsets()
-
-    /// Space between the compass and the bars or the window edge.
-    private static let compassMargin: CGFloat = 12
 
     /// iPhone Duo: the bars stand in a column on the trailing side, under the status bar, and nothing covers
     /// the top or bottom of the map. Only that column and a sidebar on the other side count there.
@@ -119,12 +127,9 @@ private struct MapScreenLayout: ViewModifier {
             }
             .safeAreaPadding(mapSafeArea)
             .ignoresSafeArea()
-            // Placed here rather than by MapKit, which on iPhone Duo put it under the bar buttons.
-            .overlay(alignment: .topTrailing) {
-                MapCompass(scope: scope)
-                    .padding(.top, mapSafeArea.top + Self.compassMargin)
-                    .padding(.trailing, mapSafeArea.trailing + Self.compassMargin)
-                    .ignoresSafeArea()
+            // Inside the map scope, so the compass in the bar follows the map.
+            .toolbar {
+                MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locate, compassScope: scope)
             }
             .mapScope(scope)
             .background {
@@ -138,20 +143,25 @@ private struct MapScreenLayout: ViewModifier {
 }
 
 extension EnvironmentValues {
-    /// Set by `mapScreen()`: the map passes it to `Map(scope:)` so the compass placed there follows it.
+    /// Set by `mapScreen`: the map passes it to `Map(scope:)` so the compass in the bar follows it.
     @Entry var mapScreenScope: Namespace.ID? = nil
 }
 
 extension View {
     /// Lays out a full-screen map: it draws to every edge, under the bars and a split view's sidebar,
     /// while the parts those cover stay its safe area. MapKit keeps its scale and legal text inside it,
-    /// the compass sits in its top trailing corner, and `viewport` tells a camera what part is visible.
+    /// and `viewport` tells a camera what part is visible. Adds the `MapScreenToolbar`, compass included.
     /// The map passes `mapScreenScope` to `Map(scope:)` and uses `mapScreenControls(scope:)`.
-    func mapScreen(viewport: Binding<MapViewport> = .constant(MapViewport())) -> some View {
-        modifier(MapScreenLayout(viewport: viewport))
+    func mapScreen(
+        viewport: Binding<MapViewport> = .constant(MapViewport()),
+        usesSatellite: Binding<Bool>,
+        reset: (() -> Void)? = nil,
+        locate: (() -> Void)? = nil
+    ) -> some View {
+        modifier(MapScreenLayout(viewport: viewport, usesSatellite: usesSatellite, reset: reset, locate: locate))
     }
 
-    /// The map's own controls: the scale, and the compass unless `mapScreen()` places it (`scope` set).
+    /// The map's own controls: the scale, and the compass unless `mapScreen` puts it in the bar (`scope` set).
     @ViewBuilder
     func mapScreenControls(scope: Namespace.ID?) -> some View {
         if scope == nil {

@@ -515,10 +515,7 @@ struct ParksView: View {
                     position: $mapPosition,
                     onSelectPark: { selectedParkID = $0.id }
                 )
-                .mapScreen()
-                .toolbar {
-                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
-                }
+                .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
             }
         }
     }

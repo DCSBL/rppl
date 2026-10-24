@@ -622,15 +622,12 @@ struct SessionMapFullscreenView: View {
                 .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             }
         }
-        .mapScreen()
+        .mapScreen(usesSatellite: $usesSatellite, reset: { resetToken += 1 }, locate: locateAction)
         .background(DisableNavigationSwipeBack())
         // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbar {
-            MapScreenToolbar(usesSatellite: $usesSatellite, reset: { resetToken += 1 }, locate: locateAction)
-        }
         .onAppear { location.refresh() }
         .onChange(of: location.coordinate) { _, coordinate in
             guard pendingLocate, coordinate != nil else { return }

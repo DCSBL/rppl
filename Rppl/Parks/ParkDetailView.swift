@@ -949,13 +949,10 @@ private struct ParkMapScreen: View {
             // The compass takes the top corner once the map turns.
             windRoseAlignment: .bottomTrailing
         )
-        .mapScreen(viewport: $viewport)
+        .mapScreen(viewport: $viewport, usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbar {
-            MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
-        }
         .onAppear { location.refresh() }
         .onChange(of: viewport) { _, _ in
             // The first frame that knows what bars and a sidebar cover; after that the map is the rider's.
