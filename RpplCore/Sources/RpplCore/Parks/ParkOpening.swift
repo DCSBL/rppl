@@ -147,6 +147,8 @@ public struct ParkOpeningException: Codable, Equatable, Sendable, ParkDateSelect
 
 public struct ParkOpening: Codable, Equatable, Sendable {
     /// Opaque: `required`, `optional`, `none`.
+    /// Page where the park publishes its opening hours.
+    public var sourceURL: String?
     public var booking: String?
     public var rules: [ParkOpeningRule]?
     public var slots: [ParkSlot]?
@@ -168,9 +170,11 @@ public struct ParkOpening: Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case booking, rules, slots, numbered, note, exceptions
         case bookingMinutes = "booking_minutes"
+        case sourceURL = "source_url"
     }
 
     public init(
+        sourceURL: String? = nil,
         booking: String? = nil,
         rules: [ParkOpeningRule]? = nil,
         slots: [ParkSlot]? = nil,
@@ -179,6 +183,7 @@ public struct ParkOpening: Codable, Equatable, Sendable {
         note: String? = nil,
         exceptions: [ParkOpeningException]? = nil
     ) {
+        self.sourceURL = sourceURL
         self.booking = booking
         self.rules = rules
         self.slots = slots

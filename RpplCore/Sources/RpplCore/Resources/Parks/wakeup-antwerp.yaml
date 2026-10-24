@@ -59,6 +59,7 @@ cables:
         lon: 4.366386561
 
 opening:
+  source_url: "https://www.wakeupcable.be/nl/"
   booking: required
   rules:
     - months:

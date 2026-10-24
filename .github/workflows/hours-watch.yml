@@ -1,0 +1,43 @@
+# Weekly, informational scan of every park's `opening.source_url`. Never fails on a changed or
+# unreachable park; the report (markers triggered, page changed, unreachable) lands in the run summary.
+
+name: Hours watch
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install "pyyaml==6.0.2" "playwright==1.49.1"
+          playwright install --with-deps chromium
+
+      - name: Restore previous page hashes
+        uses: actions/cache/restore@v4
+        with:
+          path: hours-watch-state.json
+          key: hours-watch-state-${{ github.run_id }}
+          restore-keys: hours-watch-state-
+
+      - name: Scan
+        run: python3 scripts/hours_watch.py --state hours-watch-state.json --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Save page hashes
+        uses: actions/cache/save@v4
+        with:
+          path: hours-watch-state.json
+          key: hours-watch-state-${{ github.run_id }}

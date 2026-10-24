@@ -28,6 +28,8 @@ water_temperature:
 phone: 0113 - 370270
 email: info@schotsmanwatersport.nl
 website: https://www.schotsmanwatersport.nl
+opening:
+  source_url: "https://www.schotsmanwatersport.nl"
 links:
   - kind: booking
     url: "https://www.schotsmanwatersport.nl/waterski-wakeboard/reserveren-online-ticket/"

@@ -159,6 +159,7 @@ cables:
         lon: 5.77162364784075
 
 opening:
+  source_url: "https://deberendonck.nl"
   booking: required
   booking_minutes:
     - 90
