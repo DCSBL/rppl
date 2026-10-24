@@ -4,12 +4,14 @@ import SwiftUI
 
 /// The buttons of every full-screen map, in the navigation bar so they sit with the other bar buttons
 /// (vertically under the status bar on iPhone Duo): map style, reset (back to the framed track or park),
-/// then my location. Each shows only when its action is given. Back is the navigation bar's own; the
-/// compass floats on the map (`mapScreen`).
+/// then my location. Each shows only when its action is given. Back is the navigation bar's own. The
+/// compass is a bar item only for the bar layouts of `MapCompassLayout` (`compassScope` set by `mapScreen`).
 struct MapScreenToolbar: ToolbarContent {
     @Binding var usesSatellite: Bool
     var reset: (() -> Void)?
     var locate: (() -> Void)?
+    var compassScope: Namespace.ID?
+    var compassLayout: MapCompassLayout = .floatingCorner
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
@@ -25,6 +27,96 @@ struct MapScreenToolbar: ToolbarContent {
             if let locate {
                 Button("Center on my location", systemImage: "location", action: locate)
             }
+            if let compassScope, compassLayout == .barGroup {
+                MapCompass(scope: compassScope)
+            }
+        }
+        if let compassScope, compassLayout == .barItem {
+            // Its own round control without glass, shown once the map turns.
+            ToolbarItem(placement: .topBarTrailing) {
+                MapCompass(scope: compassScope)
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+        if let compassScope, compassLayout == .barItemGlass {
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            ToolbarItem(placement: .topBarTrailing) {
+                MapCompass(scope: compassScope)
+            }
+        }
+        if let compassScope, compassLayout == .barLeading {
+            ToolbarItem(placement: .topBarLeading) {
+                MapCompass(scope: compassScope)
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+        if let compassScope, compassLayout == .barBottom {
+            ToolbarItem(placement: .bottomBar) {
+                MapCompass(scope: compassScope)
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+    }
+}
+
+/// Where a full-screen map puts its compass. The Debug screen picks one (TestFlight and debug builds only;
+/// the App Store build always uses `defaultLayout`), so the layouts can be compared on a real iPhone Duo.
+enum MapCompassLayout: String, CaseIterable, Identifiable {
+    /// Floats on the map in the top trailing corner of the uncovered area, clear of the bar column.
+    case floatingCorner
+    /// Floats in the top trailing corner of the window; nothing else aligns to it, bars can cover it.
+    case floatingWindowCorner
+    /// Floats in the top leading corner of the uncovered area.
+    case floatingLeading
+    /// MapKit's own placement (`.mapControls`), inside the safe area, clear of the bar buttons.
+    case mapKitDefault
+    /// A bar item without glass under the map buttons (#556).
+    case barItem
+    /// A bar item in its own glass capsule under the map buttons, as in Photos.
+    case barItemGlass
+    /// Inside the capsule of the map buttons.
+    case barGroup
+    /// Experimental: a bar item on the leading side.
+    case barLeading
+    /// Experimental: a bottom bar item.
+    case barBottom
+    /// No compass. The map still rotates with two fingers, and reset points it north again.
+    case hidden
+
+    static let defaultLayout = MapCompassLayout.floatingCorner
+
+    var id: String { rawValue }
+
+    /// The layout in effect for a stored value: debug builds and TestFlight honor it.
+    static func resolved(_ storedValue: String) -> MapCompassLayout {
+        guard AppReleaseChannel.allowsDebugTools else { return defaultLayout }
+        return MapCompassLayout(rawValue: storedValue) ?? defaultLayout
+    }
+
+    /// Whether the map itself places the compass (nothing for `mapScreen` to draw or add to the bars).
+    var isPlacedByMapKit: Bool { self == .mapKitDefault }
+
+    /// Where a floating compass sits in the map, nil for the other layouts.
+    var floatingAlignment: Alignment? {
+        switch self {
+        case .floatingCorner, .floatingWindowCorner: .topTrailing
+        case .floatingLeading: .topLeading
+        default: nil
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .floatingCorner: "Floating, top corner (now)"
+        case .floatingWindowCorner: "Floating, window corner"
+        case .floatingLeading: "Floating, top leading"
+        case .mapKitDefault: "MapKit default"
+        case .barItem: "Bar item, no glass (#556)"
+        case .barItemGlass: "Bar item, own glass"
+        case .barGroup: "Bar item, in the buttons"
+        case .barLeading: "Bar item, leading (experimental)"
+        case .barBottom: "Bottom bar item (experimental)"
+        case .hidden: "No compass, rotate only"
         }
     }
 }
@@ -98,17 +190,29 @@ private struct MapScreenLayout: ViewModifier {
     let reset: (() -> Void)?
     let locate: (() -> Void)?
     @Environment(\.layoutDirection) private var layoutDirection
+    @AppStorage(AppSettingsKey.debugMapCompassLayout) private var storedCompassLayout = MapCompassLayout.defaultLayout.rawValue
     @Namespace private var scope
     @State private var safeArea = EdgeInsets()
 
     /// Space between the compass and the bars or the window edge.
     private static let compassMargin: CGFloat = 12
 
+    private var compassLayout: MapCompassLayout { .resolved(storedCompassLayout) }
+
     /// iPhone Duo: the bars stand in a column on the trailing side, under the status bar, and nothing covers
     /// the top or bottom of the map. Only that column and a sidebar on the other side count there.
     private var mapSafeArea: EdgeInsets {
         guard safeArea.trailing > safeArea.leading + 20 else { return safeArea }
         return EdgeInsets(top: 0, leading: safeArea.leading, bottom: 0, trailing: safeArea.trailing)
+    }
+
+    /// Distance from the window edge on the compass's side.
+    private func compassInset(_ alignment: Alignment) -> CGFloat {
+        switch compassLayout {
+        case .floatingWindowCorner: Self.compassMargin
+        case .floatingLeading: safeArea.leading + Self.compassMargin
+        default: mapSafeArea.trailing + Self.compassMargin
+        }
     }
 
     func body(content: Content) -> some View {
@@ -122,16 +226,24 @@ private struct MapScreenLayout: ViewModifier {
             }
             .safeAreaPadding(mapSafeArea)
             .ignoresSafeArea()
-            // Floating in the top trailing corner of the uncovered part, clear of the bars: a bar item
-            // put a band across the top on iPhone Duo, and MapKit's own placement sat under the buttons.
-            .overlay(alignment: .topTrailing) {
-                MapCompass(scope: scope)
-                    .padding(.top, mapSafeArea.top + Self.compassMargin)
-                    .padding(.trailing, mapSafeArea.trailing + Self.compassMargin)
-                    .ignoresSafeArea()
+            // Floating layouts: a bar item put a band across the top on iPhone Duo, and MapKit's own
+            // placement sat under the buttons.
+            .overlay(alignment: compassLayout.floatingAlignment ?? .topTrailing) {
+                if let alignment = compassLayout.floatingAlignment {
+                    MapCompass(scope: scope)
+                        .padding(.top, mapSafeArea.top + Self.compassMargin)
+                        .padding(alignment == .topLeading ? .leading : .trailing, compassInset(alignment))
+                        .ignoresSafeArea()
+                }
             }
             .toolbar {
-                MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locate)
+                MapScreenToolbar(
+                    usesSatellite: $usesSatellite,
+                    reset: reset,
+                    locate: locate,
+                    compassScope: scope,
+                    compassLayout: compassLayout
+                )
             }
             .mapScope(scope)
             .background {
@@ -164,16 +276,25 @@ extension View {
         modifier(MapScreenLayout(viewport: viewport, usesSatellite: usesSatellite, reset: reset, locate: locate))
     }
 
-    /// The map's own controls: the scale, and the compass unless `mapScreen` places it (`scope` set).
-    @ViewBuilder
+    /// The map's own controls: the scale, and the compass only for `MapCompassLayout.mapKitDefault`.
     func mapScreenControls(scope: Namespace.ID?) -> some View {
-        if scope == nil {
-            mapControls {
+        modifier(MapScreenControls(placesCompass: scope == nil))
+    }
+}
+
+private struct MapScreenControls: ViewModifier {
+    /// A map outside `mapScreen` keeps MapKit's compass.
+    let placesCompass: Bool
+    @AppStorage(AppSettingsKey.debugMapCompassLayout) private var storedCompassLayout = MapCompassLayout.defaultLayout.rawValue
+
+    func body(content: Content) -> some View {
+        if placesCompass || MapCompassLayout.resolved(storedCompassLayout).isPlacedByMapKit {
+            content.mapControls {
                 MapCompass()
                 MapScaleView()
             }
         } else {
-            mapControls {
+            content.mapControls {
                 MapScaleView()
             }
         }
