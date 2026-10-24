@@ -683,7 +683,10 @@ private struct SessionCard: View {
                 .stroke(Color.rpplAccent, lineWidth: 2)
                 .opacity(isSelected ? 1 : 0)
         }
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        // One element that opens the session, as the NavigationLink row was; a selection row alone reads
+        // as loose texts to VoiceOver and to UI tests.
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
         .rpplAnimation(.easeOut(duration: 0.3), value: isHighlighted)
     }
 

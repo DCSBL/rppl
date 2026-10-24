@@ -30,8 +30,11 @@ struct LogbookSessionDetailView: View {
     @State private var tracksLoading = false
     @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
-    @State private var loadTask: Task<Void, Never>?
-    @State private var tracksTask: Task<Void, Never>?
+    /// Bumped to read the session again (after an edit); the load runs in `.task(id:)`, so SwiftUI
+    /// cancels it when the view goes away and starts it again when it comes back.
+    @State private var reloadToken = 0
+    /// The token whose load ran to the end, tracks and city included; nil until then.
+    @State private var loadedToken: Int?
     @State private var errorText: String?
     @State private var showExportError = false
     @State private var exportErrorText: String?
@@ -136,7 +139,10 @@ struct LogbookSessionDetailView: View {
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
-        .onAppear { startLoadIfNeeded() }
+        .task(id: reloadToken) {
+            guard loadedToken != reloadToken else { return }
+            await loadSession(token: reloadToken)
+        }
         .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
         .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { endFlagEditing() }
@@ -156,10 +162,7 @@ struct LogbookSessionDetailView: View {
                 self.manifest?.waterTemperatureEstimate = estimate
             }
         }
-        .onDisappear {
-            cancelLoad()
-            cancelExport()
-        }
+        .onDisappear { cancelExport() }
         .toolbar {
             if isEditingFlags {
                 ToolbarItem(placement: .topBarLeading) {
@@ -186,12 +189,11 @@ struct LogbookSessionDetailView: View {
                 }
                 if showsShare {
                     ToolbarItem(placement: .topBarTrailing) {
-                        if isExporting {
-                            ProgressView()
-                        } else {
-                            Button("Share", systemImage: "square.and.arrow.up", action: shareTapped)
-                                .labelStyle(.iconOnly)
-                        }
+                        // Stays the same button while the file is written: swapping in a spinner made the
+                        // bar re-layout (a flicker) on the first share, the only one that writes the file.
+                        Button("Share", systemImage: "square.and.arrow.up", action: shareTapped)
+                            .labelStyle(.iconOnly)
+                            .disabled(isExporting)
                     }
                 }
             }
@@ -782,26 +784,12 @@ struct LogbookSessionDetailView: View {
 
     /// Re-reads the session after it was edited, keeping what is on screen meanwhile.
     private func reload() {
-        guard loadTask == nil else { return }
-        loadTask = Task(priority: .userInitiated) { await loadSession() }
+        reloadToken += 1
     }
 
-    private func startLoadIfNeeded() {
-        guard loadTask == nil, loadPhase != .ready else { return }
-        loadPhase = .loading
-        loadTask = Task(priority: .userInitiated) {
-            await loadSession()
-        }
-    }
-
-    private func cancelLoad() {
-        loadTask?.cancel()
-        loadTask = nil
-        tracksTask?.cancel()
-        tracksTask = nil
-    }
-
-    private func loadSession() async {
+    /// Shows the session as soon as its summary is read; GPS tracks and the city name fill in after.
+    /// Every await is followed by a cancellation check, so a load SwiftUI cancelled never writes.
+    private func loadSession(token: Int) async {
         let source = source
         let store = store
 
@@ -811,6 +799,7 @@ struct LogbookSessionDetailView: View {
                 guard let store else {
                     throw SessionStoreError.ioFailure("Session store missing")
                 }
+                WakeLog.debug(.ui, "session load \(sessionId.prefix(8))…")
                 let summary = try await StoreIO.runOffMain {
                     try SessionLoader.loadSummary(store: store, sessionId: sessionId)
                 }
@@ -828,6 +817,7 @@ struct LogbookSessionDetailView: View {
                         parks: ParkCatalog.loadApp()
                     )
                 }
+                try Task.checkCancellation()
                 if let linkedPark {
                     manifest = (try? store.readManifest(sessionId: sessionId)) ?? summary.manifest
                     cityName = linkedPark.compactName
@@ -835,28 +825,11 @@ struct LogbookSessionDetailView: View {
                 } else {
                     cityName = summary.cityName
                 }
-                if cityName == nil {
-                    let peek = try await StoreIO.runOffMain {
-                        try store.peekLocationSamples(sessionId: sessionId)
-                    }
-                    cityName = await SessionCityResolver.shared.cityName(
-                        sessionId: sessionId,
-                        locations: peek
-                    )
-                    if let cityName {
-                        try? await StoreIO.runOffMain {
-                            try store.updateDerivedCityName(cityName, sessionId: sessionId)
-                        }
-                    }
-                } else if let cityName {
-                    SessionCityResolver.shared.remember(sessionId: sessionId, cityName: cityName)
-                }
                 loadPhase = .ready
-                loadTask = nil
-                tracksLoading = true
-                tracksTask = Task(priority: .utility) {
-                    await loadTracks(store: store, sessionId: sessionId, sets: summary.stats.sets)
-                }
+                WakeLog.debug(.ui, "session ready \(sessionId.prefix(8))…")
+
+                try await loadTracks(store: store, sessionId: sessionId, sets: summary.stats.sets)
+                try await resolveCityName(store: store, sessionId: sessionId)
 
             case .bundledExample:
                 WakeLog.debug(.ui, "example session load (ephemeral, timeline → now)")
@@ -864,15 +837,40 @@ struct LogbookSessionDetailView: View {
                 try Task.checkCancellation()
                 applyFullBundle(bundle)
                 loadPhase = .ready
-                loadTask = nil
             }
+            loadedToken = token
         } catch is CancellationError {
-            loadTask = nil
+            // The run that replaces this one sets its own state.
         } catch {
+            tracksLoading = false
+            // A failed track or city read leaves the session on screen.
+            guard loadPhase != .ready else {
+                WakeLog.error(.store, "LogbookSessionDetail after ready: \(error.localizedDescription)")
+                return
+            }
             errorText = error.localizedDescription
             loadPhase = .failed
-            loadTask = nil
             WakeLog.error(.store, "LogbookSessionDetail load: \(error.localizedDescription)")
+        }
+    }
+
+    /// Geocodes the track only when the session has no city yet. Runs after the session is on screen:
+    /// reverse geocoding can take long or never answer, and the session must not wait for it.
+    private func resolveCityName(store: SessionFileStore, sessionId: String) async throws {
+        if let cityName {
+            SessionCityResolver.shared.remember(sessionId: sessionId, cityName: cityName)
+            return
+        }
+        let peek = try await StoreIO.runOffMain {
+            try store.peekLocationSamples(sessionId: sessionId)
+        }
+        try Task.checkCancellation()
+        let resolved = await SessionCityResolver.shared.cityName(sessionId: sessionId, locations: peek)
+        try Task.checkCancellation()
+        guard let resolved else { return }
+        cityName = resolved
+        try? await StoreIO.runOffMain {
+            try store.updateDerivedCityName(resolved, sessionId: sessionId)
         }
     }
 
@@ -880,41 +878,34 @@ struct LogbookSessionDetailView: View {
         store: SessionFileStore,
         sessionId: String,
         sets: [SetSegmentStats]
-    ) async {
-        do {
-            let locations = try await StoreIO.runOffMain {
-                try store.readLocationSamples(sessionId: sessionId)
+    ) async throws {
+        tracksLoading = true
+        let locations = try await StoreIO.runOffMain {
+            try store.readLocationSamples(sessionId: sessionId)
+        }
+        try Task.checkCancellation()
+        let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
+        allLocations = sortedLocations
+        applyTrackLayers(locations: sortedLocations, sets: sets)
+        if UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts) {
+            let telemetry = try await StoreIO.runOffMain {
+                let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
+                return Dictionary(sets.map { set in
+                    (set.index, SetTelemetryBuilder.build(
+                        locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
+                    ))
+                }, uniquingKeysWith: { first, _ in first })
             }
             try Task.checkCancellation()
-            let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-            allLocations = sortedLocations
-            applyTrackLayers(locations: sortedLocations, sets: sets)
-            if UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts) {
-                setTelemetry = try await StoreIO.runOffMain {
-                    let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
-                    return Dictionary(sets.map { set in
-                        (set.index, SetTelemetryBuilder.build(
-                            locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
-                        ))
-                    }, uniquingKeysWith: { first, _ in first })
-                }
-            }
-            if sessionMapTrackData == nil {
-                sessionMapTrackData = SessionMapTrackBuilder.build(
-                    locations: sortedLocations,
-                    sets: sets
-                )
-            }
-            tracksLoading = false
-            tracksTask = nil
-        } catch is CancellationError {
-            tracksTask = nil
-            tracksLoading = false
-        } catch {
-            tracksLoading = false
-            tracksTask = nil
-            WakeLog.error(.store, "LogbookSessionDetail tracks: \(error.localizedDescription)")
+            setTelemetry = telemetry
         }
+        if sessionMapTrackData == nil {
+            sessionMapTrackData = SessionMapTrackBuilder.build(
+                locations: sortedLocations,
+                sets: sets
+            )
+        }
+        tracksLoading = false
     }
 
     private func applyFullBundle(_ bundle: SessionLoadBundle) {
@@ -1032,7 +1023,7 @@ struct LogbookSessionDetailView: View {
     }
 
     private func presentMail(zipURL: URL, manifest: SessionManifest, cityName: String?) {
-        // Present after toolbar ProgressView → icon swap so the sheet is not dropped.
+        // Present on the next turn of the run loop, so it is not dropped while an alert is closing.
         let mail = SessionMail(
             zipURL: zipURL,
             subject: SessionMailShare.subject(manifest: manifest, cityName: cityName),
@@ -1044,7 +1035,7 @@ struct LogbookSessionDetailView: View {
     }
 
     private func presentShareSheet(for url: URL) {
-        // Present after toolbar ProgressView → icon swap so the share sheet is not dropped.
+        // Present on the next turn of the run loop, so it is not dropped while an alert is closing.
         Task { @MainActor in
             ActivitySharePresenter.present(items: [url])
         }
@@ -1053,7 +1044,7 @@ struct LogbookSessionDetailView: View {
     private func presentExportFailure(_ message: String) {
         finishExportTask()
         exportErrorText = message
-        // Present after toolbar ProgressView → icon swap so SwiftUI does not drop the alert.
+        // Present on the next turn of the run loop, so SwiftUI does not drop the alert.
         Task { @MainActor in
             showExportError = true
         }

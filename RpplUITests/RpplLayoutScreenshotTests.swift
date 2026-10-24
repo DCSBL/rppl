@@ -10,6 +10,9 @@ final class RpplLayoutScreenshotTests: XCTestCase {
     override func setUpWithError() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["RPPL_LAYOUT_SHOTS"] != nil)
         continueAfterFailure = false
+        // Landscape at the largest text size, the list column shows about one card, so reaching one takes
+        // many short drags: more than the job's two-minute default.
+        executionTimeAllowance = 300
     }
 
     override func tearDown() {
@@ -39,7 +42,8 @@ final class RpplLayoutScreenshotTests: XCTestCase {
         XCTAssertTrue(app.waitForSessionCount(18))
         shot("logbook", orientation)
         let card = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Wakeboard, Project 7")).firstMatch
-        XCTAssertTrue(app.scrollToElement(card))
+        // Two-pane, the middle of the window is the detail column: drag the list itself.
+        XCTAssertTrue(app.scrollToElement(card, in: app.collectionViews.firstMatch))
         card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         sleep(4) // detail and map tiles
         shot("logbook-session", orientation)

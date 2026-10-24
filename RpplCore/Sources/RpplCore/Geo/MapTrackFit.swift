@@ -27,6 +27,26 @@ public struct MapTrackFrame: Codable, Equatable, Sendable {
     }
 }
 
+/// Points of a map view covered by bars or a sidebar, by screen side (not leading/trailing).
+public struct MapViewInsets: Equatable, Sendable {
+    public var top: Double
+    public var left: Double
+    public var bottom: Double
+    public var right: Double
+
+    public static let zero = MapViewInsets(top: 0, left: 0, bottom: 0, right: 0)
+
+    public init(top: Double, left: Double, bottom: Double, right: Double) {
+        self.top = top
+        self.left = left
+        self.bottom = bottom
+        self.right = right
+    }
+
+    var horizontal: Double { left + right }
+    var vertical: Double { top + bottom }
+}
+
 /// Camera parameters to frame GPS tracks on a MapKit map (pitch 0).
 public struct MapTrackFit: Equatable, Sendable {
     public var centerLatitude: Double
@@ -126,24 +146,37 @@ public enum MapTrackFitter {
         )
     }
 
+    /// Camera for `frame` on a map of `viewWidth` × `viewHeight` points. A map that draws under bars or
+    /// a sidebar passes their `insets`: the track is framed in the part left uncovered, and centered there.
     public static func fit(
         frame: MapTrackFrame,
         viewWidth: Double,
-        viewHeight: Double
+        viewHeight: Double,
+        insets: MapViewInsets = .zero
     ) -> MapTrackFit? {
         guard viewWidth > 1, viewHeight > 1 else { return nil }
+        // Covered so far that nothing is left: frame in the whole view instead.
+        let covered = viewWidth - insets.horizontal > 1 && viewHeight - insets.vertical > 1 ? insets : .zero
         let metersPerPoint = max(
-            frame.spanWidthMeters / viewWidth,
-            frame.spanHeightMeters / viewHeight
+            frame.spanWidthMeters / (viewWidth - covered.horizontal),
+            frame.spanHeightMeters / (viewHeight - covered.vertical)
         )
         let visibleHeightMeters = metersPerPoint * viewHeight
         let distance = max(
             minimumCameraDistanceMeters,
             (visibleHeightMeters / 2) / tan(halfVerticalFOVRadians)
         )
+        let shifted = center(
+            latitude: frame.centerLatitude,
+            longitude: frame.centerLongitude,
+            headingDegrees: frame.headingDegrees,
+            cameraDistanceMeters: distance,
+            viewHeight: viewHeight,
+            insets: covered
+        )
         return MapTrackFit(
-            centerLatitude: frame.centerLatitude,
-            centerLongitude: frame.centerLongitude,
+            centerLatitude: shifted.latitude,
+            centerLongitude: shifted.longitude,
             headingDegrees: frame.headingDegrees,
             cameraDistanceMeters: distance
         )
@@ -153,12 +186,39 @@ public enum MapTrackFitter {
         locations: [(latitude: Double, longitude: Double)],
         viewWidth: Double,
         viewHeight: Double,
+        insets: MapViewInsets = .zero,
         paddingFactor: Double = defaultPaddingFactor
     ) -> MapTrackFit? {
         guard let frame = frame(locations: locations, paddingFactor: paddingFactor) else {
             return nil
         }
-        return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight)
+        return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight, insets: insets)
+    }
+
+    /// Camera center that shows `latitude`/`longitude` in the middle of the part of the view inside
+    /// `insets`, rather than in the middle of the whole view.
+    public static func center(
+        latitude: Double,
+        longitude: Double,
+        headingDegrees: Double,
+        cameraDistanceMeters: Double,
+        viewHeight: Double,
+        insets: MapViewInsets
+    ) -> (latitude: Double, longitude: Double) {
+        guard viewHeight > 1, insets != .zero else { return (latitude, longitude) }
+        let metersPerPoint = 2 * cameraDistanceMeters * tan(halfVerticalFOVRadians) / viewHeight
+        // Points from the middle of the view to the middle of the uncovered part: right and down.
+        let right = (insets.left - insets.right) / 2
+        let down = (insets.top - insets.bottom) / 2
+        // The camera moves the other way, turned from screen axes to east/north by the heading.
+        let heading = headingDegrees * .pi / 180
+        let east = -metersPerPoint * (right * cos(heading) - down * sin(heading))
+        let north = metersPerPoint * (right * sin(heading) + down * cos(heading))
+        let metersPerDegreeLon = metersPerDegreeLat * cos(latitude * .pi / 180)
+        return (
+            latitude + north / metersPerDegreeLat,
+            longitude + (metersPerDegreeLon > 1 ? east / metersPerDegreeLon : 0)
+        )
     }
 
     /// Flatten ride/session tracks into coordinate pairs for `fit` / `frame`.
