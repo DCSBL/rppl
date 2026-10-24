@@ -1,3 +1,3 @@
-tag=2026.10.8-beta.9
-commit=b00a62db79ebed3c92e0457baee8674d3c657902
-run=40078729899
+tag=2026.10.8-beta.10
+commit=d38c662afe8a9b9f259fa8ab4d5ec7dc45d9a4a6
+run=40080617462
