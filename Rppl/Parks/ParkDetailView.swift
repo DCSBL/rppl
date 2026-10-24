@@ -949,13 +949,10 @@ private struct ParkMapScreen: View {
             // The compass takes the top corner once the map turns.
             windRoseAlignment: .bottomTrailing
         )
-        .mapScreen(viewport: $viewport)
+        .mapScreen(viewport: $viewport, usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbar {
-            MapScreenToolbar(usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
-        }
         .onAppear { location.refresh() }
         .onChange(of: viewport) { _, _ in
             // The first frame that knows what bars and a sidebar cover; after that the map is the rider's.
@@ -1002,11 +999,12 @@ private struct ParkMap: View {
     var showsUserLocation = false
     var windRoseAlignment: Alignment = .topTrailing
 
+    @Environment(\.mapScreenScope) private var mapScreenScope
     @State private var mapHeading: Double = 0
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
-        Map(position: $position) {
+        Map(position: $position, scope: mapScreenScope) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
             ForEach(startMarkers, id: \.id) { marker in
@@ -1033,10 +1031,7 @@ private struct ParkMap: View {
             }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
-        .mapControls {
-            MapCompass()
-            MapScaleView()
-        }
+        .mapScreenControls(scope: mapScreenScope)
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }

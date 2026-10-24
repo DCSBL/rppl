@@ -25,6 +25,8 @@ struct ParksView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showSearch = false
     @State private var searchText = ""
+    /// Bumped when the search field is submitted on the map: it then looks the text up as a place.
+    @State private var placeSearchToken = 0
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
     @AppStorage(AppSettingsKey.parkDataUpdatesEnabled) private var parkDataUpdatesEnabled = false
     @AppStorage(AppSettingsKey.didAskParkDataConsent) private var didAskParkDataConsent = false
@@ -156,6 +158,17 @@ struct ParksView: View {
     /// Pull distance (pt) that counts as a refresh when the finger lets go.
     private static let pullThreshold: CGFloat = 70
     private static let pullIndicatorHeight: CGFloat = 64
+
+    private var showsRefreshIndicator: Bool {
+        !showsMapInList && parkDataUpdatesEnabled && updates.errorMessage == nil && updates.isRefreshing
+    }
+
+    /// A pull drags the large title down with the list; the header goes along instead of letting the
+    /// title slide under it. While refreshing it stays lower, making room for the indicator above it.
+    private var headerShift: CGFloat {
+        guard !showsMapInList else { return 0 }
+        return pullDistance + (showsRefreshIndicator ? Self.pullIndicatorHeight : 0)
+    }
 
     /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
     private func pullToRefresh() async {
@@ -334,6 +347,8 @@ struct ParksView: View {
                     location: location,
                     topInset: headerHeight,
                     position: $mapPosition,
+                    placeQuery: searchText,
+                    placeSearchToken: placeSearchToken,
                     onSelectPark: { selectedParkID = $0.id }
                 )
                     .ignoresSafeArea()
@@ -407,32 +422,34 @@ struct ParksView: View {
                 .contentMargins(.horizontal, LogbookLayout.horizontalInset, for: .scrollContent)
                 .contentMargins(
                     .top,
-                    8 + (updates.isRefreshing ? Self.pullIndicatorHeight : 0),
+                    8 + (showsRefreshIndicator ? Self.pullIndicatorHeight : 0),
                     for: .scrollContent
                 )
             }
 
-            // Pull indicator and error sit right below the pinned header, in the gap the list
-            // leaves when it is pulled down.
-            if !showsMapInList {
-                if let message = updates.errorMessage {
-                    ParkDataErrorBanner(message: message)
-                        .padding(.top, 8)
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .transition(.opacity)
-                } else if parkDataUpdatesEnabled, updates.isRefreshing || pullDistance > 0 {
-                    ParkDataPullIndicator(
-                        controller: updates,
-                        progress: min(1, pullDistance / Self.pullThreshold)
-                    )
-                    .frame(height: Self.pullIndicatorHeight)
-                    .padding(.top, 4)
+            // The error sits right below the pinned header.
+            if !showsMapInList, let message = updates.errorMessage {
+                ParkDataErrorBanner(message: message)
+                    .padding(.top, 8)
                     .frame(maxWidth: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-                }
+                    .transition(.opacity)
             }
         }
-        .safeAreaBar(edge: .top, spacing: 0) { filterHeader(hasParks: !allParks.isEmpty) }
+        .safeAreaBar(edge: .top, spacing: 0) {
+            filterHeader(hasParks: !allParks.isEmpty)
+                // While refreshing, the indicator takes the place the header moved away from.
+                .overlay(alignment: .top) {
+                    if showsRefreshIndicator {
+                        ParkDataPullIndicator(controller: updates, progress: 1)
+                            .frame(height: Self.pullIndicatorHeight)
+                            .offset(y: -Self.pullIndicatorHeight)
+                            .allowsHitTesting(false)
+                            .transition(.opacity)
+                    }
+                }
+                .offset(y: headerShift)
+                .animation(.snappy(duration: 0.25), value: showsRefreshIndicator)
+        }
         .navigationTitle("Parks")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
@@ -443,7 +460,12 @@ struct ParksView: View {
     private func filterHeader(hasParks: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if showSearch {
-                ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                ParkSearchField(
+                    text: $searchText,
+                    prompt: showsMapInList ? "Search places" : "Search parks",
+                    isFocused: $searchFieldFocused,
+                    onSubmit: { if showsMapInList { placeSearchToken += 1 } }
+                )
                     .transition(.move(edge: .top).combined(with: .opacity))
             } else {
                 Picker("Sort", selection: sortChoice) {
@@ -494,30 +516,33 @@ struct ParksView: View {
                     parks: visibleParks,
                     location: location,
                     position: $mapPosition,
-                    showsSearch: false,
                     onSelectPark: { selectedParkID = $0.id }
                 )
-                .mapScreen()
-                .toolbar {
-                    MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
-                }
+                .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
             }
         }
     }
 
-    /// Settings above add, like the Logbook; search on top. On the map: the map buttons instead.
+    @ViewBuilder
+    private var searchButton: some View {
+        if showSearch {
+            Button("Close search", systemImage: "xmark", action: toggleSearch)
+        } else {
+            Button("Search parks", systemImage: "magnifyingglass", action: toggleSearch)
+        }
+    }
+
+    /// Settings above add, like the Logbook; search on top. On the map: search, then the map buttons.
     @ToolbarContentBuilder
     private func listToolbar(hasParks: Bool) -> some ToolbarContent {
         if showsMapInList {
+            // Search first, as on the list; it opens the same field in the header.
+            ToolbarItem(placement: .topBarTrailing) { searchButton }
             MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if hasParks {
-                    if showSearch {
-                        Button("Close search", systemImage: "xmark", action: toggleSearch)
-                    } else {
-                        Button("Search parks", systemImage: "magnifyingglass", action: toggleSearch)
-                    }
+                    searchButton
                 }
                 Button("Settings", systemImage: "gearshape", action: showAppSettings)
                 if editorEnabled {
@@ -676,14 +701,18 @@ private struct ParksNoMatchCard: View {
 
 private struct ParkSearchField: View {
     @Binding var text: String
+    let prompt: LocalizedStringKey
     var isFocused: FocusState<Bool>.Binding
+    var onSubmit: () -> Void = {}
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.rpplMuted)
-            TextField("Search parks", text: $text)
+            TextField(prompt, text: $text)
                 .focused(isFocused)
+                .submitLabel(.search)
+                .onSubmit(onSubmit)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .foregroundStyle(Color.rpplText)

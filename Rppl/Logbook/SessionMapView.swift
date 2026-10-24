@@ -45,6 +45,7 @@ enum SessionMapLayout {
 struct SessionMapView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.mapScreenScope) private var mapScreenScope
     @ScaledMetric(relativeTo: .caption2) private var endpointSize: CGFloat = 20
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
@@ -298,7 +299,7 @@ struct SessionMapView: View {
 
     @ViewBuilder
     private var interactiveMap: some View {
-        let map = Map(position: $position, interactionModes: interactionModes) {
+        let map = Map(position: $position, interactionModes: interactionModes, scope: mapScreenScope) {
             mapContent
         }
         .mapStyle(mapStyle)
@@ -306,10 +307,7 @@ struct SessionMapView: View {
         // No 3D button: tilting stays a two-finger gesture.
         if allowsInteraction {
             map
-                .mapControls {
-                    MapCompass()
-                    MapScaleView()
-                }
+                .mapScreenControls(scope: mapScreenScope)
         } else {
             map
                 .allowsHitTesting(false)
@@ -624,15 +622,12 @@ struct SessionMapFullscreenView: View {
                 .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             }
         }
-        .mapScreen()
+        .mapScreen(usesSatellite: $usesSatellite, reset: { resetToken += 1 }, locate: locateAction)
         .background(DisableNavigationSwipeBack())
         // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
-        .toolbar {
-            MapScreenToolbar(usesSatellite: $usesSatellite, reset: { resetToken += 1 }, locate: locateAction)
-        }
         .onAppear { location.refresh() }
         .onChange(of: location.coordinate) { _, coordinate in
             guard pendingLocate, coordinate != nil else { return }
