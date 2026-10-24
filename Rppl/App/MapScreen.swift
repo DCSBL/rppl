@@ -5,7 +5,7 @@ import SwiftUI
 /// The buttons of every full-screen map, in the navigation bar so they sit with the other bar buttons
 /// (vertically under the status bar on iPhone Duo): map style, reset (back to the framed track or park),
 /// then my location. Each shows only when its action is given. Back is the navigation bar's own; the
-/// compass is the map's own control (`.mapControls`), placed by MapKit inside the safe area.
+/// compass is placed by `mapScreen()`.
 struct MapScreenToolbar: ToolbarContent {
     @Binding var usesSatellite: Bool
     var reset: (() -> Void)?
@@ -95,30 +95,74 @@ nonisolated struct MapViewport: Equatable, Sendable {
 private struct MapScreenLayout: ViewModifier {
     @Binding var viewport: MapViewport
     @Environment(\.layoutDirection) private var layoutDirection
+    @Namespace private var scope
     @State private var safeArea = EdgeInsets()
+
+    /// Space between the compass and the bars or the window edge.
+    private static let compassMargin: CGFloat = 12
+
+    /// iPhone Duo: the bars stand in a column on the trailing side, under the status bar, and nothing covers
+    /// the top or bottom of the map. Only that column and a sidebar on the other side count there.
+    private var mapSafeArea: EdgeInsets {
+        guard safeArea.trailing > safeArea.leading + 20 else { return safeArea }
+        return EdgeInsets(top: 0, leading: safeArea.leading, bottom: 0, trailing: safeArea.trailing)
+    }
 
     func body(content: Content) -> some View {
         content
+            .environment(\.mapScreenScope, scope)
             .background {
                 // Inside the padding below: the whole map, with the covered part as its safe area.
                 Color.clear.onGeometryChange(for: MapViewport.self) { proxy in
                     MapViewport(size: proxy.size, safeArea: proxy.safeAreaInsets, layoutDirection: layoutDirection)
                 } action: { viewport = $0 }
             }
-            .safeAreaPadding(safeArea)
+            .safeAreaPadding(mapSafeArea)
             .ignoresSafeArea()
+            // Placed here rather than by MapKit, which on iPhone Duo put it under the bar buttons.
+            .overlay(alignment: .topTrailing) {
+                MapCompass(scope: scope)
+                    .padding(.top, mapSafeArea.top + Self.compassMargin)
+                    .padding(.trailing, mapSafeArea.trailing + Self.compassMargin)
+                    .ignoresSafeArea()
+            }
+            .mapScope(scope)
             .background {
-                Color.clear.onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { safeArea = $0 }
+                Color.clear.onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
+                    safeArea = insets
+                    WakeLog.debug(.ui, "map screen safe area top=\(Int(insets.top)) leading=\(Int(insets.leading)) bottom=\(Int(insets.bottom)) trailing=\(Int(insets.trailing))")
+                }
             }
             .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
     }
 }
 
+extension EnvironmentValues {
+    /// Set by `mapScreen()`: the map passes it to `Map(scope:)` so the compass placed there follows it.
+    @Entry var mapScreenScope: Namespace.ID? = nil
+}
+
 extension View {
     /// Lays out a full-screen map: it draws to every edge, under the bars and a split view's sidebar,
-    /// while the parts those cover stay its safe area. MapKit keeps its compass, scale and legal text
-    /// inside it, clear of the bar buttons; `viewport` tells a camera what part is visible.
+    /// while the parts those cover stay its safe area. MapKit keeps its scale and legal text inside it,
+    /// the compass sits in its top trailing corner, and `viewport` tells a camera what part is visible.
+    /// The map passes `mapScreenScope` to `Map(scope:)` and uses `mapScreenControls(scope:)`.
     func mapScreen(viewport: Binding<MapViewport> = .constant(MapViewport())) -> some View {
         modifier(MapScreenLayout(viewport: viewport))
+    }
+
+    /// The map's own controls: the scale, and the compass unless `mapScreen()` places it (`scope` set).
+    @ViewBuilder
+    func mapScreenControls(scope: Namespace.ID?) -> some View {
+        if scope == nil {
+            mapControls {
+                MapCompass()
+                MapScaleView()
+            }
+        } else {
+            mapControls {
+                MapScaleView()
+            }
+        }
     }
 }

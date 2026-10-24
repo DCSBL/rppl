@@ -25,6 +25,8 @@ struct ParksView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showSearch = false
     @State private var searchText = ""
+    /// Bumped when the search field is submitted on the map: it then looks the text up as a place.
+    @State private var placeSearchToken = 0
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
     @AppStorage(AppSettingsKey.parkDataUpdatesEnabled) private var parkDataUpdatesEnabled = false
     @AppStorage(AppSettingsKey.didAskParkDataConsent) private var didAskParkDataConsent = false
@@ -156,6 +158,8 @@ struct ParksView: View {
     /// Pull distance (pt) that counts as a refresh when the finger lets go.
     private static let pullThreshold: CGFloat = 70
     private static let pullIndicatorHeight: CGFloat = 64
+    /// Pull distance (pt) over which the large title fades out.
+    private static let titleFadeDistance: CGFloat = 16
 
     /// Pull to refresh. Off and never asked: ask first. Off and already answered: nothing to do.
     private func pullToRefresh() async {
@@ -334,6 +338,8 @@ struct ParksView: View {
                     location: location,
                     topInset: headerHeight,
                     position: $mapPosition,
+                    placeQuery: searchText,
+                    placeSearchToken: placeSearchToken,
                     onSelectPark: { selectedParkID = $0.id }
                 )
                     .ignoresSafeArea()
@@ -435,7 +441,15 @@ struct ParksView: View {
         .safeAreaBar(edge: .top, spacing: 0) { filterHeader(hasParks: !allParks.isEmpty) }
         .navigationTitle("Parks")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar { listToolbar(hasParks: !allParks.isEmpty) }
+        .toolbar {
+            // A pull drags the large title down with the list, under the pinned header: it fades out instead.
+            ToolbarItem(placement: .largeTitle) {
+                Text("Parks")
+                    .font(.largeTitle.bold())
+                    .opacity(max(0, 1 - pullDistance / Self.titleFadeDistance))
+            }
+            listToolbar(hasParks: !allParks.isEmpty)
+        }
     }
 
     /// Sort picker (or the search field) and filters, in a bar under the navigation bar: the list scrolls under it
@@ -443,7 +457,12 @@ struct ParksView: View {
     private func filterHeader(hasParks: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if showSearch {
-                ParkSearchField(text: $searchText, isFocused: $searchFieldFocused)
+                ParkSearchField(
+                    text: $searchText,
+                    prompt: showsMapInList ? "Search places" : "Search parks",
+                    isFocused: $searchFieldFocused,
+                    onSubmit: { if showsMapInList { placeSearchToken += 1 } }
+                )
                     .transition(.move(edge: .top).combined(with: .opacity))
             } else {
                 Picker("Sort", selection: sortChoice) {
@@ -494,7 +513,6 @@ struct ParksView: View {
                     parks: visibleParks,
                     location: location,
                     position: $mapPosition,
-                    showsSearch: false,
                     onSelectPark: { selectedParkID = $0.id }
                 )
                 .mapScreen()
@@ -505,19 +523,26 @@ struct ParksView: View {
         }
     }
 
-    /// Settings above add, like the Logbook; search on top. On the map: the map buttons instead.
+    @ViewBuilder
+    private var searchButton: some View {
+        if showSearch {
+            Button("Close search", systemImage: "xmark", action: toggleSearch)
+        } else {
+            Button("Search parks", systemImage: "magnifyingglass", action: toggleSearch)
+        }
+    }
+
+    /// Settings above add, like the Logbook; search on top. On the map: search, then the map buttons.
     @ToolbarContentBuilder
     private func listToolbar(hasParks: Bool) -> some ToolbarContent {
         if showsMapInList {
+            // Search first, as on the list; it opens the same field in the header.
+            ToolbarItem(placement: .topBarTrailing) { searchButton }
             MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if hasParks {
-                    if showSearch {
-                        Button("Close search", systemImage: "xmark", action: toggleSearch)
-                    } else {
-                        Button("Search parks", systemImage: "magnifyingglass", action: toggleSearch)
-                    }
+                    searchButton
                 }
                 Button("Settings", systemImage: "gearshape", action: showAppSettings)
                 if editorEnabled {
@@ -676,14 +701,18 @@ private struct ParksNoMatchCard: View {
 
 private struct ParkSearchField: View {
     @Binding var text: String
+    let prompt: LocalizedStringKey
     var isFocused: FocusState<Bool>.Binding
+    var onSubmit: () -> Void = {}
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.rpplMuted)
-            TextField("Search parks", text: $text)
+            TextField(prompt, text: $text)
                 .focused(isFocused)
+                .submitLabel(.search)
+                .onSubmit(onSubmit)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .foregroundStyle(Color.rpplText)

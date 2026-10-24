@@ -15,15 +15,17 @@ struct ParksMapView: View {
     /// Owned by the parent: the style-toggle/recenter buttons live in its navigation bar
     /// (see `MapScreenToolbar`), sharing this same camera so they can drive it directly.
     @Binding var position: MapCameraPosition
-    /// The place search is off beside the list, whose own header already searches.
-    var showsSearch = true
+    /// The search field in the header above (opened with the search button, as on the list): submitting it
+    /// (`placeSearchToken`) looks the text up as a place and moves there.
+    var placeQuery = ""
+    var placeSearchToken = 0
     /// Beside the list a tapped pin selects the park there; otherwise it pushes the detail.
     var onSelectPark: ((Park) -> Void)?
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    @Environment(\.mapScreenScope) private var mapScreenScope
     @State private var selectedID: String?
     @State private var detailPark: Park?
-    @State private var query = ""
     @State private var searchFailed = false
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var searchPin: ParksSearchPin?
@@ -35,14 +37,8 @@ struct ParksMapView: View {
 
     private var showsCableLines: Bool { cameraDistance < Self.cableLineVisibleDistance }
 
-    private var parkMatches: [Park] {
-        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !needle.isEmpty else { return [] }
-        return parks.filter { $0.name.localizedCaseInsensitiveContains(needle) }.prefix(5).map { $0 }
-    }
-
     private var map: some View {
-        Map(position: $position, selection: $selectedID) {
+        Map(position: $position, selection: $selectedID, scope: mapScreenScope) {
             parkMarkers
             if showsCableLines {
                 cableLines
@@ -56,10 +52,7 @@ struct ParksMapView: View {
         .onMapCameraChange(frequency: .onEnd) { context in
             cameraDistance = context.camera.distance
         }
-        .mapControls {
-            MapCompass()
-            MapScaleView()
-        }
+        .mapScreenControls(scope: mapScreenScope)
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }
@@ -74,36 +67,24 @@ struct ParksMapView: View {
     }
 
     var body: some View {
-        Group {
-            if showsSearch {
-                map
-                    .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search places"))
-                    .searchSuggestions {
-                        ForEach(parkMatches) { park in
-                            Button {
-                                query = ""
-                                open(park)
-                            } label: {
-                                Label(park.name, systemImage: "mappin")
-                            }
-                        }
-                    }
-                    .onSubmit(of: .search) { Task { await search() } }
-            } else {
-                map
+        map
+            .onChange(of: placeSearchToken) { _, _ in
+                Task { await search() }
             }
-        }
-        .onChange(of: selectedID) { _, id in
-            guard let id, let park = parks.first(where: { $0.id == id }) else { return }
-            selectedID = nil
-            open(park)
-        }
-        .navigationDestination(item: $detailPark) { park in
-            ParkDetailContainer(park: park)
-        }
-        .alert(Text("No place found"), isPresented: $searchFailed) {
-            Button("OK", role: .cancel) {}
-        }
+            .onChange(of: placeQuery) { _, query in
+                if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { searchPin = nil }
+            }
+            .onChange(of: selectedID) { _, id in
+                guard let id, let park = parks.first(where: { $0.id == id }) else { return }
+                selectedID = nil
+                open(park)
+            }
+            .navigationDestination(item: $detailPark) { park in
+                ParkDetailContainer(park: park)
+            }
+            .alert(Text("No place found"), isPresented: $searchFailed) {
+                Button("OK", role: .cancel) {}
+            }
     }
 
     @MapContentBuilder
@@ -168,7 +149,7 @@ struct ParksMapView: View {
     private static let searchCameraDistance: CLLocationDistance = 60_000
 
     private func search() async {
-        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = placeQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = text
