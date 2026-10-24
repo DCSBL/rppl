@@ -307,7 +307,7 @@ struct SessionMapView: View {
         // No 3D button: tilting stays a two-finger gesture.
         if allowsInteraction {
             map
-                .mapScreenControls(scope: mapScreenScope)
+                .mapScreenControls(scope: mapScreenScope, position: $position)
         } else {
             map
                 .allowsHitTesting(false)

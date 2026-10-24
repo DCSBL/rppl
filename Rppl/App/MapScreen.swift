@@ -5,13 +5,15 @@ import SwiftUI
 /// The buttons of every full-screen map, in the navigation bar so they sit with the other bar buttons
 /// (vertically under the status bar on iPhone Duo): map style, reset (back to the framed track or park),
 /// then my location. Each shows only when its action is given. Back is the navigation bar's own. The
-/// compass is a bar item only for the bar layouts of `MapCompassLayout` (`compassScope` set by `mapScreen`).
+/// compass is a bar item only for the bar layouts of `MapCompassLayout` (`compassScope` and `compass` set
+/// by `mapScreen`).
 struct MapScreenToolbar: ToolbarContent {
     @Binding var usesSatellite: Bool
     var reset: (() -> Void)?
     var locate: (() -> Void)?
     var compassScope: Namespace.ID?
     var compassLayout: MapCompassLayout = .floatingCorner
+    var compass: MapScreenCompass?
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
@@ -29,6 +31,19 @@ struct MapScreenToolbar: ToolbarContent {
             }
             if let compassScope, compassLayout == .barGroup {
                 MapCompass(scope: compassScope)
+            }
+            if let compass, compassLayout == .customNorthButton {
+                MapScreenNorthButton(compass: compass)
+            }
+            if let compass, compassLayout == .customNorthButtonOnRotate, compass.isRotated {
+                MapScreenNorthButton(compass: compass)
+            }
+        }
+        if let compass, compassLayout == .customDialBar {
+            // Always there, so the bar never jumps; the bar item brings the glass.
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            ToolbarItem(placement: .topBarTrailing) {
+                MapScreenCompassDial(compass: compass, hasGlass: false)
             }
         }
         if let compassScope, compassLayout == .barItem {
@@ -82,6 +97,14 @@ enum MapCompassLayout: String, CaseIterable, Identifiable {
     case barBottom
     /// No compass. The map still rotates with two fingers, and reset points it north again.
     case hidden
+    /// The app's own dial (`MapScreenCompassDial`) in glass, floating like `floatingCorner`, once the map turns.
+    case customDialFloating
+    /// The app's own dial as a bar item under the map buttons, always shown.
+    case customDialBar
+    /// A north arrow button in the map buttons that turns with the map, always shown.
+    case customNorthButton
+    /// The north arrow button, only once the map turns.
+    case customNorthButtonOnRotate
 
     static let defaultLayout = MapCompassLayout.floatingCorner
 
@@ -93,13 +116,21 @@ enum MapCompassLayout: String, CaseIterable, Identifiable {
         return MapCompassLayout(rawValue: storedValue) ?? defaultLayout
     }
 
+    /// The app draws the compass itself and follows the map's heading (`MapScreenCompass`).
+    var isCustom: Bool {
+        switch self {
+        case .customDialFloating, .customDialBar, .customNorthButton, .customNorthButtonOnRotate: true
+        default: false
+        }
+    }
+
     /// Whether the map itself places the compass (nothing for `mapScreen` to draw or add to the bars).
     var isPlacedByMapKit: Bool { self == .mapKitDefault }
 
     /// Where a floating compass sits in the map, nil for the other layouts.
     var floatingAlignment: Alignment? {
         switch self {
-        case .floatingCorner, .floatingWindowCorner: .topTrailing
+        case .floatingCorner, .floatingWindowCorner, .customDialFloating: .topTrailing
         case .floatingLeading: .topLeading
         default: nil
         }
@@ -117,6 +148,10 @@ enum MapCompassLayout: String, CaseIterable, Identifiable {
         case .barLeading: "Bar item, leading (experimental)"
         case .barBottom: "Bottom bar item (experimental)"
         case .hidden: "No compass, rotate only"
+        case .customDialFloating: "Own dial, floating (on rotate)"
+        case .customDialBar: "Own dial, bar item (always)"
+        case .customNorthButton: "Own north button, in the buttons (always)"
+        case .customNorthButtonOnRotate: "Own north button, in the buttons (on rotate)"
         }
     }
 }
@@ -193,6 +228,7 @@ private struct MapScreenLayout: ViewModifier {
     @AppStorage(AppSettingsKey.debugMapCompassLayout) private var storedCompassLayout = MapCompassLayout.defaultLayout.rawValue
     @Namespace private var scope
     @State private var safeArea = EdgeInsets()
+    @State private var compass = MapScreenCompass()
 
     /// Space between the compass and the bars or the window edge.
     private static let compassMargin: CGFloat = 12
@@ -215,9 +251,26 @@ private struct MapScreenLayout: ViewModifier {
         }
     }
 
+    @ViewBuilder
+    private var floatingCompass: some View {
+        if compassLayout == .customDialFloating {
+            // Shows once the map turns, as MapKit's does.
+            ZStack {
+                if compass.isRotated {
+                    MapScreenCompassDial(compass: compass)
+                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: compass.isRotated)
+        } else {
+            MapCompass(scope: scope)
+        }
+    }
+
     func body(content: Content) -> some View {
         content
             .environment(\.mapScreenScope, scope)
+            .environment(\.mapScreenCompass, compassLayout.isCustom ? compass : nil)
             .background {
                 // Inside the padding below: the whole map, with the covered part as its safe area.
                 Color.clear.onGeometryChange(for: MapViewport.self) { proxy in
@@ -230,7 +283,7 @@ private struct MapScreenLayout: ViewModifier {
             // placement sat under the buttons.
             .overlay(alignment: compassLayout.floatingAlignment ?? .topTrailing) {
                 if let alignment = compassLayout.floatingAlignment {
-                    MapCompass(scope: scope)
+                    floatingCompass
                         .padding(.top, mapSafeArea.top + Self.compassMargin)
                         .padding(alignment == .topLeading ? .leading : .trailing, compassInset(alignment))
                         .ignoresSafeArea()
@@ -242,7 +295,8 @@ private struct MapScreenLayout: ViewModifier {
                     reset: reset,
                     locate: locate,
                     compassScope: scope,
-                    compassLayout: compassLayout
+                    compassLayout: compassLayout,
+                    compass: compassLayout.isCustom ? compass : nil
                 )
             }
             .mapScope(scope)
@@ -259,6 +313,8 @@ private struct MapScreenLayout: ViewModifier {
 extension EnvironmentValues {
     /// Set by `mapScreen`: the map passes it to `Map(scope:)` so the floating compass follows it.
     @Entry var mapScreenScope: Namespace.ID? = nil
+    /// Set by `mapScreen` for the app's own compass: the map reports its camera to it.
+    @Entry var mapScreenCompass: MapScreenCompass? = nil
 }
 
 extension View {
@@ -266,7 +322,7 @@ extension View {
     /// while the parts those cover stay its safe area. MapKit keeps its scale and legal text inside it,
     /// the compass floats in its top trailing corner, and `viewport` tells a camera what part is visible.
     /// Adds the `MapScreenToolbar`.
-    /// The map passes `mapScreenScope` to `Map(scope:)` and uses `mapScreenControls(scope:)`.
+    /// The map passes `mapScreenScope` to `Map(scope:)` and uses `mapScreenControls(scope:position:)`.
     func mapScreen(
         viewport: Binding<MapViewport> = .constant(MapViewport()),
         usesSatellite: Binding<Bool>,
@@ -276,18 +332,33 @@ extension View {
         modifier(MapScreenLayout(viewport: viewport, usesSatellite: usesSatellite, reset: reset, locate: locate))
     }
 
-    /// The map's own controls: the scale, and the compass only for `MapCompassLayout.mapKitDefault`.
-    func mapScreenControls(scope: Namespace.ID?) -> some View {
-        modifier(MapScreenControls(placesCompass: scope == nil))
+    /// The map's own controls: the scale, and the compass only for `MapCompassLayout.mapKitDefault`. For the
+    /// app's own compass the map reports its camera, and `position` turns north on a tap.
+    func mapScreenControls(scope: Namespace.ID?, position: Binding<MapCameraPosition>) -> some View {
+        modifier(MapScreenControls(placesCompass: scope == nil, position: position))
     }
 }
 
 private struct MapScreenControls: ViewModifier {
     /// A map outside `mapScreen` keeps MapKit's compass.
     let placesCompass: Bool
+    @Binding var position: MapCameraPosition
     @AppStorage(AppSettingsKey.debugMapCompassLayout) private var storedCompassLayout = MapCompassLayout.defaultLayout.rawValue
+    @Environment(\.mapScreenCompass) private var compass
 
     func body(content: Content) -> some View {
+        controls(content)
+            .onMapCameraChange(frequency: .continuous) { context in
+                compass?.update(context.camera)
+            }
+            .onChange(of: compass?.northRequests) {
+                guard let camera = compass?.northCamera else { return }
+                withAnimation { position = .camera(camera) }
+            }
+    }
+
+    @ViewBuilder
+    private func controls(_ content: Content) -> some View {
         if placesCompass || MapCompassLayout.resolved(storedCompassLayout).isPlacedByMapKit {
             content.mapControls {
                 MapCompass()
