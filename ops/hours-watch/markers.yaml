@@ -7,4 +7,21 @@
 #   absent: ["2027"]         # no text may occur (replaces the default)
 #   selector: "main"         # CSS selector for the hash (browser fetch only)
 #   fetch: browser           # skip curl, go straight to Playwright
-{}
+#   href: "openings.*\\.pdf"   # regex; matching link URLs are added to the page text, so a new
+#                            # PDF URL changes the hash and can be used in present/absent
+kempervennen-westerhoven:
+  present: ["gesloten tot april 2027"]   # closure notice; fires when it is lifted or reworded
+  absent: ["2028"]                       # the page already names 2027
+wetnwild-alphen:
+  present: ["t/m maart 2027"]            # winter hours line
+  absent: ["2028"]
+ermerstrand-erm:
+  present: ["vanaf 22 mei 2026"]         # reopening date of the season
+stroombroek-braamt:
+  fetch: browser                         # JS-rendered site, curl gets an empty shell
+wakepark-groningen:
+  fetch: browser                         # curl gets HTTP 500
+downunder-nieuwegein:
+  href: "openingstijden.*\\.pdf"         # hours are a PDF; the link changes with each new version
+beavercreek-roermond:
+  fetch: browser                         # single-page JS site, curl gets an empty shell

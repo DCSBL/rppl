@@ -100,6 +100,9 @@ def fetch(url: str, entry: dict) -> tuple[str, str]:
                 errors.append(f"{method}: {type(error).__name__}")
             else:
                 text = normalize(raw)
+                if entry.get("href"):  # hours live in a linked file (PDF): watch its URL
+                    links = re.findall(r'href=["\']([^"\']*)', raw)
+                    text += " " + " ".join(sorted({u.lower() for u in links if re.search(entry["href"], u, re.I)}))
                 if len(text) >= MIN_TEXT_CHARS:
                     return text, method
                 errors.append(f"{method}: page too short ({len(text)} chars)")
