@@ -6,6 +6,9 @@
 # - pull request: unit tests for the release scripts (Python 3.9 = Xcode command line tools).
 #
 # The tag name is user input: it reaches the shell only through env, never interpolated.
+#
+# No `paths:` filter: a never-triggered workflow leaves a required check pending forever. The workflow always
+# starts; a `changes` job decides whether the real job runs, and a job skipped by `if` still reports success.
 
 name: "Release: preflight"
 
@@ -14,12 +17,6 @@ on:
     types: [published]
   pull_request:
     branches: [main]
-    paths:
-      - "scripts/ci/**"
-      - "ci_scripts/**"
-      - "Rppl.xcodeproj/project.pbxproj"
-      - "Rppl/Info.plist"
-      - ".github/workflows/release-preflight.yml"
 
 concurrency:
   group: release-preflight-${{ github.event.release.tag_name || github.event.pull_request.number || github.ref }}
@@ -29,9 +26,40 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Changed paths (release scripts)
+    runs-on: ubuntu-24.04
+    outputs:
+      scripts: ${{ steps.filter.outputs.scripts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "scripts=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          if printf '%s\n' "$changed" | grep -Eq '^(scripts/ci/|ci_scripts/|Rppl\.xcodeproj/project\.pbxproj$|Rppl/Info\.plist$|\.github/workflows/release-preflight\.yml$)'; then
+            echo "scripts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scripts=false" >> "$GITHUB_OUTPUT"
+          fi
+
   unit-tests:
     name: Release script tests
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.scripts == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

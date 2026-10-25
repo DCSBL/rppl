@@ -1,18 +1,14 @@
 # Marketing preview: renders the App Store assets (marketing/) from the committed website screenshots and checks
 # sizes/alpha, so changes to marketing.yaml or the template are visible on the PR (download the artifact).
 # The real assets are rendered from CI screenshots in release-screenshots.yml.
+#
+# No `paths:` filter: a never-triggered workflow leaves a required check pending forever. The workflow always
+# starts; a `changes` job decides whether the real job runs, and a job skipped by `if` still reports success.
 
 name: Marketing assets preview
 
 on:
   pull_request:
-    paths:
-      - marketing/**
-      - assets/rppl.svg
-      - web/public/shots/**
-      - scripts/ci/check_marketing_assets.py
-      - scripts/ci/test_check_marketing_assets.py
-      - .github/workflows/marketing-render.yml
 
 concurrency:
   group: marketing-render-${{ github.event.pull_request.number }}
@@ -22,8 +18,40 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Changed paths (marketing)
+    runs-on: ubuntu-24.04
+    outputs:
+      marketing: ${{ steps.filter.outputs.marketing }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "marketing=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          if printf '%s\n' "$changed" | grep -Eq '^(marketing/|assets/rppl\.svg$|web/public/shots/|scripts/ci/(test_)?check_marketing_assets\.py$|\.github/workflows/marketing-render\.yml$)'; then
+            echo "marketing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "marketing=false" >> "$GITHUB_OUTPUT"
+          fi
+
   render:
     name: Render App Store assets
+    needs: changes
+    if: needs.changes.outputs.marketing == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

@@ -113,7 +113,21 @@ RpplCore `swift test` runs in its own workflow, see [Core tests (Linux)](#core-t
 - SwiftLint install is a **step-level** skip when the PR has no matching paths. The job always reports a status, so you can mark **`Pre-commit (lint)`** as a required check without skipped-job merge blocks.
 - Hooks with no matching files are skipped by pre-commit (exit 0).
 
-To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require status checks **`Pre-commit (lint)`**, **`RpplCore tests (Linux)`** and **`Smoke (app unit tests)`** (macOS CI). Require only these fast checks, so the slow UI tests never block a merge.
+To enforce: GitHub → Settings → Branches → Branch protection (or ruleset) for `main` → require every status check below. Rule: a check that runs and fails blocks the merge, a check that is skipped does not. This works because no PR workflow has a `paths:` filter: each one always starts and a `changes` job decides which jobs run; a job skipped by `if` reports success, so a required check never stays pending. Require the `changes` jobs too, since a failed `changes` job makes its dependents skip.
+
+| Workflow | Required checks |
+|---|---|
+| Lint | `Pre-commit (lint)` |
+| Core tests (Linux) | `Detect code changes`, `RpplCore tests (Linux)`, `Core test summary` |
+| Validate parks | `Validate park data` |
+| macOS CI | `Changed paths (macOS CI)`, `Smoke (app unit tests)`, `Core and release script tests (macOS)`, `Build app (dry run)`, `UI tests (iPhone Simulator)`, `UI tests (Apple Watch Simulator)` |
+| UI test matrix | `Changed paths (UI matrix)`, `Merge UI screenshots` (fails if any cell failed; the cells themselves have matrix names, do not require them) |
+| UI layout screenshots | `Changed paths (layouts)`, `Merge layout screenshots` |
+| Marketing assets preview | `Changed paths (marketing)`, `Render App Store assets` |
+| Release: preflight | `Changed paths (release scripts)`, `Release script tests` |
+| Website deploy | `Changed paths (website)`, `Build website` |
+
+Do not require `Analyze (…)` (CodeQL), the release-only and dependabot jobs, or `release notes` / the `Required screenshots`, `Extra screenshots` and `App Store marketing assets` jobs: they do not run on PRs.
 
 ### Cancel on merge
 
