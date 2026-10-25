@@ -23,7 +23,6 @@ struct ParksMapView: View {
     var onSelectPark: ((Park) -> Void)?
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
-    @Environment(\.mapScreenScope) private var mapScreenScope
     @State private var selectedID: String?
     @State private var detailPark: Park?
     @State private var searchFailed = false
@@ -38,7 +37,7 @@ struct ParksMapView: View {
     private var showsCableLines: Bool { cameraDistance < Self.cableLineVisibleDistance }
 
     private var map: some View {
-        Map(position: $position, selection: $selectedID, scope: mapScreenScope) {
+        Map(position: $position, selection: $selectedID) {
             parkMarkers
             if showsCableLines {
                 cableLines
@@ -52,7 +51,7 @@ struct ParksMapView: View {
         .onMapCameraChange(frequency: .onEnd) { context in
             cameraDistance = context.camera.distance
         }
-        .mapScreenControls(scope: mapScreenScope, position: $position)
+        .mapScreenControls()
         .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: topInset)
         }

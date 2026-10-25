@@ -45,7 +45,6 @@ enum SessionMapLayout {
 struct SessionMapView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @Environment(\.layoutDirection) private var layoutDirection
-    @Environment(\.mapScreenScope) private var mapScreenScope
     @ScaledMetric(relativeTo: .caption2) private var endpointSize: CGFloat = 20
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
@@ -299,7 +298,7 @@ struct SessionMapView: View {
 
     @ViewBuilder
     private var interactiveMap: some View {
-        let map = Map(position: $position, interactionModes: interactionModes, scope: mapScreenScope) {
+        let map = Map(position: $position, interactionModes: interactionModes) {
             mapContent
         }
         .mapStyle(mapStyle)
@@ -307,7 +306,7 @@ struct SessionMapView: View {
         // No 3D button: tilting stays a two-finger gesture.
         if allowsInteraction {
             map
-                .mapScreenControls(scope: mapScreenScope, position: $position)
+                .mapScreenControls()
         } else {
             map
                 .allowsHitTesting(false)
