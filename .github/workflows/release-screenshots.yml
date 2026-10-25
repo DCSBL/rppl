@@ -171,6 +171,20 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      # Before the check: a missing Watch shot (the Watch simulator hangs now and then) must not keep the iPhone shots
+      # off the release.
+      - name: Attach to release
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+          for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
+          for f in screenshots-watch/*.png; do cp "$f" "watch-$(basename "$f")"; done
+          files=(iphone-*.png watch-*.png)
+          [ "${#files[@]}" -gt 0 ] && gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
+          exit 0
+
       - name: Check the required shots exist
         shell: bash
         run: |
@@ -181,14 +195,6 @@ jobs:
           done
           [ -f screenshots-watch/06-live-riding.png ] || { echo "::error::required Watch shot 06-live-riding is missing"; missing=1; }
           exit "$missing"
-
-      - name: Attach to release
-        shell: bash
-        run: |
-          set -euo pipefail
-          for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
-          for f in screenshots-watch/*.png; do cp "$f" "watch-$(basename "$f")"; done
-          gh release upload "$RELEASE_TAG" iphone-*.png watch-*.png --clobber
 
   screenshots-extra:
     name: screenshots-extra
