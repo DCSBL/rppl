@@ -7,7 +7,7 @@
 #
 # The tag name is user input: it reaches the shell only through env, never interpolated.
 
-name: Release preflight
+name: "Release: preflight"
 
 on:
   release:
@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   unit-tests:
-    name: release scripts
+    name: Release script tests
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
@@ -46,7 +46,7 @@ jobs:
         run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
 
   preflight:
-    name: release preflight
+    name: Preflight release checks
     if: github.event_name == 'release'
     runs-on: ubuntu-24.04
     steps:

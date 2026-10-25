@@ -30,7 +30,7 @@ env:
 
 jobs:
   distribute:
-    name: distribute
+    name: Update parks distribution PR
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout main

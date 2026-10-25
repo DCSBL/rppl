@@ -2,7 +2,7 @@
 # sizes/alpha, so changes to marketing.yaml or the template are visible on the PR (download the artifact).
 # The real assets are rendered from CI screenshots in release-screenshots.yml.
 
-name: Marketing render
+name: Marketing assets preview
 
 on:
   pull_request:
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   render:
-    name: render
+    name: Render App Store assets
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

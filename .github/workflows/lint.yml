@@ -1,4 +1,4 @@
-# PR checks on Linux — pre-commit only (hygiene, codespell, SwiftLint).
+# Lint on Linux — pre-commit only (hygiene, codespell, SwiftLint).
 # RpplCore unit tests run in core-tests.yml (Linux, swift container) and in the local push gate.
 # No xcode-gate / xcodebuild (macOS / Xcode only).
 #
@@ -6,14 +6,14 @@
 # PR has no matching file changes (a skipped *job* would block merge when the
 # check is required; a skipped *step* does not).
 
-name: PR checks
+name: Lint
 
 on:
   pull_request:
     branches: [main, 'wip/**']
 
 concurrency:
-  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  group: lint-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -26,7 +26,7 @@ env:
 
 jobs:
   pre-commit:
-    name: pre-commit
+    name: Pre-commit (lint)
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

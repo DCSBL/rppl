@@ -1,7 +1,7 @@
 # Weekly, informational scan of every park's `opening.source_url`. Never fails on a changed or
 # unreachable park; the report (markers triggered, page changed, unreachable) lands in the run summary.
 
-name: Hours watch
+name: Opening hours watch
 
 on:
   schedule:
@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   scan:
+    name: Scan park hours pages
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7

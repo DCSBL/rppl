@@ -10,7 +10,7 @@
 # only touches park YAML (validated by parks-validate.yml), docs, web or the like, the
 # test steps skip. Pushes to main always run everything, as the backstop.
 
-name: Core tests
+name: Core tests (Linux)
 
 on:
   pull_request:
@@ -97,7 +97,7 @@ jobs:
           retention-days: 7
 
   report:
-    name: Test summary
+    name: Core test summary
     needs: [changes, core-tests]
     # Also after a failed test run; not when cancelled by a newer push or when tests were skipped.
     if: ${{ !cancelled() && needs.changes.outputs.code == 'true' }}

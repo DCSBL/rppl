@@ -8,7 +8,7 @@
 #
 # `smoke` is the fast gate (compile + app unit tests, target <= 6 min): the heavy jobs wait for it,
 # so a broken build neither queues ~20 min of UI tests nor blocks the macOS runners. Merge on a green
-# `Smoke`; the rest is the real verification. A merged PR cancels its own runs (cancel-on-merge.yml)
+# `Smoke (app unit tests)`; the rest is the real verification. A merged PR cancels its own runs (cancel-on-merge.yml)
 # unless it is "scary" (label `full-ci`, release/CI/project paths).
 #
 # No `paths:` filter: the jobs always report a status, so they can be required checks. The two UI
@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   changes:
-    name: Changed paths
+    name: Changed paths (macOS CI)
     runs-on: ubuntu-24.04
     outputs:
       phone: ${{ steps.filter.outputs.phone }}
@@ -71,7 +71,7 @@ jobs:
           fi
 
   smoke:
-    name: Smoke
+    name: Smoke (app unit tests)
     runs-on: macos-26
     timeout-minutes: 20
     steps:
@@ -117,7 +117,7 @@ jobs:
           retention-days: 7
 
   tests:
-    name: Tests (macOS)
+    name: Core and release script tests (macOS)
     needs: smoke
     runs-on: macos-26
     timeout-minutes: 45
@@ -149,7 +149,7 @@ jobs:
           retention-days: 7
 
   build:
-    name: Build (dry run)
+    name: Build app (dry run)
     needs: smoke
     runs-on: macos-26
     timeout-minutes: 45

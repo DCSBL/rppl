@@ -15,7 +15,7 @@
 # them again. A manual run renders with marketing/ from the branch you pick.
 # The tag reaches the shell only through env, never interpolated.
 
-name: Release screenshots
+name: "Release: screenshots and marketing assets"
 
 on:
   release:
@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   screenshots-required:
-    name: screenshots-required
+    name: Required screenshots (iPhone + Watch)
     if: github.event_name == 'release' || inputs.regenerate_screenshots
     runs-on: macos-26
     timeout-minutes: 45
@@ -189,7 +189,7 @@ jobs:
           gh release upload "$RELEASE_TAG" iphone-*.png watch-*.png --clobber
 
   screenshots-extra:
-    name: screenshots-extra
+    name: Extra screenshots (optional)
     if: github.event_name == 'release' || inputs.regenerate_screenshots
     runs-on: macos-26
     timeout-minutes: 60
@@ -323,7 +323,7 @@ jobs:
           exit 0
 
   marketing:
-    name: marketing assets
+    name: App Store marketing assets
     needs: screenshots-required
     # A skipped screenshots job (manual run reusing the release assets) is fine; a failed one is not.
     # The extra screenshots never gate this job.

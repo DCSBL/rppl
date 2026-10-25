@@ -2,7 +2,7 @@
 # Needs Settings → Pages → Source: GitHub Actions (repo must be public or on a paid plan).
 # Privacy page renders repo-root LEGAL.md, so changes there redeploy too.
 
-name: Web
+name: Website deploy
 
 on:
   push:
@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   build:
-    name: build
+    name: Build website
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -52,7 +52,7 @@ jobs:
           path: web/dist
 
   deploy:
-    name: deploy
+    name: Deploy to GitHub Pages
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
