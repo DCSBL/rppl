@@ -331,7 +331,7 @@ jobs:
           exit 0
 
   screenshots-duo:
-    name: screenshots-duo
+    name: iPhone Duo screenshots (optional)
     if: github.event_name == 'release' || inputs.regenerate_screenshots
     runs-on: macos-26
     timeout-minutes: 45
@@ -473,7 +473,7 @@ jobs:
         run: gh release upload "$RELEASE_TAG" "rppl-appstore-assets-${RELEASE_TAG}.zip" --clobber
 
   release-notes:
-    name: release notes
+    name: Release notes
     needs: [screenshots-required, screenshots-extra, screenshots-duo]
     # Runs once both screenshot jobs are done, whatever their result, and rebuilds the section from the
     # assets that actually exist on the release.
