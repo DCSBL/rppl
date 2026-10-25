@@ -30,9 +30,12 @@ struct LogbookSessionDetailView: View {
     @State private var tracksLoading = false
     @State private var cityName: String?
     @State private var loadPhase: LoadPhase = .loading
-    /// Bumped to read the session again (after an edit); the load runs in `.task(id:)`, so SwiftUI
-    /// cancels it when the view goes away and starts it again when it comes back.
+    /// Bumped to read the session again (after an edit). The load runs in `loadTask`, which outlives the
+    /// view appearing and disappearing: a load tied to `.task` was cancelled when a park was pushed on top
+    /// and, on a folded layout, not always restarted on the way back, leaving "Loading session…" up.
     @State private var reloadToken = 0
+    @State private var loadTask: Task<Void, Never>?
+    @State private var loadingToken: Int?
     /// The token whose load ran to the end, tracks and city included; nil until then.
     @State private var loadedToken: Int?
     @State private var errorText: String?
@@ -139,10 +142,8 @@ struct LogbookSessionDetailView: View {
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .tint(Color.rpplAccent)
-        .task(id: reloadToken) {
-            guard loadedToken != reloadToken else { return }
-            await loadSession(token: reloadToken)
-        }
+        .onAppear { startLoadIfNeeded() }
+        .onChange(of: reloadToken) { _, _ in startLoadIfNeeded() }
         .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
         .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { endFlagEditing() }
@@ -785,6 +786,19 @@ struct LogbookSessionDetailView: View {
     /// Re-reads the session after it was edited, keeping what is on screen meanwhile.
     private func reload() {
         reloadToken += 1
+    }
+
+    /// Starts the load for the current token unless it already ran or is running; a newer token replaces it.
+    private func startLoadIfNeeded() {
+        let token = reloadToken
+        guard loadedToken != token else { return }
+        if loadTask != nil, loadingToken == token { return }
+        loadTask?.cancel()
+        loadingToken = token
+        loadTask = Task {
+            await loadSession(token: token)
+            if loadingToken == token { loadTask = nil }
+        }
     }
 
     /// Shows the session as soon as its summary is read; GPS tracks and the city name fill in after.
