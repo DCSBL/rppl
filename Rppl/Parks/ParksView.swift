@@ -23,6 +23,7 @@ struct ParksView: View {
     @State private var showMap = false
     @State private var windowWidth: CGFloat = 0
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showSearch = false
     @State private var searchText = ""
     /// Bumped when the search field is submitted on the map: it then looks the text up as a place.
@@ -67,7 +68,11 @@ struct ParksView: View {
 
     /// The distance-sorted list is on screen: the one place this tab needs the person's location.
     private var layout: WindowLayout {
-        WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize)
+        WindowLayout.resolve(
+            width: Double(windowWidth),
+            isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize,
+            isCompactWidthClass: horizontalSizeClass == .compact
+        )
     }
 
     /// The map replaces the list only in a narrow window; a wide window shows it beside the list.

@@ -6,6 +6,8 @@
 #   PNGs is missing. They are attached to the release as iphone-*/watch-* assets.
 # - screenshots-extra: everything else (dark mode, other scenarios). Parallel and allowed to fail: a failure
 #   is a warning and blocks nothing.
+# - screenshots-duo: three iPhone Duo shots (folded session list, unfolded session detail and parks), attached
+#   as duo-*. Optional like screenshots-extra; a wide iPhone stands in until the Duo simulator is on the runners.
 # - marketing: renders the App Store assets from the required shots and attaches one zip. Needs only
 #   screenshots-required.
 # - release-notes: rebuilds the Screenshots section of the release description from the assets on the release,
@@ -169,6 +171,20 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      # Before the check: a missing Watch shot (the Watch simulator hangs now and then) must not keep the iPhone shots
+      # off the release.
+      - name: Attach to release
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+          for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
+          for f in screenshots-watch/*.png; do cp "$f" "watch-$(basename "$f")"; done
+          files=(iphone-*.png watch-*.png)
+          [ "${#files[@]}" -gt 0 ] && gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
+          exit 0
+
       - name: Check the required shots exist
         shell: bash
         run: |
@@ -179,14 +195,6 @@ jobs:
           done
           [ -f screenshots-watch/06-live-riding.png ] || { echo "::error::required Watch shot 06-live-riding is missing"; missing=1; }
           exit "$missing"
-
-      - name: Attach to release
-        shell: bash
-        run: |
-          set -euo pipefail
-          for f in screenshots/*.png; do cp "$f" "iphone-$(basename "$f")"; done
-          for f in screenshots-watch/*.png; do cp "$f" "watch-$(basename "$f")"; done
-          gh release upload "$RELEASE_TAG" iphone-*.png watch-*.png --clobber
 
   screenshots-extra:
     name: Extra screenshots (optional)
@@ -322,6 +330,80 @@ jobs:
           [ "${#files[@]}" -gt 0 ] && gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
           exit 0
 
+  screenshots-duo:
+    name: screenshots-duo
+    if: github.event_name == 'release' || inputs.regenerate_screenshots
+    runs-on: macos-26
+    timeout-minutes: 45
+    # Optional shots: a failure here is a warning, never a failed release run.
+    continue-on-error: true
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      # Stand-in for the iPhone Duo until its simulator is on the runners: the largest iPhone, portrait when
+      # folded and landscape when unfolded (two panes, like the Duo).
+      - name: iPhone Duo screenshots
+        continue-on-error: true
+        shell: bash
+        env:
+          TEST_RUNNER_RPPL_DUO_SHOTS: "1"
+        run: |
+          set -uo pipefail
+          udid="$(python3 scripts/ci/pick_simulator.py "iPhone 17 Pro Max")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplDuoScreenshotTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 180 \
+            -resultBundlePath DuoScreenshots.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            > xcodebuild-duo.log 2>&1
+          status=$?
+          grep -E "error:|failed|XCTAssert|Failing tests" xcodebuild-duo.log | head -60 || true
+          tail -20 xcodebuild-duo.log
+          exit "$status"
+
+      - name: Export Duo screenshots
+        if: always()
+        run: python3 scripts/ci/export_screenshots.py DuoScreenshots.xcresult screenshots-duo || true
+
+      - name: Upload workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots-duo
+          path: |
+            screenshots-duo/*.png
+            xcodebuild-duo.log
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Attach to release
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+          for f in screenshots-duo/*.png; do cp "$f" "duo-$(basename "$f")"; done
+          files=(duo-*.png)
+          [ "${#files[@]}" -gt 0 ] && gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
+          exit 0
+
   marketing:
     name: App Store marketing assets
     needs: screenshots-required
@@ -392,7 +474,7 @@ jobs:
 
   release-notes:
     name: release notes
-    needs: [screenshots-required, screenshots-extra]
+    needs: [screenshots-required, screenshots-extra, screenshots-duo]
     # Runs once both screenshot jobs are done, whatever their result, and rebuilds the section from the
     # assets that actually exist on the release.
     if: ${{ !cancelled() && needs.screenshots-required.result != 'skipped' }}
@@ -418,7 +500,8 @@ jobs:
           # At most this many shots per device type go in the description; the rest go in one zip.
           per_device = 3
           # The shots marketing/marketing.yaml uses come first; the rest follow in name order.
-          preferred = ["02-logbook-3-1", "04-session-tracked-2", "06-parks-open-1", "06-live-riding"]
+          preferred = ["02-logbook-3-1", "04-session-tracked-2", "06-parks-open-1", "06-live-riding",
+                       "02-logbook-folded", "04-session-unfolded", "06-parks-unfolded"]
           names = sorted(n for n in Path("assets.txt").read_text().split() if n.endswith(".png"))
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
           def pick(prefix):

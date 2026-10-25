@@ -19,4 +19,10 @@ struct WindowLayoutTests {
     @Test func zeroWidthStacks() {
         #expect(WindowLayout.resolve(width: 0, isAccessibilityTextSize: false) == .stack)
     }
+
+    @Test("a compact width class stays a stack however wide the window is")
+    func compactWidthClassStaysStack() {
+        #expect(WindowLayout.resolve(width: 874, isAccessibilityTextSize: false, isCompactWidthClass: true) == .stack)
+        #expect(WindowLayout.resolve(width: 874, isAccessibilityTextSize: false, isCompactWidthClass: false) == .twoPane)
+    }
 }
