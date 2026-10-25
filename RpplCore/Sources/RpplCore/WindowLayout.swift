@@ -24,4 +24,13 @@ public enum WindowLayout: Equatable, Sendable {
         let minimum = isAccessibilityTextSize ? twoPaneMinWidthAccessibility : twoPaneMinWidth
         return width >= minimum ? .twoPane : .stack
     }
+
+    /// Whether the sidebar column shows the map in place of its list. Only the system's own collapsed
+    /// verdict (compact width class) decides, not the measured width: while a fold or resize is animating, the
+    /// width crosses `twoPaneMinWidth` before the split view collapses or expands, and swapping a list for an
+    /// `MKMapView` inside that scene update made the map re-inset on every layout pass until the watchdog
+    /// killed the app (iPhone Duo, half-fold).
+    public static func sidebarHostsMap(wantsMap: Bool, isCompactWidthClass: Bool) -> Bool {
+        wantsMap && isCompactWidthClass
+    }
 }
