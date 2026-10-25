@@ -946,7 +946,7 @@ private struct ParkMapScreen: View {
             weather: weather,
             position: $position,
             showsUserLocation: location.availability == .available,
-            // The compass takes the top corner once the map turns.
+            // Out of the way of the bar buttons in the top corner.
             windRoseAlignment: .bottomTrailing
         )
         .mapScreen(viewport: $viewport, usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
@@ -999,12 +999,11 @@ private struct ParkMap: View {
     var showsUserLocation = false
     var windRoseAlignment: Alignment = .topTrailing
 
-    @Environment(\.mapScreenScope) private var mapScreenScope
     @State private var mapHeading: Double = 0
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
-        Map(position: $position, scope: mapScreenScope) {
+        Map(position: $position) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
             ForEach(startMarkers, id: \.id) { marker in
@@ -1031,7 +1030,7 @@ private struct ParkMap: View {
             }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
-        .mapScreenControls(scope: mapScreenScope, position: $position)
+        .mapScreenControls()
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }

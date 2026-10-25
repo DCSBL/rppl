@@ -147,7 +147,8 @@ public enum MapTrackFitter {
     }
 
     /// Camera for `frame` on a map of `viewWidth` × `viewHeight` points. A map that draws under bars or
-    /// a sidebar passes their `insets`: the track is framed in the part left uncovered, and centered there.
+    /// a sidebar passes their `insets`: the track is sized to the part left uncovered. The center stays the
+    /// frame's: MapKit centers a camera in the uncovered part itself, when that part is its safe area.
     public static func fit(
         frame: MapTrackFrame,
         viewWidth: Double,
@@ -166,17 +167,9 @@ public enum MapTrackFitter {
             minimumCameraDistanceMeters,
             (visibleHeightMeters / 2) / tan(halfVerticalFOVRadians)
         )
-        let shifted = center(
-            latitude: frame.centerLatitude,
-            longitude: frame.centerLongitude,
-            headingDegrees: frame.headingDegrees,
-            cameraDistanceMeters: distance,
-            viewHeight: viewHeight,
-            insets: covered
-        )
         return MapTrackFit(
-            centerLatitude: shifted.latitude,
-            centerLongitude: shifted.longitude,
+            centerLatitude: frame.centerLatitude,
+            centerLongitude: frame.centerLongitude,
             headingDegrees: frame.headingDegrees,
             cameraDistanceMeters: distance
         )
@@ -193,32 +186,6 @@ public enum MapTrackFitter {
             return nil
         }
         return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight, insets: insets)
-    }
-
-    /// Camera center that shows `latitude`/`longitude` in the middle of the part of the view inside
-    /// `insets`, rather than in the middle of the whole view.
-    public static func center(
-        latitude: Double,
-        longitude: Double,
-        headingDegrees: Double,
-        cameraDistanceMeters: Double,
-        viewHeight: Double,
-        insets: MapViewInsets
-    ) -> (latitude: Double, longitude: Double) {
-        guard viewHeight > 1, insets != .zero else { return (latitude, longitude) }
-        let metersPerPoint = 2 * cameraDistanceMeters * tan(halfVerticalFOVRadians) / viewHeight
-        // Points from the middle of the view to the middle of the uncovered part: right and down.
-        let right = (insets.left - insets.right) / 2
-        let down = (insets.top - insets.bottom) / 2
-        // The camera moves the other way, turned from screen axes to east/north by the heading.
-        let heading = headingDegrees * .pi / 180
-        let east = -metersPerPoint * (right * cos(heading) - down * sin(heading))
-        let north = metersPerPoint * (right * sin(heading) + down * cos(heading))
-        let metersPerDegreeLon = metersPerDegreeLat * cos(latitude * .pi / 180)
-        return (
-            latitude + north / metersPerDegreeLat,
-            longitude + (metersPerDegreeLon > 1 ? east / metersPerDegreeLon : 0)
-        )
     }
 
     /// Flatten ride/session tracks into coordinate pairs for `fit` / `frame`.
