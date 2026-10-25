@@ -4,7 +4,7 @@
 # Runs RpplLayoutScreenshotTests only (it skips itself without RPPL_LAYOUT_SHOTS, so the other UI jobs never run it).
 # Output: one artifact `layout-screenshots` with <device>-<text>/<screenshot>.png, linked in a PR comment.
 
-name: Layouts
+name: UI layout screenshots
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   changes:
-    name: Changed paths
+    name: Changed paths (layouts)
     runs-on: ubuntu-24.04
     outputs:
       ui: ${{ steps.filter.outputs.ui }}
@@ -42,14 +42,14 @@ jobs:
             echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
           changed="$(git diff --name-only "$BASE...$HEAD")"
-          if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplCore/|RpplUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/layouts\.yml$)'; then
+          if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplCore/|RpplUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/ui-layout-screenshots\.yml$)'; then
             echo "ui=true" >> "$GITHUB_OUTPUT"
           else
             echo "ui=false" >> "$GITHUB_OUTPUT"
           fi
 
   layouts:
-    name: Layouts ${{ matrix.variant }}
+    name: Layout screenshots ${{ matrix.variant }}
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26

@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   validate:
-    name: validate
+    name: Validate park data
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

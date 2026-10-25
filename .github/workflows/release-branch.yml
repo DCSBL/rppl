@@ -14,7 +14,7 @@
 #
 # The tag name is user input: it reaches the shell only through env, never interpolated.
 
-name: Release branch
+name: "Release: push release branch"
 
 on:
   release:
@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   push-branch:
-    name: push release branch
+    name: Push release/X.Y.Z branch
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

@@ -6,10 +6,10 @@
 # Every cell exports its screenshots; the last job merges them into ONE artifact, one folder per case
 # with one PNG per device: ui-screenshots.zip -> ios/<case>/<device>.png, watch/<case>/<device>.png.
 # Heavier than macos-ci.yml's single-device UI jobs, so the cells skip on PRs touching no app/UI code.
-# No `paths:` filter: the workflow always starts, so "Merge screenshots" can be a required check.
-# A skipped job reports success; when the cells ran, "Merge screenshots" fails if any cell failed.
+# No `paths:` filter: the workflow always starts, so "Merge UI screenshots" can be a required check.
+# A skipped job reports success; when the cells ran, "Merge UI screenshots" fails if any cell failed.
 
-name: UI matrix
+name: UI test matrix
 
 on:
   pull_request:
@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   changes:
-    name: Changed paths
+    name: Changed paths (UI matrix)
     runs-on: ubuntu-24.04
     outputs:
       ui: ${{ steps.filter.outputs.ui }}
@@ -55,7 +55,7 @@ jobs:
           fi
 
   iphone:
-    name: iPhone ${{ matrix.variant }}
+    name: iPhone UI tests ${{ matrix.variant }}
     needs: changes
     # Disabled: se-ax5 UI tests fail, see #517.
     if: false
@@ -136,7 +136,7 @@ jobs:
           retention-days: 7
 
   watch:
-    name: Watch ${{ matrix.variant }}
+    name: Watch UI tests ${{ matrix.variant }}
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26
@@ -208,7 +208,7 @@ jobs:
           retention-days: 7
 
   merge:
-    name: Merge screenshots
+    name: Merge UI screenshots
     needs: [changes, iphone, watch]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
