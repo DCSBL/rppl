@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "Rppl"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
+          }
         }
       }
     },
@@ -54,7 +60,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl leest hartslag en energie tijdens kabelpark sessions zodat je ze op iPhone kunt bekijken."
+            "value" : "Rppl leest hartslag en energie tijdens kabelparksessies zodat je ze op iPhone kunt bekijken."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl liest Herzfrequenz und Energie während deiner Cable-Park-Sessions, damit du sie auf dem iPhone ansehen kannst."
           }
         }
       }
@@ -77,7 +89,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl gebruikt Gezondheid op iPhone voor session-weergave. Workouts worden vanaf Apple Watch opgeslagen."
+            "value" : "Rppl gebruikt Gezondheid op iPhone voor sessieweergave. Workouts worden vanaf Apple Watch opgeslagen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl nutzt Health auf dem iPhone für die Session-Ansichten. Workouts werden von der Apple Watch gespeichert."
           }
         }
       }
@@ -100,7 +118,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl gebruikt je locatie om cable parks op afstand te sorteren en een plek in te vullen als je een park of session toevoegt."
+            "value" : "Rppl gebruikt je locatie om cable parks op afstand te sorteren en een plek in te vullen als je een park of sessie toevoegt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl nutzt deinen Standort, um Cable Parks nach Entfernung zu sortieren und einen Spot einzutragen, wenn du einen Park oder eine Session hinzufügst."
           }
         }
       }
@@ -123,7 +147,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl gebruikt bewegings-API’s bij het bekijken van session-context op iPhone."
+            "value" : "Rppl gebruikt bewegings-API’s bij het bekijken van sessiecontext op iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl nutzt Bewegungs-APIs, wenn du den Kontext einer Session auf dem iPhone ansiehst."
           }
         }
       }

@@ -35,7 +35,9 @@ Product defaults: [CONTRIBUTING.md](CONTRIBUTING.md). Streams/detection/transfer
 
 When generating, translating, or rewriting product copy about wakeboarding / cable parks **in any language**, keep authentic community slang and English jargon. Do not replace core terms with literal local equivalents — that reads amateurish in cable-park culture.
 
-**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `session` / `sessions`, `set` / `sets`, `lap` / `laps`, `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
+**Keep in English** (integrate into local grammar; conjugating loan verbs is fine where natural): `riding` / `ride` / `rides`, `set` / `sets`, `lap` / `laps`, `cable`, `dock`, `kicker`, `feature`, `rail`, `box`, `pop`, `cut in`, `boots` / `bindings`, `regular` / `goofy` / `switch`, `wipeout`, trick names (`Raley`, `Backroll`, …). Obstacle and trick names stay 100% English.
+
+**Exception: `session` is *sessie* in Dutch** (*sessies*, *sessiedetails*, *waterskisessie*). The English loan reads odd in Dutch, so only this one is translated. English keeps "session".
 
 ### Set vs lap (do not conflate)
 
@@ -57,7 +59,7 @@ Crossing counter (`LapSetTracker` / `lapCount`): leave start, path, re-enter →
 
 Never call a circuit crossing a “set”. Never call a detected riding segment a “lap”. Derived JSON key is `lapCount`.
 
-**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* as stand-ins for ride/lap/set jargon, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"session"*, *"set"*, *"lap(s)"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
+**Dutch anti-patterns** (NL is shipped today; same rule applies to future locales): avoid *varen*, *rijden*, *rit(ten)*, *ronde(s)* as stand-ins for ride/lap/set jargon, *schans*, *handvat*, *steiger*, *kabelbaan*, *aansnijden*, *afzet* for those concepts. Prefer e.g. *"aan het riden"*, *"set"*, *"lap(s)"*, *"dock"*, *"kicker"*, *"in-cutten"*, *"pop"*. Place name *kabelpark* is fine.
 
 Glossary reference: [Nootica wakeboarding glossary](https://www.nootica.com/webzine/wakeboarding-glossary.html) (set ≈ round of wakeboarding; distinguish from lap = full circuit).
 

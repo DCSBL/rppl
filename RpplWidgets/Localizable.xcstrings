@@ -20,6 +20,12 @@
             "state" : "translated",
             "value" : "Kies een park"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park wählen"
+          }
         }
       }
     },
@@ -41,6 +47,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inactief"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv"
           }
         }
       }
@@ -64,6 +76,12 @@
             "state" : "translated",
             "value" : "Vandaag open tot %@"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute geöffnet bis %@"
+          }
         }
       }
     },
@@ -85,6 +103,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vandaag open van %@ tot %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute geöffnet von %@ bis %@"
           }
         }
       }
@@ -108,6 +132,12 @@
             "state" : "translated",
             "value" : "Morgen geopend vanaf %@"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen geöffnet ab %@"
+          }
         }
       }
     },
@@ -129,6 +159,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Morgen open"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen geöffnet"
           }
         }
       }
@@ -152,6 +188,12 @@
             "state" : "translated",
             "value" : "Gesloten"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschlossen"
+          }
         }
       }
     },
@@ -173,6 +215,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openingstijden onbekend"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnungszeiten unbekannt"
           }
         }
       }
@@ -196,6 +244,12 @@
             "state" : "translated",
             "value" : "Parktijden"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parkzeiten"
+          }
         }
       }
     },
@@ -217,6 +271,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openingstijden van een kabelpark."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnungszeiten eines Cable Parks."
           }
         }
       }
@@ -240,6 +300,12 @@
             "state" : "translated",
             "value" : "Kies park"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park wählen"
+          }
         }
       }
     },
@@ -258,6 +324,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Park"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Park"
@@ -326,6 +398,24 @@
               }
             }
           }
+        },
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Öffnet in %lld Tag"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Öffnet in %lld Tagen"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -347,6 +437,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kies het kabelpark waarvan je de openingstijden wilt zien. Leeg toont je meest bezochte park."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Cable Park, dessen Öffnungszeiten angezeigt werden sollen. Leer zeigt deinen am häufigsten besuchten Park."
           }
         }
       }
@@ -370,6 +466,12 @@
             "state" : "translated",
             "value" : "Open tot %@"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geöffnet bis %@"
+          }
         }
       }
     },
@@ -391,6 +493,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uren onbekend"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeiten unbekannt"
           }
         }
       }
@@ -414,6 +522,12 @@
             "state" : "translated",
             "value" : "Top parken"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top-Parks"
+          }
         }
       }
     },
@@ -435,6 +549,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Je favoriete parken, meest bezocht eerst, met open of gesloten."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Favoriten-Parks, die am häufigsten besuchten zuerst, mit „geöffnet“ oder „geschlossen“."
           }
         }
       }
@@ -458,6 +578,12 @@
             "state" : "translated",
             "value" : "Open van %@ tot %@"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geöffnet von %@ bis %@"
+          }
         }
       }
     },
@@ -480,6 +606,12 @@
             "state" : "translated",
             "value" : "Houd de widget ingedrukt en kies Pas widget aan."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Widget gedrückt und wähle „Widget bearbeiten“."
+          }
         }
       }
     },
@@ -500,7 +632,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd de widget ingedrukt en kies Pas widget aan. Zodra je sessions logt, tonen we je meest bezochte park."
+            "value" : "Houd de widget ingedrukt en kies Pas widget aan. Zodra je sessies logt, tonen we je meest bezochte park."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Widget gedrückt und wähle „Widget bearbeiten“. Sobald du Sessions loggst, erscheint hier dein am häufigsten besuchter Park."
           }
         }
       }
@@ -524,6 +662,12 @@
             "state" : "translated",
             "value" : "Nog geen favorieten"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Favoriten"
+          }
         }
       }
     },
@@ -545,6 +689,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geef parken een ster in Rppl."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markiere Parks in Rppl mit einem Stern."
           }
         }
       }
@@ -568,6 +718,12 @@
             "state" : "translated",
             "value" : "Geef parken een ster in Rppl, dan staan ze hier met hun openingstijden."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markiere Parks in Rppl mit einem Stern, dann erscheinen sie hier mit ihren Öffnungszeiten."
+          }
         }
       }
     },
@@ -588,7 +744,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatste session"
+            "value" : "Laatste sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Session"
           }
         }
       }
@@ -610,7 +772,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Locatie, sets, laps, riding- en inactieve tijd van je laatste session."
+            "value" : "Locatie, sets, laps, riding- en inactieve tijd van je laatste sessie."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort, Sets, Laps, Riding- und Inaktivzeit deiner letzten Session."
           }
         }
       }
@@ -632,7 +800,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nog geen sessions"
+            "value" : "Nog geen sessies"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Sessions"
           }
         }
       }
@@ -654,7 +828,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een session op met je Watch, dan staat je laatste hier."
+            "value" : "Neem een sessie op met je Watch, dan staat je laatste hier."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeichne eine Session mit deiner Watch auf, dann erscheint deine letzte hier."
           }
         }
       }
@@ -676,7 +856,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een session op met je Watch."
+            "value" : "Neem een sessie op met je Watch."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeichne eine Session mit deiner Watch auf."
           }
         }
       }
@@ -696,6 +882,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sets"
@@ -722,6 +914,12 @@
             "state" : "translated",
             "value" : "Laps"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps"
+          }
         }
       }
     },
@@ -744,6 +942,12 @@
             "state" : "translated",
             "value" : "Riding"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
+          }
         }
       }
     },
@@ -762,6 +966,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Session"

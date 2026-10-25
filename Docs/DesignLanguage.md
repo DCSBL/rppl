@@ -113,7 +113,7 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 
 | Concept | English | Dutch | Don't use |
 |---------|---------|-------|-----------|
-| One recording, normally one per park day | session | session | workout, ride, rit |
+| One recording, normally one per park day | session | sessie | workout, ride, rit, session |
 | Detected riding segment | set | set | ride, run, lap |
 | Full circuit around the cable | lap | lap | round, ronde, set |
 | On the water, moving | riding | riding, aan het riden | varen, rijden |
@@ -122,6 +122,10 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 | Cable park | park | park | kabelbaan |
 
 "Park day" explains what a session is (onboarding, empty states). It is not a second name for sessions in lists and headers.
+
+### German
+
+Standard German (`de`) for Germany and German-speaking Belgium. Always the informal *du / dein* form. Buttons follow iOS German: *Löschen*, *Abbrechen*, *Erneut versuchen*, *Auswählen*. Alert titles say what failed ("Export fehlgeschlagen"). Save is *Speichern*, never *Sichern*. Slang stays English per AGENTS.md, including *Session* and *Riding*: *Sets*, *Laps*, *Cable*, *Dock*, *Rider*, *Flags*. Park day is *Parktag*, cable park is *Cable Park*. Obstacle and trick names stay English.
 
 ### French (Belgium)
 

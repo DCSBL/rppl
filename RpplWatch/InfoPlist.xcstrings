@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "Rppl"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
+          }
         }
       }
     },
@@ -56,6 +62,12 @@
             "state" : "translated",
             "value" : "Rppl heeft toestemming nodig om een watersport-workout te starten zodat sensors actief blijven en hartslag kan worden vastgelegd."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl braucht die Erlaubnis, ein Wassersport-Workout zu starten, damit die Sensoren aktiv bleiben und die Herzfrequenz aufgezeichnet werden kann."
+          }
         }
       }
     },
@@ -77,7 +89,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de session eindigt."
+            "value" : "Rppl slaat je kabelpark-workout op in Gezondheid wanneer de sessie eindigt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl speichert dein Cable-Park-Workout in Health, wenn die Session endet."
           }
         }
       }
@@ -100,7 +118,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl neemt GPS op voor de hele park session, ook als de pols omlaag is."
+            "value" : "Rppl neemt GPS op voor de hele parksessie, ook als de pols omlaag is."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl zeichnet GPS für die gesamte Park-Session auf, auch wenn das Handgelenk unten ist."
           }
         }
       }
@@ -123,7 +147,13 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl neemt GPS op tijdens kabelpark-wakeboard sessions."
+            "value" : "Rppl neemt GPS op tijdens kabelpark-wakeboardsessies."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl zeichnet GPS während Cable-Park-Wakeboard-Sessions auf."
           }
         }
       }
@@ -147,6 +177,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl neemt apparaatbeweging op om riding versus rusten bij de dock te helpen detecteren."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl zeichnet die Gerätebewegung auf, um Riding und Pausen am Dock besser zu erkennen."
           }
         }
       }
