@@ -356,7 +356,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd de widget ingedrukt en kies Pas widget aan. Zodra je sessions logt, tonen we je meest bezochte park."
+            "value" : "Houd de widget ingedrukt en kies Pas widget aan. Zodra je sessies logt, tonen we je meest bezochte park."
           }
         }
       }
@@ -420,7 +420,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatste session"
+            "value" : "Laatste sessie"
           }
         }
       }
@@ -436,7 +436,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Locatie, sets, laps, riding- en inactieve tijd van je laatste session."
+            "value" : "Locatie, sets, laps, riding- en inactieve tijd van je laatste sessie."
           }
         }
       }
@@ -452,7 +452,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nog geen sessions"
+            "value" : "Nog geen sessies"
           }
         }
       }
@@ -468,7 +468,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een session op met je Watch, dan staat je laatste hier."
+            "value" : "Neem een sessie op met je Watch, dan staat je laatste hier."
           }
         }
       }
@@ -484,7 +484,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een session op met je Watch."
+            "value" : "Neem een sessie op met je Watch."
           }
         }
       }
@@ -548,7 +548,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session"
+            "value" : "Sessie"
           }
         }
       }

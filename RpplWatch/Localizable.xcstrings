@@ -1157,7 +1157,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig om GPS tijdens je park session op te nemen zodat Rppl sets en afstand kan volgen."
+            "value" : "Nodig om GPS tijdens je parksessie op te nemen zodat Rppl sets en afstand kan volgen."
           }
         }
       }
@@ -1272,7 +1272,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl session"
+            "value" : "Rppl-sessie"
           }
         }
       }
@@ -1288,7 +1288,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl is gestopt na een probleem. Alles tot %@ is opgeslagen. Start een nieuwe session."
+            "value" : "Rppl is gestopt na een probleem. Alles tot %@ is opgeslagen. Start een nieuwe sessie."
           }
         }
       }
@@ -1336,7 +1336,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session"
+            "value" : "Sessie"
           }
         }
       }
@@ -1352,7 +1352,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session voltooid"
+            "value" : "Sessie voltooid"
           }
         }
       }
@@ -1400,7 +1400,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session map"
+            "value" : "Sessiekaart"
           }
         }
       }
@@ -1448,7 +1448,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Startlocatie van session"
+            "value" : "Startlocatie van sessie"
           }
         }
       }
@@ -1464,7 +1464,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaart van startlocatie van session"
+            "value" : "Kaart van startlocatie van sessie"
           }
         }
       }
@@ -1480,7 +1480,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session gesynchroniseerd"
+            "value" : "Sessie gesynchroniseerd"
           }
         }
       }
@@ -1496,7 +1496,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions gesynchroniseerd"
+            "value" : "Sessies gesynchroniseerd"
           }
         }
       }
@@ -1609,7 +1609,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start kabelpark session"
+            "value" : "Start kabelparksessie"
           }
         }
       }
@@ -1626,7 +1626,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session starten"
+            "value" : "Sessie starten"
           }
         }
       }
@@ -1642,7 +1642,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session starten"
+            "value" : "Sessie starten"
           }
         }
       }
@@ -1659,7 +1659,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start session in \\(.applicationName)"
+            "value" : "Start sessie in \\(.applicationName)"
           }
         }
       }
@@ -1691,7 +1691,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start een session"
+            "value" : "Start een sessie"
           }
         }
       }
@@ -1707,7 +1707,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start een Rppl recording session in het kabelpark."
+            "value" : "Start een Rppl-opnamesessie in het kabelpark."
           }
         }
       }
@@ -2350,7 +2350,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session verwijderen?"
+            "value" : "Sessie verwijderen?"
           }
         }
       }
@@ -2366,7 +2366,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session beëindigen?"
+            "value" : "Sessie beëindigen?"
           }
         }
       }
@@ -2382,7 +2382,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session beëindigen"
+            "value" : "Sessie beëindigen"
           }
         }
       }
@@ -2446,7 +2446,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session opslaan"
+            "value" : "Sessie opslaan"
           }
         }
       }
@@ -2606,7 +2606,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stelt machtigingen in en start dan een session"
+            "value" : "Stelt machtigingen in en start dan een sessie"
           }
         }
       }
@@ -2638,7 +2638,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig voor je session"
+            "value" : "Nodig voor je sessie"
           }
         }
       }

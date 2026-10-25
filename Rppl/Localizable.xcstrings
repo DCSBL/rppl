@@ -376,7 +376,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kabelpark sessions"
+            "value" : "Kabelparksessies"
           }
         }
       }
@@ -458,7 +458,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session importeren mislukt"
+            "value" : "Sessie importeren mislukt"
           }
         }
       }
@@ -474,7 +474,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session laden mislukt"
+            "value" : "Sessie laden mislukt"
           }
         }
       }
@@ -701,7 +701,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Het volledige session-bestand met ruwe sensorgegevens. Deze gegevens zijn niet gefilterd of geanonimiseerd en kunnen persoonlijke gegevens bevatten."
+            "value" : "Het volledige sessiebestand met ruwe sensorgegevens. Deze gegevens zijn niet gefilterd of geanonimiseerd en kunnen persoonlijke gegevens bevatten."
           }
         }
       }
@@ -814,7 +814,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session importeren"
+            "value" : "Sessie importeren"
           }
         }
       }
@@ -846,7 +846,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session geïmporteerd"
+            "value" : "Sessie geïmporteerd"
           }
         }
       }
@@ -991,7 +991,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laat iPhone Gezondheid lezen voor session-details. Workouts worden op Apple Watch opgenomen."
+            "value" : "Laat iPhone Gezondheid lezen voor sessiedetails. Workouts worden op Apple Watch opgenomen."
           }
         }
       }
@@ -1007,7 +1007,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laat iPhone beweging gebruiken wanneer je een session bekijkt."
+            "value" : "Laat iPhone beweging gebruiken wanneer je een sessie bekijkt."
           }
         }
       }
@@ -1124,7 +1124,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session laden…"
+            "value" : "Sessie laden…"
           }
         }
       }
@@ -1140,7 +1140,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions laden…"
+            "value" : "Sessies laden…"
           }
         }
       }
@@ -1385,7 +1385,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen detecties in deze session."
+            "value" : "Geen detecties in deze sessie."
           }
         }
       }
@@ -1482,7 +1482,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nog geen sessions"
+            "value" : "Nog geen sessies"
           }
         }
       }
@@ -1827,7 +1827,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verwijderen van deze iPhone verbergt de session hier in Rppl. Verwijderen van iPhone en iCloud verwijdert de session permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
+            "value" : "Verwijderen van deze iPhone verbergt de sessie hier in Rppl. Verwijderen van iPhone en iCloud verwijdert de sessie permanent van alle apparaten. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
@@ -2024,7 +2024,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session"
+            "value" : "Sessie"
           }
         }
       }
@@ -2040,7 +2040,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session geïmporteerd"
+            "value" : "Sessie geïmporteerd"
           }
         }
       }
@@ -2056,7 +2056,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session-opslag ontbreekt. Probeer opnieuw vanuit het logboek."
+            "value" : "Sessieopslag ontbreekt. Probeer opnieuw vanuit het logboek."
           }
         }
       }
@@ -2072,7 +2072,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions"
+            "value" : "Sessies"
           }
         }
       }
@@ -2218,7 +2218,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toont kaarten bij je sessions. Stads- en spotnamen komen al uit Watch-GPS die bij elke session is opgeslagen."
+            "value" : "Toont kaarten bij je sessies. Stads- en spotnamen komen al uit Watch-GPS die bij elke sessie is opgeslagen."
           }
         }
       }
@@ -2251,7 +2251,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Er ging iets fout bij het verwijderen van de session."
+            "value" : "Er ging iets fout bij het verwijderen van de sessie."
           }
         }
       }
@@ -2267,7 +2267,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Er ging iets mis tijdens het importeren van de session."
+            "value" : "Er ging iets mis tijdens het importeren van de sessie."
           }
         }
       }
@@ -2383,7 +2383,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Syncstatus, machtigingen en handmatige session-inspectie."
+            "value" : "Syncstatus, machtigingen en handmatige sessie-inspectie."
           }
         }
       }
@@ -2465,7 +2465,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De session staat in je logboek. Er is niets naar Gezondheid geschreven."
+            "value" : "De sessie staat in je logboek. Er is niets naar Gezondheid geschreven."
           }
         }
       }
@@ -2481,7 +2481,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verwijdert deze session permanent uit Rppl op deze iPhone en uit iCloud Drive. Dit kan niet ongedaan worden gemaakt."
+            "value" : "Verwijdert deze sessie permanent uit Rppl op deze iPhone en uit iCloud Drive. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
@@ -2497,7 +2497,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verwijdert deze session permanent uit Rppl op deze iPhone. Dit kan niet ongedaan worden gemaakt."
+            "value" : "Verwijdert deze sessie permanent uit Rppl op deze iPhone. Dit kan niet ongedaan worden gemaakt."
           }
         }
       }
@@ -2871,7 +2871,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session importeren mislukt"
+            "value" : "Sessie importeren mislukt"
           }
         }
       }
@@ -2969,7 +2969,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen sessions om te importeren"
+            "value" : "Geen sessies om te importeren"
           }
         }
       }
@@ -3011,7 +3011,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deze session staat al in je logboek."
+            "value" : "Deze sessie staat al in je logboek."
           }
         }
       }
@@ -3043,7 +3043,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kan deze session-export niet lezen. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
+            "value" : "Kan deze sessie-export niet lezen. Exporteer opnieuw vanuit Rppl en probeer het nog eens."
           }
         }
       }
@@ -5035,7 +5035,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl kan deze session naar de ontwikkelaars sturen. Anders kies je zelf een app."
+            "value" : "Rppl kan deze sessie naar de ontwikkelaars sturen. Anders kies je zelf een app."
           }
         }
       }
@@ -5739,7 +5739,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session verwijderen mislukt"
+            "value" : "Sessie verwijderen mislukt"
           }
         }
       }
@@ -5771,7 +5771,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session verwijderen?"
+            "value" : "Sessie verwijderen?"
           }
         }
       }
@@ -5787,7 +5787,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session exporteren?"
+            "value" : "Sessie exporteren?"
           }
         }
       }
@@ -5895,7 +5895,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions en sets"
+            "value" : "Sessies en sets"
           }
         }
       }
@@ -5905,7 +5905,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deze sessions staan in je iCloud Drive. Kies welke je aan het logboek op deze iPhone toevoegt."
+            "value" : "Deze sessies staan in je iCloud Drive. Kies welke je aan het logboek op deze iPhone toevoegt."
           }
         }
       }
@@ -5921,7 +5921,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elke session in iCloud Drive staat al in het logboek op deze iPhone."
+            "value" : "Elke sessie in iCloud Drive staat al in het logboek op deze iPhone."
           }
         }
       }
@@ -6363,7 +6363,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importeer via iCloud Drive of een session-export met ruwe data. Geïmporteerde sessions verschijnen in het logboek."
+            "value" : "Importeer via iCloud Drive of een sessie-export met ruwe data. Geïmporteerde sessies verschijnen in het logboek."
           }
         }
       }
@@ -6379,7 +6379,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kies een session-export met ruwe data uit Bestanden. Geïmporteerde sessions verschijnen in het logboek."
+            "value" : "Kies een sessie-export met ruwe data uit Bestanden. Geïmporteerde sessies verschijnen in het logboek."
           }
         }
       }
@@ -9091,7 +9091,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "per session"
+            "value" : "per sessie"
           }
         }
       }
@@ -9811,7 +9811,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste afstand van alle sets deze session."
+            "value" : "Meeste afstand van alle sets deze sessie."
           }
         }
       }
@@ -9827,7 +9827,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Langst op het water van alle sets deze session."
+            "value" : "Langst op het water van alle sets deze sessie."
           }
         }
       }
@@ -9843,7 +9843,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kortste set deze session. Overkomt iedereen."
+            "value" : "Kortste set deze sessie. Overkomt iedereen."
           }
         }
       }
@@ -9859,7 +9859,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoogste constante snelheid van alle sets deze session."
+            "value" : "Hoogste constante snelheid van alle sets deze sessie."
           }
         }
       }
@@ -9875,7 +9875,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste laps in één set deze session."
+            "value" : "Meeste laps in één set deze sessie."
           }
         }
       }
@@ -9891,7 +9891,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kortste pauze voor een set deze session. Amper droog."
+            "value" : "Kortste pauze voor een set deze sessie. Amper droog."
           }
         }
       }
@@ -9907,7 +9907,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Langste session in je logboek."
+            "value" : "Langste sessie in je logboek."
           }
         }
       }
@@ -9923,7 +9923,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Langst aan het riden van al je sessions."
+            "value" : "Langst aan het riden van al je sessies."
           }
         }
       }
@@ -9939,7 +9939,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste laps van al je sessions."
+            "value" : "Meeste laps van al je sessies."
           }
         }
       }
@@ -9955,7 +9955,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grootste deel van de session aan het riden. Amper op de dock gezeten."
+            "value" : "Grootste deel van de sessie aan het riden. Amper op de dock gezeten."
           }
         }
       }
@@ -9971,7 +9971,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste calorieën verbrand van al je sessions."
+            "value" : "Meeste calorieën verbrand van al je sessies."
           }
         }
       }
@@ -10003,7 +10003,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste sets van al je sessions."
+            "value" : "Meeste sets van al je sessies."
           }
         }
       }
@@ -10019,7 +10019,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste afstand van al je sessions."
+            "value" : "Meeste afstand van al je sessies."
           }
         }
       }
@@ -10035,7 +10035,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoogste snelheid van al je sessions."
+            "value" : "Hoogste snelheid van al je sessies."
           }
         }
       }
@@ -10051,7 +10051,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kleinste deel van de session aan het riden. Meer dock dan cable."
+            "value" : "Kleinste deel van de sessie aan het riden. Meer dock dan cable."
           }
         }
       }
@@ -10067,7 +10067,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste regen van al je sessions. Nat werd je toch al."
+            "value" : "Meeste regen van al je sessies. Nat werd je toch al."
           }
         }
       }
@@ -10083,7 +10083,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laatst gestopt van al je sessions. Tot ver in de avond aan het riden."
+            "value" : "Laatst gestopt van al je sessies. Tot ver in de avond aan het riden."
           }
         }
       }
@@ -10099,7 +10099,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vroegste start van al je sessions. Op de cable voordat de meesten hebben ontbeten."
+            "value" : "Vroegste start van al je sessies. Op de cable voordat de meesten hebben ontbeten."
           }
         }
       }
@@ -10115,7 +10115,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koudste water van al je sessions. En echt koud ook."
+            "value" : "Koudste water van al je sessies. En echt koud ook."
           }
         }
       }
@@ -10131,7 +10131,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeste wind van al je sessions, en het waaide flink."
+            "value" : "Meeste wind van al je sessies, en het waaide flink."
           }
         }
       }
@@ -10147,7 +10147,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warmste lucht van al je sessions. Een echte zomerdag."
+            "value" : "Warmste lucht van al je sessies. Een echte zomerdag."
           }
         }
       }
@@ -10163,7 +10163,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koudste lucht van al je sessions. Wetsuitweer."
+            "value" : "Koudste lucht van al je sessies. Wetsuitweer."
           }
         }
       }
@@ -10179,7 +10179,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Terug op het water na een lange pauze, de langste deze session."
+            "value" : "Terug op het water na een lange pauze, de langste deze sessie."
           }
         }
       }
@@ -10227,7 +10227,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session toevoegen"
+            "value" : "Sessie toevoegen"
           }
         }
       }
@@ -10243,7 +10243,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session bewerken"
+            "value" : "Sessie bewerken"
           }
         }
       }
@@ -10259,7 +10259,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session opslaan mislukt"
+            "value" : "Sessie opslaan mislukt"
           }
         }
       }
@@ -10451,7 +10451,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl houdt je kabelpark-wakeboard sessions bij. Apple Watch neemt een hele parkdag op (sets, laps, snelheid, route); op iPhone voeg je een session ook handmatig toe."
+            "value" : "Rppl houdt je kabelpark-wakeboardsessies bij. Apple Watch neemt een hele parkdag op (sets, laps, snelheid, route); op iPhone voeg je een sessie ook handmatig toe."
           }
         }
       }
@@ -10467,7 +10467,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nieuwe session"
+            "value" : "Nieuwe sessie"
           }
         }
       }
@@ -10483,7 +10483,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een parkdag op met Apple Watch, of voeg een session handmatig toe met de + knop."
+            "value" : "Neem een parkdag op met Apple Watch, of voeg een sessie handmatig toe met de + knop."
           }
         }
       }
@@ -11139,7 +11139,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessiondetails aanpassen"
+            "value" : "Sessiedetails aanpassen"
           }
         }
       }
@@ -11235,7 +11235,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kies een eindtijd na de starttijd om deze session op te slaan."
+            "value" : "Kies een eindtijd na de starttijd om deze sessie op te slaan."
           }
         }
       }
@@ -11251,7 +11251,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lange session opslaan?"
+            "value" : "Lange sessie opslaan?"
           }
         }
       }
@@ -11267,7 +11267,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weet je zeker dat je een session van %@ wilt opslaan?"
+            "value" : "Weet je zeker dat je een sessie van %@ wilt opslaan?"
           }
         }
       }
@@ -11283,7 +11283,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afstand per session"
+            "value" : "Afstand per sessie"
           }
         }
       }
@@ -11299,7 +11299,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duur per session"
+            "value" : "Duur per sessie"
           }
         }
       }
@@ -11315,7 +11315,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gemiddeld per session"
+            "value" : "Gemiddeld per sessie"
           }
         }
       }
