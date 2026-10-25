@@ -123,6 +123,10 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 
 "Park day" explains what a session is (onboarding, empty states). It is not a second name for sessions in lists and headers.
 
+### German
+
+Standard German (`de`) for Germany and German-speaking Belgium. Always the informal *du / dein* form. Buttons follow iOS German: *Löschen*, *Abbrechen*, *Erneut versuchen*, *Auswählen*. Alert titles say what failed ("Export fehlgeschlagen"). Save is *Speichern*, never *Sichern*. Slang stays English per AGENTS.md, including *Session* and *Riding*: *Sets*, *Laps*, *Cable*, *Dock*, *Rider*, *Flags*. Park day is *Parktag*, cable park is *Cable Park*. Obstacle and trick names stay English.
+
 ### Examples
 
 | Before | After |

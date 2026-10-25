@@ -14,6 +14,12 @@
             "state" : "translated",
             "value" : "Kabelpark"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable Park"
+          }
         }
       }
     },
@@ -29,6 +35,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verbonden"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbunden"
           }
         }
       }
@@ -46,6 +58,12 @@
             "state" : "translated",
             "value" : "Inactief"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv"
+          }
         }
       }
     },
@@ -58,6 +76,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kneeboard"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kneeboard"
@@ -78,6 +102,12 @@
             "state" : "translated",
             "value" : "Monoski"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monoski"
+          }
         }
       }
     },
@@ -93,6 +123,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Anders"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonstiges"
           }
         }
       }
@@ -110,6 +146,12 @@
             "state" : "translated",
             "value" : "Installeer / open Rppl op iPhone."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl auf dem iPhone installieren / öffnen."
+          }
         }
       }
     },
@@ -125,6 +167,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installeer Rppl op de Watch."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl auf der Watch installieren."
           }
         }
       }
@@ -142,6 +190,12 @@
             "state" : "translated",
             "value" : "iPhone en Watch zijn verbonden — klaar om te synchroniseren."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone und Watch sind verbunden – bereit zum Synchronisieren."
+          }
         }
       }
     },
@@ -157,6 +211,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone-app ontbreekt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-App fehlt"
           }
         }
       }
@@ -174,6 +234,12 @@
             "state" : "translated",
             "value" : "Geen Watch gekoppeld"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Watch gekoppelt"
+          }
         }
       }
     },
@@ -189,6 +255,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niet geactiveerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht aktiviert"
           }
         }
       }
@@ -206,6 +278,12 @@
             "state" : "translated",
             "value" : "Koppel een Apple Watch om sessies te synchroniseren."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppel eine Apple Watch, um Sessions zu synchronisieren."
+          }
         }
       }
     },
@@ -222,6 +300,12 @@
             "state" : "translated",
             "value" : "Gekoppeld en klaar — bestanden synchroniseren als de telefoon in de buurt is."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekoppelt und bereit – Dateien werden synchronisiert, sobald das iPhone in der Nähe ist."
+          }
         }
       }
     },
@@ -237,6 +321,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klaar (wachtrij)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit (in Warteschlange)"
           }
         }
       }
@@ -271,6 +361,12 @@
             "state" : "translated",
             "value" : "Sessie inactief — open de app opnieuw."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session inaktiv – öffne die App erneut."
+          }
         }
       }
     },
@@ -286,6 +382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niet ondersteund"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützt"
           }
         }
       }
@@ -320,6 +422,12 @@
             "state" : "translated",
             "value" : "Wachten tot WatchConnectivity activeert."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warten, bis WatchConnectivity aktiviert wird."
+          }
         }
       }
     },
@@ -332,6 +440,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wakeboard"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wakeboard"
@@ -352,6 +466,12 @@
             "state" : "translated",
             "value" : "Wakeskate"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wakeskate"
+          }
         }
       }
     },
@@ -367,6 +487,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Waterski"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wasserski"
           }
         }
       }
@@ -384,6 +510,12 @@
             "state" : "translated",
             "value" : "Watch-app ontbreekt"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch-App fehlt"
+          }
         }
       }
     },
@@ -399,6 +531,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "WatchConnectivity is hier niet beschikbaar."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchConnectivity ist hier nicht verfügbar."
           }
         }
       }
@@ -416,6 +554,12 @@
             "state" : "translated",
             "value" : "Noord"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nord"
+          }
         }
       }
     },
@@ -431,6 +575,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Noordoost"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordost"
           }
         }
       }
@@ -448,6 +598,12 @@
             "state" : "translated",
             "value" : "Oost"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ost"
+          }
         }
       }
     },
@@ -463,6 +619,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zuidoost"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Südost"
           }
         }
       }
@@ -480,6 +642,12 @@
             "state" : "translated",
             "value" : "Zuid"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süd"
+          }
         }
       }
     },
@@ -496,6 +664,12 @@
             "state" : "translated",
             "value" : "Zuidwest"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Südwest"
+          }
         }
       }
     },
@@ -508,6 +682,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "West"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "West"
@@ -528,6 +708,12 @@
             "state" : "translated",
             "value" : "Noordwest"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordwest"
+          }
         }
       }
     },
@@ -540,6 +726,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "N"
@@ -560,6 +752,12 @@
             "state" : "translated",
             "value" : "NO"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NO"
+          }
         }
       }
     },
@@ -572,6 +770,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "O"
@@ -592,6 +796,12 @@
             "state" : "translated",
             "value" : "ZO"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SO"
+          }
         }
       }
     },
@@ -607,6 +817,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Z"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S"
           }
         }
       }
@@ -624,6 +840,12 @@
             "state" : "translated",
             "value" : "ZW"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SW"
+          }
         }
       }
     },
@@ -636,6 +858,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "W"
@@ -656,6 +884,12 @@
             "state" : "translated",
             "value" : "NW"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NW"
+          }
         }
       }
     },
@@ -668,6 +902,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bft %lld"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bft %lld"
@@ -688,6 +928,12 @@
             "state" : "translated",
             "value" : "Niet verwacht"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht erwartet"
+          }
         }
       }
     },
@@ -704,6 +950,12 @@
             "state" : "translated",
             "value" : "Regent nu"
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es regnet gerade"
+          }
         }
       }
     },
@@ -716,6 +968,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen %@"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Regen %@"
