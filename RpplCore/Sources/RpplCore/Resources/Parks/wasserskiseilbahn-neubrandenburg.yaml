@@ -1,0 +1,192 @@
+version: 1
+id: wasserskiseilbahn-neubrandenburg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserskiseilbahn Neubrandenburg
+short_name: Wasserskiseilbahn
+languages:
+  - de
+  - en
+  - nl
+address: "Reitbahnweg 90, 17034 Neubrandenburg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 53.573825
+  lon: 13.259291
+
+phone: "+49 395 4216161"
+email: "info@wasserski-seilbahn.de"
+website: https://www.wasserski-seilbahn.de
+
+cables:
+  - name: Cable
+    length_m: 845
+    description: >-
+      Fünf Masten mit je 9,50 m Höhe. Bis zu 10 Rider fahren gleichzeitig.
+
+opening:
+  source_url: "https://www.wasserski-seilbahn.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Im Oktober fährt der Lift samstags und sonntags von 14:00 bis 17:00. Von November bis
+    März ist der Lift geschlossen. Bei schlechtem Wetter schließt die Anlage früher.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: "2 hours"
+    options:
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "23"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "32"
+        currency: EUR
+        per: day
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Year pass
+    options:
+      - amount: "750"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "580"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Beginner course
+    options:
+      - amount: "45"
+        currency: EUR
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "45"
+        currency: EUR
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Neoprenanzug
+          en: wetsuit
+          nl: wetsuit
+      - amount: "10"
+        currency: EUR
+        per: day
+        note:
+          de: Neoprenanzug
+          en: wetsuit
+          nl: wetsuit
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Beginner Board
+          en: beginner board
+          nl: beginner board
+      - amount: "20"
+        currency: EUR
+        per: day
+        note:
+          de: Beginner Board
+          en: beginner board
+          nl: beginner board
+      - amount: "20"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Expert Board
+          en: expert board
+          nl: expert board
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: Expert Board
+          en: expert board
+          nl: expert board
+
+facilities:
+  - "Paarski, Monoski, Kneeboard und Schwimmweste inklusive"
+  - Obstacles
+  - Gastronomie
+
+description: >-
+  Wasserskianlage auf dem Reitbahnsee mit Obstacles und Anfängerkursen.

@@ -1,0 +1,202 @@
+version: 1
+id: cable-park-twistesee
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Cable Park Twistesee
+short_name: Cable Park Twistesee
+languages:
+  - de
+  - en
+  - nl
+address: "Zum Wiggenberg, 34454 Bad Arolsen"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.381993
+  lon: 9.056971
+
+phone: "+49 5691 629636"
+email: "info@wasserski-twistesee.de"
+website: https://www.wasserski-twistesee.de
+
+cables:
+  - name: Cable
+    length_m: 800
+    description: >-
+      Acht Mitnehmer. Die Geschwindigkeit liegt zwischen 29 und 58 km/h.
+
+opening:
+  source_url: "https://www.wasserski-twistesee.de/%C3%B6ffnungszeiten"
+  booking: optional
+  note: >-
+    Die Saison läuft von Ostern bis zum 3. Oktober. Montags ist im Mai, Juni und September
+    Ruhetag, außer für gebuchte Gruppen. Am Donnerstagabend ist Clubtraining.
+  rules:
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "14:00"
+      close: "17:00"
+    - months:
+        - 5
+        - 6
+      days:
+        - tue
+        - wed
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 5
+        - 6
+      days:
+        - thu
+      open: "15:00"
+      close: "18:00"
+    - months:
+        - 5
+        - 6
+      days:
+        - sat
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 5
+        - 6
+      days:
+        - sun
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - mon
+        - thu
+      open: "13:00"
+      close: "18:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - tue
+        - fri
+      open: "13:00"
+      close: "20:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - wed
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - sat
+      open: "12:00"
+      close: "21:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - sun
+      open: "12:00"
+      close: "18:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - thu
+      open: "15:00"
+      close: "17:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
+
+prices:
+  - name: Double hour
+    options:
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Mo bis Fr, ab 16 Jahren"
+          en: "Mon to Fri, 16 and older"
+          nl: "ma t/m vr, vanaf 16 jaar"
+      - amount: "34"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Sa, So, Feiertage, ab 16 Jahren"
+          en: "Sat, Sun, holidays, 16 and older"
+          nl: "za, zo, feestdagen, vanaf 16 jaar"
+  - name: Day ticket
+    options:
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: "Mo bis Fr, ab 16 Jahren"
+          en: "Mon to Fri, 16 and older"
+          nl: "ma t/m vr, vanaf 16 jaar"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Sa, So, Feiertage, ab 16 Jahren"
+          en: "Sat, Sun, holidays, 16 and older"
+          nl: "za, zo, feestdagen, vanaf 16 jaar"
+  - name: Beginner course
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Wasserski, mit Material"
+          en: "water ski, gear included"
+          nl: "waterski, materiaal inbegrepen"
+      - amount: "45"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Wakeboard und Wakeskate
+          en: wakeboard and wakeskate
+          nl: wakeboard en wakeskate
+
+facilities:
+  - Wasserski und Schwimmweste kostenlos
+  - Sonnenterrasse
+  - Gastronomie
+  - Spielplatz
+
+description: >-
+  Wasserski- und Wakeboardanlage am Twistesee mit Anfängerkursen.

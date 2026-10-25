@@ -1,0 +1,114 @@
+version: 1
+id: chill-and-wake-friedberg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Chill & Wake Friedberg
+short_name: Chill & Wake
+languages:
+  - de
+  - en
+  - nl
+address: "Seestraße 27, 86316 Friedberg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.363538
+  lon: 10.966926
+
+phone: "+49 821 602741"
+email: "team@chill-and-wake.de"
+website: https://www.chill-and-wake.de
+links:
+  - kind: booking
+    url: "https://www.chill-and-wake.de/tickets/"
+  - kind: instagram
+    url: "https://www.instagram.com/chillandwake/"
+
+opening:
+  source_url: "https://www.chill-and-wake.de/open/"
+  booking: optional
+  note: >-
+    Die Saison 2026 lief vom 3. April bis 4. Oktober. Die tagesaktuellen Zeiten stehen auf
+    der Ticketseite. Die Preise sind dynamisch und steigen mit der Auslastung.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "34"
+        currency: EUR
+        per: hour
+        note:
+          de: "ab 15 Jahren, Standardpreis"
+          en: "15 and older, standard price"
+          nl: "vanaf 15 jaar, standaardprijs"
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: "Jugend bis 15 Jahre, Standardpreis"
+          en: "youth up to 15, standard price"
+          nl: "jeugd t/m 15 jaar, standaardprijs"
+  - name: "2 hours"
+    options:
+      - amount: "40"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 15 Jahren, Standardpreis"
+          en: "15 and older, standard price"
+          nl: "vanaf 15 jaar, standaardprijs"
+      - amount: "31"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugend bis 15 Jahre, Standardpreis"
+          en: "youth up to 15, standard price"
+          nl: "jeugd t/m 15 jaar, standaardprijs"
+  - name: Day ticket
+    options:
+      - amount: "53"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 15 Jahren, Standardpreis"
+          en: "15 and older, standard price"
+          nl: "vanaf 15 jaar, standaardprijs"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugend bis 15 Jahre, Standardpreis"
+          en: "youth up to 15, standard price"
+          nl: "jeugd t/m 15 jaar, standaardprijs"
+  - name: Membership 2026
+    options:
+      - amount: "30"
+        currency: EUR
+        note:
+          de: Standard
+          en: standard
+          nl: standaard
+      - amount: "90"
+        currency: EUR
+        note:
+          de: Premium
+          en: premium
+          nl: premium
+
+facilities:
+  - Bistro
+  - Kurse
+  - Kids Club ab 6 Jahren
+
+description: >-
+  Wakeboard- und Wasserskipark am Friedberger See bei Augsburg.

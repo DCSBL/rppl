@@ -1,0 +1,196 @@
+version: 1
+id: wasserskipark-aschheim
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserskipark Aschheim
+short_name: Wasserskipark
+languages:
+  - de
+  - en
+  - nl
+address: "Am Eventpark 30, 85609 Aschheim"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.162883
+  lon: 11.724247
+
+email: "kontakt@wasserskipark-aschheim.de"
+website: https://www.wasserskipark-aschheim.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wasserskipark-aschheim.wakesys.com/browser/index.php"
+
+cables:
+  - name: Große Anlage
+    length_m: 750
+    description: >-
+      Fünf Masten mit 9 Mitnehmern und 19 Features von UNIT Parktech.
+  - name: Easy-Start-Lift
+    direction: "2.0"
+    length_m: 150
+    description: >-
+      Zwei Masten, für Neulinge und kleine Gruppen.
+
+opening:
+  source_url: "https://www.wasserskipark-aschheim.de/oeffnungszeiten-anreise/"
+  booking: optional
+  note: >-
+    Die Zeiten für den öffentlichen Liftbetrieb stehen in einem Kalender auf der Website.
+    Änderungen stehen auf Instagram und Facebook.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: "2 hours"
+    options:
+      - amount: "39"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "52"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Season pass
+    options:
+      - amount: "1100"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "950"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Off-season ticket
+    options:
+      - amount: "30"
+        currency: EUR
+  - name: RFID wristband
+    options:
+      - amount: "7"
+        currency: EUR
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Easy-Up für Anfänger
+          en: Easy-Up for beginners
+          nl: Easy-Up voor beginners
+      - amount: "16"
+        currency: EUR
+        per:
+          de: ab 2 Stunden
+          en: from 2 hours
+          nl: vanaf 2 uur
+        note:
+          de: Easy-Up für Anfänger
+          en: Easy-Up for beginners
+          nl: Easy-Up voor beginners
+      - amount: "17"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: für Fortgeschrittene
+          en: for advanced riders
+          nl: voor gevorderden
+      - amount: "23"
+        currency: EUR
+        per:
+          de: ab 2 Stunden
+          en: from 2 hours
+          nl: vanaf 2 uur
+        note:
+          de: für Fortgeschrittene
+          en: for advanced riders
+          nl: voor gevorderden
+  - name: Wetsuit rental
+    options:
+      - amount: "7"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "13"
+        currency: EUR
+        per:
+          de: ab 2 Stunden
+          en: from 2 hours
+          nl: vanaf 2 uur
+
+facilities:
+  - "Schwimmweste, Wasserski und Kneeboard kostenlos"
+  - Leihmaterial
+  - Schrankmiete
+
+description: >-
+  Wasserskipark im Sportpark Aschheim vor den Toren Münchens. Die Park-Crew baut das Setup
+  regelmäßig um.

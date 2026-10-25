@@ -1,0 +1,190 @@
+version: 1
+id: strandparx-cable-island-magdeburg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: STRANDPARX cable island Magdeburg
+short_name: Cable Island
+languages:
+  - de
+  - en
+  - nl
+address: "Barleber Str. 1, 39126 Magdeburg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 52.176257
+  lon: 11.641275
+
+phone: "+49 152 37713818"
+email: "booking@strandparx.de"
+website: https://www.strandparx.de
+
+opening:
+  source_url: "https://www.strandparx.de/kontakt/"
+  booking: optional
+  note: >-
+    Die Hauptsaison läuft von Mai bis 3. Oktober, ab dem 14. Mai täglich ab 12 Uhr. In der
+    Nebensaison ab dem 4. Oktober ist samstags, sonntags und an Feiertagen geöffnet,
+    wetterbedingte Schließung ist möglich. Am 6. Dezember 2026 gibt es von 14 bis 18 Uhr
+    eine Sonderöffnung.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: regulär
+          en: regular
+          nl: regulier
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: ermäßigt
+          en: reduced
+          nl: gereduceerd
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: regulär
+          en: regular
+          nl: regulier
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: ermäßigt
+          en: reduced
+          nl: gereduceerd
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: regulär
+          en: regular
+          nl: regulier
+      - amount: "36"
+        currency: EUR
+        per: day
+        note:
+          de: ermäßigt
+          en: reduced
+          nl: gereduceerd
+  - name: All in ticket
+    options:
+      - amount: "55"
+        currency: EUR
+        per: day
+        note:
+          de: "Mo bis Fr, regulär, mit Verleihmaterial und Eintritt"
+          en: "Mon to Fri, regular, with rental gear and entry"
+          nl: "ma t/m vr, regulier, met leenmateriaal en toegang"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Mo bis Fr, ermäßigt, mit Verleihmaterial und Eintritt"
+          en: "Mon to Fri, reduced, with rental gear and entry"
+          nl: "ma t/m vr, gereduceerd, met leenmateriaal en toegang"
+  - name: "3 day ticket"
+    options:
+      - amount: "120"
+        currency: EUR
+        note:
+          de: regulär
+          en: regular
+          nl: regulier
+      - amount: "99"
+        currency: EUR
+        note:
+          de: ermäßigt
+          en: reduced
+          nl: gereduceerd
+  - name: Unlimited ticket
+    options:
+      - amount: "799"
+        currency: EUR
+        note:
+          de: regulär
+          en: regular
+          nl: regulier
+      - amount: "599"
+        currency: EUR
+        note:
+          de: ermäßigt
+          en: reduced
+          nl: gereduceerd
+  - name: Wakeboard rental
+    options:
+      - amount: "8"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Beginner
+          en: beginner
+          nl: beginner
+      - amount: "13"
+        currency: EUR
+        per: day
+        note:
+          de: Beginner
+          en: beginner
+          nl: beginner
+      - amount: "12"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Features
+          en: features
+          nl: features
+      - amount: "15"
+        currency: EUR
+        per: day
+        note:
+          de: Features
+          en: features
+          nl: features
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "9"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Paarski, Weste und Helm im Ticket inklusive"
+  - Stand-up-Paddling
+  - Fußballgolf
+  - Beachvolleyball
+  - Übernachten
+
+description: >-
+  Wakepark am Neustädter See in Magdeburg. Der Eintritt zum See kostet extra.

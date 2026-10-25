@@ -1,0 +1,190 @@
+version: 1
+id: wasserski-bleibtreusee
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski Bleibtreusee
+short_name: Wasserski Bleibtreusee
+languages:
+  - de
+  - en
+  - nl
+address: "Bleibtreuseeweg 1, 50321 Brühl"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.840135
+  lon: 6.867640
+
+phone: "+49 2232 22681"
+email: "info@wasserski-bleibtreusee.de"
+website: https://www.wasserski-bleibtreusee.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wasserski-bleibtreusee.wakesys.com/browser/index.php"
+
+cables:
+  - name: Große Bahn
+  - name: Kleine Bahn
+
+opening:
+  source_url: "https://www.wasserski-bleibtreusee.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Im öffentlichen Betrieb ist dienstags, donnerstags und freitags von 14:30 bis 17:00 und
+    am Wochenende von 12:00 bis 17:00 geöffnet, montags ist Ruhetag. Mittwochs gelten eigene
+    Zeiten pro Datum. Ab Mai läuft der Lift samstags von 12:00 bis 14:00 mit 26 statt 30
+    km/h.
+
+prices:
+  - name: "2 hour ticket"
+    options:
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: "2 hour ticket all inclusive"
+    options:
+      - amount: "46"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "41"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "46"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "41"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Day ticket all inclusive
+    options:
+      - amount: "65"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "61"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: RFID wristband
+    options:
+      - amount: "6"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Early Board
+    options:
+      - amount: "20"
+        currency: EUR
+        per: hour
+      - amount: "22"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "26"
+        currency: EUR
+        per:
+          de: "3 Stunden"
+          en: "3 hours"
+          nl: "3 uur"
+  - name: Membership
+    options:
+      - amount: "110"
+        currency: EUR
+        note:
+          de: "10 € günstiger pro 2-Stunden-Karte"
+          en: "10 euro off each 2 hour ticket"
+          nl: "10 euro korting per 2-uurskaart"
+  - name: Wakeboard rental
+    options:
+      - amount: "8"
+        currency: EUR
+        per: hour
+      - amount: "12"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "20"
+        currency: EUR
+        per: day
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "6"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "9"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Paarski, Kneeboard und Prallschutzweste inklusive"
+  - Sonnendeck
+  - Stand-up-Paddling
+  - Imbiss
+
+description: >-
+  Wasserskianlage am Bleibtreusee mit großer Bahn und kleiner Bahn. Der Zugang läuft über
+  ein RFID-Armband.

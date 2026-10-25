@@ -1,0 +1,208 @@
+version: 1
+id: bernsteinsee-sassenburg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski & Wakeboard Bernsteinsee
+short_name: Bernsteinsee
+languages:
+  - de
+  - en
+  - nl
+address: "Bernsteinallee 7, 38524 Sassenburg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 52.560824
+  lon: 10.670658
+
+phone: "+49 5379 981400"
+website: https://www.bernsteinsee.com/wasserski-wakeboard/
+
+cables:
+  - name: Cable
+    length_m: 684
+    description: >-
+      Rixen-Seilbahn mit Obstacles von Unit Parktech.
+  - name: Little BRO
+    direction: "2.0"
+    length_m: 70
+    description: >-
+      Anfängerbahn zum Üben der Starts.
+
+opening:
+  source_url: "https://www.bernsteinsee.com/wasserski-wakeboard/"
+  booking: optional
+  note: >-
+    Die Öffnungszeiten 2026 stehen noch nicht auf der Website. Die Rezeption ist montags bis
+    freitags von 8 bis 18 Uhr besetzt.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "18"
+        currency: EUR
+        per: hour
+        note:
+          de: unter 17 Jahren
+          en: under 17
+          nl: onder 17 jaar
+  - name: "2 hours"
+    options:
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "24"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: unter 17 Jahren
+          en: under 17
+          nl: onder 17 jaar
+  - name: Day ticket
+    options:
+      - amount: "39"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "29"
+        currency: EUR
+        per: day
+        note:
+          de: unter 17 Jahren
+          en: under 17
+          nl: onder 17 jaar
+  - name: Year pass
+    options:
+      - amount: "749"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "649"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: unter 17 Jahren
+          en: under 17
+          nl: onder 17 jaar
+  - name: Subscription
+    options:
+      - amount: "69"
+        currency: EUR
+        per:
+          de: monatlich
+          en: monthly
+          nl: maandelijks
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "59"
+        currency: EUR
+        per:
+          de: monatlich
+          en: monthly
+          nl: maandelijks
+        note:
+          de: unter 17 Jahren
+          en: under 17
+          nl: onder 17 jaar
+  - name: Wetsuit rental
+    options:
+      - amount: "7"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "10"
+        currency: EUR
+        per: day
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "12"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Profi
+          en: pro
+          nl: pro
+      - amount: "18"
+        currency: EUR
+        per: day
+        note:
+          de: Profi
+          en: pro
+          nl: pro
+      - amount: "20"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kicker mit Helm
+          en: kicker board with helmet
+          nl: kicker board met helm
+      - amount: "30"
+        currency: EUR
+        per: day
+        note:
+          de: Kicker mit Helm
+          en: kicker board with helmet
+          nl: kicker board met helm
+
+facilities:
+  - Wasserski und Weste inklusive
+  - Stand-up-Paddling
+  - Beachclub
+  - Restaurant
+  - Hotel
+
+description: >-
+  Wasserski- und Wakeboardanlage am Bernsteinsee beim Bernsteinsee Hotel in Stüde.

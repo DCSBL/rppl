@@ -1,0 +1,237 @@
+version: 1
+id: wildwakepark-steinberger-see
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: WildWakePark Steinberger See
+short_name: WildWakePark
+languages:
+  - de
+  - en
+  - nl
+address: "In der Oder 1, 92449 Steinberg am See"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 49.288754
+  lon: 12.159136
+
+phone: "+49 9431 790380"
+email: "info@wildwakepark.de"
+website: https://www.wildwakepark.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wildwakepark.wakesys.com/"
+
+cables:
+  - name: Seilbahnen
+    description: >-
+      Vier Seilbahnen für jedes Niveau, mit Übungsliften für Anfänger und 18 Features.
+
+opening:
+  source_url: "https://www.wildwakepark.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison 2026 ist beendet, der Park öffnet wieder am 26. März 2027. Die Zeiten ändern
+    sich pro Zeitraum und stehen mit Daten auf der Website.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche bis 17 Jahre, Frühbucher, bis 2 Tage vorher online"
+          en: "youth up to 17, early booking, online up to 2 days ahead"
+          nl: "jeugd t/m 17 jaar, vroegboeken, tot 2 dagen vooraf online"
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Frühbucher, bis 2 Tage vorher online"
+          en: "adults, early booking, online up to 2 days ahead"
+          nl: "volwassenen, vroegboeken, tot 2 dagen vooraf online"
+      - amount: "31"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche bis 17 Jahre, online"
+          en: "youth up to 17, online"
+          nl: "jeugd t/m 17 jaar, online"
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, online"
+          en: "adults, online"
+          nl: "volwassenen, online"
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche bis 17 Jahre, vor Ort"
+          en: "youth up to 17, on site"
+          nl: "jeugd t/m 17 jaar, ter plaatse"
+      - amount: "37"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, vor Ort"
+          en: "adults, on site"
+          nl: "volwassenen, ter plaatse"
+  - name: Day ticket
+    options:
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche bis 17 Jahre, Frühbucher, bis 2 Tage vorher online"
+          en: "youth up to 17, early booking, online up to 2 days ahead"
+          nl: "jeugd t/m 17 jaar, vroegboeken, tot 2 dagen vooraf online"
+      - amount: "55"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Frühbucher, bis 2 Tage vorher online"
+          en: "adults, early booking, online up to 2 days ahead"
+          nl: "volwassenen, vroegboeken, tot 2 dagen vooraf online"
+      - amount: "53"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche bis 17 Jahre, online"
+          en: "youth up to 17, online"
+          nl: "jeugd t/m 17 jaar, online"
+      - amount: "58"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, online"
+          en: "adults, online"
+          nl: "volwassenen, online"
+      - amount: "57"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche bis 17 Jahre, vor Ort"
+          en: "youth up to 17, on site"
+          nl: "jeugd t/m 17 jaar, ter plaatse"
+      - amount: "62"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, vor Ort"
+          en: "adults, on site"
+          nl: "volwassenen, ter plaatse"
+  - name: Membership
+    options:
+      - amount: "30"
+        currency: EUR
+        note:
+          de: "Classic, 6 € günstiger pro Ticket"
+          en: "Classic, 6 euro off each ticket"
+          nl: "Classic, 6 euro korting per ticket"
+      - amount: "80"
+        currency: EUR
+        note:
+          de: "Gold, 10 € günstiger pro Ticket"
+          en: "Gold, 10 euro off each ticket"
+          nl: "Gold, 10 euro korting per ticket"
+  - name: Wakeboard rental
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "12"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "24"
+        currency: EUR
+        per: day
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "12"
+        currency: EUR
+        per: hour
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+      - amount: "19"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+      - amount: "38"
+        currency: EUR
+        per: day
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+  - name: Wetsuit rental
+    options:
+      - amount: "4"
+        currency: EUR
+        per: hour
+      - amount: "6"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "12"
+        currency: EUR
+        per: day
+
+facilities:
+  - Schwimmweste im Ticket inklusive
+  - Wasserski und Kneeboard kostenlos
+  - Stand-up-Paddling
+  - Adventure Golf
+  - "Bistro und Café"
+  - Übernachtung
+
+description: >-
+  Wakepark am Steinberger See mit vier Seilbahnen.

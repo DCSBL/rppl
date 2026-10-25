@@ -1,0 +1,65 @@
+version: 1
+id: cable-park-mannheim
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakeboarding & Wasserski Mannheim
+short_name: Cable Park Mannheim
+languages:
+  - de
+  - en
+  - nl
+address: "Rohrhofer Straße 55, 68219 Mannheim"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 49.418279
+  lon: 8.525628
+
+phone: "+49 621 8930322"
+website: https://www.wakeboarding-mannheim.de
+
+cables:
+  - name: Cable
+    length_m: 780
+    description: >-
+      Fullsize-Cable mit 11 Mitnehmern und 16 Obstacle-Sektionen, seit 1982 am Rheinauer See.
+      Ein Rückholboot holt gestürzte Rider ab.
+
+opening:
+  source_url: "https://www.wakeboarding-mannheim.de"
+  booking: none
+  note: >-
+    Ab Oktober ist montags geschlossen, sonntags von 13 bis 17 Uhr geöffnet und dienstags
+    bis samstags nach Ankündigung auf Instagram, Facebook und Google. Es gibt keine
+    Slotbuchung.
+
+prices:
+  - name: Beach entry
+    options:
+      - amount: "4.5"
+        currency: EUR
+        per: person
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "3.5"
+        currency: EUR
+        per: person
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+
+facilities:
+  - Seegartengastronomie mit schwimmenden Terrassen
+  - Strandbar
+  - Stand-up-Paddling
+  - Shop
+
+description: >-
+  Cable Park am Rheinauer See mit Obstacle-Park.
