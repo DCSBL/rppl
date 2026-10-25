@@ -63,6 +63,23 @@ class ParseTagTests(unittest.TestCase):
                     pr.parse_tag(tag)
 
 
+class BaseBranchTests(unittest.TestCase):
+    def test_duo_suffix_builds_from_the_duo_branch(self):
+        self.assertEqual(pr.base_branch("duo.1"), "wip/iphone-duo")
+        self.assertEqual(pr.base_branch("duo.12"), "wip/iphone-duo")
+
+    def test_other_tags_build_from_main(self):
+        for suffix in (None, "beta.1", "rc1", "duo", "xduo.1"):
+            with self.subTest(suffix=suffix):
+                self.assertEqual(pr.base_branch(suffix), "main")
+
+    def test_on_main_check_compares_against_the_base(self):
+        with mock.patch.object(pr, "http_get_json", return_value=(200, {"status": "ahead"})) as get:
+            with self.assertRaisesRegex(pr.ReleaseError, "wip/iphone-duo"):
+                pr.check_on_main("DCSBL/rppl", "2026.10.2-duo.1", None, "wip/iphone-duo")
+        self.assertIn("compare/wip/iphone-duo...2026.10.2-duo.1", get.call_args[0][0])
+
+
 class VersionTests(unittest.TestCase):
     def test_bump_replaces_every_occurrence(self):
         text = "a\n\t\t\t\tMARKETING_VERSION = 1.0;\n b\n\t\t\t\tMARKETING_VERSION = 2.5.1;\n"
@@ -349,6 +366,11 @@ class RunTests(unittest.TestCase):
 class ReleaseBranchTests(unittest.TestCase):
     def test_release_branch(self):
         self.assertEqual(pr.release_branch("2026.10.4"), "release/2026.10.4")
+
+    def test_duo_release_branch_has_its_own_group(self):
+        self.assertEqual(pr.release_branch("2026.10.8", "duo.1"), "release/duo/2026.10.8")
+        self.assertEqual(pr.release_branch("2026.10.8", "beta.1"), "release/2026.10.8")
+        self.assertEqual(pr.parse_release_branch("release/duo/2026.10.8"), "2026.10.8")
 
     def test_parse_release_branch(self):
         self.assertEqual(pr.parse_release_branch("release/2026.10.4"), "2026.10.4")

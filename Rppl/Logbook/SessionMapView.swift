@@ -40,20 +40,12 @@ enum SessionMapLayout {
             EdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 16)
         }
     }
-
-    /// Keeps MapKit attribution ("Maps Legal") out of home-indicator / corner radius.
-    var attributionSafeAreaPadding: EdgeInsets {
-        switch self {
-        case .embedded:
-            EdgeInsets()
-        case .fullscreen:
-            EdgeInsets(top: 0, leading: 8, bottom: 12, trailing: 0)
-        }
-    }
 }
 
 struct SessionMapView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    @Environment(\.layoutDirection) private var layoutDirection
+    @ScaledMetric(relativeTo: .caption2) private var endpointSize: CGFloat = 20
     /// Per-ride solid tracks (ride cards).
     let tracks: [[LocationSample]]
     /// Session overview heatmap tracks.
@@ -66,11 +58,22 @@ struct SessionMapView: View {
     var layout: SessionMapLayout = .embedded
     /// Park cable outlines drawn as a thin line beneath the tracks.
     var cableOverlays: [[CLLocationCoordinate2D]] = []
+    /// Set on a full-screen map: style and reset live in the navigation bar (`MapScreenToolbar`).
+    var usesBarButtons = false
+    /// Bumped by the bar's reset button: back to the fitted frame.
+    var resetToken = 0
+    /// The blue dot, once location access is on; nil hides it.
+    var userLocation: CLLocationCoordinate2D?
+    /// Bumped by the bar's location button: centers on `userLocation`.
+    var locateToken = 0
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var position: MapCameraPosition = .automatic
     @State private var fitted: MapTrackFit?
     @State private var showReset = false
+    /// The whole map and, full screen, the part bars and a sidebar cover (see `mapScreen`).
+    @State private var viewport = MapViewport()
+    @State private var lastCamera: MapCamera?
 
     init(
         locations: [LocationSample],
@@ -145,7 +148,7 @@ struct SessionMapView: View {
         ZStack(alignment: .topLeading) {
             interactiveMap
 
-            if showsStyleToggle {
+            if showsStyleToggle, !usesBarButtons {
                 SessionMapControlCluster(
                     showsStyleToggle: true,
                     layout: layout
@@ -155,7 +158,7 @@ struct SessionMapView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if allowsInteraction, showReset {
+            if allowsInteraction, showReset, !usesBarButtons {
                 resetButton
                     .padding(layout.resetPadding)
                     .safeAreaPadding(.bottom, layout == .fullscreen ? 4 : 0)
@@ -163,26 +166,46 @@ struct SessionMapView: View {
         }
         .background {
             GeometryReader { geo in
+                // Embedded in a card the safe area is not the map's business: only full screen frames around it.
+                let measured = MapViewport(
+                    size: geo.size,
+                    safeArea: layout == .fullscreen ? geo.safeAreaInsets : EdgeInsets(),
+                    layoutDirection: layoutDirection
+                )
                 Color.clear
                     .onAppear {
-                        updateFit(for: geo.size, forceApply: true)
+                        updateFit(for: measured, forceApply: true)
                     }
-                    .onChange(of: geo.size) { _, newSize in
-                        updateFit(for: newSize, forceApply: !showReset)
+                    .onChange(of: measured) { _, next in
+                        updateFit(for: next, forceApply: !showReset)
                     }
                     .onChange(of: dataSignature) { _, _ in
                         showReset = false
-                        updateFit(for: geo.size, forceApply: true)
+                        updateFit(for: measured, forceApply: true)
                     }
                     .onChange(of: preferredFrameSignature) { _, _ in
                         if fitCoordinates.count < 2, preferredFrame != nil {
                             showReset = false
-                            updateFit(for: geo.size, forceApply: true)
+                            updateFit(for: measured, forceApply: true)
                         }
                     }
             }
         }
+        .onChange(of: resetToken) { _, _ in
+            applyFittedCamera(animated: true)
+            showReset = false
+        }
+        .onChange(of: locateToken) { _, _ in
+            guard let userLocation else { return }
+            // Keeps the zoom and turn the map has now, like the location button in Maps.
+            let distance = lastCamera?.distance ?? fitted?.cameraDistanceMeters ?? 1_000
+            let heading = lastCamera?.heading ?? 0
+            withRpplAnimation(.easeInOut(duration: 0.25)) {
+                position = .camera(viewport.camera(centeredOn: userLocation, distance: distance, heading: heading))
+            }
+        }
         .onMapCameraChange(frequency: .onEnd) { context in
+            lastCamera = context.camera
             guard allowsInteraction else { return }
             // Do not write `position` back here: it interrupts pan inertia and
             // swallows the next swipe. The Map binding already tracks the camera.
@@ -206,6 +229,9 @@ struct SessionMapView: View {
             soloContent
         } else {
             flatContent
+        }
+        if userLocation != nil {
+            UserAnnotation()
         }
     }
 
@@ -259,9 +285,9 @@ struct SessionMapView: View {
     ) -> some MapContent {
         Annotation(title, coordinate: coordinate) {
             Image(systemName: symbol)
-                .font(.system(size: 9, weight: .heavy))
+                .font(.system(size: endpointSize * 0.45, weight: .heavy))
                 .foregroundStyle(.white)
-                .frame(width: 20, height: 20)
+                .frame(width: endpointSize, height: endpointSize)
                 .background(Color.rpplHighlight, in: Circle())
                 .overlay {
                     Circle().strokeBorder(.white.opacity(0.85), lineWidth: 1.5)
@@ -277,13 +303,10 @@ struct SessionMapView: View {
         }
         .mapStyle(mapStyle)
 
+        // No 3D button: tilting stays a two-finger gesture.
         if allowsInteraction {
             map
-                .mapControls {
-                    MapPitchToggle()
-                    MapCompass()
-                }
-                .safeAreaPadding(layout.attributionSafeAreaPadding)
+                .mapScreenControls()
         } else {
             map
                 .allowsHitTesting(false)
@@ -368,26 +391,31 @@ struct SessionMapView: View {
         min(0.35, 0.85 / Double(max(setCount, 1)))
     }
 
-    private func updateFit(for size: CGSize, forceApply: Bool) {
+    private func updateFit(for measured: MapViewport, forceApply: Bool) {
+        viewport = measured
+        let size = measured.size
         let next: MapTrackFit?
         let frame = prefersPersistedFrame ? preferredFrame : nil
         if let frame, fitCoordinates.count >= 2 || sessionMapData != nil {
             next = MapTrackFitter.fit(
                 frame: frame,
                 viewWidth: Double(size.width),
-                viewHeight: Double(size.height)
+                viewHeight: Double(size.height),
+                insets: measured.insets
             )
         } else if fitCoordinates.count >= 2 {
             next = MapTrackFitter.fit(
                 locations: fitCoordinates,
                 viewWidth: Double(size.width),
-                viewHeight: Double(size.height)
+                viewHeight: Double(size.height),
+                insets: measured.insets
             )
         } else if let frame {
             next = MapTrackFitter.fit(
                 frame: frame,
                 viewWidth: Double(size.width),
-                viewHeight: Double(size.height)
+                viewHeight: Double(size.height),
+                insets: measured.insets
             )
         } else {
             next = nil
@@ -553,6 +581,23 @@ struct SessionMapFullscreenView: View {
         self.preferredFrame = preferredFrame
     }
 
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @State private var resetToken = 0
+    @State private var locateToken = 0
+    @State private var location = ParksLocationProvider()
+    @State private var pendingLocate = false
+
+    private var userLocation: CLLocationCoordinate2D? {
+        guard location.availability == .available, let coordinate = location.coordinate else { return nil }
+        return CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
+    }
+
+    /// Only once location access is on: this map never asks for it.
+    private var locateAction: (() -> Void)? {
+        guard location.availability == .available else { return nil }
+        return locate
+    }
+
     var body: some View {
         Group {
             if let sessionMapData {
@@ -560,30 +605,58 @@ struct SessionMapFullscreenView: View {
                     sessionMapData: sessionMapData,
                     rendering: rendering,
                     allowsInteraction: true,
-                    showsStyleToggle: true,
                     preferredFrame: preferredFrame,
                     layout: .fullscreen,
                     cableOverlays: cableOverlays
                 )
+                .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             } else {
                 SessionMapView(
                     tracks: tracks,
                     rendering: rendering,
                     allowsInteraction: true,
-                    showsStyleToggle: true,
                     preferredFrame: preferredFrame,
                     layout: .fullscreen
                 )
+                .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             }
         }
-        .ignoresSafeArea(edges: .bottom)
+        .mapScreen(usesSatellite: $usesSatellite, reset: { resetToken += 1 }, locate: locateAction)
         .background(DisableNavigationSwipeBack())
-        .toolbar(.hidden, for: .tabBar)
+        // Only the map and the bar buttons: no title band over the map.
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
+        .onAppear { location.refresh() }
+        .onChange(of: location.coordinate) { _, coordinate in
+            guard pendingLocate, coordinate != nil else { return }
+            pendingLocate = false
+            locateToken += 1
+        }
         .background(Color.rpplBackground)
         .tint(Color.rpplAccent)
         .accessibilityLabel(title)
+    }
+
+    /// Waits for a first fix when there is none yet.
+    private func locate() {
+        if location.coordinate != nil {
+            locateToken += 1
+        } else {
+            pendingLocate = true
+            location.refresh()
+        }
+    }
+}
+
+private extension SessionMapView {
+    func barButtons(resetToken: Int, locateToken: Int, userLocation: CLLocationCoordinate2D?) -> SessionMapView {
+        var copy = self
+        copy.usesBarButtons = true
+        copy.resetToken = resetToken
+        copy.locateToken = locateToken
+        copy.userLocation = userLocation
+        return copy
     }
 }
 

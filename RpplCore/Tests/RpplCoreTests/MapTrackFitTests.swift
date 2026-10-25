@@ -88,6 +88,25 @@ struct MapTrackFitTests {
         #expect(phone.cameraDistanceMeters != tall.cameraDistanceMeters)
     }
 
+    @Test func insetsFrameTheUncoveredPart() {
+        let frame = MapTrackFrame(
+            centerLatitude: 52.1, centerLongitude: 5.1, headingDegrees: 0,
+            spanWidthMeters: 400, spanHeightMeters: 200
+        )
+        // A 300 pt sidebar over the left of a 700 pt map leaves 400 pt: as wide as a 400 pt map.
+        let covered = MapTrackFitter.fit(
+            frame: frame, viewWidth: 700, viewHeight: 300,
+            insets: MapViewInsets(top: 0, left: 300, bottom: 0, right: 0)
+        )
+        let narrow = MapTrackFitter.fit(frame: frame, viewWidth: 400, viewHeight: 300)
+        #expect(covered != nil && narrow != nil)
+        guard let covered, let narrow else { return }
+        #expect(abs(covered.cameraDistanceMeters - narrow.cameraDistanceMeters) < 0.001)
+        // MapKit centers in the uncovered part itself (its safe area): the center stays put.
+        #expect(covered.centerLongitude == frame.centerLongitude)
+        #expect(covered.centerLatitude == frame.centerLatitude)
+    }
+
     @Test func startFrameFromSingleLocation() {
         let frame = MapTrackFitter.frame(locations: [(latitude: 52.1, longitude: 5.1)])
         #expect(frame != nil)

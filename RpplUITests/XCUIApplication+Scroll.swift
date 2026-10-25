@@ -4,12 +4,14 @@ extension XCUIApplication {
     /// Scrolls (short drags, so it cannot overshoot) until `element` is hittable in the upper part of the
     /// window. Lazy lists only build rows near the viewport (a small screen or big text pushes the cards
     /// off it), and a tap or swipe on a row at the screen edge misses. Stops once a drag no longer moves it.
-    func scrollTo(_ element: XCUIElement, maxDrags: Int = 20) {
-        let window = windows.firstMatch
-        let height = window.frame.height
+    /// `container` is what to drag: the whole window by default; beside a detail column, the list itself.
+    func scrollTo(_ element: XCUIElement, in container: XCUIElement? = nil, maxDrags: Int = 20) {
+        let area = container ?? windows.firstMatch
+        let top = area.frame.minY
+        let height = area.frame.height
         func drag(up: Bool) {
-            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.7 : 0.35))
-            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.4 : 0.65))
+            let start = area.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.7 : 0.35))
+            let end = area.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.4 : 0.65))
             start.press(forDuration: 0.05, thenDragTo: end)
         }
         var previousMinY: CGFloat?
@@ -19,9 +21,9 @@ extension XCUIApplication {
                 continue
             }
             let frame = element.frame
-            if frame.maxY <= 0 {
-                drag(up: false) // overshot: it is above the window
-            } else if element.isHittable && frame.midY < height * 0.7 {
+            if frame.maxY <= top {
+                drag(up: false) // overshot: it is above the area
+            } else if element.isHittable && frame.midY < top + height * 0.7 {
                 return
             } else if frame.minY == previousMinY {
                 return // the list cannot scroll further
@@ -34,20 +36,27 @@ extension XCUIApplication {
 
     /// Scrolls to a session card or chart (rows are only built near the viewport). Waits on the tab bar, which
     /// stays on screen, and retries because the logbook may still be loading when the first swipes land.
-    func scrollToElement(_ element: XCUIElement) -> Bool {
+    func scrollToElement(_ element: XCUIElement, in container: XCUIElement? = nil) -> Bool {
         guard tabBars.firstMatch.waitForExistence(timeout: 30) else { return false }
         for _ in 0..<3 {
-            scrollTo(element)
+            scrollTo(element, in: container)
             if element.waitForExistence(timeout: 10) { return true }
         }
         return false
     }
 
-    /// Waits until the logbook totals tile (always at the top, never lazily skipped) reads `count` sessions.
+    /// Waits until the logbook totals tile reads `count` sessions. In a short, narrow list column (landscape at
+    /// the largest text size) the header can push the tile off the viewport, so the list scrolls to it.
     func waitForSessionCount(_ count: Int, timeout: TimeInterval = 45) -> Bool {
         let tile = descendants(matching: .any)["logbook-total-sessions"].firstMatch
         let deadline = Date().addingTimeInterval(timeout) // one budget: the test allowance is 120 s in total
-        guard tile.waitForExistence(timeout: timeout) else { return false }
+        if !tile.waitForExistence(timeout: 10) {
+            let list = collectionViews.firstMatch
+            for _ in 0..<4 where !tile.exists && list.exists {
+                list.swipeUp()
+            }
+        }
+        guard tile.waitForExistence(timeout: max(1, deadline.timeIntervalSinceNow)) else { return false }
         let reads = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label BEGINSWITH %@", String(count)), object: tile)
         return XCTWaiter().wait(for: [reads], timeout: max(1, deadline.timeIntervalSinceNow)) == .completed
     }

@@ -6,6 +6,11 @@
 # .github/xcode-problem-matcher.json (GitHub caps this at 10 per step, 50 per job; the full log is
 # the `*-log` artifact). The Linux core-tests.yml stays as the fast, container-based check.
 #
+# `smoke` is the fast gate (compile + app unit tests, target <= 6 min): the heavy jobs wait for it,
+# so a broken build neither queues ~20 min of UI tests nor blocks the macOS runners. Merge on a green
+# `Smoke`; the rest is the real verification. A merged PR cancels its own runs (cancel-on-merge.yml)
+# unless it is "scary" (label `full-ci`, release/CI/project paths).
+#
 # No `paths:` filter: the jobs always report a status, so they can be required checks. The two UI
 # jobs are the slow ones (~17 min of test run, build is ~3 min), so they skip when a PR touches
 # nothing they exercise. A job skipped by `if` still reports success.
@@ -14,14 +19,14 @@ name: macOS CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 'wip/**']
   push:
     branches: [main]
   workflow_dispatch:
 
 concurrency:
   group: macos-ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -65,28 +70,19 @@ jobs:
             echo "watch=false" >> "$GITHUB_OUTPUT"
           fi
 
-  tests:
-    name: Tests (macOS)
+  smoke:
+    name: Smoke
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
       - name: Toolchain
-        run: |
-          xcodebuild -version
-          swift --version
+        run: xcodebuild -version
 
-      - name: Release script tests
-        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
-
-      - name: RpplCore tests + coverage floor
-        shell: bash # pipefail: keep the script's exit code through tee
-        run: |
-          echo "::add-matcher::.github/xcode-problem-matcher.json"
-          python3 scripts/check-core-coverage.py 2>&1 | tee core-tests.log
-
+      # Compile the whole app (iOS + embedded Watch + widgets) and run the app unit tests: the
+      # "does it work" gate. A compile error on macOS (#550) shows up here in a few minutes.
       - name: App unit tests (iOS Simulator)
         shell: bash
         run: |
@@ -113,16 +109,48 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: tests-log
+          name: smoke-log
           path: |
-            core-tests.log
             app-tests.log
             RpplTests.xcresult
           if-no-files-found: ignore
           retention-days: 7
 
+  tests:
+    name: Tests (macOS)
+    needs: smoke
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Release script tests
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
+
+      - name: RpplCore tests + coverage floor
+        shell: bash # pipefail: keep the script's exit code through tee
+        run: |
+          echo "::add-matcher::.github/xcode-problem-matcher.json"
+          python3 scripts/check-core-coverage.py 2>&1 | tee core-tests.log
+
+      - name: Upload logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: tests-log
+          path: core-tests.log
+          if-no-files-found: ignore
+          retention-days: 7
+
   build:
     name: Build (dry run)
+    needs: smoke
     runs-on: macos-26
     timeout-minutes: 45
     steps:
@@ -168,7 +196,7 @@ jobs:
 
   ui-tests:
     name: UI tests (iPhone Simulator)
-    needs: changes
+    needs: [smoke, changes]
     if: needs.changes.outputs.phone == 'true'
     runs-on: macos-26
     timeout-minutes: 45
@@ -256,7 +284,7 @@ jobs:
 
   watch-ui-tests:
     name: UI tests (Apple Watch Simulator)
-    needs: changes
+    needs: [smoke, changes]
     if: needs.changes.outputs.watch == 'true'
     runs-on: macos-26
     timeout-minutes: 45

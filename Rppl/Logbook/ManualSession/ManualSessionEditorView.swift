@@ -152,7 +152,8 @@ struct ManualSessionEditorView: View {
                 }
             }
             .confirmationDialog("Discard changes?", isPresented: $showDiscard, titleVisibility: .visible) {
-                Button("Discard changes", role: .destructive) { dismiss() }
+                // Closing the sheet while the dialog is still going away was sometimes dropped: wait a turn.
+                Button("Discard changes", role: .destructive) { Task { @MainActor in dismiss() } }
                 Button("Keep editing", role: .cancel) {}
             }
             .alert("End is before start", isPresented: $showReversed) {

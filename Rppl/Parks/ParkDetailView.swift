@@ -8,6 +8,8 @@ struct ParkDetailView: View {
     let isFavorite: Bool
     /// Date from the Parks "Open" filter; nil for today or no filter.
     var plannedDate: Date?
+    /// Beside the list in a wide window: closes the detail back to the map (a cross, not a back arrow).
+    var onClose: (() -> Void)?
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -32,6 +34,7 @@ struct ParkDetailView: View {
     @State private var showMail = false
     @State private var confirmRemove = false
     @State private var showReopeningEvent = false
+    @State private var showShareWithRppl = false
 
     private var bookingURL: URL? {
         park.links?.first { $0.kind.lowercased() == "booking" }.flatMap { URL(string: $0.url) }
@@ -79,22 +82,38 @@ struct ParkDetailView: View {
                 linksCard
                 footer
             }
-            .padding(.horizontal, LogbookLayout.horizontalInset)
             .padding(.vertical, 8)
+            .readableWidth()
         }
+        .detailMargins(onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: onToggleFavorite) {
-                    Image(systemName: isFavorite ? "star.fill" : "star")
+            if let onClose {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close, action: onClose)
                 }
-                .accessibilityLabel(isFavorite ? Text("Remove favorite") : Text("Add favorite"))
             }
-            if editorEnabled {
-                ToolbarItem(placement: .primaryAction) { editMenu }
+            // One group with titled buttons: the bar can lay them out, or move them into its overflow,
+            // as one stable item instead of rebuilding loose icon-only items.
+            ToolbarItemGroup(placement: .primaryAction) {
+                if isFavorite {
+                    Button("Remove favorite", systemImage: "star.fill", action: onToggleFavorite)
+                } else {
+                    Button("Add favorite", systemImage: "star", action: onToggleFavorite)
+                }
+                if editorEnabled {
+                    editMenu
+                }
             }
+        }
+        .alert("Share with Rppl?", isPresented: $showShareWithRppl) {
+            Button("Share with Rppl") { sendToRppl() }
+            Button("Other app or file") { ParkShare.share(park) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your changes to this park can go to the developers. Otherwise pick any app.")
         }
         .sheet(isPresented: $showEditor) {
             ParkEditorView(original: park, resuming: resumeDraft)
@@ -184,26 +203,40 @@ struct ParkDetailView: View {
         }
     }
 
+    /// Parks you changed or made can go to Rppl; for the rest Share is the plain share sheet.
+    private var canShareWithRppl: Bool {
+        guard let origin = entry?.origin else { return false }
+        return origin == .custom || origin == .edited
+    }
+
+    private func shareTapped() {
+        if canShareWithRppl {
+            showShareWithRppl = true
+        } else {
+            ParkShare.share(park)
+        }
+    }
+
+    private func sendToRppl() {
+        if MailAvailability.canSend {
+            showMail = true
+        } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
+            openURL(url)
+        } else {
+            ParkShare.share(park)
+        }
+    }
+
     private var editMenu: some View {
         Menu {
             Button("Edit", systemImage: "pencil") { startEditing() }
-            Button("Share", systemImage: "square.and.arrow.up") { ParkShare.share(park) }
-            if let origin = entry?.origin, origin == .custom || origin == .edited {
-                Button("Send to Rppl", systemImage: "envelope") {
-                    if MailAvailability.canSend {
-                        showMail = true
-                    } else if let url = ParkShare.mailtoURL(for: park, changedSections: changedSections) {
-                        openURL(url)
-                    } else {
-                        ParkShare.share(park)
-                    }
-                }
+            Button("Share", systemImage: "square.and.arrow.up", action: shareTapped)
+            if canShareWithRppl {
                 Button(removeTitle, systemImage: "arrow.uturn.backward", role: .destructive) { confirmRemove = true }
             }
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Label("Edit park", systemImage: "ellipsis.circle")
         }
-        .accessibilityLabel(Text("Edit park"))
     }
 
     @ViewBuilder
@@ -230,9 +263,25 @@ struct ParkDetailView: View {
 
     private var mapCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ParkMap(park: park, usesSatellite: usesSatellite, weather: weather)
-                .frame(height: 220)
-                .logbookNestedClip()
+            // A preview: tapping it opens the full-screen map (the whole window when folded, the detail column beside a list).
+            ZStack {
+                ParkMap(park: park, usesSatellite: usesSatellite, weather: weather, position: .constant(.region(ParkMap.region(for: park))))
+                    .allowsHitTesting(false)
+                NavigationLink {
+                    ParkMapScreen(park: park, weather: weather)
+                } label: {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(height: 220)
+            .logbookNestedClip()
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(Text("Map"))
+            .accessibilityHint(Text("Shows full-screen map"))
 
             if let address = park.address {
                 Text(address)
@@ -866,23 +915,103 @@ struct ParkDetailView: View {
     }
 }
 
+/// One park on the map, interactive and full screen, with the map buttons in the navigation bar.
+private struct ParkMapScreen: View {
+    let park: Park
+    let weather: ParkWeather?
+
+    @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
+    @State private var position: MapCameraPosition
+    @State private var viewport = MapViewport()
+    @State private var hasFramedPark = false
+    @State private var location = ParksLocationProvider()
+    @State private var pendingRecenter = false
+
+    init(park: Park, weather: ParkWeather?) {
+        self.park = park
+        self.weather = weather
+        _position = State(initialValue: .region(ParkMap.region(for: park)))
+    }
+
+    /// Only once location access is on: this map never asks for it.
+    private var locateAction: (() -> Void)? {
+        guard location.availability == .available else { return nil }
+        return recenterOnUser
+    }
+
+    var body: some View {
+        ParkMap(
+            park: park,
+            usesSatellite: usesSatellite,
+            weather: weather,
+            position: $position,
+            showsUserLocation: location.availability == .available,
+            // Out of the way of the bar buttons in the top corner.
+            windRoseAlignment: .bottomTrailing
+        )
+        .mapScreen(viewport: $viewport, usesSatellite: $usesSatellite, reset: reset, locate: locateAction)
+        .navigationTitle(park.compactName)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
+        .onAppear { location.refresh() }
+        .onChange(of: viewport) { _, _ in
+            // The first frame that knows what bars and a sidebar cover; after that the map is the rider's.
+            guard !hasFramedPark, let camera = viewport.camera(fitting: ParkMap.region(for: park)) else { return }
+            hasFramedPark = true
+            position = .camera(camera)
+        }
+        .onChange(of: location.coordinate) { _, coordinate in
+            guard pendingRecenter, let coordinate else { return }
+            pendingRecenter = false
+            move(to: coordinate)
+        }
+    }
+
+    private func reset() {
+        guard let camera = viewport.camera(fitting: ParkMap.region(for: park)) else { return }
+        withRpplAnimation {
+            position = .camera(camera)
+        }
+    }
+
+    private func recenterOnUser() {
+        if let coordinate = location.coordinate {
+            move(to: coordinate)
+        } else {
+            pendingRecenter = true
+            location.refresh()
+        }
+    }
+
+    private func move(to coordinate: ParkCoordinate) {
+        let center = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
+        withRpplAnimation {
+            position = .camera(viewport.camera(centeredOn: center, distance: 5_000))
+        }
+    }
+}
+
 private struct ParkMap: View {
     let park: Park
     let usesSatellite: Bool
     let weather: ParkWeather?
+    @Binding var position: MapCameraPosition
+    var showsUserLocation = false
+    var windRoseAlignment: Alignment = .topTrailing
 
     @State private var mapHeading: Double = 0
+    @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 18
 
     var body: some View {
-        Map(initialPosition: .region(region)) {
+        Map(position: $position) {
             Marker(park.name, coordinate: coordinate(park.location.lat, park.location.lon))
                 .tint(.red)
             ForEach(startMarkers, id: \.id) { marker in
                 Annotation("", coordinate: marker.coordinate, anchor: .center) {
                     Image(systemName: "location.north.fill")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: markerSize / 2, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 18, height: 18)
+                        .frame(width: markerSize, height: markerSize)
                         .background(Color.rpplAccent, in: Circle())
                         .overlay(Circle().strokeBorder(.white, lineWidth: 1.5))
                         .rotationEffect(.degrees((marker.bearing ?? 0) - mapHeading))
@@ -896,12 +1025,16 @@ private struct ParkMap: View {
                         .stroke(Color.rpplAccent, lineWidth: 3)
                 }
             }
+            if showsUserLocation {
+                UserAnnotation()
+            }
         }
         .mapStyle(usesSatellite ? .hybrid : .standard)
+        .mapScreenControls()
         .onMapCameraChange(frequency: .continuous) { context in
             mapHeading = context.camera.heading
         }
-        .overlay(alignment: .topTrailing) {
+        .overlay(alignment: windRoseAlignment) {
             if let weather {
                 WindRoseView(
                     directionDegrees: weather.windDirectionDegrees,
@@ -931,7 +1064,7 @@ private struct ParkMap: View {
         }
     }
 
-    private var region: MKCoordinateRegion {
+    static func region(for park: Park) -> MKCoordinateRegion {
         let all = [park.location]
             + (park.cables ?? []).flatMap { ($0.points ?? []).map(\.coordinate) }
         let lats = all.map(\.lat)

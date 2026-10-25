@@ -9,6 +9,7 @@ struct AppInfoView: View {
     @State private var permissions = PhonePermissionsController.shared
     @State private var iCloud = PhoneICloudDriveController.shared
     @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
     @State private var showDisableDeleteConfirm = false
     @State private var showSupportMail = false
     @AppStorage(AppSettingsKey.parkWaterTemperatureEnabled) private var waterTemperatureEnabled = false
@@ -50,13 +51,27 @@ struct AppInfoView: View {
                     Toggle("Update park data", isOn: $parkDataUpdatesEnabled)
                         .tint(Color.rpplAccent)
                     if parkDataUpdatesEnabled {
-                        ParkDataStatusLine(controller: parkDataUpdates)
+                        HStack(spacing: 12) {
+                            ParkDataStatusLine(controller: parkDataUpdates, alignment: .leading)
+                            if parkDataUpdates.isRefreshing {
+                                ProgressView()
+                            } else {
+                                Button {
+                                    Task { await parkDataUpdates.manualRefresh() }
+                                } label: {
+                                    Image(systemName: "arrow.clockwise")
+                                }
+                                .buttonStyle(.borderless)
+                                .tint(Color.rpplAccent)
+                                .accessibilityLabel(Text("Update park data"))
+                            }
+                        }
                     }
                 } header: {
                     Text("Park data")
                 } footer: {
                     Text(
-                        "Fetches new and changed parks from GitHub, about once a day and when you pull down in Parks. GitHub can see your IP address; nothing else is sent. Off: Rppl uses the parks that came with the app."
+                        "Fetches new park info from GitHub, a website where developers share files. GitHub can see your IP address; nothing else is sent."
                     )
                 }
                 .onChange(of: parkDataUpdatesEnabled) { _, enabled in
@@ -158,6 +173,11 @@ struct AppInfoView: View {
             .background(RpplBackdrop())
             .navigationTitle("Rppl")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close) { dismiss() }
+                }
+            }
             .toolbarBackground(Color.rpplBackdropTop, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .tint(Color.rpplAccent)

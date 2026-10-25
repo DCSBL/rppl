@@ -180,6 +180,7 @@ final class ParkDataUpdateController {
 /// the relative time keeps up.
 struct ParkDataStatusLine: View {
     let controller: ParkDataUpdateController
+    var alignment: TextAlignment = .center
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -187,8 +188,8 @@ struct ParkDataStatusLine: View {
                 Text(text)
                     .font(.footnote)
                     .foregroundStyle(Color.rpplMuted)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(alignment)
+                    .frame(maxWidth: .infinity, alignment: alignment == .center ? .center : .leading)
                     .accessibilityLabel(text)
             }
         }
@@ -207,5 +208,36 @@ struct ParkDataErrorBanner: View {
             .padding(.vertical, 8)
             .background(.regularMaterial, in: Capsule())
             .accessibilityAddTraits(.updatesFrequently)
+    }
+}
+
+/// Shown under the Parks header while pulling down and while fetching: a ring that fills with the
+/// pull, a spinner while updating, and the "checked … · data from …" line.
+struct ParkDataPullIndicator: View {
+    let controller: ParkDataUpdateController
+    /// 0...1 of the pull distance needed to trigger a refresh.
+    let progress: Double
+
+    var body: some View {
+        VStack(spacing: 6) {
+            if controller.isRefreshing {
+                ProgressView()
+            } else {
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(Color.rpplAccent, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 20, height: 20)
+            }
+            if controller.isRefreshing {
+                Text("Updating park data…")
+                    .font(.footnote)
+                    .foregroundStyle(Color.rpplMuted)
+            } else {
+                ParkDataStatusLine(controller: controller)
+            }
+        }
+        .opacity(controller.isRefreshing ? 1 : progress)
+        .accessibilityElement(children: .combine)
     }
 }

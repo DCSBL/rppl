@@ -27,6 +27,26 @@ public struct MapTrackFrame: Codable, Equatable, Sendable {
     }
 }
 
+/// Points of a map view covered by bars or a sidebar, by screen side (not leading/trailing).
+public struct MapViewInsets: Equatable, Sendable {
+    public var top: Double
+    public var left: Double
+    public var bottom: Double
+    public var right: Double
+
+    public static let zero = MapViewInsets(top: 0, left: 0, bottom: 0, right: 0)
+
+    public init(top: Double, left: Double, bottom: Double, right: Double) {
+        self.top = top
+        self.left = left
+        self.bottom = bottom
+        self.right = right
+    }
+
+    var horizontal: Double { left + right }
+    var vertical: Double { top + bottom }
+}
+
 /// Camera parameters to frame GPS tracks on a MapKit map (pitch 0).
 public struct MapTrackFit: Equatable, Sendable {
     public var centerLatitude: Double
@@ -126,15 +146,21 @@ public enum MapTrackFitter {
         )
     }
 
+    /// Camera for `frame` on a map of `viewWidth` × `viewHeight` points. A map that draws under bars or
+    /// a sidebar passes their `insets`: the track is sized to the part left uncovered. The center stays the
+    /// frame's: MapKit centers a camera in the uncovered part itself, when that part is its safe area.
     public static func fit(
         frame: MapTrackFrame,
         viewWidth: Double,
-        viewHeight: Double
+        viewHeight: Double,
+        insets: MapViewInsets = .zero
     ) -> MapTrackFit? {
         guard viewWidth > 1, viewHeight > 1 else { return nil }
+        // Covered so far that nothing is left: frame in the whole view instead.
+        let covered = viewWidth - insets.horizontal > 1 && viewHeight - insets.vertical > 1 ? insets : .zero
         let metersPerPoint = max(
-            frame.spanWidthMeters / viewWidth,
-            frame.spanHeightMeters / viewHeight
+            frame.spanWidthMeters / (viewWidth - covered.horizontal),
+            frame.spanHeightMeters / (viewHeight - covered.vertical)
         )
         let visibleHeightMeters = metersPerPoint * viewHeight
         let distance = max(
@@ -153,12 +179,13 @@ public enum MapTrackFitter {
         locations: [(latitude: Double, longitude: Double)],
         viewWidth: Double,
         viewHeight: Double,
+        insets: MapViewInsets = .zero,
         paddingFactor: Double = defaultPaddingFactor
     ) -> MapTrackFit? {
         guard let frame = frame(locations: locations, paddingFactor: paddingFactor) else {
             return nil
         }
-        return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight)
+        return fit(frame: frame, viewWidth: viewWidth, viewHeight: viewHeight, insets: insets)
     }
 
     /// Flatten ride/session tracks into coordinate pairs for `fit` / `frame`.

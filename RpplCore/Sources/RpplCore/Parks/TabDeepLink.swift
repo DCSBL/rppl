@@ -32,7 +32,7 @@ public enum DeepLinkCatalog {
         Entry(url: "rppl://parks", summary: "Parks tab"),
         Entry(url: "rppl://parks/favorites", summary: "Parks tab, starred parks only"),
         Entry(url: "rppl://park/<park-id>", summary: "Park detail"),
-        Entry(url: "rppl://about", summary: "Rppl tab (about, settings)"),
+        Entry(url: "rppl://about", summary: "Settings, opens the Rppl modal"),
         Entry(url: "rppl://debug", summary: "Hidden Debug screen"),
     ]
 }

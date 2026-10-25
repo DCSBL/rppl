@@ -32,11 +32,11 @@ struct ParkEditorView: View {
         .alert("Keep your changes?", isPresented: $confirmClose) {
             Button("Save as draft") {
                 session.saveDraftNow()
-                dismiss()
+                dismissAfterAlert()
             }
             Button("Discard changes", role: .destructive) {
                 session.discardDraft()
-                dismiss()
+                dismissAfterAlert()
             }
             Button("Keep editing", role: .cancel) {}
         } message: {
@@ -108,6 +108,12 @@ struct ParkEditorView: View {
             session.discardDraft()
             dismiss()
         }
+    }
+
+    /// Closing the sheet from an alert button while that alert is still going away was sometimes dropped,
+    /// leaving the editor open; wait for the next turn of the run loop.
+    private func dismissAfterAlert() {
+        Task { @MainActor in dismiss() }
     }
 
     private func save() {
@@ -284,11 +290,13 @@ private struct ParkGuidedFlow: View {
 }
 
 private struct ParkWelcomeStep: View {
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 44
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Image(systemName: "figure.waterskiing")
-                    .font(.system(size: 44))
+                    .font(.system(size: iconSize))
                     .foregroundStyle(Color.rpplAccent)
                     .accessibilityHidden(true)
                 Text("Add a cable park")
