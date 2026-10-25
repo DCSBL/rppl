@@ -69,6 +69,7 @@ cables:
         lon: 4.679423784843997
 
 opening:
+  source_url: "https://wetnwild.nl/wakepark/"
   booking: optional
   numbered: false
   booking_minutes:

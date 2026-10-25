@@ -46,6 +46,7 @@ links:
     url: "https://www.facebook.com/burnside.cablepark"
 
 opening:
+  source_url: "https://www.burnsidecablepark.nl/openingstijden/"
   booking: optional
   note: >-
     The cable only starts with three riders on quieter days, so agree a time with friends. The

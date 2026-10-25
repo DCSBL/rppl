@@ -60,6 +60,7 @@ cables:
       swimming back after a fall.
 
 opening:
+  source_url: "https://watersportverhuurbedrijfdearne.nl/watersport/"
   booking: required
   note: >-
     The wakeboard/waterski cable runs May 1 through September 30 only (other De Arne facilities
