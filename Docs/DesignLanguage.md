@@ -99,9 +99,9 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 
 1. **Short.** A label is one or two words. A sentence says one thing.
 2. **Sentence case everywhere**: titles, buttons, alerts, tabs. "Delete session?", not "Delete Session?". Proper names keep their capitals: Rppl, Apple Watch, iCloud Drive, Water Lock, Health, Apple Weather.
-3. **Talk to the rider.** English "you". Dutch: always *je / jouw*, never *u*.
+3. **Talk to the rider.** English "you". Dutch: always *je / jouw*, never *u*. French (Belgium): always *tu / ton*, never *vous*.
 4. **Buttons start with a verb**: Export, Delete, Try again, Show example session. Cancel stays Cancel. Dutch buttons use the infinitive, like iOS itself: *Verwijderen*, *Opnieuw proberen*, *Alles selecteren*.
-5. **Errors: what happened, then what to do.** "Could not export. Try again from the logbook." No blame, no codes up front, no exclamation marks. Dutch alert titles use *… mislukt* ("Exporteren mislukt").
+5. **Errors: what happened, then what to do.** "Could not export. Try again from the logbook." No blame, no codes up front, no exclamation marks. Dutch alert titles use *… mislukt* ("Exporteren mislukt"). French alert titles name the thing and say it was impossible ("Export impossible").
 6. **App Intent titles are the exception**: Shortcuts and the Action Button follow Apple's Title Case ("Start Cable Park Session").
 7. **Empty states: what's missing and how to get it.** "No sessions yet. Record a park day with Apple Watch, or add a session by hand with the + button."
 8. **Confirmations:** the question is the title ("Delete session?"), the consequence is the message, the destructive button repeats the verb ("Delete").
@@ -126,6 +126,10 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 ### German
 
 Standard German (`de`) for Germany and German-speaking Belgium. Always the informal *du / dein* form. Buttons follow iOS German: *Löschen*, *Abbrechen*, *Erneut versuchen*, *Auswählen*. Alert titles say what failed ("Export fehlgeschlagen"). Save is *Speichern*, never *Sichern*. Slang stays English per AGENTS.md, including *Session* and *Riding*: *Sets*, *Laps*, *Cable*, *Dock*, *Rider*, *Flags*. Park day is *Parktag*, cable park is *Cable Park*. Obstacle and trick names stay English.
+
+### French (Belgium)
+
+Catalog code `fr`. Address the rider with *tu / ton*. Buttons use the infinitive like iOS (*Supprimer*, *Réessayer*, *Tout sélectionner*); alert titles name the thing and say it was impossible (*Export impossible*). System concepts use Apple's French terms (*Santé*, *Forme*, *Réglages*, *Fichiers*). Slang stays English: *session*, *set*, *lap*, *riding*, *cable*, *dock*, *rider*, trick names, *cable park*, *Water Lock*. Avoid *câble*, *tremplin*, *rampe*, *séance*, *manche*, *tour* for those concepts. A "park day" is a *journée au park*. Booking time slots are *créneaux*.
 
 ### Examples
 

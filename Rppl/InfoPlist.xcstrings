@@ -10,6 +10,12 @@
             "value" : "Rppl"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -45,6 +51,12 @@
             "value" : "Rppl reads heart rate and energy during cable-park sessions so you can review them on iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl lit ta fréquence cardiaque et ton énergie pendant tes sessions au cable park pour que tu puisses les revoir sur iPhone."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66,6 +78,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl uses Health on iPhone for companion session views. Workouts are saved from Apple Watch."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl utilise Santé sur iPhone pour l’affichage des sessions. Les entraînements sont enregistrés depuis l’Apple Watch."
           }
         },
         "nl" : {
@@ -91,6 +109,12 @@
             "value" : "Rppl uses your location to sort cable parks by distance and to fill in a spot when you add a park or session."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl utilise ta position pour trier les cable parks par distance et remplir un lieu quand tu ajoutes un park ou une session."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -112,6 +136,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl uses motion APIs when reviewing session context on iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl utilise les API de mouvement quand tu revois le contexte d’une session sur iPhone."
           }
         },
         "nl" : {
