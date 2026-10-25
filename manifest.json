@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "dataVersion": 2,
-  "publishedAt": "2026-10-23T06:31:26Z",
+  "dataVersion": 3,
+  "publishedAt": "2026-10-25T08:32:27Z",
   "enabled": true,
   "minAppSchema": 1,
   "maxAppSchema": 1,
@@ -9,137 +9,137 @@
     {
       "id": "aquabest-best",
       "file": "aquabest-best.yaml",
-      "sha256": "a90ece43bee1d14c76f0eb68a414a841694ede6f4ec843af33b4153404d71dae"
+      "sha256": "805c13bc8c8e479137006ff55d8a43be4ccc799bc9ae68f03ff21ba0813a2c21"
     },
     {
       "id": "beavercreek-roermond",
       "file": "beavercreek-roermond.yaml",
-      "sha256": "db89fb7f80a3972c3419e6bbada9ac5631bd2a67938d35f44611d2fd4d06e9cd"
+      "sha256": "745b8e1bf2d81eeac2d99f2701960e4968c52ce3bdbac5bf3402acbb6bce3c5a"
     },
     {
       "id": "betuwestrand-beesd",
       "file": "betuwestrand-beesd.yaml",
-      "sha256": "5b6d1dc961ffee5fb20e75ca45fe980bfe546969f5cbb7a146482c965efe96a0"
+      "sha256": "6e46c956cad1513aa690e9a355de7830eede16fe66c6806c636c13c672fb07f1"
     },
     {
       "id": "breakout-harkstede",
       "file": "breakout-harkstede.yaml",
-      "sha256": "88bf6365811441abf09418bc3e40ee742e355228f80afd388ef91378bde3f674"
+      "sha256": "28bf2a6fbb7bbf6f25feba064e1410f703fc9e41220600267f54959f45f32bea"
     },
     {
       "id": "burnside-emst",
       "file": "burnside-emst.yaml",
-      "sha256": "b7ba68733cfe3902afa46655129ec9394c656d0b262301b2ef6248a2ca727d01"
+      "sha256": "19a42de2ba7199669e19edec59b6b2d8a02fc8d190dc893f9ecbf15a4bdca0bc"
     },
     {
       "id": "dearne-arnemuiden",
       "file": "dearne-arnemuiden.yaml",
-      "sha256": "3c47832a160799c02dc75f3a41810dce650c623a8283475f68a9f5f9cfe83ec6"
+      "sha256": "56041cd07fccddaee8ac58be73f8427e36320761719c969c257683c3fb8a965b"
     },
     {
       "id": "deberendonck-wijchen",
       "file": "deberendonck-wijchen.yaml",
-      "sha256": "48a78ba2cacd46073a9ad47a973fc45e91d349f7804a1eeb113cd9cc8aeddcc6"
+      "sha256": "c07534a88b18f263a27a6dd24b09596d7834e0aaeaacd97e000e1b73bab442ea"
     },
     {
       "id": "downunder-nieuwegein",
       "file": "downunder-nieuwegein.yaml",
-      "sha256": "bc5d63e86eb30687fd23447457633831de55a15b58a6969d275254d444f28b88"
+      "sha256": "e569b01f9480fdf7b257eb4f4adfd290087ad8fff31fec4530e8493e835a1733"
     },
     {
       "id": "ermerstrand-erm",
       "file": "ermerstrand-erm.yaml",
-      "sha256": "e3a0cc989acbd4d3e7ab33951175f3890264b122a85350e7ae4e81cda40ec9c7"
+      "sha256": "6b791a91bf4fcd7adadd7a7eaa770c7ec9aa626f4268d735e045becd4bf5e848"
     },
     {
       "id": "goodlife-hoogstraten",
       "file": "goodlife-hoogstraten.yaml",
-      "sha256": "32f0558bc26ac4bab44371f9450a4416776ecd22d9539c8f3407c079c5568834"
+      "sha256": "cefc050d9678e2788058859af32e03b5a464dbe6a15393a756ef763c1311a93d"
     },
     {
       "id": "kempervennen-westerhoven",
       "file": "kempervennen-westerhoven.yaml",
-      "sha256": "eaa5ca40cc66dfa1e9ed7bd5914b7856a91a3b85b73fee174f6fddc6c22c7c12"
+      "sha256": "c32bb46134f6aa052b3c131a0fe6694ef7dde07b7adb4152244686c07d314fc8"
     },
     {
       "id": "lakeside-paradise-knokke",
       "file": "lakeside-paradise-knokke.yaml",
-      "sha256": "74f5b79b5582aa8af567de02adc468e7b7d7d6b901928c84bd1796e6bc9107f1"
+      "sha256": "98780c1b3bdd22a4ae738bbeaf963c0a50418b7af4055f461e9c4a7a8fafc57b"
     },
     {
       "id": "lakeside-zwolle",
       "file": "lakeside-zwolle.yaml",
-      "sha256": "49941209c3081400d05a8c401b7e682e8dcbba8f3e732a20f870c3b2484a58c0"
+      "sha256": "46076622733a3842081a0e7d3a8db9d55a94194118d2a1b65afa79972192e59c"
     },
     {
       "id": "lunalake-heerhugowaard",
       "file": "lunalake-heerhugowaard.yaml",
-      "sha256": "5a84e0dba8ec86456e2d10e9e07246d4a730b127369e0446c75e81aac9a4c56b"
+      "sha256": "a56adbcbca834a642d9b51117c96bcaa993e57e43fb3445f841ffd12da66c416"
     },
     {
       "id": "project7-rotterdam",
       "file": "project7-rotterdam.yaml",
-      "sha256": "a7ed95a5e173a5c05fe67301f589dd522c607b7abd528b4d3948cf30a11cdd76"
+      "sha256": "4aacf901e6cacc4580baa21e1d06fbadcc7fbbbfdd474687d5b4b6d39963bb11"
     },
     {
       "id": "schotsman-kamperland",
       "file": "schotsman-kamperland.yaml",
-      "sha256": "635cca04fc8db25202b965c1ccb67dbf356823667476f4dc895c129bb812af22"
+      "sha256": "9143c86449fabc930afbe91cd95069363f9967fd10e734e20df822a341a1b616"
     },
     {
       "id": "seven-twenty-sevenum",
       "file": "seven-twenty-sevenum.yaml",
-      "sha256": "f4f24077c79b405c6f11d593bfc94c9f404ed7e34067525d7deff28e957751b1"
+      "sha256": "ceada75d8b4a3dadfad90916d1780ab7e66c25176a4c5dcda5fe3b4fd8cd5999"
     },
     {
       "id": "stroombroek-braamt",
       "file": "stroombroek-braamt.yaml",
-      "sha256": "91ff5254c017693d68c235c193d9501ca784347663067af9f4f6e5ca6ebabef5"
+      "sha256": "a2b51028acf7b568df3904517b4477247dc6ef1d49915aec658cb19b7eb85b91"
     },
     {
       "id": "view-almere",
       "file": "view-almere.yaml",
-      "sha256": "5ec6724d160baab896681b5492b37885b43378477615d1e77d60613cb7d990ad"
+      "sha256": "c0edc5420ea83bcba59c032aec0f3c1d01f8c7f426415bfce11ee989f9bf425f"
     },
     {
       "id": "wakepark-groningen",
       "file": "wakepark-groningen.yaml",
-      "sha256": "ebb6e81eb1232e374380ff4a270e1f9638ecae6a8a6daf7c481ec81fb9c4d721"
+      "sha256": "c0b0d0d55715f66e2886b975b0eca84a6b2f72e0aa819b196f37fbab6ae22878"
     },
     {
       "id": "wakeup-antwerp",
       "file": "wakeup-antwerp.yaml",
-      "sha256": "24ca6b9c8b076a003b932c6a09c1ef45f2b3960d457c4c54172ee83bb2f9b0f7"
+      "sha256": "285be5b49af4a98665ef59228b5f4d6109bed72ded7ae425bf58b578c817623c"
     },
     {
       "id": "waterskibaan-sneek",
       "file": "waterskibaan-sneek.yaml",
-      "sha256": "e0364a02aea58d480fb954f07f6cd853bb27f25cfcdce13c747473510c18685d"
+      "sha256": "1c324df3e7aa85434d68a1c11ea15225719c82337537e47a89fc5a005b192855"
     },
     {
       "id": "waterskitwente-enschede",
       "file": "waterskitwente-enschede.yaml",
-      "sha256": "6b081bfad3cb8477e8c7e94861768fb80b7d178cab270235a28b12acffbc5a3b"
+      "sha256": "7c01705f530b0fbac7cf320ae4687b5ec0ff7edd7a93f3152f6661696c914155"
     },
     {
       "id": "watersportcentre-veendam",
       "file": "watersportcentre-veendam.yaml",
-      "sha256": "1a68c1bc8b130adbbdcb3336f58f66b5098240d28b1bde958e77606dc549f4b9"
+      "sha256": "e80d4bdf95afabe5d2aa13a4be280286b88cd1f9b05c3f773e04455666ed557e"
     },
     {
       "id": "wetnwild-alphen",
       "file": "wetnwild-alphen.yaml",
-      "sha256": "38302dd930f4dffaabf8c3178081085796734705b728bcb2b49c2181ea4fb993"
+      "sha256": "43126e3016fffc7950e6eb052cd3ff1ab6f42181279dc15fd125d60f951a3443"
     },
     {
       "id": "wollebrand-honselersdijk",
       "file": "wollebrand-honselersdijk.yaml",
-      "sha256": "59d17db5e4690475a0abe3a7ad14c3282e3a6cb953dbdbe7e78feac443d0bc88"
+      "sha256": "b19140e4974dc93827bf19c67407354d69b728f5f41adf9e61765c2468631904"
     },
     {
       "id": "zeumeren-voorthuizen",
       "file": "zeumeren-voorthuizen.yaml",
-      "sha256": "bb73f27d3e1bf0e19975326f1c81f837a9a540692deafc78e699378af02523c4"
+      "sha256": "ddf2b8f11770f52748195188623af30f8c958c7898a2bda0a05362e1bf2c062b"
     }
   ]
 }

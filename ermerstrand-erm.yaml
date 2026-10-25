@@ -46,6 +46,7 @@ cables:
         lon: 6.803225
 
 opening:
+  source_url: "https://ermerstrand.nl/waterskibaan"
   note: >-
     De baan start vanaf 3 reserveringen. Bij onweer is de baan dicht.
 

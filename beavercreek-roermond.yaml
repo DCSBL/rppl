@@ -59,6 +59,7 @@ cables:
     description: Full size cable, runs at 30 km/h in regular operation.
 
 opening:
+  source_url: "https://www.wake-park.nl"
   booking: optional
   note: >-
     Hours depend on season and weather. Tickets can also be bought on site, but can sell out

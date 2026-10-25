@@ -80,6 +80,7 @@ cables:
     description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
 
 opening:
+  source_url: "https://www.cableparkviewalmere.nl"
   booking: optional
   note: >-
     Booking ahead is recommended, especially on weekends, holidays and sunny days when sessions
