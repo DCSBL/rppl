@@ -1,11 +1,11 @@
 import Foundation
 
 extension Park {
-    /// Town from the address: what follows the postcode ("8300 Knokke-Heist" → "Knokke-Heist"),
+    /// Town from the address: what follows the postcode ("8300 Knokke-Heist", "86316 Friedberg" → town),
     /// else the last comma part. `nil` without an address.
     public var cityName: String? {
         guard let address = address?.trimmingCharacters(in: .whitespacesAndNewlines), !address.isEmpty else { return nil }
-        if let range = address.range(of: #"\b\d{4}(?:\s?[A-Z]{2}\b)?\s+"#, options: .regularExpression) {
+        if let range = address.range(of: #"\b\d{4,5}(?:\s?[A-Z]{2}\b)?\s+"#, options: .regularExpression) {
             let city = address[range.upperBound...].trimmingCharacters(in: .whitespaces)
             if !city.isEmpty { return city }
         }

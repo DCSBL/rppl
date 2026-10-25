@@ -11,6 +11,7 @@ struct ParkPlaceTests {
         #expect(park(address: "Kosboulevard 35, 3059 XZ Rotterdam").cityName == "Rotterdam")
         #expect(park(address: "Duinenwater 41, 8300 Knokke-Heist").cityName == "Knokke-Heist")
         #expect(park(address: "Straat 1, 2321 Meer, Hoogstraten").cityName == "Meer, Hoogstraten")
+        #expect(park(address: "Seestraße 27, 86316 Friedberg").cityName == "Friedberg")
     }
 
     @Test func cityFallsBackToLastPartOrNil() {
