@@ -27,6 +27,8 @@ water_temperature:
 phone: 0314 - 395 283
 email: info@kabelwaterskibaan.nl
 website: https://kabelwaterskibaan.nl
+opening:
+  source_url: "https://kabelwaterskibaan.nl"
 links:
   - kind: booking
     url: "https://kabelwaterskibaan.nl/reserveren-activiteit?type=watersport"

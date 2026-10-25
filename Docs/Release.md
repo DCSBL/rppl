@@ -17,7 +17,7 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
 
 ## Cut a release
 
-1. Merge what you want to ship to `main`. Check the PR checks were green.
+1. Merge what you want to ship to `main`. Check the PR checks (lint, tests) were green.
 2. GitHub → **Releases** → **Draft a new release**.
 3. **Tag**: create a semver tag targeting `main`, with or without a leading `v`: `2026.9.1` or `v2026.9.1`. For a candidate you want to iterate on, add `-beta.1`, `-beta.2`, and so on.
 4. **Description**: write the release notes, or use **Generate release notes** (PR titles). Testers see this text as "What to Test".

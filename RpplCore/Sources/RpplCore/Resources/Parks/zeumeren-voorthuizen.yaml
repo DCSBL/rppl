@@ -57,6 +57,7 @@ cables:
       and 5 corners. 16 obstacles in the water. Minimum age is 10 for waterski and 12 for wakeboard.
 
 opening:
+  source_url: "https://zeumerenwatersport.nl"
   booking_minutes:
     - 90
     - 180

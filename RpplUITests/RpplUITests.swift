@@ -86,6 +86,20 @@ final class RpplUITests: XCTestCase {
         waitForExpectations(timeout: 15)
     }
 
+    /// Landscape iPhones are wide enough for two panes but still collapse the split view into one stack,
+    /// so the map must stay reachable through the "View on map" segment.
+    @MainActor
+    func testParksMapOptionAvailableInLandscape() throws {
+        try XCTSkipIf(UIDevice.current.userInterfaceIdiom != .phone, "iPhone only")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
+        app.tabBars.buttons["Parks"].tap()
+        let mapOption = app.segmentedControls.buttons["View on map"]
+        XCTAssertTrue(mapOption.waitForExistence(timeout: 15))
+        mapOption.tap()
+        XCTAssertTrue(app.segmentedControls.buttons["Nearby"].waitForExistence(timeout: 15))
+    }
+
     @MainActor
     func testParksSearchOpensDetail() {
         app.tabBars.buttons["Parks"].tap()
