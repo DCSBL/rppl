@@ -5,6 +5,8 @@ updated_at: 2026-10-25
 history:
   - date: 2026-10-25
     description: initial (2.0 and full size cable, 2026 prices; hours are only published as an image)
+  - date: 2026-10-25
+    description: add 2026 opening hours read from the park's hours image (without the Easter holiday week)
 
 name: The Outsider Cablepark
 short_name: The Outsider
@@ -40,8 +42,160 @@ cables:
     description: Vijf bochten, met obstacles. Tot acht riders tegelijk, vanaf 10 jaar.
 
 opening:
+  source_url: "https://theoutsidervlaamseardennen.be/wakeboarden-en-waterskien-kabelbaan-cablepark-oudenaarde/"
   note: >-
     Het seizoen loopt van april tot oktober. Op feestdagen opent de kabel om 13:00. Zijn er 12 uur vooraf geen inschrijvingen, dan blijft de kabel dicht.
+  rules:
+    - months:
+        - 4
+      days:
+        - wed
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - thu
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - wed
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - thu
+        - fri
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - sat
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - sun
+      open: "13:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - wed
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - thu
+        - fri
+      open: "16:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - sat
+      open: "11:00"
+      close: "21:00"
+    - months:
+        - 6
+      days:
+        - sun
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 7
+      days:
+        - mon
+        - tue
+        - wed
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 7
+      days:
+        - thu
+        - fri
+      open: "14:00"
+      close: "21:00"
+    - months:
+        - 7
+      days:
+        - sat
+      open: "11:00"
+      close: "21:00"
+    - months:
+        - 7
+      days:
+        - sun
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 8
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 8
+      days:
+        - weekend
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - wed
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - thu
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "11:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - wed
+      open: "15:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - fri
+      open: "16:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "13:00"
+      close: "18:00"
 
 prices:
   - name: Ticket, 1 hour
