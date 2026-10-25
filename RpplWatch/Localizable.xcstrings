@@ -1428,7 +1428,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bereit zum Synchronisieren"
+            "value" : "Bereit zum Sync"
           }
         }
       }
@@ -1450,7 +1450,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aufnahme läuft"
+            "value" : "Aufnahme"
           }
         }
       }
@@ -1577,7 +1577,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Übertragungen wiederholen"
+            "value" : "Erneut senden"
           }
         }
       }
@@ -2501,7 +2501,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Synchronisiert …"
+            "value" : "Synchronisiere …"
           }
         }
       }
@@ -3244,7 +3244,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session wird gespeichert"
+            "value" : "Session speichern"
           }
         }
       }
@@ -3288,7 +3288,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nur bei eingeschaltetem Bildschirm"
+            "value" : "Nur bei Display an"
           }
         }
       }
@@ -3442,7 +3442,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konfigurieren"
+            "value" : "Einrichten"
           }
         }
       }
