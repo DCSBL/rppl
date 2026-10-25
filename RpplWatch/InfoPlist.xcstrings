@@ -10,6 +10,12 @@
             "value" : "Rppl"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -39,6 +45,12 @@
             "value" : "Rppl needs permission to start a water-sports workout so sensors stay active and heart rate can be recorded."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl a besoin de l’autorisation de démarrer un entraînement de sport nautique pour que les capteurs restent actifs et que ta fréquence cardiaque puisse être enregistrée."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -54,6 +66,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl saves your cable-park workout to Health when the session ends."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl enregistre ton entraînement au cable park dans Santé à la fin de la session."
           }
         },
         "nl" : {
@@ -73,6 +91,12 @@
             "value" : "Rppl records GPS for the full park session, including when the wrist is down."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl enregistre le GPS pendant toute la session au park, même quand le poignet est baissé."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -90,6 +114,12 @@
             "value" : "Rppl records GPS during cable-park wakeboarding sessions."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl enregistre le GPS pendant tes sessions de wakeboard au cable park."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -105,6 +135,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rppl records device motion to help detect riding versus resting at the dock."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl enregistre les mouvements de l’appareil pour aider à distinguer le riding du repos au dock."
           }
         },
         "nl" : {

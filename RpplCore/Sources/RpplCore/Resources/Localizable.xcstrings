@@ -9,6 +9,12 @@
             "value" : "Cable park"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable park"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23,6 +29,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connected"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecté"
           }
         },
         "nl" : {
@@ -41,6 +53,12 @@
             "value" : "Inactive"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -52,6 +70,12 @@
     "Kneeboard" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kneeboard"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kneeboard"
@@ -73,6 +97,12 @@
             "value" : "Monoski"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monoski"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87,6 +117,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Other"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autre"
           }
         },
         "nl" : {
@@ -105,6 +141,12 @@
             "value" : "Install / open Rppl on iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installe / ouvre Rppl sur iPhone."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -119,6 +161,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Install Rppl on the Watch."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installe Rppl sur la Watch."
           }
         },
         "nl" : {
@@ -137,6 +185,12 @@
             "value" : "iPhone and Watch are connected — ready to sync."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’iPhone et la Watch sont connectés — prêts à synchroniser."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -151,6 +205,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone app missing"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App iPhone manquante"
           }
         },
         "nl" : {
@@ -169,6 +229,12 @@
             "value" : "No Watch paired"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune Watch associée"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -183,6 +249,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not activated"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non activé"
           }
         },
         "nl" : {
@@ -201,6 +273,12 @@
             "value" : "Pair an Apple Watch to sync sessions."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associe une Apple Watch pour synchroniser tes sessions."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -217,6 +295,12 @@
             "value" : "Paired and ready — files sync when the phone is nearby."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associée et prête — les fichiers se synchronisent quand le téléphone est à proximité."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -231,6 +315,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ready (queued)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt (en file d’attente)"
           }
         },
         "nl" : {
@@ -266,6 +356,12 @@
             "value" : "Session inactive — reopen the app."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session inactive — rouvre l’app."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -280,6 +376,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unsupported"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non pris en charge"
           }
         },
         "nl" : {
@@ -315,6 +417,12 @@
             "value" : "Waiting for WatchConnectivity to activate."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente de l’activation de WatchConnectivity."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -326,6 +434,12 @@
     "Wakeboard" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wakeboard"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wakeboard"
@@ -347,6 +461,12 @@
             "value" : "Wakeskate"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wakeskate"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -361,6 +481,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Waterski"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ski nautique"
           }
         },
         "nl" : {
@@ -379,6 +505,12 @@
             "value" : "Watch app missing"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Watch manquante"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -393,6 +525,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "WatchConnectivity is not available here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchConnectivity n’est pas disponible ici."
           }
         },
         "nl" : {
@@ -411,6 +549,12 @@
             "value" : "North"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nord"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -425,6 +569,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Northeast"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nord-est"
           }
         },
         "nl" : {
@@ -443,6 +593,12 @@
             "value" : "East"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Est"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -457,6 +613,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Southeast"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sud-est"
           }
         },
         "nl" : {
@@ -475,6 +637,12 @@
             "value" : "South"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sud"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -489,6 +657,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Southwest"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sud-ouest"
           }
         },
         "nl" : {
@@ -507,6 +681,12 @@
             "value" : "West"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouest"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -523,6 +703,12 @@
             "value" : "Northwest"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nord-ouest"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -534,6 +720,12 @@
     "N" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "N"
@@ -555,6 +747,12 @@
             "value" : "NE"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NE"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -566,6 +764,12 @@
     "E" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "E"
@@ -587,6 +791,12 @@
             "value" : "SE"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SE"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -598,6 +808,12 @@
     "S" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "S"
@@ -619,6 +835,12 @@
             "value" : "SW"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SO"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -633,6 +855,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "W"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O"
           }
         },
         "nl" : {
@@ -651,6 +879,12 @@
             "value" : "NW"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NO"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -662,6 +896,12 @@
     "Bft %lld" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bft %lld"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bft %lld"
@@ -683,6 +923,12 @@
             "value" : "Not expected"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas prévue"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -699,6 +945,12 @@
             "value" : "Raining now"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il pleut"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -713,6 +965,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rain %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pluie %@"
           }
         },
         "nl" : {
