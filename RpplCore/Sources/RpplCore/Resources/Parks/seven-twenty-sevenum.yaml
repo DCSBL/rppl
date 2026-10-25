@@ -63,6 +63,7 @@ cables:
         lon: 5.968199
 
 opening:
+  source_url: "https://www.seven-twenty.nl/openingstijden-wakeboarden-sevenum-direct-reserveren/"
   note: >-
     In de herfst op werkdagen alleen op reservering, vanaf 3 deelnemers. Bij slecht weer kunnen de
     tijden afwijken.

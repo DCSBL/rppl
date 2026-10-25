@@ -69,6 +69,7 @@ cables:
         lon: 4.23868536788128
 
 opening:
+  source_url: "https://www.kabelskibaan.nl/openingstijden/"
   booking: required
   note: >-
     Book a block online in advance. Arrive 30 minutes before your start time. Outside

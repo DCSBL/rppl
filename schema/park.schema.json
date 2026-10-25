@@ -295,6 +295,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "source_url": {
+          "description": "Page where the park publishes its opening hours. Scanned weekly for changes by scripts/hours_watch.py.",
+          "$ref": "#/$defs/url"
+        },
         "booking": { "type": "string" },
         "rules": {
           "type": "array",

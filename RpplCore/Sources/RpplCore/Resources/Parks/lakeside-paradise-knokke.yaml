@@ -103,6 +103,7 @@ cables:
       start on the hour.
 
 opening:
+  source_url: "https://www.lakesideparadise.be/info/openingsuren/"
   booking: required
   note: >-
     Pro Cable: open daily (by reservation) from 30 March through the autumn school break;

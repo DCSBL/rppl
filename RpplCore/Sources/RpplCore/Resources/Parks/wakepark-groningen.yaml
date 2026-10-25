@@ -21,6 +21,8 @@ location:
 phone: 06 29 177 109
 email: info@wakeparkgroningen.nl
 website: https://www.wakeparkgroningen.nl
+opening:
+  source_url: "https://www.wakeparkgroningen.nl"
 links:
   - kind: booking
     url: "https://www.wakeparkgroningen.nl/book"

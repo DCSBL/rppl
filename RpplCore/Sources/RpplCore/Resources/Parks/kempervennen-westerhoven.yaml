@@ -24,6 +24,8 @@ location:
 phone: +31 (0) 40 207 18 98
 email: info@hetwaterskicentrum.nl
 website: https://www.hetwaterskicentrum.nl
+opening:
+  source_url: "https://www.hetwaterskicentrum.nl/openingstijden/"
 links:
   - kind: booking
     url: "https://booking.hetwaterskicentrum.nl/book"
