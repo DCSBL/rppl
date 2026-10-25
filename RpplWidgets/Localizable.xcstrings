@@ -294,6 +294,12 @@
                   "value" : "Ouvert dans %lld jour"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ouvert dans %lld jours"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",

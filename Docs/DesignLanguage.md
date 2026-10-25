@@ -123,6 +123,10 @@ We talk like a friend who rides: short, direct, a bit of park slang. Never cute,
 
 "Park day" explains what a session is (onboarding, empty states). It is not a second name for sessions in lists and headers.
 
+### French (Belgium)
+
+Catalog code `fr`. Address the rider with *tu / ton*. Buttons use the infinitive like iOS (*Supprimer*, *Réessayer*, *Tout sélectionner*); alert titles name the thing and say it was impossible (*Export impossible*). System concepts use Apple's French terms (*Santé*, *Forme*, *Réglages*, *Fichiers*). Slang stays English: *session*, *set*, *lap*, *riding*, *cable*, *dock*, *rider*, trick names, *cable park*, *Water Lock*. Avoid *câble*, *tremplin*, *rampe*, *séance*, *manche*, *tour* for those concepts. A "park day" is a *journée au park*. Booking time slots are *créneaux*.
+
 ### Examples
 
 | Before | After |

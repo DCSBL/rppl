@@ -68,6 +68,12 @@
                   "value" : "%lld lap"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld laps"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -126,6 +132,12 @@
                   "value" : "%lld set"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld sets"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -179,6 +191,12 @@
           "variations" : {
             "plural" : {
               "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld au total"
+                }
+              },
+              "many" : {
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld au total"
@@ -3867,7 +3885,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active iCloud Drive pour importer des jours de park depuis le cloud."
+            "value" : "Active iCloud Drive pour importer des journées au park depuis le cloud."
           }
         },
         "nl" : {
@@ -4829,6 +4847,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld visite"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld visites"
                 }
               },
               "other" : {
@@ -8581,6 +8605,12 @@
                   "value" : "%lld changement annoncé est conservé tel quel"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld changements annoncés sont conservés tels quels"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -8637,6 +8667,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld créneau"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld créneaux"
                 }
               },
               "other" : {
@@ -8697,6 +8733,12 @@
                   "value" : "%lld date"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dates"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -8755,6 +8797,12 @@
                   "value" : "%lld période d’ouverture"
                 }
               },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld périodes d’ouverture"
+                }
+              },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -8811,6 +8859,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld tarif"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarifs"
                 }
               },
               "other" : {

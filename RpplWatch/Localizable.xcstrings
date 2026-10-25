@@ -25,7 +25,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld jours de park sont sur ton iPhone."
+            "value" : "%lld journées au park sont sur ton iPhone."
           }
         },
         "nl" : {
@@ -1229,7 +1229,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le jour de park est sur ton iPhone."
+            "value" : "La journée au park est sur ton iPhone."
           }
         },
         "nl" : {
@@ -1571,7 +1571,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Relancer les transferts"
+            "value" : "Relancer"
           }
         },
         "nl" : {
@@ -1860,7 +1860,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afficher la trace moyenne"
+            "value" : "Voir trace moyenne"
           }
         },
         "nl" : {
@@ -1882,7 +1882,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afficher la heatmap"
+            "value" : "Voir la heatmap"
           }
         },
         "nl" : {
@@ -2158,7 +2158,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Démarrer la session"
+            "value" : "Lancer session"
           }
         },
         "nl" : {
@@ -3150,7 +3150,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Terminer la session"
+            "value" : "Terminer"
           }
         },
         "nl" : {
