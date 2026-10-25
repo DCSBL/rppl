@@ -1,0 +1,45 @@
+version: 1
+id: hot-sport-seepark-niederweimar
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Hot Sport Seepark Niederweimar
+short_name: Hot Sport Seepark
+languages:
+  - de
+  - en
+  - nl
+address: "Am Weimarer See 10, 35096 Weimar (Lahn)"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.759721
+  lon: 8.740398
+
+phone: "+49 6421 972370"
+website: https://seepark.hotsport.de
+links:
+  - kind: booking
+    url: "https://hotsport.wakeparkmanager.com/angebotsgruppen/seepark-tickets/2"
+
+opening:
+  source_url: "https://seepark.hotsport.de/preise-3"
+  booking: optional
+  note: >-
+    An der großen Bahn ist vom 19. Oktober bis 6. Dezember 2026 samstags von 14:30 bis 16:30
+    und sonntags von 12:30 bis 14:30 Uhr geöffnet, die Saison 2027 startet am 7. März. Die
+    Beginnerbahnen laufen täglich, Beginnerkurse montags bis freitags von 14 bis 16 Uhr und
+    am Wochenende von 10 bis 16 Uhr.
+
+facilities:
+  - Strandbad
+  - Restaurant
+  - Strandbar
+  - Zelten am See
+
+description: >-
+  Wakeboard- und Wasserskianlage im Seepark Niederweimar bei Marburg mit Beginnerbahnen
+  und großer Bahn.

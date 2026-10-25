@@ -1,0 +1,191 @@
+version: 1
+id: wasserski-leipzig-kulkwitzer-see
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski Leipzig Kulkwitzer See
+short_name: Wasserski Leipzig
+languages:
+  - de
+  - en
+  - nl
+address: "Seestraße 7, 04207 Leipzig"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.317419
+  lon: 12.253238
+
+phone: "+49 341 2256952"
+email: "wasserski-leipzig@t-online.de"
+website: https://www.wasserski-leipzig.de
+
+cables:
+  - name: Cable
+    length_m: 800
+    description: >-
+      Fünf Masten.
+
+opening:
+  source_url: "https://www.wasserski-leipzig.de/"
+  booking: none
+  note: >-
+    Die Saison läuft von April bis Oktober. Im Juli ist mittwochs bis sonntags und an
+    Feiertagen von 12 bis 20 Uhr geöffnet, montags und dienstags geschlossen. In der
+    Übergangszeit zum Herbst läuft die Anlage erst ab drei Personen. Zahlung nur bar.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: "ab 17 Jahren, Mo bis Fr"
+          en: "17 and older, Mon to Fri"
+          nl: "vanaf 17 jaar, ma t/m vr"
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: "ab 17 Jahren, Wochenende und Feiertage"
+          en: "17 and older, weekends and holidays"
+          nl: "vanaf 17 jaar, weekenden en feestdagen"
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: "bis 16 Jahre, Mo bis Fr"
+          en: "up to 16, Mon to Fri"
+          nl: "t/m 16 jaar, ma t/m vr"
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: "bis 16 Jahre, Wochenende und Feiertage"
+          en: "up to 16, weekends and holidays"
+          nl: "t/m 16 jaar, weekenden en feestdagen"
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 17 Jahren, Mo bis Fr"
+          en: "17 and older, Mon to Fri"
+          nl: "vanaf 17 jaar, ma t/m vr"
+      - amount: "40"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 17 Jahren, Wochenende und Feiertage"
+          en: "17 and older, weekends and holidays"
+          nl: "vanaf 17 jaar, weekenden en feestdagen"
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "bis 16 Jahre, Mo bis Fr"
+          en: "up to 16, Mon to Fri"
+          nl: "t/m 16 jaar, ma t/m vr"
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "bis 16 Jahre, Wochenende und Feiertage"
+          en: "up to 16, weekends and holidays"
+          nl: "t/m 16 jaar, weekenden en feestdagen"
+  - name: Day ticket
+    options:
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 17 Jahren, Mo bis Fr"
+          en: "17 and older, Mon to Fri"
+          nl: "vanaf 17 jaar, ma t/m vr"
+      - amount: "55"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 17 Jahren, Wochenende und Feiertage"
+          en: "17 and older, weekends and holidays"
+          nl: "vanaf 17 jaar, weekenden en feestdagen"
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 16 Jahre, Mo bis Fr"
+          en: "up to 16, Mon to Fri"
+          nl: "t/m 16 jaar, ma t/m vr"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 16 Jahre, Wochenende und Feiertage"
+          en: "up to 16, weekends and holidays"
+          nl: "t/m 16 jaar, weekenden en feestdagen"
+  - name: Season pass
+    options:
+      - amount: "800"
+        currency: EUR
+        note:
+          de: ab 17 Jahren
+          en: "17 and older"
+          nl: vanaf 17 jaar
+      - amount: "550"
+        currency: EUR
+        note:
+          de: bis 16 Jahre
+          en: up to 16
+          nl: t/m 16 jaar
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per: hour
+      - amount: "8"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "10"
+        currency: EUR
+        per: day
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per: hour
+      - amount: "15"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "20"
+        currency: EUR
+        per: day
+
+facilities:
+  - Wasserski und Schwimmweste inklusive
+  - "Café und Bistro mit Seeterrasse"
+
+description: >-
+  Wasserski- und Wakeboardanlage am nordöstlichen Ufer des Kulkwitzer Sees.
