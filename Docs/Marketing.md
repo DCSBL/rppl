@@ -5,12 +5,13 @@ Stills for the App Store product page, rendered from HTML: Poppins headlines, Ap
 | Output | Size | Folder in the zip |
 |--------|------|-------------------|
 | iPhone screenshots | 1206x2622 (the only size we ship; Apple accepts 1206x2622, 2622x1206, 1179x2556 and 2556x1179 for this slot) | `screenshots/iphone-6.3/` |
+| iPhone Duo screenshots | 2853x2007 (inner display, landscape; Apple's Duo sizes are 2034x1398, 1398x2034, 2853x2007 and 2007x2853) | `screenshots/iphone-duo/` |
 | Product page header | 16:9 5244x2950 | `product-page-header/16x9/` |
 | Search results | 3:2 3840x2560 (Apple's max for this ratio) | `search-results/3x2/` |
 
 The search results use 3:2 because the App Store crops a 16:9 image to about 3:2 and cut off the sides. The header is the `header` slide (photo, logo, name and tagline, no devices; Apple crops the header image heavily, so the lockup sits in the uncropped safe area, 1400x962 at (1922, 664) of the 5244x2950 image) and the search results are the `search` slide (photo, logo, headline, phone and watch). Photos live in [`marketing/photos/`](../marketing/photos). Swap one (keep it as large as you can; the 16:9 size needs 5244 px wide) and re-render to change it. The phone and watch frames are scaled to the real size ratio of the devices.
 
-Files are `<NN>-<slide id>.png`, numbered in `slides` order. PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). Check the specs page before adding formats.
+Files are `<NN>-<slide id>.png`, numbered in `slides` order across all formats (the Duo slides come last, so their files are 07 to 10). PNGs have no alpha (App Store Connect rejects it); `render.mjs` re-encodes the browser output as RGB. Specs: [screenshots](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications), [header and search results](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications). Check the specs page before adding formats.
 
 ## What gets rendered: `marketing/marketing.yaml`
 
@@ -48,6 +49,10 @@ slides:
 `screenshot` names are the XCUITest attachment names from `RpplScreenshotTests` / `RpplWatchScreenshotTests`, which `release-screenshots.yml` exports (the files are `iphone-<name>.png` / `watch-<name>.png` on the release). A missing name fails the render. Pick shots without Apple Maps imagery where you can.
 
 The release run only guarantees the shots the slides use: `Required screenshots` job (`screenshots-required`) in `release-screenshots.yml` runs just those tests (`testLogbookThreeSessions`, `testTrackedSessionDetail`, `testParksOpen`, Watch `testLiveRiding`) and fails when one of the PNGs is missing. When you point a slide at another shot, add its test to that job's `-only-testing` list and to the check step, and add it to `-skip-testing` in `screenshots-extra`. Everything else runs in `screenshots-extra`, which may fail without blocking marketing.
+
+## iPhone Duo slides
+
+The Duo slides (`layout: duo`, format `duo-inner`) put the framed devices at explicit positions in format pixels: the folded display (`outer`), the unfolded display (`inner`) and the Watch. The screenshot is clipped to the device outline before the frame goes on top, so no square corners show. The Duo screenshots are committed in [`marketing/duo-shots/`](../marketing/duo-shots) (JPEG, 95 quality) because the CI Duo export is not good enough yet. To use a CI export for a device, replace its `file:` with `screenshot: <name>` in `marketing.yaml`. The Duo USP slide is the normal `usp` layout; it switches to a landscape arrangement when the format is wider than it is tall.
 
 ## Render locally
 

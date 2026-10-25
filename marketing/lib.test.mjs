@@ -54,3 +54,13 @@ test("validateConfig search layout needs image, title, screenshot and watch_scre
   validateConfig({ ...base, slides: [search] });
   assert.throws(() => validateConfig({ ...base, slides: [{ ...search, watch_screenshot: undefined }] }), /search/);
 });
+
+test("validateConfig duo layout needs text_at and devices with kind, position and a source", () => {
+  const base = { formats: { a: { w: 1, h: 1, folder: "a" } }, defaults: { formats: ["a"] } };
+  const duo = { id: "d", layout: "duo", text: "FIND **YOUR** SPOTS", text_at: { x: 1, y: 2, size: 3 }, devices: [{ kind: "inner", file: "f.jpg", x: 0, y: 0, w: 10 }] };
+  validateConfig({ ...base, slides: [duo] });
+  assert.throws(() => validateConfig({ ...base, slides: [{ ...duo, text_at: undefined }] }), /text_at/);
+  assert.throws(() => validateConfig({ ...base, slides: [{ ...duo, devices: [] }] }), /devices/);
+  assert.throws(() => validateConfig({ ...base, slides: [{ ...duo, devices: [{ kind: "tablet", file: "f.jpg", x: 0, y: 0, w: 1 }] }] }), /kind/);
+  assert.throws(() => validateConfig({ ...base, slides: [{ ...duo, devices: [{ kind: "watch", x: 0, y: 0, w: 1 }] }] }), /file or screenshot/);
+});

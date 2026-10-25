@@ -61,3 +61,8 @@ h1 span { display: block; }
 .usp-photo .usp-row { gap: 0.76em; font-weight: 600; color: rgb(255 255 255 / 0.94); text-shadow: 0 4px 18px rgb(0 0 0 / 0.3); }
 .usp-photo svg { filter: drop-shadow(0 4px 12px rgb(0 0 0 / 0.3)); }
 .usp-photo .abs { z-index: 1; }
+
+/* iPhone Duo slides (layout: duo): devices are canvases drawn by layout.js (screenshot clipped to the device outline, frame on top), placed in format pixels. */
+.duo-dev { position: absolute; filter: drop-shadow(0 40px 70px rgb(3 59 79 / 0.4)) drop-shadow(0 12px 22px rgb(0 0 0 / 0.28)); }
+h1.inline span { display: inline; }
+.duo-src { display: none; }
