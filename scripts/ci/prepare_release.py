@@ -12,8 +12,7 @@ the built commit (a branch that was not pushed by the workflow).
 
 Build mode (default), for tag X.Y.Z, vX.Y.Z or either with a -suffix (2026.9.1, v2026.9.1-beta.1):
   1. Validate the tag and derive the marketing version X.Y.Z (suffix dropped).
-  2. Require the tagged commit to be on main (GitHub compare API, skipped when unreachable);
-     a -duo.N suffix (2026.10.2-duo.1) requires wip/iphone-duo instead, for device test builds.
+  2. Require the tagged commit to be on main (GitHub compare API, skipped when unreachable).
   3. Set every MARKETING_VERSION in Rppl.xcodeproj (iPhone and Watch must match).
   4. Write the GitHub release body as TestFlight/WhatToTest.en-US.txt (plain text, 4000 chars).
   5. Stamp RpplBuildDate, RpplReleaseTag (tag without the v) and RpplGitCommit (short SHA of
@@ -25,7 +24,6 @@ The build number is left alone: Xcode Cloud assigns it (CI_BUILD_NUMBER).
 prints the What to Test preview (also to $GITHUB_STEP_SUMMARY when set).
 
 --release-branch does steps 1-2, writes nothing and reports the branch name release/X.Y.Z
-(release/duo/X.Y.Z for a -duo.N tag)
 ("branch=..." in $GITHUB_OUTPUT when set).
 
 Environment:
@@ -55,10 +53,7 @@ NOTES_LOCALE = "en-US"
 NOTES_LIMIT = 4000
 TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?$")
 BRANCH_PREFIX = "release/"
-BRANCH_RE = re.compile(r"^release/(?:duo/)?(\d+\.\d+\.\d+)$")
-DUO_BRANCH = "wip/iphone-duo"
-DUO_SUFFIX_PREFIX = "duo."
-DUO_BRANCH_DIR = "duo/"
+BRANCH_RE = re.compile(r"^release/(\d+\.\d+\.\d+)$")
 MARKER_FILE = Path("ci_scripts/release-marker.txt")
 TAGS_PER_PAGE = 100
 TAGS_MAX_PAGES = 5
@@ -92,19 +87,16 @@ def parse_tag(tag: str) -> Tuple[str, Optional[str]]:
     return match.group(1), match.group(2)
 
 
-def release_branch(version: str, suffix: Optional[str] = None) -> str:
-    """The branch Xcode Cloud builds for a marketing version: every build of X.Y.Z shares it.
-
-    -duo.N test builds get release/duo/X.Y.Z, their own Build Group next to the real release.
-    """
-    return BRANCH_PREFIX + (DUO_BRANCH_DIR if base_branch(suffix) == DUO_BRANCH else "") + version
+def release_branch(version: str) -> str:
+    """The branch Xcode Cloud builds for a marketing version: every build of X.Y.Z shares it."""
+    return BRANCH_PREFIX + version
 
 
 def parse_release_branch(branch: str) -> str:
-    """Return the marketing version of release/X.Y.Z or release/duo/X.Y.Z, or raise ReleaseError."""
+    """Return the marketing version of release/X.Y.Z, or raise ReleaseError."""
     match = BRANCH_RE.fullmatch(branch)
     if not match:
-        raise ReleaseError("Branch %r is not a release branch. Expected release/X.Y.Z or release/duo/X.Y.Z." % branch)
+        raise ReleaseError("Branch %r is not a release branch. Expected release/X.Y.Z." % branch)
     return match.group(1)
 
 
@@ -284,22 +276,17 @@ def find_release_tag(repo: str, version: str, commit: str, token: Optional[str],
     )
 
 
-def base_branch(suffix: Optional[str]) -> str:
-    """Tags with a -duo.N suffix are device test builds from the Duo collection branch, the rest ship from main."""
-    return DUO_BRANCH if suffix and suffix.startswith(DUO_SUFFIX_PREFIX) else "main"
-
-
-def check_on_main(repo: str, tag: str, token: Optional[str], base: str = "main") -> None:
-    """Raise ReleaseError when the tagged commit is not in base's history. Skips if unreachable."""
-    url = "https://api.github.com/repos/%s/compare/%s...%s" % (repo, base, tag)
+def check_on_main(repo: str, tag: str, token: Optional[str]) -> None:
+    """Raise ReleaseError when the tagged commit is not in main's history. Skips if unreachable."""
+    url = "https://api.github.com/repos/%s/compare/main...%s" % (repo, tag)
     status, payload = http_get_json(url, token)
     if status != 200 or not isinstance(payload, dict):
-        annotate("warning", "Could not verify the tag is on %s (HTTP %d); continuing." % (base, status))
+        annotate("warning", "Could not verify the tag is on main (HTTP %d); continuing." % status)
         return
     compare_status = payload.get("status")
     if compare_status not in ("identical", "behind"):
         raise ReleaseError(
-            "Tag %s is not on %s (compare status: %s). Release from %s only." % (tag, base, compare_status, base)
+            "Tag %s is not on main (compare status: %s). Release from main only." % (tag, compare_status)
         )
 
 
@@ -355,7 +342,7 @@ def run(args: argparse.Namespace) -> None:
         marker = read_release_marker(root)
         if marker:
             tag, tagged_commit = marker
-            if parse_tag(tag)[0] != branch_version or release_branch(*parse_tag(tag)) != args.branch:
+            if parse_tag(tag)[0] != branch_version or release_branch(parse_tag(tag)[0]) != args.branch:
                 raise ReleaseError("Marker tag %s is not a %s release (branch %s)." % (tag, branch_version, args.branch))
             print("Branch %s at %s: marker for release tag %s" % (args.branch, built[:SHORT_SHA_LENGTH], tag))
         else:
@@ -366,10 +353,10 @@ def run(args: argparse.Namespace) -> None:
     print("Release tag %s -> marketing version %s%s" % (tag, version, " (suffix %s)" % suffix if suffix else ""))
 
     if not offline:
-        check_on_main(repo, tag, token, base_branch(suffix))
+        check_on_main(repo, tag, token)
 
     if args.release_branch:
-        branch = release_branch(version, suffix)
+        branch = release_branch(version)
         print("Release branch for %s: %s" % (tag, branch))
         output = os.environ.get("GITHUB_OUTPUT")
         if output:
