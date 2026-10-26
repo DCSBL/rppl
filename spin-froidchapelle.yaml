@@ -1,0 +1,118 @@
+version: 1
+id: spin-froidchapelle
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (full size and 2.0 cable, rental prices; the cable has no hours of its own on the site)
+
+name: The Spin Leisure Park
+short_name: The Spin
+languages:
+  - fr
+  - en
+  - nl
+address: Rue Crossart 61, 6440 Froidchapelle
+timezone: Europe/Brussels
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.2207435
+  lon: 4.3850516
+
+phone: "+32 (0)71 31 39 82"
+email: info@thespin.be
+website: https://thespin.be/single-page-activite/teleski-nautique/
+links:
+  - kind: instagram
+    url: "https://www.instagram.com/the_spin_leisure_park/"
+  - kind: facebook
+    url: "https://www.facebook.com/TheSpinLeisurePark"
+
+description: The Spin se trouve au lac de Féronval. Le parc a un grand câble et un câble 2.0, ainsi qu'un aquapark et un skatepark.
+
+cables:
+  - name: Grand câble
+    description: Boucle de cinq pylônes à vitesse fixe, ou réduite pendant les slow sessions.
+  - name: Petit câble (2.0)
+    direction: "2.0"
+    description: Câble débutant en aller-retour à vitesse réglable, pour les cours privés.
+
+opening:
+  note: >-
+    Réservation recommandée. Fermé en cas de gel ou de sécheresse. Slow sessions sur le grand câble: le mercredi de 13:00 à 15:00 de début mai à fin septembre, les week-ends et jours fériés de 11:00 à 13:00 de début avril à fin septembre.
+  exceptions:
+    - kind: hours
+      label: Horaires réduits
+      dates:
+        - "2026-10-28"
+        - "2026-10-30"
+      open: "14:00"
+      close: "17:00"
+      note: Réservation obligatoire
+
+prices:
+  - name: Combinaison
+    options:
+      - amount: "6"
+        currency: EUR
+        per: hour
+      - amount: "8"
+        currency: EUR
+        per:
+          fr: 2 heures
+          en: 2 hours
+          nl: 2 uur
+      - amount: "12"
+        currency: EUR
+        per: day
+  - name: Wakeboard
+    options:
+      - amount: "8"
+        currency: EUR
+        per: hour
+      - amount: "11"
+        currency: EUR
+        per:
+          fr: 2 heures
+          en: 2 hours
+          nl: 2 uur
+      - amount: "18"
+        currency: EUR
+        per: day
+  - name: Testboard
+    options:
+      - amount: "12"
+        currency: EUR
+        per: hour
+      - amount: "18"
+        currency: EUR
+        per:
+          fr: 2 heures
+          en: 2 hours
+          nl: 2 uur
+      - amount: "35"
+        currency: EUR
+        per: day
+  - name: Privatisation du grand câble
+    options:
+      - amount: "20"
+        currency: EUR
+        per: person
+        note:
+          fr: 1 heure, à partir de
+          en: 1 hour, from
+          nl: 1 uur, vanaf
+      - amount: "28"
+        currency: EUR
+        per: person
+        note:
+          fr: 2 heures, à partir de
+          en: 2 hours, from
+          nl: 2 uur, vanaf
+
+facilities:
+  - Aquapark
+  - Skatepark
+  - Hébergement
+  - Restauration
+  - Casque, gilet, skis et kneeboard prêtés

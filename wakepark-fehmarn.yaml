@@ -1,0 +1,56 @@
+version: 1
+id: wakepark-fehmarn
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakepark Fehmarn
+short_name: Wakepark Fehmarn
+languages:
+  - de
+  - en
+  - nl
+address: "Wulfener Hals Weg 50, 23769 Fehmarn"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 54.410120
+  lon: 11.164979
+
+phone: "+49 4371 8890853"
+email: "info@wakeparkfehmarn.de"
+website: https://wakeparkfehmarn.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wakeparkfehmarn.wakesys.com/browser/index.php"
+
+cables:
+  - name: Bahn 1
+    direction: "2.0"
+    description: >-
+      Einsteigerbahn ohne Hindernisse.
+  - name: Bahn 2
+    direction: "2.0"
+    description: >-
+      Mit einem Kicker und einem Table.
+  - name: Bahn 3
+    direction: "2.0"
+    description: >-
+      Runde von über 400 Metern mit Bi-Level.
+
+opening:
+  source_url: "https://wakeparkfehmarn.de/"
+  booking: required
+  note: >-
+    Tickets und Kurse werden online gebucht. Die drei Bahnen laufen mit System 2.0.
+
+facilities:
+  - Restaurant und Bar
+  - Pro Shop
+  - Funpark
+
+description: >-
+  Wakepark am Wulfener Hals auf Fehmarn mit drei System 2.0 Bahnen.

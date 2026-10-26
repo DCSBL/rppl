@@ -1,0 +1,190 @@
+version: 1
+id: wasserski-wakeboard-hamburg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski & Wakeboard Hamburg
+short_name: Wasserski Hamburg
+languages:
+  - de
+  - en
+  - nl
+address: "Am Neuländer Baggerteich 3, 21079 Hamburg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 53.458826
+  lon: 10.013902
+
+phone: "+49 175 1161715"
+email: "info@wasserski-hamburg.de"
+website: https://wasserski-hamburg.de
+links:
+  - kind: booking
+    url: "https://wasserski-hamburg.de/preise/"
+
+cables:
+  - name: Cable
+    description: >-
+      Fünf-Mast-Anlage südlich der Elbe am Neuländersee.
+
+opening:
+  source_url: "https://wasserski-hamburg.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison läuft von April bis Oktober und ist beendet. In der Wintersaison von November
+    bis März gibt es Sonderöffnungen. Der Nikolauslauf findet am 5. Dezember 2026 von 12 bis
+    15 Uhr statt.
+
+prices:
+  - name: "1 hour without gear"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene ab 18 Jahren
+          en: adults 18 and older
+          nl: volwassenen vanaf 18 jaar
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "2 hours without gear"
+    options:
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene ab 18 Jahren
+          en: adults 18 and older
+          nl: volwassenen vanaf 18 jaar
+      - amount: "27"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Day ticket without gear
+    options:
+      - amount: "48"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene ab 18 Jahren
+          en: adults 18 and older
+          nl: volwassenen vanaf 18 jaar
+      - amount: "39"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Beginner ticket
+    options:
+      - amount: "42"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Wasserski, mit Material"
+          en: "adults, water ski, gear included"
+          nl: "volwassenen, waterski, inclusief materiaal"
+      - amount: "49"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Wakeboard, mit Material"
+          en: "adults, wakeboard, gear included"
+          nl: "volwassenen, wakeboard, inclusief materiaal"
+      - amount: "37"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche, Wasserski, mit Material"
+          en: "youth, water ski, gear included"
+          nl: "jeugd, waterski, inclusief materiaal"
+      - amount: "44"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche, Wakeboard, mit Material"
+          en: "youth, wakeboard, gear included"
+          nl: "jeugd, wakeboard, inclusief materiaal"
+  - name: Year pass
+    options:
+      - amount: "890"
+        currency: EUR
+        per:
+          de: "12 Monate"
+          en: "12 months"
+          nl: "12 maanden"
+        note:
+          de: Erwachsene ab 18 Jahren
+          en: adults 18 and older
+          nl: volwassenen vanaf 18 jaar
+      - amount: "730"
+        currency: EUR
+        per:
+          de: "12 Monate"
+          en: "12 months"
+          nl: "12 maanden"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: RFID wristband
+    options:
+      - amount: "3"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Wetsuit rental
+    options:
+      - amount: "8"
+        currency: EUR
+        per: hour
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "15"
+        currency: EUR
+        per: day
+
+facilities:
+  - Gastronomie
+  - Eisstockschießen im Winter
+  - Verleihmaterial
+
+description: >-
+  Wasserski- und Wakeboardanlage am Neuländer Baggerteich. Es ist die einzige in Hamburg.

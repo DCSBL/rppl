@@ -1,0 +1,198 @@
+version: 1
+id: turncable-thannhausen
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Turncable Wakepark Thannhausen
+short_name: Turncable
+languages:
+  - de
+  - en
+  - nl
+address: "Edelstetter Str. 38, 86470 Thannhausen"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.292163
+  lon: 10.445415
+
+phone: "+49 8281 7995080"
+email: "info@turncable.de"
+website: https://www.turncable.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://turncable.wakesys.com/"
+
+cables:
+  - name: Fullsize-Lifte
+    description: >-
+      Zwei Fullsize-Lifte und ein System 2.0 Lift.
+
+opening:
+  source_url: "https://www.turncable.de/anfahrt-oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison 2026 startete am 11. April und ist beendet. Aktuelle Änderungen stehen auf
+    Instagram und Facebook.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "2 hours"
+    options:
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Day ticket
+    options:
+      - amount: "53"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "43"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Multi day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, pro Tag ab 3 Tagen in Folge"
+          en: "adults, per day from 3 days in a row"
+          nl: "volwassenen, per dag vanaf 3 dagen achter elkaar"
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche, pro Tag ab 3 Tagen in Folge"
+          en: "youth, per day from 3 days in a row"
+          nl: "jeugd, per dag vanaf 3 dagen achter elkaar"
+  - name: Season pass
+    options:
+      - amount: "900"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "690"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Membership
+    options:
+      - amount: "60"
+        currency: EUR
+        note:
+          de: "pro Saison, 15 % Nachlass auf Stunden- und Tageskarten"
+          en: "per season, 15 percent off hour and day tickets"
+          nl: "per seizoen, 15 procent korting op uur- en dagkaarten"
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "18"
+        currency: EUR
+        per: day
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "19"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Features
+          en: features
+          nl: features
+      - amount: "29"
+        currency: EUR
+        per: day
+        note:
+          de: Features
+          en: features
+          nl: features
+  - name: Wetsuit rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "10"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Paarski, Kneeboard, Schwimmweste und Helm kostenlos"
+  - Beachclub
+  - Übernachtung in Lodges
+  - Wake Shop
+
+description: >-
+  Wakepark zwischen Augsburg und Ulm mit zwei Fullsize-Liften und einem System 2.0 Lift.

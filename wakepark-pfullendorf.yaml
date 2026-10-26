@@ -1,0 +1,41 @@
+version: 1
+id: wakepark-pfullendorf
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakepark Pfullendorf
+short_name: Wakepark
+languages:
+  - de
+  - en
+  - nl
+address: "Bannholzerweg 18, 88630 Pfullendorf"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 47.930430
+  lon: 9.236930
+
+phone: "+49 7552 4086901"
+email: "booking@wakepark-pfullendorf.de"
+website: https://www.wakepark-pfullendorf.de
+wakesys: true
+
+opening:
+  source_url: "https://www.wakepark-pfullendorf.de/offnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison 2026 startete am 29. März. Bis 12. Oktober ist mittwochs bis freitags von
+    14:00 bis 19:00 und am Wochenende von 12:00 bis 19:00 geöffnet, ab 13. Oktober ruht der
+    Park im Winter. Die Zeiten wechseln pro Monat und sind im Sommer länger.
+
+facilities:
+  - "Schwimmweste, Wasserski und Kneeboard in jeder Zeitkarte kostenlos"
+  - Verleih
+  - Seeblick
+
+description: >-
+  Wakepark im Seepark Pfullendorf. Tickets gibt es online oder im Shop.

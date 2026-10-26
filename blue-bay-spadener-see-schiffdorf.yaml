@@ -1,0 +1,154 @@
+version: 1
+id: blue-bay-spadener-see-schiffdorf
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Blue Bay Spadener See
+short_name: Blue Bay
+languages:
+  - de
+  - en
+  - nl
+address: "Am Spadener See 52, 27619 Schiffdorf"
+timezone: Europe/Berlin
+# Pin from the map link on the park's site, not a confirmed dock point.
+location:
+  lat: 53.570953
+  lon: 8.653885
+
+phone: "+49 471 30698712"
+email: "info@blue-bay.de"
+website: https://blue-bay.de
+links:
+  - kind: booking
+    url: "https://www.wakeshop.de/"
+
+cables:
+  - name: Cable
+    description: >-
+      Fünf-Mast-Anlage, SHAPE Wakepark.
+
+opening:
+  source_url: "https://blue-bay.de/oeffnungszeiten-2/"
+  booking: optional
+  note: >-
+    Ab dem 5. Oktober ist freitags von 16:00 bis Sonnenuntergang und am Wochenende von 13:00
+    bis Sonnenuntergang geöffnet. Die Zeiten ändern sich pro Zeitraum und je nach Wetter.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "24"
+        currency: EUR
+        per: hour
+        note:
+          de: "Erwachsene, Online-Shop"
+          en: "adults, online shop"
+          nl: "volwassenen, online shop"
+      - amount: "27"
+        currency: EUR
+        per: hour
+        note:
+          de: "Erwachsene, Tageskasse"
+          en: "adults, on site at the desk"
+          nl: "volwassenen, ter plaatse aan de kassa"
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Online-Shop"
+          en: "youth up to 17, pupils, students, online shop"
+          nl: "jeugd t/m 17, scholieren, studenten, online shop"
+      - amount: "22"
+        currency: EUR
+        per: hour
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Tageskasse"
+          en: "youth up to 17, pupils, students, on site at the desk"
+          nl: "jeugd t/m 17, scholieren, studenten, ter plaatse aan de kassa"
+  - name: "2 hours"
+    options:
+      - amount: "29"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Online-Shop"
+          en: "adults, online shop"
+          nl: "volwassenen, online shop"
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Tageskasse"
+          en: "adults, on site at the desk"
+          nl: "volwassenen, ter plaatse aan de kassa"
+      - amount: "24"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Online-Shop"
+          en: "youth up to 17, pupils, students, online shop"
+          nl: "jeugd t/m 17, scholieren, studenten, online shop"
+      - amount: "27"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Tageskasse"
+          en: "youth up to 17, pupils, students, on site at the desk"
+          nl: "jeugd t/m 17, scholieren, studenten, ter plaatse aan de kassa"
+  - name: Day ticket
+    options:
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Online-Shop"
+          en: "adults, online shop"
+          nl: "volwassenen, online shop"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Tageskasse"
+          en: "adults, on site at the desk"
+          nl: "volwassenen, ter plaatse aan de kassa"
+      - amount: "30"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Online-Shop"
+          en: "youth up to 17, pupils, students, online shop"
+          nl: "jeugd t/m 17, scholieren, studenten, online shop"
+      - amount: "33"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche bis 17, Schüler, Studierende, Tageskasse"
+          en: "youth up to 17, pupils, students, on site at the desk"
+          nl: "jeugd t/m 17, scholieren, studenten, ter plaatse aan de kassa"
+
+facilities:
+  - Palmenstrand
+  - Seeterrassen Restaurant
+  - Wasserpark
+  - Adventure Golf
+  - Stand-up-Paddling
+  - Hundestrand
+
+description: >-
+  Wasserski- und Wakeboardpark am Spadener See mit Fünf-Mast-Anlage und Strandbad.

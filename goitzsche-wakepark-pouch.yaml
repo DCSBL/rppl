@@ -1,0 +1,125 @@
+version: 1
+id: goitzsche-wakepark-pouch
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Goitzsche Wakepark
+short_name: Goitzsche Wakepark
+languages:
+  - de
+  - en
+  - nl
+address: "Zur Agora 1, 06774 Muldestausee"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.630627
+  lon: 12.386871
+
+phone: "+49 174 6972528"
+website: https://agora-erlebnis-resort.de
+links:
+  - kind: booking
+    url: "https://agora-erlebnis-resort.de/tickets-und-gutscheine/"
+
+cables:
+  - name: Cable
+    description: >-
+      Sechs Masten und 11 Obstacles von Unit Parktech und PMC.
+
+opening:
+  source_url: "https://agora-erlebnis-resort.de/wakepark/"
+  booking: optional
+  note: >-
+    Die Öffnungszeiten stehen auf der Kontaktseite des Agora Erlebnis Resorts. Der Park ist
+    für Fahrer ab 6 Jahren.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Ermäßigte bis 14 Jahre
+          en: reduced up to 14
+          nl: gereduceerd t/m 14 jaar
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Ermäßigte bis 14 Jahre
+          en: reduced up to 14
+          nl: gereduceerd t/m 14 jaar
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: Ermäßigte bis 14 Jahre
+          en: reduced up to 14
+          nl: gereduceerd t/m 14 jaar
+  - name: Feature board
+    options:
+      - amount: "20"
+        currency: EUR
+        per: hour
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "35"
+        currency: EUR
+        per: day
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+  - name: Helmet rental
+    options:
+      - amount: "3"
+        currency: EUR
+
+facilities:
+  - Aquapark
+  - Stand-up-Paddling
+  - Bootsverleih
+  - Eventlocation
+
+description: >-
+  Wakepark mit 6-Mast-Anlage am Goitzschesee.

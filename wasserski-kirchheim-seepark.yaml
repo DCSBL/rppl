@@ -1,0 +1,62 @@
+version: 1
+id: wasserski-kirchheim-seepark
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski & Wakeboard Paradies Kirchheim
+short_name: Wasserski Paradies
+languages:
+  - de
+  - en
+  - nl
+address: "Seepark Haus 1, 36275 Kirchheim"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.819189
+  lon: 9.523289
+
+phone: "+49 6628 8666"
+email: "info@wasserski-kirchheim.de"
+website: https://www.wasserski-kirchheim.de
+
+opening:
+  source_url: "https://www.wasserski-kirchheim.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Die Öffnungszeiten für die Saison 2026 stehen als Grafik auf der Website. Die Anlage
+    kann nach Absprache auch exklusiv gemietet werden.
+
+prices:
+  - name: Beginner course
+    options:
+      - amount: "34"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+  - name: All inclusive course
+    options:
+      - amount: "69"
+        currency: EUR
+        note:
+          de: "Erwachsene, Tageskarte mit Material"
+          en: "adults, day ticket with gear"
+          nl: "volwassenen, dagkaart met materiaal"
+      - amount: "59"
+        currency: EUR
+        note:
+          de: "Jugendliche, Tageskarte mit Material"
+          en: "youth, day ticket with gear"
+          nl: "jeugd, dagkaart met materiaal"
+
+facilities:
+  - "Schwimmweste, einfaches Wakeboard und Wasserski inklusive"
+  - Gruppenmiete
+
+description: >-
+  Wasserski- und Wakeboardanlage im Seepark Kirchheim.

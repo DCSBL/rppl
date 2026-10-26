@@ -1,0 +1,230 @@
+version: 1
+id: wasserski-wakeboard-kalletal
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski & Wakeboard Kalletal
+short_name: Wasserski Kalletal
+languages:
+  - de
+  - en
+  - nl
+address: "Seeweg 1, 32689 Kalletal"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 52.176240
+  lon: 9.001698
+
+phone: "+49 5755 777"
+email: "info@wasserski-kalletal.de"
+website: https://www.wasserski-kalletal.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wasserski-kalletal.wakesys.com/browser/index.php?lang=DE"
+
+cables:
+  - name: Cable
+    length_m: 800
+    description: >-
+      Fünf Masten, mit Kickern, Texas Jack, Transition Rail, Diamond Peak, Pipe, Butter Box
+      und Funbox. Der See wird nur für Wasserski und Wakeboard genutzt.
+
+opening:
+  source_url: "https://www.wasserski-kalletal.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Die Saison 2026 lief bis 25. Oktober. Im Oktober ist mittwochs bis freitags von 13 bis
+    18 Uhr und am Wochenende von 12 bis 18 Uhr geöffnet, an Feiertagen wie sonntags.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "18"
+        currency: EUR
+        per: hour
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: "2 hours"
+    options:
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "24"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: Day ticket
+    options:
+      - amount: "48"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "38"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: Week ticket
+    options:
+      - amount: "200"
+        currency: EUR
+        per:
+          de: "Woche, für Campinggäste"
+          en: "week, for camping guests"
+          nl: "week, voor kampeergasten"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "150"
+        currency: EUR
+        per:
+          de: "Woche, für Campinggäste"
+          en: "week, for camping guests"
+          nl: "week, voor kampeergasten"
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: Season pass
+    options:
+      - amount: "850"
+        currency: EUR
+        per:
+          de: "4. April bis 26. Oktober"
+          en: "4 April to 26 October"
+          nl: "4 april t/m 26 oktober"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "700"
+        currency: EUR
+        per:
+          de: "4. April bis 26. Oktober"
+          en: "4 April to 26 October"
+          nl: "4 april t/m 26 oktober"
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: RFID wristband
+    options:
+      - amount: "5"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Wetsuit rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+      - amount: "14"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "10"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder und Jugendliche 6 bis 15 Jahre
+          en: children and youth 6 to 15
+          nl: kinderen en jeugd 6 t/m 15 jaar
+  - name: Wakeboard rental
+    options:
+      - amount: "15"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: "Basic, Erwachsene"
+          en: "basic, adults"
+          nl: "basic, volwassenen"
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: "Basic, Kinder und Jugendliche"
+          en: "basic, children and youth"
+          nl: "basic, kinderen en jeugd"
+      - amount: "30"
+        currency: EUR
+        per: day
+        note:
+          de: "Basic, Erwachsene"
+          en: "basic, adults"
+          nl: "basic, volwassenen"
+      - amount: "20"
+        currency: EUR
+        per: day
+        note:
+          de: "Basic, Kinder und Jugendliche"
+          en: "basic, children and youth"
+          nl: "basic, kinderen en jeugd"
+
+facilities:
+  - Bistro
+  - Camping
+  - Equipment-Verleih
+
+description: >-
+  Wasserski- und Wakeboardanlage im CampingPark Kalletal zwischen Hannover und Bielefeld.

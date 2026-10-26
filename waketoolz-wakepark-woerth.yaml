@@ -1,0 +1,239 @@
+version: 1
+id: waketoolz-wakepark-woerth
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Waketoolz Wakepark Wörth
+short_name: Waketoolz Wakepark
+languages:
+  - de
+  - en
+  - nl
+address: "Landshuter Str. 96, 84109 Wörth an der Isar"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.624240
+  lon: 12.348961
+
+phone: "+49 8702 9487297"
+website: https://www.waketoolz-wakepark.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://waketoolz-wakepark.wakesys.com/browser/index.php"
+
+cables:
+  - name: "5-Mast-Anlage"
+  - name: System 2.0
+    direction: "2.0"
+    description: >-
+      Bis zu drei Wakeboarder gleichzeitig.
+
+opening:
+  source_url: "https://www.waketoolz-wakepark.de/"
+  booking: optional
+  note: >-
+    Montag ist Ruhetag, Ostermontag und Pfingstmontag sind geöffnet.
+  rules:
+    - months:
+        - 4
+      days:
+        - fri
+        - sat
+        - sun
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 5
+        - 6
+        - 7
+        - 8
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 5
+        - 6
+        - 7
+        - 8
+      days:
+        - weekend
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "14:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - fri
+        - sat
+        - sun
+      open: "14:00"
+      close: "18:00"
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "35"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "2 hours"
+    options:
+      - amount: "45"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "40"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "4 hours"
+    options:
+      - amount: "55"
+        currency: EUR
+        per:
+          de: "4 Stunden"
+          en: "4 hours"
+          nl: "4 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "50"
+        currency: EUR
+        per:
+          de: "4 Stunden"
+          en: "4 hours"
+          nl: "4 uur"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Day ticket
+    options:
+      - amount: "65"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "60"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Weekend ticket
+    options:
+      - amount: "166"
+        currency: EUR
+        per:
+          de: Freitag bis Sonntag
+          en: Friday to Sunday
+          nl: vrijdag t/m zondag
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "153"
+        currency: EUR
+        per:
+          de: Freitag bis Sonntag
+          en: Friday to Sunday
+          nl: vrijdag t/m zondag
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "10 day tickets"
+    options:
+      - amount: "650"
+        currency: EUR
+        per:
+          de: "10 plus 1"
+          en: "10 plus 1"
+          nl: "10 plus 1"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "600"
+        currency: EUR
+        per:
+          de: "10 plus 1"
+          en: "10 plus 1"
+          nl: "10 plus 1"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: System 2.0
+    options:
+      - amount: "40"
+        currency: EUR
+        per:
+          de: "20 Minuten"
+          en: "20 minutes"
+          nl: "20 minuten"
+  - name: RFID wristband
+    options:
+      - amount: "10"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+
+facilities:
+  - Bistro
+  - Strandbad
+  - Unterkunft
+
+description: >-
+  Wakepark am Wörther See mit 5-Mast-Anlage und System 2.0.

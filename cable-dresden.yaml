@@ -1,0 +1,86 @@
+version: 1
+id: cable-dresden
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Cable Dresden
+languages:
+  - de
+  - en
+  - nl
+address: "Pirnaer Landstraße 107, 01257 Dresden"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.014448
+  lon: 13.821373
+
+phone: "+49 160 91141419"
+email: "info@cable-dresden.de"
+website: https://www.cable-dresden.de
+links:
+  - kind: booking
+    url: "https://www.cable-dresden.de/buchung/produkte.html"
+
+opening:
+  source_url: "https://www.cable-dresden.de/oeffnungszeiten.html"
+  booking: required
+  note: >-
+    Die Seilbahn läuft in Slots mit 28 oder 30 km/h. Die freien Zeiten stehen im
+    Buchungskalender.
+
+prices:
+  - name: Slot
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: "ca., Richtwert"
+          en: "approx., indicative"
+          nl: "ca., richtprijs"
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ca., Richtwert"
+          en: "approx., indicative"
+          nl: "ca., richtprijs"
+      - amount: "59"
+        currency: EUR
+        per: day
+        note:
+          de: "ab, Richtwert"
+          en: "from, indicative"
+          nl: "vanaf, richtprijs"
+  - name: Season pass 2026
+    options:
+      - amount: "699"
+        currency: EUR
+  - name: Discount card
+    options:
+      - amount: "250"
+        currency: EUR
+        note:
+          de: "11 x 1 Stunde"
+          en: "11 x 1 hour"
+          nl: "11 x 1 uur"
+      - amount: "350"
+        currency: EUR
+        note:
+          de: "11 x 2 Stunden"
+          en: "11 x 2 hours"
+          nl: "11 x 2 uur"
+
+facilities:
+  - "Strandcafé"
+  - Kurse für Anfänger
+
+description: >-
+  Wasserski- und Wakeboardanlage mit Obstacles und Anfängerkursen.

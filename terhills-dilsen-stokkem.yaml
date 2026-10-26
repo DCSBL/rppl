@@ -1,0 +1,143 @@
+version: 1
+id: terhills-dilsen-stokkem
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (two full size cables, 2026 hours; no prices published outside the booking system)
+
+name: Terhills Cablepark
+languages:
+  - nl
+  - en
+  - fr
+  - de
+address: Nationaal Parklaan 1, 3650 Dilsen-Stokkem
+timezone: Europe/Brussels
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.0073601
+  lon: 5.6900085
+
+email: info@terhillscablepark.be
+website: https://www.terhillscablepark.be/
+links:
+  - kind: booking
+    url: "https://bookings.terhillscablepark.be"
+  - kind: instagram
+    url: "https://www.instagram.com/TerhillsCablepark/"
+  - kind: facebook
+    url: "https://www.facebook.com/TerhillsCablepark/"
+
+description: Terhills Cablepark ligt in Nationaal Park Hoge Kempen. Het park heeft twee full size cables en een aquapark.
+
+cables:
+  - name: Beginners Cable
+    direction: ccw
+    description: Voor wie voor het eerst waterskiet of wakeboardt en voor licht gevorderde riders.
+  - name: Freestyle Cable
+    direction: ccw
+    description: Snellere cable met obstacles in het water. Alleen riders die zelfstandig kunnen starten en lappen mogen op deze cable.
+
+opening:
+  source_url: "https://www.terhillscablepark.be/en/openingstijden/"
+  booking: required
+  note: >-
+    Dit zijn de tijden van de cables. Je reserveert online per tijdslot. Bij drukte kan er een extra tijdslot bijkomen.
+  rules:
+    - months:
+        - 4
+        - 5
+      days:
+        - wed
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 4
+        - 5
+      days:
+        - weekend
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 6
+        - 7
+        - 8
+      days:
+        - sat
+      open: "10:00"
+      close: "20:00"
+    - months:
+        - 6
+        - 7
+        - 8
+      days:
+        - sun
+      open: "10:30"
+      close: "20:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - weekdays
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 9
+      from: "2026-09-01"
+      until: "2026-09-13"
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 9
+      from: "2026-09-01"
+      until: "2026-09-13"
+      days:
+        - sat
+      open: "10:00"
+      close: "20:00"
+    - months:
+        - 9
+      from: "2026-09-01"
+      until: "2026-09-13"
+      days:
+        - sun
+      open: "10:30"
+      close: "20:00"
+    - months:
+        - 9
+      from: "2026-09-14"
+      days:
+        - wed
+        - sat
+        - sun
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 10
+      days:
+        - wed
+        - sat
+        - sun
+      open: "14:00"
+      close: "18:00"
+
+facilities:
+  - Aquapark
+  - Restaurant
+  - Beachbar
+  - Wetsuit en zwemvest inbegrepen

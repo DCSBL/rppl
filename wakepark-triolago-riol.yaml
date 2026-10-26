@@ -1,0 +1,171 @@
+version: 1
+id: wakepark-triolago-riol
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: WakePark Triolago
+short_name: WakePark Triolago
+languages:
+  - de
+  - en
+  - nl
+address: "Freizeitsee Triolago, 54340 Riol"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 49.792119
+  lon: 6.805846
+
+phone: "+49 170 2804634"
+email: "info@wakepark-triolago.de"
+website: https://www.wakepark-triolago.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wakepark-triolago.wakesys.com/browser/index.php"
+
+opening:
+  source_url: "https://www.wakepark-triolago.de/landing/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Vom 17. Oktober bis 1. November 2026 ist freitags ab 15 Uhr und am Wochenende ab 12 Uhr
+    geöffnet, vom 2. November bis 12. Dezember nur am Wochenende ab 12 Uhr, immer bis
+    Sonnenuntergang. In der Saison gibt es täglich eine langsame Stunde von 12 bis 14 Uhr.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "21"
+        currency: EUR
+        per: hour
+        note:
+          de: online
+          en: online
+          nl: online
+      - amount: "23"
+        currency: EUR
+        per: hour
+        note:
+          de: vor Ort
+          en: on site
+          nl: ter plaatse
+  - name: "2 hours"
+    options:
+      - amount: "27"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: online
+          en: online
+          nl: online
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: vor Ort
+          en: on site
+          nl: ter plaatse
+  - name: Day ticket
+    options:
+      - amount: "38"
+        currency: EUR
+        per: day
+        note:
+          de: online
+          en: online
+          nl: online
+      - amount: "43"
+        currency: EUR
+        per: day
+        note:
+          de: vor Ort
+          en: on site
+          nl: ter plaatse
+  - name: RFID wristband
+    options:
+      - amount: "6"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Year membership
+    options:
+      - amount: "600"
+        currency: EUR
+  - name: Short wetsuit rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "9"
+        currency: EUR
+        per: day
+  - name: Long wetsuit rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "13"
+        currency: EUR
+        per: day
+  - name: Wakeboard rental
+    options:
+      - amount: "11"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Easyup
+          en: Easyup
+          nl: Easyup
+      - amount: "16"
+        currency: EUR
+        per: day
+        note:
+          de: Easyup
+          en: Easyup
+          nl: Easyup
+      - amount: "17"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Easyride und Pro-Board
+          en: Easyride and Pro-Board
+          nl: Easyride en Pro-Board
+      - amount: "22"
+        currency: EUR
+        per: day
+        note:
+          de: Easyride und Pro-Board
+          en: Easyride and Pro-Board
+          nl: Easyride en Pro-Board
+
+facilities:
+  - "Wasserski, Schwimmweste und Helm in jedem Ticket inklusive"
+  - Pizza und Flammkuchen
+  - Badestrand
+  - WaterChimp
+
+description: >-
+  Wakepark am Freizeitsee Triolago in Riol.

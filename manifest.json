@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "dataVersion": 3,
-  "publishedAt": "2026-10-25T08:32:27Z",
+  "dataVersion": 4,
+  "publishedAt": "2026-10-26T23:54:27Z",
   "enabled": true,
   "minAppSchema": 1,
   "maxAppSchema": 1,
@@ -10,6 +10,11 @@
       "id": "aquabest-best",
       "file": "aquabest-best.yaml",
       "sha256": "805c13bc8c8e479137006ff55d8a43be4ccc799bc9ae68f03ff21ba0813a2c21"
+    },
+    {
+      "id": "beachclub-nethen-rastede",
+      "file": "beachclub-nethen-rastede.yaml",
+      "sha256": "ec1008b27b62dda4a44c420054155fbc52479a5d30c5a8a1d2c6c068cde58350"
     },
     {
       "id": "beavercreek-roermond",
@@ -22,6 +27,16 @@
       "sha256": "6e46c956cad1513aa690e9a355de7830eede16fe66c6806c636c13c672fb07f1"
     },
     {
+      "id": "blaue-lagune-wachtendonk",
+      "file": "blaue-lagune-wachtendonk.yaml",
+      "sha256": "5eef330f3575f7edee22e06bf814c7d72e352b5ea67a5ef1f6b0e4480c630bc6"
+    },
+    {
+      "id": "blue-bay-spadener-see-schiffdorf",
+      "file": "blue-bay-spadener-see-schiffdorf.yaml",
+      "sha256": "7c0c40b6810755f612fad1b40557fcee73f10918c361f7ba2ab6aef69ea8389b"
+    },
+    {
       "id": "breakout-harkstede",
       "file": "breakout-harkstede.yaml",
       "sha256": "28bf2a6fbb7bbf6f25feba064e1410f703fc9e41220600267f54959f45f32bea"
@@ -30,6 +45,31 @@
       "id": "burnside-emst",
       "file": "burnside-emst.yaml",
       "sha256": "19a42de2ba7199669e19edec59b6b2d8a02fc8d190dc893f9ecbf15a4bdca0bc"
+    },
+    {
+      "id": "cable-dresden",
+      "file": "cable-dresden.yaml",
+      "sha256": "3acd0d2aaf1751a5151b76cc8dac6ac0a41dbd4389e6034ee8c77880e62b1527"
+    },
+    {
+      "id": "cable-park-ruegen-zirkow",
+      "file": "cable-park-ruegen-zirkow.yaml",
+      "sha256": "29a9970b11ef0377699e385b882607c659ce7da0fbfa8af76b5db2df5fb89095"
+    },
+    {
+      "id": "cable-park-twistesee",
+      "file": "cable-park-twistesee.yaml",
+      "sha256": "600fb3327943f8c98157f9ebd220a48a6b88577cb82007ec42fbcb2b3a66a790"
+    },
+    {
+      "id": "cablesport-arena-pinneberg",
+      "file": "cablesport-arena-pinneberg.yaml",
+      "sha256": "640fcf8429d4021f7504c642394a402b9ee2a4157c35eff637b9cbd1d470db39"
+    },
+    {
+      "id": "chill-and-wake-friedberg",
+      "file": "chill-and-wake-friedberg.yaml",
+      "sha256": "e3aa7f452a64cd2e0116155812d33cb2246f06383c658ab3c1dd8a694526fcae"
     },
     {
       "id": "dearne-arnemuiden",
@@ -42,6 +82,11 @@
       "sha256": "c07534a88b18f263a27a6dd24b09596d7834e0aaeaacd97e000e1b73bab442ea"
     },
     {
+      "id": "dock79-saint-ghislain",
+      "file": "dock79-saint-ghislain.yaml",
+      "sha256": "afef3fb985fcd1bcb603b209379ec9e323664f67ba426e2638ebe6e99c7d91e1"
+    },
+    {
       "id": "downunder-nieuwegein",
       "file": "downunder-nieuwegein.yaml",
       "sha256": "e569b01f9480fdf7b257eb4f4adfd290087ad8fff31fec4530e8493e835a1733"
@@ -52,9 +97,29 @@
       "sha256": "6b791a91bf4fcd7adadd7a7eaa770c7ec9aa626f4268d735e045becd4bf5e848"
     },
     {
+      "id": "friedenhainsee-parkstetten",
+      "file": "friedenhainsee-parkstetten.yaml",
+      "sha256": "f6995ff057617d70c962080d7fee9d2b7f392a1b723d588250c2c79e2beb8369"
+    },
+    {
+      "id": "goitzsche-wakepark-pouch",
+      "file": "goitzsche-wakepark-pouch.yaml",
+      "sha256": "be65f54c2cff5f820f0d4dc406ced2576964b0c3af890d0d8efab04ab12177c2"
+    },
+    {
       "id": "goodlife-hoogstraten",
       "file": "goodlife-hoogstraten.yaml",
       "sha256": "cefc050d9678e2788058859af32e03b5a464dbe6a15393a756ef763c1311a93d"
+    },
+    {
+      "id": "gufi-see-gundelfingen",
+      "file": "gufi-see-gundelfingen.yaml",
+      "sha256": "62ed4877d3cc0b923ca33944d84e420ec0056eb9007452e3dc80a31146f99212"
+    },
+    {
+      "id": "hot-sport-seepark-niederweimar",
+      "file": "hot-sport-seepark-niederweimar.yaml",
+      "sha256": "a0b550161ef09b4e6d610a551faad347540b8e32797eac222b000146bc62cd34"
     },
     {
       "id": "kempervennen-westerhoven",
@@ -77,6 +142,16 @@
       "sha256": "a56adbcbca834a642d9b51117c96bcaa993e57e43fb3445f841ffd12da66c416"
     },
     {
+      "id": "outsider-oudenaarde",
+      "file": "outsider-oudenaarde.yaml",
+      "sha256": "7ff517360d2e4a17696eee04fede6fcd85ff3a79a5f1f12068d7ab1b84134837"
+    },
+    {
+      "id": "pineapple-wakepark-rossau",
+      "file": "pineapple-wakepark-rossau.yaml",
+      "sha256": "7ffa507f1c2c7d5e557174666769067d624908f030ad71f0ff94234ff13e62eb"
+    },
+    {
       "id": "project7-rotterdam",
       "file": "project7-rotterdam.yaml",
       "sha256": "4aacf901e6cacc4580baa21e1d06fbadcc7fbbbfdd474687d5b4b6d39963bb11"
@@ -92,9 +167,54 @@
       "sha256": "ceada75d8b4a3dadfad90916d1780ab7e66c25176a4c5dcda5fe3b4fd8cd5999"
     },
     {
+      "id": "southlake-heuchelheim",
+      "file": "southlake-heuchelheim.yaml",
+      "sha256": "ea6623993703849f100e4f10177967ccbfd9198d9106020ac7038e7211fc3377"
+    },
+    {
+      "id": "spin-froidchapelle",
+      "file": "spin-froidchapelle.yaml",
+      "sha256": "8e9c2f6d90a3a3d15986b427618f5353707b49aa57043b4be2959ea3d6e0c5f9"
+    },
+    {
+      "id": "spotz-wakeboard-park-norderstedt",
+      "file": "spotz-wakeboard-park-norderstedt.yaml",
+      "sha256": "85dbcd04a971a51d86e1cec5d43eaa25fcc8a74b9c700fd2b1fd1893b7645e0e"
+    },
+    {
+      "id": "strandparx-cable-island-magdeburg",
+      "file": "strandparx-cable-island-magdeburg.yaml",
+      "sha256": "ceb3ce77a12e909780d4f21d831681a91b55ea2cc1577a1670d3f85627a07766"
+    },
+    {
       "id": "stroombroek-braamt",
       "file": "stroombroek-braamt.yaml",
       "sha256": "a2b51028acf7b568df3904517b4477247dc6ef1d49915aec658cb19b7eb85b91"
+    },
+    {
+      "id": "suedsee-wakepark-xanten",
+      "file": "suedsee-wakepark-xanten.yaml",
+      "sha256": "71f6606d014dee057d217066ec707879cb59090555762a037115a5d2e6132b3d"
+    },
+    {
+      "id": "supieria-rostock",
+      "file": "supieria-rostock.yaml",
+      "sha256": "ad3d71fa4ea80ea1a8deb85d10d47255362f559a0a3ab15c9662d383edb0ac17"
+    },
+    {
+      "id": "terhills-dilsen-stokkem",
+      "file": "terhills-dilsen-stokkem.yaml",
+      "sha256": "ecd7defd0fa3a6a9aed8480ad9345381034e533eb9f766af9efbfd0ddf64e55c"
+    },
+    {
+      "id": "thebricks-duisburg",
+      "file": "thebricks-duisburg.yaml",
+      "sha256": "d815df1c81723e8ef4be23f149d70d97a9765d7431f4f296128dc81d251f8311"
+    },
+    {
+      "id": "turncable-thannhausen",
+      "file": "turncable-thannhausen.yaml",
+      "sha256": "590d21b36a30cbad6b2bc26dfd7be78c696bf63c07a50c63bea307118f1edeaf"
     },
     {
       "id": "view-almere",
@@ -102,14 +222,144 @@
       "sha256": "c0edc5420ea83bcba59c032aec0f3c1d01f8c7f426415bfce11ee989f9bf425f"
     },
     {
+      "id": "wake-and-beach-halbendorf",
+      "file": "wake-and-beach-halbendorf.yaml",
+      "sha256": "423a78f8c902b7d717152cba8f9102baf5f2faac6b16cd3dd6ceeda53db18cc1"
+    },
+    {
+      "id": "wake-and-groove-geisenfeld",
+      "file": "wake-and-groove-geisenfeld.yaml",
+      "sha256": "3cc50d6831f4f635c62617d388a035a0bedb806785be03cfd16d3fddc2e15225"
+    },
+    {
+      "id": "wake-and-ski-blauer-see-garbsen",
+      "file": "wake-and-ski-blauer-see-garbsen.yaml",
+      "sha256": "7009ef48a22a9d33c0f7922a596f889fd61fd1619e50154629172f5113c03da0"
+    },
+    {
+      "id": "wakebeach-257-dormagen",
+      "file": "wakebeach-257-dormagen.yaml",
+      "sha256": "86b0aad88029d2c67038f560f2acea25323fc8b81c2f59df237d268a98678f63"
+    },
+    {
+      "id": "wakepark-brombachsee",
+      "file": "wakepark-brombachsee.yaml",
+      "sha256": "7e7ad0e99af9af98460df651fad85d30b15b0db44fd88e4271f696499f6d500c"
+    },
+    {
+      "id": "wakepark-fehmarn",
+      "file": "wakepark-fehmarn.yaml",
+      "sha256": "b7ae4a1b03ab5da7d0d1cdd3e17bf524be3a9f26fb7f285baa5fe5ae2d8b7e89"
+    },
+    {
       "id": "wakepark-groningen",
       "file": "wakepark-groningen.yaml",
       "sha256": "c0b0d0d55715f66e2886b975b0eca84a6b2f72e0aa819b196f37fbab6ae22878"
     },
     {
+      "id": "wakepark-grossbeeren",
+      "file": "wakepark-grossbeeren.yaml",
+      "sha256": "bdf2b7c0ea13548ed06b3e1933417437da0a20de596c07e2ff1733f98670330e"
+    },
+    {
+      "id": "wakepark-pfullendorf",
+      "file": "wakepark-pfullendorf.yaml",
+      "sha256": "c8fdea3eeb8cf176be2d6ff19f1c158f4295e6b1cfc0aa7327aad89506437e8b"
+    },
+    {
+      "id": "wakepark-thulba",
+      "file": "wakepark-thulba.yaml",
+      "sha256": "2f4570ec2bd96e62ac5b27c26eb730f571d1093668b7afa6177df0b8520ad261"
+    },
+    {
+      "id": "wakepark-triolago-riol",
+      "file": "wakepark-triolago-riol.yaml",
+      "sha256": "677ea11be782d69c64cdc2124248b180437386a4cad74c354cbd16201764a47e"
+    },
+    {
+      "id": "wakepark-tunisee-freiburg",
+      "file": "wakepark-tunisee-freiburg.yaml",
+      "sha256": "dbc8881d0dd3888aa01266b3d9089fcace3754ba610ad044c322b05d4a332a26"
+    },
+    {
+      "id": "waketoolz-wakepark-woerth",
+      "file": "waketoolz-wakepark-woerth.yaml",
+      "sha256": "b40efcc320b7d1f5cfcc63b2bab6358e8ee95d70e332645eaf172e6c044b07ff"
+    },
+    {
       "id": "wakeup-antwerp",
       "file": "wakeup-antwerp.yaml",
       "sha256": "285be5b49af4a98665ef59228b5f4d6109bed72ded7ae425bf58b578c817623c"
+    },
+    {
+      "id": "wasserski-bleibtreusee",
+      "file": "wasserski-bleibtreusee.yaml",
+      "sha256": "2f497d3b0cf6ad4411572b6e4fa51f093bc1b76f17967fd2e82edb0cf8e48cfe"
+    },
+    {
+      "id": "wasserski-hamm",
+      "file": "wasserski-hamm.yaml",
+      "sha256": "0b3281ce0745bf079f78c070accc5740bf026fe4ef5d21183c5f28acc4a47ac9"
+    },
+    {
+      "id": "wasserski-jagel",
+      "file": "wasserski-jagel.yaml",
+      "sha256": "a3730be6681015f671d43ca52c119be4cb8287eecb42c171e108e53621fb8e01"
+    },
+    {
+      "id": "wasserski-kirchheim-seepark",
+      "file": "wasserski-kirchheim-seepark.yaml",
+      "sha256": "9d969bdb9c4afa6e42ec1ef93756c66491e105a5b86045364bf7ea963eefef0e"
+    },
+    {
+      "id": "wasserski-langenfeld",
+      "file": "wasserski-langenfeld.yaml",
+      "sha256": "4697b1ddbb4e5ef4659821842617947dc3f74d42ea3d5fbfc59db3d191b2612b"
+    },
+    {
+      "id": "wasserski-paderborn",
+      "file": "wasserski-paderborn.yaml",
+      "sha256": "85db0cd7c89c36c91a41fd2bdc4e64be60f25cd5b34eaeb2dc34e75fde9b61fd"
+    },
+    {
+      "id": "wasserski-st-leon",
+      "file": "wasserski-st-leon.yaml",
+      "sha256": "22ad0056b41b24ad78ecca51cdd54a931b8a098d3fe623bf003bd2276ac977d1"
+    },
+    {
+      "id": "wasserski-wakeboard-hamburg",
+      "file": "wasserski-wakeboard-hamburg.yaml",
+      "sha256": "df721afe5844916ecaf46c338f919eee9f1e71dacd02c34c9956dde6172198ce"
+    },
+    {
+      "id": "wasserski-wakeboard-kalletal",
+      "file": "wasserski-wakeboard-kalletal.yaml",
+      "sha256": "751e07093ed3a3c6f33740a5b42fb7a182e6ee079642662ca406e9474618d4b8"
+    },
+    {
+      "id": "wasserskilift-zachun",
+      "file": "wasserskilift-zachun.yaml",
+      "sha256": "91ca4899d4e9d70761a1bb5374f421a09f56eff7e0d9d2e34a3efad5f8e0b6e0"
+    },
+    {
+      "id": "wasserskipark-aschheim",
+      "file": "wasserskipark-aschheim.yaml",
+      "sha256": "397e09000166bfa209ac5119359a7b19f86df52038a6148ca0bc0ae44d22bdce"
+    },
+    {
+      "id": "wasserskipark-damp",
+      "file": "wasserskipark-damp.yaml",
+      "sha256": "4425c636c6e2f4714e8849111b4955fb501298327bd191fcd3f146a1571ec01e"
+    },
+    {
+      "id": "wasserskipark-zossen",
+      "file": "wasserskipark-zossen.yaml",
+      "sha256": "87c08243e77c897989147b332b6d613b4f306211250a039ce03cc40ed42c1f17"
+    },
+    {
+      "id": "wasserskiseilbahn-neubrandenburg",
+      "file": "wasserskiseilbahn-neubrandenburg.yaml",
+      "sha256": "99fe4fd5182e74606ded3303851f3df459953a5aca028bbb0167cd844794d4b8"
     },
     {
       "id": "waterskibaan-sneek",
@@ -127,9 +377,24 @@
       "sha256": "e80d4bdf95afabe5d2aa13a4be280286b88cd1f9b05c3f773e04455666ed557e"
     },
     {
+      "id": "wawaco-weissenhaeuser-strand",
+      "file": "wawaco-weissenhaeuser-strand.yaml",
+      "sha256": "3a57eeac9dd0ec79adfee5b23849446fdb4c730354c0a6e192ef056a40956685"
+    },
+    {
+      "id": "wet-and-wild-velten",
+      "file": "wet-and-wild-velten.yaml",
+      "sha256": "0048d385f474c0463634a0aaffe738f41720f862d8fa5ea67b4015867c76d00f"
+    },
+    {
       "id": "wetnwild-alphen",
       "file": "wetnwild-alphen.yaml",
       "sha256": "43126e3016fffc7950e6eb052cd3ff1ab6f42181279dc15fd125d60f951a3443"
+    },
+    {
+      "id": "wildwakepark-steinberger-see",
+      "file": "wildwakepark-steinberger-see.yaml",
+      "sha256": "6fcc100a2cd30e99c48a6a323d48cb158e11ffc4cc8344e4609b3e0f5a72d976"
     },
     {
       "id": "wollebrand-honselersdijk",

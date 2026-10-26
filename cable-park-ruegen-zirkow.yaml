@@ -1,0 +1,226 @@
+version: 1
+id: cable-park-ruegen-zirkow
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Cable Park Rügen
+short_name: Cable Park Rügen
+languages:
+  - de
+  - en
+  - nl
+address: "Am Kapellenberg 1, 18528 Zirkow"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 54.379395
+  lon: 13.525154
+
+phone: "+49 38393 131470"
+email: "info@wasserskiruegen.de"
+website: https://wasserskiruegen.de
+
+opening:
+  source_url: "https://wasserskiruegen.de/oeffnungszeiten/"
+  booking: none
+  note: >-
+    Die Saison 2026 begann am 4. April. Im Juli und August ist täglich ab 12 Uhr bis
+    Sonnenuntergang geöffnet, in der Vor- und Nachsaison ändern sich die Zeiten mit
+    Nachfrage und Wetter. Verbindliche Zeiten stehen auf Google.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche unter 16 Jahre
+          en: youth under 16
+          nl: jeugd onder 16 jaar
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "29"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche unter 16 Jahre
+          en: youth under 16
+          nl: jeugd onder 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "49"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "39"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche unter 16 Jahre
+          en: youth under 16
+          nl: jeugd onder 16 jaar
+  - name: Beginner card
+    options:
+      - amount: "49"
+        currency: EUR
+        per:
+          de: "2 Stunden mit Ski und Material"
+          en: "2 hours with skis and gear"
+          nl: "2 uur met ski en materiaal"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "44"
+        currency: EUR
+        per:
+          de: "2 Stunden mit Ski und Material"
+          en: "2 hours with skis and gear"
+          nl: "2 uur met ski en materiaal"
+        note:
+          de: Jugendliche unter 16 Jahre
+          en: youth under 16
+          nl: jeugd onder 16 jaar
+  - name: Beginner card easy board
+    options:
+      - amount: "63"
+        currency: EUR
+        per:
+          de: "2 Stunden mit Wakeboard und Material"
+          en: "2 hours with wakeboard and gear"
+          nl: "2 uur met wakeboard en materiaal"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "59"
+        currency: EUR
+        per:
+          de: "2 Stunden mit Wakeboard und Material"
+          en: "2 hours with wakeboard and gear"
+          nl: "2 uur met wakeboard en materiaal"
+        note:
+          de: Jugendliche unter 16 Jahre
+          en: youth under 16
+          nl: jeugd onder 16 jaar
+  - name: Season pass 2026
+    options:
+      - amount: "749"
+        currency: EUR
+        note:
+          de: ab 18 Jahren
+          en: "18 and older"
+          nl: vanaf 18 jaar
+      - amount: "629"
+        currency: EUR
+        note:
+          de: "16 bis 17 Jahre"
+          en: "16 to 17"
+          nl: "16 t/m 17 jaar"
+      - amount: "499"
+        currency: EUR
+        note:
+          de: "10 bis 15 Jahre"
+          en: "10 to 15"
+          nl: "10 t/m 15 jaar"
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per: hour
+        note:
+          de: Easy
+          en: easy
+          nl: easy
+      - amount: "15"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Easy
+          en: easy
+          nl: easy
+      - amount: "25"
+        currency: EUR
+        per: day
+        note:
+          de: Easy
+          en: easy
+          nl: easy
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+      - amount: "25"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+  - name: Wetsuit rental
+    options:
+      - amount: "9"
+        currency: EUR
+        per: hour
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "15"
+        currency: EUR
+        per: day
+
+facilities:
+  - Wasserski und Schwimmweste kostenlos
+  - AQUAFUN Wasserpark
+  - Restaurant
+  - Camping
+  - Ferienwohnungen
+
+description: >-
+  Wasserskianlage in Zirkow auf Rügen mit Wasserpark, Restaurant und Camping.
