@@ -18,8 +18,8 @@ the reference style. Applies whenever an AI agent drafts or rewrites this text, 
 4. **Short.** One or two sentences per field. If there's more to say, that's a sign the field has too
    much in it, not a reason to write a paragraph.
 5. **Wakeboard slang stays English** per [AGENTS.md](../AGENTS.md#wakeboard-slang-all-locales): *kicker*,
-   *rail*, *box*, *pop*, *cut in*, *dock*, *set*, *lap*, *session* keep their English form inside Dutch
-   sentences. Don't translate them.
+   *rail*, *box*, *pop*, *cut in*, *dock*, *set*, *lap* keep their English form inside Dutch
+   sentences. Don't translate them. The exception is *session*, which is *sessie* in Dutch.
 6. **Only what's confirmed.** Per the `park-data-collection` skill, don't add a claim (difficulty,
    suitability, atmosphere) that isn't on the source page.
 

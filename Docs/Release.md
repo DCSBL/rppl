@@ -18,9 +18,9 @@ The newest Xcode does not run on the maintainer's Mac, so releases are built in 
 ## Cut a release
 
 1. Merge what you want to ship to `main`. Check the PR checks (lint, tests) were green.
-2. GitHub → **Releases** → **Draft a new release**.
-3. **Tag**: create a semver tag targeting `main`, with or without a leading `v`: `2026.9.1` or `v2026.9.1`. For a candidate you want to iterate on, add `-beta.1`, `-beta.2`, and so on.
-4. **Description**: write the release notes, or use **Generate release notes** (PR titles). Testers see this text as "What to Test".
+2. GitHub → **Releases**. Two drafts are always waiting (see [Draft releases](#draft-releases)): the next beta (`2026.10.8-beta.5`) and the next final (`2026.10.8`). Open the one you want. Without a draft, **Draft a new release** works as before.
+3. **Tag**: the draft already has it. By hand, create a semver tag targeting `main`, with or without a leading `v`: `2026.9.1` or `v2026.9.1`. For a candidate you want to iterate on, add `-beta.1`, `-beta.2`, and so on.
+4. **Description**: the draft has the notes (PR titles since the previous release). Edit them if needed. Testers see this text as "What to Test".
 5. **Publish**. The tag is created. GitHub Actions → **Release branch** then moves `release/X.Y.Z` to the tagged commit, which starts the Xcode Cloud **Release** workflow.
 6. Check the run:
    - GitHub Actions → **Release preflight** shows the tag verdict and a preview of the "What to Test" text. Red means fix the release, then **Rebuild** in Xcode Cloud (the build only reads the description when it starts).
@@ -35,10 +35,25 @@ Tag rules (the **Release branch** workflow fails on anything else and no build s
 |-----|--------|
 | `2026.9.1`, `v2026.9.1` | version `2026.9.1` |
 | `2026.9.1-beta.2`, `v2026.9.1-beta.2` | version `2026.9.1` (suffix only labels the release) |
-| `2026.10.2-duo.1`, `v2026.10.2-duo.1` | version `2026.10.2`; a device test build from `wip/iphone-duo` (see [Duo test builds](#duo-test-builds)) |
 | `2026.9`, `v1.2`, `latest`, `vNext` | rejected; App Store versions are three integers |
 
 Build numbers are not set by the repo. Xcode Cloud assigns an integer per app and increments it for every build.
+
+## Draft releases
+
+The **Release: drafts** workflow (`.github/workflows/release-drafts.yml`, `scripts/ci/draft_releases.py`) keeps two drafts on GitHub. A draft has no tag and builds nothing; publishing it does.
+
+| Draft | Tag | Notes are the changes since |
+|-------|-----|-----------------------------|
+| Next beta (pre-release) | `X.Y.Z-beta.N` | the previous beta, or the previous final if that is newer |
+| Next final | `X.Y.Z` | the previous final release |
+
+`X.Y.Z` is the version in progress: the highest version that has no final yet, so a beta series keeps its number until its final is out. Once the final is published the drafts move on to the next version (`N + 1` this month, `.1` in a new month) and appear within a minute, also when nothing was merged (the notes then say "No changes since …"). That is what lets you submit the next version for TestFlight early approval. Example: `2026.10.7-beta.4` is the last release, so the drafts are `2026.10.7-beta.5` and `2026.10.7`; publish beta.5 and the beta draft becomes `2026.10.7-beta.6`; publish `2026.10.7` and the drafts become `2026.10.8-beta.1` and `2026.10.8`.
+
+- The drafts refresh on every push to `main` and every published release (or run the workflow by hand). The refresh **overwrites** the notes, so edit a draft right before publishing it.
+- Notes are the squash-merged PR titles on `main`, grouped by the type of the title (`feat` New, `fix` Fixed, `refactor`/`test`/`docs`/`chore` Under the hood, anything else Other).
+- Tags with another suffix (`-rc.1`, ...) are ignored when numbering and when picking the previous release.
+- Release Drafter is not used: it manages one draft per config and would let a second config overwrite the first.
 
 ## Release branches and build groups
 
@@ -56,10 +71,6 @@ Consequences:
 - `release/*` branches are build triggers, not development branches. Do not push work to them by hand; a push without a marker or a matching release tag fails in the Post-Clone step.
 - The branch history is a chain of marker snapshots, not `main`'s history. Never merge it back.
 - TestFlight → **Versions** is still the per-version overview of builds. **Build Groups** now shows one entry per version too.
-
-## Duo test builds
-
-For trying a branch on a physical device before it reaches `main` (iPhone Duo work on `wip/iphone-duo`): publish a GitHub release with a `-duo.N` tag targeting `wip/iphone-duo`, for example `2026.10.2-duo.1`. The tag check requires the tagged commit to be on `wip/iphone-duo` instead of `main`; everything else is the normal flow (Xcode Cloud, TestFlight internal). The release branch is `release/duo/X.Y.Z`, so Duo builds get their own Build Group and never mix with the real release of the same version. Pick a version above the one on the App Store (a live version is closed for new builds). Mark the GitHub release as a pre-release and never promote a `-duo` build to external testers or the App Store.
 
 ## Versions, betas and Beta App Review
 

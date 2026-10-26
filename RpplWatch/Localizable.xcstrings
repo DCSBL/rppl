@@ -22,10 +22,22 @@
             "value" : "%lld park days are on your iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld journées au park sont sur ton iPhone."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld parkdagen staan op je iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Parktage sind auf deinem iPhone."
           }
         }
       }
@@ -38,10 +50,22 @@
             "value" : "Ack failed: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l’ack : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ack mislukt: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack fehlgeschlagen: %@"
           }
         }
       }
@@ -54,7 +78,19 @@
             "value" : "Acked %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack %@"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ack %@"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ack %@"
@@ -87,10 +123,22 @@
             "value" : "Avg speed"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitesse moy."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gem. snelheid"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ø Geschw."
           }
         }
       }
@@ -103,10 +151,22 @@
             "value" : "Cable Park"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable park"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kabelpark"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable Park"
           }
         }
       }
@@ -119,10 +179,22 @@
             "value" : "Calories"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calorieën"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalorien"
           }
         }
       }
@@ -135,10 +207,22 @@
             "value" : "Cancel"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuleren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
           }
         }
       }
@@ -185,10 +269,22 @@
             "value" : "denied"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "refusé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "geweigerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abgelehnt"
           }
         }
       }
@@ -201,10 +297,22 @@
             "value" : "Detection: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détection : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detectie: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erkennung: %@"
           }
         }
       }
@@ -217,10 +325,22 @@
             "value" : "Discard"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwerfen"
           }
         }
       }
@@ -233,10 +353,22 @@
             "value" : "Discard: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suppression : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwerfen: %@"
           }
         }
       }
@@ -249,10 +381,22 @@
             "value" : "Discarding…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suppression…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verworfen …"
           }
         }
       }
@@ -265,10 +409,22 @@
             "value" : "DIST"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIST"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "AFST"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIST"
           }
         }
       }
@@ -281,10 +437,22 @@
             "value" : "Distance"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afstand"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distanz"
           }
         }
       }
@@ -297,10 +465,22 @@
             "value" : "Done"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
           }
         }
       }
@@ -313,10 +493,22 @@
             "value" : "Duration"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duur"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dauer"
           }
         }
       }
@@ -329,10 +521,22 @@
             "value" : "Elapsed"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écoulé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verstreken"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstrichen"
           }
         }
       }
@@ -345,10 +549,22 @@
             "value" : "Failed"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mislukt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlgeschlagen"
           }
         }
       }
@@ -361,10 +577,22 @@
             "value" : "File delivered - awaiting phone ack"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fichier livré - en attente de l’ack du téléphone"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bestand afgeleverd - wachten op telefoon-ack"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei übergeben – warte auf Ack vom iPhone"
           }
         }
       }
@@ -394,7 +622,19 @@
             "value" : "Flush: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flush : %@"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flush: %@"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flush: %@"
@@ -444,10 +684,22 @@
             "value" : "Health"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Santé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gezondheid"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
           }
         }
       }
@@ -460,10 +712,22 @@
             "value" : "Health auth: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorisation Santé : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gezondheid-auth: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health-Auth: %@"
           }
         }
       }
@@ -476,10 +740,22 @@
             "value" : "Health unavailable"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Santé indisponible"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gezondheid niet beschikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health nicht verfügbar"
           }
         }
       }
@@ -492,10 +768,22 @@
             "value" : "Heart rate %@ beats per minute"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque %@ battements par minute"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hartslag %@ slagen per minuut"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herzfrequenz %@ Schläge pro Minute"
           }
         }
       }
@@ -508,10 +796,22 @@
             "value" : "Heart rate unavailable"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque indisponible"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hartslag niet beschikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herzfrequenz nicht verfügbar"
           }
         }
       }
@@ -524,10 +824,22 @@
             "value" : "Helps tell when you are riding versus resting at the dock."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aide à distinguer quand tu es en riding ou au repos au dock."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Helpt te bepalen of je aan het riden bent of rust bij de dock."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hilft zu erkennen, ob du gerade riding bist oder am Dock pausierst."
           }
         }
       }
@@ -540,10 +852,22 @@
             "value" : "Idle"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inactief"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv"
           }
         }
       }
@@ -556,10 +880,22 @@
             "value" : "Inactive"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inactief"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv"
           }
         }
       }
@@ -572,10 +908,22 @@
             "value" : "Inactive for"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif depuis"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inactief sinds"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv seit"
           }
         }
       }
@@ -588,10 +936,22 @@
             "value" : "iPhone not reachable - transfers will queue"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone injoignable - les transferts seront mis en file d’attente"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone niet bereikbaar - transfers gaan in wachtrij"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone nicht erreichbar – Übertragungen kommen in die Warteschlange"
           }
         }
       }
@@ -604,10 +964,22 @@
             "value" : "iPhone reachable"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone joignable"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone bereikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone erreichbar"
           }
         }
       }
@@ -620,10 +992,22 @@
             "value" : "Keep"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bewaren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behalten"
           }
         }
       }
@@ -636,10 +1020,22 @@
             "value" : "KM/H"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KM/H"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "KM/U"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KM/H"
           }
         }
       }
@@ -652,7 +1048,19 @@
             "value" : "Laps"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laps"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laps"
@@ -668,7 +1076,19 @@
             "value" : "LAPS"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAPS"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAPS"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "LAPS"
@@ -684,10 +1104,22 @@
             "value" : "Last"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laatste"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte"
           }
         }
       }
@@ -700,10 +1132,22 @@
             "value" : "Last set"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier set"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laatste set"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letztes Set"
           }
         }
       }
@@ -716,10 +1160,22 @@
             "value" : "Last set %1$@, %2$@, %3$lld laps"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier set %1$@, %2$@, %3$lld laps"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laatste set %1$@, %2$@, %3$lld laps"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letztes Set %1$@, %2$@, %3$lld Laps"
           }
         }
       }
@@ -732,10 +1188,22 @@
             "value" : "Locks the screen to prevent accidental taps"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouille l’écran pour éviter les touches accidentelles"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vergrendelt het scherm tegen per ongeluk tikken"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sperrt den Bildschirm gegen versehentliche Berührungen"
           }
         }
       }
@@ -748,10 +1216,22 @@
             "value" : "Location"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Locatie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standort"
           }
         }
       }
@@ -781,10 +1261,22 @@
             "value" : "Mark transfer: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer le transfert : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transfer markeren: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übertragung markieren: %@"
           }
         }
       }
@@ -814,10 +1306,22 @@
             "value" : "Motion"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beweging"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung"
           }
         }
       }
@@ -864,10 +1368,22 @@
             "value" : "No GPS"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de GPS"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen GPS"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein GPS"
           }
         }
       }
@@ -880,10 +1396,22 @@
             "value" : "No GPS start location"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de position GPS de départ"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen GPS-startlocatie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein GPS-Startort"
           }
         }
       }
@@ -896,10 +1424,22 @@
             "value" : "No sets yet"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de sets"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nog geen sets"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Sets"
           }
         }
       }
@@ -912,10 +1452,22 @@
             "value" : "On iPhone, open Settings > Privacy & Security > Location Services > Rppl, allow While Using the App and turn on Precise Location."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone, ouvre Réglages > Confidentialité et sécurité > Service de localisation > Rppl, autorise Lorsque l’app est active et active Position exacte."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Locatievoorzieningen > Rppl, sta Bij gebruik van de app toe en zet Exacte locatie aan."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne auf dem iPhone Einstellungen > Datenschutz & Sicherheit > Ortungsdienste > Rppl, erlaube „Beim Verwenden der App“ und aktiviere „Genauer Standort“."
           }
         }
       }
@@ -928,10 +1480,22 @@
             "value" : "On iPhone, open Settings > Privacy & Security > Motion & Fitness and enable Rppl."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone, ouvre Réglages > Confidentialité et sécurité > Mouvement et forme et active Rppl."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open op iPhone Instellingen > Privacy en beveiliging > Beweging en fitness en schakel Rppl in."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne auf dem iPhone Einstellungen > Datenschutz & Sicherheit > Bewegung & Fitness und aktiviere Rppl."
           }
         }
       }
@@ -944,10 +1508,22 @@
             "value" : "Park day is on your iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La journée au park est sur ton iPhone."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parkdag staat op je iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Parktag ist auf deinem iPhone."
           }
         }
       }
@@ -960,10 +1536,22 @@
             "value" : "Pause"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pauze"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
           }
         }
       }
@@ -976,10 +1564,22 @@
             "value" : "Paused"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pause"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gepauzeerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausiert"
           }
         }
       }
@@ -992,10 +1592,22 @@
             "value" : "Pending transfers: %lld"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferts en attente : %lld"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openstaande transfers: %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausstehende Übertragungen: %lld"
           }
         }
       }
@@ -1008,10 +1620,22 @@
             "value" : "Pending: %lld"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente : %lld"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openstaand: %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausstehend: %lld"
           }
         }
       }
@@ -1024,10 +1648,22 @@
             "value" : "Permissions"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorisations"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Machtigingen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen"
           }
         }
       }
@@ -1040,10 +1676,22 @@
             "value" : "Phone connected"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléphone connecté"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Telefoon verbonden"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone verbunden"
           }
         }
       }
@@ -1056,10 +1704,22 @@
             "value" : "Queued %@…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En file d’attente %@…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "In wachtrij %@…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Warteschlange %@ …"
           }
         }
       }
@@ -1089,10 +1749,22 @@
             "value" : "Ready to sync"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt à synchroniser"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klaar om te synchroniseren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit zum Sync"
           }
         }
       }
@@ -1105,10 +1777,22 @@
             "value" : "Recording"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnemen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme"
           }
         }
       }
@@ -1121,10 +1805,22 @@
             "value" : "Recording stopped"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement arrêté"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnemen gestopt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme gestoppt"
           }
         }
       }
@@ -1154,10 +1850,22 @@
             "value" : "Required to record GPS during your park session so Rppl can track sets and distance."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessaire pour enregistrer le GPS pendant ta session au park afin que Rppl puisse suivre les sets et la distance."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig om GPS tijdens je park session op te nemen zodat Rppl sets en afstand kan volgen."
+            "value" : "Nodig om GPS tijdens je parksessie op te nemen zodat Rppl sets en afstand kan volgen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nötig, um GPS während deiner Park-Session aufzuzeichnen, damit Rppl Sets und Distanz verfolgen kann."
           }
         }
       }
@@ -1170,10 +1878,22 @@
             "value" : "Required to save the workout to Fitness and record heart rate while you ride."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessaire pour enregistrer l’entraînement dans Forme et mesurer ta fréquence cardiaque pendant le riding."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nodig om de workout in Fitness op te slaan en hartslag tijdens het riden vast te leggen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nötig, um das Workout in Fitness zu speichern und beim Riding die Herzfrequenz aufzuzeichnen."
           }
         }
       }
@@ -1186,10 +1906,22 @@
             "value" : "Resume"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hervatten"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen"
           }
         }
       }
@@ -1202,10 +1934,22 @@
             "value" : "Retry transfers"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relancer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transfers opnieuw"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut senden"
           }
         }
       }
@@ -1218,7 +1962,19 @@
             "value" : "RIDE"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RIDE"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RIDE"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "RIDE"
@@ -1234,7 +1990,19 @@
             "value" : "Sets"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sets"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sets"
@@ -1250,7 +2018,19 @@
             "value" : "Riding"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Riding"
@@ -1269,10 +2049,22 @@
             "value" : "Rppl session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Rppl"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl session"
+            "value" : "Rppl-sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl-Session"
           }
         }
       }
@@ -1285,10 +2077,22 @@
             "value" : "Rppl stopped after a problem. Everything up to %@ is saved. Start a new session."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl s’est arrêté suite à un problème. Tout jusqu’à %@ est enregistré. Démarre une nouvelle session."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rppl is gestopt na een probleem. Alles tot %@ is opgeslagen. Start een nieuwe session."
+            "value" : "Rppl is gestopt na een probleem. Alles tot %@ is opgeslagen. Start een nieuwe sessie."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rppl wurde nach einem Problem beendet. Alles bis %@ ist gespeichert. Starte eine neue Session."
           }
         }
       }
@@ -1301,10 +2105,22 @@
             "value" : "Save workout: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement de l’entraînement : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workout opslaan: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout speichern: %@"
           }
         }
       }
@@ -1317,10 +2133,22 @@
             "value" : "Sensors-only (no HK workout)"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capteurs uniquement (pas d’entraînement HK)"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alleen sensors (geen HK-workout)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur Sensoren (kein HK-Workout)"
           }
         }
       }
@@ -1333,7 +2161,19 @@
             "value" : "Session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Session"
@@ -1349,10 +2189,22 @@
             "value" : "Session complete"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session terminée"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session voltooid"
+            "value" : "Sessie voltooid"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session abgeschlossen"
           }
         }
       }
@@ -1365,10 +2217,22 @@
             "value" : "Averaged track"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trace moyenne"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gemiddelde track"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemittelte Strecke"
           }
         }
       }
@@ -1381,7 +2245,19 @@
             "value" : "Heatmap"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heatmap"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heatmap"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heatmap"
@@ -1397,10 +2273,22 @@
             "value" : "Session map"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte de la session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session map"
+            "value" : "Sessiekaart"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session-Karte"
           }
         }
       }
@@ -1413,10 +2301,22 @@
             "value" : "Show averaged track"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir trace moyenne"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gemiddelde track tonen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemittelte Strecke zeigen"
           }
         }
       }
@@ -1429,10 +2329,22 @@
             "value" : "Show heatmap"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir la heatmap"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heatmap tonen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heatmap zeigen"
           }
         }
       }
@@ -1445,10 +2357,22 @@
             "value" : "Session start location"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieu de départ de la session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Startlocatie van session"
+            "value" : "Startlocatie van sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startort der Session"
           }
         }
       }
@@ -1461,10 +2385,22 @@
             "value" : "Session start location map"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte du lieu de départ de la session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaart van startlocatie van session"
+            "value" : "Kaart van startlocatie van sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte des Startorts der Session"
           }
         }
       }
@@ -1477,10 +2413,22 @@
             "value" : "Session synced"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session synchronisée"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session gesynchroniseerd"
+            "value" : "Sessie gesynchroniseerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session synchronisiert"
           }
         }
       }
@@ -1493,10 +2441,22 @@
             "value" : "Sessions synced"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions synchronisées"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions gesynchroniseerd"
+            "value" : "Sessies gesynchroniseerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions synchronisiert"
           }
         }
       }
@@ -1509,10 +2469,22 @@
             "value" : "Shows full-screen map"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche la carte en plein écran"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toont kaart op volledig scherm"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt die Karte im Vollbild"
           }
         }
       }
@@ -1525,10 +2497,22 @@
             "value" : "Sim: Detected"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim : détecté"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sim: Detectie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Erkannt"
           }
         }
       }
@@ -1541,10 +2525,22 @@
             "value" : "Sim: Inactive"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim : inactif"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sim: Inactief"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Inaktiv"
           }
         }
       }
@@ -1557,7 +2553,19 @@
             "value" : "Sim: Ride"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim : ride"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim: Ride"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sim: Ride"
@@ -1573,7 +2581,19 @@
             "value" : "Start"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start"
@@ -1606,10 +2626,22 @@
             "value" : "Start Cable Park Session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer une session cable park"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start kabelpark session"
+            "value" : "Start kabelparksessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable-Park-Session starten"
           }
         }
       }
@@ -1626,7 +2658,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session starten"
+            "value" : "Sessie starten"
           }
         }
       }
@@ -1639,7 +2671,19 @@
             "value" : "Start Session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer session"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessie starten"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Session starten"
@@ -1659,7 +2703,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start session in \\(.applicationName)"
+            "value" : "Start sessie in \\(.applicationName)"
           }
         }
       }
@@ -1672,10 +2716,22 @@
             "value" : "Starting…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrage…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starten…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet …"
           }
         }
       }
@@ -1688,10 +2744,22 @@
             "value" : "Starts a session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarre une session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start een session"
+            "value" : "Start een sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet eine Session"
           }
         }
       }
@@ -1704,10 +2772,22 @@
             "value" : "Starts an Rppl cable-park recording session."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarre une session d’enregistrement Rppl au cable park."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start een Rppl recording session in het kabelpark."
+            "value" : "Start een Rppl-opnamesessie in het kabelpark."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet eine Rppl-Aufzeichnung im Cable Park."
           }
         }
       }
@@ -1720,10 +2800,22 @@
             "value" : "Stop"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stop"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopp"
           }
         }
       }
@@ -1736,10 +2828,22 @@
             "value" : "Stopped - waiting for phone ack"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêté - en attente de l’ack du téléphone"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gestopt - wachten op telefoon-ack"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestoppt – warte auf Ack vom iPhone"
           }
         }
       }
@@ -1752,10 +2856,22 @@
             "value" : "Stopping…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêt…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stoppen…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppt …"
           }
         }
       }
@@ -1768,10 +2884,22 @@
             "value" : "Stops recording and queues transfer to iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrête l’enregistrement et met le transfert vers l’iPhone en file d’attente."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stopt met opnemen en zet transfer naar iPhone in de wachtrij."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beendet die Aufnahme und stellt die Übertragung zum iPhone in die Warteschlange."
           }
         }
       }
@@ -1784,10 +2912,22 @@
             "value" : "Store: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stockage : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opslag: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speicher: %@"
           }
         }
       }
@@ -1834,7 +2974,19 @@
             "value" : "Sync %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync %@"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync %@"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sync %@"
@@ -1850,10 +3002,22 @@
             "value" : "Synced"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gesynchroniseerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisiert"
           }
         }
       }
@@ -1866,10 +3030,22 @@
             "value" : "Synced to iPhone"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisé avec l’iPhone"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gesynchroniseerd naar iPhone"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit iPhone synchronisiert"
           }
         }
       }
@@ -1882,10 +3058,22 @@
             "value" : "Syncing to iPhone"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation avec l’iPhone"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Synchroniseren naar iPhone"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisiere mit iPhone"
           }
         }
       }
@@ -1898,10 +3086,22 @@
             "value" : "Syncing…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Synchroniseren…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisiere …"
           }
         }
       }
@@ -1914,10 +3114,22 @@
             "value" : "Transfer error: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur de transfert : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transferfout: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übertragungsfehler: %@"
           }
         }
       }
@@ -1930,10 +3142,22 @@
             "value" : "Transfer failed (kept on Watch): %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfert échoué (conservé sur la Watch) : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transfer mislukt (blijft op Watch): %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übertragung fehlgeschlagen (bleibt auf der Watch): %@"
           }
         }
       }
@@ -1946,10 +3170,22 @@
             "value" : "Transfer list error: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur de liste de transferts : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transferlijstfout: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler in der Übertragungsliste: %@"
           }
         }
       }
@@ -1962,10 +3198,22 @@
             "value" : "Transferring…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfert…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Overzetten…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überträgt …"
           }
         }
       }
@@ -1978,10 +3226,22 @@
             "value" : "Turn Digital Crown to unlock"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tourne la Digital Crown pour déverrouiller"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Draai Digital Crown om te ontgrendelen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drehe die Digital Crown zum Entsperren"
           }
         }
       }
@@ -1994,10 +3254,22 @@
             "value" : "Type of Workout"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type d’entraînement"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type workout"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout-Typ"
           }
         }
       }
@@ -2010,10 +3282,22 @@
             "value" : "Under 30 seconds and no sets. Discard deletes it here. Keep transfers to iPhone."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins de 30 secondes et aucun set. Supprimer l’efface ici. Garder l’envoie vers l’iPhone."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Korter dan 30 seconden en geen sets. Verwijderen wist het hier. Bewaren stuurt naar iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unter 30 Sekunden und keine Sets. „Verwerfen“ löscht sie hier. „Behalten“ überträgt sie aufs iPhone."
           }
         }
       }
@@ -2043,10 +3327,22 @@
             "value" : "Water"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eau"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Water"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wasser"
           }
         }
       }
@@ -2059,10 +3355,22 @@
             "value" : "Disable Water Lock"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactiver Water Lock"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Water Lock uitschakelen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock ausschalten"
           }
         }
       }
@@ -2075,10 +3383,22 @@
             "value" : "Enable Water Lock"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer Water Lock"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Water Lock inschakelen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock einschalten"
           }
         }
       }
@@ -2091,10 +3411,22 @@
             "value" : "Water Lock"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Watervergrendeling"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Lock"
           }
         }
       }
@@ -2107,10 +3439,22 @@
             "value" : "WC activate error: %@"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur d’activation WC : %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "WC-activatiefout: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC-Aktivierungsfehler: %@"
           }
         }
       }
@@ -2123,10 +3467,22 @@
             "value" : "WC activated"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC activé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "WC geactiveerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC aktiviert"
           }
         }
       }
@@ -2139,10 +3495,22 @@
             "value" : "WC idle"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC inactif"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "WC inactief"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC inaktiv"
           }
         }
       }
@@ -2155,10 +3523,22 @@
             "value" : "WC not activated - will retry"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC non activé - nouvel essai"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "WC niet geactiveerd - opnieuw proberen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC nicht aktiviert – neuer Versuch"
           }
         }
       }
@@ -2171,10 +3551,22 @@
             "value" : "WC unsupported"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC non pris en charge"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "WC niet ondersteund"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WC nicht unterstützt"
           }
         }
       }
@@ -2187,7 +3579,19 @@
             "value" : "Workout"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entraînement"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workout"
@@ -2203,10 +3607,22 @@
             "value" : "Workout not authorized - tap Request permissions or enable in Health settings. Continuing without workout."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entraînement non autorisé - touche Demander les autorisations ou active-le dans les réglages Santé. Poursuite sans entraînement."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workout niet toegestaan - tik op Machtigingen vragen of zet aan in Gezondheid. Doorgaan zonder workout."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout nicht autorisiert – tippe auf „Berechtigungen“ oder aktiviere es in den Health-Einstellungen. Weiter ohne Workout."
           }
         }
       }
@@ -2219,10 +3635,22 @@
             "value" : "Workout: %@. Continuing sensors-only."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entraînement : %@. Poursuite avec les capteurs uniquement."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workout: %@. Doorgaan met alleen sensors."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout: %@. Weiter nur mit Sensoren."
           }
         }
       }
@@ -2235,10 +3663,22 @@
             "value" : "workout: authorized"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entraînement : autorisé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "workout: toegestaan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: autorisiert"
           }
         }
       }
@@ -2251,10 +3691,22 @@
             "value" : "workout: denied - enable in Settings › Health"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entraînement : refusé - active-le dans Réglages › Santé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "workout: geweigerd - zet aan in Instellingen › Gezondheid"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: abgelehnt – aktiviere es unter Einstellungen › Health"
           }
         }
       }
@@ -2267,10 +3719,22 @@
             "value" : "workout: notDetermined"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entraînement : non déterminé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "workout: niet bepaald"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: nicht festgelegt"
           }
         }
       }
@@ -2283,10 +3747,22 @@
             "value" : "workout: unknown"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entraînement : inconnu"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "workout: onbekend"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "workout: unbekannt"
           }
         }
       }
@@ -2299,10 +3775,22 @@
             "value" : "Timers paused"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minuteurs en pause"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Timers gepauzeerd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timer pausiert"
           }
         }
       }
@@ -2315,10 +3803,22 @@
             "value" : "On iPhone, open the Health app > Sharing > Apps > Rppl and turn on workout access. Or: Settings > Health > Data Access & Devices > Rppl."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone, ouvre l’app Santé > Partage > Apps > Rppl et active l’accès aux entraînements. Ou : Réglages > Santé > Accès aux données et appareils > Rppl."
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open op iPhone de Gezondheid-app > Delen > Apps > Rppl en zet workouttoegang aan. Of: Instellingen > Gezondheid > Toegang tot gegevens en apparaten > Rppl."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne auf dem iPhone die Health-App > Teilen > Apps und Dienste > Rppl und aktiviere den Workout-Zugriff. Oder: Einstellungen > Health > Datenzugriff & Geräte > Rppl."
           }
         }
       }
@@ -2331,7 +3831,19 @@
             "value" : "- BPM"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- BPM"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- BPM"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "- BPM"
@@ -2347,10 +3859,22 @@
             "value" : "Discard Session?"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la session ?"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session verwijderen?"
+            "value" : "Sessie verwijderen?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session verwerfen?"
           }
         }
       }
@@ -2363,10 +3887,22 @@
             "value" : "End Session?"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer la session ?"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session beëindigen?"
+            "value" : "Sessie beëindigen?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session beenden?"
           }
         }
       }
@@ -2379,10 +3915,22 @@
             "value" : "End Session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session beëindigen"
+            "value" : "Sessie beëindigen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session beenden"
           }
         }
       }
@@ -2395,7 +3943,19 @@
             "value" : "Cable"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable"
+          }
+        },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cable"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cable"
@@ -2411,10 +3971,22 @@
             "value" : "Current"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cours"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Huidig"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell"
           }
         }
       }
@@ -2427,10 +3999,22 @@
             "value" : "Saving…"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement…"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opslaan…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichert …"
           }
         }
       }
@@ -2443,10 +4027,22 @@
             "value" : "Saving session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement de la session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Session opslaan"
+            "value" : "Sessie opslaan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session speichern"
           }
         }
       }
@@ -2459,10 +4055,22 @@
             "value" : "Watch storage almost full - free up space"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stockage de la Watch presque plein - libère de l’espace"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Watch-opslag bijna vol - maak ruimte vrij"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch-Speicher fast voll – gib Speicherplatz frei"
           }
         }
       }
@@ -2475,10 +4083,22 @@
             "value" : "Screen-on only"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écran allumé uniquement"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alleen scherm aan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur bei Display an"
           }
         }
       }
@@ -2491,10 +4111,22 @@
             "value" : "Close"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sluit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
           }
         }
       }
@@ -2507,10 +4139,22 @@
             "value" : "Save failing"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l’enregistrement"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opslaan mislukt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichern schlägt fehl"
           }
         }
       }
@@ -2523,10 +4167,22 @@
             "value" : "Storage low"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stockage faible"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weinig opslag"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenig Speicher"
           }
         }
       }
@@ -2539,10 +4195,22 @@
             "value" : "Battery low"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Batterie faible"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Batterij bijna leeg"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akku fast leer"
           }
         }
       }
@@ -2555,10 +4223,22 @@
             "value" : "Approximate location"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position approximative"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geschatte locatie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungefährer Standort"
           }
         }
       }
@@ -2571,10 +4251,22 @@
             "value" : "Recording at risk"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement menacé"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opname loopt risico"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme in Gefahr"
           }
         }
       }
@@ -2587,10 +4279,22 @@
             "value" : "Configure"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configureer"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einrichten"
           }
         }
       }
@@ -2603,10 +4307,22 @@
             "value" : "Sets up permissions, then starts a session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure les autorisations, puis démarre une session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stelt machtigingen in en start dan een session"
+            "value" : "Stelt machtigingen in en start dan een sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richtet Berechtigungen ein und startet dann eine Session"
           }
         }
       }
@@ -2619,10 +4335,22 @@
             "value" : "Continue"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ga door"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
           }
         }
       }
@@ -2635,10 +4363,22 @@
             "value" : "Needed for your session"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessaire pour ta session"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nodig voor je session"
+            "value" : "Nodig voor je sessie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für deine Session nötig"
           }
         }
       }
@@ -2651,10 +4391,22 @@
             "value" : "Asked when you continue"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandé quand tu continues"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wordt gevraagd zodra je doorgaat"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird beim Fortfahren abgefragt"
           }
         }
       }

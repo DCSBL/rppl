@@ -34,7 +34,7 @@ repos:
         exclude: ^Rppl(?:Watch)?/Resources/Exports/|package-lock\.json$|^ops/hours-watch/markers\.yaml$|^marketing/device-frames/.*\.rtf$
         args:
           - "--skip=*.pbxproj,*.xcuserstate,*.png,*.jpg,*.xcstrings,Exports,Rppl/Resources/Exports,RpplWatch/Resources/Exports,RpplCore/.build,.swiftpm,DerivedData,tools"
-          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin,weerd,periode,ist,oder,vor,lief,startet,tage,oktober,dezember,juni,juli"
+          - "--ignore-words-list=te,crate,mot,inout,alllocations,als,openen,mappin,weerd,periode,oktober,ans,combinaison,fixe,restauration,ist,oder,vor,lief,startet,tage,dezember,juni,juli"
           # Park text in other languages: German words (ist, oder, vor, month names) in a park's first-language text, and
           # the `nl:`/`fr:`/`de:` lines of a language map (Docs/Parks.md#languages).
           - '--ignore-regex=^\s+(nl|fr|de|es|it|pt|pl|da|sv)(-[A-Za-z0-9]+)?:\s.*$'

@@ -25,4 +25,11 @@ struct WindowLayoutTests {
         #expect(WindowLayout.resolve(width: 874, isAccessibilityTextSize: false, isCompactWidthClass: true) == .stack)
         #expect(WindowLayout.resolve(width: 874, isAccessibilityTextSize: false, isCompactWidthClass: false) == .twoPane)
     }
+
+    @Test("the sidebar hosts the map only when collapsed, whatever the width")
+    func sidebarHostsMapFollowsSizeClass() {
+        #expect(WindowLayout.sidebarHostsMap(wantsMap: true, isCompactWidthClass: true))
+        #expect(!WindowLayout.sidebarHostsMap(wantsMap: true, isCompactWidthClass: false))
+        #expect(!WindowLayout.sidebarHostsMap(wantsMap: false, isCompactWidthClass: true))
+    }
 }

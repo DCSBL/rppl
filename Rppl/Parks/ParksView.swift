@@ -75,8 +75,11 @@ struct ParksView: View {
         )
     }
 
-    /// The map replaces the list only in a narrow window; a wide window shows it beside the list.
-    private var showsMapInList: Bool { showMap && layout == .stack }
+    /// The map replaces the list only while the split view is collapsed into one stack; otherwise it shows
+    /// beside the list. Follows the size class, not the width, so the column never swaps mid-fold.
+    private var showsMapInList: Bool {
+        WindowLayout.sidebarHostsMap(wantsMap: showMap, isCompactWidthClass: horizontalSizeClass == .compact)
+    }
 
     /// The park open in the detail column (pushed when the split view is collapsed).
     private var selectedPark: Park? {

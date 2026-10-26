@@ -1,0 +1,43 @@
+# Release drafts. Keeps two draft GitHub releases up to date (scripts/ci/draft_releases.py, Docs/Release.md):
+#
+# - the next beta, X.Y.Z-beta.N: changes since the previous beta
+# - the next final, X.Y.Z: changes since the previous final release
+#
+# push to main: refresh the notes of both drafts.
+# release published: the next drafts appear right away (a new beta number, or the next version once the
+#   final is out), with "No changes" notes when nothing was merged, so a build can be released early.
+#
+# Drafts create no tag and start no build; only publishing one does. Runs a few seconds on Linux.
+# No Release Drafter: it keeps one draft per config and would let two configs overwrite each other.
+
+name: "Release: drafts"
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: release-drafts
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  drafts:
+    name: Update draft releases
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Update drafts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/ci/draft_releases.py

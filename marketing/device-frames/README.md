@@ -5,13 +5,15 @@ Apple device frames used to render the App Store marketing stills in [`marketing
 | File | Frame | Screen opening (px) |
 |------|-------|---------------------|
 | `iPhone 18 Pro - Black - Portrait.png` | iPhone 18 Pro, black, portrait | 1206 x 2622 at (72, 69) in a 1350 x 2760 image |
+| `iPhone Duo - Night Sky - Outer Closed Portrait.png` | iPhone Duo, Night Sky, folded (outer display), portrait | 1398 x 2034 at (88, 80) in a 1574 x 2194 image |
+| `iPhone Duo - Night Sky - Inner Open Landscape.png` | iPhone Duo, Night Sky, unfolded (inner display), landscape | 2853 x 2007 at (120, 120) in a 3093 x 2247 image |
 | `AW Ultra 3 - Black - Ocean Band Black.png` | Apple Watch Ultra 3, black, Ocean Band | 422 x 514 at (89, 223) in a 600 x 960 image |
 
-The screen openings are transparent. A screenshot is placed behind the frame, so its size must match the opening: iPhone screenshots are scaled to the phone opening, Watch screenshots (422 x 514) fit the watch opening exactly.
+The screen openings are transparent. The Duo slides (`layout: duo`) draw the screenshot clipped to the outline of the device first, so its square corners never show past the rounded frame. A screenshot is placed behind the frame, so its size must match the opening: iPhone screenshots are scaled to the phone opening, Watch screenshots (422 x 514) fit the watch opening exactly.
 
 ## Source
 
-Both PNGs come from the Apple Design Resources at <https://developer.apple.com/design/resources/> (product bezels for iPhone and Apple Watch). They are committed unmodified, together with the license that came with the download: [`Apple Design Resources License.rtf`](<Apple Design Resources License.rtf>).
+The PNGs come from the Apple Design Resources at <https://developer.apple.com/design/resources/> (product bezels for iPhone and Apple Watch). They are committed unmodified, together with the license that came with the download: [`Apple Design Resources License.rtf`](<Apple Design Resources License.rtf>).
 
 ## Why they are committed
 

@@ -151,6 +151,16 @@ export function validateConfig(cfg) {
     } else if (s.layout === "search") {
       if (!s.image || !s.title || !s.screenshot || !s.watch_screenshot) fail(`slides[${i}] (search) needs image, title, screenshot and watch_screenshot`);
       parseText(s.text);
+    } else if (s.layout === "duo") {
+      parseText(s.text);
+      if (!s.text_at || ![s.text_at.x, s.text_at.y, s.text_at.size].every(Number.isFinite)) fail(`slides[${i}] (duo) needs text_at {x, y, size}`);
+      if (s.logo_at && ![s.logo_at.x, s.logo_at.y, s.logo_at.size].every(Number.isFinite)) fail(`slides[${i}].logo_at needs x, y and size`);
+      if (!Array.isArray(s.devices) || !s.devices.length) fail(`slides[${i}] (duo) needs devices`);
+      s.devices.forEach((d, j) => {
+        if (!["outer", "inner", "watch"].includes(d.kind)) fail(`slides[${i}].devices[${j}].kind must be outer|inner|watch`);
+        if (![d.x, d.y, d.w].every(Number.isFinite)) fail(`slides[${i}].devices[${j}] needs numeric x, y and w`);
+        if (!d.file && !d.screenshot) fail(`slides[${i}].devices[${j}] needs file or screenshot`);
+      });
     } else if (s.layout === "usp") {
       if (!Array.isArray(s.items) || !s.items.length) fail(`slides[${i}] (usp) needs items`);
     } else {
