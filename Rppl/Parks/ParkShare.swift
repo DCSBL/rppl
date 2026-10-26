@@ -27,24 +27,30 @@ enum ParkShare {
         ActivitySharePresenter.present(items: [url])
     }
 
-    /// Debug: every park as the app uses it (user edits win), one YAML document each, separated by `---`.
-    /// A leading comment marks where each came from (bundled, ota, edited, custom).
-    static func allParksYAML(_ entries: [ParkEntry]) -> String {
-        entries.compactMap { entry -> String? in
-            guard let yaml = try? ParkCatalog.encode(entry.park) else {
-                WakeLog.error(.store, "park share all \(entry.id): encode failed")
-                return nil
-            }
-            return "---\n# origin: \(entry.origin.rawValue)\n" + yaml
-        }
-        .joined(separator: "\n")
-    }
-
-    static func allParksFile(_ entries: [ParkEntry]) -> URL? {
+    /// Debug: every park as the app uses it (user edits win) as its own `<id>.yaml`, zipped into
+    /// `rppl-all-parks.zip`. Nil when writing or zipping fails.
+    static func allParksZip(_ entries: [ParkEntry]) -> URL? {
+        let fm = FileManager.default
+        let folder = fm.temporaryDirectory.appendingPathComponent("rppl-all-parks", isDirectory: true)
+        let zip = fm.temporaryDirectory.appendingPathComponent("rppl-all-parks.zip")
         do {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("rppl-all-parks.yaml")
-            try allParksYAML(entries).write(to: url, atomically: true, encoding: .utf8)
-            return url
+            try? fm.removeItem(at: folder)
+            try? fm.removeItem(at: zip)
+            try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            for entry in entries {
+                try ParkCatalog.encode(entry.park)
+                    .write(to: folder.appendingPathComponent("\(entry.id).yaml"), atomically: true, encoding: .utf8)
+            }
+            // A coordinated read with `.forUploading` hands back a zip of the directory.
+            var coordinationError: NSError?
+            var result: Result<Void, Error>?
+            NSFileCoordinator().coordinate(readingItemAt: folder, options: .forUploading, error: &coordinationError) { zipped in
+                do { try fm.copyItem(at: zipped, to: zip); result = .success(()) } catch { result = .failure(error) }
+            }
+            if let coordinationError { throw coordinationError }
+            try result?.get()
+            try? fm.removeItem(at: folder)
+            return zip
         } catch {
             WakeLog.error(.store, "park share all: \(error.localizedDescription)")
             return nil
@@ -53,7 +59,7 @@ enum ParkShare {
 
     @MainActor
     static func shareAll(_ entries: [ParkEntry]) {
-        guard let url = allParksFile(entries) else { return }
+        guard let url = allParksZip(entries) else { return }
         ActivitySharePresenter.present(items: [url])
     }
 

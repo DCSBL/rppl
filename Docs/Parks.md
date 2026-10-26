@@ -27,7 +27,7 @@ The Parks tab lists cable parks (nearby or most visited; the Favourites filter n
 - An override stores `based_on_updated_at`, the bundled `updated_at` it was edited from, and `based_on_revision`, the bundled `history.count` at that point (catches a same-day bundled content change that `updated_at`'s day granularity can't). When the app later ships a newer `updated_at` or a longer `history`, the park shows **Update available** and asks: keep my version (bumps both) or use the app version (deletes the override). Always add a `history` entry when editing a bundled park file, even without changing `updated_at`, so existing overrides pick up the fix.
 - `author` credits whoever wrote or maintains the file (shown as "Credits" in the detail footer). Rppl is the default credit and is not shown, so bundled files leave `author` out.
 - Share exports `<id>.yaml` through the share sheet. "Send to Rppl" opens a mail to rppl@dcsbl.nl with the YAML attached (falls back to the share sheet when Mail is not set up).
-- Debug screen (hold the logo on About): "No cable geo filter" adds a filter pill for parks without traced cable coordinates, and "Share all park info" shares one multi-document YAML (`rppl-all-parks.yaml`) with every park as the app uses it, including edited and custom parks.
+- Debug screen (hold the logo on About): "No cable geo filter" adds a filter pill for parks without traced cable coordinates, and "Share all park info" shares `rppl-all-parks.zip` with one `<id>.yaml` per park as the app uses it, including edited and custom parks.
 
 ### Keeping a park file tidy
 

@@ -43,7 +43,7 @@ struct DebugLogView: View {
                     Label("Share all park info", systemImage: "square.and.arrow.up")
                 }
             } footer: {
-                Text("One multi-document YAML file with every park as the app uses it, including edited and custom parks.")
+                Text("A zip with one YAML file per park, as the app uses it, including edited and custom parks.")
             }
 
             Section {
