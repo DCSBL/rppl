@@ -1,0 +1,131 @@
+version: 1
+id: wakepark-thulba
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: WakePark Thulba
+short_name: WakePark
+languages:
+  - de
+  - en
+  - nl
+address: "Untere Au 5, 97723 Thulba"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.173958
+  lon: 9.923701
+
+phone: "+49 9736 4726"
+email: "info@wakepark-thulba.de"
+website: https://www.wakepark-thulba.de
+links:
+  - kind: booking
+    url: "https://www.wakepark-thulba.de/ticket-buchen/"
+
+opening:
+  source_url: "https://www.wakepark-thulba.de/opening-hours/"
+  booking: optional
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "28"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "23"
+        currency: EUR
+        per: hour
+        note:
+          de: Kinder und Jugendliche bis 18 Jahre
+          en: children and youth up to 18
+          nl: kinderen en jeugd t/m 18 jaar
+  - name: "2 hours"
+    options:
+      - amount: "38"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder und Jugendliche bis 18 Jahre
+          en: children and youth up to 18
+          nl: kinderen en jeugd t/m 18 jaar
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Mo bis Fr außerhalb Ferien und Feiertage"
+          en: "adults, Mon to Fri outside holidays"
+          nl: "volwassenen, ma t/m vr buiten vakanties"
+      - amount: "54"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Sa und So, Ferien, Feiertage"
+          en: "adults, Sat and Sun, holidays"
+          nl: "volwassenen, za en zo, vakanties"
+      - amount: "37"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 18 Jahre, Mo bis Fr außerhalb Ferien und Feiertage"
+          en: "up to 18, Mon to Fri outside holidays"
+          nl: "t/m 18 jaar, ma t/m vr buiten vakanties"
+      - amount: "44"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 18 Jahre, Sa und So, Ferien, Feiertage"
+          en: "up to 18, Sat and Sun, holidays"
+          nl: "t/m 18 jaar, za en zo, vakanties"
+  - name: Year pass
+    options:
+      - amount: "989"
+        currency: EUR
+        per:
+          de: "365 Tage"
+          en: "365 days"
+          nl: "365 dagen"
+        note:
+          de: "Erwachsene, Gold, unlimitiert"
+          en: "adults, Gold, unlimited"
+          nl: "volwassenen, Gold, onbeperkt"
+      - amount: "779"
+        currency: EUR
+        per:
+          de: "365 Tage"
+          en: "365 days"
+          nl: "365 dagen"
+        note:
+          de: "bis 18 Jahre, Gold, unlimitiert"
+          en: "up to 18, Gold, unlimited"
+          nl: "t/m 18 jaar, Gold, onbeperkt"
+
+facilities:
+  - Übernachtung in Blockhütten
+  - Kleiner Shop
+  - Biergarten
+
+description: >-
+  WakePark am See in Thulba für Wakeboard, Wakeskate, Kneeboard und Wasserski.

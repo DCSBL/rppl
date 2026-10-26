@@ -1,0 +1,173 @@
+version: 1
+id: gufi-see-gundelfingen
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Gufi See Gundelfingen
+short_name: Gufi See
+languages:
+  - de
+  - en
+  - nl
+address: "Haldenweg 10, 89423 Gundelfingen an der Donau"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.520844
+  lon: 10.328771
+
+phone: "+49 9073 920690"
+website: https://www.wasserski-gundelfingen.de
+links:
+  - kind: booking
+    url: "https://gufi-see.faktorly.cloud/kurse.php"
+  - kind: instagram
+    url: "https://www.instagram.com/gufisee"
+
+cables:
+  - name: Cable
+    length_m: 809
+    description: >-
+      Elf Mitnehmer und 20 Features, seit 1998 in Betrieb. Im öffentlichen Betrieb läuft die
+      Bahn mit 28 bis 30 km/h.
+
+opening:
+  source_url: "https://www.wasserski-gundelfingen.de/oeffnungszeiten.html"
+  booking: required
+  note: >-
+    In der Nachsaison ist samstags und sonntags geöffnet. Maßgeblich sind die Zeiten im
+    Ticketshop-Kalender, die Teilnehmerzahl ist begrenzt.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "bis 17 Jahre, Frühbucher"
+          en: "up to 17, early booking"
+          nl: "t/m 17 jaar, vroegboeken"
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "bis 17 Jahre, online"
+          en: "up to 17, online"
+          nl: "t/m 17 jaar, online"
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "bis 17 Jahre, vor Ort"
+          en: "up to 17, on site"
+          nl: "t/m 17 jaar, ter plaatse"
+      - amount: "34"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 18 Jahren, Frühbucher"
+          en: "18 and older, early booking"
+          nl: "vanaf 18 jaar, vroegboeken"
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 18 Jahren, online"
+          en: "18 and older, online"
+          nl: "vanaf 18 jaar, online"
+      - amount: "38"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 18 Jahren, vor Ort"
+          en: "18 and older, on site"
+          nl: "vanaf 18 jaar, ter plaatse"
+  - name: Day ticket
+    options:
+      - amount: "41"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 17 Jahre, Frühbucher"
+          en: "up to 17, early booking"
+          nl: "t/m 17 jaar, vroegboeken"
+      - amount: "43"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 17 Jahre, online"
+          en: "up to 17, online"
+          nl: "t/m 17 jaar, online"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: "bis 17 Jahre, vor Ort"
+          en: "up to 17, on site"
+          nl: "t/m 17 jaar, ter plaatse"
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 18 Jahren, Frühbucher"
+          en: "18 and older, early booking"
+          nl: "vanaf 18 jaar, vroegboeken"
+      - amount: "52"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 18 Jahren, online"
+          en: "18 and older, online"
+          nl: "vanaf 18 jaar, online"
+      - amount: "54"
+        currency: EUR
+        per: day
+        note:
+          de: "ab 18 Jahren, vor Ort"
+          en: "18 and older, on site"
+          nl: "vanaf 18 jaar, ter plaatse"
+  - name: Member card
+    options:
+      - amount: "40"
+        currency: EUR
+        note:
+          de: "Normal, 5 € günstiger pro 2-Stunden-Karte online"
+          en: "Normal, 5 euro off each 2 hour card online"
+          nl: "Normal, 5 euro korting per 2-uurskaart online"
+      - amount: "90"
+        currency: EUR
+        note:
+          de: "Gold, 10 € günstiger pro 2-Stunden-Karte online"
+          en: "Gold, 10 euro off each 2 hour card online"
+          nl: "Gold, 10 euro korting per 2-uurskaart online"
+
+facilities:
+  - "Wasserski, Kneeboard und Schwimmweste inklusive"
+  - Mietservice für Wakeboards und Neoprenanzüge
+  - Gastronomie
+
+description: >-
+  Wasserski- und Wakeboard-Seilbahn an einem eigenen See. Die Startplattform ist so
+  gebaut, dass Anfänger direkt an der Seilbahn starten.

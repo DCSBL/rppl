@@ -1,0 +1,194 @@
+version: 1
+id: suedsee-wakepark-xanten
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Südsee Wakepark Xanten
+short_name: Südsee Wakepark
+languages:
+  - de
+  - en
+  - nl
+address: "Am Meerend 2, 46509 Xanten"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.685258
+  lon: 6.437774
+
+phone: "+49 2801 715656"
+website: https://www.wasserski-xanten.de
+
+cables:
+  - name: "5-Mast-Anlage"
+    length_m: 1000
+    description: >-
+      Zehn Mitnehmer und ein Feature Park.
+  - name: Easy Start
+    direction: "2.0"
+    length_m: 100
+    description: >-
+      Einsteiger-Seilbahn, die Geschwindigkeit wird pro Fahrer eingestellt.
+
+opening:
+  source_url: "https://www.f-z-x.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Im Oktober ist freitags von 16 bis 19 Uhr und samstags, sonntags und an Feiertagen von
+    13 bis 19 Uhr geöffnet, an einzelnen Tagen ist geschlossen. Die tagesaktuellen Zeiten
+    stehen beim Freizeitzentrum Xanten.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "22"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: "2 hours"
+    options:
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "22"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "33"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Beginner ticket with water skis
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "25"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Beginner ticket with wakeboard
+    options:
+      - amount: "40"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Year pass limited
+    options:
+      - amount: "780"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "510"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Year pass unlimited
+    options:
+      - amount: "890"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "595"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+
+facilities:
+  - Naturbad
+  - Beginner-Kurse
+  - Bahnmiete
+
+description: >-
+  Wasserski- und Wakeboardanlage am Xantener Südsee, gegenüber dem Naturbad.

@@ -1,0 +1,185 @@
+version: 1
+id: southlake-heuchelheim
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Southlake Wasserski- und Wakeboardzentrum Heuchelheim
+short_name: Southlake
+languages:
+  - de
+  - en
+  - nl
+address: "Lahnparkstraße, 35452 Heuchelheim"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.566800
+  lon: 8.628013
+
+phone: "+49 641 6868888"
+email: "wwz@wasserski-heuchelheim.de"
+website: https://wasserski-heuchelheim.de
+
+opening:
+  source_url: "https://wasserski-heuchelheim.de/kontakt/"
+  booking: required
+  note: >-
+    Die Anlage läuft in Slots, die online gebucht werden. Der Saisonstart 2026 war am 4.
+    April. Die Slotzeiten ändern sich pro Monat und stehen auf der Kontaktseite.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "37"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: "4 hours"
+    options:
+      - amount: "49"
+        currency: EUR
+        per:
+          de: "4 Stunden"
+          en: "4 hours"
+          nl: "4 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "44"
+        currency: EUR
+        per:
+          de: "4 Stunden"
+          en: "4 hours"
+          nl: "4 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: "10 card 2 hours"
+    options:
+      - amount: "340"
+        currency: EUR
+        per:
+          de: "10 x 2 Stunden"
+          en: "10 x 2 hours"
+          nl: "10 x 2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "270"
+        currency: EUR
+        per:
+          de: "10 x 2 Stunden"
+          en: "10 x 2 hours"
+          nl: "10 x 2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Year pass
+    options:
+      - amount: "799"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "599"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Beginner ticket
+    options:
+      - amount: "42"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Wasserski, mit Material"
+          en: "water ski, gear included"
+          nl: "waterski, inclusief materiaal"
+      - amount: "52"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Wakeboard, mit Material"
+          en: "wakeboard, gear included"
+          nl: "wakeboard, inclusief materiaal"
+      - amount: "69"
+        currency: EUR
+        per:
+          de: "4 Stunden"
+          en: "4 hours"
+          nl: "4 uur"
+        note:
+          de: "Wasserski und Wakeboard, mit Material"
+          en: "water ski and wakeboard, gear included"
+          nl: "waterski en wakeboard, inclusief materiaal"
+  - name: Happy slot
+    options:
+      - amount: "29"
+        currency: EUR
+        note:
+          de: "Donnerstagabend, nur vor Ort und bar"
+          en: "Thursday evening, on site and cash only"
+          nl: "donderdagavond, alleen ter plaatse en contant"
+  - name: Wetsuit rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "10"
+        currency: EUR
+        per:
+          de: ab 4 Stunden
+          en: from 4 hours
+          nl: vanaf 4 uur
+
+facilities:
+  - "Schwimmweste, Paarski und Monoski inklusive"
+  - Lakelounge
+  - Beachbar
+  - Stand-up-Paddling
+  - Zeltwiese
+
+description: >-
+  Wasserski- und Wakeboardzentrum an den Heuchelheimer Seen bei Gießen.

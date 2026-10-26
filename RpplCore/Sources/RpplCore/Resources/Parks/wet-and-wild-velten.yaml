@@ -1,0 +1,155 @@
+version: 1
+id: wet-and-wild-velten
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wet & Wild Velten
+short_name: Wet & Wild
+languages:
+  - de
+  - en
+  - nl
+address: "Am Bernsteinsee 1, 16727 Velten"
+timezone: Europe/Berlin
+# Pin from the map embed on the park's site, not a confirmed dock point.
+location:
+  lat: 52.699700
+  lon: 13.224100
+
+phone: "+49 3303 400145"
+email: "info@wakeboard-berlin.de"
+website: https://www.wakeboard-berlin.de
+
+cables:
+  - name: Lift I
+    description: >-
+      Große Seilbahn.
+  - name: Lift II
+    direction: "2.0"
+    description: >-
+      System 2.0.
+
+opening:
+  source_url: "https://www.wakeboard-berlin.de"
+  booking: optional
+  note: >-
+    In der Saison ist montags bis freitags von 13 bis 21 Uhr, samstags von 13 bis 20 Uhr und
+    sonntags von 12 bis 20 Uhr geöffnet. Kurse finden samstags und sonntags von 9 bis 11 Uhr
+    statt.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "27"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Day ticket
+    options:
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "20"
+        currency: EUR
+        per: day
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "20"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "10"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Wasserski, Monoski, Kneeboard und Schwimmweste kostenlos"
+  - Aquapark
+  - Beachvolleyball
+  - Stand-up-Paddling
+  - Cocktailbar
+
+description: >-
+  Wakeboard- und Wasserskianlage am Bernsteinsee, seit 1994. Es gibt eine große Seilbahn
+  und einen Lift mit System 2.0.

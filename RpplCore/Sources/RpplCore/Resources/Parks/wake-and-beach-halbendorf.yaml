@@ -1,0 +1,144 @@
+version: 1
+id: wake-and-beach-halbendorf
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wake and Beach Halbendorf
+short_name: Wake and Beach
+languages:
+  - de
+  - en
+  - nl
+address: "Am See 1, 02959 Schleife"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.545692
+  lon: 14.560170
+
+phone: "+49 35773 910050"
+email: "kontakt@wakeboard-halbendorf.de"
+website: https://wakeboard-halbendorf.de
+
+cables:
+  - name: Cable
+    length_m: 730
+    description: >-
+      Rixen-Anlage mit fünf Masten.
+  - name: Lil-Bro
+    direction: "2.0"
+    length_m: 130
+    description: >-
+      Rixen-Übungslift mit zwei Masten für Einsteiger.
+
+opening:
+  source_url: "https://wakeboard-halbendorf.de/aktuelle-oeffnungszeiten-der-freizeitmoeglichkeiten-am-strand/"
+  booking: optional
+  note: >-
+    Cable, Restaurant und Aquapark haben eigene Öffnungszeiten, die aktuellen Zeiten stehen
+    auf der Website.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "20"
+        currency: EUR
+        per: hour
+        note:
+          de: regulärer Betrieb
+          en: regular operation
+          nl: regulier bedrijf
+      - amount: "17"
+        currency: EUR
+        per: hour
+        note:
+          de: "ermäßigt, Azubis und Schüler bis 18 Jahre"
+          en: "reduced, trainees and pupils up to 18"
+          nl: "gereduceerd, stagiairs en scholieren t/m 18 jaar"
+  - name: "2 hours"
+    options:
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: regulärer Betrieb
+          en: regular operation
+          nl: regulier bedrijf
+      - amount: "25"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ermäßigt, Azubis und Schüler bis 18 Jahre"
+          en: "reduced, trainees and pupils up to 18"
+          nl: "gereduceerd, stagiairs en scholieren t/m 18 jaar"
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: regulärer Betrieb
+          en: regular operation
+          nl: regulier bedrijf
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: "ermäßigt, Azubis und Schüler bis 18 Jahre"
+          en: "reduced, trainees and pupils up to 18"
+          nl: "gereduceerd, stagiairs en scholieren t/m 18 jaar"
+  - name: Season pass
+    options:
+      - amount: "695"
+        currency: EUR
+        note:
+          de: "Mai bis September, ab 18 Jahren"
+          en: "May to September, 18 and older"
+          nl: "mei t/m september, vanaf 18 jaar"
+      - amount: "495"
+        currency: EUR
+        note:
+          de: "Mai bis September, ermäßigt"
+          en: "May to September, reduced"
+          nl: "mei t/m september, gereduceerd"
+  - name: Beginner course
+    options:
+      - amount: "45"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Wasserski, am Wochenende vormittags"
+          en: "water ski, weekend mornings"
+          nl: "waterski, weekendochtenden"
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ermäßigt, Azubis und Schüler bis 18 Jahre"
+          en: "reduced, trainees and pupils up to 18"
+          nl: "gereduceerd, stagiairs en scholieren t/m 18 jaar"
+
+facilities:
+  - Aquapark
+  - Restaurant
+  - "Imbiss mit Eiscafé"
+  - Übernachtung
+  - Verleih
+
+description: >-
+  Wasserski- und Wakeboardanlage am Halbendorfer See mit Aquapark und Restaurant.

@@ -1,0 +1,180 @@
+version: 1
+id: wasserskilift-zachun
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserskilift ZachunBeach
+short_name: ZachunBeach
+languages:
+  - de
+  - en
+  - nl
+address: Zachun
+timezone: Europe/Berlin
+# Geocode of the village name, the park's site publishes no street address.
+location:
+  lat: 53.477837
+  lon: 11.320740
+
+phone: "+49 38859 6010"
+email: "info@wasserskilift.de"
+website: https://www.wasserskilift.de
+
+opening:
+  source_url: "https://alpincenter.com/wittenburg/wasserskilift-zachun/liftzeiten-preise"
+  booking: optional
+  note: >-
+    Die Saison 2026 lief vom 1. Mai bis 3. Oktober. Die Liftzeiten stehen in einem Kalender
+    auf der Website.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene ab 13 Jahren
+          en: adults 13 and older
+          nl: volwassenen vanaf 13 jaar
+      - amount: "15"
+        currency: EUR
+        per: hour
+        note:
+          de: Kinder 4 bis 12 Jahre
+          en: children 4 to 12
+          nl: kinderen 4 t/m 12 jaar
+  - name: "2 hours"
+    options:
+      - amount: "26"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene ab 13 Jahren
+          en: adults 13 and older
+          nl: volwassenen vanaf 13 jaar
+      - amount: "21"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder 4 bis 12 Jahre
+          en: children 4 to 12
+          nl: kinderen 4 t/m 12 jaar
+  - name: Extension
+    options:
+      - amount: "11"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene ab 13 Jahren
+          en: adults 13 and older
+          nl: volwassenen vanaf 13 jaar
+      - amount: "8"
+        currency: EUR
+        per: hour
+        note:
+          de: Kinder 4 bis 12 Jahre
+          en: children 4 to 12
+          nl: kinderen 4 t/m 12 jaar
+  - name: Day ticket
+    options:
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene ab 13 Jahren
+          en: adults 13 and older
+          nl: volwassenen vanaf 13 jaar
+      - amount: "30"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder 4 bis 12 Jahre
+          en: children 4 to 12
+          nl: kinderen 4 t/m 12 jaar
+  - name: Beach entry
+    options:
+      - amount: "2"
+        currency: EUR
+        per: person
+        note:
+          de: Erwachsene ab 16 Jahren
+          en: adults 16 and older
+          nl: volwassenen vanaf 16 jaar
+      - amount: "1"
+        currency: EUR
+        per: person
+        note:
+          de: Kinder bis 15 Jahre
+          en: children up to 15
+          nl: kinderen t/m 15 jaar
+  - name: Wakeboard rental
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+        note:
+          de: Beginner oder Advanced
+          en: beginner or advanced
+          nl: beginner of advanced
+      - amount: "11"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Beginner oder Advanced
+          en: beginner or advanced
+          nl: beginner of advanced
+      - amount: "16"
+        currency: EUR
+        per: day
+        note:
+          de: Beginner oder Advanced
+          en: beginner or advanced
+          nl: beginner of advanced
+      - amount: "12"
+        currency: EUR
+        per: hour
+        note:
+          de: Obstacled
+          en: obstacle
+          nl: obstacle
+      - amount: "17"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Obstacled
+          en: obstacle
+          nl: obstacle
+      - amount: "27"
+        currency: EUR
+        per: day
+        note:
+          de: Obstacled
+          en: obstacle
+          nl: obstacle
+
+facilities:
+  - Paarski und Kneeboard inklusive
+  - Restaurant
+  - Badebereich
+  - Camping
+  - Kartbahn
+
+description: >-
+  Wasserskilift des alpincenter Hamburg-Wittenburg mit Badebereich, Restaurant und
+  Camping.

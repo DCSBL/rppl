@@ -1,0 +1,162 @@
+version: 1
+id: wasserskipark-zossen
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserskipark Zossen
+short_name: Wasserskipark
+languages:
+  - de
+  - en
+  - nl
+address: "Schünower Str. 19, 15806 Zossen"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 52.225986
+  lon: 13.388330
+
+phone: "+49 3377 203534"
+email: "info@wasserskipark-zossen.de"
+website: https://www.wasserskipark-zossen.de
+links:
+  - kind: booking
+    url: "https://www.wasserskipark-zossen.de/onlinebuchen"
+
+opening:
+  source_url: "https://www.wasserskipark-zossen.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Die Seilbahn hat einen groben Jahresplan, die tagesaktuellen Zeiten stehen in der
+    Online-Buchung.
+
+prices:
+  - name: Ticket youth
+    options:
+      - amount: "18"
+        currency: EUR
+        per: hour
+        note:
+          de: "Frühbucher, Jugendliche bis 15 Jahre"
+          en: "early booking, youth up to 15"
+          nl: "vroegboeken, jeugd t/m 15 jaar"
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: "vor Ort, Jugendliche bis 15 Jahre"
+          en: "on site, youth up to 15"
+          nl: "ter plaatse, jeugd t/m 15 jaar"
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Frühbucher, Jugendliche bis 15 Jahre"
+          en: "early booking, youth up to 15"
+          nl: "vroegboeken, jeugd t/m 15 jaar"
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "vor Ort, Jugendliche bis 15 Jahre"
+          en: "on site, youth up to 15"
+          nl: "ter plaatse, jeugd t/m 15 jaar"
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche bis 15 Jahre
+          en: youth up to 15
+          nl: jeugd t/m 15 jaar
+  - name: Ticket adult
+    options:
+      - amount: "23"
+        currency: EUR
+        per: hour
+        note:
+          de: "Frühbucher, ab 16 Jahren"
+          en: "early booking, 16 and older"
+          nl: "vroegboeken, vanaf 16 jaar"
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: "vor Ort, ab 16 Jahren"
+          en: "on site, 16 and older"
+          nl: "ter plaatse, vanaf 16 jaar"
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Frühbucher, ab 16 Jahren"
+          en: "early booking, 16 and older"
+          nl: "vroegboeken, vanaf 16 jaar"
+      - amount: "42"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "vor Ort, ab 16 Jahren"
+          en: "on site, 16 and older"
+          nl: "ter plaatse, vanaf 16 jaar"
+      - amount: "58"
+        currency: EUR
+        per: day
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "1 oder 2 Stunden"
+          en: "1 or 2 hours"
+          nl: "1 of 2 uur"
+        note:
+          de: Wakeboard
+          en: wakeboard
+          nl: wakeboard
+      - amount: "25"
+        currency: EUR
+        per: day
+        note:
+          de: Wakeboard
+          en: wakeboard
+          nl: wakeboard
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: "1 oder 2 Stunden"
+          en: "1 or 2 hours"
+          nl: "1 of 2 uur"
+      - amount: "15"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Wasserski, Kneeboard und Schwimmweste inklusive"
+  - Aquapark
+  - Strand
+  - Gastronomie
+
+description: >-
+  Wasserski- und Wakeboardanlage mit Strand und Aquapark. Die Seilbahn kann auch exklusiv
+  gemietet werden.
