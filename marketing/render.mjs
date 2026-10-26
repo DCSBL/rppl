@@ -57,6 +57,13 @@ const icon = (name) => {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="11" stroke-width="1.6"/><g transform="translate(3.600 3.600) scale(.7)">${ICONS[name]}</g></svg>`;
 };
 
+// Frames for layout: duo. opening = [x, y, w, h] of the transparent screen in the frame PNG (see device-frames/README.md).
+const DUO_FRAMES = {
+  outer: { file: "iPhone Duo - Night Sky - Outer Closed Portrait.png", w: 1574, h: 2194, opening: [88, 80, 1398, 2034] },
+  inner: { file: "iPhone Duo - Night Sky - Inner Open Landscape.png", w: 3093, h: 2247, opening: [120, 120, 2853, 2007] },
+  watch: { file: "AW Ultra 3 - Black - Ocean Band Black.png", w: 600, h: 960, opening: [89, 223, 422, 514] },
+};
+
 const shotCtx = { dirs: args.shots, fallbacks: cfg.fallbacks, allowFallback: args.allowFallback, root: configDir };
 const shotUri = (name) => dataUri(resolveShot(name, shotCtx));
 
@@ -85,6 +92,18 @@ function html(slide, fmt) {
       ${device(null, "p", shotUri(slide.screenshot))}${device(null, "w", shotUri(slide.watch_screenshot))}`, { layout: "search" });
   }
   const cfgJs = { layout: slide.layout ?? "shot", align, logo: !!slide.logo, hasWatch: !!slide.watch_screenshot, watch: slide.watch ?? {} };
+  if (slide.layout === "duo") {
+    const kinds = [...new Set(slide.devices.map((d) => d.kind))];
+    const frames = Object.fromEntries(kinds.map((k) => [k, { w: DUO_FRAMES[k].w, h: DUO_FRAMES[k].h, opening: DUO_FRAMES[k].opening }]));
+    const text = slide.text_at.stack
+      ? wordsHtml(slide.text)
+      : parseText(slide.text).map((l) => (l.accent ? `<span class="accent">${l.word}</span>` : `<span>${l.word}</span>`)).join(" ");
+    return doc(fmt, "", vars, `${slide.logo_at ? `<div id="logo" class="abs logo">${logo(true)}</div>` : ""}
+      <h1 id="title" class="abs${slide.text_at.stack ? "" : " inline"}">${text}</h1>
+      ${kinds.map((k) => `<img id="frame-${k}" class="duo-src" src="${dataUri(path.join(here, "device-frames", DUO_FRAMES[k].file))}">`).join("")}
+      ${slide.devices.map((d, i) => `<img id="shot-${i}" class="duo-src" src="${d.file ? dataUri(path.resolve(configDir, d.file)) : shotUri(d.screenshot)}"><canvas id="dev-${i}" class="duo-dev"></canvas>`).join("")}`,
+      { layout: "duo", devices: slide.devices.map(({ kind, x, y, w }) => ({ kind, x, y, w })), text_at: slide.text_at, logo_at: slide.logo_at, frames });
+  }
   if (slide.layout === "usp") {
     const photoBg = slide.image ? `<img class="photo-bg" src="${photo(slide)}"><div class="shade"></div>` : "";
     return doc(fmt, slide.image ? "usp-photo" : "", `${vars}${slide.image ? `;--pos:${slide.object_position ?? "50% 50%"}` : ""}`, `${photoBg}<div id="mark" class="abs logo">${logo(true)}</div><div id="usp-title" class="abs usp-title">${slide.title ?? ""}</div>
