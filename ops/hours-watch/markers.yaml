@@ -25,6 +25,8 @@ dearne-arnemuiden:
   present: ["zondag t/m vrijdag van 9:00 uur tot 17:30 uur"]
 deberendonck-wijchen:
   present: ["april gesloten 12.30 – 17.00 mei 15.30 – 20.00"]
+dock79-saint-ghislain:
+  present: ["opening hours 2026"]
 downunder-nieuwegein:
   href: "openingstijden.*\\.pdf"         # hours are a PDF, the link changes with each new version
   present: ["openingstijden-cablepark-2026.pdf"]
@@ -38,6 +40,8 @@ lakeside-paradise-knokke:
   present: ["vanaf 30 maart t.e.m. de herfstvakantie, elke dag open"]
 lunalake-heerhugowaard:
   present: ["zomervakantie: 6 juli t/m 16 augustus 2026"]
+outsider-oudenaarde:
+  present: ["seizoensabonnement vanaf 2 maart 2026"]   # hours are an image, watch the season text
 project7-rotterdam:
   present: ["april* – 12:30-17:00 u mei* 14:00-20:00 u"]
 schotsman-kamperland:
@@ -46,6 +50,8 @@ seven-twenty-sevenum:
   present: ["geopend van maart t/m oktober", "meivakantie van 25 april tot en met 3 mei 2026"]
 stroombroek-braamt:
   fetch: browser                         # JS-rendered site, curl gets an empty shell
+terhills-dilsen-stokkem:
+  present: ["tot en met 13 september", "vanaf 14 september"]
 wakepark-groningen:
   fetch: browser                         # curl gets HTTP 500
 wakeup-antwerp:
