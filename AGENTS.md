@@ -166,7 +166,7 @@ When the user asks for a code change, go straight to a PR — do not stop to ask
 | Gate / lint | `.pre-commit-config.yaml`, `.swiftlint.yml`, `scripts/git-hooks/` |
 | GitHub lint workflow | `.github/workflows/lint.yml` · [Docs/DevWorkflow.md](Docs/DevWorkflow.md) |
 | App Store screenshots / product page header (HTML → PNG zip on every release) | `marketing/marketing.yaml` (texts, shots, placement), `marketing/render.mjs`, `scripts/ci/check_marketing_assets.py`, `.github/workflows/release-screenshots.yml` · [Docs/Marketing.md](Docs/Marketing.md) |
-| Release / TestFlight (GitHub release tag → `release/X.Y.Z` branch → Xcode Cloud → TestFlight internal; the only Xcode Cloud build) | [Docs/Release.md](Docs/Release.md), `ci_scripts/ci_post_clone.sh`, `scripts/ci/prepare_release.py`, `.github/workflows/release-preflight.yml`, `.github/workflows/release-branch.yml` |
+| Release / TestFlight (GitHub release tag → `release/X.Y.Z` branch → Xcode Cloud → TestFlight internal; the only Xcode Cloud build) | [Docs/Release.md](Docs/Release.md), `ci_scripts/ci_post_clone.sh`, `scripts/ci/prepare_release.py`, `.github/workflows/release-preflight.yml`, `.github/workflows/release-branch.yml`, `.github/workflows/release-drafts.yml`, `scripts/ci/draft_releases.py` |
 | System / Core design (UML) | [Docs/DESIGN.md](Docs/DESIGN.md), [RpplCore/DESIGN.md](RpplCore/DESIGN.md) |
 | UI / Info.plist copy (any locale) | `*.xcstrings` · `scripts/format-xcstrings.py` · Wakeboard slang section above · voice rules in [Docs/DesignLanguage.md](Docs/DesignLanguage.md#voice-and-tone) |
 | Tiles, gauges, metric symbols / tints | `Rppl/Design/` · [Docs/DesignLanguage.md](Docs/DesignLanguage.md) |
