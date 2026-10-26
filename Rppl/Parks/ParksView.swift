@@ -39,7 +39,7 @@ struct ParksView: View {
     @State private var headerHeight: CGFloat = 0
     /// How far the list is pulled down past its resting position, for the pull-to-refresh indicator.
     @State private var pullDistance: CGFloat = 0
-    @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.netherlands)
+    @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.opening())
     @State private var mapPendingRecenter = false
     /// Two-pane only: the park shown on the right instead of the map.
     @State private var selectedParkID: String?

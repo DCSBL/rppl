@@ -198,6 +198,7 @@ Rules and slots share optional selectors, all of which must match a date:
 - Recurring special days (holidays) use a rule with `dates`; it appears as an extra line under the month of those dates. Unplanned openings, closures and events use `exceptions` instead.
 - Today shows notices for the day's exceptions under the hours; a park detail with announced exceptions still ahead gets an "Upcoming changes" card. The list chip reads "Closed · <label>" when a labelled `closed` exception is the reason.
 - Cables are called "full size" (`cw`/`ccw`) or "2.0". The map shows an arrow on each start point, pointing towards the next traced point.
+- **Opening view of the map:** the parks map opens on the whole country of the device's region setting (`Locale.current.region`), not on the person's location, so it needs no permission. Supported: Netherlands, Belgium and Germany (`ParksMapDefaults.opening(for:)`). Any other region opens on the Netherlands. Adding a country for parks means a new region in `ParksMapDefaults` plus a line here.
 
 ### Exceptions
 

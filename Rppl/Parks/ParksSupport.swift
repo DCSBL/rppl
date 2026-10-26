@@ -23,6 +23,30 @@ enum ParksMapDefaults {
         center: CLLocationCoordinate2D(latitude: 52.35, longitude: 5.3),
         span: MKCoordinateSpan(latitudeDelta: 3.4, longitudeDelta: 4.6)
     )
+
+    /// All of Belgium, framed the same way as `netherlands`.
+    static let belgium = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 50.95, longitude: 4.6),
+        span: MKCoordinateSpan(latitudeDelta: 2.6, longitudeDelta: 3.6)
+    )
+
+    /// All of Germany, framed the same way as `netherlands`.
+    static let germany = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 51.9, longitude: 10.4),
+        span: MKCoordinateSpan(latitudeDelta: 8.6, longitudeDelta: 10.5)
+    )
+
+    /// The country shown on opening, from the device's region setting (not the location, so no
+    /// permission is needed). Only countries we have parks for are listed; any other region
+    /// falls back to the Netherlands. A country needs a new entry here and a line in
+    /// `Docs/Parks.md` ("Opening view of the map").
+    static func opening(for region: Locale.Region? = Locale.current.region) -> MKCoordinateRegion {
+        switch region?.identifier {
+        case "BE": belgium
+        case "DE": germany
+        default: netherlands
+        }
+    }
 }
 
 /// One-shot iPhone location fix for "nearby" sorting. Denied or unavailable simply means no distances.
