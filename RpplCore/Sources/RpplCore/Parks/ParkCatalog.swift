@@ -241,19 +241,30 @@ public struct ParkFilters: Equatable, Sendable {
     public var openOnDate: Date?
     public var cableDirections: Set<ParkCableDirection>
     public var favoritesOnly: Bool
+    /// Debug: only parks without any traced cable coordinates.
+    public var withoutCableGeoOnly: Bool
 
     public init(
         openOnDate: Date? = nil,
         cableDirections: Set<ParkCableDirection> = [],
-        favoritesOnly: Bool = false
+        favoritesOnly: Bool = false,
+        withoutCableGeoOnly: Bool = false
     ) {
         self.openOnDate = openOnDate
         self.cableDirections = cableDirections
         self.favoritesOnly = favoritesOnly
+        self.withoutCableGeoOnly = withoutCableGeoOnly
     }
 
     public var isActive: Bool {
-        openOnDate != nil || !cableDirections.isEmpty || favoritesOnly
+        openOnDate != nil || !cableDirections.isEmpty || favoritesOnly || withoutCableGeoOnly
+    }
+}
+
+extension Park {
+    /// At least one cable has traced coordinates.
+    public var hasCableGeo: Bool {
+        (cables ?? []).contains { !($0.points ?? []).isEmpty }
     }
 }
 
@@ -303,6 +314,7 @@ public enum ParkListing {
         guard filters.isActive else { return parks }
         return parks.filter { park in
             if filters.favoritesOnly, !favorites.contains(park.id) { return false }
+            if filters.withoutCableGeoOnly, park.hasCableGeo { return false }
             if !filters.cableDirections.isEmpty {
                 let directions = Set((park.cables ?? []).compactMap(\.direction))
                 if directions.isDisjoint(with: filters.cableDirections) { return false }

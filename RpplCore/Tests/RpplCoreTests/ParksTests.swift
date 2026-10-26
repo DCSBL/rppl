@@ -493,6 +493,15 @@ struct ParksTests {
         let closedDay = ParkFilters(openOnDate: date("2026-10-07"))
         #expect(ParkListing.filtered(parks, favorites: [], filters: closedDay).isEmpty)
 
+        // Debug filter: parks without traced cable coordinates.
+        var noGeo = project7
+        noGeo.cables = [ParkCable(name: "Cable")]
+        let withoutGeo = ParkFilters(withoutCableGeoOnly: true)
+        #expect(withoutGeo.isActive)
+        #expect(project7.hasCableGeo)
+        #expect(!noGeo.hasCableGeo)
+        #expect(ParkListing.filtered([project7, noGeo], favorites: [], filters: withoutGeo).count == 1)
+
         // Cleared filters show everything, including closed parks.
         #expect(ParkListing.filtered(parks, favorites: [], filters: ParkFilters()).map(\.id) == parks.map(\.id))
     }

@@ -27,6 +27,36 @@ enum ParkShare {
         ActivitySharePresenter.present(items: [url])
     }
 
+    /// Debug: every park as the app uses it (user edits win), one YAML document each, separated by `---`.
+    /// A leading comment marks where each came from (bundled, ota, edited, custom).
+    static func allParksYAML(_ entries: [ParkEntry]) -> String {
+        entries.compactMap { entry -> String? in
+            guard let yaml = try? ParkCatalog.encode(entry.park) else {
+                WakeLog.error(.store, "park share all \(entry.id): encode failed")
+                return nil
+            }
+            return "---\n# origin: \(entry.origin.rawValue)\n" + yaml
+        }
+        .joined(separator: "\n")
+    }
+
+    static func allParksFile(_ entries: [ParkEntry]) -> URL? {
+        do {
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("rppl-all-parks.yaml")
+            try allParksYAML(entries).write(to: url, atomically: true, encoding: .utf8)
+            return url
+        } catch {
+            WakeLog.error(.store, "park share all: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    @MainActor
+    static func shareAll(_ entries: [ParkEntry]) {
+        guard let url = allParksFile(entries) else { return }
+        ActivitySharePresenter.present(items: [url])
+    }
+
     static let blockStart = "----- START RPPL PARK -----"
     static let blockEnd = "----- END RPPL PARK -----"
 
