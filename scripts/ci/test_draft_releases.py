@@ -48,8 +48,8 @@ class PlanTests(unittest.TestCase):
         self.assertIsNone(plan["beta_base"])
         self.assertIsNone(plan["final_base"])
 
-    def test_duo_and_other_tags_are_ignored(self):
-        plan = dr.plan(["2026.10.8", "2026.10.9-duo.1", "v2026.10.9", "2026.10.9-rc.1", "latest"], OCT)
+    def test_other_tags_are_ignored(self):
+        plan = dr.plan(["2026.10.8", "v2026.10.9", "2026.10.9-rc.1", "latest"], OCT)
         self.assertEqual(plan["final"], "2026.10.9")
         self.assertEqual(plan["beta_base"], "2026.10.8")
 

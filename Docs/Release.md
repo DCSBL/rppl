@@ -52,7 +52,7 @@ The **Release: drafts** workflow (`.github/workflows/release-drafts.yml`, `scrip
 
 - The drafts refresh on every push to `main` and every published release (or run the workflow by hand). The refresh **overwrites** the notes, so edit a draft right before publishing it.
 - Notes are the squash-merged PR titles on `main`, grouped by the type of the title (`feat` New, `fix` Fixed, `refactor`/`test`/`docs`/`chore` Under the hood, anything else Other).
-- `-duo.N` tags and other suffixes are ignored when numbering and when picking the previous release. Duo tags are still created by hand.
+- Tags with another suffix (`-rc.1`, ...) are ignored when numbering and when picking the previous release.
 - Release Drafter is not used: it manages one draft per config and would let a second config overwrite the first.
 
 ## Release branches and build groups

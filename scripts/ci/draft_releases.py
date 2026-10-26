@@ -11,7 +11,7 @@ this script only writes drafts.
 X.Y.Z is the version in progress: the highest version that has a beta but no final yet, or, when
 the highest version has its final, the next one (N + 1 in the current month, .1 in a new month).
 So publishing the final immediately produces the next pair of drafts, with "No changes" notes
-when nothing was merged. Duo test tags (-duo.N) and other suffixes are ignored.
+when nothing was merged. Tags with any other suffix (-rc.N, ...) are ignored.
 
 Notes are the first-parent commit subjects of origin/main between the base tag and main, i.e. the
 squash-merged PR titles. They are grouped by the type of the PR title (<component>(<type>): ...).
@@ -45,7 +45,7 @@ OTHER_SECTION = "Other"
 
 
 def parse_tag(tag: str) -> Optional[Tuple[Version, Optional[int]]]:
-    """(version, beta number or None for a final), or None for any other tag (duo, rc, v-prefix...)."""
+    """(version, beta number or None for a final), or None for any other tag (rc, v-prefix...)."""
     match = TAG_RE.fullmatch(tag)
     if not match:
         return None
