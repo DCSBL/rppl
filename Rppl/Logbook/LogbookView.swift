@@ -6,6 +6,7 @@ struct LogbookView: View {
     @Binding var navigation: LogbookNavigationRequest
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.requestReview) private var requestReview
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var iCloud = PhoneICloudDriveController.shared
@@ -260,10 +261,20 @@ struct LogbookView: View {
         .tag(sessionId)
     }
 
-    /// Detail column: the selected session, or the season charts when nothing is selected.
+    /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
+    /// is the column's root. The system back button clears the selection.
+    private var pushedSessionId: Binding<String?> {
+        Binding(
+            get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
+            set: { if $0 == nil { selectedSessionId = nil } }
+        )
+    }
+
+    /// Detail column. Beside the list: a stack with a placeholder, the selected session pushed on it (the
+    /// system's push and back button). Collapsed: the session is the root, so back goes to the list.
     @ViewBuilder
     private var splitDetail: some View {
-        if let sessionId = selectedSessionId {
+        if horizontalSizeClass == .compact, let sessionId = selectedSessionId {
             NavigationStack {
                 LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
                     .embeddedInSplit(layout == .twoPane)
@@ -271,10 +282,17 @@ struct LogbookView: View {
             }
             .id(sessionId)
         } else {
-            ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
-                .foregroundStyle(Color.rpplMuted)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(RpplBackdrop())
+            NavigationStack {
+                ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
+                    .foregroundStyle(Color.rpplMuted)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(RpplBackdrop())
+                    .navigationDestination(item: pushedSessionId) { sessionId in
+                        LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
+                            .embeddedInSplit()
+                            .toolbar(.visible, for: .navigationBar)
+                    }
+            }
         }
     }
 

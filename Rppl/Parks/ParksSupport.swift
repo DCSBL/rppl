@@ -673,8 +673,8 @@ struct ParkDetailContainer: View {
     let park: Park
     /// The date picked in the Parks "Open" filter; the detail adds a card for that day.
     var plannedDate: Date?
-    /// Set when the detail sits beside the list: closes it back to the map instead of popping a stack.
-    var onClose: (() -> Void)?
+    /// Set when the detail is pushed in the detail column beside the list.
+    var isBesideList = false
     @State private var favorites = ParkFavorites.shared
     @State private var store = ParkStore.shared
 
@@ -685,7 +685,7 @@ struct ParkDetailContainer: View {
             entry: entry,
             isFavorite: favorites.contains(park.id),
             plannedDate: plannedDate,
-            onClose: onClose,
+            isBesideList: isBesideList,
             onToggleFavorite: { favorites.toggle(park.id) }
         )
     }
