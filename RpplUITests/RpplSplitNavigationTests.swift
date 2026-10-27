@@ -1,10 +1,9 @@
 import XCTest
 
 /// Opening, switching and closing a park or session in the Parks and Logbook split views, the flows that
-/// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the window is wide enough for the list and the
-/// detail side by side, as on an unfolded Duo; on iPhone (the regular UI job) the split view is collapsed,
-/// as on a folded Duo. Portrait on purpose: rotating the iPad simulator on CI gave the app a 476pt window,
-/// which collapses the split view and made the side-by-side tests meaningless.
+/// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the test makes the app's window full screen, so the
+/// list shows beside the detail as on an unfolded Duo; on iPhone (the regular UI job) the split view is
+/// collapsed, as on a folded Duo. Portrait on purpose: in landscape the CI iPad gave the app a 476pt window.
 /// The detail is found by its accessibility identifier (`park-detail-<id>`, `session-detail-<park id>`). On a
 /// failed check the test prints the accessibility tree to the log, so a CI run shows what was on screen.
 final class RpplSplitNavigationTests: XCTestCase {
@@ -21,31 +20,51 @@ final class RpplSplitNavigationTests: XCTestCase {
         super.tearDown()
     }
 
-    /// The window the app really got, which decides whether the split view collapses. Not the device: an iPad
-    /// can hand the app a narrow window, and then it behaves like a folded Duo.
-    private var windowWidth: CGFloat { app.windows.firstMatch.frame.width }
+    /// Whether the list shows beside the detail, read from the screen: the Logbook's empty detail
+    /// placeholder only shows when the split view is not collapsed. Not the window width: iPadOS opens the
+    /// app in a window (635pt on CI) whose size class is compact, and then it behaves like a folded Duo.
+    private var isTwoPane = false
 
-    /// Wide enough for the list beside the detail (`WindowLayout.twoPaneMinWidth`).
-    private var isTwoPane: Bool { windowWidth >= 520 }
+    private var windowWidth: Int { Int(app.windows.firstMatch.frame.width) }
 
     private func launch() {
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30), "the app did not start")
-        print("window: \(Int(windowWidth))pt wide, two panes: \(isTwoPane)")
+        isTwoPane = app.staticTexts["No session selected"].waitForExistence(timeout: 5)
+        if !isTwoPane, UIDevice.current.userInterfaceIdiom == .pad {
+            enterFullScreen()
+            isTwoPane = app.staticTexts["No session selected"].waitForExistence(timeout: 5)
+        }
+        print("window: \(windowWidth)pt wide, two panes: \(isTwoPane)")
     }
 
-    /// Guards the side-by-side tests above from skipping unnoticed: on an iPad the app should get a wide
-    /// window, and if CI hands it a narrow one, those tests are not covering anything.
+    /// iPadOS opens apps in a resizable window; its window controls can make it fill the screen. The
+    /// controls belong to SpringBoard, and their labels are logged when none matches.
+    private func enterFullScreen() {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let labels = ["Full Screen", "Enter Full Screen", "Fill", "Fill Screen", "Maximize", "Zoom"]
+        let control = springboard.buttons.matching(NSPredicate(format: "label IN %@ OR identifier IN %@", labels, labels)).firstMatch
+        if control.waitForExistence(timeout: 3) {
+            control.tap()
+            return
+        }
+        let buttons = springboard.buttons.allElementsBoundByIndex.map { "'\($0.label)' [\($0.identifier)]" }
+        print("--- no full screen control; SpringBoard buttons: \(buttons.joined(separator: ", "))")
+        print("--- SpringBoard tree ---\n\(springboard.debugDescription)")
+    }
+
+    /// Guards the side-by-side tests below from skipping unnoticed: on an iPad the list should show beside
+    /// the detail, and if CI hands the app a compact window, those tests are not covering anything.
     @MainActor
     func testIPadWindowIsWideEnoughForTwoPanes() throws {
         try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "iPad only")
         launch()
-        check(isTwoPane, "the iPad window is \(Int(windowWidth))pt wide, so the split view collapses")
+        check(isTwoPane, "the iPad window is \(windowWidth)pt wide and the split view collapses")
     }
 
-    /// Skips a side-by-side test on a window that collapses the split view, naming the width it got.
+    /// Skips a side-by-side test when the split view is collapsed, naming the window width.
     private func requireTwoPane() throws {
-        try XCTSkipUnless(isTwoPane, "needs the list beside the detail; this window is \(Int(windowWidth))pt wide")
+        try XCTSkipUnless(isTwoPane, "needs the list beside the detail; this window is \(windowWidth)pt wide and collapsed")
     }
 
     private func parkDetail(_ id: String) -> XCUIElement {
