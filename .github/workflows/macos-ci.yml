@@ -58,6 +58,9 @@ jobs:
           fi
           # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
           changed="$(git diff --name-only "$BASE...$HEAD")"
+          # Park data lives in RpplCore but is checked by parks-validate.yml and the Core tests; a
+          # YAML-only PR does not need 40 minutes of simulator time (pushes to main still run everything).
+          changed="$(printf '%s\n' "$changed" | grep -Ev '^RpplCore/Sources/RpplCore/Resources/Parks/.*\.ya?ml$' || true)"
           shared='^(RpplCore/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/macos-ci\.yml$|\.github/xcode-problem-matcher\.json$)'
           if printf '%s\n' "$changed" | grep -Eq "$shared|^(Rppl/|RpplWidgets/|RpplUITests/)"; then
             echo "phone=true" >> "$GITHUB_OUTPUT"
