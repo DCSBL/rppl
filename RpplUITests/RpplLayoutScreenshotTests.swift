@@ -2,7 +2,7 @@ import XCTest
 
 /// Layout screenshots for wide and rotated windows (iPad, iPhone landscape, iPhone Duo): portrait and
 /// landscape, Logbook with a session open and Parks. Only runs when `RPPL_LAYOUT_SHOTS` is set
-/// (`TEST_RUNNER_RPPL_LAYOUT_SHOTS=1`, see `.github/workflows/layouts.yml`), so the regular UI jobs skip it.
+/// (`TEST_RUNNER_RPPL_LAYOUT_SHOTS=1`, see `.github/workflows/ui-layout-screenshots.yml`), so the regular UI jobs skip it.
 /// Text size comes from the simulator (`simctl ui content_size`). Names: `layout-<screen>-<orientation>`.
 final class RpplLayoutScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
@@ -31,10 +31,8 @@ final class RpplLayoutScreenshotTests: XCTestCase {
 
     private func shot(_ name: String, _ orientation: UIDeviceOrientation) {
         sleep(1)
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "layout-\(name)-\(orientation.isLandscape ? "landscape" : "portrait")"
-        attachment.lifetime = .keepAlways
-        add(attachment)
+        // The whole screen: app.screenshot() is cropped in landscape (XCTestCase+Screenshot.swift).
+        attachScreenshot(named: "layout-\(name)-\(orientation.isLandscape ? "landscape" : "portrait")", of: app)
     }
 
     private func logbook(_ orientation: UIDeviceOrientation) {
