@@ -1,8 +1,10 @@
 import XCTest
 
 /// Opening, switching and closing a park or session in the Parks and Logbook split views, the flows that
-/// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the list and the detail stand side by side, as
-/// on an unfolded Duo; on iPhone (the regular UI job) the split view is collapsed, as on a folded Duo.
+/// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the window is wide enough for the list and the
+/// detail side by side, as on an unfolded Duo; on iPhone (the regular UI job) the split view is collapsed,
+/// as on a folded Duo. Portrait on purpose: rotating the iPad simulator on CI gave the app a 476pt window,
+/// which collapses the split view and made the side-by-side tests meaningless.
 /// The detail is found by its accessibility identifier (`park-detail-<id>`, `session-detail-<park id>`). On a
 /// failed check the test prints the accessibility tree to the log, so a CI run shows what was on screen.
 final class RpplSplitNavigationTests: XCTestCase {
@@ -16,15 +18,34 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     override func tearDown() {
         app?.terminate()
-        XCUIDevice.shared.orientation = .portrait
         super.tearDown()
     }
 
-    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    /// The window the app really got, which decides whether the split view collapses. Not the device: an iPad
+    /// can hand the app a narrow window, and then it behaves like a folded Duo.
+    private var windowWidth: CGFloat { app.windows.firstMatch.frame.width }
+
+    /// Wide enough for the list beside the detail (`WindowLayout.twoPaneMinWidth`).
+    private var isTwoPane: Bool { windowWidth >= 520 }
 
     private func launch() {
-        if isPad { XCUIDevice.shared.orientation = .landscapeLeft }
         app.launch()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30), "the app did not start")
+        print("window: \(Int(windowWidth))pt wide, two panes: \(isTwoPane)")
+    }
+
+    /// Guards the side-by-side tests above from skipping unnoticed: on an iPad the app should get a wide
+    /// window, and if CI hands it a narrow one, those tests are not covering anything.
+    @MainActor
+    func testIPadWindowIsWideEnoughForTwoPanes() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "iPad only")
+        launch()
+        check(isTwoPane, "the iPad window is \(Int(windowWidth))pt wide, so the split view collapses")
+    }
+
+    /// Skips a side-by-side test on a window that collapses the split view, naming the width it got.
+    private func requireTwoPane() throws {
+        try XCTSkipUnless(isTwoPane, "needs the list beside the detail; this window is \(Int(windowWidth))pt wide")
     }
 
     private func parkDetail(_ id: String) -> XCUIElement {
@@ -63,11 +84,10 @@ final class RpplSplitNavigationTests: XCTestCase {
         }
     }
 
-    /// On iPad the split view hides the list while a pushed detail is open (too little room for both next to
-    /// the tab bar's split); the sidebar button brings it back. A Duo keeps both side by side. `marker` is an
-    /// element of the list.
+    /// The split view may hide the list while a pushed detail is open; the sidebar button brings it back.
+    /// `marker` is an element of the list.
     private func revealList(_ marker: XCUIElement) {
-        guard isPad, !marker.waitForExistence(timeout: 2) else { return }
+        guard isTwoPane, !marker.waitForExistence(timeout: 2) else { return }
         let toggle = app.buttons.matching(NSPredicate(
             format: "identifier == 'ToggleSidebar' OR label == 'Show Sidebar' OR label == 'Sidebar' OR label == 'Show sidebar'"
         )).firstMatch
@@ -86,7 +106,7 @@ final class RpplSplitNavigationTests: XCTestCase {
     private func openSession(_ park: String) {
         let card = card("Wakeboard, \(park)")
         revealList(app.collectionViews.firstMatch)
-        check(app.scrollToElement(card, in: isPad ? app.collectionViews.firstMatch : nil), "no card for \(park)")
+        check(app.scrollToElement(card, in: isTwoPane ? app.collectionViews.firstMatch : nil), "no card for \(park)")
         // Beside the detail, tap the card's trailing edge: its middle may hold a link.
         card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
     }
@@ -105,8 +125,8 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     @MainActor
     func testPickingAnotherSessionReplacesTheOpenOne() throws {
-        try XCTSkipUnless(isPad, "needs the list beside the detail (iPad)")
         launch()
+        try requireTwoPane()
         openSession("Lakeside Zwolle")
         check(waitShown(sessionDetail("lakeside-zwolle")), "first session did not open")
         openSession("Wakepark Groningen")
@@ -153,8 +173,8 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     @MainActor
     func testPickingAnotherParkReplacesTheOpenOne() throws {
-        try XCTSkipUnless(isPad, "needs the list beside the detail (iPad)")
         launch()
+        try requireTwoPane()
         openParksTab()
         openPark("Zwolle")
         check(waitShown(parkDetail("lakeside-zwolle")), "first park did not open")
