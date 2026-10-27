@@ -710,7 +710,7 @@ private struct SessionCard: View {
     }
 
     private var activityIcon: some View {
-        MDIIconView(icon: .skiWater)
+        WakeboardIcon()
             .foregroundStyle(MetricKind.riding.tint)
             .frame(width: 20, height: 20)
             .frame(width: 36, height: 36)

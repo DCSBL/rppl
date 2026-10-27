@@ -112,7 +112,6 @@ struct SetTelemetryCharts: View {
     }
 
     private static func clock(_ seconds: Double) -> String {
-        let total = Int(seconds.rounded())
-        return String(format: "%d:%02d", total / 60, total % 60)
+        Duration.seconds(Int(seconds.rounded())).formatted(.time(pattern: .minuteSecond))
     }
 }

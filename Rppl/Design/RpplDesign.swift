@@ -87,10 +87,20 @@ struct MetricIcon: View {
 
     var body: some View {
         if metric == .riding {
-            MDIIconView(icon: .skiWater)
+            WakeboardIcon()
                 .frame(width: 14, height: 14)
         } else {
             Image(systemName: systemImage)
         }
+    }
+}
+
+/// The wakeboarder glyph (Material Design Icons `ski-water`, see LEGAL.md) as a template vector asset.
+struct WakeboardIcon: View {
+    var body: some View {
+        Image("ski-water")
+            .resizable()
+            .scaledToFit()
+            .accessibilityLabel(Text("Wakeboarding"))
     }
 }
