@@ -154,7 +154,7 @@ struct LogbookSessionDetailView: View {
         } message: {
             Text(flagSaveError ?? "")
         }
-        .task { parks = ParkCatalog.loadApp() }
+        .task { parks = (try? await StoreIO.runOffMain { ParkCatalog.loadApp() }) ?? [] }
         .task(id: waterEstimateKey) {
             guard waterEstimateKey != nil, let store, let manifest, let sessionStats else { return }
             if let estimate = await SessionWaterEstimate.fetchIfNeeded(

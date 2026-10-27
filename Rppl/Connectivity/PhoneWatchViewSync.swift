@@ -12,8 +12,10 @@ enum PhoneWatchViewSync {
     }
 
     static func allPhoneUpdates(store: SessionFileStore) throws -> [WatchViewUpdate] {
-        try store.listSessionIDs().compactMap { sessionId in
-            try makeUpdate(store: store, sessionId: sessionId)
+        try store.listReadableManifests().compactMap { manifest in
+            guard manifest.transferState == .acknowledged, manifest.mirrorsToWatch else { return nil }
+            let derived = try store.ensureDerivedView(sessionId: manifest.sessionId)
+            return WatchViewUpdate(manifest: manifest, derived: derived)
         }
     }
 
@@ -52,18 +54,22 @@ enum PhoneWatchViewSync {
         )
     }
 
+    /// Runs at WC activation, so at app launch: reading every session's derived view happens
+    /// off the main actor and the first logbook frame does not wait for it.
     static func rebroadcastViewUpdates(store: SessionFileStore) {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated else { return }
-        do {
-            let updates = try allPhoneUpdates(store: store)
-            for update in updates {
-                pushViewUpdate(update)
+        Task { @MainActor in
+            do {
+                let updates = try await StoreIO.runOffMain { try allPhoneUpdates(store: store) }
+                for update in updates {
+                    pushViewUpdate(update)
+                }
+                if !updates.isEmpty {
+                    WakeLog.debug(.sync, "rebroadcast viewUpdate count=\(updates.count)")
+                }
+            } catch {
+                WakeLog.error(.sync, "rebroadcast viewUpdate failed: \(error.localizedDescription)")
             }
-            if !updates.isEmpty {
-                WakeLog.debug(.sync, "rebroadcast viewUpdate count=\(updates.count)")
-            }
-        } catch {
-            WakeLog.error(.sync, "rebroadcast viewUpdate failed: \(error.localizedDescription)")
         }
     }
 
