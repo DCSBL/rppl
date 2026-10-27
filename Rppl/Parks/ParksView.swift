@@ -93,12 +93,6 @@ struct ParksView: View {
         selectedParkID.flatMap { store.entry(id: $0)?.park }
     }
 
-    /// Beside the list a cross closes the park, back to the map; collapsed, the back button does.
-    private var detailClose: (() -> Void)? {
-        guard layout == .twoPane else { return nil }
-        return { selectedParkID = nil }
-    }
-
     private var showsNearby: Bool {
         !showsMapInList && !isSearching && sort == .distance
     }
@@ -276,8 +270,6 @@ struct ParksView: View {
             listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
         } detail: {
             detailColumn(visibleParks: visibleParks)
-                // Beside the list the park slides in over the map instead of appearing at once.
-                .rpplAnimation(.snappy(duration: 0.3), value: selectedParkID)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
@@ -528,19 +520,24 @@ struct ParksView: View {
         )
     }
 
-    /// Two-pane right side: the selected park, or the map of the listed parks.
+    /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
+    /// column's root. The system back button clears the selection.
+    private var pushedPark: Binding<Park?> {
+        Binding(
+            get: { horizontalSizeClass == .compact ? nil : selectedPark },
+            set: { if $0 == nil { selectedParkID = nil } }
+        )
+    }
+
+    /// Right side. Beside the list: a stack with the map of the listed parks, the selected park pushed on it
+    /// (the system's push and back button). Collapsed: the park is the root, so back goes to the list.
     @ViewBuilder
     private func detailColumn(visibleParks: [Park]) -> some View {
-        if let park = selectedPark {
+        if horizontalSizeClass == .compact, let park = selectedPark {
             NavigationStack {
-                ParkDetailContainer(
-                    park: park,
-                    plannedDate: openFilterDate,
-                    onClose: detailClose
-                )
+                ParkDetailContainer(park: park, plannedDate: openFilterDate)
             }
             .id(park.id)
-            .transition(.move(edge: .trailing))
         } else {
             NavigationStack {
                 ParksMapView(
@@ -550,8 +547,10 @@ struct ParksView: View {
                     onSelectPark: { selectedParkID = $0.id }
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
+                .navigationDestination(item: pushedPark) { park in
+                    ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
+                }
             }
-            .transition(.opacity)
         }
     }
 

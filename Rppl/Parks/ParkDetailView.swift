@@ -8,8 +8,8 @@ struct ParkDetailView: View {
     let isFavorite: Bool
     /// Date from the Parks "Open" filter; nil for today or no filter.
     var plannedDate: Date?
-    /// Beside the list in a wide window: closes the detail back to the map (a cross, not a back arrow).
-    var onClose: (() -> Void)?
+    /// Pushed in the detail column beside the list in a wide window: wider margins.
+    var isBesideList = false
     let onToggleFavorite: () -> Void
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
@@ -85,17 +85,11 @@ struct ParkDetailView: View {
             .padding(.vertical, 8)
             .readableWidth()
         }
-        .detailMargins(onClose == nil ? LogbookLayout.horizontalInset : LogbookLayout.wideInset)
+        .detailMargins(isBesideList ? LogbookLayout.wideInset : LogbookLayout.horizontalInset)
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let onClose {
-                // A back arrow, as in the collapsed stack: the park slides in from the right and back out.
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Back", systemImage: "chevron.left", action: onClose)
-                }
-            }
             // One group with titled buttons: the bar can lay them out, or move them into its overflow,
             // as one stable item instead of rebuilding loose icon-only items.
             ToolbarItemGroup(placement: .primaryAction) {
