@@ -1,0 +1,112 @@
+# Split view navigation with the list beside the detail, the stand-in for an unfolded iPhone Duo: opening,
+# switching and closing a park or session (RpplSplitNavigationTests) on the largest iPhone in landscape, as
+# the Duo screenshots in release-screenshots.yml do. Not an iPad: Rppl is iPhone-only, so an iPad gives it a
+# compact compatibility window. The collapsed case (a folded Duo) runs in portrait in macos-ci.yml's UI tests,
+# which include the same class.
+
+name: UI split navigation
+
+on:
+  pull_request:
+    branches: [main, 'wip/**']
+  workflow_dispatch:
+
+concurrency:
+  group: split-nav-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Changed paths (split navigation)
+    runs-on: ubuntu-24.04
+    outputs:
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplCore/|RpplUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/ui-split-navigation\.yml$)'; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ui=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  wide:
+    name: Split navigation (wide iPhone)
+    needs: changes
+    if: ${{ needs.changes.outputs.ui == 'true' }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: xcodebuild test (RpplSplitNavigationTests)
+        shell: bash
+        env:
+          TEST_RUNNER_RPPL_SPLIT_WIDE: "1"
+        run: |
+          set -euo pipefail
+          udid="$(python3 scripts/ci/pick_simulator.py "iPhone 17 Pro Max")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          # Keep the app's debug log (WakeLog) with its text, for the failure summary.
+          xcrun simctl spawn "$udid" log config --subsystem nl.dcsbl.rppl --mode "level:debug,persist:debug,private_data:on" || true
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplSplitNavigationTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 300 \
+            -resultBundlePath SplitNavigation.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tee split-navigation.log
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-split-navigation
+          path: |
+            split-navigation.log
+            SplitNavigation.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # The tests print the accessibility tree when a check fails; show those, short, at the end of the log.
+      - name: Failure summary
+        if: ${{ failure() }}
+        run: |
+          grep -n -E "error: |accessibility tree at failure" split-navigation.log | head -40 || true
+          awk '/accessibility tree at failure/{n=120} n-->0' split-navigation.log | grep -v -E "^\s*t = " | head -400 || true
+          # The app's own log: its most repeated lines show a loop that keeps it busy.
+          log="$(xcrun simctl spawn "$SIM_UDID" log show --last 90m --debug --info --style compact --predicate 'subsystem == "nl.dcsbl.rppl"' 2>/dev/null || true)"
+          echo "--- app log: most repeated messages ---"
+          printf '%s\n' "$log" | sed -E 's/^[0-9-]+ [0-9:.]+ +[A-Za-z]+ +[^ ]+ +//' | cut -c1-200 | sort | uniq -c | sort -rn | head -30 || true
+          echo "--- app log: split selection ---"
+          printf '%s\n' "$log" | grep -E "\] (select|pushed) " | tail -80 || true
+          echo "--- app log: last lines ---"
+          printf '%s\n' "$log" | tail -120 || true

@@ -138,6 +138,8 @@ struct LogbookSessionDetailView: View {
             .readableWidth()
         }
         .detailMargins(isEmbeddedInSplit ? LogbookLayout.wideInset : 20)
+        // UI tests find the open session by its park (RpplSplitNavigationTests).
+        .accessibilityIdentifier("session-detail-\(manifest?.parkId ?? "loading")")
         .background(RpplBackdrop())
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
