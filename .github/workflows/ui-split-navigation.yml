@@ -67,6 +67,9 @@ jobs:
           udid="$(python3 scripts/ci/pick_simulator.py "iPhone 17 Pro Max")"
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
+          echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          # Keep the app's debug log (WakeLog) with its text, for the failure summary.
+          xcrun simctl spawn "$udid" log config --subsystem nl.dcsbl.rppl --mode "level:debug,persist:debug,private_data:on" || true
           xcodebuild test \
             -project Rppl.xcodeproj \
             -scheme Rppl \
@@ -99,3 +102,9 @@ jobs:
         run: |
           grep -n -E "error: |accessibility tree at failure" split-navigation.log | head -40 || true
           awk '/accessibility tree at failure/{n=120} n-->0' split-navigation.log | grep -v -E "^\s*t = " | head -400 || true
+          # The app's own log: its most repeated lines show a loop that keeps it busy.
+          log="$(xcrun simctl spawn "$SIM_UDID" log show --last 90m --debug --info --style compact --predicate 'subsystem == "nl.dcsbl.rppl"' 2>/dev/null || true)"
+          echo "--- app log: most repeated messages ---"
+          printf '%s\n' "$log" | sed -E 's/^[0-9-]+ [0-9:.]+ +[A-Za-z]+ +[^ ]+ +//' | cut -c1-200 | sort | uniq -c | sort -rn | head -30 || true
+          echo "--- app log: last lines ---"
+          printf '%s\n' "$log" | tail -120 || true
