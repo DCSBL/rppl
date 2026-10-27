@@ -81,6 +81,7 @@ struct WatchLogbookListView: View {
 
 private struct WatchSessionRow: View {
     let entry: WatchSessionEntry
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -153,6 +154,8 @@ private struct WatchSessionRow: View {
 
     private var rowMapSource: SessionMapSnapshotSource? {
         guard WatchDisplayLayout.showsSessionOverviewStartMap else { return nil }
+        // The thumbnail column would leave the metrics no width; the detail still has the map.
+        guard !dynamicTypeSize.isAccessibilitySize else { return nil }
         if let mapFrame = entry.mapFrame {
             return .frame(mapFrame)
         }
