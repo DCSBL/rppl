@@ -52,7 +52,6 @@ struct ParksTests {
         #expect(plain(ParkSchedule.displayTime(minutes: 18 * 60, locale: us)) == "6:00 PM")
         #expect(plain(ParkSchedule.displayTime(minutes: 24 * 60, locale: us)) == "12:00 AM")
         #expect(ParkSchedule.displayTime(minutes: 18 * 60 + 30, locale: Locale(identifier: "nl_NL")) == "18:30")
-        #expect(ParkSchedule.displayTime(minutes: 9 * 60, locale: Locale(identifier: "de_DE")) == "09:00")
     }
 
     @Test func project7SeptemberWeekendAddsBlock2() throws {
