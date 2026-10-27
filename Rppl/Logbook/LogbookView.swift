@@ -272,7 +272,6 @@ struct LogbookView: View {
     /// new session is pushed on it once it exists. A stack created with a session already pushed reported a pop
     /// of it straight away, which closed it again.
     private func select(_ id: String?) {
-        WakeLog.debug(.ui, "select session \(id ?? "nil") (was \(selectedSessionId ?? "nil"))")
         guard let id, let current = selectedSessionId, id != current, horizontalSizeClass != .compact else {
             switchingToSession = nil
             selectedSessionId = id
@@ -294,17 +293,13 @@ struct LogbookView: View {
     }
 
     /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
-    /// is the column's root. The system back button clears the selection.
-    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the session that is still
-    /// selected clears the selection.
+    /// is the column's root. The system back button clears the selection; a stack replaced by `select(_:)`
+    /// reports a pop as it goes, so only a pop of the session that is still selected clears it.
     private var pushedSessionId: Binding<String?> {
         let shown = selectedSessionId
         return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
-            set: { item in
-                WakeLog.debug(.ui, "pushed session set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedSessionId ?? "nil")")
-                if item == nil, selectedSessionId == shown { selectedSessionId = nil }
-            }
+            set: { if $0 == nil, selectedSessionId == shown { selectedSessionId = nil } }
         )
     }
 

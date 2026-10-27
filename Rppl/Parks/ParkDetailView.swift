@@ -86,8 +86,6 @@ struct ParkDetailView: View {
             .readableWidth()
         }
         .detailMargins(isBesideList ? LogbookLayout.wideInset : LogbookLayout.horizontalInset)
-        // UI tests find the open park by its id (RpplSplitNavigationTests).
-        .accessibilityIdentifier("park-detail-\(park.id)")
         .background(RpplBackdrop())
         .navigationTitle(park.compactName)
         .navigationBarTitleDisplayMode(.inline)

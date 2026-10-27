@@ -531,7 +531,6 @@ struct ParksView: View {
     /// new park is pushed on it once it exists. A stack created with a park already pushed reported a pop
     /// of it straight away, which closed it again.
     private func select(_ id: String?) {
-        WakeLog.debug(.ui, "select park \(id ?? "nil") (was \(selectedParkID ?? "nil"))")
         guard let id, let current = selectedParkID, id != current, horizontalSizeClass != .compact else {
             switchingToPark = nil
             selectedParkID = id
@@ -553,17 +552,13 @@ struct ParksView: View {
     }
 
     /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
-    /// column's root. The system back button clears the selection.
-    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the park that is still
-    /// selected clears the selection.
+    /// column's root. The system back button clears the selection; a stack replaced by `select(_:)`
+    /// reports a pop as it goes, so only a pop of the park that is still selected clears it.
     private var pushedPark: Binding<Park?> {
         let shown = selectedParkID
         return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedPark },
-            set: { item in
-                WakeLog.debug(.ui, "pushed park set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedParkID ?? "nil")")
-                if item == nil, selectedParkID == shown { selectedParkID = nil }
-            }
+            set: { if $0 == nil, selectedParkID == shown { selectedParkID = nil } }
         )
     }
 
