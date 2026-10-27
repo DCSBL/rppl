@@ -395,35 +395,17 @@ struct LogbookView: View {
         let speedValue = if let speed, speed > 0 { DistanceFormat.kilometersPerHour(speed) } else { "-" }
 
         return InfoTile("Total", metric: .riding) {
-            Group {
-                if useAccessibilityLayout {
-                    VStack(alignment: .leading, spacing: 12) {
-                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
-                            countTotal = countTotal.cycled()
-                        }
-                        totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
-                            distanceTotal = distanceTotal.cycled()
-                        }
-                        totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
-                            speedTotal = speedTotal.cycled()
-                        }
-                    }
-                } else {
-                    HStack(spacing: 0) {
-                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
-                            countTotal = countTotal.cycled()
-                        }
-                        totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
-                            distanceTotal = distanceTotal.cycled()
-                        }
-                        totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
-                            speedTotal = speedTotal.cycled()
-                        }
-                    }
+            AdaptiveStack(spacing: useAccessibilityLayout ? 12 : 0) {
+                totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
+                    countTotal = countTotal.cycled()
+                }
+                totalDivider(horizontal: useAccessibilityLayout)
+                totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
+                    distanceTotal = distanceTotal.cycled()
+                }
+                totalDivider(horizontal: useAccessibilityLayout)
+                totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
+                    speedTotal = speedTotal.cycled()
                 }
             }
             .sensoryFeedback(.selection, trigger: countTotal)
@@ -473,11 +455,12 @@ struct LogbookView: View {
     }
 
     private var sessionsHeader: some View {
-        HStack {
+        // The count sits under the title at accessibility sizes, where the two no longer share a line.
+        AdaptiveStack(columnAlignment: .leading, spacing: useAccessibilityLayout ? 2 : nil) {
             Text("Sessions")
                 .font(.title3.bold())
                 .foregroundStyle(Color.rpplText)
-            Spacer()
+            if !useAccessibilityLayout { Spacer() }
             Text(catalog.isLoading ? "…" : LogbookFormatting.sessionCount(catalog.entries.count))
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)

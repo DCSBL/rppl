@@ -531,30 +531,36 @@ struct FlowLayout: Layout {
         for (index, origin) in result.origins.enumerated() {
             subviews[index].place(
                 at: CGPoint(x: bounds.minX + origin.x, y: bounds.minY + origin.y),
-                proposal: .unspecified
+                proposal: ProposedViewSize(result.sizes[index])
             )
         }
     }
 
-    private func arrange(width: CGFloat, subviews: Subviews) -> (size: CGSize, origins: [CGPoint]) {
+    private func arrange(width: CGFloat, subviews: Subviews) -> (size: CGSize, origins: [CGPoint], sizes: [CGSize]) {
         var origins: [CGPoint] = []
+        var sizes: [CGSize] = []
         var x: CGFloat = 0
         var y: CGFloat = 0
         var rowHeight: CGFloat = 0
         var maxX: CGFloat = 0
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            var size = subview.sizeThatFits(.unspecified)
+            // Wider than the row (a chip at an accessibility text size): it gets the row's width and wraps.
+            if size.width > width {
+                size = subview.sizeThatFits(ProposedViewSize(width: width, height: nil))
+            }
             if x > 0, x + size.width > width {
                 x = 0
                 y += rowHeight + spacing
                 rowHeight = 0
             }
             origins.append(CGPoint(x: x, y: y))
+            sizes.append(size)
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
             maxX = max(maxX, x - spacing)
         }
-        return (CGSize(width: maxX, height: y + rowHeight), origins)
+        return (CGSize(width: maxX, height: y + rowHeight), origins, sizes)
     }
 }
 
