@@ -282,10 +282,13 @@ struct LogbookView: View {
 
     /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
     /// is the column's root. The system back button clears the selection.
+    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the session that is still
+    /// selected clears the selection.
     private var pushedSessionId: Binding<String?> {
-        Binding(
+        let shown = selectedSessionId
+        return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
-            set: { if $0 == nil { selectedSessionId = nil } }
+            set: { if $0 == nil, selectedSessionId == shown { selectedSessionId = nil } }
         )
     }
 

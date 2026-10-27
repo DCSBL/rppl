@@ -87,6 +87,11 @@ private struct MapScreenLayout: ViewModifier {
     let locate: (() -> Void)?
     @Environment(\.layoutDirection) private var layoutDirection
     @State private var safeArea = EdgeInsets()
+    /// Off screen (a detail pushed over the map), its safe area flips between two values every frame and each
+    /// flip lays the map out again, which kept the app busy until it stopped responding. Measurements wait
+    /// in `latestSafeArea` until the map is back on screen.
+    @State private var isOnScreen = false
+    @State private var latestSafeArea = SafeAreaBox()
 
     /// iPhone Duo: the bars stand in a column on the trailing side, under the status bar, and nothing covers
     /// the top or bottom of the map. Only that column and a sidebar on the other side count there.
@@ -111,12 +116,24 @@ private struct MapScreenLayout: ViewModifier {
             }
             .background {
                 Color.clear.onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
+                    latestSafeArea.insets = insets
+                    guard isOnScreen else { return }
                     safeArea = insets
                     WakeLog.debug(.ui, "map screen safe area top=\(Int(insets.top)) leading=\(Int(insets.leading)) bottom=\(Int(insets.bottom)) trailing=\(Int(insets.trailing))")
                 }
             }
+            .onAppear {
+                isOnScreen = true
+                safeArea = latestSafeArea.insets
+            }
+            .onDisappear { isOnScreen = false }
             .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
     }
+}
+
+/// Holds the last measured safe area without making the view depend on it.
+private final class SafeAreaBox {
+    var insets = EdgeInsets()
 }
 
 extension EnvironmentValues {

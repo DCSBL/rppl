@@ -541,10 +541,13 @@ struct ParksView: View {
 
     /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
     /// column's root. The system back button clears the selection.
+    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the park that is still
+    /// selected clears the selection.
     private var pushedPark: Binding<Park?> {
-        Binding(
+        let shown = selectedParkID
+        return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedPark },
-            set: { if $0 == nil { selectedParkID = nil } }
+            set: { if $0 == nil, selectedParkID == shown { selectedParkID = nil } }
         )
     }
 
