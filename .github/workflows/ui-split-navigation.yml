@@ -1,0 +1,90 @@
+# Split view navigation with the list beside the detail, the stand-in for an unfolded iPhone Duo: opening,
+# switching and closing a park or session (RpplSplitNavigationTests) on an iPad simulator. The collapsed
+# case (a folded Duo) runs on iPhone in macos-ci.yml's UI tests, which include the same class.
+
+name: UI split navigation
+
+on:
+  pull_request:
+    branches: [main, 'wip/**']
+  workflow_dispatch:
+
+concurrency:
+  group: split-nav-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Changed paths (split navigation)
+    runs-on: ubuntu-24.04
+    outputs:
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI relevant changes
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplCore/|RpplUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/ui-split-navigation\.yml$)'; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ui=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  ipad:
+    name: Split navigation (iPad)
+    needs: changes
+    if: ${{ needs.changes.outputs.ui == 'true' }}
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: xcodebuild test (RpplSplitNavigationTests)
+        shell: bash
+        run: |
+          set -euo pipefail
+          udid="$(python3 scripts/ci/pick_simulator.py "iPad Pro 13-inch (M5)")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcodebuild test \
+            -project Rppl.xcodeproj \
+            -scheme Rppl \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplSplitNavigationTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            -resultBundlePath SplitNavigation.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tee split-navigation.log
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-split-navigation
+          path: |
+            split-navigation.log
+            SplitNavigation.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
