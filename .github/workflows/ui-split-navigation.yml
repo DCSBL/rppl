@@ -88,3 +88,10 @@ jobs:
             SplitNavigation.xcresult
           if-no-files-found: ignore
           retention-days: 7
+
+      # The tests print the accessibility tree when a check fails; show those, short, at the end of the log.
+      - name: Failure summary
+        if: ${{ failure() }}
+        run: |
+          grep -n -E "error: |accessibility tree at failure" split-navigation.log | head -40 || true
+          awk '/accessibility tree at failure/{n=120} n-->0' split-navigation.log | grep -v -E "^\s*t = " | head -400 || true
