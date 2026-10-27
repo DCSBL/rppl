@@ -95,6 +95,12 @@ struct MetricIcon: View {
     }
 }
 
+extension DynamicTypeSize {
+    /// From here decoration goes: gauges, timeline bars and chart axes, whose text stays beside them. The
+    /// smaller accessibility sizes still have room for them.
+    var hidesDecoration: Bool { self >= .accessibility3 }
+}
+
 /// See `rpplPopoverContent(width:maxWidth:)`.
 private struct PopoverContent: ViewModifier {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize

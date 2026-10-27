@@ -5,6 +5,7 @@ import SwiftUI
 /// Season tiles under "Total": one bar per session (days without a session never show up), plus
 /// water and air temperature per day. The caller only shows this once `SeasonStats.showsCharts`.
 struct SeasonCharts: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let season: SeasonStats
     @State private var showsDuration = false
 
@@ -25,13 +26,17 @@ struct SeasonCharts: View {
             showsDuration ? "Duration per session" : "Distance per session",
             metric: showsDuration ? .duration : .distance
         ) {
-            Picker("Distance & duration", selection: $showsDuration) {
+            let picker = Picker("Distance & duration", selection: $showsDuration) {
                 Text("Distance").tag(false)
                 Text("Duration").tag(true)
             }
-            .pickerStyle(.segmented)
             .labelsHidden()
-            .fixedSize()
+            // Segments truncate at accessibility sizes; a menu shows the chosen one on one line.
+            if dynamicTypeSize.isAccessibilitySize {
+                picker.pickerStyle(.menu)
+            } else {
+                picker.pickerStyle(.segmented).fixedSize()
+            }
 
             if let mean = Self.mean(points) {
                 MetricValue(
@@ -94,6 +99,7 @@ struct SeasonCharts: View {
 }
 
 private struct SeasonBarChart: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let points: [SeasonStats.Point]
     let tint: Color
     let showsMonths: Bool
@@ -143,6 +149,9 @@ private struct SeasonBarChart: View {
                 }
             }
         }
+        // The axis labels alone fill the chart at the largest sizes; the average above it stays readable.
+        .chartXAxis(dynamicTypeSize.hidesDecoration ? .hidden : .automatic)
+        .chartYAxis(dynamicTypeSize.hidesDecoration ? .hidden : .automatic)
         .frame(height: height)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Sessions"))
@@ -152,6 +161,7 @@ private struct SeasonBarChart: View {
 }
 
 private struct SeasonTemperatureChart: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let days: [SeasonStats.Day]
 
     private struct Reading: Identifiable {
@@ -220,6 +230,8 @@ private struct SeasonTemperatureChart: View {
                 }
             }
         }
+        .chartXAxis(dynamicTypeSize.hidesDecoration ? .hidden : .automatic)
+        .chartYAxis(dynamicTypeSize.hidesDecoration ? .hidden : .automatic)
         .frame(height: 150)
     }
 }
