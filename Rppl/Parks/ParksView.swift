@@ -276,9 +276,22 @@ struct ParksView: View {
             listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
         } detail: {
             detailColumn(visibleParks: visibleParks)
+                // Beside the list the park fades in over the map instead of appearing at once.
+                .rpplAnimation(.snappy(duration: 0.3), value: selectedParkID)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
+        // Collapsed, a pick from the list or the map has to bring the detail on top itself: a tap on a pin
+        // sets the selection from outside the list, and a park that is still selected after back would make
+        // the next tap on its row a no-op. So back clears the selection.
+        .onChange(of: selectedParkID) { _, id in
+            guard id != nil, horizontalSizeClass == .compact else { return }
+            withRpplAnimation { compactColumn = .detail }
+        }
+        .onChange(of: compactColumn) { _, column in
+            guard column == .sidebar, horizontalSizeClass == .compact else { return }
+            selectedParkID = nil
+        }
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
             ParkEditorView(original: nil)
         }
@@ -527,6 +540,7 @@ struct ParksView: View {
                 )
             }
             .id(park.id)
+            .transition(.opacity)
         } else {
             NavigationStack {
                 ParksMapView(
@@ -537,6 +551,7 @@ struct ParksView: View {
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
             }
+            .transition(.opacity)
         }
     }
 
