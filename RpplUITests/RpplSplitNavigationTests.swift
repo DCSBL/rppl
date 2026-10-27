@@ -63,6 +63,19 @@ final class RpplSplitNavigationTests: XCTestCase {
         }
     }
 
+    /// On iPad the split view hides the list while a pushed detail is open (too little room for both next to
+    /// the tab bar's split); the sidebar button brings it back. A Duo keeps both side by side. `marker` is an
+    /// element of the list.
+    private func revealList(_ marker: XCUIElement) {
+        guard isPad, !marker.waitForExistence(timeout: 2) else { return }
+        let toggle = app.buttons.matching(NSPredicate(
+            format: "identifier == 'ToggleSidebar' OR label == 'Show Sidebar' OR label == 'Sidebar' OR label == 'Show sidebar'"
+        )).firstMatch
+        check(toggle.waitForExistence(timeout: 5), "list hidden and no sidebar button")
+        toggle.tap()
+        check(marker.waitForExistence(timeout: 10), "list did not come back")
+    }
+
     private func waitGone(_ element: XCUIElement, timeout: TimeInterval = 10) -> Bool {
         let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: element)
         return XCTWaiter().wait(for: [gone], timeout: timeout) == .completed
@@ -72,6 +85,7 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     private func openSession(_ park: String) {
         let card = card("Wakeboard, \(park)")
+        revealList(app.collectionViews.firstMatch)
         check(app.scrollToElement(card, in: isPad ? app.collectionViews.firstMatch : nil), "no card for \(park)")
         // Beside the detail, tap the card's trailing edge: its middle may hold a link.
         card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
@@ -113,6 +127,7 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     /// Finds the park with the list's search and taps its card.
     private func openPark(_ query: String) {
+        revealList(app.buttons.matching(NSPredicate(format: "label == 'Search parks' OR label == 'Close search'")).firstMatch)
         if app.buttons["Close search"].exists { app.buttons["Close search"].tap() }
         app.buttons["Search parks"].firstMatch.tap()
         let field = app.textFields["Search parks"]
