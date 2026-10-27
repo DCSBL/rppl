@@ -93,12 +93,6 @@ struct ParksView: View {
         selectedParkID.flatMap { store.entry(id: $0)?.park }
     }
 
-    /// Beside the list a cross closes the park, back to the map; collapsed, the back button does.
-    private var detailClose: (() -> Void)? {
-        guard layout == .twoPane else { return nil }
-        return { selectedParkID = nil }
-    }
-
     private var showsNearby: Bool {
         !showsMapInList && !isSearching && sort == .distance
     }
@@ -279,6 +273,17 @@ struct ParksView: View {
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .tint(Color.rpplAccent)
+        // Collapsed, a pick from the list or the map has to bring the detail on top itself: a tap on a pin
+        // sets the selection from outside the list, and a park that is still selected after back would make
+        // the next tap on its row a no-op. So back clears the selection.
+        .onChange(of: selectedParkID) { _, id in
+            guard id != nil, horizontalSizeClass == .compact else { return }
+            withRpplAnimation { compactColumn = .detail }
+        }
+        .onChange(of: compactColumn) { _, column in
+            guard column == .sidebar, horizontalSizeClass == .compact else { return }
+            selectedParkID = nil
+        }
         .sheet(isPresented: $showEditor, onDismiss: reloadDrafts) {
             ParkEditorView(original: nil)
         }
@@ -515,16 +520,22 @@ struct ParksView: View {
         )
     }
 
-    /// Two-pane right side: the selected park, or the map of the listed parks.
+    /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
+    /// column's root. The system back button clears the selection.
+    private var pushedPark: Binding<Park?> {
+        Binding(
+            get: { horizontalSizeClass == .compact ? nil : selectedPark },
+            set: { if $0 == nil { selectedParkID = nil } }
+        )
+    }
+
+    /// Right side. Beside the list: a stack with the map of the listed parks, the selected park pushed on it
+    /// (the system's push and back button). Collapsed: the park is the root, so back goes to the list.
     @ViewBuilder
     private func detailColumn(visibleParks: [Park]) -> some View {
-        if let park = selectedPark {
+        if horizontalSizeClass == .compact, let park = selectedPark {
             NavigationStack {
-                ParkDetailContainer(
-                    park: park,
-                    plannedDate: openFilterDate,
-                    onClose: detailClose
-                )
+                ParkDetailContainer(park: park, plannedDate: openFilterDate)
             }
             .id(park.id)
         } else {
@@ -536,6 +547,9 @@ struct ParksView: View {
                     onSelectPark: { selectedParkID = $0.id }
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
+                .navigationDestination(item: pushedPark) { park in
+                    ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
+                }
             }
         }
     }
