@@ -1,19 +1,29 @@
-# macOS checks: full test run and a dry-run build of every app target (iOS + embedded Watch/widgets).
+# macOS checks: build the app once, then run every test target against that build.
 # Public repo = free macOS runners. The Release build stays in Xcode Cloud (Docs/Release.md);
 # nothing here signs, archives or uploads.
 #
+# `build` compiles the Rppl and RpplWatch schemes with `xcodebuild build-for-testing` (iOS + embedded
+# Watch + widgets + the test runners) and uploads Build/Products as the `test-products` artifact. The
+# other jobs download it and run `xcodebuild test-without-building`, so the app is compiled once per
+# run instead of once per job (about 10 minutes of each simulator job before this). A compile error
+# shows up in `build` in a few minutes and the test jobs never start.
+#
 # Warnings and errors from the compiler become inline PR annotations through
 # .github/xcode-problem-matcher.json (GitHub caps this at 10 per step, 50 per job; the full log is
-# the `*-log` artifact). The Linux core-tests.yml stays as the fast, container-based check.
+# the `build-log` artifact). The Linux core-tests.yml stays as the fast, container-based check.
 #
-# `smoke` is the fast gate (compile + app unit tests, target <= 6 min): the heavy jobs wait for it,
-# so a broken build neither queues ~20 min of UI tests nor blocks the macOS runners. Merge on a green
-# `Smoke (app unit tests)`; the rest is the real verification. A merged PR cancels its own runs (cancel-on-merge.yml)
-# unless it is "scary" (label `full-ci`, release/CI/project paths).
+# The job names `Build app (dry run)` and `Smoke (app unit tests)` are required checks in the main
+# ruleset, so they keep their names. Merge on green `build` + `smoke`; the rest is the real
+# verification. A merged PR cancels its own runs (cancel-on-merge.yml) unless it is "scary"
+# (label `full-ci`, release/CI/project paths).
 #
-# No `paths:` filter: the jobs always report a status, so they can be required checks. The two UI
-# jobs are the slow ones (~17 min of test run, build is ~3 min), so they skip when a PR touches
+# No `paths:` filter: the jobs always report a status, so they can be required checks. The UI jobs
+# are the slow ones (about 16 minutes of iPhone test run, 5 of Watch), so they skip when a PR touches
 # nothing they exercise. A job skipped by `if` still reports success.
+#
+# The first app launch on a fresh simulator can take over a minute (automation session + dyld) and
+# used to time out the first UI test (#579): every UI job runs one throwaway test first, like the
+# Watch jobs always did.
 
 name: macOS CI
 
@@ -70,10 +80,11 @@ jobs:
             echo "watch=false" >> "$GITHUB_OUTPUT"
           fi
 
-  smoke:
-    name: Smoke (app unit tests)
+  build:
+    # The name is pinned by the main ruleset (required check); it is the build-for-testing step now.
+    name: Build app (dry run)
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -81,12 +92,88 @@ jobs:
       - name: Toolchain
         run: xcodebuild -version
 
-      # Compile the whole app (iOS + embedded Watch + widgets) and run the app unit tests: the
-      # "does it work" gate. A compile error on macOS (#550) shows up here in a few minutes.
+      # Both schemes into one DerivedData: the RpplWatch scheme also builds the iOS app, so the
+      # second invocation only adds the Watch test runner. ONLY_ACTIVE_ARCH keeps it to arm64, which
+      # is what the simulators on these runners run.
+      - name: xcodebuild build-for-testing (iOS + Watch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::add-matcher::.github/xcode-problem-matcher.json"
+          for scheme in Rppl RpplWatch; do
+            case "$scheme" in
+              Rppl) platform="iOS Simulator" ;;
+              RpplWatch) platform="watchOS Simulator" ;;
+            esac
+            xcodebuild build-for-testing \
+              -project Rppl.xcodeproj \
+              -scheme "$scheme" \
+              -destination "generic/platform=${platform}" \
+              -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+              CODE_SIGNING_ALLOWED=NO \
+              COMPILER_INDEX_STORE_ENABLE=NO \
+              ONLY_ACTIVE_ARCH=YES \
+              2>&1 | tee -a build.log
+          done
+
+      # tar keeps the executable bits and symlinks inside the .app bundles, which a plain artifact
+      # upload drops. Swift modules and debug symbols are not needed to run the tests.
+      - name: Pack test products
+        shell: bash
+        run: |
+          set -euo pipefail
+          products="$RUNNER_TEMP/DerivedData/Build/Products"
+          ls "$products"
+          tar -C "$products" --exclude='*.swiftmodule' --exclude='*.dSYM' -cf test-products.tar .
+          du -h test-products.tar
+
+      - name: Upload test products
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-products
+          path: test-products.tar
+          compression-level: 1
+          retention-days: 1
+
+      - name: Warning / error summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          {
+            echo "### Build"
+            echo "errors: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: error: ' || true)"
+            echo "warnings: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: warning: ' || true)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  smoke:
+    name: Smoke (app unit tests)
+    needs: build
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
       - name: App unit tests (iOS Simulator)
         shell: bash
         run: |
           set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" iphonesimulator)"
           udid="$(xcrun simctl list devices available -j | python3 -c '
           import json, sys
           for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
@@ -94,15 +181,11 @@ jobs:
                   if d["name"].startswith("iPhone") and d["isAvailable"]:
                       print(d["udid"]); sys.exit()
           sys.exit("no iPhone simulator available")')"
-          echo "::add-matcher::.github/xcode-problem-matcher.json"
-          xcodebuild test \
-            -project Rppl.xcodeproj \
-            -scheme Rppl \
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplTests \
             -resultBundlePath RpplTests.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO \
             2>&1 | tee app-tests.log
 
       - name: Upload logs
@@ -118,7 +201,7 @@ jobs:
 
   tests:
     name: Core and release script tests (macOS)
-    needs: smoke
+    needs: build
     runs-on: macos-26
     timeout-minutes: 45
     steps:
@@ -148,55 +231,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  build:
-    name: Build app (dry run)
-    needs: smoke
-    runs-on: macos-26
-    timeout-minutes: 45
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Toolchain
-        run: xcodebuild -version
-
-      # Same invocation as scripts/git-hooks/xcode-gate.sh: the Rppl scheme embeds Watch + widgets.
-      - name: xcodebuild build (iOS + Watch)
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "::add-matcher::.github/xcode-problem-matcher.json"
-          xcodebuild build \
-            -project Rppl.xcodeproj \
-            -scheme Rppl \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            ONLY_ACTIVE_ARCH=YES \
-            2>&1 | tee build.log
-
-      - name: Warning / error summary
-        if: ${{ !cancelled() }}
-        shell: bash
-        run: |
-          {
-            echo "### Build"
-            echo "errors: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: error: ' || true)"
-            echo "warnings: $(sort -u build.log | grep -cE '^/.+:[0-9]+:[0-9]+: warning: ' || true)"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload log
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-log
-          path: build.log
-          if-no-files-found: ignore
-          retention-days: 7
-
   ui-tests:
     name: UI tests (iPhone Simulator)
-    needs: [smoke, changes]
+    needs: [build, changes]
     if: needs.changes.outputs.phone == 'true'
     runs-on: macos-26
     timeout-minutes: 45
@@ -207,6 +244,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
       # Rppl/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
       # build); release-screenshots.yml does the same for releases.
@@ -214,6 +257,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" iphonesimulator)"
           udid="$(xcrun simctl list devices available -j | python3 -c '
           import json, sys
           for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
@@ -224,19 +268,26 @@ jobs:
           # Boot first: a cold simulator made the runner fail to launch and every wait time out.
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
-          xcodebuild test \
-            -project Rppl.xcodeproj \
-            -scheme Rppl \
+          # Warm-up: the first launch of the app on a fresh simulator took 75 s and timed out the
+          # first test (#579); a throwaway test with a long allowance absorbs it.
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplUITests/testTabsSwitch \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 300 \
+            > warm-up.log 2>&1 || echo "::warning::UI warm-up test failed (see warm-up.log in ui-tests-result)"
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests \
             -retry-tests-on-failure \
             -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 120 \
+            -default-test-execution-time-allowance 180 \
             -resultBundlePath RpplUITests.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO \
             2>&1 | tee ui-tests.log
 
       - name: Export screenshots
@@ -278,13 +329,14 @@ jobs:
           name: ui-tests-result
           path: |
             ui-tests.log
+            warm-up.log
             RpplUITests.xcresult
           if-no-files-found: ignore
           retention-days: 7
 
   watch-ui-tests:
     name: UI tests (Apple Watch Simulator)
-    needs: [smoke, changes]
+    needs: [build, changes]
     if: needs.changes.outputs.watch == 'true'
     runs-on: macos-26
     timeout-minutes: 45
@@ -295,6 +347,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
       # RpplWatch/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
       # build); release-screenshots.yml does the same for releases.
@@ -302,6 +360,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" watchsimulator)"
           udid="$(xcrun simctl list devices available -j | python3 -c '
           import json, sys
           for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
@@ -313,19 +372,16 @@ jobs:
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
           # Warm-up: the first launch on a cold watch simulator hung twice in CI; let a throwaway
-          # test absorb it (also builds), then run the real thing.
-          xcodebuild test \
-            -project Rppl.xcodeproj \
-            -scheme RpplWatch \
+          # test absorb it, then run the real thing.
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
             -destination "platform=watchOS Simulator,id=${udid}" \
             -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 240 \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            >/dev/null 2>&1 || true
-          bash scripts/ci/run_watch_ui_tests.sh "$udid" RpplWatchUITests.xcresult watch-ui-tests.log
+            > warm-up.log 2>&1 || echo "::warning::Watch warm-up test failed (see warm-up.log in watch-ui-tests-result)"
+          XCTESTRUN="$xctestrun" bash scripts/ci/run_watch_ui_tests.sh "$udid" RpplWatchUITests.xcresult watch-ui-tests.log
 
       - name: Export screenshots
         if: ${{ !cancelled() }}
@@ -366,6 +422,153 @@ jobs:
           name: watch-ui-tests-result
           path: |
             watch-ui-tests.log
+            watch-ui-tests.log.attempt1
+            warm-up.log
             RpplWatchUITests.xcresult
           if-no-files-found: ignore
           retention-days: 7
+
+  # Layout screenshots for wide and rotated windows, the stand-in for iPhone Duo until a real device or
+  # the Duo simulator is on the runners: iPad (regular width, live window resizing) and iPhone landscape,
+  # portrait and landscape, at the default and the largest accessibility text size. Was its own workflow
+  # (ui-layout-screenshots.yml); it lives here so the four cells reuse the build instead of compiling
+  # four more times. Runs RpplLayoutScreenshotTests only (it skips itself without RPPL_LAYOUT_SHOTS, so
+  # the other UI jobs never run it). Output: one artifact `layout-screenshots` with
+  # <device>-<text>/<screenshot>.png, linked in a PR comment.
+  layouts:
+    name: Layout screenshots ${{ matrix.variant }}
+    needs: [build, changes]
+    if: needs.changes.outputs.phone == 'true'
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { variant: ipad-default, device: "iPad Pro 13-inch (M5)", text: large }
+          - { variant: ipad-ax5, device: "iPad Pro 13-inch (M5)", text: accessibility-extra-extra-extra-large }
+          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
+          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
+      - name: xcodebuild test (RpplLayoutScreenshotTests)
+        shell: bash
+        env:
+          DEVICE: ${{ matrix.device }}
+          TEXT: ${{ matrix.text }}
+          TEST_RUNNER_RPPL_LAYOUT_SHOTS: "1"
+        run: |
+          set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" iphonesimulator)"
+          udid="$(python3 scripts/ci/pick_simulator.py "$DEVICE")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl ui "$udid" content_size "$TEXT"
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          # Warm-up, see ui-tests: the first launch on a fresh simulator is slow.
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplUITests/testTabsSwitch \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 300 \
+            > warm-up.log 2>&1 || echo "::warning::UI warm-up test failed (see warm-up.log in the result artifact)"
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplLayoutScreenshotTests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            -resultBundlePath Layouts.xcresult \
+            2>&1 | tee layouts.log
+
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          python3 scripts/ci/export_screenshots.py Layouts.xcresult screenshots
+          mkdir -p "out/$VARIANT"
+          cp screenshots/*.png "out/$VARIANT/"
+
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: shots-layout-${{ matrix.variant }}
+          path: out
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-layout-${{ matrix.variant }}
+          path: |
+            layouts.log
+            warm-up.log
+            Layouts.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  layouts-merge:
+    name: Merge layout screenshots
+    needs: [changes, layouts]
+    if: ${{ !cancelled() && needs.changes.outputs.phone == 'true' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download cell screenshots
+        uses: actions/download-artifact@v8
+        with:
+          pattern: shots-layout-*
+          path: merged
+          merge-multiple: true
+
+      - name: Upload one screenshot bundle
+        id: bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: layout-screenshots
+          path: merged
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Fork PRs get a read-only token, so they only get the artifact.
+      - name: Comment screenshot link
+        if: ${{ steps.bundle.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          ARTIFACT_URL: ${{ steps.bundle.outputs.artifact-url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          marker='<!-- layout-screenshots -->'
+          printf '%s\n### Layout screenshots (iPad and iPhone, portrait and landscape)\n\n[Download the zip](%s) · `%s`\n\nFolders: `<device>-<text>/layout-<screen>-<orientation>.png` (`ipad`/`promax`, `default`/`ax5`).\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
+          else
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file comment.md
+          fi
+
+      - name: Fail if any cell failed
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "A layout cell failed; see the cell logs."
+          exit 1
