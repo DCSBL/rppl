@@ -261,13 +261,12 @@ struct LogbookView: View {
         .tag(sessionId)
     }
 
-    /// The detail column's stack beside the list: the selected session pushed on the placeholder; empty while
-    /// collapsed, where the session is the column's root. A path, so picking another session replaces the
-    /// pushed one instead of popping it first and losing the new selection; the system back button clears it.
-    private var pushedPath: Binding<[String]> {
+    /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
+    /// is the column's root. The system back button clears the selection.
+    private var pushedSessionId: Binding<String?> {
         Binding(
-            get: { horizontalSizeClass == .compact ? [] : (selectedSessionId.map { [$0] } ?? []) },
-            set: { selectedSessionId = $0.last }
+            get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
+            set: { if $0 == nil { selectedSessionId = nil } }
         )
     }
 
@@ -283,12 +282,12 @@ struct LogbookView: View {
             }
             .id(sessionId)
         } else {
-            NavigationStack(path: pushedPath) {
+            NavigationStack {
                 ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(RpplBackdrop())
-                    .navigationDestination(for: String.self) { sessionId in
+                    .navigationDestination(item: pushedSessionId) { sessionId in
                         LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
                             .embeddedInSplit()
                             .toolbar(.visible, for: .navigationBar)

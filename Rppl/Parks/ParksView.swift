@@ -520,14 +520,12 @@ struct ParksView: View {
         )
     }
 
-    /// The detail column's stack beside the list: the selected park pushed on the map; empty while collapsed,
-    /// where the park is the column's root. A path, not an item binding, so picking another park replaces the
-    /// pushed one instead of popping it first and losing the new selection. Only a pop by the person (the
-    /// system back button) empties it, which clears the selection.
-    private var pushedPath: Binding<[String]> {
+    /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
+    /// column's root. The system back button clears the selection.
+    private var pushedPark: Binding<Park?> {
         Binding(
-            get: { horizontalSizeClass == .compact ? [] : (selectedPark.map { [$0.id] } ?? []) },
-            set: { selectedParkID = $0.last }
+            get: { horizontalSizeClass == .compact ? nil : selectedPark },
+            set: { if $0 == nil { selectedParkID = nil } }
         )
     }
 
@@ -541,7 +539,7 @@ struct ParksView: View {
             }
             .id(park.id)
         } else {
-            NavigationStack(path: pushedPath) {
+            NavigationStack {
                 ParksMapView(
                     parks: visibleParks,
                     location: location,
@@ -549,10 +547,8 @@ struct ParksView: View {
                     onSelectPark: { selectedParkID = $0.id }
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
-                .navigationDestination(for: String.self) { id in
-                    if let park = store.entry(id: id)?.park {
-                        ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
-                    }
+                .navigationDestination(item: pushedPark) { park in
+                    ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
                 }
             }
         }
