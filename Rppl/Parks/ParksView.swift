@@ -39,6 +39,8 @@ struct ParksView: View {
     @State private var withoutCableGeoOnly = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @State private var headerHeight: CGFloat = 0
+    /// Accessibility sizes: the "Open on a day" sheet, opened from the Filters menu.
+    @State private var showOpenDateSheet = false
     /// How far the list is pulled down past its resting position, for the pull-to-refresh indicator.
     @State private var pullDistance: CGFloat = 0
     @State private var mapPosition: MapCameraPosition = .region(ParksMapDefaults.opening())
@@ -60,6 +62,10 @@ struct ParksView: View {
     @Environment(\.showAppSettings) private var showAppSettings
 
     private var parks: [Park] { store.entries.map(\.park).filter(\.isListed) }
+
+    /// At accessibility sizes the sort picker and the filter pills leave no room for the list under the
+    /// large title, so sort and filters become menus in the navigation bar.
+    private var useAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
 
     private var isSearching: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -484,7 +490,14 @@ struct ParksView: View {
 
     /// Sort picker (or the search field) and filters, in a bar under the navigation bar: the list scrolls under it
     /// with the system's edge effect, and the large title collapses as with any list.
+    @ViewBuilder
     private func filterHeader(hasParks: Bool) -> some View {
+        if showSearch || !useAccessibilityLayout {
+            filterHeaderContent(hasParks: hasParks)
+        }
+    }
+
+    private func filterHeaderContent(hasParks: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if showSearch {
                 ParkSearchField(
@@ -495,16 +508,9 @@ struct ParksView: View {
                 )
                     .transition(.move(edge: .top).combined(with: .opacity))
             } else {
-                Picker("Sort", selection: sortChoice) {
-                    Text("Nearby").tag(SortChoice.sort(.distance))
-                    Text("Most visited").tag(SortChoice.sort(.visits))
-                    if layout == .stack {
-                        Text("View on map").tag(SortChoice.map)
-                    }
-                }
-                .pickerStyle(.segmented)
+                sortPicker.pickerStyle(.segmented)
             }
-            if hasParks {
+            if hasParks, !useAccessibilityLayout {
                 ParksFilterBar(
                     openDate: $openFilterDate,
                     cableDirections: $cableFilter,
@@ -593,6 +599,62 @@ struct ParksView: View {
         }
     }
 
+    private var sortPicker: some View {
+        Picker("Sort", selection: sortChoice) {
+            Text("Nearby").tag(SortChoice.sort(.distance))
+            Text("Most visited").tag(SortChoice.sort(.visits))
+            if layout == .stack {
+                Text("View on map").tag(SortChoice.map)
+            }
+        }
+    }
+
+    /// Accessibility sizes: the sort picker as a bar menu.
+    private var sortMenu: some View {
+        Menu {
+            sortPicker
+        } label: {
+            Label("Sort", systemImage: "arrow.up.arrow.down")
+        }
+    }
+
+    /// Accessibility sizes: the filter pills as one bar menu; the icon fills while a filter is on.
+    private var filterMenu: some View {
+        Menu {
+            Toggle("Open today", systemImage: "clock", isOn: Binding(
+                get: { openFilterDate.map { Calendar.current.isDateInToday($0) } ?? false },
+                set: { openFilterDate = $0 ? AppClock.now : nil }
+            ))
+            Button("Open on a day…", systemImage: "calendar") { showOpenDateSheet = true }
+            Menu {
+                ForEach(ParksFilterBar.cableChoices, id: \.self) { direction in
+                    Toggle(ParksFilterBar.label(for: direction), isOn: Binding(
+                        get: { cableFilter.contains(direction) },
+                        set: { if $0 { cableFilter.insert(direction) } else { cableFilter.remove(direction) } }
+                    ))
+                }
+            } label: {
+                Label("Cable", systemImage: "arrow.triangle.2.circlepath")
+            }
+            Toggle("Favourites", systemImage: "star.fill", isOn: $favoritesOnly)
+            if noCableGeoFilterEnabled {
+                Toggle("No cable geo", systemImage: "ladybug", isOn: $withoutCableGeoOnly)
+            }
+            if filters.isActive {
+                Divider()
+                Button("Clear filters", systemImage: "xmark.circle", role: .destructive, action: clearFilters)
+            }
+        } label: {
+            Label(
+                "Filters",
+                systemImage: filters.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle"
+            )
+        }
+        .sheet(isPresented: $showOpenDateSheet) {
+            ParksOpenDatePicker(date: $openFilterDate)
+        }
+    }
+
     @ViewBuilder
     private var searchButton: some View {
         if showSearch {
@@ -607,10 +669,20 @@ struct ParksView: View {
     private func listToolbar(hasParks: Bool) -> some ToolbarContent {
         if showsMapInList {
             // Search first, as on the list; it opens the same field in the header.
-            ToolbarItem(placement: .topBarTrailing) { searchButton }
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if useAccessibilityLayout {
+                    sortMenu
+                    if hasParks { filterMenu }
+                }
+                searchButton
+            }
             MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                if useAccessibilityLayout {
+                    sortMenu
+                    if hasParks { filterMenu }
+                }
                 if hasParks {
                     searchButton
                 }
@@ -633,7 +705,7 @@ private struct ParksFilterBar: View {
     var withoutCableGeoOnly: Binding<Bool>?
     @State private var showOpenPicker = false
 
-    private static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoPointZero]
+    static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoPointZero]
 
     private var openLabel: String {
         guard let openDate else { return String(localized: "Open") }
@@ -857,6 +929,7 @@ private struct ParkDraftCard: View {
 }
 
 private struct ParkCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let park: Park
     let visitCount: Int
     let distanceMeters: Double?
@@ -887,32 +960,39 @@ private struct ParkCard: View {
         if visitCount > 0 {
             ParkChip(text: ParkFormatting.visits(visitCount))
         }
-        if park.wakesys == true {
+        if park.wakesys == true, !dynamicTypeSize.hidesDecoration {
             ParkChip(text: "Wakesys")
         }
     }
 
     private var cardContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
+            // The name wraps: it is how riders tell parks apart. The star and the origin badge go under it
+            // at accessibility sizes.
+            AdaptiveStack(rowAlignment: .firstTextBaseline, spacing: 6) {
                 Text(park.name)
                     .font(.headline)
                     .foregroundStyle(Color.rpplText)
-                    .lineLimit(2)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                     .fixedSize(horizontal: false, vertical: true)
-                if isFavorite {
-                    Image(systemName: "star.fill")
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplAccent)
-                        .accessibilityLabel(Text("Favorite"))
-                }
-                if let badge = ParkOriginBadge.text(for: entry) {
-                    Text(badge)
-                        .font(.caption)
-                        .foregroundStyle(Color.rpplMuted)
+                if isFavorite || ParkOriginBadge.text(for: entry) != nil {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        if isFavorite {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.rpplAccent)
+                                .accessibilityLabel(Text("Favorite"))
+                        }
+                        if let badge = ParkOriginBadge.text(for: entry) {
+                            Text(badge)
+                                .font(.caption)
+                                .foregroundStyle(Color.rpplMuted)
+                        }
+                    }
                 }
             }
-            if let address = park.address {
+            // The detail has the address; at the largest sizes the list keeps to name and status.
+            if let address = park.address, !dynamicTypeSize.hidesDecoration {
                 Text(address)
                     .font(.caption)
                     .foregroundStyle(Color.rpplMuted)
@@ -921,6 +1001,7 @@ private struct ParkCard: View {
             }
             // Two explicit rows when one row overflows: a wrapping Layout inside a List
             // row reported one row of height, so the card did not grow with the chips.
+            // One chip per row when two no longer share one (accessibility sizes).
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 6) {
                     statusChips
@@ -929,6 +1010,10 @@ private struct ParkCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) { statusChips }
                     HStack(spacing: 6) { countChips }
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    statusChips
+                    countChips
                 }
             }
         }
