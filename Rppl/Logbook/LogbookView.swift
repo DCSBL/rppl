@@ -24,11 +24,12 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
-    /// Bumped by `select(_:)` when another session is picked while one is open beside the list: the detail
-    /// stack is rebuilt with the new session pushed. Replacing the item of a pushed destination makes SwiftUI
-    /// report a pop, which cleared the new selection. It changes in the same update as the selection, so the
-    /// old stack never sees the new session (bumped later, in `onChange`, the pop had already happened).
+    /// Bumped by `select(_:)` when another session is picked while one is open beside the list, so the detail
+    /// stack is rebuilt for it: replacing the item of a pushed destination makes SwiftUI report a pop, which
+    /// cleared the new selection.
     @State private var detailStackToken = 0
+    /// The session `select(_:)` is about to push on a rebuilt detail stack.
+    @State private var switchingToSession: String?
     /// Collapsed (narrow), the list is the root; opening a session shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
     @Environment(\.showAppSettings) private var showAppSettings
@@ -111,7 +112,7 @@ struct LogbookView: View {
         }
         // Back from a session (narrow) or deselected: flash its row, maybe ask for a review.
         .onChange(of: selectedSessionId) { old, new in
-            guard let old, new == nil else { return }
+            guard let old, new == nil, switchingToSession == nil else { return }
             didOpenSession = true
             flashHighlight(old)
             requestReviewIfPending()
@@ -267,18 +268,29 @@ struct LogbookView: View {
     }
 
     /// Opens a session, or closes it with nil. Use this rather than setting `selectedSessionId`, so that
-    /// switching sessions beside the list rebuilds the detail stack (`detailStackToken`).
+    /// switching sessions beside the list works: the detail stack is rebuilt (`detailStackToken`) empty and the
+    /// new session is pushed on it once it exists. A stack created with a session already pushed reported a pop
+    /// of it straight away, which closed it again.
     private func select(_ id: String?) {
         WakeLog.debug(.ui, "select session \(id ?? "nil") (was \(selectedSessionId ?? "nil"))")
-        if selectedSessionId != nil, id != nil, id != selectedSessionId, horizontalSizeClass != .compact {
-            detailStackToken += 1
+        guard let id, let current = selectedSessionId, id != current, horizontalSizeClass != .compact else {
+            switchingToSession = nil
+            selectedSessionId = id
+            return
         }
-        selectedSessionId = id
+        switchingToSession = id
+        detailStackToken += 1
+        selectedSessionId = nil
+        DispatchQueue.main.async {
+            guard switchingToSession == id else { return }
+            switchingToSession = nil
+            selectedSessionId = id
+        }
     }
 
     /// The list's selection, through `select(_:)`.
     private var sessionSelection: Binding<String?> {
-        Binding(get: { selectedSessionId }, set: { select($0) })
+        Binding(get: { switchingToSession ?? selectedSessionId }, set: { select($0) })
     }
 
     /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session

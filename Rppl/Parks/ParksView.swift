@@ -47,11 +47,12 @@ struct ParksView: View {
     @State private var selectedParkID: String?
     /// Collapsed (narrow), the list is the root; opening a park shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
-    /// Bumped by `select(_:)` when another park is picked while one is open beside the list: the detail stack
-    /// is rebuilt with the new park pushed. Replacing the item of a pushed destination makes SwiftUI report a
-    /// pop, which cleared the new selection. It changes in the same update as the selection, so the old stack
-    /// never sees the new park (bumped later, in `onChange`, the pop had already happened).
+    /// Bumped by `select(_:)` when another park is picked while one is open beside the list, so the detail
+    /// stack is rebuilt for it: replacing the item of a pushed destination makes SwiftUI report a pop, which
+    /// cleared the new selection.
     @State private var detailStackToken = 0
+    /// The park `select(_:)` is about to push on a rebuilt detail stack.
+    @State private var switchingToPark: String?
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -525,19 +526,30 @@ struct ParksView: View {
         )
     }
 
-    /// Opens a park, or closes it with nil. Use this rather than setting `selectedParkID`, so that switching
-    /// parks beside the list rebuilds the detail stack (`detailStackToken`).
+    /// Opens a park, or closes it with nil. Use this rather than setting `selectedParkID`, so that
+    /// switching parks beside the list works: the detail stack is rebuilt (`detailStackToken`) empty and the
+    /// new park is pushed on it once it exists. A stack created with a park already pushed reported a pop
+    /// of it straight away, which closed it again.
     private func select(_ id: String?) {
         WakeLog.debug(.ui, "select park \(id ?? "nil") (was \(selectedParkID ?? "nil"))")
-        if selectedParkID != nil, id != nil, id != selectedParkID, horizontalSizeClass != .compact {
-            detailStackToken += 1
+        guard let id, let current = selectedParkID, id != current, horizontalSizeClass != .compact else {
+            switchingToPark = nil
+            selectedParkID = id
+            return
         }
-        selectedParkID = id
+        switchingToPark = id
+        detailStackToken += 1
+        selectedParkID = nil
+        DispatchQueue.main.async {
+            guard switchingToPark == id else { return }
+            switchingToPark = nil
+            selectedParkID = id
+        }
     }
 
     /// The list's selection, through `select(_:)`.
     private var parkSelection: Binding<String?> {
-        Binding(get: { selectedParkID }, set: { select($0) })
+        Binding(get: { switchingToPark ?? selectedParkID }, set: { select($0) })
     }
 
     /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the

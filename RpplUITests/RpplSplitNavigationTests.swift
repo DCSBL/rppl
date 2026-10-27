@@ -115,9 +115,9 @@ final class RpplSplitNavigationTests: XCTestCase {
         let card = card("Wakeboard, \(park)")
         revealList(app.collectionViews.firstMatch)
         check(app.scrollToElement(card, in: isTwoPane ? app.collectionViews.firstMatch : nil), "no card for \(park)")
-        // Right of the card's middle: the middle may hold a link, the trailing edge sits under the list's
-        // scroll indicator (which takes the tap), and the top may still be under the navigation bar.
-        card.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)).tap()
+        // Low on the card's right: the middle may hold a link, the trailing edge sits under the list's scroll
+        // indicator (which takes the tap), and the top may still be under the bar or the pinned section header.
+        card.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.8)).tap()
     }
 
     @MainActor
