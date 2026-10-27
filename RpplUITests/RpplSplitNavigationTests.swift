@@ -38,7 +38,7 @@ final class RpplSplitNavigationTests: XCTestCase {
         print("window: \(windowWidth)pt wide, two panes: \(isTwoPane)")
     }
 
-    /// iPadOS opens apps in a resizable window. Its window controls (SpringBoard's) may offer to fill the
+    /// iPadOS opens apps in a resizable window. Its window controls (SpringBoard's) offer Zoom, which fills the
     /// screen; otherwise drag the window's resize grabber to the bottom right corner of the screen.
     private func enterFullScreen() {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -46,7 +46,7 @@ final class RpplSplitNavigationTests: XCTestCase {
         if controls.waitForExistence(timeout: 3) {
             controls.tap()
             let fill = springboard.descendants(matching: .any).matching(NSPredicate(
-                format: "label BEGINSWITH[c] 'Fill' OR label CONTAINS[c] 'Full Screen' OR label CONTAINS[c] 'Maximize'"
+                format: "label == 'Zoom' OR label BEGINSWITH[c] 'Fill' OR label CONTAINS[c] 'Full Screen'"
             )).firstMatch
             if fill.waitForExistence(timeout: 3) {
                 print("window controls: tapping '\(fill.label)'")
@@ -56,7 +56,7 @@ final class RpplSplitNavigationTests: XCTestCase {
             let items = springboard.descendants(matching: .any).allElementsBoundByIndex
                 .map(\.label).filter { !$0.isEmpty }
             print("window controls offer no fill: \(items.joined(separator: ", "))")
-            controls.tap()
+            if controls.exists { controls.tap() }
         }
         let grabber = springboard.descendants(matching: .any)["resize-grabber"]
         guard grabber.waitForExistence(timeout: 3) else {
