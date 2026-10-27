@@ -47,6 +47,10 @@ struct ParksView: View {
     @State private var selectedParkID: String?
     /// Collapsed (narrow), the list is the root; opening a park shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
+    /// Bumped when another park is picked while one is open beside the list: the detail stack is rebuilt
+    /// with the new park pushed. Replacing the item of a pushed destination makes SwiftUI report a pop first,
+    /// which cleared the new selection.
+    @State private var detailStackToken = 0
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -276,7 +280,8 @@ struct ParksView: View {
         // Collapsed, a pick from the list or the map has to bring the detail on top itself: a tap on a pin
         // sets the selection from outside the list, and a park that is still selected after back would make
         // the next tap on its row a no-op. So back clears the selection.
-        .onChange(of: selectedParkID) { _, id in
+        .onChange(of: selectedParkID) { old, id in
+            if old != nil, id != nil, horizontalSizeClass != .compact { detailStackToken += 1 }
             guard id != nil, horizontalSizeClass == .compact else { return }
             withRpplAnimation { compactColumn = .detail }
         }
@@ -551,6 +556,7 @@ struct ParksView: View {
                     ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
                 }
             }
+            .id(detailStackToken)
         }
     }
 

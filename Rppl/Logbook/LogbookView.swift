@@ -24,6 +24,10 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
+    /// Bumped when another session is picked while one is open beside the list: the detail stack is rebuilt
+    /// with the new session pushed. Replacing the item of a pushed destination makes SwiftUI report a pop
+    /// first, which cleared the new selection.
+    @State private var detailStackToken = 0
     /// Collapsed (narrow), the list is the root; opening a session shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
     @Environment(\.showAppSettings) private var showAppSettings
@@ -106,6 +110,7 @@ struct LogbookView: View {
         }
         // Back from a session (narrow) or deselected: flash its row, maybe ask for a review.
         .onChange(of: selectedSessionId) { old, new in
+            if old != nil, new != nil, horizontalSizeClass != .compact { detailStackToken += 1 }
             guard let old, new == nil else { return }
             didOpenSession = true
             flashHighlight(old)
@@ -293,6 +298,7 @@ struct LogbookView: View {
                             .toolbar(.visible, for: .navigationBar)
                     }
             }
+            .id(detailStackToken)
         }
     }
 
