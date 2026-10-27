@@ -3,8 +3,8 @@ import XCTest
 /// Opening, switching and closing a park or session in the Parks and Logbook split views, the flows that
 /// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the list and the detail stand side by side, as
 /// on an unfolded Duo; on iPhone (the regular UI job) the split view is collapsed, as on a folded Duo.
-/// The detail is checked by its texts: list cards are one combined element, so their texts do not show up
-/// as `staticTexts`.
+/// The detail is found by its accessibility identifier (`park-detail-<id>`, `session-detail-<park id>`). On a
+/// failed check the test prints the accessibility tree to the log, so a CI run shows what was on screen.
 final class RpplSplitNavigationTests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -27,8 +27,23 @@ final class RpplSplitNavigationTests: XCTestCase {
         app.launch()
     }
 
-    private func text(containing value: String) -> XCUIElement {
-        app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", value)).firstMatch
+    private func parkDetail(_ id: String) -> XCUIElement {
+        app.descendants(matching: .any)["park-detail-\(id)"].firstMatch
+    }
+
+    private func sessionDetail(_ parkID: String) -> XCUIElement {
+        app.descendants(matching: .any)["session-detail-\(parkID)"].firstMatch
+    }
+
+    /// Fails with the accessibility tree in the log.
+    private func check(_ condition: Bool, _ message: String, file: StaticString = #filePath, line: UInt = #line) {
+        guard !condition else { return }
+        print("--- accessibility tree at failure: \(message) ---\n\(app.debugDescription)")
+        XCTFail(message, file: file, line: line)
+    }
+
+    private func waitShown(_ element: XCUIElement, timeout: TimeInterval = 15) -> Bool {
+        element.waitForExistence(timeout: timeout)
     }
 
     private func card(_ prefix: String) -> XCUIElement {
@@ -43,7 +58,7 @@ final class RpplSplitNavigationTests: XCTestCase {
         } else {
             // The system back button carries the previous title as its label; the detail bar is the last one.
             let bars = app.navigationBars.allElementsBoundByIndex
-            XCTAssertFalse(bars.isEmpty, "no navigation bar")
+            check(!bars.isEmpty, "no navigation bar")
             bars.last?.buttons.firstMatch.tap()
         }
     }
@@ -57,7 +72,7 @@ final class RpplSplitNavigationTests: XCTestCase {
 
     private func openSession(_ park: String) {
         let card = card("Wakeboard, \(park)")
-        XCTAssertTrue(app.scrollToElement(card, in: isPad ? app.collectionViews.firstMatch : nil), "no card for \(park)")
+        check(app.scrollToElement(card, in: isPad ? app.collectionViews.firstMatch : nil), "no card for \(park)")
         // Beside the detail, tap the card's trailing edge: its middle may hold a link.
         card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
     }
@@ -66,12 +81,12 @@ final class RpplSplitNavigationTests: XCTestCase {
     func testSessionOpensAndBackReturns() {
         launch()
         openSession("Lakeside Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "session detail did not open")
+        check(waitShown(sessionDetail("lakeside-zwolle")), "session detail did not open")
         tapBack()
-        XCTAssertTrue(waitGone(text(containing: "Zwolle")), "back did not close the session")
+        check(waitGone(sessionDetail("lakeside-zwolle")), "back did not close the session")
         // The same session again: a selection left behind after back made this tap a no-op.
         openSession("Lakeside Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "session did not open a second time")
+        check(waitShown(sessionDetail("lakeside-zwolle")), "session did not open a second time")
     }
 
     @MainActor
@@ -79,12 +94,12 @@ final class RpplSplitNavigationTests: XCTestCase {
         try XCTSkipUnless(isPad, "needs the list beside the detail (iPad)")
         launch()
         openSession("Lakeside Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "first session did not open")
+        check(waitShown(sessionDetail("lakeside-zwolle")), "first session did not open")
         openSession("Wakepark Groningen")
-        XCTAssertTrue(text(containing: "Groningen").waitForExistence(timeout: 15), "second session did not open")
-        XCTAssertTrue(waitGone(text(containing: "Zwolle")), "first session still shown")
+        check(waitShown(sessionDetail("wakepark-groningen")), "second session did not open")
+        check(waitGone(sessionDetail("lakeside-zwolle")), "first session still shown")
         tapBack()
-        XCTAssertTrue(app.staticTexts["No session selected"].waitForExistence(timeout: 15), "back did not return to the placeholder")
+        check(waitShown(app.staticTexts["No session selected"]), "back did not return to the placeholder")
     }
 
     // MARK: Parks
@@ -101,11 +116,11 @@ final class RpplSplitNavigationTests: XCTestCase {
         if app.buttons["Close search"].exists { app.buttons["Close search"].tap() }
         app.buttons["Search parks"].firstMatch.tap()
         let field = app.textFields["Search parks"]
-        XCTAssertTrue(field.waitForExistence(timeout: 15))
+        check(field.waitForExistence(timeout: 15), "no search field")
         field.tap()
         field.typeText(query)
         let result = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", query)).firstMatch
-        XCTAssertTrue(result.waitForExistence(timeout: 15), "no park found for \(query)")
+        check(result.waitForExistence(timeout: 15), "no park found for \(query)")
         result.tap()
     }
 
@@ -114,11 +129,11 @@ final class RpplSplitNavigationTests: XCTestCase {
         launch()
         openParksTab()
         openPark("Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "park detail did not open")
+        check(waitShown(parkDetail("lakeside-zwolle")), "park detail did not open")
         tapBack()
-        XCTAssertTrue(waitGone(text(containing: "Zwolle")), "back did not close the park")
+        check(waitGone(parkDetail("lakeside-zwolle")), "back did not close the park")
         openPark("Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "park did not open a second time")
+        check(waitShown(parkDetail("lakeside-zwolle")), "park did not open a second time")
     }
 
     @MainActor
@@ -127,11 +142,11 @@ final class RpplSplitNavigationTests: XCTestCase {
         launch()
         openParksTab()
         openPark("Zwolle")
-        XCTAssertTrue(text(containing: "Zwolle").waitForExistence(timeout: 15), "first park did not open")
+        check(waitShown(parkDetail("lakeside-zwolle")), "first park did not open")
         openPark("Groningen")
-        XCTAssertTrue(text(containing: "Groningen").waitForExistence(timeout: 15), "second park did not open")
-        XCTAssertTrue(waitGone(text(containing: "Zwolle")), "first park still shown")
+        check(waitShown(parkDetail("wakepark-groningen")), "second park did not open")
+        check(waitGone(parkDetail("lakeside-zwolle")), "first park still shown")
         tapBack()
-        XCTAssertTrue(waitGone(text(containing: "Groningen")), "back did not close the park")
+        check(waitGone(parkDetail("wakepark-groningen")), "back did not close the park")
     }
 }
