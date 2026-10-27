@@ -11,6 +11,7 @@ struct DebugLogView: View {
     @State private var showMail = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
+    @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
 
     var body: some View {
         List {
@@ -26,6 +27,23 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Show and edit set flags in the logbook. Saved flags are kept when this is off.")
+            }
+
+            Section {
+                Toggle("No cable geo filter", isOn: $noCableGeoFilterEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Adds a filter to the Parks list and map for parks without cable coordinates.")
+            }
+
+            Section {
+                Button {
+                    ParkShare.shareAll(ParkStore.shared.entries)
+                } label: {
+                    Label("Share all park info", systemImage: "square.and.arrow.up")
+                }
+            } footer: {
+                Text("A zip with one YAML file per park, as the app uses it, including edited and custom parks.")
             }
 
             Section {

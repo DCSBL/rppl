@@ -36,6 +36,8 @@ struct ParksView: View {
     @State private var openFilterDate: Date?
     @State private var cableFilter: Set<ParkCableDirection> = []
     @State private var favoritesOnly = false
+    @State private var withoutCableGeoOnly = false
+    @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @State private var headerHeight: CGFloat = 0
     /// How far the list is pulled down past its resting position, for the pull-to-refresh indicator.
     @State private var pullDistance: CGFloat = 0
@@ -63,7 +65,12 @@ struct ParksView: View {
     }
 
     private var filters: ParkFilters {
-        ParkFilters(openOnDate: openFilterDate, cableDirections: cableFilter, favoritesOnly: favoritesOnly)
+        ParkFilters(
+            openOnDate: openFilterDate,
+            cableDirections: cableFilter,
+            favoritesOnly: favoritesOnly,
+            withoutCableGeoOnly: noCableGeoFilterEnabled && withoutCableGeoOnly
+        )
     }
 
     /// The distance-sorted list is on screen: the one place this tab needs the person's location.
@@ -118,6 +125,7 @@ struct ParksView: View {
             openFilterDate = nil
             cableFilter = []
             favoritesOnly = false
+            withoutCableGeoOnly = false
         }
     }
 
@@ -489,7 +497,8 @@ struct ParksView: View {
                 ParksFilterBar(
                     openDate: $openFilterDate,
                     cableDirections: $cableFilter,
-                    favoritesOnly: $favoritesOnly
+                    favoritesOnly: $favoritesOnly,
+                    withoutCableGeoOnly: noCableGeoFilterEnabled ? $withoutCableGeoOnly : nil
                 )
             }
         }
@@ -567,6 +576,8 @@ private struct ParksFilterBar: View {
     @Binding var openDate: Date?
     @Binding var cableDirections: Set<ParkCableDirection>
     @Binding var favoritesOnly: Bool
+    /// Debug filter; nil hides the pill.
+    var withoutCableGeoOnly: Binding<Bool>?
     @State private var showOpenPicker = false
 
     private static let cableChoices: [ParkCableDirection] = [.clockwise, .counterClockwise, .twoPointZero]
@@ -632,6 +643,17 @@ private struct ParksFilterBar: View {
                     )
                 }
                 .buttonStyle(.plain)
+
+                if let withoutCableGeoOnly {
+                    Button { withoutCableGeoOnly.wrappedValue.toggle() } label: {
+                        ParksFilterPillLabel(
+                            title: "No cable geo",
+                            isActive: withoutCableGeoOnly.wrappedValue,
+                            systemImage: "ladybug"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .scrollClipDisabled()

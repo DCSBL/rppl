@@ -23,6 +23,8 @@ enum AppSettingsKey {
     static let debugSetCharts = "rppl.debugSetCharts"
     /// Debug: show and edit set flags/labels in the logbook (default off; stored flags are kept either way).
     static let debugSetFlags = "rppl.debugSetFlags"
+    /// Debug: add a "No cable geo" filter pill to the Parks list and map (default off).
+    static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).
