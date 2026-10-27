@@ -38,19 +38,34 @@ final class RpplSplitNavigationTests: XCTestCase {
         print("window: \(windowWidth)pt wide, two panes: \(isTwoPane)")
     }
 
-    /// iPadOS opens apps in a resizable window; its window controls can make it fill the screen. The
-    /// controls belong to SpringBoard, and their labels are logged when none matches.
+    /// iPadOS opens apps in a resizable window. Its window controls (SpringBoard's) may offer to fill the
+    /// screen; otherwise drag the window's resize grabber to the bottom right corner of the screen.
     private func enterFullScreen() {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let labels = ["Full Screen", "Enter Full Screen", "Fill", "Fill Screen", "Maximize", "Zoom"]
-        let control = springboard.buttons.matching(NSPredicate(format: "label IN %@ OR identifier IN %@", labels, labels)).firstMatch
-        if control.waitForExistence(timeout: 3) {
-            control.tap()
+        let controls = springboard.buttons["window-controls:nl.dcsbl.rppl"]
+        if controls.waitForExistence(timeout: 3) {
+            controls.tap()
+            let fill = springboard.descendants(matching: .any).matching(NSPredicate(
+                format: "label BEGINSWITH[c] 'Fill' OR label CONTAINS[c] 'Full Screen' OR label CONTAINS[c] 'Maximize'"
+            )).firstMatch
+            if fill.waitForExistence(timeout: 3) {
+                print("window controls: tapping '\(fill.label)'")
+                fill.tap()
+                return
+            }
+            let items = springboard.descendants(matching: .any).allElementsBoundByIndex
+                .map(\.label).filter { !$0.isEmpty }
+            print("window controls offer no fill: \(items.joined(separator: ", "))")
+            controls.tap()
+        }
+        let grabber = springboard.descendants(matching: .any)["resize-grabber"]
+        guard grabber.waitForExistence(timeout: 3) else {
+            print("no resize grabber")
             return
         }
-        let buttons = springboard.buttons.allElementsBoundByIndex.map { "'\($0.label)' [\($0.identifier)]" }
-        print("--- no full screen control; SpringBoard buttons: \(buttons.joined(separator: ", "))")
-        print("--- SpringBoard tree ---\n\(springboard.debugDescription)")
+        let corner = springboard.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: -2, dy: -2))
+        grabber.press(forDuration: 0.5, thenDragTo: corner)
+        print("dragged the resize grabber; window now \(windowWidth)pt wide")
     }
 
     /// Guards the side-by-side tests below from skipping unnoticed: on an iPad the list should show beside
