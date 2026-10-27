@@ -64,7 +64,7 @@ final class RpplSplitNavigationTests: XCTestCase {
             return
         }
         let corner = springboard.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: -2, dy: -2))
-        grabber.press(forDuration: 0.5, thenDragTo: corner)
+        grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.5, thenDragTo: corner)
         print("dragged the resize grabber; window now \(windowWidth)pt wide")
     }
 
