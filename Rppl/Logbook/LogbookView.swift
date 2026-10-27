@@ -269,6 +269,7 @@ struct LogbookView: View {
     /// Opens a session, or closes it with nil. Use this rather than setting `selectedSessionId`, so that
     /// switching sessions beside the list rebuilds the detail stack (`detailStackToken`).
     private func select(_ id: String?) {
+        WakeLog.debug(.ui, "select session \(id ?? "nil") (was \(selectedSessionId ?? "nil"))")
         if selectedSessionId != nil, id != nil, id != selectedSessionId, horizontalSizeClass != .compact {
             detailStackToken += 1
         }
@@ -288,7 +289,10 @@ struct LogbookView: View {
         let shown = selectedSessionId
         return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
-            set: { if $0 == nil, selectedSessionId == shown { selectedSessionId = nil } }
+            set: { item in
+                WakeLog.debug(.ui, "pushed session set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedSessionId ?? "nil")")
+                if item == nil, selectedSessionId == shown { selectedSessionId = nil }
+            }
         )
     }
 

@@ -528,6 +528,7 @@ struct ParksView: View {
     /// Opens a park, or closes it with nil. Use this rather than setting `selectedParkID`, so that switching
     /// parks beside the list rebuilds the detail stack (`detailStackToken`).
     private func select(_ id: String?) {
+        WakeLog.debug(.ui, "select park \(id ?? "nil") (was \(selectedParkID ?? "nil"))")
         if selectedParkID != nil, id != nil, id != selectedParkID, horizontalSizeClass != .compact {
             detailStackToken += 1
         }
@@ -547,7 +548,10 @@ struct ParksView: View {
         let shown = selectedParkID
         return Binding(
             get: { horizontalSizeClass == .compact ? nil : selectedPark },
-            set: { if $0 == nil, selectedParkID == shown { selectedParkID = nil } }
+            set: { item in
+                WakeLog.debug(.ui, "pushed park set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedParkID ?? "nil")")
+                if item == nil, selectedParkID == shown { selectedParkID = nil }
+            }
         )
     }
 
