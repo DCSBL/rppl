@@ -6,6 +6,17 @@ public enum WindowLayout: Equatable, Sendable {
     case stack
     case twoPane
 
+    /// The text size tiers the layout cares about, so this stays free of SwiftUI's `DynamicTypeSize`.
+    public enum TextSize: Equatable, Sendable {
+        /// Extra small up to extra extra extra large.
+        case standard
+        /// The first three accessibility sizes.
+        case accessibility
+        /// The two largest accessibility sizes: body text is three times the default, so even an unfolded
+        /// iPhone Duo (about 1000 points) cannot hold a list beside a detail. One stack, always.
+        case largestAccessibility
+    }
+
     /// Narrowest window (points) that gets two panes at normal text sizes.
     public static let twoPaneMinWidth: Double = 520
 
@@ -17,12 +28,29 @@ public enum WindowLayout: Equatable, Sendable {
     /// is then unreachable, so it must not be treated as two panes.
     public static func resolve(
         width: Double,
-        isAccessibilityTextSize: Bool,
+        textSize: TextSize,
         isCompactWidthClass: Bool = false
     ) -> WindowLayout {
         if isCompactWidthClass { return .stack }
-        let minimum = isAccessibilityTextSize ? twoPaneMinWidthAccessibility : twoPaneMinWidth
+        let minimum: Double
+        switch textSize {
+        case .standard: minimum = twoPaneMinWidth
+        case .accessibility: minimum = twoPaneMinWidthAccessibility
+        case .largestAccessibility: return .stack
+        }
         return width >= minimum ? .twoPane : .stack
+    }
+
+    public static func resolve(
+        width: Double,
+        isAccessibilityTextSize: Bool,
+        isCompactWidthClass: Bool = false
+    ) -> WindowLayout {
+        resolve(
+            width: width,
+            textSize: isAccessibilityTextSize ? .accessibility : .standard,
+            isCompactWidthClass: isCompactWidthClass
+        )
     }
 
     /// Whether the sidebar column shows the map in place of its list. Only the system's own collapsed

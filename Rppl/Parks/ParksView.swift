@@ -89,7 +89,7 @@ struct ParksView: View {
     private var layout: WindowLayout {
         WindowLayout.resolve(
             width: Double(windowWidth),
-            isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize,
+            textSize: dynamicTypeSize.windowTextSize,
             isCompactWidthClass: horizontalSizeClass == .compact
         )
     }

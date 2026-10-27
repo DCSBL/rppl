@@ -36,6 +36,7 @@ Check each at `.accessibility3` and `.accessibility5` (previews in `DesignGaller
 - Charts: axis label count and legend wrapping.
 - Widgets (`RpplWidgets`): they scale with the system size; check each family.
 - Watch: the riding view must still fit without scrolling on the smallest supported case, or the primary metrics (time, laps, speed) must stay on the first screen with the rest below.
+- Done: iPhone Duo unfolded (and any window from 760 pt) keeps two panes up to `.accessibility3`; at `.accessibility4` and `.accessibility5` `WindowLayout` always resolves to one stack (`WindowLayout.TextSize.largestAccessibility`), because a sidebar plus detail cannot hold body text at three times the default.
 
 ## 3. Verification
 
