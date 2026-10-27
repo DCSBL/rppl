@@ -106,5 +106,7 @@ jobs:
           log="$(xcrun simctl spawn "$SIM_UDID" log show --last 90m --debug --info --style compact --predicate 'subsystem == "nl.dcsbl.rppl"' 2>/dev/null || true)"
           echo "--- app log: most repeated messages ---"
           printf '%s\n' "$log" | sed -E 's/^[0-9-]+ [0-9:.]+ +[A-Za-z]+ +[^ ]+ +//' | cut -c1-200 | sort | uniq -c | sort -rn | head -30 || true
+          echo "--- app log: split selection ---"
+          printf '%s\n' "$log" | grep -E "\] (select|pushed) " | tail -80 || true
           echo "--- app log: last lines ---"
           printf '%s\n' "$log" | tail -120 || true
