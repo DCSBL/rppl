@@ -276,7 +276,7 @@ struct ParksView: View {
             listColumn(allParks: allParks, visitCounts: visitCounts, visibleParks: visibleParks, orderedParks: orderedParks)
         } detail: {
             detailColumn(visibleParks: visibleParks)
-                // Beside the list the park fades in over the map instead of appearing at once.
+                // Beside the list the park slides in over the map instead of appearing at once.
                 .rpplAnimation(.snappy(duration: 0.3), value: selectedParkID)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
@@ -540,7 +540,7 @@ struct ParksView: View {
                 )
             }
             .id(park.id)
-            .transition(.opacity)
+            .transition(.move(edge: .trailing))
         } else {
             NavigationStack {
                 ParksMapView(

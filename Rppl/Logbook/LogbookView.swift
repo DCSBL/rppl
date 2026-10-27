@@ -43,6 +43,8 @@ struct LogbookView: View {
             listContent
         } detail: {
             splitDetail
+                // Beside the list the session slides in over the placeholder instead of appearing at once.
+                .rpplAnimation(.snappy(duration: 0.3), value: selectedSessionId)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .sheet(isPresented: $showAddSession) {
@@ -270,11 +272,13 @@ struct LogbookView: View {
                     .toolbar(.visible, for: .navigationBar)
             }
             .id(sessionId)
+            .transition(.move(edge: .trailing))
         } else {
             ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
                 .foregroundStyle(Color.rpplMuted)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(RpplBackdrop())
+                .transition(.opacity)
         }
     }
 

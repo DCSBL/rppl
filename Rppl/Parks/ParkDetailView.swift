@@ -91,8 +91,9 @@ struct ParkDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if let onClose {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close, action: onClose)
+                // A back arrow, as in the collapsed stack: the park slides in from the right and back out.
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Back", systemImage: "chevron.left", action: onClose)
                 }
             }
             // One group with titled buttons: the bar can lay them out, or move them into its overflow,
