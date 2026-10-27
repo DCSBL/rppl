@@ -35,6 +35,7 @@ Check each at `.accessibility3` and `.accessibility5` (previews in `DesignGaller
 - Logbook list rows, park cards, chips (`ParkChip`, `HighlightChip`), `SetFlagBadge` wrapping.
 - Charts: axis label count and legend wrapping.
 - Widgets (`RpplWidgets`): they scale with the system size; check each family.
+- Done (widgets): capped at `.accessibility2` (`DynamicTypeSize.widgetMaximum`); each widget drops pieces with `ViewThatFits` (Last session: times and bar, then counts; Park hours: city, then water and time zone note; Top parks: fewer rows).
 - Watch: the riding view must still fit without scrolling on the smallest supported case, or the primary metrics (time, laps, speed) must stay on the first screen with the rest below.
 - Done (Watch): at accessibility sizes the riding and inactive status block becomes three vertical pages (status and times, set metrics, vitals), the hero time takes two lines, control tiles show only their symbol (the accessibility label keeps the name), the start page drops the clock, the sync page stacks its buttons, the logbook row drops the map thumbnail and the recording badge shows a symbol plus count.
 - Done: iPhone Duo unfolded (and any window from 760 pt) keeps two panes up to `.accessibility3`; at `.accessibility4` and `.accessibility5` `WindowLayout` always resolves to one stack (`WindowLayout.TextSize.largestAccessibility`), because a sidebar plus detail cannot hold body text at three times the default.

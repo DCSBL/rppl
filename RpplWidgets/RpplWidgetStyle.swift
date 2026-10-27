@@ -1,5 +1,11 @@
 import SwiftUI
 
+extension DynamicTypeSize {
+    /// Widgets cannot scroll and have a fixed size: beyond this the content would be cut. Two steps
+    /// into the accessibility range already double the text.
+    static let widgetMaximum = DynamicTypeSize.accessibility2
+}
+
 /// The calm Rppl gradient with an accent glow (same look as `RpplBackdrop` in the app).
 struct RpplWidgetBackground: View {
     var body: some View {

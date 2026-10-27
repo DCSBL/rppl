@@ -102,20 +102,23 @@ struct ParkHoursView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .widgetURL(entry.parkID.flatMap(ParkDeepLink.url(forParkID:)))
+        .dynamicTypeSize(...DynamicTypeSize.widgetMaximum)
         .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
-    /// The park name is never cut off: it wraps and shrinks before it clips. The city only shows when it fits.
+    /// The park name is never cut off: it wraps and shrinks before it clips. The city only shows when it
+    /// fits, and at larger text sizes the water temperature and time zone note go too.
     private var text: some View {
         ViewThatFits(in: .vertical) {
-            textStack(showCity: true)
-            textStack(showCity: false)
+            textStack(showCity: true, showExtras: true)
+            textStack(showCity: false, showExtras: true)
+            textStack(showCity: false, showExtras: false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     @ViewBuilder
-    private func textStack(showCity: Bool) -> some View {
+    private func textStack(showCity: Bool, showExtras: Bool) -> some View {
         if entry.parkName == nil {
             WidgetEmptyState(
                 symbol: "mappin.and.ellipse",
@@ -125,11 +128,11 @@ struct ParkHoursView: View {
                     : "Touch and hold the widget, then choose Edit Widget."
             )
         } else {
-            filledStack(showCity: showCity)
+            filledStack(showCity: showCity, showExtras: showExtras)
         }
     }
 
-    private func filledStack(showCity: Bool) -> some View {
+    private func filledStack(showCity: Bool, showExtras: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.parkName ?? "")
@@ -153,12 +156,12 @@ struct ParkHoursView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color("RpplMuted"))
                         .minimumScaleFactor(0.8)
-                    if let celsius = entry.waterCelsius {
+                    if showExtras, let celsius = entry.waterCelsius {
                         Label(TemperatureFormat.celsius(celsius), systemImage: "water.waves")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(Color("RpplMuted"))
                     }
-                    if let note = entry.timeZoneNote {
+                    if showExtras, let note = entry.timeZoneNote {
                         Text(note)
                             .font(.caption2)
                             .foregroundStyle(Color("RpplMuted").opacity(0.75))

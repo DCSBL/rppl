@@ -85,11 +85,17 @@ struct TopParksView: View {
                     column(right)
                 }
             } else {
-                column(Array(entry.rows.prefix(3)))
+                // Larger text sizes hold fewer rows; a row is never half shown.
+                ViewThatFits(in: .vertical) {
+                    column(Array(entry.rows.prefix(3)))
+                    column(Array(entry.rows.prefix(2)))
+                    column(Array(entry.rows.prefix(1)))
+                }
             }
         }
         // A tap opens the Parks tab on nearby parks with the Favourites filter on.
         .widgetURL(ParkDeepLink.favoritesURL)
+        .dynamicTypeSize(...DynamicTypeSize.widgetMaximum)
         .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
