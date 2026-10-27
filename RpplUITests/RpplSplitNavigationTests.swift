@@ -1,28 +1,33 @@
 import XCTest
 
 /// Opening, switching and closing a park or session in the Parks and Logbook split views, the flows that
-/// broke on iPhone Duo. On iPad (`ui-split-navigation.yml`) the test makes the app's window full screen, so the
-/// list shows beside the detail as on an unfolded Duo; on iPhone (the regular UI job) the split view is
-/// collapsed, as on a folded Duo. Portrait on purpose: in landscape the CI iPad gave the app a 476pt window.
+/// broke on iPhone Duo. With `RPPL_SPLIT_WIDE` set (`ui-split-navigation.yml`) the largest iPhone runs in
+/// landscape, where the list shows beside the detail as on an unfolded Duo; otherwise (the regular UI job) the
+/// iPhone stays in portrait and the split view is collapsed, as on a folded Duo. Not an iPad: Rppl is
+/// iPhone-only, so an iPad runs it in a compatibility window that is always compact.
 /// The detail is found by its accessibility identifier (`park-detail-<id>`, `session-detail-<park id>`). On a
 /// failed check the test prints the accessibility tree to the log, so a CI run shows what was on screen.
 final class RpplSplitNavigationTests: XCTestCase {
     private var app: XCUIApplication!
 
+    /// Set on the CI job that stands in for an unfolded Duo.
+    private let wide = ProcessInfo.processInfo.environment["RPPL_SPLIT_WIDE"] != nil
+
     override func setUpWithError() throws {
         continueAfterFailure = false
+        XCUIDevice.shared.orientation = wide ? .landscapeLeft : .portrait
         app = XCUIApplication()
         app.launchArguments = ["-rpplUITest", "-AppleLanguages", "(en)", "-AppleLocale", "en_NL"]
     }
 
     override func tearDown() {
         app?.terminate()
+        XCUIDevice.shared.orientation = .portrait
         super.tearDown()
     }
 
     /// Whether the list shows beside the detail, read from the screen: the Logbook's empty detail
-    /// placeholder only shows when the split view is not collapsed. Not the window width: iPadOS opens the
-    /// app in a window (635pt on CI) whose size class is compact, and then it behaves like a folded Duo.
+    /// placeholder only shows when the split view is not collapsed.
     private var isTwoPane = false
 
     private var windowWidth: Int { Int(app.windows.firstMatch.frame.width) }
@@ -31,50 +36,16 @@ final class RpplSplitNavigationTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30), "the app did not start")
         isTwoPane = app.staticTexts["No session selected"].waitForExistence(timeout: 5)
-        if !isTwoPane, UIDevice.current.userInterfaceIdiom == .pad {
-            enterFullScreen()
-            isTwoPane = app.staticTexts["No session selected"].waitForExistence(timeout: 5)
-        }
         print("window: \(windowWidth)pt wide, two panes: \(isTwoPane)")
     }
 
-    /// iPadOS opens apps in a resizable window. Its window controls (SpringBoard's) offer Zoom, which fills the
-    /// screen; otherwise drag the window's resize grabber to the bottom right corner of the screen.
-    private func enterFullScreen() {
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let controls = springboard.buttons["window-controls:nl.dcsbl.rppl"]
-        if controls.waitForExistence(timeout: 3) {
-            controls.tap()
-            let fill = springboard.descendants(matching: .any).matching(NSPredicate(
-                format: "label == 'Zoom' OR label BEGINSWITH[c] 'Fill' OR label CONTAINS[c] 'Full Screen'"
-            )).firstMatch
-            if fill.waitForExistence(timeout: 3) {
-                print("window controls: tapping '\(fill.label)'")
-                fill.tap()
-                return
-            }
-            let items = springboard.descendants(matching: .any).allElementsBoundByIndex
-                .map(\.label).filter { !$0.isEmpty }
-            print("window controls offer no fill: \(items.joined(separator: ", "))")
-            if controls.exists { controls.tap() }
-        }
-        let grabber = springboard.descendants(matching: .any)["resize-grabber"]
-        guard grabber.waitForExistence(timeout: 3) else {
-            print("no resize grabber")
-            return
-        }
-        let corner = springboard.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: -2, dy: -2))
-        grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.5, thenDragTo: corner)
-        print("dragged the resize grabber; window now \(windowWidth)pt wide")
-    }
-
-    /// Guards the side-by-side tests below from skipping unnoticed: on an iPad the list should show beside
-    /// the detail, and if CI hands the app a compact window, those tests are not covering anything.
+    /// Guards the side-by-side tests below from skipping unnoticed: on the wide job the list must show
+    /// beside the detail, or those tests are not covering anything.
     @MainActor
-    func testIPadWindowIsWideEnoughForTwoPanes() throws {
-        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "iPad only")
+    func testWideWindowShowsTwoPanes() throws {
+        try XCTSkipUnless(wide, "only on the wide job")
         launch()
-        check(isTwoPane, "the iPad window is \(windowWidth)pt wide and the split view collapses")
+        check(isTwoPane, "the window is \(windowWidth)pt wide and the split view collapses")
     }
 
     /// Skips a side-by-side test when the split view is collapsed, naming the window width.

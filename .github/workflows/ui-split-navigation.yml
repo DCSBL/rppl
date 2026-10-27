@@ -1,6 +1,8 @@
 # Split view navigation with the list beside the detail, the stand-in for an unfolded iPhone Duo: opening,
-# switching and closing a park or session (RpplSplitNavigationTests) on an iPad simulator. The collapsed
-# case (a folded Duo) runs on iPhone in macos-ci.yml's UI tests, which include the same class.
+# switching and closing a park or session (RpplSplitNavigationTests) on the largest iPhone in landscape, as
+# the Duo screenshots in release-screenshots.yml do. Not an iPad: Rppl is iPhone-only, so an iPad gives it a
+# compact compatibility window. The collapsed case (a folded Duo) runs in portrait in macos-ci.yml's UI tests,
+# which include the same class.
 
 name: UI split navigation
 
@@ -46,8 +48,8 @@ jobs:
             echo "ui=false" >> "$GITHUB_OUTPUT"
           fi
 
-  ipad:
-    name: Split navigation (iPad)
+  wide:
+    name: Split navigation (wide iPhone)
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: macos-26
@@ -58,9 +60,11 @@ jobs:
 
       - name: xcodebuild test (RpplSplitNavigationTests)
         shell: bash
+        env:
+          TEST_RUNNER_RPPL_SPLIT_WIDE: "1"
         run: |
           set -euo pipefail
-          udid="$(python3 scripts/ci/pick_simulator.py "iPad Pro 13-inch (M5)")"
+          udid="$(python3 scripts/ci/pick_simulator.py "iPhone 17 Pro Max")"
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
           xcodebuild test \
