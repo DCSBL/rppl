@@ -24,9 +24,10 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
-    /// Bumped when another session is picked while one is open beside the list: the detail stack is rebuilt
-    /// with the new session pushed. Replacing the item of a pushed destination makes SwiftUI report a pop
-    /// first, which cleared the new selection.
+    /// Bumped by `select(_:)` when another session is picked while one is open beside the list: the detail
+    /// stack is rebuilt with the new session pushed. Replacing the item of a pushed destination makes SwiftUI
+    /// report a pop, which cleared the new selection. It changes in the same update as the selection, so the
+    /// old stack never sees the new session (bumped later, in `onChange`, the pop had already happened).
     @State private var detailStackToken = 0
     /// Collapsed (narrow), the list is the root; opening a session shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
@@ -110,7 +111,6 @@ struct LogbookView: View {
         }
         // Back from a session (narrow) or deselected: flash its row, maybe ask for a review.
         .onChange(of: selectedSessionId) { old, new in
-            if old != nil, new != nil, horizontalSizeClass != .compact { detailStackToken += 1 }
             guard let old, new == nil else { return }
             didOpenSession = true
             flashHighlight(old)
@@ -131,7 +131,7 @@ struct LogbookView: View {
     }
 
     private var listContent: some View {
-        List(selection: $selectedSessionId) {
+        List(selection: sessionSelection) {
             if connectivity.pendingAckCount > 0 {
                 Section {
                     SyncStatusIndicator(
@@ -266,6 +266,20 @@ struct LogbookView: View {
         .tag(sessionId)
     }
 
+    /// Opens a session, or closes it with nil. Use this rather than setting `selectedSessionId`, so that
+    /// switching sessions beside the list rebuilds the detail stack (`detailStackToken`).
+    private func select(_ id: String?) {
+        if selectedSessionId != nil, id != nil, id != selectedSessionId, horizontalSizeClass != .compact {
+            detailStackToken += 1
+        }
+        selectedSessionId = id
+    }
+
+    /// The list's selection, through `select(_:)`.
+    private var sessionSelection: Binding<String?> {
+        Binding(get: { selectedSessionId }, set: { select($0) })
+    }
+
     /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
     /// is the column's root. The system back button clears the selection.
     private var pushedSessionId: Binding<String?> {
@@ -304,7 +318,7 @@ struct LogbookView: View {
 
     private func consumeNavigationRequests() {
         if let sessionId = navigation.openSessionId {
-            selectedSessionId = sessionId
+            select(sessionId)
             compactColumn = .detail
             navigation.openSessionId = nil
             flashHighlight(sessionId)

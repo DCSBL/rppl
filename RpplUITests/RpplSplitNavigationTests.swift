@@ -76,8 +76,11 @@ final class RpplSplitNavigationTests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", prefix)).firstMatch
     }
 
-    /// The navigation bar that shows a back button: the detail's, not the list column's.
+    /// The navigation bar that shows a back button: the detail's, not the list column's. Logs how long the tap
+    /// took, as XCTest waits for the app's animations to end: a map that keeps the app busy shows up here.
     private func tapBack() {
+        let start = Date()
+        defer { print("back took \(String(format: "%.1f", Date().timeIntervalSince(start)))s") }
         let back = app.navigationBars.buttons.matching(NSPredicate(format: "label == 'Back' OR identifier == 'BackButton'")).firstMatch
         if back.waitForExistence(timeout: 5) {
             back.tap()
@@ -112,8 +115,9 @@ final class RpplSplitNavigationTests: XCTestCase {
         let card = card("Wakeboard, \(park)")
         revealList(app.collectionViews.firstMatch)
         check(app.scrollToElement(card, in: isTwoPane ? app.collectionViews.firstMatch : nil), "no card for \(park)")
-        // Beside the detail, tap the card's trailing edge: its middle may hold a link.
-        card.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        // The card's top right, beside its title: its middle may hold a link, and its trailing edge sits under
+        // the list's scroll indicator, which takes the tap.
+        card.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.15)).tap()
     }
 
     @MainActor

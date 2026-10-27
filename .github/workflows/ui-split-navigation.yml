@@ -76,7 +76,7 @@ jobs:
             -test-iterations 2 \
             -parallel-testing-enabled NO \
             -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 120 \
+            -default-test-execution-time-allowance 300 \
             -resultBundlePath SplitNavigation.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \

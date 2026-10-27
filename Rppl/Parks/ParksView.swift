@@ -47,9 +47,10 @@ struct ParksView: View {
     @State private var selectedParkID: String?
     /// Collapsed (narrow), the list is the root; opening a park shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
-    /// Bumped when another park is picked while one is open beside the list: the detail stack is rebuilt
-    /// with the new park pushed. Replacing the item of a pushed destination makes SwiftUI report a pop first,
-    /// which cleared the new selection.
+    /// Bumped by `select(_:)` when another park is picked while one is open beside the list: the detail stack
+    /// is rebuilt with the new park pushed. Replacing the item of a pushed destination makes SwiftUI report a
+    /// pop, which cleared the new selection. It changes in the same update as the selection, so the old stack
+    /// never sees the new park (bumped later, in `onChange`, the pop had already happened).
     @State private var detailStackToken = 0
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
@@ -218,7 +219,7 @@ struct ParksView: View {
         if store.entries.isEmpty { store.reload() }
         openParkID = nil
         guard store.entry(id: id) != nil else { return }
-        selectedParkID = id
+        select(id)
         compactColumn = .detail
     }
 
@@ -280,8 +281,7 @@ struct ParksView: View {
         // Collapsed, a pick from the list or the map has to bring the detail on top itself: a tap on a pin
         // sets the selection from outside the list, and a park that is still selected after back would make
         // the next tap on its row a no-op. So back clears the selection.
-        .onChange(of: selectedParkID) { old, id in
-            if old != nil, id != nil, horizontalSizeClass != .compact { detailStackToken += 1 }
+        .onChange(of: selectedParkID) { _, id in
             guard id != nil, horizontalSizeClass == .compact else { return }
             withRpplAnimation { compactColumn = .detail }
         }
@@ -375,11 +375,11 @@ struct ParksView: View {
                     position: $mapPosition,
                     placeQuery: searchText,
                     placeSearchToken: placeSearchToken,
-                    onSelectPark: { selectedParkID = $0.id }
+                    onSelectPark: { select($0.id) }
                 )
                     .ignoresSafeArea()
             } else {
-                List(selection: $selectedParkID) {
+                List(selection: parkSelection) {
                     if editorEnabled, !isSearching {
                         draftRows
                     }
@@ -525,6 +525,20 @@ struct ParksView: View {
         )
     }
 
+    /// Opens a park, or closes it with nil. Use this rather than setting `selectedParkID`, so that switching
+    /// parks beside the list rebuilds the detail stack (`detailStackToken`).
+    private func select(_ id: String?) {
+        if selectedParkID != nil, id != nil, id != selectedParkID, horizontalSizeClass != .compact {
+            detailStackToken += 1
+        }
+        selectedParkID = id
+    }
+
+    /// The list's selection, through `select(_:)`.
+    private var parkSelection: Binding<String?> {
+        Binding(get: { selectedParkID }, set: { select($0) })
+    }
+
     /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
     /// column's root. The system back button clears the selection.
     private var pushedPark: Binding<Park?> {
@@ -549,7 +563,7 @@ struct ParksView: View {
                     parks: visibleParks,
                     location: location,
                     position: $mapPosition,
-                    onSelectPark: { selectedParkID = $0.id }
+                    onSelectPark: { select($0.id) }
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
                 .navigationDestination(item: pushedPark) { park in
