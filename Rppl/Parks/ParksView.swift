@@ -47,6 +47,12 @@ struct ParksView: View {
     @State private var selectedParkID: String?
     /// Collapsed (narrow), the list is the root; opening a park shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
+    /// Bumped by `select(_:)` when another park is picked while one is open beside the list, so the detail
+    /// stack is rebuilt for it: replacing the item of a pushed destination makes SwiftUI report a pop, which
+    /// cleared the new selection.
+    @State private var detailStackToken = 0
+    /// The park `select(_:)` is about to push on a rebuilt detail stack.
+    @State private var switchingToPark: String?
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var mapUsesSatellite = false
     @FocusState private var searchFieldFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -214,7 +220,7 @@ struct ParksView: View {
         if store.entries.isEmpty { store.reload() }
         openParkID = nil
         guard store.entry(id: id) != nil else { return }
-        selectedParkID = id
+        select(id)
         compactColumn = .detail
     }
 
@@ -370,11 +376,11 @@ struct ParksView: View {
                     position: $mapPosition,
                     placeQuery: searchText,
                     placeSearchToken: placeSearchToken,
-                    onSelectPark: { selectedParkID = $0.id }
+                    onSelectPark: { select($0.id) }
                 )
                     .ignoresSafeArea()
             } else {
-                List(selection: $selectedParkID) {
+                List(selection: parkSelection) {
                     if editorEnabled, !isSearching {
                         draftRows
                     }
@@ -520,14 +526,44 @@ struct ParksView: View {
         )
     }
 
-    /// The detail column's stack beside the list: the selected park pushed on the map; empty while collapsed,
-    /// where the park is the column's root. A path, not an item binding, so picking another park replaces the
-    /// pushed one instead of popping it first and losing the new selection. Only a pop by the person (the
-    /// system back button) empties it, which clears the selection.
-    private var pushedPath: Binding<[String]> {
-        Binding(
-            get: { horizontalSizeClass == .compact ? [] : (selectedPark.map { [$0.id] } ?? []) },
-            set: { selectedParkID = $0.last }
+    /// Opens a park, or closes it with nil. Use this rather than setting `selectedParkID`, so that
+    /// switching parks beside the list works: the detail stack is rebuilt (`detailStackToken`) empty and the
+    /// new park is pushed on it once it exists. A stack created with a park already pushed reported a pop
+    /// of it straight away, which closed it again.
+    private func select(_ id: String?) {
+        WakeLog.debug(.ui, "select park \(id ?? "nil") (was \(selectedParkID ?? "nil"))")
+        guard let id, let current = selectedParkID, id != current, horizontalSizeClass != .compact else {
+            switchingToPark = nil
+            selectedParkID = id
+            return
+        }
+        switchingToPark = id
+        detailStackToken += 1
+        selectedParkID = nil
+        DispatchQueue.main.async {
+            guard switchingToPark == id else { return }
+            switchingToPark = nil
+            selectedParkID = id
+        }
+    }
+
+    /// The list's selection, through `select(_:)`.
+    private var parkSelection: Binding<String?> {
+        Binding(get: { switchingToPark ?? selectedParkID }, set: { select($0) })
+    }
+
+    /// Park pushed on the detail column's stack beside the list; nil while collapsed, where the park is the
+    /// column's root. The system back button clears the selection.
+    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the park that is still
+    /// selected clears the selection.
+    private var pushedPark: Binding<Park?> {
+        let shown = selectedParkID
+        return Binding(
+            get: { horizontalSizeClass == .compact ? nil : selectedPark },
+            set: { item in
+                WakeLog.debug(.ui, "pushed park set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedParkID ?? "nil")")
+                if item == nil, selectedParkID == shown { selectedParkID = nil }
+            }
         )
     }
 
@@ -541,20 +577,19 @@ struct ParksView: View {
             }
             .id(park.id)
         } else {
-            NavigationStack(path: pushedPath) {
+            NavigationStack {
                 ParksMapView(
                     parks: visibleParks,
                     location: location,
                     position: $mapPosition,
-                    onSelectPark: { selectedParkID = $0.id }
+                    onSelectPark: { select($0.id) }
                 )
                 .mapScreen(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
-                .navigationDestination(for: String.self) { id in
-                    if let park = store.entry(id: id)?.park {
-                        ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
-                    }
+                .navigationDestination(item: pushedPark) { park in
+                    ParkDetailContainer(park: park, plannedDate: openFilterDate, isBesideList: true)
                 }
             }
+            .id(detailStackToken)
         }
     }
 

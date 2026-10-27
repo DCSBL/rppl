@@ -87,6 +87,10 @@ private struct MapScreenLayout: ViewModifier {
     let locate: (() -> Void)?
     @Environment(\.layoutDirection) private var layoutDirection
     @State private var safeArea = EdgeInsets()
+    /// With a detail pushed over the map beside a split view's list, the measured safe area flips between two
+    /// values every frame, each flip laying the map out again: the app stopped responding. A flip straight
+    /// back is ignored (`SafeAreaHistory`).
+    @State private var history = SafeAreaHistory()
 
     /// iPhone Duo: the bars stand in a column on the trailing side, under the status bar, and nothing covers
     /// the top or bottom of the map. Only that column and a sidebar on the other side count there.
@@ -111,11 +115,31 @@ private struct MapScreenLayout: ViewModifier {
             }
             .background {
                 Color.clear.onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
+                    guard history.accept(insets) else { return }
                     safeArea = insets
                     WakeLog.debug(.ui, "map screen safe area top=\(Int(insets.top)) leading=\(Int(insets.leading)) bottom=\(Int(insets.bottom)) trailing=\(Int(insets.trailing))")
                 }
             }
             .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+    }
+}
+
+/// The map screen's last two safe areas, kept outside the view's state so that reading them doesn't
+/// update the view.
+private final class SafeAreaHistory {
+    private var current = EdgeInsets()
+    private var previous: EdgeInsets?
+    private var changedAt = Date.distantPast
+
+    /// False for a change back to the previous value within half a second of the last change: a layout
+    /// loop, not a new layout.
+    func accept(_ insets: EdgeInsets) -> Bool {
+        let now = Date()
+        if insets == previous, now.timeIntervalSince(changedAt) < 0.5 { return false }
+        previous = current
+        current = insets
+        changedAt = now
+        return true
     }
 }
 
