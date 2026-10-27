@@ -461,6 +461,76 @@ jobs:
   # four more times. Runs RpplLayoutScreenshotTests only (it skips itself without RPPL_LAYOUT_SHOTS, so
   # the other UI jobs never run it). The promax-default cell also runs RpplDuoScreenshotTests (iPhone Duo
   # stand-in, folded and unfolded). Output: layouts/<variant>/ and duo/, merged by `layouts-merge`.
+  # The UI tests again at the largest accessibility text size, on the smallest and the largest
+  # supported iPhone (#517, #548). Screenshots of this size come from `layouts`.
+  ui-tests-text:
+    name: UI tests ${{ matrix.variant }}
+    needs: [build, changes]
+    if: needs.changes.outputs.phone == 'true'
+    runs-on: macos-26
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { variant: se-ax5, device: "iPhone SE (3rd generation)", text: accessibility-extra-extra-extra-large }
+          - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
+      - name: xcodebuild test (RpplUITests)
+        shell: bash
+        env:
+          DEVICE: ${{ matrix.device }}
+          TEXT: ${{ matrix.text }}
+        run: |
+          set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" iphonesimulator)"
+          udid="$(python3 scripts/ci/pick_simulator.py "$DEVICE")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl ui "$udid" content_size "$TEXT"
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          # Warm-up, see ui-tests: the first launch on a fresh simulator is slow.
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests/RpplUITests/testTabsSwitch \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 300 \
+            > warm-up.log 2>&1 || echo "::warning::UI warm-up test failed (see warm-up.log in the result artifact)"
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=iOS Simulator,id=${udid}" \
+            -only-testing:RpplUITests \
+            -retry-tests-on-failure \
+            -test-iterations 2 \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 180 \
+            -resultBundlePath RpplUITests.xcresult \
+            2>&1 | tee ui-tests.log
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-ui-${{ matrix.variant }}
+          path: |
+            ui-tests.log
+            warm-up.log
+            RpplUITests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
   layouts:
     name: Layout screenshots ${{ matrix.variant }}
     needs: [build, changes]
