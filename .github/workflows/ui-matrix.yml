@@ -1,8 +1,8 @@
 # Placeholder for the required checks `Changed paths (UI matrix)` and `Merge UI screenshots`.
 # The Watch cells (Series 11, Ultra 3) moved into macos-ci.yml (`watch-devices`) so they reuse its single
 # build, and every screenshot now lands in that run's one `screenshots` artifact. The iPhone SE cell was
-# disabled (#517) and went with this file's other jobs; restore it from git history together with the
-# XCTSkip in RpplUITests.testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize when #517 is fixed.
+# disabled (#517) and went with this file's other jobs; the se-ax5 and promax-ax5 UI tests are back as
+# `ui-tests-text` in macos-ci.yml.
 # Once the ruleset no longer requires these two checks, delete this workflow.
 
 name: UI test matrix

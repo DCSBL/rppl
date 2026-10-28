@@ -94,10 +94,8 @@ final class RpplUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
         app.tabBars.buttons["Parks"].tap()
-        let mapOption = app.segmentedControls.buttons["View on map"]
-        XCTAssertTrue(mapOption.waitForExistence(timeout: 15))
-        mapOption.tap()
-        XCTAssertTrue(app.segmentedControls.buttons["Nearby"].waitForExistence(timeout: 15))
+        app.chooseParksSort("View on map")
+        XCTAssertTrue(app.parksSortOptionExists("Nearby"))
     }
 
     @MainActor
@@ -132,6 +130,11 @@ final class RpplUITests: XCTestCase {
         XCTAssertEqual(distance.value as? String, "18") // one bar per session
         XCTAssertGreaterThan(distance.frame.height, 50)
 
+        // Accessibility text sizes swap the segments for a menu: open it, then pick the entry.
+        let metricMenu = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Distance & duration")).firstMatch
+        if metricMenu.exists {
+            metricMenu.tap()
+        }
         app.buttons["Duration"].tap()
         XCTAssertEqual(chart("season-duration-chart").value as? String, "18")
 
@@ -165,14 +168,15 @@ final class RpplUITests: XCTestCase {
     func testTotalsSpeedSwapKeepsTextSize() {
         assertSpeedSwapKeepsTextSize()
         let sessions = total("logbook-total-sessions")
-        XCTAssertEqual(total("logbook-total-speed").frame.height, sessions.frame.height, accuracy: 0.5)
+        let speed = total("logbook-total-speed")
+        // Big text stacks the tiles, where each one is as tall as its own content.
+        if abs(speed.frame.minY - sessions.frame.minY) < 1 {
+            XCTAssertEqual(speed.frame.height, sessions.frame.height, accuracy: 0.5)
+        }
     }
 
     @MainActor
-    func testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize() throws {
-        // Disabled: the large text (Dynamic Type) UI tests were unreliable on CI simulators (#517).
-        // To re-enable, delete this XCTSkip; the same cells are commented out in ui-matrix.yml.
-        throw XCTSkip("Large text UI tests disabled, see #517")
+    func testTotalsSpeedSwapKeepsTextSizeAtLargeTextSize() {
         app.terminate()
         launch(textSize: "UICTContentSizeCategoryAccessibilityL")
         assertSpeedSwapKeepsTextSize()
