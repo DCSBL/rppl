@@ -3,16 +3,16 @@ import Foundation
 /// Discovers session packages by reading `manifest.json` (folder name ≠ session id).
 public enum SessionPackageLocator {
     public struct Entry: Equatable, Sendable {
-        public var sessionId: String
+        /// Decoded once per scan; listings reuse it instead of reading `manifest.json` again.
+        public var manifest: SessionManifest
         public var directoryURL: URL
-        public var startedAt: Date
-        public var cityName: String?
 
-        public init(sessionId: String, directoryURL: URL, startedAt: Date, cityName: String? = nil) {
-            self.sessionId = sessionId
+        public var sessionId: String { manifest.sessionId }
+        public var startedAt: Date { manifest.startedAt }
+
+        public init(manifest: SessionManifest, directoryURL: URL) {
+            self.manifest = manifest
             self.directoryURL = directoryURL
-            self.startedAt = startedAt
-            self.cityName = cityName
         }
     }
 
@@ -79,24 +79,13 @@ public enum SessionPackageLocator {
         guard fileManager.fileExists(atPath: manifestURL.path) else {
             throw SessionStoreError.sessionNotFound(sessionDirectory.lastPathComponent)
         }
+        // Only the manifest: the derived view (stats + map tracks) is the largest file of a
+        // package and nothing in a scan needs it.
         let manifest = try jsonDecoder.decode(
             SessionManifest.self,
             from: Data(contentsOf: manifestURL)
         )
-        var cityName: String?
-        let viewURL = sessionDirectory
-            .appendingPathComponent("derived", isDirectory: true)
-            .appendingPathComponent("view.json")
-        if fileManager.fileExists(atPath: viewURL.path),
-           let view = try? jsonDecoder.decode(DerivedSessionView.self, from: Data(contentsOf: viewURL)) {
-            cityName = view.cityName
-        }
-        return Entry(
-            sessionId: manifest.sessionId,
-            directoryURL: sessionDirectory,
-            startedAt: manifest.startedAt,
-            cityName: cityName
-        )
+        return Entry(manifest: manifest, directoryURL: sessionDirectory)
     }
 
     public static func existingFolderNames(

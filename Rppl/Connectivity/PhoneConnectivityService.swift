@@ -142,14 +142,12 @@ final class PhoneConnectivityService: NSObject {
     func rebroadcastAcksForImportedSessions() {
         guard WCSession.default.activationState == .activated else { return }
         do {
-            let ids = try store.listSessionIDs()
             var count = 0
-            for id in ids {
-                let manifest = try store.readManifest(sessionId: id)
+            for manifest in try store.listReadableManifests() {
                 guard manifest.transferState == .acknowledged else { continue }
                 // File imports never came from Watch — do not rebroadcast ack.
                 guard manifest.imported == nil else { continue }
-                WCSession.default.transferUserInfo([AppConstants.wcAckMessageKey: id])
+                WCSession.default.transferUserInfo([AppConstants.wcAckMessageKey: manifest.sessionId])
                 count += 1
             }
             if count > 0 {

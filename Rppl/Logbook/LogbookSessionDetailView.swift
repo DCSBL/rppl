@@ -156,7 +156,7 @@ struct LogbookSessionDetailView: View {
         } message: {
             Text(flagSaveError ?? "")
         }
-        .task { parks = ParkCatalog.loadApp() }
+        .task { await loadParks() }
         .task(id: waterEstimateKey) {
             guard waterEstimateKey != nil, let store, let manifest, let sessionStats else { return }
             if let estimate = await SessionWaterEstimate.fetchIfNeeded(
@@ -801,6 +801,11 @@ struct LogbookSessionDetailView: View {
             await loadSession(token: token)
             if loadingToken == token { loadTask = nil }
         }
+    }
+
+    /// Park YAML parsing stays off the main actor so the first frame does not wait for it.
+    private func loadParks() async {
+        parks = (try? await StoreIO.runOffMain { ParkCatalog.loadApp() }) ?? []
     }
 
     /// Shows the session as soon as its summary is read; GPS tracks and the city name fill in after.

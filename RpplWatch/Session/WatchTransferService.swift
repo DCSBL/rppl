@@ -41,9 +41,13 @@ final class WatchTransferService: NSObject {
     }
 
     func refreshSyncState() {
+        refreshConnectionState()
+        refreshPendingCount()
+    }
+
+    private func refreshConnectionState() {
         let previous = syncState
         syncState = SyncConnectionProbe.current()
-        refreshPendingCount()
         if previous != syncState {
             WakeLog.debug(.sync, "state \(previous) → \(syncState)")
         }
@@ -91,7 +95,9 @@ final class WatchTransferService: NSObject {
             store = SessionFileStore(rootURL: AppConstants.documentsSessionsRoot)
         }
         guard let store else { return }
-        refreshSyncState()
+        // One store scan for the count and the due list: at Stop this ran three times in a row
+        // on the main thread (every stored manifest each time).
+        refreshConnectionState()
 
         let controller = WatchSessionController.shared
         if !force, controller.isRunning, !controller.isStopping {
@@ -102,13 +108,13 @@ final class WatchTransferService: NSObject {
         do {
             let pending = try store.sessionsNeedingTransfer()
             pendingTransferCount = pending.count
+            syncStatusRevision &+= 1
             let due = force ? pending : TransferRetryPolicy.due(pending, now: Date())
             lastMessage = String(localized: "Pending transfers: \(pending.count)")
             WakeLog.debug(.transfer, "transferPending count=\(pending.count) due=\(due.count) force=\(force)")
             for manifest in due {
                 transfer(sessionId: manifest.sessionId, store: store)
             }
-            refreshPendingCount()
         } catch {
             lastMessage = String(localized: "Transfer list error: \(error.localizedDescription)")
             WakeLog.error(.transfer, "list error: \(error.localizedDescription)")

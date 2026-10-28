@@ -38,12 +38,10 @@ public struct SessionLoadBundle: Sendable {
 public struct SessionSummaryBundle: Sendable {
     public let manifest: SessionManifest
     public let derived: DerivedSessionView
-    public let byteSize: Int64
 
-    public init(manifest: SessionManifest, derived: DerivedSessionView, byteSize: Int64) {
+    public init(manifest: SessionManifest, derived: DerivedSessionView) {
         self.manifest = manifest
         self.derived = derived
-        self.byteSize = byteSize
     }
 
     public var stats: SessionStats { derived.stats }
@@ -98,12 +96,12 @@ public enum SessionLoader {
         )
     }
 
-    /// Manifest + derived stats/frame only (ensures sidecar). No location/health parse when fresh.
+    /// Manifest + derived stats/frame only (ensures sidecar). No location/health parse when fresh,
+    /// and no package size: that walked every file of every session on each logbook load.
     public static func loadSummary(store: SessionFileStore, sessionId: String) throws -> SessionSummaryBundle {
         let manifest = try store.readManifest(sessionId: sessionId)
         let derived = try store.ensureDerivedView(sessionId: sessionId)
-        let byteSize = try store.sessionByteSize(sessionId: sessionId)
-        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: byteSize)
+        return SessionSummaryBundle(manifest: manifest, derived: derived)
     }
 
     /// Read-only manifest + derived for distilled Watch logbook (never rebuilds from raw).
@@ -112,7 +110,7 @@ public enum SessionLoader {
         guard let derived = try store.readDerivedView(sessionId: sessionId) else {
             throw SessionStoreError.ioFailure("Missing derived view for \(sessionId)")
         }
-        return SessionSummaryBundle(manifest: manifest, derived: derived, byteSize: 0)
+        return SessionSummaryBundle(manifest: manifest, derived: derived)
     }
 
     /// In-memory load from a Share export / WC package (no disk write).
