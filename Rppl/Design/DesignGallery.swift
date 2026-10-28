@@ -101,3 +101,8 @@ private struct DesignGallery: View {
     DesignGallery()
         .environment(\.dynamicTypeSize, .accessibility2)
 }
+
+#Preview("Tiles — largest accessibility size") {
+    DesignGallery()
+        .environment(\.dynamicTypeSize, .accessibility5)
+}

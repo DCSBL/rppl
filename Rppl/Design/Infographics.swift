@@ -2,7 +2,9 @@ import SwiftUI
 import RpplCore
 
 /// Big number with a smaller, muted unit (`42,2` `km/h`), one line, shrinks before truncating.
+/// At accessibility text sizes the unit moves under the number: one line shrunk to 60 % is unreadable there.
 struct MetricValue: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     enum Size {
         case hero
         case large
@@ -48,10 +50,21 @@ struct MetricValue: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(attributed)
-                .foregroundStyle(Color.rpplText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+            if dynamicTypeSize.isAccessibilitySize {
+                Text(parts.value)
+                    .font(valueFont)
+                    .foregroundStyle(Color.rpplText)
+                if let unit = parts.unit {
+                    Text(unit)
+                        .font(size.unitFont)
+                        .foregroundStyle(RpplDesign.secondaryText)
+                }
+            } else {
+                Text(attributed)
+                    .foregroundStyle(Color.rpplText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+            }
             if let caption {
                 Text(caption)
                     .font(.caption2)
@@ -60,11 +73,14 @@ struct MetricValue: View {
         }
     }
 
+    /// `.total` stops growing at 56 pt, where `.title2` ends at the largest accessibility size.
+    private var valueFont: Font {
+        size == .total ? .system(size: min(totalPointSize, 56), weight: .bold).monospacedDigit() : size.valueFont
+    }
+
     private var attributed: AttributedString {
         var value = AttributedString(parts.value)
-        value.font = size == .total
-            ? .system(size: totalPointSize, weight: .bold).monospacedDigit()
-            : size.valueFont
+        value.font = valueFont
         guard let unit = parts.unit else { return value }
         var suffix = AttributedString("\u{00A0}" + unit)
         suffix.font = size.unitFont
@@ -169,8 +185,10 @@ struct TimelineBar: View {
     }
 }
 
-/// Compact metric: tinted symbol + value, optional caption underneath.
+/// Compact metric: tinted symbol + value, optional caption underneath. One line that never wraps, except at
+/// accessibility text sizes, where a value such as `NW · 12 km/h` is wider than a tile and wraps instead.
 struct StatChip: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let metric: MetricKind
     let value: String
     var caption: LocalizedStringKey?
@@ -186,8 +204,8 @@ struct StatChip: View {
                     .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
                     .foregroundStyle(Color.rpplText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .lineLimit(wraps ? nil : 1)
+                    .minimumScaleFactor(wraps ? 1 : 0.75)
             }
             if let caption {
                 Text(caption)
@@ -195,7 +213,9 @@ struct StatChip: View {
                     .foregroundStyle(RpplDesign.secondaryText)
             }
         }
-        .fixedSize(horizontal: true, vertical: false)
+        .fixedSize(horizontal: !wraps, vertical: false)
         .accessibilityElement(children: .combine)
     }
+
+    private var wraps: Bool { dynamicTypeSize.isAccessibilitySize }
 }

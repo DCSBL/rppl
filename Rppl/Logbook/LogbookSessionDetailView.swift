@@ -771,8 +771,7 @@ struct LogbookSessionDetailView: View {
                 Text("No heart rate or calories recorded. The watch was likely worn over clothing and was unable to measure your heart rate.")
                     .font(.footnote)
                     .padding()
-                    .frame(maxWidth: 260)
-                    .presentationCompactAdaptation(.popover)
+                    .rpplPopoverContent(maxWidth: 260)
             }
         }
     }

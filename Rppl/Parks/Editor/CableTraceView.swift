@@ -6,6 +6,8 @@ import SwiftUI
 /// Tap an existing point to select it, pan to the new spot and press Move here.
 struct CableTraceView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    /// Point marker; the selected one and the start flag inside it scale along with it.
+    @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 14
     @Binding var cable: ParkCable
     let center: ParkCoordinate
 
@@ -97,16 +99,16 @@ struct CableTraceView: View {
         } label: {
             Circle()
                 .fill(point.start == true ? Color.green : (isSelected ? Color.orange : Color.rpplAccent))
-                .frame(width: isSelected ? 22 : 14, height: isSelected ? 22 : 14)
+                .frame(width: isSelected ? markerSize * 1.6 : markerSize, height: isSelected ? markerSize * 1.6 : markerSize)
                 .overlay(Circle().strokeBorder(.white, lineWidth: 2))
                 .overlay {
                     if differentiateWithoutColor, point.start == true {
                         Image(systemName: "flag.fill")
-                            .font(.system(size: 8))
+                            .font(.system(size: markerSize * 0.6))
                             .foregroundStyle(.white)
                     }
                 }
-                .frame(width: 44, height: 44)
+                .frame(width: max(44, markerSize * 2), height: max(44, markerSize * 2))
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)

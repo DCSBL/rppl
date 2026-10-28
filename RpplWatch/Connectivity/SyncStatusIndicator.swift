@@ -3,6 +3,7 @@ import RpplCore
 
 struct SyncStatusIndicator: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    @ScaledMetric(relativeTo: .caption2) private var dotSize: CGFloat = 8
     let state: SyncConnectionState
     var pendingCount: Int = 0
 
@@ -12,13 +13,13 @@ struct SyncStatusIndicator: View {
                 Image(systemName: symbol)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(color)
-                    .frame(width: 8, height: 8)
+                    .frame(width: dotSize, height: dotSize)
                     .padding(.top, 3)
                     .accessibilityHidden(true)
             } else {
                 Circle()
                     .fill(color)
-                    .frame(width: 8, height: 8)
+                    .frame(width: dotSize, height: dotSize)
                     .padding(.top, 3)
             }
 
