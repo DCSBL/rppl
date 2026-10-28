@@ -29,10 +29,7 @@ final class RpplDuoScreenshotTests: XCTestCase {
 
     private func shot(_ name: String) {
         sleep(1) // let scroll/animation settle
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
+        attachScreenshot(named: name, of: app) // the whole screen: app.screenshot() is cropped in landscape
     }
 
     /// Folded: the session list in one column.
