@@ -6,6 +6,7 @@
 # Usage: run_watch_ui_tests.sh UDID RESULT.xcresult LOG
 #   XCTESTRUN=<file>   test the products of an earlier `build-for-testing` (macos-ci.yml) instead of
 #                      building the RpplWatch scheme here.
+#   ONLY_TESTING=<id>  test only this class (default: the whole RpplWatchUITests target).
 set -uo pipefail
 udid="$1" result="$2" log="$3"
 attempts="${WATCH_UI_ATTEMPTS:-2}"
@@ -20,7 +21,7 @@ for attempt in $(seq 1 "$attempts"); do
   rm -rf "$result"
   if xcodebuild "${build[@]}" \
     -destination "platform=watchOS Simulator,id=${udid}" \
-    -only-testing:RpplWatchUITests \
+    -only-testing:"${ONLY_TESTING:-RpplWatchUITests}" \
     -retry-tests-on-failure \
     -test-iterations 2 \
     -parallel-testing-enabled NO \
