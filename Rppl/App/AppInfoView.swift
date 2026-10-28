@@ -51,7 +51,7 @@ struct AppInfoView: View {
                     Toggle("Update park data", isOn: $parkDataUpdatesEnabled)
                         .tint(Color.rpplAccent)
                     if parkDataUpdatesEnabled {
-                        HStack(spacing: 12) {
+                        AdaptiveStack(spacing: 12) {
                             ParkDataStatusLine(controller: parkDataUpdates, alignment: .leading)
                             if parkDataUpdates.isRefreshing {
                                 ProgressView()
