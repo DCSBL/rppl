@@ -130,6 +130,10 @@ final class RpplUITests: XCTestCase {
         XCTAssertEqual(distance.value as? String, "18") // one bar per session
         XCTAssertGreaterThan(distance.frame.height, 50)
 
+        // Accessibility text sizes swap the segments for a menu: open it, then pick the entry.
+        if !app.buttons["Duration"].exists, app.buttons["Distance"].firstMatch.exists {
+            app.buttons["Distance"].firstMatch.tap()
+        }
         app.buttons["Duration"].tap()
         XCTAssertEqual(chart("season-duration-chart").value as? String, "18")
 
@@ -163,7 +167,11 @@ final class RpplUITests: XCTestCase {
     func testTotalsSpeedSwapKeepsTextSize() {
         assertSpeedSwapKeepsTextSize()
         let sessions = total("logbook-total-sessions")
-        XCTAssertEqual(total("logbook-total-speed").frame.height, sessions.frame.height, accuracy: 0.5)
+        let speed = total("logbook-total-speed")
+        // Big text stacks the tiles, where each one is as tall as its own content.
+        if abs(speed.frame.minY - sessions.frame.minY) < 1 {
+            XCTAssertEqual(speed.frame.height, sessions.frame.height, accuracy: 0.5)
+        }
     }
 
     @MainActor
