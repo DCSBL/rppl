@@ -16,6 +16,19 @@ struct WindowLayoutTests {
         #expect(WindowLayout.resolve(width: width, isAccessibilityTextSize: accessibility) == expected)
     }
 
+    @Test(arguments: [
+        (519.9, WindowLayout.TextSize.standard, WindowLayout.stack),
+        (520.0, .standard, .twoPane),
+        (759.9, .accessibility, .stack),
+        (760.0, .accessibility, .twoPane),
+        (760.0, .largestAccessibility, .stack),
+        (1024.0, .largestAccessibility, .stack),
+        (2000.0, .largestAccessibility, .stack),
+    ])
+    func resolvesByTextSizeTier(width: Double, textSize: WindowLayout.TextSize, expected: WindowLayout) {
+        #expect(WindowLayout.resolve(width: width, textSize: textSize) == expected)
+    }
+
     @Test func zeroWidthStacks() {
         #expect(WindowLayout.resolve(width: 0, isAccessibilityTextSize: false) == .stack)
     }

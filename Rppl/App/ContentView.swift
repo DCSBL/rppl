@@ -59,7 +59,7 @@ struct ContentView: View {
         .onGeometryChange(for: WindowLayout.self) {
             WindowLayout.resolve(
                 width: Double($0.size.width),
-                isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize
+                textSize: dynamicTypeSize.windowTextSize
             )
         } action: { layout in
             WakeLog.debug(.ui, "window layout=\(layout) textSize=\(dynamicTypeSize)")
