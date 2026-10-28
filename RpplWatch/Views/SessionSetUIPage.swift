@@ -8,6 +8,11 @@ import RpplCore
 struct SessionSetUIPage: View {
     @Bindable var session: WatchSessionController
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Accessibility text sizes: the status block no longer fits one screen, so it becomes three
+    /// vertical pages (status and times, set metrics, vitals) that each scroll.
+    private var useAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
 
     var body: some View {
         Group {
@@ -82,7 +87,11 @@ struct SessionSetUIPage: View {
     private var ridingView: some View {
         // Same container as Inactive so both states lay out, size and space every element alike.
         TabView {
-            statusBlock(isRiding: true)
+            if useAccessibilityLayout {
+                accessibilityPages(isRiding: true)
+            } else {
+                statusBlock(isRiding: true)
+            }
         }
         .tabViewStyle(.verticalPage)
     }
@@ -91,10 +100,78 @@ struct SessionSetUIPage: View {
         // Same vertical-page pattern as `IdleSessionView` — proven on-device, unlike the earlier
         // `.scrollTargetBehavior(.viewAligned)` attempt, which left the summary unreachable.
         TabView {
-            statusBlock(isRiding: false)
+            if useAccessibilityLayout {
+                accessibilityPages(isRiding: false)
+            } else {
+                statusBlock(isRiding: false)
+            }
             sessionSummaryPage
         }
         .tabViewStyle(.verticalPage)
+    }
+
+    /// The status block split over three scrolling pages, every metric on its own line.
+    @ViewBuilder
+    private func accessibilityPages(isRiding: Bool) -> some View {
+        let speedKmh = isRiding ? session.currentSetSpeedKmh : session.cableSpeedKmh
+        let lapCount = session.isSetOngoing ? session.currentSetLapCount : session.lastSetLapCount
+
+        accessibilityPage {
+            statusLine(
+                primary: isRiding ? "Riding" : "Inactive",
+                color: segmentColor(isRiding: isRiding),
+                icon: isRiding ? "play.circle.fill" : "pause.circle.fill",
+                isItalic: isRiding && session.isUnsure
+            )
+            heroTimeRow(isRiding: isRiding)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        accessibilityPage {
+            metricTile(
+                value: SessionFormatters.distance(session.displaySetMeters),
+                label: "DIST",
+                metric: .distance
+            )
+            metricTile(
+                value: speedKmh.map { DistanceFormat.speedValue($0) } ?? "--",
+                label: DistanceFormat.speedUnitSymbol(),
+                metric: .speed,
+                caption: isRiding ? LocalizedStringKey("Current") : LocalizedStringKey("Cable")
+            )
+            metricTile(
+                value: "\(lapCount)",
+                label: "LAPS",
+                metric: .laps
+            )
+        }
+        accessibilityPage {
+            if session.waterTemperatureAvailable || session.waterTemperatureDisplay != nil {
+                metricTile(
+                    value: session.waterTemperatureDisplay.map {
+                        SessionFormatters.waterTemp($0.celsius, isEstimate: $0.isEstimate)
+                    } ?? TemperatureFormat.placeholder,
+                    label: "WATER",
+                    metric: .water
+                )
+            }
+            heartRateRow
+                .frame(maxWidth: .infinity)
+            metricTile(
+                value: session.totalEnergyKilocalories.map { EnergyFormat.kilocalories($0) } ?? "--",
+                label: "CAL",
+                metric: .energy
+            )
+        }
+    }
+
+    private func accessibilityPage<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        ScrollView {
+            VStack(spacing: 12, content: content)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 6)
+                .padding(.top, 24)
+                .padding(.bottom, 32)
+        }
     }
 
     /// Shared Riding/Inactive block: wall clock, status line, hero segment/total time, then
@@ -183,12 +260,25 @@ struct SessionSetUIPage: View {
         func hero(_ color: Color, _ italic: Bool) -> Text {
             Text("\(Text(segment).foregroundStyle(color).italic(italic)) / \(Text(total).foregroundStyle(.yellow))")
         }
-        return heroContent(isRiding: isRiding, hero: hero)
-            .font(.system(.title2, design: .rounded).bold())
-            .monospacedDigit()
-            .minimumScaleFactor(0.7)
-            .lineLimit(1)
-            .alwaysOnSupportingMetric(isLuminanceReduced)
+        func segmentOnly(_ color: Color, _ italic: Bool) -> Text {
+            Text(segment).foregroundStyle(color).italic(italic)
+        }
+        return Group {
+            if useAccessibilityLayout {
+                // Two lines: segment time, then the session total under it.
+                VStack(spacing: 2) {
+                    heroContent(isRiding: isRiding, hero: segmentOnly)
+                    Text(total).foregroundStyle(.yellow)
+                }
+            } else {
+                heroContent(isRiding: isRiding, hero: hero)
+            }
+        }
+        .font(.system(.title2, design: .rounded).bold())
+        .monospacedDigit()
+        .minimumScaleFactor(0.7)
+        .lineLimit(1)
+        .alwaysOnSupportingMetric(isLuminanceReduced)
     }
 
     /// While unsure mid-ride the set clock is held, so the segment time fades dark blue ↔ blue at

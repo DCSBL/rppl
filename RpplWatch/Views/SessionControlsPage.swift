@@ -5,6 +5,7 @@ struct SessionControlsPage: View {
     @Bindable var session: WatchSessionController
     /// The glyph grows with the text size up to 40 pt: the tile fills the page and cannot grow with it.
     @ScaledMetric(relativeTo: .title) private var glyphSize: CGFloat = 28
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showStopConfirmation = false
     @State private var showDiscardConfirmation = false
     /// Frozen when Stop is tapped so the dialog does not change while it is open.
@@ -35,6 +36,8 @@ struct SessionControlsPage: View {
             if let worst = session.recordingIssues.first {
                 Text(RecordingIssueText.label(for: worst.code))
                     .font(.caption2)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
                     .foregroundStyle(worst.severity == .critical ? .red : .orange)
             }
         }
@@ -104,12 +107,17 @@ struct SessionControlsPage: View {
                     .foregroundStyle(tint)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(tint.opacity(0.25), in: Capsule())
-                Text(title)
-                    .font(.footnote)
-                    .foregroundStyle(.white)
+                // At accessibility sizes the label would take the tile's height; the symbol and
+                // the accessibility label carry the meaning.
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Text(title)
+                        .font(.footnote)
+                        .foregroundStyle(.white)
+                }
             }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
         .disabled(disabled)
         .opacity(disabled ? 0.5 : 1)
     }

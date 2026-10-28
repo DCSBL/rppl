@@ -4,6 +4,7 @@ import RpplCore
 struct IdleSyncPage: View {
     @Bindable var session: WatchSessionController
     @Bindable var transfer: WatchTransferService
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -31,7 +32,11 @@ struct IdleSyncPage: View {
                     .minimumScaleFactor(0.7)
             }
 
-            HStack(spacing: 16) {
+            // Side by side normally; under each other at accessibility sizes, where the labels wrap.
+            let buttons = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: 10))
+                : AnyLayout(HStackLayout(spacing: 16))
+            buttons {
                 syncCircle(
                     systemImage: "lock.shield",
                     label: String(localized: "Permissions")
@@ -70,8 +75,9 @@ struct IdleSyncPage: View {
                 Text(label)
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(Color.rpplIdleAccent)
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                     .minimumScaleFactor(0.6)
+                    .multilineTextAlignment(.center)
             }
         }
         .buttonStyle(.plain)

@@ -20,11 +20,18 @@ enum RecordingIssueText {
 /// layout does not jump; renders nothing when the recording is healthy.
 struct RecordingIssueBadge: View {
     let issues: [RecordingIssue]
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         if let worst = issues.first {
             HStack(spacing: 3) {
-                Text(RecordingIssueText.label(for: worst.code))
+                // At accessibility sizes the text would cover the page: a symbol says "at risk", the
+                // controls page still names the issue.
+                if dynamicTypeSize.isAccessibilitySize {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                } else {
+                    Text(RecordingIssueText.label(for: worst.code))
+                }
                 if issues.count > 1 {
                     Text("+\(issues.count - 1)")
                 }
@@ -34,6 +41,8 @@ struct RecordingIssueBadge: View {
             .padding(.vertical, 2)
             .background(worst.severity == .critical ? Color.red : Color.orange, in: Capsule())
             .foregroundStyle(.black)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(RecordingIssueText.label(for: worst.code)))
             .allowsHitTesting(false)
         }
     }
