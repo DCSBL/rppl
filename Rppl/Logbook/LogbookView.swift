@@ -239,7 +239,8 @@ struct LogbookView: View {
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
             .navigationTitle("Logbook")
-            .navigationSubtitle("Sessions and sets")
+            // No subtitle at accessibility sizes: with the large title it took a third of a small screen.
+            .navigationSubtitle(useAccessibilityLayout ? Text(verbatim: "") : Text("Sessions and sets"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 // Settings above add in the vertical bar of iPhone Duo, settings left of add elsewhere.
@@ -662,8 +663,8 @@ private struct SessionCard: View {
                         Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
                             .foregroundStyle(Color.rpplText)
                             .font(.headline)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.75)
+                            .lineLimit(useAccessibilityLayout ? nil : 2)
+                            .minimumScaleFactor(useAccessibilityLayout ? 1 : 0.75)
 
                         // Park name wraps instead of truncating: it is how riders tell sessions apart.
                         Label {
@@ -683,19 +684,35 @@ private struct SessionCard: View {
                 }
 
                 if !entry.highlights.isEmpty {
+                    // At accessibility sizes every badge is a line of its own, so the card shows two and a count;
+                    // the session detail has them all.
+                    let shown = useAccessibilityLayout ? Array(entry.highlights.prefix(2)) : entry.highlights
                     FlowLayout(spacing: 6) {
-                        ForEach(entry.highlights, id: \.rawValue) { highlight in
+                        ForEach(shown, id: \.rawValue) { highlight in
                             HighlightChip(highlight)
+                        }
+                        if shown.count < entry.highlights.count {
+                            ParkChip(text: "+\(entry.highlights.count - shown.count)", tint: Color.rpplMuted)
                         }
                     }
                 }
 
-                Text(sessionMetaText)
+                if useAccessibilityLayout {
+                    // Date, time and duration each on a line: the joined line truncated at these sizes.
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(sessionMetaParts, id: \.self) { Text($0) }
+                    }
                     .font(.footnote)
                     .foregroundStyle(Color.rpplMuted)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Text(sessionMetaParts.joined(separator: " · "))
+                        .font(.footnote)
+                        .foregroundStyle(Color.rpplMuted)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
                 Divider()
                     .overlay(Color.rpplFill)
@@ -742,13 +759,13 @@ private struct SessionCard: View {
             .accessibilityHidden(true)
     }
 
-    private var sessionMetaText: String {
+    private var sessionMetaParts: [String] {
         let date = LogbookFormatting.sessionDate(entry.manifest.startedAt)
         let range = LogbookFormatting.sessionTimeRange(
             start: entry.manifest.startedAt,
             end: entry.manifest.endedAt ?? entry.stats?.endedAt
         )
-        return "\(date) · \(range) · \(durationText)"
+        return [date, range, durationText]
     }
 
     private var durationText: String {

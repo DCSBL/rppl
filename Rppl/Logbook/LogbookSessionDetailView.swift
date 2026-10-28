@@ -10,6 +10,7 @@ enum LogbookSessionDetailSource: Equatable {
 }
 
 struct LogbookSessionDetailView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let source: LogbookSessionDetailSource
     var store: SessionFileStore?
     /// Root of the split view's detail column: nothing to go back to.
@@ -466,17 +467,17 @@ struct LogbookSessionDetailView: View {
 
     private func sessionInfoTile(manifest: SessionManifest, stats: SessionStats) -> some View {
         InfoTile("Session", metric: .duration) {
-            LabeledContent("Time") {
+            infoRow("Time") {
                 Text(
                     LogbookFormatting.sessionTimeRange(
                         start: manifest.startedAt,
                         end: manifest.endedAt ?? stats.endedAt
                     )
                 )
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
             }
 
-            LabeledContent("Location") {
+            infoRow("Location") {
                 if isManual {
                     Text(cityName ?? "-")
                 } else {
@@ -496,13 +497,30 @@ struct LogbookSessionDetailView: View {
         .foregroundStyle(Color.rpplText)
     }
 
+    /// Label and value on one line, as `LabeledContent`; label over value at accessibility sizes.
+    @ViewBuilder
+    private func infoRow<Value: View>(_ label: LocalizedStringKey, @ViewBuilder value: () -> Value) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(RpplDesign.secondaryText)
+                value()
+            }
+        } else {
+            LabeledContent(label, content: value)
+        }
+    }
+
     private func speedTile(_ stats: SessionStats) -> some View {
         InfoTile("Speed", metric: .speed) {
             MetricValue(
                 displayedMaxSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                 caption: "Max speed"
             )
-            if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
+            if dynamicTypeSize.hidesDecoration, let cable = displayedCableSpeedKmh {
+                StatChip(metric: .speed, value: DistanceFormat.kilometersPerHour(cable), caption: "Cable speed")
+            } else if let max = displayedMaxSpeedKmh, let cable = displayedCableSpeedKmh, max > 0 {
                 // Names the bar and shows the exact cable speed it plots, then 0/max ticks
                 // below so the fill (cable speed) and the 100% end (max speed) both read at a glance.
                 HStack(spacing: 4) {
@@ -544,14 +562,19 @@ struct LogbookSessionDetailView: View {
 
     private func ridingTile(_ stats: SessionStats) -> some View {
         InfoTile("Riding", metric: .riding) {
-            Gauge(value: MetricDisplay.fraction(stats.ridingInactiveRatio, of: 1)) {
-                Text("Riding")
-            } currentValueLabel: {
-                Text(LogbookFormatting.percent(stats.ridingInactiveRatio))
+            if dynamicTypeSize.hidesDecoration {
+                // The percentage no longer fits inside the ring.
+                MetricValue(LogbookFormatting.percent(stats.ridingInactiveRatio), caption: "Riding")
+            } else {
+                Gauge(value: MetricDisplay.fraction(stats.ridingInactiveRatio, of: 1)) {
+                    Text("Riding")
+                } currentValueLabel: {
+                    Text(LogbookFormatting.percent(stats.ridingInactiveRatio))
+                }
+                .gaugeStyle(.rpplRing(tint: MetricKind.riding.tint, lineWidth: 9))
+                .frame(maxWidth: 96)
+                .frame(maxWidth: .infinity)
             }
-            .gaugeStyle(.rpplRing(tint: MetricKind.riding.tint, lineWidth: 9))
-            .frame(maxWidth: 96)
-            .frame(maxWidth: .infinity)
 
             StatChip(
                 metric: .riding,
@@ -569,10 +592,10 @@ struct LogbookSessionDetailView: View {
     /// Full width: every set on the session timeline at its real start and length.
     private func setsTile(_ stats: SessionStats, start: Date, end: Date) -> some View {
         InfoTile("Sets & laps", metric: .sets) {
-            HStack(alignment: .firstTextBaseline, spacing: 16) {
+            AdaptiveStack(rowAlignment: .firstTextBaseline, spacing: dynamicTypeSize.isAccessibilitySize ? 8 : 16) {
                 MetricValue(LogbookFormatting.countValue(stats.knownSetCount), caption: "Sets")
                 StatChip(metric: .laps, value: LogbookFormatting.countValue(stats.knownLapCount), caption: "Laps")
-                Spacer(minLength: 0)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
             }
             if let tallies = manifest?.manual?.tallies, tallies.count > 1 {
                 ForEach(tallies.indices, id: \.self) { index in
@@ -582,7 +605,7 @@ struct LogbookSessionDetailView: View {
                     .font(.subheadline)
                 }
             }
-            if !stats.sets.isEmpty, end > start {
+            if !stats.sets.isEmpty, end > start, !dynamicTypeSize.hidesDecoration {
                 TimelineBar(
                     spans: stats.sets.map {
                         MetricDisplay.span(from: $0.startedAt, to: $0.endedAt, inRangeFrom: start, to: end)
@@ -735,7 +758,8 @@ struct LogbookSessionDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.rpplMuted)
                 } else {
-                    if stats.sets.count > 1 {
+                    // The set cards carry the same numbers; the chart's axis labels do not fit the largest sizes.
+                    if stats.sets.count > 1, !dynamicTypeSize.hidesDecoration {
                         SetDurationChart(sets: stats.sets)
                     }
                     ForEach(stats.sets) { set in
@@ -1080,6 +1104,7 @@ struct LogbookSessionDetailView: View {
 }
 
 private struct SetDetailCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let set: SetSegmentStats
     let locations: [LocationSample]
     var rendering: SessionMapRendering = .flat
@@ -1143,7 +1168,7 @@ private struct SetDetailCard: View {
                     .logbookNestedBackground(Color.rpplFill)
             }
 
-            if let telemetry, !telemetry.isEmpty {
+            if let telemetry, !telemetry.isEmpty, !dynamicTypeSize.hidesDecoration {
                 SetTelemetryCharts(telemetry: telemetry)
             }
 
