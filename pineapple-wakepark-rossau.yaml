@@ -1,0 +1,270 @@
+version: 1
+id: pineapple-wakepark-rossau
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Pineapplewakepark Rossau
+short_name: Pineapplewakepark
+languages:
+  - de
+  - en
+  - nl
+address: "Heidelbeerweg 1, 09661 Rossau"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.986281
+  lon: 13.078079
+
+phone: "+49 171 2261958"
+email: "info@pineapplewakepark.de"
+website: https://www.pineapplewakepark.de
+
+opening:
+  source_url: "https://www.pineapplewakepark.de/oeffnungszeiten"
+  booking: optional
+  note: >-
+    Die Zeiten gelten für 2026 und die Saison läuft von März bis Oktober. Montag ist im
+    März, April und Mai sowie im September und Oktober Ruhetag, Dienstag bis Donnerstag im
+    März, April und Oktober.
+  rules:
+    - months:
+        - 3
+      days:
+        - fri
+      open: "15:00"
+      close: "18:00"
+    - months:
+        - 3
+      days:
+        - weekend
+      open: "13:00"
+      close: "18:00"
+    - months:
+        - 4
+      days:
+        - fri
+      open: "16:00"
+      close: "19:00"
+    - months:
+        - 4
+      days:
+        - weekend
+      open: "13:00"
+      close: "19:00"
+    - months:
+        - 5
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 5
+      days:
+        - weekend
+      open: "13:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - weekdays
+      open: "16:00"
+      close: "20:00"
+    - months:
+        - 6
+      days:
+        - weekend
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 7
+        - 8
+      days:
+        - daily
+      open: "12:00"
+      close: "20:00"
+    - months:
+        - 9
+      days:
+        - tue
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "19:00"
+    - months:
+        - 9
+      days:
+        - weekend
+      open: "12:00"
+      close: "19:00"
+    - months:
+        - 10
+      days:
+        - fri
+      open: "15:00"
+      close: "18:00"
+    - months:
+        - 10
+      days:
+        - weekend
+      open: "12:00"
+      close: "18:00"
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "23"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Day ticket
+    options:
+      - amount: "44"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "36"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Weekend ticket
+    options:
+      - amount: "105"
+        currency: EUR
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "85"
+        currency: EUR
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Season pass 2026
+    options:
+      - amount: "810"
+        currency: EUR
+        note:
+          de: "Erwachsene, 28. März bis 31. Oktober"
+          en: "adults, 28 March to 31 October"
+          nl: "volwassenen, 28 maart t/m 31 oktober"
+      - amount: "580"
+        currency: EUR
+        note:
+          de: "Kinder, 28. März bis 31. Oktober"
+          en: "children, 28 March to 31 October"
+          nl: "kinderen, 28 maart t/m 31 oktober"
+  - name: All-in package
+    options:
+      - amount: "66"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Tageskarte mit Leihmaterial"
+          en: "adults, day ticket with rental gear"
+          nl: "volwassenen, dagkaart met leenmateriaal"
+      - amount: "53"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche, Tageskarte mit Leihmaterial"
+          en: "youth, day ticket with rental gear"
+          nl: "jeugd, dagkaart met leenmateriaal"
+  - name: Wakeboard rental
+    options:
+      - amount: "8"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "16"
+        currency: EUR
+        per: day
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "14"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+      - amount: "28"
+        currency: EUR
+        per: day
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "9"
+        currency: EUR
+        per: day
+  - name: Helmet rental
+    options:
+      - amount: "3"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "5"
+        currency: EUR
+        per: day
+
+facilities:
+  - Schwimmweste und Wasserski inklusive
+  - Obstaclepark
+  - Badestrand
+  - Gastronomie
+  - Camping
+
+description: >-
+  Wasserski- und Wakeboardanlage mit Obstaclepark, Badestrand und Camping.

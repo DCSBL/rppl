@@ -1,0 +1,195 @@
+version: 1
+id: wake-and-ski-blauer-see-garbsen
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wake & Ski Blauer See Garbsen
+short_name: Wake & Ski Blauer See
+languages:
+  - de
+  - en
+  - nl
+address: "Am Blauen See 119, 30823 Garbsen"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 52.419028
+  lon: 9.545439
+
+phone: "+49 5137 899642"
+email: "wasserski@blauersee-garbsen.de"
+website: https://www.blauersee-garbsen.de/wake-ski/allgemein
+
+opening:
+  source_url: "https://www.blauersee-garbsen.de/wake-ski/oeffnungszeiten"
+  booking: none
+  note: >-
+    Vom 3. bis 31. Oktober 2026 ist am Wochenende und an Feiertagen von 13 bis 17 Uhr
+    geöffnet. Die Nebensaison läuft vom 28. März bis 14. Mai und vom 16. September bis 31.
+    Oktober, die Hauptsaison vom 15. Mai bis 15. September.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "27"
+        currency: EUR
+        per: hour
+        note:
+          de: "Erwachsene, Nebensaison"
+          en: "adults, off season"
+          nl: "volwassenen, laagseizoen"
+      - amount: "27"
+        currency: EUR
+        per: hour
+        note:
+          de: "Erwachsene, Hauptsaison Mo bis Fr"
+          en: "adults, main season Mon to Fri"
+          nl: "volwassenen, hoogseizoen ma t/m vr"
+      - amount: "29"
+        currency: EUR
+        per: hour
+        note:
+          de: "Erwachsene, Hauptsaison Sa und So"
+          en: "adults, main season Sat and Sun"
+          nl: "volwassenen, hoogseizoen za en zo"
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Nebensaison"
+          en: "children and youth up to 17, off season"
+          nl: "kinderen en jeugd t/m 17 jaar, laagseizoen"
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Mo bis Fr"
+          en: "children and youth up to 17, main season Mon to Fri"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen ma t/m vr"
+      - amount: "21"
+        currency: EUR
+        per: hour
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Sa und So"
+          en: "children and youth up to 17, main season Sat and Sun"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen za en zo"
+  - name: "2 hours"
+    options:
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Nebensaison"
+          en: "adults, off season"
+          nl: "volwassenen, laagseizoen"
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Hauptsaison Mo bis Fr"
+          en: "adults, main season Mon to Fri"
+          nl: "volwassenen, hoogseizoen ma t/m vr"
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, Hauptsaison Sa und So"
+          en: "adults, main season Sat and Sun"
+          nl: "volwassenen, hoogseizoen za en zo"
+      - amount: "23"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Nebensaison"
+          en: "children and youth up to 17, off season"
+          nl: "kinderen en jeugd t/m 17 jaar, laagseizoen"
+      - amount: "23"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Mo bis Fr"
+          en: "children and youth up to 17, main season Mon to Fri"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen ma t/m vr"
+      - amount: "25"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Sa und So"
+          en: "children and youth up to 17, main season Sat and Sun"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen za en zo"
+  - name: Day ticket
+    options:
+      - amount: "46"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Nebensaison"
+          en: "adults, off season"
+          nl: "volwassenen, laagseizoen"
+      - amount: "46"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Hauptsaison Mo bis Fr"
+          en: "adults, main season Mon to Fri"
+          nl: "volwassenen, hoogseizoen ma t/m vr"
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, Hauptsaison Sa und So"
+          en: "adults, main season Sat and Sun"
+          nl: "volwassenen, hoogseizoen za en zo"
+      - amount: "29"
+        currency: EUR
+        per: day
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Nebensaison"
+          en: "children and youth up to 17, off season"
+          nl: "kinderen en jeugd t/m 17 jaar, laagseizoen"
+      - amount: "29"
+        currency: EUR
+        per: day
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Mo bis Fr"
+          en: "children and youth up to 17, main season Mon to Fri"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen ma t/m vr"
+      - amount: "33"
+        currency: EUR
+        per: day
+        note:
+          de: "Kinder und Jugendliche bis 17 Jahre, Hauptsaison Sa und So"
+          en: "children and youth up to 17, main season Sat and Sun"
+          nl: "kinderen en jeugd t/m 17 jaar, hoogseizoen za en zo"
+
+facilities:
+  - "Schwimmweste, Leihski, Teller und Kneeboard inklusive"
+  - Trainingslift
+  - Aquapark
+  - Adventure-Minigolf
+  - Camping
+  - Pro Shop
+
+description: >-
+  Wake- und Skipark im Erholungsgebiet Blauer See mit Trainingslift und Obstaclepark.

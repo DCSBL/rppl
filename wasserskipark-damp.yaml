@@ -1,0 +1,207 @@
+version: 1
+id: wasserskipark-damp
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserskipark Damp
+short_name: Wasserskipark
+languages:
+  - de
+  - en
+  - nl
+address: "Parkstraße 1, 24351 Damp"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 54.577978
+  lon: 10.018002
+
+phone: "+49 4352 9529852"
+email: "info@wasserski-damp.de"
+website: https://wasserski-damp.de
+
+cables:
+  - name: Cable
+    description: >-
+      Rixen-Anlage mit fünf Masten, seit 2007 in Betrieb.
+
+opening:
+  source_url: "https://wasserski-damp.de/offnungszeiten-preise/"
+  booking: none
+  note: >-
+    Die Saison 2026 lief vom 3. April bis 4. Oktober, die Saison 2027 startet im April.
+    Anmeldung oder Buchung ist nicht nötig.
+
+prices:
+  - name: Beginner ticket
+    options:
+      - amount: "38"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche, ab 16 Jahren Erwachsenentarif"
+          en: "youth, adult rate from 16"
+          nl: "jeugd, vanaf 16 jaar volwassenentarief"
+  - name: "2 hour ticket"
+    options:
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "28"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche, ab 16 Jahren Erwachsenentarif"
+          en: "youth, adult rate from 16"
+          nl: "jeugd, vanaf 16 jaar volwassenentarief"
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche, ab 16 Jahren Erwachsenentarif"
+          en: "youth, adult rate from 16"
+          nl: "jeugd, vanaf 16 jaar volwassenentarief"
+  - name: Last hour
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Year pass
+    options:
+      - amount: "850"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "700"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Jugendliche
+          en: youth
+          nl: jeugd
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "19"
+        currency: EUR
+        per: day
+        note:
+          de: Anfänger
+          en: beginner
+          nl: beginner
+      - amount: "14"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Profi
+          en: pro
+          nl: pro
+      - amount: "27"
+        currency: EUR
+        per: day
+        note:
+          de: Profi
+          en: pro
+          nl: pro
+      - amount: "17"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+        note:
+          de: Obstacle
+          en: obstacle
+          nl: obstacle
+      - amount: "33"
+        currency: EUR
+        per: day
+        note:
+          de: Obstacle
+          en: obstacle
+          nl: obstacle
+  - name: Wetsuit rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "19"
+        currency: EUR
+        per: day
+
+facilities:
+  - Paarski und Schwimmweste kostenlos
+  - Gastronomie
+
+description: >-
+  Wasserskipark direkt an der Ostsee.

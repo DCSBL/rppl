@@ -1,0 +1,157 @@
+version: 1
+id: cablesport-arena-pinneberg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Cablesport Arena Pinneberg
+short_name: Cablesport Arena
+languages:
+  - de
+  - en
+  - nl
+address: "Burmeisterallee 2, 25421 Pinneberg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 53.649875
+  lon: 9.805905
+
+phone: "+49 4101 8586603"
+email: "moinmoin@cablesport.de"
+website: https://cablesport.de
+links:
+  - kind: booking
+    url: "https://tickets.cablesport.de/"
+
+opening:
+  source_url: "https://cablesport.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison läuft von Mai bis Oktober. Im Oktober ist mittwochs von 15 Uhr bis
+    Sonnenuntergang und samstags, sonntags und an Feiertagen von 13 Uhr bis Sonnenuntergang
+    geöffnet. Die Zeiten gelten auch bei schlechtem Wetter.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "28"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche unter 18
+          en: youth under 18
+          nl: jeugd onder 18
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche unter 18
+          en: youth under 18
+          nl: jeugd onder 18
+  - name: Day ticket
+    options:
+      - amount: "50"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "42"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche unter 18
+          en: youth under 18
+          nl: jeugd onder 18
+  - name: Beginner package
+    options:
+      - amount: "53"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "48"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche unter 18
+          en: youth under 18
+          nl: jeugd onder 18
+  - name: Beginner intensive course
+    options:
+      - amount: "62"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+  - name: Wakeboard rental
+    options:
+      - amount: "15"
+        currency: EUR
+        per: hour
+      - amount: "18"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "28"
+        currency: EUR
+        per: day
+  - name: Wetsuit rental
+    options:
+      - amount: "9"
+        currency: EUR
+        per: hour
+      - amount: "12"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "18"
+        currency: EUR
+        per: day
+
+facilities:
+  - Schwimmweste in jeder Zeitkarte inklusive
+  - Strandklub
+  - Verleih
+
+description: >-
+  Wasserski- und Wakeboardanlage mit Strandklub in Pinneberg.

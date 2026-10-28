@@ -1,0 +1,99 @@
+version: 1
+id: wasserski-langenfeld
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski Langenfeld
+short_name: Wasserski Langenfeld
+languages:
+  - de
+  - en
+  - nl
+address: "Baumberger Str. 88, 40764 Langenfeld"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.111542
+  lon: 6.912480
+
+phone: "+49 2173 39462222"
+email: "kontakt@wasserski-langenfeld.de"
+website: https://www.wasserski-langenfeld.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://langenfeld.wakesys.com"
+
+cables:
+  - name: Wasserskiseilbahnen
+    description: >-
+      Sechs Seilbahnen, dazu eine stehende Welle zum Surfen. Die zweite Bahn läuft im
+      öffentlichen Betrieb von 12 bis 18 Uhr langsam.
+
+opening:
+  source_url: "https://www.wasserski-langenfeld.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Saison 2026 endet am 6. Dezember, die Saison 2027 startet am 13. März. Die Zeiten
+    pro Bahn stehen in einem Kalender auf der Website.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Erwachsene, mit Wasserski und Schwimmweste"
+          en: "adults, water skis and life vest included"
+          nl: "volwassenen, inclusief waterski en zwemvest"
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Jugendliche, mit Wasserski und Schwimmweste"
+          en: "youth, water skis and life vest included"
+          nl: "jeugd, inclusief waterski en zwemvest"
+  - name: Day ticket
+    options:
+      - amount: "48"
+        currency: EUR
+        per: day
+        note:
+          de: "Erwachsene, mit Wasserski und Schwimmweste"
+          en: "adults, water skis and life vest included"
+          nl: "volwassenen, inclusief waterski en zwemvest"
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: "Jugendliche, mit Wasserski und Schwimmweste"
+          en: "youth, water skis and life vest included"
+          nl: "jeugd, inclusief waterski en zwemvest"
+  - name: RFID wristband
+    options:
+      - amount: "5"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+
+facilities:
+  - Seehaus Gastronomie
+  - Surfwelle
+  - Camping
+  - Grillplätze
+  - Duschen
+
+description: >-
+  Wasserskianlage mit sechs Seilbahnen und einer stehenden Welle zum Surfen.

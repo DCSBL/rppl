@@ -1,0 +1,116 @@
+version: 1
+id: wasserski-st-leon
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski St. Leon
+short_name: Wasserski St. Leon
+languages:
+  - de
+  - en
+  - nl
+address: "Am St. Leoner See 1, 68789 St. Leon-Rot"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 49.281487
+  lon: 8.585326
+
+phone: "+49 6227 52314"
+email: "info@wasserski-stleon.de"
+website: https://wasserski-stleon.de
+links:
+  - kind: booking
+    url: "https://wasserski-stleon.coremanager.info/shop"
+
+cables:
+  - name: Große Bahn
+    description: >-
+      Vier Masten, für Fortgeschrittene.
+  - name: Anfängerbahn
+    direction: "2.0"
+    description: >-
+      Zwei Masten, für Anfängerkurse in Gruppen bis 12 Teilnehmer.
+
+opening:
+  source_url: "https://wasserski-stleon.de/zeiten"
+  booking: required
+  note: >-
+    Die Bahnen laufen in Zeitslots, die online gebucht werden. Die Startzeiten ändern sich
+    pro Zeitraum, im Oktober gelten eigene Zeiten.
+
+prices:
+  - name: Große Bahn slot
+    options:
+      - amount: "23"
+        currency: EUR
+        per: session
+        note:
+          de: "ab, Erwachsene"
+          en: "from, adults"
+          nl: "vanaf, volwassenen"
+      - amount: "19"
+        currency: EUR
+        per: session
+        note:
+          de: "ab, Jugendliche bis 15 Jahre"
+          en: "from, youth up to 15"
+          nl: "vanaf, jeugd t/m 15 jaar"
+  - name: Anfängerbahn course
+    options:
+      - amount: "27"
+        currency: EUR
+        per: session
+        note:
+          de: "ab, Erwachsene"
+          en: "from, adults"
+          nl: "vanaf, volwassenen"
+      - amount: "23"
+        currency: EUR
+        per: session
+        note:
+          de: "ab, Jugendliche bis 15 Jahre"
+          en: "from, youth up to 15"
+          nl: "vanaf, jeugd t/m 15 jaar"
+  - name: Rental
+    options:
+      - amount: "8"
+        currency: EUR
+        per: session
+        note:
+          de: Wakeboard
+          en: wakeboard
+          nl: wakeboard
+      - amount: "12"
+        currency: EUR
+        per: session
+        note:
+          de: Kicker Board
+          en: kicker board
+          nl: kicker board
+      - amount: "6"
+        currency: EUR
+        per: session
+        note:
+          de: Neoprenanzug
+          en: wetsuit
+          nl: wetsuit
+      - amount: "3"
+        currency: EUR
+        per: session
+        note:
+          de: Helm
+          en: helmet
+          nl: helm
+
+facilities:
+  - "Wasserski, Schwimmweste und Kneeboard im Ticket inklusive"
+  - Camping
+  - Seerestaurant
+  - Pro Shop
+
+description: >-
+  Wasserskianlage am St. Leoner See mit großer Bahn und Anfängerbahn.

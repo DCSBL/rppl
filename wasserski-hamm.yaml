@@ -1,0 +1,211 @@
+version: 1
+id: wasserski-hamm
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski Hamm
+short_name: Wasserski Hamm
+languages:
+  - de
+  - en
+  - nl
+address: "Sundernstraße 10, 59071 Hamm"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.698911
+  lon: 7.915737
+
+phone: "+49 2388 303825"
+email: "info@wasserski-hamm.de"
+website: https://www.wasserski-hamm.de
+
+cables:
+  - name: Bahn 1
+    length_m: 784
+    description: >-
+      Sechs Masten, 11 Mitnehmer und Obstacles.
+  - name: Bahn 2
+    length_m: 440
+    description: >-
+      Sechs Masten, 6 Mitnehmer.
+  - name: Übungsbahn
+    direction: "2.0"
+    description: >-
+      Zwei Masten, für Anfänger und erste Inverts.
+
+opening:
+  source_url: "https://www.wasserski-hamm.de/"
+  booking: none
+  note: >-
+    Das Saisonende 2026 ist am 25. Oktober, die Saison 2027 startet am 28. März. In den
+    Herbstferien ist montags bis freitags von 16:00 bis 18:30 und am Wochenende von 14:00
+    bis 17:00 geöffnet. Bahn 2 ist geschlossen.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "34"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "29"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Day ticket
+    options:
+      - amount: "47"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "39"
+        currency: EUR
+        per: day
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Last hour
+    options:
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "21"
+        currency: EUR
+        per: hour
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Week ticket
+    options:
+      - amount: "230"
+        currency: EUR
+        per:
+          de: Woche
+          en: week
+          nl: week
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "180"
+        currency: EUR
+        per:
+          de: Woche
+          en: week
+          nl: week
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: Year pass
+    options:
+      - amount: "820"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "620"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Jugendliche bis 16 Jahre
+          en: youth up to 16
+          nl: jeugd t/m 16 jaar
+  - name: RFID wristband
+    options:
+      - amount: "5"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Easy-Up
+          en: Easy-Up
+          nl: Easy-Up
+      - amount: "20"
+        currency: EUR
+        per: day
+        note:
+          de: Easy-Up
+          en: Easy-Up
+          nl: Easy-Up
+      - amount: "25"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Pro-Board
+          en: pro board
+          nl: pro board
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: Pro-Board
+          en: pro board
+          nl: pro board
+  - name: Wetsuit rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "12"
+        currency: EUR
+        per: day
+
+facilities:
+  - Ski und Schwimmweste inklusive
+  - Badesee und Liegewiese
+  - Camping
+  - Gastronomie
+  - Beachvolleyball
+
+description: >-
+  Wasserskianlage mit zwei Bahnen und einer Übungsbahn am See in Hamm.

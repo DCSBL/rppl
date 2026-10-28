@@ -1,0 +1,141 @@
+version: 1
+id: wakepark-tunisee-freiburg
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakepark Tunisee
+short_name: Wakepark Tunisee
+languages:
+  - de
+  - en
+  - nl
+address: "Seestraße 30, 79108 Freiburg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 48.065046
+  lon: 7.818787
+
+phone: "+49 7665 9329910"
+email: "info@wakepark-tunisee.de"
+website: https://www.wakepark-tunisee.de
+
+cables:
+  - name: Cable
+    length_m: 600
+    description: >-
+      Full-Size-Cable von Sesitec mit acht Features von Unit Parktech.
+
+opening:
+  source_url: "https://www.wakepark-tunisee.de"
+  booking: none
+  note: >-
+    Im Oktober ist mittwochs bis freitags von 15:00 bis 17:00 und samstags und sonntags von
+    13:00 bis 18:00 geöffnet, montags und dienstags ist Ruhetag. Die Saison endet am 30.
+    Oktober 2026. Es gibt keine Slots, Tickets gibt es vor Ort.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "23"
+        currency: EUR
+        per: hour
+        note:
+          de: "ermäßigt, Schüler, Studenten bis 25, unter 18"
+          en: "reduced, pupils, students up to 25, under 18"
+          nl: "gereduceerd, scholieren, studenten t/m 25, onder 18"
+  - name: "2 hours"
+    options:
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "29"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ermäßigt, Schüler, Studenten bis 25, unter 18"
+          en: "reduced, pupils, students up to 25, under 18"
+          nl: "gereduceerd, scholieren, studenten t/m 25, onder 18"
+  - name: Day ticket
+    options:
+      - amount: "46"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "40"
+        currency: EUR
+        per: day
+        note:
+          de: "ermäßigt, Schüler, Studenten bis 25, unter 18"
+          en: "reduced, pupils, students up to 25, under 18"
+          nl: "gereduceerd, scholieren, studenten t/m 25, onder 18"
+  - name: Year pass
+    options:
+      - amount: "750"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: ab 18 Jahren
+          en: "18 and older"
+          nl: vanaf 18 jaar
+      - amount: "550"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: bis 18 Jahre
+          en: up to 18
+          nl: t/m 18 jaar
+  - name: Site entry
+    options:
+      - amount: "3.5"
+        currency: EUR
+        per: person
+        note:
+          de: "Erwachsene, zusätzlich an der Campingplatzkasse"
+          en: "adults, extra at the campsite desk"
+          nl: "volwassenen, extra bij de campingkassa"
+      - amount: "2"
+        currency: EUR
+        per: person
+        note:
+          de: Kinder 6 bis 13 Jahre
+          en: children 6 to 13
+          nl: kinderen 6 tot 13 jaar
+
+facilities:
+  - "Paarski, Kneeboard, Schwimmweste und Helm kostenlos"
+  - Ausrüstungsverleih
+  - Camping
+  - Gastronomie
+
+description: >-
+  Wakepark im Freiburger Norden mit acht Features.

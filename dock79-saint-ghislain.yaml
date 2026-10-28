@@ -1,0 +1,290 @@
+version: 1
+id: dock79-saint-ghislain
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (full size and beginner cable, 2026 hours and prices)
+
+name: Dock79 Cable Park
+short_name: Dock79
+languages:
+  - fr
+  - en
+  - nl
+address: Rue de la Hamaide 79, 7333 Saint-Ghislain
+timezone: Europe/Brussels
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 50.4609828
+  lon: 3.7888121
+
+phone: "+32 (0)65 66 25 07"
+email: info@dock79.be
+website: https://dock79.be/en/activity/cable-park/
+
+description: Le prix comprend les skis, un wakeboard débutant, un kneeboard, un gilet de sauvetage et un casque.
+
+cables:
+  - name: Grand câble
+    description: Cinq pylônes, pour riders dès 8 ans.
+  - name: Câble débutant
+    description: Pour les débutants, avec des cours d'initiation personnalisés.
+
+opening:
+  source_url: "https://dock79.be/en/activity/cable-park/"
+  note: >-
+    Les jours fériés, les horaires du week-end s'appliquent. Cours d'initiation du 15 mai au 15 septembre, les week-ends et jours fériés de 12:00 à 20:00.
+  rules:
+    - months:
+        - 3
+      days:
+        - weekend
+      open: "12:00"
+      close: "16:00"
+    - months:
+        - 4
+      days:
+        - mon
+        - wed
+        - thu
+        - fri
+      open: "15:00"
+      close: "20:00"
+    - months:
+        - 4
+        - 5
+        - 6
+        - 7
+      days:
+        - weekend
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 8
+      until: "2026-08-23"
+      days:
+        - weekend
+      open: "11:00"
+      close: "20:00"
+    - months:
+        - 5
+        - 6
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 7
+      from: "2026-07-01"
+      until: "2026-07-05"
+      days:
+        - weekdays
+      open: "14:00"
+      close: "20:00"
+    - months:
+        - 7
+      from: "2026-07-06"
+      days:
+        - weekdays
+      open: "13:00"
+      close: "20:00"
+    - months:
+        - 8
+      until: "2026-08-23"
+      days:
+        - weekdays
+      open: "13:00"
+      close: "20:00"
+    - months:
+        - 8
+      from: "2026-08-24"
+      days:
+        - weekdays
+      open: "14:00"
+      close: sunset
+    - months:
+        - 9
+      until: "2026-09-27"
+      days:
+        - weekdays
+      open: "14:00"
+      close: sunset
+    - months:
+        - 9
+        - 10
+      from: "2026-09-28"
+      days:
+        - wed
+        - fri
+      open: "15:00"
+      close: sunset
+    - months:
+        - 8
+      from: "2026-08-24"
+      days:
+        - weekend
+      open: "11:00"
+      close: sunset
+    - months:
+        - 9
+        - 10
+      days:
+        - weekend
+      open: "11:00"
+      close: sunset
+
+prices:
+  - name: Grand câble, 1 heure
+    options:
+      - amount: "26"
+        currency: EUR
+        note:
+          fr: adultes (15 ans et plus)
+          en: adults (15 and over)
+          nl: volwassenen (15 jaar en ouder)
+      - amount: "21"
+        currency: EUR
+        note:
+          fr: enfants (moins de 15 ans)
+          en: children (under 15)
+          nl: kinderen (onder 15 jaar)
+      - amount: "24"
+        currency: EUR
+        note:
+          fr: adultes, groupe de 10 ou plus
+          en: adults, group of 10 or more
+          nl: volwassenen, groep van 10 of meer
+      - amount: "19"
+        currency: EUR
+        note:
+          fr: enfants, groupe de 10 ou plus
+          en: children, group of 10 or more
+          nl: kinderen, groep van 10 of meer
+  - name: Grand câble, 2 heures
+    options:
+      - amount: "36"
+        currency: EUR
+        note:
+          fr: adultes (15 ans et plus)
+          en: adults (15 and over)
+          nl: volwassenen (15 jaar en ouder)
+      - amount: "31"
+        currency: EUR
+        note:
+          fr: enfants (moins de 15 ans)
+          en: children (under 15)
+          nl: kinderen (onder 15 jaar)
+      - amount: "34"
+        currency: EUR
+        note:
+          fr: adultes, groupe de 10 ou plus
+          en: adults, group of 10 or more
+          nl: volwassenen, groep van 10 of meer
+      - amount: "29"
+        currency: EUR
+        note:
+          fr: enfants, groupe de 10 ou plus
+          en: children, group of 10 or more
+          nl: kinderen, groep van 10 of meer
+  - name: Grand câble, journée
+    options:
+      - amount: "56"
+        currency: EUR
+        note:
+          fr: adultes (15 ans et plus)
+          en: adults (15 and over)
+          nl: volwassenen (15 jaar en ouder)
+      - amount: "51"
+        currency: EUR
+        note:
+          fr: enfants (moins de 15 ans)
+          en: children (under 15)
+          nl: kinderen (onder 15 jaar)
+  - name: Carte de 5 entrées
+    options:
+      - amount: "104"
+        currency: EUR
+        note:
+          fr: "adultes, 5 x 1 heure, valable l'année d'achat"
+          en: "adults, 5 x 1 hour, valid in the year of purchase"
+          nl: "volwassenen, 5 x 1 uur, geldig in het jaar van aankoop"
+      - amount: "84"
+        currency: EUR
+        note:
+          fr: "enfants, 5 x 1 heure, valable l'année d'achat"
+          en: "children, 5 x 1 hour, valid in the year of purchase"
+          nl: "kinderen, 5 x 1 uur, geldig in het jaar van aankoop"
+      - amount: "144"
+        currency: EUR
+        note:
+          fr: "adultes, 5 x 2 heures, valable l'année d'achat"
+          en: "adults, 5 x 2 hours, valid in the year of purchase"
+          nl: "volwassenen, 5 x 2 uur, geldig in het jaar van aankoop"
+      - amount: "124"
+        currency: EUR
+        note:
+          fr: "enfants, 5 x 2 heures, valable l'année d'achat"
+          en: "children, 5 x 2 hours, valid in the year of purchase"
+          nl: "kinderen, 5 x 2 uur, geldig in het jaar van aankoop"
+  - name: Cours d'initiation, 1 heure
+    options:
+      - amount: "55"
+        currency: EUR
+        note:
+          fr: "adultes, jusqu'à 5 personnes, matériel compris"
+          en: "adults, up to 5 people, equipment included"
+          nl: "volwassenen, tot 5 personen, materiaal inbegrepen"
+      - amount: "50"
+        currency: EUR
+        note:
+          fr: "enfants, jusqu'à 5 personnes, matériel compris"
+          en: "children, up to 5 people, equipment included"
+          nl: "kinderen, tot 5 personen, materiaal inbegrepen"
+  - name: Cours d'initiation, 2 heures
+    options:
+      - amount: "70"
+        currency: EUR
+        note:
+          fr: "adultes, jusqu'à 5 personnes, matériel compris"
+          en: "adults, up to 5 people, equipment included"
+          nl: "volwassenen, tot 5 personen, materiaal inbegrepen"
+      - amount: "65"
+        currency: EUR
+        note:
+          fr: "enfants, jusqu'à 5 personnes, matériel compris"
+          en: "children, up to 5 people, equipment included"
+          nl: "kinderen, tot 5 personen, materiaal inbegrepen"
+  - name: Combinaison
+    options:
+      - amount: "7"
+        currency: EUR
+        per: hour
+      - amount: "9"
+        currency: EUR
+        per:
+          fr: 2 heures
+          en: 2 hours
+          nl: 2 uur
+      - amount: "13"
+        currency: EUR
+        per: day
+  - name: Boots fermées
+    options:
+      - amount: "13"
+        currency: EUR
+        per: hour
+      - amount: "19"
+        currency: EUR
+        per:
+          fr: 2 heures
+          en: 2 hours
+          nl: 2 uur
+      - amount: "31"
+        currency: EUR
+        per: day
+
+facilities:
+  - Bar avec terrasse
+  - Restaurant La Sablière
+  - Location de matériel

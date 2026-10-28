@@ -1,0 +1,178 @@
+version: 1
+id: wasserski-jagel
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wasserski Jagel
+short_name: Wasserski Jagel
+languages:
+  - de
+  - en
+  - nl
+address: "Selker Weg 26a, 24878 Jagel"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 54.459590
+  lon: 9.551409
+
+phone: "+49 4624 981"
+email: "info@wasserski-jagel.de"
+website: https://wasserski-jagel.de
+
+opening:
+  source_url: "https://wasserski-jagel.de/"
+  booking: optional
+  note: >-
+    Die Saison 2026 lief von April bis Oktober. Vom 5. bis 31. Oktober ist samstags und
+    sonntags von 15:00 bis 18:00 geöffnet, mit einem Oktober-Special von 15 € für 1 Stunde
+    und 30 € für 3 Stunden.
+
+prices:
+  - name: "2 hours"
+    options:
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "26"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "35"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Last chance
+    options:
+      - amount: "25"
+        currency: EUR
+        per:
+          de: ab 1 Stunde vor Schließung
+          en: from 1 hour before closing
+          nl: vanaf 1 uur voor sluiting
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "20"
+        currency: EUR
+        per:
+          de: ab 1 Stunde vor Schließung
+          en: from 1 hour before closing
+          nl: vanaf 1 uur voor sluiting
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Season pass
+    options:
+      - amount: "800"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "600"
+        currency: EUR
+        per:
+          de: Saison
+          en: season
+          nl: seizoen
+        note:
+          de: Kinder
+          en: children
+          nl: kinderen
+  - name: Group in public hours
+    options:
+      - amount: "24"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab 16 Jahren, mindestens 7 Personen"
+          en: "16 and older, at least 7 people"
+          nl: "vanaf 16 jaar, minimaal 7 personen"
+      - amount: "20"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "Kinder und Jugendliche, mindestens 7 Personen"
+          en: "children and youth, at least 7 people"
+          nl: "kinderen en jeugd, minimaal 7 personen"
+  - name: Wetsuit rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "19"
+        currency: EUR
+        per: day
+  - name: Easy wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "19"
+        currency: EUR
+        per: day
+  - name: Pro wakeboard rental
+    options:
+      - amount: "14"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "27"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Ski, Schwimmweste und Helm inklusive"
+  - Stellplätze für Wohnmobile
+
+description: >-
+  Wasserski- und Wakeboardanlage in Jagel in Schleswig-Holstein.

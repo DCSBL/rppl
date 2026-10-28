@@ -1,0 +1,288 @@
+version: 1
+id: wawaco-weissenhaeuser-strand
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: WaWaCo Weißenhäuser Strand
+short_name: WaWaCo
+languages:
+  - de
+  - en
+  - nl
+address: "Seestraße 1, 23758 Weißenhäuser Strand"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 54.310402
+  lon: 10.801673
+
+phone: "+49 4361 5540"
+email: "info@weissenhaeuserstrand.de"
+website: https://www.wawaco.de
+
+cables:
+  - name: Main Lift
+    length_m: 600
+    description: >-
+      Fünf Masten mit sieben Mitnehmern.
+  - name: Little Bro
+    direction: "2.0"
+    description: >-
+      Lift für Anfänger und Invert-Training.
+
+opening:
+  source_url: "https://www.weissenhaeuserstrand.de/en/attractions/waterpark/water-ski-lift-prices-opening-hours/"
+  booking: optional
+  note: >-
+    Vom 12. Oktober bis 1. November 2026 ist täglich von 11:30 Uhr bis Sonnenuntergang
+    geöffnet. Die Zeiten ändern sich je nach Saison.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "24"
+        currency: EUR
+        per: hour
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: "2 hours"
+    options:
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "24"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Day ticket
+    options:
+      - amount: "43"
+        currency: EUR
+        per: day
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "34"
+        currency: EUR
+        per: day
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Weekly ticket
+    options:
+      - amount: "215"
+        currency: EUR
+        per:
+          de: Woche
+          en: week
+          nl: week
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "170"
+        currency: EUR
+        per:
+          de: Woche
+          en: week
+          nl: week
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Year pass
+    options:
+      - amount: "775"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "575"
+        currency: EUR
+        per:
+          de: "1 Jahr"
+          en: "1 year"
+          nl: "1 jaar"
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Beginner ticket
+    options:
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Waterski beginner course
+    options:
+      - amount: "35"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "30"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Wakeboard beginner course
+    options:
+      - amount: "41"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Erwachsene
+          en: adults
+          nl: volwassenen
+      - amount: "36"
+        currency: EUR
+        per:
+          de: "1,5 Stunden mit Ausrüstung"
+          en: "1.5 hours with gear"
+          nl: "1,5 uur met uitrusting"
+        note:
+          de: Kinder bis 14 Jahre
+          en: children up to 14
+          nl: kinderen t/m 14 jaar
+  - name: Wakeboard rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 1 Stunde
+          en: up to 1 hour
+          nl: tot 1 uur
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "8"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "13"
+        currency: EUR
+        per: day
+        note:
+          de: Basic
+          en: basic
+          nl: basic
+      - amount: "8"
+        currency: EUR
+        per:
+          de: bis 1 Stunde
+          en: up to 1 hour
+          nl: tot 1 uur
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+      - amount: "13"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+      - amount: "21"
+        currency: EUR
+        per: day
+        note:
+          de: Pro
+          en: pro
+          nl: pro
+  - name: Wetsuit rental
+    options:
+      - amount: "6"
+        currency: EUR
+        per:
+          de: bis 1 Stunde
+          en: up to 1 hour
+          nl: tot 1 uur
+      - amount: "7"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "10"
+        currency: EUR
+        per: day
+
+facilities:
+  - "Wasserski, Kneeboard und Schwimmweste in Gruppenmiete inklusive"
+  - Verleih
+  - Einführungskurse
+
+description: >-
+  Wasserski- und Wakeboardlift im Waterpark des Ferienparks Weißenhäuser Strand.

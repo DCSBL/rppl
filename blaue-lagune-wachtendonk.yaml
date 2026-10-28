@@ -1,0 +1,164 @@
+version: 1
+id: blaue-lagune-wachtendonk
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Blaue Lagune Wakepark Wachtendonk
+short_name: Blaue Lagune
+languages:
+  - de
+  - en
+  - nl
+address: "Jülicher Str. 1-2, 47669 Wachtendonk"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.359196
+  lon: 6.276248
+
+phone: "+49 2839 277"
+email: "info@blauelagune.de"
+website: https://www.blauelagune.de
+links:
+  - kind: booking
+    url: "https://blauelagune.coremanager.info/shop"
+
+cables:
+  - name: Full Size Anlage
+    length_m: 780
+    description: >-
+      Fünf Masten von Sesitec mit 10 Mitnehmern und Featurepark.
+  - name: Beginner System 2.0
+    direction: "2.0"
+    length_m: 100
+    description: >-
+      Zwei Masten am Ufer, für Anfänger. Das Schwimmabzeichen Bronze ist nötig.
+
+opening:
+  source_url: "https://www.blauelagune.de/oeffnungszeiten/"
+  booking: required
+  note: >-
+    Die Saison 2026 begann am 4. April, der Wakepark ist jetzt in der Winterpause. Die
+    Zeiten wechseln pro Zeitraum und stehen mit Daten auf der Website. Eintritt gibt es nur
+    mit Online-Ticket.
+
+prices:
+  - name: Day ticket
+    options:
+      - amount: "37"
+        currency: EUR
+        per: day
+        note:
+          de: "ab, mit Eintritt, nur online"
+          en: "from, entry included, online only"
+          nl: "vanaf, inclusief toegang, alleen online"
+  - name: "2 hour ticket"
+    options:
+      - amount: "26"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: "ab, mit Eintritt, nur online"
+          en: "from, entry included, online only"
+          nl: "vanaf, inclusief toegang, alleen online"
+  - name: Beginner package
+    options:
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: "ab, fester Slot mit Eintritt, Schwimmabzeichen Bronze nötig"
+          en: "from, fixed slot with entry, bronze swim badge required"
+          nl: "vanaf, vaste slot met toegang, zwemdiploma brons nodig"
+  - name: After work ticket
+    options:
+      - amount: "19"
+        currency: EUR
+        per: hour
+        note:
+          de: "ab, letzte Stunde vor Liftschluss"
+          en: "from, last hour before closing"
+          nl: "vanaf, laatste uur voor sluiting"
+  - name: Companion ticket
+    options:
+      - amount: "8"
+        currency: EUR
+        note:
+          de: "ab, zum Zuschauen"
+          en: "from, for spectators"
+          nl: "vanaf, voor toeschouwers"
+  - name: Wetsuit rental
+    options:
+      - amount: "7"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "11"
+        currency: EUR
+        per: day
+  - name: Wakeboard rental
+    options:
+      - amount: "10"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Easy Up oder Easy Ride
+          en: Easy Up or Easy Ride
+          nl: Easy Up of Easy Ride
+      - amount: "19"
+        currency: EUR
+        per: day
+        note:
+          de: Easy Up oder Easy Ride
+          en: Easy Up or Easy Ride
+          nl: Easy Up of Easy Ride
+      - amount: "19"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+      - amount: "30"
+        currency: EUR
+        per: day
+        note:
+          de: Feature
+          en: feature
+          nl: feature
+  - name: Helmet rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+      - amount: "8"
+        currency: EUR
+        per: day
+
+facilities:
+  - Wasserski und Leihwesten kostenlos
+  - Strandbad
+  - Aquapark
+  - Stand-up-Paddling
+  - Gastronomie
+  - Ferienhäuser
+
+description: >-
+  Wakepark an der Blauen Lagune mit Full Size Anlage und Beginner System 2.0.

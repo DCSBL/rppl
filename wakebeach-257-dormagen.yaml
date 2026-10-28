@@ -1,0 +1,148 @@
+version: 1
+id: wakebeach-257-dormagen
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakebeach 257 Dormagen
+short_name: Wakebeach 257
+languages:
+  - de
+  - en
+  - nl
+address: "Am Straberger See 16, 41542 Dormagen"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 51.102936
+  lon: 6.771495
+
+email: "info@wakebeach.de"
+website: https://wakebeach.de
+wakesys: true
+links:
+  - kind: booking
+    url: "https://wakebeach-257.wakesys.com/browser"
+
+opening:
+  source_url: "https://wakebeach.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Öffnungszeiten der nächsten sieben Tage stehen als Kalender auf der Website. Bezahlt
+    wird vor Ort nur mit EC-Karte.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "25"
+        currency: EUR
+        per: hour
+        note:
+          de: Buchung bis 3 Tage vorher
+          en: booked up to 3 days ahead
+          nl: geboekt tot 3 dagen vooraf
+      - amount: "28"
+        currency: EUR
+        per: hour
+        note:
+          de: Buchung ab 3 Tage vorher
+          en: booked within 3 days
+          nl: geboekt binnen 3 dagen
+      - amount: "29"
+        currency: EUR
+        per: hour
+        note:
+          de: vor Ort an der Kasse
+          en: on site at the desk
+          nl: ter plaatse aan de kassa
+  - name: "2 hours"
+    options:
+      - amount: "29"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Buchung bis 3 Tage vorher
+          en: booked up to 3 days ahead
+          nl: geboekt tot 3 dagen vooraf
+      - amount: "32"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: Buchung ab 3 Tage vorher
+          en: booked within 3 days
+          nl: geboekt binnen 3 dagen
+      - amount: "33"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: vor Ort an der Kasse
+          en: on site at the desk
+          nl: ter plaatse aan de kassa
+  - name: Day ticket
+    options:
+      - amount: "45"
+        currency: EUR
+        per: day
+  - name: Beginner session
+    options:
+      - amount: "45"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: samstags 10 bis 12 Uhr
+          en: Saturdays 10 to 12
+          nl: zaterdags 10 tot 12 uur
+  - name: RFID wristband
+    options:
+      - amount: "6"
+        currency: EUR
+        note:
+          de: "einmalig, RFID-Armband"
+          en: "one time, RFID wristband"
+          nl: "eenmalig, RFID-polsband"
+  - name: Wakeboard rental
+    options:
+      - amount: "15"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "20"
+        currency: EUR
+        per: day
+  - name: Wetsuit rental
+    options:
+      - amount: "5"
+        currency: EUR
+        per:
+          de: bis 2 Stunden
+          en: up to 2 hours
+          nl: tot 2 uur
+      - amount: "8"
+        currency: EUR
+        per: day
+
+facilities:
+  - Wasserski und Schwimmweste inklusive
+  - Beachbar
+  - Aquapark 257
+  - Strandbad im Sommer
+
+description: >-
+  Wakeboard- und Wasserskianlage am Straberger See zwischen Köln und Düsseldorf. Es gibt
+  einen großen Lift und einen Übungslift.

@@ -1,0 +1,50 @@
+version: 1
+id: wakepark-brombachsee
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: Wakepark Brombachsee
+short_name: Wakepark Brombachsee
+languages:
+  - de
+  - en
+  - nl
+address: "Badehalbinsel 7, 91720 Absberg"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 49.137613
+  lon: 10.876996
+
+email: "info@wakepark-brombachsee.de"
+website: https://wakepark-brombachsee.de
+wakesys: true
+
+cables:
+  - name: Full Size Cable
+    length_m: 600
+    description: >-
+      Cable von Wakeparx mit Features von UNIT Parktech.
+  - name: Übungsanlage
+    direction: "2.0"
+    description: >-
+      System 2.0 für Einsteiger.
+
+opening:
+  source_url: "https://wakepark-brombachsee.de/wakepark/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Die Zeiten für den öffentlichen Betrieb stehen in einem Kalender auf der Website.
+    Dienstags und Donnerstags gibt es SlowRide-Hours mit 27 km/h.
+
+facilities:
+  - Beachbar
+  - Stand-up-Paddling
+  - Aquapark
+  - Zeltwiese Absberg
+
+description: >-
+  Wakepark auf der Badehalbinsel Absberg im Fränkischen Seenland.

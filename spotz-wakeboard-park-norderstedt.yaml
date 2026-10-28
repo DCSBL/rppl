@@ -1,0 +1,146 @@
+version: 1
+id: spotz-wakeboard-park-norderstedt
+created_at: 2026-10-25
+updated_at: 2026-10-25
+history:
+  - date: 2026-10-25
+    description: initial (from the park website)
+
+name: SPOTZ Wakeboard Park Norderstedt
+short_name: SPOTZ
+languages:
+  - de
+  - en
+  - nl
+address: "Schöne Aussicht 6, 22844 Norderstedt"
+timezone: Europe/Berlin
+# Geocode of the address, not a confirmed dock point.
+location:
+  lat: 53.712972
+  lon: 10.021112
+
+phone: "+49 40 32040140"
+email: "info@spotz-norderstedt.de"
+website: https://spotz-norderstedt.de
+links:
+  - kind: booking
+    url: "https://spotz-norderstedt.wakeparkmanager.com/"
+  - kind: instagram
+    url: "https://www.instagram.com/spotzwakeboardpark/"
+
+opening:
+  source_url: "https://spotz-norderstedt.de/oeffnungszeiten/"
+  booking: optional
+  note: >-
+    Der Zeitplan 2026 hat Zeiträume pro Woche. Vom 6. bis 26. Oktober war mittwochs 14:00
+    bis 18:00 und am Wochenende 12:00 bis 16:00 geöffnet, vom 27. Oktober bis 16. November
+    am Wochenende 12:00 bis 16:00. Bezahlt wird nur bargeldlos.
+
+prices:
+  - name: "1 hour"
+    options:
+      - amount: "30"
+        currency: EUR
+        per: hour
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+      - amount: "26"
+        currency: EUR
+        per: hour
+        note:
+          de: bis 15 Jahre
+          en: up to 15
+          nl: t/m 15 jaar
+  - name: "2 hours"
+    options:
+      - amount: "38"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+      - amount: "31"
+        currency: EUR
+        per:
+          de: "2 Stunden"
+          en: "2 hours"
+          nl: "2 uur"
+        note:
+          de: bis 15 Jahre
+          en: up to 15
+          nl: t/m 15 jaar
+  - name: Day ticket
+    options:
+      - amount: "52"
+        currency: EUR
+        per: day
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+      - amount: "42"
+        currency: EUR
+        per: day
+        note:
+          de: bis 15 Jahre
+          en: up to 15
+          nl: t/m 15 jaar
+  - name: "10 card"
+    options:
+      - amount: "380"
+        currency: EUR
+        per:
+          de: "11 x 2 Stunden"
+          en: "11 x 2 hours"
+          nl: "11 x 2 uur"
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+      - amount: "310"
+        currency: EUR
+        per:
+          de: "11 x 2 Stunden"
+          en: "11 x 2 hours"
+          nl: "11 x 2 uur"
+        note:
+          de: bis 15 Jahre
+          en: up to 15
+          nl: t/m 15 jaar
+  - name: Season pass 2026
+    options:
+      - amount: "1010"
+        currency: EUR
+        per:
+          de: März bis November
+          en: March to November
+          nl: maart t/m november
+        note:
+          de: ab 16 Jahren
+          en: "16 and older"
+          nl: vanaf 16 jaar
+      - amount: "810"
+        currency: EUR
+        per:
+          de: März bis November
+          en: March to November
+          nl: maart t/m november
+        note:
+          de: bis 15 Jahre
+          en: up to 15
+          nl: t/m 15 jaar
+
+facilities:
+  - Seeterrassen
+  - Adventure Golf
+  - Funpark
+
+description: >-
+  Wakeboardpark im Stadtpark Norderstedt am Stadtparksee mit Seeterrassen und Adventure
+  Golf.
