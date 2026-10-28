@@ -4,7 +4,7 @@
 # - screenshots-required: only the four shots marketing/marketing.yaml uses (3 iPhone, 1 Watch). Tests retry
 #   once, and whatever was captured is exported even when a test fails. The job fails only if one of the four
 #   PNGs is missing. They are attached to the release as iphone-*/watch-* assets.
-# - screenshots-extra: everything else (dark mode, other scenarios). Parallel and allowed to fail: a failure
+# - screenshots-extra: everything else (the other scenarios). Parallel and allowed to fail: a failure
 #   is a warning and blocks nothing.
 # - screenshots-duo: three iPhone Duo shots (folded session list, unfolded session detail and parks), attached
 #   as duo-*. Optional like screenshots-extra; a wide iPhone stands in until the Duo simulator is on the runners.
@@ -212,7 +212,7 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
 
-      - name: iPhone screenshots (the rest, dark mode)
+      - name: iPhone screenshots (the rest)
         continue-on-error: true
         shell: bash
         run: |
@@ -235,7 +235,6 @@ jobs:
             -skip-testing:RpplUITests/RpplScreenshotTests/testLogbookThreeSessions \
             -skip-testing:RpplUITests/RpplScreenshotTests/testTrackedSessionDetail \
             -skip-testing:RpplUITests/RpplScreenshotTests/testParksOpen \
-            -only-testing:RpplUITests/RpplDarkScreenshotTests \
             -retry-tests-on-failure \
             -test-iterations 2 \
             -parallel-testing-enabled NO \
@@ -505,7 +504,7 @@ jobs:
           names = sorted(n for n in Path("assets.txt").read_text().split() if n.endswith(".png"))
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
           def pick(prefix):
-              mine = [n for n in names if n.startswith(prefix + "-") and not n[:-4].endswith("-dark")]
+              mine = [n for n in names if n.startswith(prefix + "-")]
               rank = lambda n: (0, preferred.index(n[len(prefix) + 1:-4])) if n[len(prefix) + 1:-4] in preferred else (1, 0)
               return sorted(mine, key=rank)[:per_device]
           def rows(files, width):
@@ -516,7 +515,7 @@ jobs:
           groups = [("iphone", "iPhone", 220), ("duo", "iPhone Duo", 220), ("watch", "Apple Watch", 160)]
           shown = {prefix: pick(prefix) for prefix, _, _ in groups}
           parts = [f"### Screenshots ({label}, mock data)\n\n{rows(shown[prefix], width)}" for prefix, label, width in groups if shown[prefix]]
-          parts.append(f"The remaining screenshots (other scenarios and dark mode) are in `rppl-screenshots-{tag}.zip` attached to this release.")
+          parts.append(f"The remaining screenshots (other scenarios) are in `rppl-screenshots-{tag}.zip` attached to this release.")
           section = f"{start}\n" + "\n\n".join(parts) + f"\n{end}\n"
           Path("body.md").write_text(body + "\n\n" + section)
           Path("rest.txt").write_text("\n".join(n for n in names if n not in {f for fs in shown.values() for f in fs}))
