@@ -160,6 +160,7 @@ struct SetFlagCloud: View {
 /// A set card's flag row. Read mode: the saved badges, nothing when empty. Edit mode (`flagging`
 /// set): badges tap to remove, plus a trailing "+ Flag".
 struct SetFlagRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     let flags: [String]
     var flagging: SetFlagging?
@@ -194,7 +195,8 @@ struct SetFlagRow: View {
                                 ToolbarItem(placement: .confirmationAction) { Button("Done") { showsPicker = false } }
                             }
                     }
-                    .presentationDetents([.medium, .large])
+                    // A medium sheet shows two flags at accessibility sizes.
+                    .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
                     .presentationBackground(Color.rpplBackground)
                 }
             }
@@ -204,6 +206,7 @@ struct SetFlagRow: View {
 
 /// "🏁 Set x" heading shared by tracked and manual set cards.
 struct SetCardTitle: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let index: Int
 
     var body: some View {
@@ -215,8 +218,8 @@ struct SetCardTitle: View {
         }
         .foregroundStyle(Color.rpplText)
         .font(.headline)
-        .lineLimit(2)
-        .minimumScaleFactor(0.75)
+        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+        .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.75)
         .fixedSize(horizontal: false, vertical: true)
     }
 }

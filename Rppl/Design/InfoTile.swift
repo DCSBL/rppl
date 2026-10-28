@@ -38,6 +38,7 @@ struct InfoTile<Content: View>: View {
 
 struct TileHeader: View {
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: LocalizedStringKey
     let systemImage: String
     var tint: Color = RpplDesign.headerColor
@@ -48,10 +49,11 @@ struct TileHeader: View {
             MetricIcon(metric: metric, systemImage: systemImage)
                 .foregroundStyle(tint)
                 .accessibilityHidden(true)
+            // One shrinking line; two lines at accessibility sizes, where "Distance & duration" no longer fits one.
             Text(title)
                 .textCase(.uppercase)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.8)
         }
         .font(.caption.weight(.semibold))
         .foregroundStyle(contrast == .increased ? Color.rpplMuted : RpplDesign.headerColor)

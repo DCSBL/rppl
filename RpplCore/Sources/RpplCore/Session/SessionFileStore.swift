@@ -497,6 +497,15 @@ public final class SessionFileStore: @unchecked Sendable {
         return try rebuildPackageIndex().keys.sorted()
     }
 
+    /// Every readable manifest, from the same scan that indexes the packages: one decode per
+    /// session instead of a scan plus a `readManifest` each.
+    public func listReadableManifests() throws -> [SessionManifest] {
+        try ensureRootExists()
+        return try scanPackages().values
+            .map(\.manifest)
+            .sorted { $0.sessionId < $1.sessionId }
+    }
+
     /// Permanently removes one session package directory from this store.
     public func deleteSession(sessionId: String) throws {
         lock.lock()
@@ -741,12 +750,6 @@ public final class SessionFileStore: @unchecked Sendable {
     public func sessionsNeedingTransfer() throws -> [SessionManifest] {
         let manifests = try listReadableManifests()
         return TransferPendingFilter.needingTransfer(manifests)
-    }
-
-    public func listReadableManifests() throws -> [SessionManifest] {
-        try listSessionIDs().compactMap { sessionId in
-            try? readManifest(sessionId: sessionId)
-        }
     }
 
     /// Reads the streams under the store lock, then encodes and writes without it: encoding a
@@ -1042,16 +1045,20 @@ public final class SessionFileStore: @unchecked Sendable {
 
     @discardableResult
     private func rebuildPackageIndex() throws -> [String: URL] {
+        try scanPackages().mapValues(\.directoryURL)
+    }
+
+    /// Scans the root once and refreshes the path index from it.
+    private func scanPackages() throws -> [String: SessionPackageLocator.Entry] {
         let entries = try SessionPackageLocator.index(
             in: rootURL,
             fileManager: fileManager,
             decoder: decoder
         )
-        let map = Dictionary(uniqueKeysWithValues: entries.map { ($0.key, $0.value.directoryURL) })
         lock.lock()
-        packageIndex = map
+        packageIndex = entries.mapValues(\.directoryURL)
         lock.unlock()
-        return map
+        return entries
     }
 
     /// Renames the package directory when the current name is still app-generated.

@@ -130,11 +130,11 @@ extension ParkWidgetState {
             let to = Self.end(window)
             return String(localized: "Open until \(to)")
         case .opensToday(let window):
-            let from = ParkSchedule.timeText(minutes: window.startMinute)
+            let from = ParkSchedule.displayTime(minutes: window.startMinute)
             let to = Self.end(window)
             return String(localized: "Open from \(from) to \(to)")
         case .opensTomorrow(let startMinute):
-            let from = ParkSchedule.timeText(minutes: startMinute)
+            let from = ParkSchedule.displayTime(minutes: startMinute)
             return String(localized: "Open tomorrow from \(from)")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")

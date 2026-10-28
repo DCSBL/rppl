@@ -233,7 +233,7 @@ enum ParkFormatting {
     }
 
     static func time(_ minutes: Int) -> String {
-        ParkSchedule.timeText(minutes: minutes)
+        ParkSchedule.displayTime(minutes: minutes)
     }
 
     /// The closing time of a window; `sunset` stays English in every locale and is not calculated.
@@ -246,7 +246,12 @@ enum ParkFormatting {
     }
 
     static func slot(_ slot: ParkSlot) -> String {
-        "\(slot.start) – \(slot.end)"
+        "\(clock(slot.start)) – \(clock(slot.end))"
+    }
+
+    /// A stored `HH:mm` in the reader's clock style; anything unreadable as written.
+    private static func clock(_ text: String) -> String {
+        ParkSchedule.minutes(text).map(time) ?? text
     }
 
     static func days(_ tokens: [String]?) -> String? {
@@ -528,33 +533,42 @@ struct FlowLayout: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let result = arrange(width: bounds.width, subviews: subviews)
-        for (index, origin) in result.origins.enumerated() {
+        for (index, frame) in result.frames.enumerated() {
             subviews[index].place(
-                at: CGPoint(x: bounds.minX + origin.x, y: bounds.minY + origin.y),
-                proposal: .unspecified
+                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                proposal: ProposedViewSize(frame.size)
             )
         }
     }
 
-    private func arrange(width: CGFloat, subviews: Subviews) -> (size: CGSize, origins: [CGPoint]) {
-        var origins: [CGPoint] = []
+    private struct Arrangement {
+        var size: CGSize
+        var frames: [CGRect]
+    }
+
+    private func arrange(width: CGFloat, subviews: Subviews) -> Arrangement {
+        var frames: [CGRect] = []
         var x: CGFloat = 0
         var y: CGFloat = 0
         var rowHeight: CGFloat = 0
         var maxX: CGFloat = 0
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            var size = subview.sizeThatFits(.unspecified)
+            // Wider than the row (a chip at an accessibility text size): it gets the row's width and wraps.
+            if size.width > width {
+                size = subview.sizeThatFits(ProposedViewSize(width: width, height: nil))
+            }
             if x > 0, x + size.width > width {
                 x = 0
                 y += rowHeight + spacing
                 rowHeight = 0
             }
-            origins.append(CGPoint(x: x, y: y))
+            frames.append(CGRect(origin: CGPoint(x: x, y: y), size: size))
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
             maxX = max(maxX, x - spacing)
         }
-        return (CGSize(width: maxX, height: y + rowHeight), origins)
+        return Arrangement(size: CGSize(width: maxX, height: y + rowHeight), frames: frames)
     }
 }
 

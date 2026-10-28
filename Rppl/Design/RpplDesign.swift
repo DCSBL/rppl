@@ -69,7 +69,7 @@ enum MetricKind: CaseIterable, Equatable {
     }
 }
 
-/// Renders a metric's icon: the MDI ski-water glyph for `.riding`, an SF Symbol otherwise.
+/// Renders a metric's icon: the wakeboard glyph for `.riding`, an SF Symbol otherwise.
 /// `systemImage` lets call sites that already resolved `MetricKind.systemImage` skip re-deriving it.
 struct MetricIcon: View {
     var metric: MetricKind?
@@ -87,10 +87,58 @@ struct MetricIcon: View {
 
     var body: some View {
         if metric == .riding {
-            MDIIconView(icon: .skiWater)
+            WakeboardIcon()
                 .frame(width: 14, height: 14)
         } else {
             Image(systemName: systemImage)
         }
+    }
+}
+
+extension DynamicTypeSize {
+    /// From here decoration goes: gauges, timeline bars and chart axes, whose text stays beside them. The
+    /// smaller accessibility sizes still have room for them.
+    var hidesDecoration: Bool { self >= .accessibility3 }
+}
+
+/// The wakeboarder glyph as a template vector asset. The `activity-*` set is adapted from Material Design Icons
+/// `ski-water` (see LEGAL.md).
+struct WakeboardIcon: View {
+    var body: some View {
+        Image("activity-wakeboard")
+            .resizable()
+            .scaledToFit()
+            .accessibilityLabel(Text("Wakeboarding"))
+    }
+}
+
+/// See `rpplPopoverContent(width:maxWidth:)`.
+private struct PopoverContent: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let width: CGFloat?
+    let maxWidth: CGFloat?
+
+    func body(content: Content) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            ScrollView {
+                content.frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .presentationDetents([.medium, .large])
+            .presentationBackground(Color.rpplBackground)
+        } else {
+            content
+                .frame(width: width)
+                .frame(maxWidth: maxWidth)
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+extension View {
+    /// The content of a `popover`: a popover of the given width on a phone, as the system would do on iPad. At
+    /// accessibility text sizes the same content is a sheet that scrolls instead: a paragraph at those sizes
+    /// is taller than the screen, and a popover never scrolls.
+    func rpplPopoverContent(width: CGFloat? = nil, maxWidth: CGFloat? = nil) -> some View {
+        modifier(PopoverContent(width: width, maxWidth: maxWidth))
     }
 }

@@ -24,6 +24,12 @@ struct LogbookView: View {
     @State private var didOpenSession = false
     @State private var windowWidth: CGFloat = 0
     @State private var selectedSessionId: String?
+    /// Bumped by `select(_:)` when another session is picked while one is open beside the list, so the detail
+    /// stack is rebuilt for it: replacing the item of a pushed destination makes SwiftUI report a pop, which
+    /// cleared the new selection.
+    @State private var detailStackToken = 0
+    /// The session `select(_:)` is about to push on a rebuilt detail stack.
+    @State private var switchingToSession: String?
     /// Collapsed (narrow), the list is the root; opening a session shows the detail on top.
     @State private var compactColumn = NavigationSplitViewColumn.sidebar
     @Environment(\.showAppSettings) private var showAppSettings
@@ -106,7 +112,7 @@ struct LogbookView: View {
         }
         // Back from a session (narrow) or deselected: flash its row, maybe ask for a review.
         .onChange(of: selectedSessionId) { old, new in
-            guard let old, new == nil else { return }
+            guard let old, new == nil, switchingToSession == nil else { return }
             didOpenSession = true
             flashHighlight(old)
             requestReviewIfPending()
@@ -126,7 +132,7 @@ struct LogbookView: View {
     }
 
     private var listContent: some View {
-        List(selection: $selectedSessionId) {
+        List(selection: sessionSelection) {
             if connectivity.pendingAckCount > 0 {
                 Section {
                     SyncStatusIndicator(
@@ -233,7 +239,8 @@ struct LogbookView: View {
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
             .navigationTitle("Logbook")
-            .navigationSubtitle("Sessions and sets")
+            // No subtitle at accessibility sizes: with the large title it took a third of a small screen.
+            .navigationSubtitle(useAccessibilityLayout ? Text(verbatim: "") : Text("Sessions and sets"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 // Settings above add in the vertical bar of iPhone Duo, settings left of add elsewhere.
@@ -261,13 +268,44 @@ struct LogbookView: View {
         .tag(sessionId)
     }
 
-    /// The detail column's stack beside the list: the selected session pushed on the placeholder; empty while
-    /// collapsed, where the session is the column's root. A path, so picking another session replaces the
-    /// pushed one instead of popping it first and losing the new selection; the system back button clears it.
-    private var pushedPath: Binding<[String]> {
-        Binding(
-            get: { horizontalSizeClass == .compact ? [] : (selectedSessionId.map { [$0] } ?? []) },
-            set: { selectedSessionId = $0.last }
+    /// Opens a session, or closes it with nil. Use this rather than setting `selectedSessionId`, so that
+    /// switching sessions beside the list works: the detail stack is rebuilt (`detailStackToken`) empty and the
+    /// new session is pushed on it once it exists. A stack created with a session already pushed reported a pop
+    /// of it straight away, which closed it again.
+    private func select(_ id: String?) {
+        WakeLog.debug(.ui, "select session \(id ?? "nil") (was \(selectedSessionId ?? "nil"))")
+        guard let id, let current = selectedSessionId, id != current, horizontalSizeClass != .compact else {
+            switchingToSession = nil
+            selectedSessionId = id
+            return
+        }
+        switchingToSession = id
+        detailStackToken += 1
+        selectedSessionId = nil
+        DispatchQueue.main.async {
+            guard switchingToSession == id else { return }
+            switchingToSession = nil
+            selectedSessionId = id
+        }
+    }
+
+    /// The list's selection, through `select(_:)`.
+    private var sessionSelection: Binding<String?> {
+        Binding(get: { switchingToSession ?? selectedSessionId }, set: { select($0) })
+    }
+
+    /// Session pushed on the detail column's stack beside the list; nil while collapsed, where the session
+    /// is the column's root. The system back button clears the selection.
+    /// A stack replaced by `select(_:)` reports a pop as it goes, so only a pop of the session that is still
+    /// selected clears the selection.
+    private var pushedSessionId: Binding<String?> {
+        let shown = selectedSessionId
+        return Binding(
+            get: { horizontalSizeClass == .compact ? nil : selectedSessionId },
+            set: { item in
+                WakeLog.debug(.ui, "pushed session set \(item == nil ? "nil" : "item"), shown \(shown ?? "nil"), selected \(selectedSessionId ?? "nil")")
+                if item == nil, selectedSessionId == shown { selectedSessionId = nil }
+            }
         )
     }
 
@@ -283,23 +321,24 @@ struct LogbookView: View {
             }
             .id(sessionId)
         } else {
-            NavigationStack(path: pushedPath) {
+            NavigationStack {
                 ContentUnavailableView("No session selected", systemImage: "list.bullet.rectangle")
                     .foregroundStyle(Color.rpplMuted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(RpplBackdrop())
-                    .navigationDestination(for: String.self) { sessionId in
+                    .navigationDestination(item: pushedSessionId) { sessionId in
                         LogbookSessionDetailView(sessionId: sessionId, store: connectivity.store)
                             .embeddedInSplit()
                             .toolbar(.visible, for: .navigationBar)
                     }
             }
+            .id(detailStackToken)
         }
     }
 
     private func consumeNavigationRequests() {
         if let sessionId = navigation.openSessionId {
-            selectedSessionId = sessionId
+            select(sessionId)
             compactColumn = .detail
             navigation.openSessionId = nil
             flashHighlight(sessionId)
@@ -395,35 +434,17 @@ struct LogbookView: View {
         let speedValue = if let speed, speed > 0 { DistanceFormat.kilometersPerHour(speed) } else { "-" }
 
         return InfoTile("Total", metric: .riding) {
-            Group {
-                if useAccessibilityLayout {
-                    VStack(alignment: .leading, spacing: 12) {
-                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
-                            countTotal = countTotal.cycled()
-                        }
-                        totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
-                            distanceTotal = distanceTotal.cycled()
-                        }
-                        totalDivider(horizontal: true)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
-                            speedTotal = speedTotal.cycled()
-                        }
-                    }
-                } else {
-                    HStack(spacing: 0) {
-                        totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
-                            countTotal = countTotal.cycled()
-                        }
-                        totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
-                            distanceTotal = distanceTotal.cycled()
-                        }
-                        totalDivider(horizontal: false)
-                        totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
-                            speedTotal = speedTotal.cycled()
-                        }
-                    }
+            AdaptiveStack(spacing: useAccessibilityLayout ? 12 : 0) {
+                totalMetric(value: sessionsValue, label: countLabel, id: "logbook-total-sessions") {
+                    countTotal = countTotal.cycled()
+                }
+                totalDivider(horizontal: useAccessibilityLayout)
+                totalMetric(value: loading ? "-" : distanceValue, label: distanceLabel, id: "logbook-total-distance") {
+                    distanceTotal = distanceTotal.cycled()
+                }
+                totalDivider(horizontal: useAccessibilityLayout)
+                totalMetric(value: loading ? "-" : speedValue, label: speedLabel, shortLabel: speedShortLabel, id: "logbook-total-speed") {
+                    speedTotal = speedTotal.cycled()
                 }
             }
             .sensoryFeedback(.selection, trigger: countTotal)
@@ -473,11 +494,12 @@ struct LogbookView: View {
     }
 
     private var sessionsHeader: some View {
-        HStack {
+        // The count sits under the title at accessibility sizes, where the two no longer share a line.
+        AdaptiveStack(columnAlignment: .leading, spacing: useAccessibilityLayout ? 2 : nil) {
             Text("Sessions")
                 .font(.title3.bold())
                 .foregroundStyle(Color.rpplText)
-            Spacer()
+            if !useAccessibilityLayout { Spacer() }
             Text(catalog.isLoading ? "…" : LogbookFormatting.sessionCount(catalog.entries.count))
                 .font(.subheadline)
                 .foregroundStyle(Color.rpplMuted)
@@ -641,8 +663,8 @@ private struct SessionCard: View {
                         Text(ActivityCodes.localizedTitle(for: entry.manifest.activityCode))
                             .foregroundStyle(Color.rpplText)
                             .font(.headline)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.75)
+                            .lineLimit(useAccessibilityLayout ? nil : 2)
+                            .minimumScaleFactor(useAccessibilityLayout ? 1 : 0.75)
 
                         // Park name wraps instead of truncating: it is how riders tell sessions apart.
                         Label {
@@ -662,19 +684,35 @@ private struct SessionCard: View {
                 }
 
                 if !entry.highlights.isEmpty {
+                    // At accessibility sizes every badge is a line of its own, so the card shows two and a count;
+                    // the session detail has them all.
+                    let shown = useAccessibilityLayout ? Array(entry.highlights.prefix(2)) : entry.highlights
                     FlowLayout(spacing: 6) {
-                        ForEach(entry.highlights, id: \.rawValue) { highlight in
+                        ForEach(shown, id: \.rawValue) { highlight in
                             HighlightChip(highlight)
+                        }
+                        if shown.count < entry.highlights.count {
+                            ParkChip(text: "+\(entry.highlights.count - shown.count)", tint: Color.rpplMuted)
                         }
                     }
                 }
 
-                Text(sessionMetaText)
+                if useAccessibilityLayout {
+                    // Date, time and duration each on a line: the joined line truncated at these sizes.
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(sessionMetaParts, id: \.self) { Text($0) }
+                    }
                     .font(.footnote)
                     .foregroundStyle(Color.rpplMuted)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Text(sessionMetaParts.joined(separator: " · "))
+                        .font(.footnote)
+                        .foregroundStyle(Color.rpplMuted)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
                 Divider()
                     .overlay(Color.rpplFill)
@@ -710,7 +748,7 @@ private struct SessionCard: View {
     }
 
     private var activityIcon: some View {
-        MDIIconView(icon: .skiWater)
+        WakeboardIcon()
             .foregroundStyle(MetricKind.riding.tint)
             .frame(width: 20, height: 20)
             .frame(width: 36, height: 36)
@@ -721,13 +759,13 @@ private struct SessionCard: View {
             .accessibilityHidden(true)
     }
 
-    private var sessionMetaText: String {
+    private var sessionMetaParts: [String] {
         let date = LogbookFormatting.sessionDate(entry.manifest.startedAt)
         let range = LogbookFormatting.sessionTimeRange(
             start: entry.manifest.startedAt,
             end: entry.manifest.endedAt ?? entry.stats?.endedAt
         )
-        return "\(date) · \(range) · \(durationText)"
+        return [date, range, durationText]
     }
 
     private var durationText: String {

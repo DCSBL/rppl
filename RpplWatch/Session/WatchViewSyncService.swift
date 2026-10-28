@@ -87,17 +87,16 @@ final class WatchViewSyncService {
         }
     }
 
-    func knownSessionsOnWatch() -> [WatchKnownSession] {
-        guard let ids = try? store.listSessionIDs() else { return [] }
-        return ids.compactMap { sessionId in
+    nonisolated static func knownSessions(in store: SessionFileStore) -> [WatchKnownSession] {
+        guard let manifests = try? store.listReadableManifests() else { return [] }
+        return manifests.compactMap { manifest in
             guard
-                let manifest = try? store.readManifest(sessionId: sessionId),
                 WatchViewDeletePolicy.mayDelete(manifest),
-                let derived = try? store.readDerivedView(sessionId: sessionId)
+                let derived = try? store.readDerivedView(sessionId: manifest.sessionId)
             else {
                 return nil
             }
-            return WatchKnownSession(sessionId: sessionId, analyzerVersion: derived.analyzerVersion)
+            return WatchKnownSession(sessionId: manifest.sessionId, analyzerVersion: derived.analyzerVersion)
         }
     }
 
@@ -112,22 +111,28 @@ final class WatchViewSyncService {
             return
         }
 
-        let known = knownSessionsOnWatch()
-        guard let payload = try? WatchViewSyncCodec.encodeSyncRequest(known: known) else { return }
+        // Reading every stored derived view (stats + map tracks) for its analyzer version is
+        // the logbook's heaviest read: off the main thread so opening the logbook stays smooth.
+        let store = store
+        Task {
+            let known = (try? await StoreIO.runOffMain { Self.knownSessions(in: store) }) ?? []
+            guard WCSession.default.isReachable else { return }
+            guard let payload = try? WatchViewSyncCodec.encodeSyncRequest(known: known) else { return }
 
-        WakeLog.debug(.sync, "syncRequest known=\(known.count)")
-        WCSession.default.sendMessage(
-            payload,
-            replyHandler: { [weak self] reply in
-                Task { @MainActor in
-                    if let syncReply = try? WatchViewSyncCodec.decodeSyncReply(from: reply) {
-                        self?.applySyncReply(syncReply)
+            WakeLog.debug(.sync, "syncRequest known=\(known.count)")
+            WCSession.default.sendMessage(
+                payload,
+                replyHandler: { [weak self] reply in
+                    Task { @MainActor in
+                        if let syncReply = try? WatchViewSyncCodec.decodeSyncReply(from: reply) {
+                            self?.applySyncReply(syncReply)
+                        }
                     }
+                },
+                errorHandler: { error in
+                    WakeLog.error(.sync, "syncRequest failed: \(error.localizedDescription)")
                 }
-            },
-            errorHandler: { error in
-                WakeLog.error(.sync, "syncRequest failed: \(error.localizedDescription)")
-            }
-        )
+            )
+        }
     }
 }

@@ -3,6 +3,8 @@ import RpplCore
 
 struct SessionControlsPage: View {
     @Bindable var session: WatchSessionController
+    /// The glyph grows with the text size up to 40 pt: the tile fills the page and cannot grow with it.
+    @ScaledMetric(relativeTo: .title) private var glyphSize: CGFloat = 28
     @State private var showStopConfirmation = false
     @State private var showDiscardConfirmation = false
     /// Frozen when Stop is tapped so the dialog does not change while it is open.
@@ -98,7 +100,7 @@ struct SessionControlsPage: View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: min(glyphSize, 40), weight: .bold))
                     .foregroundStyle(tint)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(tint.opacity(0.25), in: Capsule())

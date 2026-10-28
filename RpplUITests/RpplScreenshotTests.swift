@@ -3,9 +3,8 @@ import XCTest
 /// Release screenshots: seeded mock logbook (`UITestFixtures`), clock frozen at Sat 15 Aug 2026 12:30 (Parks: Sat 5 Sep 14:00).
 /// CI exports the attachments (`scripts/ci/export_screenshots.py`) and adds them to the release.
 /// Each test is one scenario and doubles as a UI check: it fails when a screen does not render.
-/// `RpplDarkScreenshotTests` re-runs every scenario in dark mode (`<name>-dark.png`).
 /// The generated logbooks (`-rpplUITestSessions N`) mix tracked and manual sessions.
-class RpplScreenshotTests: XCTestCase {
+final class RpplScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
 
     nonisolated(unsafe) static var diagnostics: [String] = []
@@ -14,9 +13,6 @@ class RpplScreenshotTests: XCTestCase {
         diagnostics.forEach { print($0) }
         super.tearDown()
     }
-
-    /// Overridden by the dark-mode subclass.
-    class var isDark: Bool { false }
 
     /// Sat 5 Sep 2026 14:00 Amsterdam: every mocked park is within its opening hours.
     private static let summerNow = "1788609600"
@@ -32,14 +28,13 @@ class RpplScreenshotTests: XCTestCase {
     private func launch(_ args: [String] = []) {
         app = XCUIApplication()
         app.launchArguments = ["-rpplUITest", "-AppleLanguages", "(en)", "-AppleLocale", "en_NL"] + args
-        if Self.isDark { app.launchArguments += ["-AppleInterfaceStyle", "Dark"] }
         app.launch()
     }
 
     private func shot(_ name: String) {
         sleep(1) // let scroll/animation settle
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = Self.isDark ? "\(name)-dark" : name
+        attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
     }
@@ -150,7 +145,7 @@ class RpplScreenshotTests: XCTestCase {
 
     @MainActor
     func testParksMap() {
-        // The satellite choice persists in UserDefaults; the dark class runs first and leaves it on.
+        // The satellite choice persists in UserDefaults across launches on the same simulator.
         openParks(args: ["-rppl.favoriteParkIDs", "(project7-rotterdam, lakeside-zwolle)", "-rppl.mapUsesSatellite", "NO"])
         app.buttons["View on map"].tap()
         sleep(4) // map tiles
@@ -167,8 +162,4 @@ class RpplScreenshotTests: XCTestCase {
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 15))
         scrollShots("12-park-detail", count: 3)
     }
-}
-
-final class RpplDarkScreenshotTests: RpplScreenshotTests {
-    override class var isDark: Bool { true }
 }

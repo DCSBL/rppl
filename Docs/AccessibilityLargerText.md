@@ -1,6 +1,6 @@
 # Larger Text plan
 
-Status: planned, not started. Reduce Motion, Increased Contrast and Differentiate Without Color are done (see [Design language](DesignLanguage.md#accessibility)).
+Status: in progress, screen by screen. Reduce Motion, Increased Contrast and Differentiate Without Color are done (see [Design language](DesignLanguage.md#accessibility)).
 
 Goal: the phone app and Watch stay usable at the largest Dynamic Type sizes, so Rppl can claim "Larger Text" on its App Store accessibility label. Riding screens on the Watch are the priority: a rider glances at them mid-set.
 
@@ -8,17 +8,22 @@ Expect layouts to break at accessibility sizes. Do this as its own work, screen 
 
 ## 1. Fixed font sizes
 
-These do not scale with Dynamic Type today. Move each to a text style or `@ScaledMetric`, and cap where a fixed container makes scaling unsafe.
-
-| File | Size | Use |
-|------|------|-----|
-| `RpplWatch/Views/SessionControlsPage.swift` | 28 pt | Controls glyph |
-| `RpplWatch/Views/SessionSetUIPage.swift` | 9 pt | Riding view caption |
-| `Rppl/Parks/Editor/CableTraceView.swift` | 8 pt | Start flag in the point marker |
-
-Done on the phone for the Parks and map glyphs (text styles and `@ScaledMetric`, the iPhone Duo work); the Watch rows and the cable trace flag remain.
+Done: every font is a text style or an `@ScaledMetric` (the Watch controls glyph is capped at 40 pt, because its tile fills the page and cannot grow with it). The manual session count field and the sync status dots scale too.
 
 Rule of thumb: glyphs inside a fixed-size circle or pin scale with `@ScaledMetric` on both glyph and container; text never goes below `.caption2`.
+
+## 1a. Shared components
+
+Done, so every tile and card gets them:
+
+- `StatChip` wraps its value at accessibility sizes instead of staying on one line (`NW · 12 km/h` is wider than a tile there).
+- `MetricValue` puts the unit under the number at accessibility sizes; one line shrunk to 60 % is unreadable there. Its `.total` size stops at 56 pt.
+- `TileHeader` gets two lines at accessibility sizes.
+- `FlowLayout` wraps a chip that is wider than the row inside it.
+- `rpplPopoverContent(width:maxWidth:)`: an explanation popover is a scrolling sheet at accessibility sizes.
+- `AdaptiveStack`: an `HStack` that is a `VStack` at accessibility sizes (`dynamicTypeSize.isAccessibilitySize`). Use it for every row of two or more texts; `ViewThatFits` where the content is small and has a natural shorter form.
+
+Rules for the screen work: content never truncates (`lineLimit(1)` plus `minimumScaleFactor` only on decoration and the Watch hero); a row becomes a column; decoration (gauges, timeline bars, chart axes) may go from `.accessibility3` up while its text stays; no Dynamic Type cap in the app, only in the widgets, whose frame is fixed.
 
 ## 2. Layout audit
 

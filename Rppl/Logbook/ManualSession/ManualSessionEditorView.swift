@@ -266,6 +266,8 @@ struct ManualSessionEditorView: View {
 private struct CountField: View {
     let title: LocalizedStringKey
     @Binding var value: Int?
+    /// Room for three digits at any text size.
+    @ScaledMetric(relativeTo: .body) private var fieldWidth: CGFloat = 64
 
     /// "-" (nil, no data) sits one step below 0: -, 0, 1, 2, ...
     private var stepperValue: Binding<Int> {
@@ -283,7 +285,7 @@ private struct CountField: View {
                 TextField("-", value: $value, format: .number)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
-                    .frame(width: 64)
+                    .frame(width: fieldWidth)
             }
         }
         .onChange(of: value) { _, new in
