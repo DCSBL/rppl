@@ -233,7 +233,7 @@ enum ParkFormatting {
     }
 
     static func time(_ minutes: Int) -> String {
-        ParkSchedule.timeText(minutes: minutes)
+        ParkSchedule.displayTime(minutes: minutes)
     }
 
     /// The closing time of a window; `sunset` stays English in every locale and is not calculated.
@@ -246,7 +246,12 @@ enum ParkFormatting {
     }
 
     static func slot(_ slot: ParkSlot) -> String {
-        "\(slot.start) – \(slot.end)"
+        "\(clock(slot.start)) – \(clock(slot.end))"
+    }
+
+    /// A stored `HH:mm` in the reader's clock style; anything unreadable as written.
+    private static func clock(_ text: String) -> String {
+        ParkSchedule.minutes(text).map(time) ?? text
     }
 
     static func days(_ tokens: [String]?) -> String? {

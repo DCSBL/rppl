@@ -256,11 +256,11 @@ extension ParkWidgetState {
             let to = Self.end(window)
             return String(localized: "Open today until \(to)")
         case .opensToday(let window):
-            let from = ParkSchedule.timeText(minutes: window.startMinute)
+            let from = ParkSchedule.displayTime(minutes: window.startMinute)
             let to = Self.end(window)
             return String(localized: "Open today from \(from) to \(to)")
         case .opensTomorrow(let startMinute):
-            let from = ParkSchedule.timeText(minutes: startMinute)
+            let from = ParkSchedule.displayTime(minutes: startMinute)
             return String(localized: "Open tomorrow from \(from)")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
         case .closed: return String(localized: "Closed")
@@ -275,6 +275,6 @@ extension ParkWidgetState {
 
     /// `sunset` stays English in every locale and is not calculated (Docs/Parks.md).
     static func end(_ window: ParkTimeWindow) -> String {
-        window.endsAtSunset ? "sunset" : ParkSchedule.timeText(minutes: window.endMinute)
+        window.endsAtSunset ? "sunset" : ParkSchedule.displayTime(minutes: window.endMinute)
     }
 }
