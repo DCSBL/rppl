@@ -48,6 +48,8 @@ jobs:
           fi
           # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
           changed="$(git diff --name-only "$BASE...$HEAD")"
+          # Park YAML is checked by parks-validate.yml and the Core tests, not by simulator runs.
+          changed="$(printf '%s\n' "$changed" | grep -Ev '^RpplCore/Sources/RpplCore/Resources/Parks/.*\.ya?ml$' || true)"
           if printf '%s\n' "$changed" | grep -Eq '^(Rppl/|RpplWatch/|RpplWidgets/|RpplCore/|RpplUITests/|RpplWatchUITests/|Rppl\.xcodeproj/|scripts/ci/|\.github/workflows/ui-matrix\.yml$)'; then
             echo "ui=true" >> "$GITHUB_OUTPUT"
           else

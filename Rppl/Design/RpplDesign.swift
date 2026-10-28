@@ -69,7 +69,7 @@ enum MetricKind: CaseIterable, Equatable {
     }
 }
 
-/// Renders a metric's icon: the MDI ski-water glyph for `.riding`, an SF Symbol otherwise.
+/// Renders a metric's icon: the wakeboard glyph for `.riding`, an SF Symbol otherwise.
 /// `systemImage` lets call sites that already resolved `MetricKind.systemImage` skip re-deriving it.
 struct MetricIcon: View {
     var metric: MetricKind?
@@ -87,7 +87,7 @@ struct MetricIcon: View {
 
     var body: some View {
         if metric == .riding {
-            MDIIconView(icon: .skiWater)
+            WakeboardIcon()
                 .frame(width: 14, height: 14)
         } else {
             Image(systemName: systemImage)
@@ -99,6 +99,17 @@ extension DynamicTypeSize {
     /// From here decoration goes: gauges, timeline bars and chart axes, whose text stays beside them. The
     /// smaller accessibility sizes still have room for them.
     var hidesDecoration: Bool { self >= .accessibility3 }
+}
+
+/// The wakeboarder glyph as a template vector asset. The `activity-*` set is adapted from Material Design Icons
+/// `ski-water` (see LEGAL.md).
+struct WakeboardIcon: View {
+    var body: some View {
+        Image("activity-wakeboard")
+            .resizable()
+            .scaledToFit()
+            .accessibilityLabel(Text("Wakeboarding"))
+    }
 }
 
 /// See `rpplPopoverContent(width:maxWidth:)`.

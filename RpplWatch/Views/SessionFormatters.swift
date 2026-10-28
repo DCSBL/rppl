@@ -3,39 +3,21 @@ import RpplCore
 
 enum SessionFormatters {
     static func elapsed(_ interval: TimeInterval) -> String {
-        let totalSeconds = max(0, Int(interval.rounded()))
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        }
-        return String(format: "%02d:%02d", minutes, seconds)
+        let duration = wholeSeconds(interval)
+        return duration < .seconds(3600)
+            ? duration.formatted(.time(pattern: .minuteSecond(padMinuteToLength: 2)))
+            : duration.formatted(.time(pattern: .hourMinuteSecond))
     }
 
     static func segmentDuration(_ interval: TimeInterval) -> String {
-        let totalSeconds = max(0, Int(interval.rounded()))
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        if minutes >= 60 {
-            let hours = minutes / 60
-            let remainingMinutes = minutes % 60
-            return String(format: "%d:%02d:%02d", hours, remainingMinutes, seconds)
-        }
-        return String(format: "%d:%02d", minutes, seconds)
+        let duration = wholeSeconds(interval)
+        return duration < .seconds(3600)
+            ? duration.formatted(.time(pattern: .minuteSecond))
+            : duration.formatted(.time(pattern: .hourMinuteSecond))
     }
 
-    /// Watch set rows — explicit minute/second units.
-    static func rideDuration(_ interval: TimeInterval) -> String {
-        let totalSeconds = max(0, Int(interval.rounded()))
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        if minutes >= 60 {
-            let hours = minutes / 60
-            let remainingMinutes = minutes % 60
-            return String(format: "%dh %dm %ds", hours, remainingMinutes, seconds)
-        }
-        return String(format: "%dm %ds", minutes, seconds)
+    private static func wholeSeconds(_ interval: TimeInterval) -> Duration {
+        .seconds(max(0, Int(interval.rounded())))
     }
 
     static func distance(_ meters: Double) -> String {

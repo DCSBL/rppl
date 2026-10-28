@@ -138,7 +138,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ### Material Design Icons
 
-The wakeboarder symbol ("ski-water") comes from Material Design Icons by Pictogrammers and its contributors, and is used unchanged. Licensed under the Apache License, Version 2.0. You can read the license at [apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+The wakeboard, waterski, kneeboard, wakeskate and monoski symbols are adapted from the "ski-water" icon in Material Design Icons by Pictogrammers and its contributors. Rppl redrew the board, legs and pose for each activity. Licensed under the Apache License, Version 2.0. You can read the license at [apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 ### Poppins
 

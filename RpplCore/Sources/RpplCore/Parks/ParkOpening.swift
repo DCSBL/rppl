@@ -512,6 +512,17 @@ public enum ParkSchedule {
         return String(format: "%02d:%02d", wrapped / 60, wrapped % 60)
     }
 
+    /// A minute of the day as the reader's clock shows it (`18:00`, `6:00 PM`). Formatted in UTC so a
+    /// daylight saving day can never shift it. `timeText` stays the stored `HH:mm`.
+    public static func displayTime(minutes: Int, locale: Locale = .autoupdatingCurrent) -> String {
+        let wrapped = ((minutes % 1440) + 1440) % 1440
+        let utc = TimeZone(secondsFromGMT: 0) ?? .gmt
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = utc
+        let style = Date.FormatStyle(date: .omitted, time: .shortened, locale: locale, calendar: calendar, timeZone: utc)
+        return Date(timeIntervalSinceReferenceDate: TimeInterval(wrapped * 60)).formatted(style)
+    }
+
     /// A calendar day in the park's time zone, with the selector matching rules and slots share.
     private struct DayContext {
         let isoDate: String
