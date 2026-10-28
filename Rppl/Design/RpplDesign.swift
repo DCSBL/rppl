@@ -1,3 +1,4 @@
+import RpplCore
 import SwiftUI
 
 /// Shared layout + color tokens for the tile-based UI. See Docs/DesignLanguage.md.
@@ -99,6 +100,12 @@ extension DynamicTypeSize {
     /// From here decoration goes: gauges, timeline bars and chart axes, whose text stays beside them. The
     /// smaller accessibility sizes still have room for them.
     var hidesDecoration: Bool { self >= .accessibility3 }
+
+    /// The tier `WindowLayout` resolves with.
+    var windowTextSize: WindowLayout.TextSize {
+        if self >= .accessibility4 { return .largestAccessibility }
+        return isAccessibilitySize ? .accessibility : .standard
+    }
 }
 
 /// The wakeboarder glyph as a template vector asset. The `activity-*` set is adapted from Material Design Icons

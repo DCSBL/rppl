@@ -39,7 +39,7 @@ struct LogbookView: View {
     }
 
     private var layout: WindowLayout {
-        WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
+        WindowLayout.resolve(width: Double(windowWidth), textSize: dynamicTypeSize.windowTextSize)
     }
 
     var body: some View {
