@@ -604,6 +604,8 @@ struct ParksView: View {
                 }
             }
             .id(detailStackToken)
+            // Beside the list the detail swaps in place, as in any split view; only collapsed does it slide in.
+            .transaction { $0.disablesAnimations = true }
         }
     }
 
