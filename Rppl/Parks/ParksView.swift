@@ -490,11 +490,8 @@ struct ParksView: View {
 
     /// Sort picker (or the search field) and filters, in a bar under the navigation bar: the list scrolls under it
     /// with the system's edge effect, and the large title collapses as with any list.
-    @ViewBuilder
     private func filterHeader(hasParks: Bool) -> some View {
-        if showSearch || !useAccessibilityLayout {
-            filterHeaderContent(hasParks: hasParks)
-        }
+        filterHeaderContent(hasParks: hasParks)
     }
 
     private func filterHeaderContent(hasParks: Bool) -> some View {
@@ -507,6 +504,17 @@ struct ParksView: View {
                     onSubmit: { if showsMapInList { placeSearchToken += 1 } }
                 )
                     .transition(.move(edge: .top).combined(with: .opacity))
+            } else if useAccessibilityLayout {
+                // Two icon-only menus instead of the segments and pills: a short header, and nothing
+                // added to the navigation bar, where more buttons squeeze the title out in landscape.
+                HStack(spacing: 12) {
+                    sortMenu
+                    if hasParks { filterMenu }
+                }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 sortPicker.pickerStyle(.segmented)
             }
@@ -609,7 +617,7 @@ struct ParksView: View {
         }
     }
 
-    /// Accessibility sizes: the sort picker as a bar menu.
+    /// Accessibility sizes: the sort picker as a menu button.
     private var sortMenu: some View {
         Menu {
             sortPicker
@@ -618,7 +626,7 @@ struct ParksView: View {
         }
     }
 
-    /// Accessibility sizes: the filter pills as one bar menu; the icon fills while a filter is on.
+    /// Accessibility sizes: the filter pills as one menu button; the icon fills while a filter is on.
     private var filterMenu: some View {
         Menu {
             Toggle("Open today", systemImage: "clock", isOn: Binding(
@@ -670,19 +678,11 @@ struct ParksView: View {
         if showsMapInList {
             // Search first, as on the list; it opens the same field in the header.
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if useAccessibilityLayout {
-                    sortMenu
-                    if hasParks { filterMenu }
-                }
                 searchButton
             }
             MapScreenToolbar(usesSatellite: $mapUsesSatellite, locate: recenterOnUser)
         } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if useAccessibilityLayout {
-                    sortMenu
-                    if hasParks { filterMenu }
-                }
                 if hasParks {
                     searchButton
                 }
