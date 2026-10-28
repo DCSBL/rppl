@@ -230,7 +230,7 @@ struct SessionSetUIPage: View {
             if let caption {
                 // Says which speed this is, right under the value it describes.
                 Text(caption)
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .textCase(.uppercase)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)

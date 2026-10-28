@@ -105,3 +105,34 @@ struct WakeboardIcon: View {
             .accessibilityLabel(Text("Wakeboarding"))
     }
 }
+
+/// See `rpplPopoverContent(width:maxWidth:)`.
+private struct PopoverContent: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let width: CGFloat?
+    let maxWidth: CGFloat?
+
+    func body(content: Content) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            ScrollView {
+                content.frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .presentationDetents([.medium, .large])
+            .presentationBackground(Color.rpplBackground)
+        } else {
+            content
+                .frame(width: width)
+                .frame(maxWidth: maxWidth)
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+extension View {
+    /// The content of a `popover`: a popover of the given width on a phone, as the system would do on iPad. At
+    /// accessibility text sizes the same content is a sheet that scrolls instead: a paragraph at those sizes
+    /// is taller than the screen, and a popover never scrolls.
+    func rpplPopoverContent(width: CGFloat? = nil, maxWidth: CGFloat? = nil) -> some View {
+        modifier(PopoverContent(width: width, maxWidth: maxWidth))
+    }
+}

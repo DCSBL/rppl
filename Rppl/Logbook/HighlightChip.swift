@@ -31,8 +31,7 @@ struct HighlightChip: View {
             Text(explanation)
                 .font(.footnote)
                 .padding()
-                .frame(maxWidth: 260)
-                .presentationCompactAdaptation(.popover)
+                .rpplPopoverContent(maxWidth: 260)
         }
     }
 }

@@ -19,12 +19,11 @@ struct ParksMapView: View {
     /// (`placeSearchToken`) looks the text up as a place and moves there.
     var placeQuery = ""
     var placeSearchToken = 0
-    /// Beside the list a tapped pin selects the park there; otherwise it pushes the detail.
-    var onSelectPark: ((Park) -> Void)?
+    /// A tapped pin opens the park through the parent's split view selection.
+    let onSelectPark: (Park) -> Void
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var selectedID: String?
-    @State private var detailPark: Park?
     @State private var searchFailed = false
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = false
     @State private var searchPin: ParksSearchPin?
@@ -57,14 +56,6 @@ struct ParksMapView: View {
         }
     }
 
-    private func open(_ park: Park) {
-        if let onSelectPark {
-            onSelectPark(park)
-        } else {
-            detailPark = park
-        }
-    }
-
     var body: some View {
         map
             .onChange(of: placeSearchToken) { _, _ in
@@ -76,10 +67,7 @@ struct ParksMapView: View {
             .onChange(of: selectedID) { _, id in
                 guard let id, let park = parks.first(where: { $0.id == id }) else { return }
                 selectedID = nil
-                open(park)
-            }
-            .navigationDestination(item: $detailPark) { park in
-                ParkDetailContainer(park: park)
+                onSelectPark(park)
             }
             .alert(Text("No place found"), isPresented: $searchFailed) {
                 Button("OK", role: .cancel) {}

@@ -53,8 +53,7 @@ final class WatchSessionCatalog {
     }
 
     nonisolated private static func loadEntries(store: SessionFileStore) throws -> [WatchSessionEntry] {
-        let manifests = try store.listSessionIDs()
-            .compactMap { try? store.readManifest(sessionId: $0) }
+        let manifests = try store.listReadableManifests()
             .filter { $0.transferState != .recording }
             .sorted { $0.startedAt > $1.startedAt }
 

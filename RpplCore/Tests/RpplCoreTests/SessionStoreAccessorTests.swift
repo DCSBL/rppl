@@ -61,6 +61,22 @@ struct SessionStoreAccessorTests {
         }
     }
 
+    @Test func scanCarriesTheManifestAndIgnoresTheDerivedView() throws {
+        let session = try TempSession.make(state: .readyToTransfer)
+        defer { session.cleanup() }
+        // A scan must not pay for (or depend on) the derived view: garbage there is fine.
+        let derived = try session.directory.appendingPathComponent("derived", isDirectory: true)
+        try FileManager.default.createDirectory(at: derived, withIntermediateDirectories: true)
+        try Data("{not-json".utf8).write(to: derived.appendingPathComponent("view.json"))
+
+        let entry = try #require(SessionPackageLocator.index(in: session.root)[session.sessionId])
+        let stored = try session.store.readManifest(sessionId: session.sessionId)
+        #expect(entry.manifest == stored)
+        #expect(entry.startedAt == Samples.t0)
+        #expect(try session.store.listReadableManifests().map(\.sessionId) == [session.sessionId])
+        #expect(try session.store.sessionsNeedingTransfer().map(\.sessionId) == [session.sessionId])
+    }
+
     @Test func locatingRejectsIdsThatCouldEscapeTheRoot() throws {
         let session = try TempSession.make()
         defer { session.cleanup() }
