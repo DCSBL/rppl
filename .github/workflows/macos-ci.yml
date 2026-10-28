@@ -255,7 +255,8 @@ jobs:
 
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
       # Rppl/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
-      # build); release-screenshots.yml does the same for releases.
+      # build); release-screenshots.yml does the same for releases. Screenshots go to the one
+      # `screenshots` artifact, see `layouts-merge`.
       - name: xcodebuild test (RpplUITests)
         shell: bash
         run: |
@@ -295,35 +296,16 @@ jobs:
 
       - name: Export screenshots
         if: ${{ !cancelled() }}
-        run: python3 scripts/ci/export_screenshots.py RpplUITests.xcresult screenshots
+        run: python3 scripts/ci/export_screenshots.py RpplUITests.xcresult out/iphone
 
       - name: Upload screenshots
-        id: screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: screenshots
-          path: screenshots/*.png
+          name: shots-iphone
+          path: out
           if-no-files-found: ignore
-          retention-days: 14
-
-      # Fork PRs get a read-only token, so they only get the artifact.
-      - name: Comment screenshot link
-        if: ${{ !cancelled() && steps.screenshots.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
-          ARTIFACT_URL: ${{ steps.screenshots.outputs.artifact-url }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          marker='<!-- ui-screenshots -->'
-          printf '%s\n### UI screenshots (mock data)\n\n[Download the screenshots](%s) · `%s`\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
-          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
-          if [ -n "$id" ]; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
-          else
-            gh pr comment "$PR" --body-file comment.md
-          fi
+          retention-days: 1
 
       - name: Upload result
         if: ${{ !cancelled() }}
@@ -357,8 +339,7 @@ jobs:
           path: ${{ runner.temp }}
 
       # Seeded mock logbook + frozen clock: the app reads `-rpplUITest` (Debug only), see
-      # RpplWatch/App/UITestFixtures.swift. The screenshot test runs here too (about a minute, no extra
-      # build); release-screenshots.yml does the same for releases.
+      # RpplWatch/App/UITestFixtures.swift. The screenshots come from the `watch-devices` cells.
       - name: xcodebuild test (RpplWatchUITests)
         shell: bash
         run: |
@@ -386,38 +367,6 @@ jobs:
             > warm-up.log 2>&1 || echo "::warning::Watch warm-up test failed (see warm-up.log in watch-ui-tests-result)"
           XCTESTRUN="$xctestrun" bash scripts/ci/run_watch_ui_tests.sh "$udid" RpplWatchUITests.xcresult watch-ui-tests.log
 
-      - name: Export screenshots
-        if: ${{ !cancelled() }}
-        run: python3 scripts/ci/export_screenshots.py RpplWatchUITests.xcresult screenshots
-
-      - name: Upload screenshots
-        id: screenshots
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: watch-screenshots
-          path: screenshots/*.png
-          if-no-files-found: ignore
-          retention-days: 14
-
-      # Fork PRs get a read-only token, so they only get the artifact.
-      - name: Comment screenshot link
-        if: ${{ !cancelled() && steps.screenshots.outputs.artifact-url && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
-          ARTIFACT_URL: ${{ steps.screenshots.outputs.artifact-url }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          marker='<!-- watch-ui-screenshots -->'
-          printf '%s\n### Watch UI screenshots (mock data)\n\n[Download the screenshots](%s) · `%s`\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
-          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
-          if [ -n "$id" ]; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
-          else
-            gh pr comment "$PR" --body-file comment.md
-          fi
-
       - name: Upload result
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -431,13 +380,87 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # Watch screenshots on the newest regular Watch and the newest Ultra. Only the screenshot class runs here
+  # (the whole suite already runs in `watch-ui-tests`); products come from the one build.
+  watch-devices:
+    name: Watch screenshots ${{ matrix.variant }}
+    needs: [build, changes]
+    if: needs.changes.outputs.watch == 'true'
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { variant: series11, device: "Apple Watch Series 11 (46mm)" }
+          - { variant: ultra3, device: "Apple Watch Ultra 3 (49mm)" }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
+      - name: xcodebuild test (RpplWatchScreenshotTests)
+        shell: bash
+        env:
+          DEVICE: ${{ matrix.device }}
+        run: |
+          set -euo pipefail
+          xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" watchsimulator)"
+          udid="$(python3 scripts/ci/pick_simulator.py "$DEVICE")"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          # Warm-up, see watch-ui-tests: the first launch on a cold watch simulator hangs.
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "platform=watchOS Simulator,id=${udid}" \
+            -only-testing:RpplWatchUITests/RpplWatchScreenshotTests/testStartPage \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 240 \
+            > warm-up.log 2>&1 || echo "::warning::Watch warm-up test failed (see warm-up.log in the result artifact)"
+          XCTESTRUN="$xctestrun" ONLY_TESTING=RpplWatchUITests/RpplWatchScreenshotTests \
+            bash scripts/ci/run_watch_ui_tests.sh "$udid" Watch.xcresult watch-screenshots.log
+
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: python3 scripts/ci/export_screenshots.py Watch.xcresult "out/watch/$VARIANT"
+
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: shots-watch-${{ matrix.variant }}
+          path: out
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-watch-${{ matrix.variant }}
+          path: |
+            watch-screenshots.log
+            watch-screenshots.log.attempt1
+            warm-up.log
+            Watch.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
   # Layout screenshots for wide and rotated windows, the stand-in for iPhone Duo until a real device or
   # the Duo simulator is on the runners: iPad (regular width, live window resizing) and iPhone landscape,
   # portrait and landscape, at the default and the largest accessibility text size. Was its own workflow
   # (ui-layout-screenshots.yml); it lives here so the four cells reuse the build instead of compiling
   # four more times. Runs RpplLayoutScreenshotTests only (it skips itself without RPPL_LAYOUT_SHOTS, so
-  # the other UI jobs never run it). Output: one artifact `layout-screenshots` with
-  # <device>-<text>/<screenshot>.png, linked in a PR comment.
+  # the other UI jobs never run it). The promax-default cell also runs RpplDuoScreenshotTests (iPhone Duo
+  # stand-in, folded and unfolded). Output: layouts/<variant>/ and duo/, merged by `layouts-merge`.
   layouts:
     name: Layout screenshots ${{ matrix.variant }}
     needs: [build, changes]
@@ -450,7 +473,7 @@ jobs:
         include:
           - { variant: ipad-default, device: "iPad Pro 13-inch (M5)", text: large }
           - { variant: ipad-ax5, device: "iPad Pro 13-inch (M5)", text: accessibility-extra-extra-extra-large }
-          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large }
+          - { variant: promax-default, device: "iPhone 17 Pro Max", text: large, duo: "1" }
           - { variant: promax-ax5, device: "iPhone 17 Pro Max", text: accessibility-extra-extra-extra-large }
     steps:
       - name: Checkout
@@ -468,6 +491,7 @@ jobs:
           DEVICE: ${{ matrix.device }}
           TEXT: ${{ matrix.text }}
           TEST_RUNNER_RPPL_LAYOUT_SHOTS: "1"
+          TEST_RUNNER_RPPL_DUO_SHOTS: ${{ matrix.duo }}
         run: |
           set -euo pipefail
           xctestrun="$(bash scripts/ci/unpack_test_products.sh "$RUNNER_TEMP/test-products.tar" "$RUNNER_TEMP/Products" iphonesimulator)"
@@ -485,10 +509,13 @@ jobs:
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 300 \
             > warm-up.log 2>&1 || echo "::warning::UI warm-up test failed (see warm-up.log in the result artifact)"
+          # Only the Duo cell sets RPPL_DUO_SHOTS; elsewhere that test class would skip itself anyway.
+          DUO_TEST=""; [ -n "${TEST_RUNNER_RPPL_DUO_SHOTS:-}" ] && DUO_TEST="-only-testing:RpplUITests/RpplDuoScreenshotTests"
           xcodebuild test-without-building \
             -xctestrun "$xctestrun" \
             -destination "platform=iOS Simulator,id=${udid}" \
             -only-testing:RpplUITests/RpplLayoutScreenshotTests \
+            ${DUO_TEST} \
             -retry-tests-on-failure \
             -test-iterations 2 \
             -parallel-testing-enabled NO \
@@ -503,14 +530,19 @@ jobs:
           VARIANT: ${{ matrix.variant }}
         run: |
           python3 scripts/ci/export_screenshots.py Layouts.xcresult screenshots
-          mkdir -p "out/$VARIANT"
-          cp screenshots/*.png "out/$VARIANT/"
+          mkdir -p "out/layouts/$VARIANT"
+          cp screenshots/layout-*.png "out/layouts/$VARIANT/"
+          # Duo shots are the ones without the layout- prefix.
+          if ls screenshots/* | grep -qv '/layout-'; then
+            mkdir -p out/duo
+            for f in screenshots/*.png; do case "$(basename "$f")" in layout-*) ;; *) cp "$f" out/duo/ ;; esac; done
+          fi
 
       - name: Upload screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: shots-layout-${{ matrix.variant }}
+          name: shots-layouts-${{ matrix.variant }}
           path: out
           if-no-files-found: ignore
           retention-days: 1
@@ -527,10 +559,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # One screenshot bundle per run instead of one artifact per job: screenshots.zip ->
+  # iphone/, watch/<device>/, layouts/<variant>/ and duo/. The job name is pinned by the ruleset.
   layouts-merge:
     name: Merge layout screenshots
-    needs: [changes, layouts]
-    if: ${{ !cancelled() && needs.changes.outputs.phone == 'true' }}
+    needs: [changes, ui-tests, watch-devices, layouts]
+    if: ${{ !cancelled() && (needs.changes.outputs.phone == 'true' || needs.changes.outputs.watch == 'true') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -539,7 +573,7 @@ jobs:
       - name: Download cell screenshots
         uses: actions/download-artifact@v8
         with:
-          pattern: shots-layout-*
+          pattern: shots-*
           path: merged
           merge-multiple: true
 
@@ -547,7 +581,7 @@ jobs:
         id: bundle
         uses: actions/upload-artifact@v7
         with:
-          name: layout-screenshots
+          name: screenshots
           path: merged
           if-no-files-found: warn
           retention-days: 14
@@ -561,17 +595,22 @@ jobs:
           ARTIFACT_URL: ${{ steps.bundle.outputs.artifact-url }}
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          marker='<!-- layout-screenshots -->'
-          printf '%s\n### Layout screenshots (iPad and iPhone, portrait and landscape)\n\n[Download the zip](%s) · `%s`\n\nFolders: `<device>-<text>/layout-<screen>-<orientation>.png` (`ipad`/`promax`, `default`/`ax5`).\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
+          marker='<!-- screenshots -->'
+          printf '%s\n### Screenshots (mock data)\n\n[Download the zip](%s) · `%s`\n\n- `iphone/`: the app on the default iPhone\n- `watch/<series11|ultra3>/`: the Watch app\n- `layouts/<ipad|promax>-<default|ax5>/`: wide and rotated windows, portrait and landscape\n- `duo/`: iPhone Duo stand-in (17 Pro Max), folded and unfolded\n' "$marker" "$ARTIFACT_URL" "${SHA:0:7}" > comment.md
+          # Older runs left one comment per artifact; drop them so the PR keeps this single one.
+          for old in '<!-- ui-screenshots -->' '<!-- watch-ui-screenshots -->' '<!-- layout-screenshots -->' '<!-- ui-matrix-screenshots -->'; do
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$old\")) | .id" |
+              while read -r oid; do gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$oid" >/dev/null || true; done
+          done
           id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
           else
-            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file comment.md
+            gh pr comment "$PR" --body-file comment.md
           fi
 
-      - name: Fail if any cell failed
-        if: ${{ contains(needs.*.result, 'failure') }}
+      - name: Fail if any layout cell failed
+        if: ${{ needs.layouts.result == 'failure' }}
         run: |
           echo "A layout cell failed; see the cell logs."
           exit 1
