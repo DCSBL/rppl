@@ -22,8 +22,44 @@ public enum ParkCatalog {
     }
 
     public static func loadBundled() -> [Park] {
-        let urls = bundledYAMLURLs(subdirectory: "Parks") + bundledYAMLURLs(subdirectory: nil)
-        return loadFiles(urls)
+        ParsedLayerCache.shared.bundled {
+            let urls = bundledYAMLURLs(subdirectory: "Parks") + bundledYAMLURLs(subdirectory: nil)
+            return loadFiles(urls)
+        }
+    }
+
+    /// Parsed park layers that do not change behind the app's back, kept per process: the
+    /// bundle is immutable, and an OTA install always moves a fresh directory into place (new
+    /// modification date). Parsing the ~80 bundled YAML files took long enough to delay the
+    /// first frame of a session detail; it now happens once. User files are never cached.
+    private final class ParsedLayerCache: @unchecked Sendable {
+        static let shared = ParsedLayerCache()
+        private let lock = NSLock()
+        private var bundledParks: [Park]?
+        private var directoryKey: (path: String, modified: Date?)?
+        private var directoryParks: [Park] = []
+
+        func bundled(_ parse: () -> [Park]) -> [Park] {
+            lock.lock()
+            defer { lock.unlock() }
+            if let bundledParks { return bundledParks }
+            let parks = parse()
+            bundledParks = parks
+            return parks
+        }
+
+        func directory(_ url: URL, _ parse: () -> [Park]) -> [Park] {
+            let modified = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+            lock.lock()
+            defer { lock.unlock() }
+            if let directoryKey, directoryKey.path == url.path, directoryKey.modified == modified {
+                return directoryParks
+            }
+            let parks = parse()
+            directoryKey = (url.path, modified)
+            directoryParks = parks
+            return parks
+        }
     }
 
     private static func bundledYAMLURLs(subdirectory: String?) -> [URL] {
@@ -51,7 +87,8 @@ public enum ParkCatalog {
             base[park.id] = ParkEntry(park: park, origin: .bundled)
         }
         guard let otaDirectory else { return base }
-        for park in loadDirectory(otaDirectory) {
+        let otaParks = ParsedLayerCache.shared.directory(otaDirectory) { loadDirectory(otaDirectory) }
+        for park in otaParks {
             if let bundled = base[park.id]?.park, bundled.isRevisionNewer(than: park) { continue }
             base[park.id] = ParkEntry(park: park, origin: .ota)
         }

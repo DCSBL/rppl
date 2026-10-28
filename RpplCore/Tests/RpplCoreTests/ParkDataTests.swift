@@ -274,6 +274,22 @@ struct ParkDataTests {
         #expect(ParkCatalog.load(userRoot: userRoot, otaDirectory: dir).first { $0.id == bundled.id }?.name == "My Name")
     }
 
+    @Test func reinstalledOtaDataReplacesTheCachedLayer() throws {
+        let ota = tempStore()
+        defer { ota.removeAll() }
+        let first = yaml(id: "cache-park", name: "First")
+        try ota.install(manifest: makeManifest(version: 1, parks: [("cache-park", first)]), files: ["cache-park.yaml": first])
+        #expect(ParkCatalog.load(userRoot: nil, otaDirectory: ota.activeDirectory()).first { $0.id == "cache-park" }?.name == "First")
+        // A second read of the same install comes from the cache, so the parks must match exactly.
+        #expect(ParkCatalog.loadBundled() == ParkCatalog.loadBundled())
+
+        // Same version re-installed into the same directory name: a fresh directory, so the
+        // cached layer is replaced, not reused.
+        let second = yaml(id: "cache-park", name: "Second")
+        try ota.install(manifest: makeManifest(version: 1, parks: [("cache-park", second)]), files: ["cache-park.yaml": second])
+        #expect(ParkCatalog.load(userRoot: nil, otaDirectory: ota.activeDirectory()).first { $0.id == "cache-park" }?.name == "Second")
+    }
+
     @Test func newerBundledDataBeatsOlderOta() throws {
         let bundled = try #require(ParkCatalog.loadBundled().first { $0.updatedAt != nil })
         let ota = tempStore()
