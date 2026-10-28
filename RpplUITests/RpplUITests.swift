@@ -131,8 +131,9 @@ final class RpplUITests: XCTestCase {
         XCTAssertGreaterThan(distance.frame.height, 50)
 
         // Accessibility text sizes swap the segments for a menu: open it, then pick the entry.
-        if !app.buttons["Duration"].exists, app.buttons["Distance"].firstMatch.exists {
-            app.buttons["Distance"].firstMatch.tap()
+        let metricMenu = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Distance & duration")).firstMatch
+        if metricMenu.exists {
+            metricMenu.tap()
         }
         app.buttons["Duration"].tap()
         XCTAssertEqual(chart("season-duration-chart").value as? String, "18")
