@@ -112,7 +112,7 @@ final class RpplScreenshotTests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Parks"].waitForExistence(timeout: 30))
         app.tabBars.buttons["Parks"].tap()
         // Nearby needs a location permission; the visit-sorted list works without one.
-        app.buttons["Most visited"].tap()
+        app.chooseParksSort("Most visited")
         // The list can build late on a slow runner or sit below a tall header at large text: wait, then scroll to it.
         let found = card("Project 7").waitForExistence(timeout: 15) || app.scrollToElement(card("Project 7"))
         if !found {
@@ -138,7 +138,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testParksFavorites() {
         openParks(args: ["-rppl.favoriteParkIDs", "(project7-rotterdam, lakeside-zwolle, wakepark-groningen)"])
         shot("08-parks-starred")
-        app.buttons["Favourites"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() // SwiftUI reports the pill as not hittable
+        app.toggleParksFilter("Favourites")
         XCTAssertTrue(card("Project 7").waitForExistence(timeout: 15))
         shot("09-parks-favorites")
     }
@@ -147,7 +147,7 @@ final class RpplScreenshotTests: XCTestCase {
     func testParksMap() {
         // The satellite choice persists in UserDefaults across launches on the same simulator.
         openParks(args: ["-rppl.favoriteParkIDs", "(project7-rotterdam, lakeside-zwolle)", "-rppl.mapUsesSatellite", "NO"])
-        app.buttons["View on map"].tap()
+        app.chooseParksSort("View on map")
         sleep(4) // map tiles
         shot("10-parks-map")
         app.buttons["Show satellite map"].tap()

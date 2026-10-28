@@ -39,7 +39,7 @@ struct LogbookView: View {
     }
 
     private var layout: WindowLayout {
-        WindowLayout.resolve(width: Double(windowWidth), isAccessibilityTextSize: useAccessibilityLayout)
+        WindowLayout.resolve(width: Double(windowWidth), textSize: dynamicTypeSize.windowTextSize)
     }
 
     var body: some View {
@@ -333,6 +333,8 @@ struct LogbookView: View {
                     }
             }
             .id(detailStackToken)
+            // Beside the list the detail swaps in place, as in any split view; only collapsed does it slide in.
+            .transaction { $0.disablesAnimations = true }
         }
     }
 

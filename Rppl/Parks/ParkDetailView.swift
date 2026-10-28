@@ -3,6 +3,7 @@ import RpplCore
 import SwiftUI
 
 struct ParkDetailView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let park: Park
     let entry: ParkEntry?
     let isFavorite: Bool
@@ -244,16 +245,22 @@ struct ParkDetailView: View {
                 Text("This park was updated in the app since you edited it. Keep your version or switch to the app version?")
                     .font(.subheadline)
                     .foregroundStyle(Color.rpplMuted)
-                HStack {
-                    Button("Keep my version") { ParkStore.shared.keepMine(entry) }
-                        .buttonStyle(.bordered)
-                    Button("Use app version") { ParkStore.shared.removeUserVersion(id: entry.id) }
-                        .buttonStyle(.borderedProminent)
+                ViewThatFits(in: .horizontal) {
+                    HStack { updateButtons(entry) }
+                    VStack(alignment: .leading) { updateButtons(entry) }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .logbookCardChrome()
         }
+    }
+
+    @ViewBuilder
+    private func updateButtons(_ entry: ParkEntry) -> some View {
+        Button("Keep my version") { ParkStore.shared.keepMine(entry) }
+            .buttonStyle(.bordered)
+        Button("Use app version") { ParkStore.shared.removeUserVersion(id: entry.id) }
+            .buttonStyle(.borderedProminent)
     }
 
     // MARK: Cards
@@ -573,7 +580,7 @@ struct ParkDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionTitle("Upcoming changes")
                     ForEach(occurrences) { occurrence in
-                        HStack(alignment: .firstTextBaseline) {
+                        AdaptiveStack(rowAlignment: .firstTextBaseline) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(ParkFormatting.exceptionDate(occurrence.date, in: park))
                                     .font(.subheadline)
@@ -587,7 +594,7 @@ struct ParkDetailView: View {
                                         .foregroundStyle(Color.rpplMuted)
                                 }
                             }
-                            Spacer(minLength: 8)
+                            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
                             if !occurrence.windows.isEmpty {
                                 Text(occurrence.windows.map(ParkFormatting.window).joined(separator: ", "))
                                     .font(.subheadline)
@@ -632,10 +639,10 @@ struct ParkDetailView: View {
                 .foregroundStyle(isCurrent ? Color.rpplAccent : Color.rpplText)
             ForEach(Array(entry.lines.enumerated()), id: \.offset) { _, line in
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .firstTextBaseline) {
+                    AdaptiveStack(rowAlignment: .firstTextBaseline) {
                         Text(lineTitle(line))
                             .foregroundStyle(Color.rpplText)
-                        Spacer(minLength: 8)
+                        if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
                         Text("\(line.open) – \(line.close)")
                             .monospacedDigit()
                             .foregroundStyle(Color.rpplText)
@@ -661,7 +668,7 @@ struct ParkDetailView: View {
             if !slots.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionTitle("Blocks")
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 8) {
                         ForEach(slots, id: \.id) { slot in
                             blockTile(slot, highlighted: todayIds.contains(slot.id))
                         }
@@ -688,8 +695,8 @@ struct ParkDetailView: View {
             Text(ParkFormatting.slot(slot))
                 .font(.subheadline.bold())
                 .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.7)
                 .foregroundStyle(highlighted ? Color.rpplAccent : Color.rpplText)
             if let label = slotLabel(slot) {
                 Text(label)
@@ -742,13 +749,13 @@ struct ParkDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle("Contact")
                 if let phone = park.phone, let phoneURL {
-                    Link(destination: phoneURL) { contactRow(phone, systemImage: "phone") }
+                    Link(destination: phoneURL) { contactRow(phone, short: "Call", systemImage: "phone") }
                 }
                 if let email = park.email, let mailURL {
-                    Link(destination: mailURL) { contactRow(email, systemImage: "envelope") }
+                    Link(destination: mailURL) { contactRow(email, short: "Mail", systemImage: "envelope") }
                 }
                 if let website = park.website, let webURL {
-                    Link(destination: webURL) { contactRow(website, systemImage: "safari") }
+                    Link(destination: webURL) { contactRow(website, short: "Website", systemImage: "safari") }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -774,20 +781,21 @@ struct ParkDetailView: View {
     @ViewBuilder
     private func priceRow(_ price: ParkPrice) -> some View {
         let options = price.options.filter { $0.amount != nil }
+        // The amount sits under the name at accessibility sizes.
         if options.count == 1, let only = options.first, only.per == nil {
-            HStack(alignment: .firstTextBaseline) {
+            AdaptiveStack(rowAlignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(price.name).foregroundStyle(Color.rpplText)
                     if let note = only.resolvedNote(parkLanguages: park.languages) { Text(note).font(.caption).foregroundStyle(Color.rpplMuted) }
                 }
-                Spacer(minLength: 8)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
                 Text(ParkFormatting.amount(only) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
             }
         } else {
             VStack(alignment: .leading, spacing: 4) {
                 Text(price.name).foregroundStyle(Color.rpplText)
                 ForEach(Array(options.enumerated()), id: \.offset) { _, option in
-                    HStack(alignment: .firstTextBaseline) {
+                    AdaptiveStack(rowAlignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 1) {
                             Text(ParkFormatting.perText(option, parkLanguages: park.languages) ?? option.resolvedNote(parkLanguages: park.languages) ?? "")
                                 .font(.subheadline)
@@ -796,7 +804,7 @@ struct ParkDetailView: View {
                                 Text(note).font(.caption).foregroundStyle(Color.rpplMuted)
                             }
                         }
-                        Spacer(minLength: 8)
+                        if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
                         Text(ParkFormatting.amount(option) ?? "").bold().foregroundStyle(Color.rpplText).monospacedDigit()
                     }
                 }
@@ -872,13 +880,19 @@ struct ParkDetailView: View {
 
     // MARK: Helpers
 
-    private func contactRow(_ text: String, systemImage: String) -> some View {
+    /// The address itself on one line; at accessibility sizes only what the link does (the address no
+    /// longer fits and is in the destination anyway).
+    private func contactRow(_ text: String, short: LocalizedStringKey, systemImage: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: systemImage)
                 .frame(width: 24, alignment: .center)
-            Text(text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+            if dynamicTypeSize.isAccessibilitySize {
+                Text(short)
+            } else {
+                Text(text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
         }
     }
 

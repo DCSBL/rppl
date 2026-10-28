@@ -63,7 +63,7 @@ final class RpplDuoScreenshotTests: XCTestCase {
         XCTAssertTrue(tab.waitForExistence(timeout: 30))
         tab.tap()
         XCTAssertTrue(app.staticTexts["Parks"].waitForExistence(timeout: 15))
-        app.buttons["Most visited"].tap()
+        app.chooseParksSort("Most visited")
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Project 7")).firstMatch.waitForExistence(timeout: 15))
         shot("06-parks-unfolded")
     }

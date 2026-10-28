@@ -7,14 +7,17 @@ struct ActivityStartPage: View {
     var enabled: Bool
     var needsSetup = false
     let action: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         GeometryReader { geo in
             let chevronSide = min(max(min(geo.size.width, geo.size.height) * 0.22, 36), 52)
-            let showClock = geo.size.height >= 200
+            // The system shows the time anyway; at accessibility sizes the title needs the room.
+            let showClock = geo.size.height >= 200 && !dynamicTypeSize.isAccessibilitySize
 
             Button(action: action) {
-                cardStack(chevronSide: chevronSide, showClock: showClock)
+                cardStack(chevronSide: chevronSide, showClock: showClock, showIcon: geo.size.height >= 170,
+                          iconHeight: min(max(geo.size.height * 0.2, 30), 46))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .buttonStyle(.plain)
@@ -27,7 +30,12 @@ struct ActivityStartPage: View {
         .containerBackground(Color.rpplIdleBackground.gradient, for: .tabView)
     }
 
-    private func cardStack(chevronSide: CGFloat, showClock: Bool) -> some View {
+    /// Template glyph per picker code; unknown codes fall back to the generic one.
+    private static func iconAssetName(for code: String) -> String {
+        ActivityCodes.pickerCodes.contains(code) ? "activity-\(code)" : "activity-other"
+    }
+
+    private func cardStack(chevronSide: CGFloat, showClock: Bool, showIcon: Bool, iconHeight: CGFloat) -> some View {
         VStack(spacing: 8) {
             if showClock {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -40,6 +48,15 @@ struct ActivityStartPage: View {
             }
 
             Spacer(minLength: 4)
+
+            if showIcon {
+                Image(Self.iconAssetName(for: code))
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: iconHeight)
+                    .foregroundStyle(Color.rpplIdlePrimary)
+                    .accessibilityHidden(true)
+            }
 
             Text(ActivityCodes.localizedTitle(for: code))
                 .font(.title2.weight(.bold))

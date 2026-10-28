@@ -60,20 +60,34 @@ struct LastSessionView: View {
             }
         }
         .widgetURL(entry.session.flatMap { SessionDeepLink.url(forSessionID: $0.sessionId) })
+        .dynamicTypeSize(...DynamicTypeSize.widgetMaximum)
         .containerBackground(for: .widget) { RpplWidgetBackground() }
     }
 
     // MARK: Layouts
 
+    /// At larger text sizes the times and the bar go first, then the counts: the place always stays.
     private func small(_ session: LastSessionWidgetSnapshot) -> some View {
+        ViewThatFits(in: .vertical) {
+            small(session, showsCounts: true, showsTimes: true)
+            small(session, showsCounts: true, showsTimes: false)
+            small(session, showsCounts: false, showsTimes: false)
+        }
+    }
+
+    private func small(_ session: LastSessionWidgetSnapshot, showsCounts: Bool, showsTimes: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             header(session)
             Spacer(minLength: 0)
-            HStack(alignment: .firstTextBaseline, spacing: 14) {
-                count(session.setCount, symbol: "flag.checkered", tint: "RpplMetricSets", caption: "Sets")
-                count(session.lapCount, symbol: "arrow.triangle.2.circlepath", tint: "RpplMetricLaps", caption: "Laps")
+            if showsCounts {
+                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                    count(session.setCount, symbol: "flag.checkered", tint: "RpplMetricSets", caption: "Sets")
+                    count(session.lapCount, symbol: "arrow.triangle.2.circlepath", tint: "RpplMetricLaps", caption: "Laps")
+                }
             }
-            if let ratio = session.ridingRatio {
+            if !showsTimes {
+                EmptyView()
+            } else if let ratio = session.ridingRatio {
                 VStack(alignment: .leading, spacing: 3) {
                     if let riding = session.ridingDuration, let inactive = session.inactiveDuration {
                         timesGrid(riding: riding, inactive: inactive)
@@ -89,7 +103,16 @@ struct LastSessionView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// The timeline bar, then the ring with its times, go first at larger text sizes.
     private func medium(_ session: LastSessionWidgetSnapshot) -> some View {
+        ViewThatFits(in: .vertical) {
+            medium(session, showsRing: true, showsTimeline: true)
+            medium(session, showsRing: true, showsTimeline: false)
+            medium(session, showsRing: false, showsTimeline: false)
+        }
+    }
+
+    private func medium(_ session: LastSessionWidgetSnapshot, showsRing: Bool, showsTimeline: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -101,7 +124,9 @@ struct LastSessionView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let ratio = session.ridingRatio {
+                if !showsRing {
+                    EmptyView()
+                } else if let ratio = session.ridingRatio {
                     VStack(alignment: .leading, spacing: 6) {
                         WidgetRing(fraction: ratio, tint: "RpplMetricRiding")
                             .frame(width: 44, height: 44)
@@ -118,7 +143,7 @@ struct LastSessionView: View {
                 }
             }
             Spacer(minLength: 0)
-            if !session.setSpans.isEmpty {
+            if showsTimeline, !session.setSpans.isEmpty {
                 VStack(spacing: 2) {
                     WidgetTimelineBar(spans: session.setSpans, tint: "RpplMetricSets")
                     HStack {

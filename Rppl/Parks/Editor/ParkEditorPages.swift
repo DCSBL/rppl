@@ -445,6 +445,7 @@ struct ParkLinksSection: View {
 }
 
 private struct ParkLinkRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Binding var link: ParkLink
     let context: GhostRowContext
     let usedKinds: Set<String>
@@ -531,7 +532,7 @@ private struct ParkLinkRow: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Text(kindTitle).lineLimit(1)
+                Text(kindTitle).lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                 Image(systemName: "chevron.up.chevron.down").font(.caption2)
             }
             .font(.subheadline.weight(.medium))
@@ -539,7 +540,8 @@ private struct ParkLinkRow: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(Color.rpplFill, in: Capsule())
-            .fixedSize()
+            // The pill keeps its own width normally; at accessibility sizes it wraps within the row.
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
         }
     }
 
