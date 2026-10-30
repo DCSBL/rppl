@@ -16,8 +16,8 @@ struct ActivityStartPage: View {
             let showClock = geo.size.height >= 200 && !dynamicTypeSize.isAccessibilitySize
 
             Button(action: action) {
-                cardStack(chevronSide: chevronSide, showClock: showClock, showIcon: geo.size.height >= 170,
-                          iconHeight: min(max(geo.size.height * 0.2, 30), 46))
+                cardStack(chevronSide: chevronSide, showClock: showClock, showIcon: geo.size.height >= 120,
+                          iconHeight: min(max(geo.size.height * 0.2, 26), 46))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .buttonStyle(.plain)
