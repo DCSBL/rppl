@@ -798,8 +798,8 @@ extension WatchSessionController {
         }
     }
 
-    /// Too few GPS fixes for Fitness to draw a map: lay the nearest park's cable (or its location)
-    /// over the workout instead. Returns route metadata naming the source, nil when GPS was enough
+    /// Too few GPS fixes for Fitness to draw a map: give it a pin at the nearest park's cable start
+    /// (or the park location) instead. Returns route metadata naming the source, nil when GPS was enough
     /// or no park is near the first fix.
     func insertFallbackRouteIfNeeded(
         into routeBuilder: HKWorkoutRouteBuilder,

@@ -1,10 +1,10 @@
 import Foundation
 
-/// What to draw on the Health route map when a workout recorded too few GPS fixes to show a route.
+/// The single spot Health gets as a route when a workout recorded too few GPS fixes: a pin, not a line.
 public struct HealthRouteFallback: Equatable, Sendable {
-    /// `cable`: the park's saved cable outline. `park`: only the park's location.
+    /// `cableStart`: the start point saved for the park's cable. `park`: the park's location.
     public enum Source: String, Sendable {
-        case cable
+        case cableStart = "cable_start"
         case park
     }
 
@@ -18,15 +18,12 @@ public struct HealthRouteFallback: Equatable, Sendable {
         usableFixCount < minimumRealFixes
     }
 
-    /// The park's first traced cable (closed when it is a loop), else the park location.
+    /// The start point of the park's first traced cable, else the park location.
     public static func make(for park: Park) -> HealthRouteFallback {
-        for cable in park.cables ?? [] {
-            var points = (cable.points ?? []).map(\.coordinate)
-            guard points.count >= 2 else { continue }
-            if cable.direction?.isLoop == true, let first = points.first { points.append(first) }
-            return HealthRouteFallback(source: .cable, coordinates: points)
+        // Two identical points: a lone fix gives Health nothing to draw.
+        if let start = (park.cables ?? []).lazy.compactMap({ $0.startPoints.first }).first?.coordinate {
+            return HealthRouteFallback(source: .cableStart, coordinates: [start, start])
         }
-        // Two points: a lone fix gives Health nothing to draw.
         return HealthRouteFallback(source: .park, coordinates: [park.location, park.location])
     }
 

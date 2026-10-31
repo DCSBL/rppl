@@ -21,12 +21,21 @@ struct HealthRouteFallbackTests {
         #expect(fallback.coordinates == [location, location])
     }
 
-    @Test func tracedCableIsUsed() {
-        let points = [ParkCoordinate(lat: 1, lon: 1), ParkCoordinate(lat: 2, lon: 2)]
-        let cable = ParkCable(points: points.map { ParkCablePoint(lat: $0.lat, lon: $0.lon) })
-        let fallback = HealthRouteFallback.make(for: park(cables: [cable]))
-        #expect(fallback.source == .cable)
-        #expect(fallback.coordinates == points)
+    @Test func cableStartIsThePin() {
+        let points = [
+            ParkCablePoint(lat: 1, lon: 1),
+            ParkCablePoint(lat: 2, lon: 2, start: true),
+            ParkCablePoint(lat: 3, lon: 3)
+        ]
+        let fallback = HealthRouteFallback.make(for: park(cables: [ParkCable(points: points)]))
+        let start = ParkCoordinate(lat: 2, lon: 2)
+        #expect(fallback.source == .cableStart)
+        #expect(fallback.coordinates == [start, start])
+    }
+
+    @Test func cableWithoutPointsFallsBackToThePark() {
+        let fallback = HealthRouteFallback.make(for: park(cables: [ParkCable(name: "empty")]))
+        #expect(fallback.source == .park)
     }
 
     @Test func timestampsSpanTheWorkout() {
