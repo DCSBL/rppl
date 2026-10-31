@@ -9,4 +9,6 @@ public enum WorkoutMetadataKeys {
     public static let setDistanceMeters = "nl.dcsbl.rppl.distanceMeters"
     /// Estimated park water temperature (°C `HKQuantity`), only when the Watch measured none.
     public static let waterTemperatureEstimate = "nl.dcsbl.rppl.waterTemperatureEstimate"
+    /// Set on a Health route drawn from park data instead of GPS: `HealthRouteFallback.Source` raw value.
+    public static let routeFallbackSource = "nl.dcsbl.rppl.routeFallbackSource"
 }

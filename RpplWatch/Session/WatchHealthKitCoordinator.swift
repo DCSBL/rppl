@@ -478,9 +478,14 @@ extension WatchSessionController {
             }.value
             await finishPendingRouteInserts()
             if let workout, let routeBuilder = workoutRouteBuilder {
+                let routeMetadata = await insertFallbackRouteIfNeeded(
+                    into: routeBuilder,
+                    from: builder.startDate ?? stoppedDate,
+                    to: stoppedDate
+                )
                 do {
                     _ = try await healthKitStep("finishRoute") {
-                        UncheckedSendable(value: try await routeBuilder.finishRoute(with: workout, metadata: nil))
+                        UncheckedSendable(value: try await routeBuilder.finishRoute(with: workout, metadata: routeMetadata))
                     }
                     WakeLog.debug(.workout, "workout route saved")
                 } catch {
@@ -603,6 +608,8 @@ extension WatchSessionController {
         workoutRouteBuilder = nil
         pendingRouteLocations.removeAll()
         routeInsertTask = nil
+        routeFixCount = 0
+        routeAnchorLocation = nil
         releaseWorkoutWaiters()
         hkRideActivityOpen = false
     }
@@ -755,11 +762,13 @@ extension WatchSessionController {
     /// callback never waits on healthd.
     func enqueueRouteLocations(_ locations: [CLLocation]) {
         guard workoutRouteBuilder != nil else { return }
+        if routeAnchorLocation == nil { routeAnchorLocation = locations.first { $0.horizontalAccuracy >= 0 } }
         let usable = locations.filter { loc in
             loc.horizontalAccuracy >= 0 && loc.horizontalAccuracy <= Self.routeMaxHorizontalAccuracyM
         }
         guard !usable.isEmpty else { return }
         pendingRouteLocations.append(contentsOf: usable)
+        routeFixCount += usable.count
         let overflow = pendingRouteLocations.count - Self.routePendingLimit
         if overflow > 0 {
             // healthd is not keeping up. Raw fixes are already in the session files; the Health
@@ -789,6 +798,42 @@ extension WatchSessionController {
         }
     }
 
+    /// Too few GPS fixes for Fitness to draw a map: lay the nearest park's cable (or its location)
+    /// over the workout instead. Returns route metadata naming the source, nil when GPS was enough
+    /// or no park is near the first fix.
+    func insertFallbackRouteIfNeeded(
+        into routeBuilder: HKWorkoutRouteBuilder,
+        from start: Date,
+        to end: Date
+    ) async -> [String: Any]? {
+        guard HealthRouteFallback.needsFallback(usableFixCount: routeFixCount),
+              let anchor = routeAnchorLocation,
+              let park = ParkListing.nearest(
+                  to: ParkCoordinate(lat: anchor.coordinate.latitude, lon: anchor.coordinate.longitude),
+                  in: ParkCatalog.loadBundled(),
+                  radiusMeters: Self.routeFallbackMaxParkMeters
+              )
+        else { return nil }
+        let fallback = HealthRouteFallback.make(for: park)
+        let locations = zip(fallback.coordinates, fallback.timestamps(from: start, to: end)).map { coordinate, time in
+            CLLocation(
+                coordinate: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon),
+                altitude: 0,
+                horizontalAccuracy: 10,
+                verticalAccuracy: -1,
+                timestamp: time
+            )
+        }
+        do {
+            try await healthKitStep("fallback route insert") { try await routeBuilder.insertRouteData(locations) }
+            WakeLog.debug(.workout, "route fallback: \(fallback.source.rawValue) of \(park.id)")
+            return [WorkoutMetadataKeys.routeFallbackSource: fallback.source.rawValue]
+        } catch {
+            WakeLog.error(.workout, "route fallback insert: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
     /// Stop path: push the remaining route points before `finishRoute`, bounded so a stalled
     /// healthd cannot hold the save hostage.
     func finishPendingRouteInserts(timeoutSeconds: TimeInterval = 5) async {
@@ -807,6 +852,8 @@ extension WatchSessionController {
     }
 
     static let routeMaxHorizontalAccuracyM = 50.0
+    /// How far the first fix may sit from a park pin or cable for the fallback to use that park.
+    static let routeFallbackMaxParkMeters = 1_000.0
     /// About an hour of 1 Hz fixes.
     static let routePendingLimit = 3_600
 }

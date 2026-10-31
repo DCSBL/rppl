@@ -228,6 +228,9 @@ final class WatchSessionController: NSObject {
     /// Route points waiting for the next batched `insertRouteData` (never awaited by detection).
     var pendingRouteLocations: [CLLocation] = []
     var routeInsertTask: Task<Void, Never>?
+    /// Fixes handed to the route builder, and the first fix of any accuracy (to find the park when GPS stays thin).
+    var routeFixCount = 0
+    var routeAnchorLocation: CLLocation?
     var sensorSamplingDense = false
     var flushTask: Task<Void, Never>?
     /// Last off-main flush; the next one waits on it so batches append in order.
