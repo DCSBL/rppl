@@ -126,6 +126,7 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     if isManual {
                         ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
+                        parkFallbackMap
                     } else {
                         sessionMap
                     }
@@ -270,11 +271,15 @@ struct LogbookSessionDetailView: View {
     @ViewBuilder
     private var sessionMap: some View {
         if sessionMapTrackData == nil, mapFrame == nil {
-            mapPlaceholder(
-                tracksLoading
-                    ? "Loading GPS…"
-                    : (sessionStats?.sets.isEmpty == false ? "No set GPS" : "No GPS track")
-            )
+            if !tracksLoading, let matchedPark {
+                parkMap(matchedPark)
+            } else {
+                mapPlaceholder(
+                    tracksLoading
+                        ? "Loading GPS…"
+                        : (sessionStats?.sets.isEmpty == false ? "No set GPS" : "No GPS track")
+                )
+            }
         } else if let sessionMapTrackData {
             ZStack(alignment: .topLeading) {
                 SessionMapView(
@@ -318,6 +323,18 @@ struct LogbookSessionDetailView: View {
         } else {
             mapPlaceholder("No GPS track")
         }
+    }
+
+    /// Manual sessions have no GPS: show the park they were typed in for, when one is set.
+    @ViewBuilder
+    private var parkFallbackMap: some View {
+        if let matchedPark { parkMap(matchedPark) }
+    }
+
+    private func parkMap(_ park: Park) -> some View {
+        SessionParkMapView(park: park, cableOverlays: cableOverlays)
+            .frame(height: 300)
+            .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
     }
 
     /// Manual park pick: stored as `manual`, so auto-matching never overrides it.
