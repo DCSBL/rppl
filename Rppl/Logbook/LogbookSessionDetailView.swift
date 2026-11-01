@@ -147,6 +147,11 @@ struct LogbookSessionDetailView: View {
         .tint(Color.rpplAccent)
         .onAppear { startLoadIfNeeded() }
         .onChange(of: reloadToken) { _, _ in startLoadIfNeeded() }
+        // A session opened right at launch (a widget tap) can be looked up in the phone's local root before
+        // the store is moved to its iCloud root, or before the copy into it finished. Read it again once
+        // the store changes instead of leaving "Session not found" up.
+        .onChange(of: connectivity.sessionsRevision) { _, _ in retryAfterStoreChange() }
+        .onChange(of: store?.rootURL) { _, _ in retryAfterStoreChange() }
         .onChange(of: customFlags) { _, flags in UserDefaults.standard.set(flags, forKey: AppSettingsKey.customSetFlags) }
         .confirmationDialog("Discard changes?", isPresented: $showsDiscardDialog, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { endFlagEditing() }
@@ -811,6 +816,15 @@ struct LogbookSessionDetailView: View {
     /// Re-reads the session after it was edited, keeping what is on screen meanwhile.
     private func reload() {
         reloadToken += 1
+    }
+
+    /// Only a failed load is retried; a session on screen is left alone.
+    private func retryAfterStoreChange() {
+        guard case .store = source, loadPhase == .failed else { return }
+        WakeLog.debug(.ui, "session load retry after store change")
+        errorText = nil
+        loadPhase = .loading
+        reload()
     }
 
     /// Starts the load for the current token unless it already ran or is running; a newer token replaces it.
