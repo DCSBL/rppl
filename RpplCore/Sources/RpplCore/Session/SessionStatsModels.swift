@@ -132,6 +132,8 @@ public struct SessionStats: Codable, Equatable, Sendable {
     /// value too; a set only overrides it when its own estimate clearly disagrees (see
     /// `CableSpeedEstimator`).
     public var cableSpeedKmh: Double?
+    /// Meters walked between sets (`WalkTrackBuilder`); nil on stats from before it was derived.
+    public var walkedMeters: Double?
     /// Typed-in lap total of a manual session; it has no sets to sum laps from.
     public var manualLapCount: Int?
     /// A manual session whose set / lap total was left unknown (not a typed 0).
@@ -172,6 +174,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         waterTemperatureRangeCelsius: ClosedRange<Double>? = nil,
         waterTemperatureAvailable: Bool = false,
         cableSpeedKmh: Double? = nil,
+        walkedMeters: Double? = nil,
         manualLapCount: Int? = nil,
         setCountUnknown: Bool = false,
         lapCountUnknown: Bool = false
@@ -192,6 +195,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         waterTemperatureMaxCelsius = waterTemperatureRangeCelsius?.upperBound
         self.waterTemperatureAvailable = waterTemperatureAvailable
         self.cableSpeedKmh = cableSpeedKmh
+        self.walkedMeters = walkedMeters
         self.manualLapCount = manualLapCount
         self.setCountUnknown = setCountUnknown
         self.lapCountUnknown = lapCountUnknown
@@ -218,6 +222,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         waterTemperatureMaxCelsius = try container.decodeIfPresent(Double.self, forKey: .waterTemperatureMaxCelsius)
         waterTemperatureAvailable = try container.decodeIfPresent(Bool.self, forKey: .waterTemperatureAvailable) ?? false
         cableSpeedKmh = try container.decodeIfPresent(Double.self, forKey: .cableSpeedKmh)
+        walkedMeters = try container.decodeIfPresent(Double.self, forKey: .walkedMeters)
         manualLapCount = try container.decodeIfPresent(Int.self, forKey: .manualLapCount)
         setCountUnknown = try container.decodeIfPresent(Bool.self, forKey: .setCountUnknown) ?? false
         lapCountUnknown = try container.decodeIfPresent(Bool.self, forKey: .lapCountUnknown) ?? false
@@ -241,6 +246,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         try container.encodeIfPresent(waterTemperatureMaxCelsius, forKey: .waterTemperatureMaxCelsius)
         try container.encode(waterTemperatureAvailable, forKey: .waterTemperatureAvailable)
         try container.encodeIfPresent(cableSpeedKmh, forKey: .cableSpeedKmh)
+        try container.encodeIfPresent(walkedMeters, forKey: .walkedMeters)
         try container.encodeIfPresent(manualLapCount, forKey: .manualLapCount)
         if setCountUnknown { try container.encode(true, forKey: .setCountUnknown) }
         if lapCountUnknown { try container.encode(true, forKey: .lapCountUnknown) }
@@ -252,7 +258,7 @@ public struct SessionStats: Codable, Equatable, Sendable {
         case setCount, sets
         case ridingDuration, inactiveDuration, ridingInactiveRatio
         case averageWaterTemperatureCelsius, waterTemperatureMinCelsius, waterTemperatureMaxCelsius
-        case waterTemperatureAvailable, cableSpeedKmh, manualLapCount
+        case waterTemperatureAvailable, cableSpeedKmh, walkedMeters, manualLapCount
         case setCountUnknown, lapCountUnknown
     }
 }

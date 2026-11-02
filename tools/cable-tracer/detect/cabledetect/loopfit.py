@@ -184,15 +184,19 @@ def refine(scorer: LoopScorer, vertices: np.ndarray, step_m: float = 6.0, radius
     return best
 
 
-def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False) -> list[LoopCandidate]:
-    """Loop proposals from the floating objects: the convex hull of the main blob cluster,
-    simplified to 4-6 vertices, then refined against the image evidence. Returns candidates
-    sorted by score (best first)."""
+def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False,
+                  extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None) -> list[LoopCandidate]:
+    """Loop proposals from the floating objects (and extra evidence such as mast detections, with
+    their own weights): the convex hull of the main cluster, simplified to 4-6 vertices, then
+    refined against the image evidence. Returns candidates sorted by score (best first)."""
+    weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
+    blob_xy = np.asarray(blob_xy, dtype=float).reshape(-1, 2)
+    if extra_xy is not None and len(extra_xy):
+        blob_xy = np.concatenate([blob_xy, np.asarray(extra_xy, dtype=float).reshape(-1, 2)])
+        weights = np.concatenate([weights, np.asarray(extra_weights, dtype=float)])
     # The cable is never far from the park location (all 27 traced parks: centroid < 260 m).
     near = np.linalg.norm(blob_xy, axis=1) <= max_distance_m if len(blob_xy) else np.zeros(0, bool)
-    blobs = [b for b, keep in zip(blobs, near) if keep]
-    blob_xy = blob_xy[near]
-    weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
+    blob_xy, weights = blob_xy[near], weights[near]
     points, weights = merge_close(blob_xy, weights, radius_m=10.0) if len(blob_xy) else (np.zeros((0, 2)), np.zeros(0))
     scorer = LoopScorer(points, weights, water_xy_test)
     candidates: list[LoopCandidate] = []

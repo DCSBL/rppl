@@ -131,7 +131,8 @@ public enum SessionTimelineRebase {
             averageWaterTemperatureCelsius: stats.averageWaterTemperatureCelsius,
             waterTemperatureRangeCelsius: stats.waterTemperatureRangeCelsius,
             waterTemperatureAvailable: stats.waterTemperatureAvailable,
-            cableSpeedKmh: stats.cableSpeedKmh
+            cableSpeedKmh: stats.cableSpeedKmh,
+            walkedMeters: stats.walkedMeters
         )
     }
 

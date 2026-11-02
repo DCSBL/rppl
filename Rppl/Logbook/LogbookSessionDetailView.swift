@@ -61,6 +61,13 @@ struct LogbookSessionDetailView: View {
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var flagsEnabled = false
+    @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
+    @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
+    @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
+    /// Debug fall map: peak g around each set end, by set index (needs the motion stream).
+    @State private var setImpacts: [Int: Double] = [:]
+    /// Debug walking route: built from GPS when the sidecar predates walk tracks.
+    @State private var walkData: WalkTrackData?
 
     private nonisolated enum ExportPurpose: Sendable {
         case share
@@ -126,6 +133,7 @@ struct LogbookSessionDetailView: View {
                 case .ready:
                     if isManual {
                         ManualBadge().frame(maxWidth: .infinity, alignment: .leading)
+                        parkFallbackMap
                     } else {
                         sessionMap
                     }
@@ -272,14 +280,33 @@ struct LogbookSessionDetailView: View {
             )
     }
 
+    /// Debug walking route: the sidecar's walks, else the ones built from GPS on load.
+    private var debugWalkTracks: [[MapCoordinate]] {
+        guard walkRouteEnabled else { return [] }
+        return sessionMapTrackData?.walkTracks ?? walkData?.tracks ?? []
+    }
+
+    private var debugWalkedMeters: Double? {
+        sessionStats?.walkedMeters ?? walkData?.walkedMeters
+    }
+
+    private var debugFallMarkers: [SessionFallMarker] {
+        guard fallMapEnabled, let sessionMapTrackData, let stats = sessionStats else { return [] }
+        return SessionFallMarker.markers(mapData: sessionMapTrackData, sets: stats.sets, impacts: setImpacts)
+    }
+
     @ViewBuilder
     private var sessionMap: some View {
         if sessionMapTrackData == nil, mapFrame == nil {
-            mapPlaceholder(
-                tracksLoading
-                    ? "Loading GPS…"
-                    : (sessionStats?.sets.isEmpty == false ? "No set GPS" : "No GPS track")
-            )
+            if !tracksLoading, let matchedPark {
+                parkMap(matchedPark)
+            } else {
+                mapPlaceholder(
+                    tracksLoading
+                        ? "Loading GPS…"
+                        : (sessionStats?.sets.isEmpty == false ? "No set GPS" : "No GPS track")
+                )
+            }
         } else if let sessionMapTrackData {
             ZStack(alignment: .topLeading) {
                 SessionMapView(
@@ -287,7 +314,9 @@ struct LogbookSessionDetailView: View {
                     rendering: sessionRendering,
                     allowsInteraction: false,
                     preferredFrame: mapFrame,
-                    cableOverlays: cableOverlays
+                    cableOverlays: cableOverlays,
+                    walkTracks: debugWalkTracks,
+                    fallMarkers: debugFallMarkers
                 )
                 .allowsHitTesting(false)
 
@@ -297,7 +326,9 @@ struct LogbookSessionDetailView: View {
                         rendering: sessionRendering,
                         title: navigationTitle,
                         preferredFrame: mapFrame,
-                        cableOverlays: cableOverlays
+                        cableOverlays: cableOverlays,
+                        walkTracks: debugWalkTracks,
+                        fallMarkers: debugFallMarkers
                     )
                 } label: {
                     Color.clear
@@ -323,6 +354,18 @@ struct LogbookSessionDetailView: View {
         } else {
             mapPlaceholder("No GPS track")
         }
+    }
+
+    /// Manual sessions have no GPS: show the park they were typed in for, when one is set.
+    @ViewBuilder
+    private var parkFallbackMap: some View {
+        if let matchedPark { parkMap(matchedPark) }
+    }
+
+    private func parkMap(_ park: Park) -> some View {
+        SessionParkMapView(park: park, cableOverlays: cableOverlays)
+            .frame(height: 300)
+            .clipShape(.rect(cornerRadius: LogbookLayout.cardCornerRadius))
     }
 
     /// Manual park pick: stored as `manual`, so auto-matching never overrides it.
@@ -422,6 +465,15 @@ struct LogbookSessionDetailView: View {
                         ridingTile(stats)
                     }
                     distanceTile(stats)
+                    if dockWaitEnabled, let wait = DockWaitStats.summary(sets: stats.sets) {
+                        dockWaitTile(wait)
+                    }
+                    if walkRouteEnabled, !isManual, let walked = debugWalkedMeters {
+                        walkedTile(walked)
+                    }
+                    if fallMapEnabled, !stats.sets.isEmpty {
+                        fallsTile(stats)
+                    }
                     let measured = stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
                         ?? stats.averageWaterTemperatureCelsius.map { TemperatureFormat.celsius($0) }
                     if let estimate = manifest?.waterTemperatureEstimate, measured == nil {
@@ -730,6 +782,45 @@ struct LogbookSessionDetailView: View {
         }
     }
 
+    /// Debug: the typical wait between sets, a busyness indicator for the dock.
+    private func dockWaitTile(_ wait: DockWaitSummary) -> some View {
+        InfoTile("Dock wait", systemImage: "hourglass", tint: MetricKind.duration.tint) {
+            MetricValue(LogbookFormatting.compactDuration(wait.median), caption: "Typical wait")
+            StatChip(
+                metric: .duration,
+                value: "\(LogbookFormatting.compactDuration(wait.lowerQuartile)) – \(LogbookFormatting.compactDuration(wait.upperQuartile))",
+                caption: "Between sets"
+            )
+        }
+    }
+
+    /// Debug: meters walked between sets (`WalkTrackBuilder`).
+    private func walkedTile(_ meters: Double) -> some View {
+        InfoTile("Walked", systemImage: "figure.walk", tint: MetricKind.inactive.tint) {
+            MetricValue(DistanceFormat.meters(meters), caption: "Walked")
+        }
+    }
+
+    /// Debug: how many sets ended in a fall and the hardest hit (`SetImpact`, from the motion stream).
+    private func fallsTile(_ stats: SessionStats) -> some View {
+        let falls = stats.sets.filter { SetImpact.isFall(setImpacts[$0.index]) }.count
+        let hardest = setImpacts.values.max()
+        return InfoTile("Falls", systemImage: "figure.fall", tint: MetricKind.energy.tint) {
+            MetricValue(
+                setImpacts.isEmpty ? "-" : LogbookFormatting.countValue(falls),
+                caption: "Falls"
+            )
+            if let hardest {
+                StatChip(
+                    metric: .energy,
+                    value: "\(hardest.formatted(.number.precision(.fractionLength(1)))) g",
+                    caption: "Hardest impact"
+                )
+            }
+            StatChip(metric: .sets, value: LogbookFormatting.setCount(stats.setCount), caption: "Sets")
+        }
+    }
+
     @ViewBuilder
     private func energyTile(_ stats: SessionStats) -> some View {
         if let total = stats.totalEnergyKilocalories {
@@ -945,17 +1036,32 @@ struct LogbookSessionDetailView: View {
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
         allLocations = sortedLocations
         applyTrackLayers(locations: sortedLocations, sets: sets)
-        if UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts) {
-            let telemetry = try await StoreIO.runOffMain {
+        let wantsCharts = UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts)
+        let wantsImpacts = UserDefaults.standard.bool(forKey: AppSettingsKey.debugFallMap)
+        if wantsCharts || wantsImpacts {
+            let (telemetry, impacts) = try await StoreIO.runOffMain {
                 let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
-                return Dictionary(sets.map { set in
-                    (set.index, SetTelemetryBuilder.build(
-                        locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
-                    ))
-                }, uniquingKeysWith: { first, _ in first })
+                let telemetry: [Int: SetTelemetry] = wantsCharts
+                    ? Dictionary(sets.map { set in
+                        (set.index, SetTelemetryBuilder.build(
+                            locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
+                        ))
+                    }, uniquingKeysWith: { first, _ in first })
+                    : [:]
+                let impacts: [Int: Double] = wantsImpacts
+                    ? Dictionary(sets.compactMap { set in
+                        SetImpact.peakG(motion: motion, around: set.endedAt).map { (set.index, $0) }
+                    }, uniquingKeysWith: { first, _ in first })
+                    : [:]
+                return (telemetry, impacts)
             }
             try Task.checkCancellation()
-            setTelemetry = telemetry
+            if wantsCharts { setTelemetry = telemetry }
+            if wantsImpacts { setImpacts = impacts }
+        }
+        if UserDefaults.standard.bool(forKey: AppSettingsKey.debugWalkRoute),
+           sessionMapTrackData?.walkTracks == nil || sessionStats?.walkedMeters == nil {
+            walkData = WalkTrackBuilder.build(locations: sortedLocations, sets: sets)
         }
         if sessionMapTrackData == nil {
             sessionMapTrackData = SessionMapTrackBuilder.build(
