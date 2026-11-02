@@ -1,12 +1,14 @@
-import AppKit
 import CableTracerCore
 import Foundation
 import MapKit
 import Observation
 import RpplCore
+#if os(macOS)
+import AppKit
+#endif
 
 /// Which cable kind to add; the reviewer picks, the shape prior fills in a first guess.
-enum TemplateKind: String, CaseIterable, Identifiable {
+public enum TemplateKind: String, CaseIterable, Identifiable {
     case loop = "Full size"
     case straight = "2.0"
     var id: String { rawValue }
@@ -14,11 +16,13 @@ enum TemplateKind: String, CaseIterable, Identifiable {
 
 @MainActor
 @Observable
-final class EditorModel {
-    private(set) var workspace: ParkWorkspace?
-    private(set) var parks: [Park] = []
+public final class EditorModel {
+    public init() {}
+
+    public private(set) var workspace: ParkWorkspace?
+    public private(set) var parks: [Park] = []
     private(set) var prior: CablePrior = .bundled
-    var reference: ReferencePoints = ReferencePoints()
+    public var reference: ReferencePoints = ReferencePoints()
 
     var searchText = ""
     var onlyUntraced = false
@@ -33,7 +37,9 @@ final class EditorModel {
     private(set) var revision = 0
     /// Bumped when the map should fly to the selected park.
     private(set) var focusRequest = 0
-    var statusMessage = ""
+    public var statusMessage = ""
+    /// Where "Export training set" writes when the platform has no folder picker (iOS).
+    public var defaultExportDirectory: URL?
 
     var isDirty: Bool {
         guard let draft, let original = parks.first(where: { $0.id == draft.id }) else { return false }
@@ -52,20 +58,33 @@ final class EditorModel {
 
     // MARK: Loading
 
-    func openDefaultDirectory() {
-        guard workspace == nil, let url = ParkWorkspace.locateBundledParks() else { return }
-        open(directory: url)
+    /// `--parks <dir>` on the command line, the `CABLE_TRACER_PARKS` environment variable
+    /// (how the iOS simulator build finds the repo on the host), else the repo found from cwd.
+    public func openDefaultDirectory() {
+        guard workspace == nil else { return }
+        let arguments = CommandLine.arguments
+        if let flag = arguments.firstIndex(of: "--parks"), arguments.indices.contains(flag + 1) {
+            open(directory: URL(fileURLWithPath: arguments[flag + 1], isDirectory: true))
+        } else if let path = ProcessInfo.processInfo.environment["CABLE_TRACER_PARKS"], !path.isEmpty {
+            open(directory: URL(fileURLWithPath: path, isDirectory: true))
+        } else if let url = ParkWorkspace.locateBundledParks() {
+            open(directory: url)
+        } else {
+            statusMessage = "No parks folder: pass --parks <dir> or set CABLE_TRACER_PARKS"
+        }
     }
 
-    func chooseDirectory() {
+    public func chooseDirectory() {
+        #if os(macOS)
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.message = "Choose the folder with park YAML files"
         if panel.runModal() == .OK, let url = panel.url { open(directory: url) }
+        #endif
     }
 
-    func open(directory: URL) {
+    public func open(directory: URL) {
         let workspace = ParkWorkspace(directory: directory)
         self.workspace = workspace
         parks = workspace.load()
@@ -202,7 +221,7 @@ final class EditorModel {
 
     // MARK: Saving
 
-    func save() {
+    public func save() {
         guard let workspace, let draft, isDirty else { return }
         let description = (parks.first { $0.id == draft.id }?.cables?.contains { ($0.points?.count ?? 0) >= 2 } == true)
             ? "adjust cable route on the map (cable-tracer)"
@@ -225,7 +244,8 @@ final class EditorModel {
     var isExporting = false
 
     /// Writes `training-set.json` plus a satellite snapshot and a cable mask per traced park.
-    func exportTrainingSet() {
+    public func exportTrainingSet() {
+        #if os(macOS)
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
@@ -233,6 +253,13 @@ final class EditorModel {
         panel.prompt = "Export here"
         panel.message = "Folder for the training set (JSON + satellite snapshots)"
         guard panel.runModal() == .OK, let directory = panel.url else { return }
+        #else
+        guard let directory = defaultExportDirectory else {
+            statusMessage = "No export folder configured"
+            return
+        }
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        #endif
         let parks = self.parks
         isExporting = true
         Task {
@@ -241,7 +268,9 @@ final class EditorModel {
                 var rows = TrainingSet.rows(parks: parks, tracedOnly: false)
                 for index in rows.indices {
                     statusMessage = "Snapshot \(index + 1)/\(rows.count): \(rows[index].name)"
-                    rows[index].snapshot = try await SnapshotExporter.export(row: rows[index], into: directory)
+                    let snapshots = try await SnapshotExporter.export(row: rows[index], into: directory)
+                    rows[index].snapshot = snapshots.overview
+                    rows[index].detailSnapshot = snapshots.detail
                 }
                 try TrainingSet.encode(rows).write(to: directory.appendingPathComponent("training-set.json"))
                 statusMessage = "Exported \(rows.count) parks to \(directory.path)"

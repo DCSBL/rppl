@@ -1,33 +1,47 @@
-import AppKit
 import CableTracerCore
 import MapKit
 import RpplCore
 import SwiftUI
+#if os(macOS)
+import AppKit
+typealias PlatformViewRepresentable = NSViewRepresentable
+typealias PlatformColor = NSColor
+typealias PlatformTapGesture = NSClickGestureRecognizer
+typealias PlatformGestureDelegate = NSGestureRecognizerDelegate
+#else
+import UIKit
+typealias PlatformViewRepresentable = UIViewRepresentable
+typealias PlatformColor = UIColor
+typealias PlatformTapGesture = UITapGestureRecognizer
+typealias PlatformGestureDelegate = UIGestureRecognizerDelegate
+#endif
 
 /// Satellite map with the cables as draggable polylines. MKMapView rather than SwiftUI's `Map`
-/// because point dragging and click-to-add need the AppKit gesture hooks.
-struct MapEditorView: NSViewRepresentable {
+/// because point dragging and click-to-add need the platform gesture hooks.
+struct MapEditorView: PlatformViewRepresentable {
     let model: EditorModel
 
     func makeCoordinator() -> Coordinator { Coordinator(model: model) }
 
-    func makeNSView(context: Context) -> MKMapView {
+    private func makeMapView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
         mapView.showsCompass = true
         mapView.showsScale = true
-        mapView.showsZoomControls = true
         mapView.isRotateEnabled = false
         mapView.isPitchEnabled = false
-        let click = NSClickGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleClick(_:)))
-        click.delegate = context.coordinator
-        mapView.addGestureRecognizer(click)
+        #if os(macOS)
+        mapView.showsZoomControls = true
+        #endif
+        let tap = PlatformTapGesture(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.delegate = context.coordinator
+        mapView.addGestureRecognizer(tap)
         context.coordinator.mapView = mapView
         return mapView
     }
 
-    func updateNSView(_ mapView: MKMapView, context: Context) {
+    private func update(_ mapView: MKMapView, context: Context) {
         let coordinator = context.coordinator
         if coordinator.lastRevision != model.revision || coordinator.lastSelectedCable != model.selectedCableIndex || coordinator.lastReference != model.reference {
             coordinator.lastRevision = model.revision
@@ -41,8 +55,16 @@ struct MapEditorView: NSViewRepresentable {
         }
     }
 
+    #if os(macOS)
+    func makeNSView(context: Context) -> MKMapView { makeMapView(context: context) }
+    func updateNSView(_ mapView: MKMapView, context: Context) { update(mapView, context: context) }
+    #else
+    func makeUIView(context: Context) -> MKMapView { makeMapView(context: context) }
+    func updateUIView(_ mapView: MKMapView, context: Context) { update(mapView, context: context) }
+    #endif
+
     @MainActor
-    final class Coordinator: NSObject, MKMapViewDelegate, NSGestureRecognizerDelegate {
+    final class Coordinator: NSObject, MKMapViewDelegate, PlatformGestureDelegate {
         let model: EditorModel
         weak var mapView: MKMapView?
         var lastRevision = -1
@@ -90,11 +112,21 @@ struct MapEditorView: NSViewRepresentable {
 
         // MARK: Gestures
 
+        #if os(macOS)
         func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldAttemptToRecognizeWith event: NSEvent) -> Bool {
             model.isAddingPoints
         }
+        #else
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            model.isAddingPoints
+        }
 
-        @objc func handleClick(_ recognizer: NSClickGestureRecognizer) {
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+            true
+        }
+        #endif
+
+        @objc func handleTap(_ recognizer: PlatformTapGesture) {
             guard let mapView, model.isAddingPoints else { return }
             let point = recognizer.location(in: mapView)
             if mapView.hitTest(point) is MKAnnotationView { return }
@@ -106,43 +138,39 @@ struct MapEditorView: NSViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let line = overlay as? CablePolyline else { return MKOverlayRenderer(overlay: overlay) }
             let renderer = MKPolylineRenderer(polyline: line)
-            renderer.strokeColor = line.isSelected ? NSColor.systemYellow : NSColor.systemCyan.withAlphaComponent(0.8)
+            renderer.strokeColor = line.isSelected ? PlatformColor.systemYellow : PlatformColor.systemCyan.withAlphaComponent(0.8)
             renderer.lineWidth = line.isSelected ? 4 : 2.5
             renderer.lineJoin = .round
             return renderer
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            if let point = annotation as? PointAnnotation {
-                let identifier = "point"
+            func marker(_ identifier: String) -> MKMarkerAnnotationView {
                 let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                     ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.annotation = annotation
+                view.displayPriority = .required
+                return view
+            }
+            if let point = annotation as? PointAnnotation {
+                let view = marker("point")
                 view.isDraggable = true
                 view.canShowCallout = false
                 view.glyphText = point.title ?? ""
                 view.markerTintColor = point.isStart ? .systemGreen : .systemYellow
-                view.displayPriority = .required
                 view.titleVisibility = .hidden
                 return view
             }
             if annotation is ReferenceAnnotation {
-                let identifier = "reference"
-                let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
-                    ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                view.annotation = annotation
+                let view = marker("reference")
                 view.markerTintColor = .systemPurple
-                view.glyphImage = NSImage(systemSymbolName: "antenna.radiowaves.left.and.right", accessibilityDescription: nil)
+                view.glyphImage = PlatformImage(systemSymbolName: "antenna.radiowaves.left.and.right", accessibilityDescription: nil)
                 view.canShowCallout = true
-                view.displayPriority = .required
                 return view
             }
-            let identifier = "park"
-            let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
-                ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-            view.annotation = annotation
+            let view = marker("park")
             view.markerTintColor = .systemRed
-            view.glyphImage = NSImage(systemSymbolName: "mappin", accessibilityDescription: nil)
+            view.glyphImage = PlatformImage(systemSymbolName: "mappin", accessibilityDescription: nil)
             view.canShowCallout = true
             return view
         }
@@ -156,6 +184,14 @@ struct MapEditorView: NSViewRepresentable {
         }
     }
 }
+
+#if !os(macOS)
+extension UIImage {
+    convenience init?(systemSymbolName: String, accessibilityDescription: String?) {
+        self.init(systemName: systemSymbolName)
+    }
+}
+#endif
 
 final class CablePolyline: MKPolyline {
     var cableIndex = 0

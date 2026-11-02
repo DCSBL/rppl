@@ -33,7 +33,10 @@ public struct TrainingRow: Codable, Equatable, Sendable {
     public var name: String
     public var location: ParkCoordinate
     public var cables: [Cable]
+    /// 1.4 km overview around the park location.
     public var snapshot: Snapshot?
+    /// 600 m close-up around the traced cables; nil for untraced parks.
+    public var detailSnapshot: Snapshot?
 
     public init(park: Park) {
         parkID = park.id

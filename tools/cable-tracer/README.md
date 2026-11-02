@@ -28,11 +28,29 @@ swift run cable-tracer --export-training-set /tmp/cable-training   # headless ex
   as purple markers.
 - "Export training set" writes `training-set.json` (every cable in local metres with shape
   statistics) plus a 1024 px satellite snapshot and a cable mask per park, at a fixed 1.37 m/px.
-  This is the input for the route-proposal step (phase 2). The same export runs headless with
+  A 600 m close-up (`-detail`, 2048 px, 0.29 m/px) around the traced cables is written too, since
+  the cable itself is invisible at the overview scale. This is the input for the route-proposal step (phase 2). The same export runs headless with
   `--export-training-set <dir>` (add `--all-parks` to include untraced parks, `--parks <dir>` for
   another parks folder).
+
+## iOS simulator build
+
+`CableTracerApp/CableTracerApp.xcodeproj` wraps the same editor as an iOS app, for a Mac where the
+agent has no screen-recording permission: the simulator can be driven and screenshotted with
+`simctl`. The simulator reads the host file system, so point it at the repo's parks folder:
+
+```bash
+xcodebuild -project CableTracerApp/CableTracerApp.xcodeproj -scheme CableTracerApp \
+  -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4)' -derivedDataPath /tmp/ct-dd build
+xcrun simctl launch booted nl.dcsbl.rppl.cable-tracer --parks "$PWD/../../RpplCore/Sources/RpplCore/Resources/Parks"
+```
+
+Saving writes straight into that folder. "Export training set" writes to the app's Documents folder
+(`xcrun simctl get_app_container booted nl.dcsbl.rppl.cable-tracer data`).
 
 ## Layout
 
 - `Sources/CableTracerCore`: pure logic, tested, builds on Linux.
-- `Sources/CableTracer`: SwiftUI + MapKit app (macOS only).
+- `Sources/CableTracerUI`: SwiftUI + MapKit editor, macOS and iOS.
+- `Sources/CableTracer`: macOS executable (app + headless export).
+- `CableTracerApp/`: iOS app project around `CableTracerUI`.

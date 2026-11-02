@@ -5,20 +5,22 @@ import RpplCore
 /// Optional ground truth to show next to the imagery: tower positions fitted from GPS tracks
 /// (`towers.csv`: park,corner,turn_deg,lat,lon,…) or dock points (`dock_points.csv`:
 /// park,kind,n,lat,lon,…). Any CSV with `park`, `lat` and `lon` columns works.
-struct ReferencePoint: Identifiable, Equatable, Sendable {
+public struct ReferencePoint: Identifiable, Equatable, Sendable {
     let id = UUID()
     var parkID: String
     var label: String
     var coordinate: ParkCoordinate
 }
 
-struct ReferencePoints: Equatable, Sendable {
-    private(set) var all: [ReferencePoint] = []
+public struct ReferencePoints: Equatable, Sendable {
+    public init() {}
+
+    public private(set) var all: [ReferencePoint] = []
     private(set) var sourceNames: [String] = []
 
     func points(for parkID: String) -> [ReferencePoint] { all.filter { $0.parkID == parkID } }
 
-    mutating func load(csv url: URL) throws {
+    public mutating func load(csv url: URL) throws {
         let text = try String(contentsOf: url, encoding: .utf8)
         var lines = text.split(whereSeparator: \.isNewline).map { $0.split(separator: ",", omittingEmptySubsequences: false).map { $0.trimmingCharacters(in: .whitespaces) } }
         guard let header = lines.first,

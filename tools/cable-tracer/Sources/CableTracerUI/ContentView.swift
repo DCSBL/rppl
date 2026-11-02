@@ -1,11 +1,16 @@
 import CableTracerCore
 import RpplCore
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
-struct ContentView: View {
+public struct ContentView: View {
     @Bindable var model: EditorModel
 
-    var body: some View {
+    public init(model: EditorModel) { self.model = model }
+
+    public var body: some View {
         NavigationSplitView {
             sidebar
         } detail: {
@@ -18,14 +23,18 @@ struct ContentView: View {
         }
         .toolbar { toolbar }
         .navigationTitle(model.draft?.name ?? "Cable Tracer")
+        #if os(macOS)
         .navigationSubtitle(model.statusMessage)
+        #endif
     }
 
     private var sidebar: some View {
         VStack(spacing: 0) {
             Toggle("Only parks without a traced cable", isOn: $model.onlyUntraced)
-                .toggleStyle(.checkbox)
                 .padding(8)
+            #if !os(macOS)
+            Text(model.statusMessage).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 8).lineLimit(2)
+            #endif
             List(model.filteredParks, selection: $model.selectedParkID) { park in
                 HStack {
                     VStack(alignment: .leading) {
@@ -37,7 +46,7 @@ struct ContentView: View {
                 }
                 .tag(park.id)
             }
-            .searchable(text: $model.searchText, placement: .sidebar, prompt: "Park")
+            .searchable(text: $model.searchText, prompt: "Park")
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260)
     }
@@ -55,7 +64,9 @@ struct ContentView: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItemGroup {
+            #if os(macOS)
             Button { model.chooseDirectory() } label: { Label("Open folder", systemImage: "folder") }
+            #endif
             Button { model.reload() } label: { Label("Reload", systemImage: "arrow.clockwise") }
             Button { model.focus() } label: { Label("Fit park", systemImage: "scope") }
                 .disabled(model.draft == nil)
@@ -63,7 +74,9 @@ struct ContentView: View {
                 .disabled(model.selectedCableIndex == nil)
                 .help("Click on the map to append a point to the selected cable")
             Menu {
+                #if os(macOS)
                 Button("Load reference CSV (towers, dock points)…") { loadReferenceCSV() }
+                #endif
                 Button("Export training set…") { model.exportTrainingSet() }
                     .disabled(model.isExporting)
             } label: { Label("More", systemImage: "ellipsis.circle") }
@@ -72,6 +85,7 @@ struct ContentView: View {
         }
     }
 
+    #if os(macOS)
     private func loadReferenceCSV() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.commaSeparatedText]
@@ -82,6 +96,7 @@ struct ContentView: View {
         }
         model.focus()
     }
+    #endif
 }
 
 /// Right-hand panel: the selected park's cables, their points and the plausibility findings.
@@ -179,7 +194,8 @@ struct InspectorView: View {
                                 get: { point.start == true },
                                 set: { _ in model.toggleStart(cable: index, point: pointIndex) }
                             ))
-                            .toggleStyle(.checkbox)
+                            .toggleStyle(.switch)
+                            .controlSize(.mini)
                             Button { model.removePoint(cable: index, point: pointIndex) } label: { Image(systemName: "minus.circle") }
                                 .buttonStyle(.plain)
                         }

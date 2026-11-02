@@ -1,5 +1,6 @@
 import AppKit
 import CableTracerCore
+import CableTracerUI
 import Foundation
 import RpplCore
 
@@ -27,7 +28,9 @@ if let flag = arguments.firstIndex(of: "--export-training-set"), arguments.indic
             print("Exporting \(rows.count) parks from \(parksDirectory.path) to \(output.path)")
             for index in rows.indices {
                 let started = Date()
-                rows[index].snapshot = try await SnapshotExporter.export(row: rows[index], into: output)
+                let snapshots = try await SnapshotExporter.export(row: rows[index], into: output)
+                rows[index].snapshot = snapshots.overview
+                rows[index].detailSnapshot = snapshots.detail
                 print(String(format: "  %@ (%.1fs)", rows[index].parkID, Date().timeIntervalSince(started)))
             }
             try TrainingSet.encode(rows).write(to: output.appendingPathComponent("training-set.json"))
