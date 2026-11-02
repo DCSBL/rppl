@@ -55,7 +55,7 @@ struct CableDetectionTests {
         bitmap[0, 0] = true
         let opened = bitmap.opened()
         #expect(!opened[0, 0])
-        #expect(opened.count == 100)
+        #expect(opened.count == 96)  // the cross element does not give the four corners back
         #expect(bitmap.eroded().count == 64)  // 8x8 core; the lone speck erodes
     }
 
@@ -70,10 +70,11 @@ struct CableDetectionTests {
         #expect(abs(net.logit(patch: Self.syntheticPatch()) - -48.563580) < 0.05)
     }
 
-    @Test func denseHeatmapMatchesThePatchClassifier() throws {
+    @Test func denseHeatmapMatchesThePythonReference() throws {
         let net = try #require(MastNet.bundled)
-        // A 128 px image that is black except for the patch at (32, 32): the dense cell covering it
-        // sees the same zero context as the patch classifier's padding.
+        // A 128 px image that is black except for the patch at (32, 32). Reference values from
+        // cabledetect.mastheat.dense_logits on the same image (the dense pass sees the biases of the
+        // black surroundings, so its cell differs from the lone patch logit by design).
         var rgb = [UInt8](repeating: 0, count: 128 * 128 * 3)
         let patch = Self.syntheticPatch()
         for y in 0..<64 { for x in 0..<64 { for c in 0..<3 { rgb[((y + 32) * 128 + x + 32) * 3 + c] = patch[(y * 64 + x) * 3 + c] } } }
@@ -81,7 +82,9 @@ struct CableDetectionTests {
         let heatmap = net.heatmap(of: image)
         #expect(heatmap.width == 5 && heatmap.height == 5)
         #expect(heatmap.logits.allSatisfy { $0.isFinite })
-        #expect(abs(heatmap.logits[2 * 5 + 2] - net.logit(patch: patch)) < 0.05)
+        #expect(abs(heatmap.logits[2 * 5 + 2] - -51.012577) < 0.05)
+        #expect(abs(heatmap.logits[0] - -17.613) < 0.05)
+        #expect(abs(heatmap.logits[4 * 5 + 4] - -19.505) < 0.05)
     }
 
     @Test func heatmapPeaksAreLocalMaximaStrongestFirst() {
