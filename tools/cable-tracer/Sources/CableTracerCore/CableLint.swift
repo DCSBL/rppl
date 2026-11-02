@@ -21,7 +21,9 @@ public enum CableLint {
         public var loopWidthMinimum = 15.0
         public var straightLengthWarning: ClosedRange<Double> = 60...300
         public var minimumSegmentM = 20.0
-        public var sharpTurnDeg = 150.0
+        /// Turn around one mast: 36-94° on the 126 traced bends, 36-91° on GPS-fitted masts.
+        public var maxTurnDeg = 95.0
+        public var impossibleTurnDeg = 120.0
         public var distanceWarningM = 1000.0
         public var distanceErrorM = 3000.0
         public var declaredLengthTolerance = 0.25
@@ -62,8 +64,18 @@ public enum CableLint {
                 add(.warning, "Segment of only \(Int(length)) m", point: (segmentIndex + 1) % points.count)
             }
         }
-        for turn in geometry.turnAnglesDeg where turn > thresholds.sharpTurnDeg {
-            add(.warning, "Sharp turn of \(Int(turn))°: the route doubles back on itself")
+        if geometry.kind == .loop {
+            for turn in geometry.turnAnglesDeg {
+                if turn > thresholds.impossibleTurnDeg {
+                    add(.error, "Bend of \(Int(turn))°: a cable turns at most ~95° around one mast")
+                } else if turn > thresholds.maxTurnDeg {
+                    add(.warning, "Bend of \(Int(turn))° is sharper than any traced mast (max 94°)")
+                }
+            }
+        } else {
+            for turn in geometry.turnAnglesDeg where turn > thresholds.impossibleTurnDeg {
+                add(.warning, "Sharp turn of \(Int(turn))°: the route doubles back on itself")
+            }
         }
 
         switch geometry.kind {

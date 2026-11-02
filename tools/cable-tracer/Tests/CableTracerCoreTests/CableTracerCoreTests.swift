@@ -101,6 +101,15 @@ final class CableTracerCoreTests: XCTestCase {
         XCTAssertTrue(CableLint.check(dented, index: 0, parkLocation: almere).contains { $0.message.contains("inward bend") })
     }
 
+    func testLintFlagsImpossibleCorner() {
+        // Pull the far bend (point 3) towards the first straight: a ~150 degree knee.
+        var knee = almereLoop
+        knee.points?[2] = ParkCablePoint(lat: 52.3583, lon: 5.2235)
+        let findings = CableLint.check(knee, index: 0, parkLocation: almere)
+        XCTAssertTrue(findings.contains { $0.severity == .error && $0.message.contains("turns at most") }, "\(findings)")
+        XCTAssertEqual(CableLint.check(almereLoop, index: 0, parkLocation: almere).filter { $0.message.contains("Bend of") }, [])
+    }
+
     func testPriorAndTemplates() {
         let park = Park(id: "almere", name: "VIEW", location: almere, cables: [almereLoop, almereTwoPointZero])
         let prior = CablePrior.learn(from: [park])

@@ -50,7 +50,10 @@ def main() -> None:
             inside = (px[:, 0] >= 0) & (px[:, 0] < _snapshot.size_px) & (px[:, 1] >= 0) & (px[:, 1] < _snapshot.size_px)
             return _w[rows, cols] & inside
 
-        candidates = loopfit.propose_loops(blobs, blob_xy, water_test)
+        rows_w, cols_w = np.nonzero(w[::8, ::8])
+        water_xy = example.to_local(snapshot, np.stack([cols_w * 8, rows_w * 8], axis=1).astype(float))
+        water_xy = water_xy[np.linalg.norm(water_xy, axis=1) <= 380]
+        candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy)
         elapsed = time.time() - started
         row = {"park": example.park_id, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates)}
         if candidates:

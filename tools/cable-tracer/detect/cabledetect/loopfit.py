@@ -12,6 +12,7 @@ from .features import Blob
 # Priors from the 27 traced parks (2026-11): loop perimeter 480-1000 m, median ~700 m.
 PERIMETER_MEDIAN_M = 700.0
 PERIMETER_LOG_SIGMA = 0.28
+MAX_TURN_DEG = 95.0
 
 
 @dataclass
@@ -114,6 +115,20 @@ class LoopScorer:
         samples = np.concatenate(samples)
         water_fraction = float(np.mean(self.water_xy_test(samples)))
 
+        # Corner rule: the cable turns at most ~95 degrees around one mast (126 traced bends:
+        # 36-94 degrees; GPS-fitted masts: 36-91). A sharper knee is not a mast, whatever the image says.
+        corner_penalty = 0.0
+        for i in range(len(vertices)):
+            incoming = vertices[i] - vertices[i - 1]
+            outgoing = vertices[(i + 1) % len(vertices)] - vertices[i]
+            cosine = np.dot(incoming, outgoing) / max(1e-9, np.linalg.norm(incoming) * np.linalg.norm(outgoing))
+            turn = float(np.degrees(np.arccos(np.clip(cosine, -1, 1))))
+            if turn > MAX_TURN_DEG + 25:
+                corner_penalty += 15.0
+                notes.append(f"corner of {turn:.0f} degrees")
+            elif turn > MAX_TURN_DEG:
+                corner_penalty += (turn - MAX_TURN_DEG) / 5.0
+
         prior = -((np.log(perimeter / PERIMETER_MEDIAN_M)) ** 2) / (2 * PERIMETER_LOG_SIGMA ** 2)
         # Shape prior: real loops are wide (axis ratio rarely over 3.5).
         rect = polygon.minimum_rotated_rectangle
@@ -124,7 +139,7 @@ class LoopScorer:
 
         # Most full-size systems have 5 masts; 4 and 6 happen, more is a trace with extra points.
         complexity = {4: -0.5, 5: 0.0, 6: -2.0}.get(len(vertices), -4.0)
-        total = 2.0 * sum(support) + 0.6 * edge - outside_penalty - interior_penalty + 4.0 * prior + shape + complexity
+        total = 2.0 * sum(support) + 0.6 * edge - outside_penalty - interior_penalty + 4.0 * prior + shape + complexity - corner_penalty
         if water_fraction < 0.97:
             total -= 40 * (0.97 - water_fraction) * 10
             notes.append(f"edges over land: {100 * (1 - water_fraction):.0f}%")
@@ -169,7 +184,7 @@ def refine(scorer: LoopScorer, vertices: np.ndarray, step_m: float = 6.0, radius
     return best
 
 
-def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0) -> list[LoopCandidate]:
+def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False) -> list[LoopCandidate]:
     """Loop proposals from the floating objects: the convex hull of the main blob cluster,
     simplified to 4-6 vertices, then refined against the image evidence. Returns candidates
     sorted by score (best first)."""
@@ -177,12 +192,19 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
     near = np.linalg.norm(blob_xy, axis=1) <= max_distance_m if len(blob_xy) else np.zeros(0, bool)
     blobs = [b for b, keep in zip(blobs, near) if keep]
     blob_xy = blob_xy[near]
-    if len(blob_xy) < 4:
-        return []
-    weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs])
-    points, weights = merge_close(blob_xy, weights, radius_m=10.0)
+    weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
+    points, weights = merge_close(blob_xy, weights, radius_m=10.0) if len(blob_xy) else (np.zeros((0, 2)), np.zeros(0))
     scorer = LoopScorer(points, weights, water_xy_test)
     candidates: list[LoopCandidate] = []
+    # Strategy B (off by default): a loop of the typical size that fits the water body. Tried on
+    # 2026-11-02 for narrow lakes and parks with few floating objects; it helped Breakout and
+    # Ermerstrand but pulled four good parks onto the wrong part of the lake (Burnside 0.84 -> 0.28),
+    # so it needs a stronger evidence term before it can run next to strategy A.
+    if use_templates and water_xy is not None and len(water_xy) >= 20:
+        candidates += template_candidates(scorer, water_xy, water_xy_test)
+    if len(points) < 4:
+        candidates.sort(key=lambda c: c.score, reverse=True)
+        return candidates
     for group in cluster_points(points, link_m=260.0)[:2]:
         if len(group) < 4:
             continue
@@ -197,6 +219,69 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
             # Blobs sit inside the cable line; push the hull out a little before refining.
             centroid = cluster.mean(axis=0)
             start = centroid + (start - centroid) * 1.06
-            candidates.append(refine(scorer, start))
+            candidate = refine(scorer, start)
+            candidates.append(candidate)
+            # A knee sharper than any mast is a vertex that should not exist: drop it and refit.
+            # Coordinate descent cannot do this on its own (it moves one vertex at a time).
+            for _ in range(2):
+                knee = sharpest_vertex(candidate.vertices_xy)
+                if knee is None or len(candidate.vertices_xy) <= 4:
+                    break
+                candidate = refine(scorer, np.delete(candidate.vertices_xy, knee, axis=0))
+                candidates.append(candidate)
     candidates.sort(key=lambda c: c.score, reverse=True)
     return candidates
+
+
+def template_candidates(scorer: LoopScorer, water_xy: np.ndarray, water_xy_test, top: int = 3) -> list[LoopCandidate]:
+    """Oriented rectangles of the prior's size (traced loops: box 200-330 m by 60-200 m), aligned
+    with the water body and centred on a grid over it; the best few are refined."""
+    center = water_xy.mean(axis=0)
+    cov = np.cov((water_xy - center).T)
+    eigvals, eigvecs = np.linalg.eigh(cov)
+    axis = eigvecs[:, int(np.argmax(eigvals))]
+    base_heading = float(np.degrees(np.arctan2(axis[0], axis[1])))
+    grid = np.unique(np.round(water_xy / 30.0) * 30.0, axis=0)
+    rough: list[tuple[float, np.ndarray]] = []
+    for c in grid:
+        for heading in (base_heading - 12, base_heading, base_heading + 12):
+            along = np.array([np.sin(np.radians(heading)), np.cos(np.radians(heading))])
+            across = np.array([along[1], -along[0]])
+            for length in (210.0, 260.0, 310.0):
+                for width in (50.0, 90.0, 130.0, 170.0):
+                    corners = np.array([
+                        c - along * length / 2 - across * width / 2,
+                        c + along * length / 2 - across * width / 2,
+                        c + along * length / 2 + across * width / 2,
+                        c - along * length / 2 + across * width / 2,
+                    ])
+                    # Cheap gate before the full score: all corners and edge midpoints on water.
+                    probes = np.concatenate([corners, (corners + np.roll(corners, -1, axis=0)) / 2])
+                    if not water_xy_test(probes).all():
+                        continue
+                    rough.append((scorer.score(corners).score, corners))
+    rough.sort(key=lambda item: item[0], reverse=True)
+    results = []
+    for _, corners in rough[:top]:
+        # Add a fifth vertex at the middle of one long side so a five-mast loop can form.
+        pentagon = np.insert(corners, 2, (corners[1] + corners[2]) / 2, axis=0)
+        for start in (corners, pentagon):
+            candidate = refine(scorer, start)
+            # Water alone is no evidence: a template that touches nothing floating is a guess.
+            if sum(candidate.vertex_support) + candidate.edge_support < 2.5:
+                candidate.score -= 6.0
+                candidate.notes.append("template without floating objects")
+            results.append(candidate)
+    return results
+
+
+def sharpest_vertex(vertices: np.ndarray, limit_deg: float = MAX_TURN_DEG + 25) -> int | None:
+    worst, worst_turn = None, limit_deg
+    for i in range(len(vertices)):
+        incoming = vertices[i] - vertices[i - 1]
+        outgoing = vertices[(i + 1) % len(vertices)] - vertices[i]
+        cosine = np.dot(incoming, outgoing) / max(1e-9, np.linalg.norm(incoming) * np.linalg.norm(outgoing))
+        turn = float(np.degrees(np.arccos(np.clip(cosine, -1, 1))))
+        if turn > worst_turn:
+            worst, worst_turn = i, turn
+    return worst
