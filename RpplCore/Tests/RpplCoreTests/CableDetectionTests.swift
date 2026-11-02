@@ -16,8 +16,11 @@ struct CableDetectionTests {
 
     @Test func minimumRectangleFollowsTheLongSide() {
         let angle = 0.6
-        let along = SIMD2(cos(angle), sin(angle)), across = SIMD2(-sin(angle), cos(angle))
-        let corners = [along * -100 + across * -50, along * 100 + across * -50, along * 100 + across * 50, along * -100 + across * 50]
+        let along = SIMD2<Double>(cos(angle), sin(angle))
+        let across = SIMD2<Double>(-sin(angle), cos(angle))
+        let halfLong = along * 100
+        let halfShort = across * 50
+        let corners: [SIMD2<Double>] = [-halfLong - halfShort, halfLong - halfShort, halfLong + halfShort, -halfLong + halfShort]
         let sides = Geometry2D.minimumRectangleSides(corners)
         #expect(abs(sides.long - 200) < 1e-6)
         #expect(abs(sides.short - 100) < 1e-6)
@@ -77,7 +80,7 @@ struct CableDetectionTests {
         let image = DetectionImage(width: 128, height: 128, rgb: rgb, metersPerPixel: 0.29, center: origin, origin: origin)
         let heatmap = net.heatmap(of: image)
         #expect(heatmap.width == 5 && heatmap.height == 5)
-        #expect(heatmap.logits.allSatisfy(\.isFinite))
+        #expect(heatmap.logits.allSatisfy { $0.isFinite })
         #expect(abs(heatmap.logits[2 * 5 + 2] - net.logit(patch: patch)) < 0.05)
     }
 
@@ -115,8 +118,8 @@ struct CableDetectionTests {
 
     @Test func impossibleCornerIsPenalisedAndDropped() {
         let fitter = LoopFitter(isWater: { _ in true })
-        let knee = [SIMD2(-100, -50), SIMD2(100, -50), SIMD2(100, 50), SIMD2(0, 80), SIMD2(-100, 50)]  // 33 degrees
-        let sharp = [SIMD2(-100, -50), SIMD2(100, -50), SIMD2(100, 50), SIMD2(0, 300), SIMD2(-100, 50)]  // 136 degrees
+        let knee: [SIMD2<Double>] = [SIMD2(-100, -50), SIMD2(100, -50), SIMD2(100, 50), SIMD2(0, 80), SIMD2(-100, 50)]  // 33 degrees
+        let sharp: [SIMD2<Double>] = [SIMD2(-100, -50), SIMD2(100, -50), SIMD2(100, 50), SIMD2(0, 300), SIMD2(-100, 50)]  // 136 degrees
         let evidence = knee.map { LoopFitter.Evidence(xy: $0, weight: 4) }
         let scored = fitter.score(sharp, evidence: evidence)
         #expect(scored.notes.contains { $0.hasPrefix("corner of") })
@@ -205,7 +208,7 @@ struct CableDetectionTests {
                 bright[base] = 210; bright[base + 1] = 205; bright[base + 2] = 200
             } }
         }
-        let centroid = masts.reduce(SIMD2(0, 0), +) / Double(masts.count)
+        let centroid = masts.reduce(SIMD2<Double>(0, 0), +) / Double(masts.count)
         for mast in masts {
             let outward = mast - centroid
             platform(at: mast + outward / vectorLength(outward) * 3, width: 4, height: 4)
