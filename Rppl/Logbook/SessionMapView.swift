@@ -12,6 +12,25 @@ struct SessionMapRendering {
     static let flat = SessionMapRendering()
 }
 
+/// Where a set ended, for the debug fall map: the last usable fix of the set, sized by the
+/// impact around the end (`SetImpact`). No impact (no motion) draws a plain dot.
+struct SessionFallMarker: Identifiable, Equatable {
+    let setIndex: Int
+    let coordinate: MapCoordinate
+    let impactG: Double?
+
+    var id: Int { setIndex }
+    var isFall: Bool { SetImpact.isFall(impactG) }
+
+    /// Markers for every set with a drawable track: one per heatmap track, in set order.
+    static func markers(mapData: SessionMapTrackData, sets: [SetSegmentStats], impacts: [Int: Double]) -> [SessionFallMarker] {
+        zip(sets, mapData.heatmapTracks).compactMap { set, track in
+            guard let last = track.last else { return nil }
+            return SessionFallMarker(setIndex: set.index, coordinate: last, impactG: impacts[set.index])
+        }
+    }
+}
+
 enum SessionMapLayout {
     case embedded
     case fullscreen
@@ -58,6 +77,10 @@ struct SessionMapView: View {
     var layout: SessionMapLayout = .embedded
     /// Park cable outlines drawn as a thin line beneath the tracks.
     var cableOverlays: [[CLLocationCoordinate2D]] = []
+    /// Debug: walks between sets, dashed beneath the set tracks.
+    var walkTracks: [[MapCoordinate]] = []
+    /// Debug: set ends sized by impact.
+    var fallMarkers: [SessionFallMarker] = []
     /// Set on a full-screen map: style and reset live in the navigation bar (`MapScreenToolbar`).
     var usesBarButtons = false
     /// Bumped by the bar's reset button: back to the fitted frame.
@@ -116,9 +139,13 @@ struct SessionMapView: View {
         showsStyleToggle: Bool = false,
         preferredFrame: MapTrackFrame? = nil,
         layout: SessionMapLayout = .embedded,
-        cableOverlays: [[CLLocationCoordinate2D]] = []
+        cableOverlays: [[CLLocationCoordinate2D]] = [],
+        walkTracks: [[MapCoordinate]] = [],
+        fallMarkers: [SessionFallMarker] = []
     ) {
         self.cableOverlays = cableOverlays
+        self.walkTracks = walkTracks
+        self.fallMarkers = fallMarkers
         self.tracks = []
         self.sessionMapData = sessionMapData
         self.rendering = rendering
@@ -225,10 +252,21 @@ struct SessionMapView: View {
                     style: StrokeStyle(lineWidth: 1.5, dash: differentiateWithoutColor ? [4, 3] : [])
                 )
         }
+        ForEach(Array(walkTracks.enumerated()), id: \.offset) { item in
+            if item.element.count >= 2 {
+                MapPolyline(coordinates: coordinates(item.element))
+                    .stroke(Color.rpplMetricTime.opacity(0.7), style: StrokeStyle(lineWidth: 2, dash: [3, 4]))
+            }
+        }
         if focusedTrack != nil {
             soloContent
         } else {
             flatContent
+        }
+        if focusedTrack == nil {
+            ForEach(fallMarkers) { marker in
+                fallAnnotation(marker)
+            }
         }
         if userLocation != nil {
             UserAnnotation()
@@ -276,6 +314,34 @@ struct SessionMapView: View {
                 endpointAnnotation("End", at: coordinate(last), symbol: "stop.fill")
             }
         }
+    }
+
+    /// Radius grows with the square root of the impact, so a 16 g wipeout reads twice a 4 g one.
+    private func fallAnnotation(_ marker: SessionFallMarker) -> some MapContent {
+        let size = endpointSize * (marker.impactG.map { 0.45 + 0.3 * $0.squareRoot() } ?? 0.5)
+        let tint = marker.isFall ? Color.rpplMetricEnergy : Color.rpplAccent
+        return Annotation(coordinate: coordinate(marker.coordinate), anchor: .center) {
+            Circle()
+                .fill(tint.opacity(0.55))
+                .overlay {
+                    Circle().strokeBorder(tint, lineWidth: 1.5)
+                }
+                .overlay {
+                    if !marker.isFall, differentiateWithoutColor {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: size * 0.5, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                }
+                .frame(width: size, height: size)
+        } label: {
+            if marker.isFall {
+                Text("Fall, set \(marker.setIndex)")
+            } else {
+                Text("Set \(marker.setIndex) end")
+            }
+        }
+        .annotationTitles(.hidden)
     }
 
     private func endpointAnnotation(
@@ -362,6 +428,7 @@ struct SessionMapView: View {
         if let sessionMapData {
             signature += "-session-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
+        signature += "-walks-\(walkTracks.count)-falls-\(fallMarkers.count)"
         let trackPoints = renderTracks.reduce(0) { $0 + $1.samples.count }
         signature += "-sets-\(renderTracks.count)-\(trackPoints)"
         return signature
@@ -539,6 +606,8 @@ struct SessionMapFullscreenView: View {
     let title: String
     var preferredFrame: MapTrackFrame? = nil
     var cableOverlays: [[CLLocationCoordinate2D]] = []
+    var walkTracks: [[MapCoordinate]] = []
+    var fallMarkers: [SessionFallMarker] = []
 
     init(
         locations: [LocationSample],
@@ -571,9 +640,13 @@ struct SessionMapFullscreenView: View {
         rendering: SessionMapRendering = .flat,
         title: String,
         preferredFrame: MapTrackFrame? = nil,
-        cableOverlays: [[CLLocationCoordinate2D]] = []
+        cableOverlays: [[CLLocationCoordinate2D]] = [],
+        walkTracks: [[MapCoordinate]] = [],
+        fallMarkers: [SessionFallMarker] = []
     ) {
         self.cableOverlays = cableOverlays
+        self.walkTracks = walkTracks
+        self.fallMarkers = fallMarkers
         self.tracks = []
         self.sessionMapData = sessionMapData
         self.rendering = rendering
@@ -607,7 +680,9 @@ struct SessionMapFullscreenView: View {
                     allowsInteraction: true,
                     preferredFrame: preferredFrame,
                     layout: .fullscreen,
-                    cableOverlays: cableOverlays
+                    cableOverlays: cableOverlays,
+                    walkTracks: walkTracks,
+                    fallMarkers: fallMarkers
                 )
                 .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             } else {
