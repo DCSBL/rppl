@@ -8,6 +8,7 @@ and not shipped; it edits the same park YAML files the app bundles
 cd tools/cable-tracer
 swift run cable-tracer          # opens the repo's parks folder automatically
 swift test                      # CableTracerCore only; also runs on Linux
+swift run cable-tracer --export-training-set /tmp/cable-training   # headless export, see below
 ```
 
 ## What it does
@@ -27,7 +28,9 @@ swift test                      # CableTracerCore only; also runs on Linux
   as purple markers.
 - "Export training set" writes `training-set.json` (every cable in local metres with shape
   statistics) plus a 1024 px satellite snapshot and a cable mask per park, at a fixed 1.37 m/px.
-  This is the input for the route-proposal step (phase 2).
+  This is the input for the route-proposal step (phase 2). The same export runs headless with
+  `--export-training-set <dir>` (add `--all-parks` to include untraced parks, `--parks <dir>` for
+  another parks folder).
 
 ## Layout
 

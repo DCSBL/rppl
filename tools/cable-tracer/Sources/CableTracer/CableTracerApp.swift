@@ -1,6 +1,6 @@
 import SwiftUI
 
-@main
+
 struct CableTracerApp: App {
     @State private var model = EditorModel()
 
