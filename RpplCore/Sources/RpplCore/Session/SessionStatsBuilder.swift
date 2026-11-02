@@ -137,7 +137,8 @@ public enum SessionStatsBuilder {
             averageWaterTemperatureCelsius: waterSummary?.currentCelsius,
             waterTemperatureRangeCelsius: waterSummary?.range,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
-            cableSpeedKmh: sessionCableSpeedKmh
+            cableSpeedKmh: sessionCableSpeedKmh,
+            walkedMeters: WalkTrackBuilder.build(locations: sortedLocations, sets: highlightedSets).walkedMeters
         )
     }
 

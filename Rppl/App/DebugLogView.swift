@@ -12,6 +12,9 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
+    @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
+    @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
+    @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
 
     var body: some View {
         List {
@@ -27,6 +30,27 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Show and edit set flags in the logbook. Saved flags are kept when this is off.")
+            }
+
+            Section {
+                Toggle("Fall map", isOn: $fallMapEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Where each set ended on the session map, sized by the impact from the motion stream, plus a falls tile.")
+            }
+
+            Section {
+                Toggle("Dock wait", isOn: $dockWaitEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("A tile with the typical wait between sets: a busyness indicator for the dock.")
+            }
+
+            Section {
+                Toggle("Walking route", isOn: $walkRouteEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Distance walked and the walks between sets on the session map; the averaged walking route of all sessions on the park map.")
             }
 
             Section {
