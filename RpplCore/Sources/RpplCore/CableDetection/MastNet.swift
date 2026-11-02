@@ -4,10 +4,10 @@ import Accelerate
 #endif
 
 /// Tiny convolutional classifier that says whether a 64 px (about 19 m at 0.29 m/px) patch of
-/// satellite imagery is centred on a cable mast. Four 3x3 convolutions with max pooling, a global
-/// mean and one linear unit: about 20k weights, trained on the hand-traced bends of the bundled
-/// parks (see tools/cable-tracer/detect). Run fully convolutionally it yields a mast heatmap with
-/// one cell per 8 px.
+/// satellite imagery is centred on a cable mast. Four 3x3 convolutions, each followed by 2x2 max
+/// pooling, a global mean and one linear unit: about 18k weights, trained on the hand-traced bends
+/// of the bundled parks (see tools/cable-tracer/detect). Run fully convolutionally it yields a mast
+/// heatmap with one cell per 16 px.
 public struct MastNet: Sendable {
     struct ConvLayer: Sendable {
         let inChannels: Int
@@ -18,7 +18,7 @@ public struct MastNet: Sendable {
     }
 
     public static let patchSize = 64
-    public static let heatmapStride = 8
+    public static let heatmapStride = 16
 
     let convs: [ConvLayer]
     let linearWeights: [Float]
@@ -77,7 +77,7 @@ public struct MastNet: Sendable {
     }
 
     /// Mast heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
-    /// is (8 row, 8 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
+    /// is (16 row, 16 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
     func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> MastHeatmap {
         let patch = Self.patchSize, step = Self.heatmapStride
         let cellsWide = max(0, image.width / step - patch / step + 1)
@@ -87,7 +87,7 @@ public struct MastNet: Sendable {
 
         // Tiles of `core` output pixels with a halo wide enough for the receptive field.
         let halo = 64
-        let core = min(512, ((max(image.width, image.height) + 7) / 8) * 8)
+        let core = min(512, ((max(image.width, image.height) + 15) / 16) * 16)
         let tileSize = core + 2 * halo
         var tile = [Float](repeating: 0, count: tileSize * tileSize * 3)
         for tileRow in Swift.stride(from: 0, to: image.height, by: core) {
@@ -99,7 +99,7 @@ public struct MastNet: Sendable {
                 let features = backbone(tile, width: tileSize, height: tileSize)
                 let pooled = Self.averagePool(features.values, width: features.width, height: features.height, channels: features.channels, window: patch / step)
                 let tileLogits = linear(pooled.values)
-                // Local cell (i, j) has its patch top-left at tile pixel (8 i, 8 j) = image pixel (tileRow - halo + 8 i, ...).
+                // Local cell (i, j) has its patch top-left at tile pixel (16 i, 16 j) = image pixel (tileRow - halo + 16 i, ...).
                 for i in 0..<pooled.height {
                     let top = tileRow - halo + i * step
                     guard top >= tileRow, top < tileRow + core, top + patch <= image.height else { continue }
@@ -148,15 +148,13 @@ public struct MastNet: Sendable {
         var channels: Int
     }
 
-    /// Convolutions with ReLU; max pooling after every layer but the last.
+    /// Convolutions with ReLU, each followed by 2x2 max pooling.
     private func backbone(_ input: [Float], width: Int, height: Int) -> FeatureMap {
         var current = FeatureMap(values: input, width: width, height: height, channels: 3)
-        for (index, layer) in convs.enumerated() {
+        for layer in convs {
             current.values = Self.convolve(current.values, width: current.width, height: current.height, layer: layer)
             current.channels = layer.outChannels
-            if index < convs.count - 1 {
-                current = Self.maxPool(current)
-            }
+            current = Self.maxPool(current)
         }
         return current
     }
@@ -303,7 +301,7 @@ public struct MastHeatmap: Sendable {
     }
 
     /// Local maxima above `probability`, at least `minimumSeparationCells` apart, strongest first.
-    public func peaks(probability: Double = 0.5, minimumSeparationCells: Int = 4) -> [Peak] {
+    public func peaks(probability: Double = 0.5, minimumSeparationCells: Int = 2) -> [Peak] {
         let threshold = Float(log(probability / (1 - probability)))
         var peaks: [Peak] = []
         for i in 0..<height {

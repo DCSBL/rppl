@@ -76,9 +76,9 @@ struct CableDetectionTests {
         for y in 0..<64 { for x in 0..<64 { for c in 0..<3 { rgb[((y + 32) * 128 + x + 32) * 3 + c] = patch[(y * 64 + x) * 3 + c] } } }
         let image = DetectionImage(width: 128, height: 128, rgb: rgb, metersPerPixel: 0.29, center: origin, origin: origin)
         let heatmap = net.heatmap(of: image)
-        #expect(heatmap.width == 9 && heatmap.height == 9)
+        #expect(heatmap.width == 5 && heatmap.height == 5)
         #expect(heatmap.logits.allSatisfy(\.isFinite))
-        #expect(abs(heatmap.logits[4 * 9 + 4] - net.logit(patch: patch)) < 0.05)
+        #expect(abs(heatmap.logits[2 * 5 + 2] - net.logit(patch: patch)) < 0.05)
     }
 
     @Test func heatmapPeaksAreLocalMaximaStrongestFirst() {
@@ -89,10 +89,10 @@ struct CableDetectionTests {
         let heatmap = MastHeatmap(width: 10, height: 10, logits: logits)
         let peaks = heatmap.peaks(probability: 0.5, minimumSeparationCells: 2)
         #expect(peaks.count == 2)
-        #expect(peaks[0].column == 7 * 8 + 32 && peaks[0].row == 7 * 8 + 32)
+        #expect(peaks[0].column == 7 * 16 + 32 && peaks[0].row == 7 * 16 + 32)
         #expect(abs(peaks[0].probability - 1 / (1 + exp(-2.0))) < 1e-9)
-        #expect(peaks[1].column == 2 * 8 + 32)
-        #expect(abs(heatmap.probability(nearColumn: 2 * 8 + 32 + 4, row: 2 * 8 + 32) - 1 / (1 + exp(-1.0))) < 1e-9)
+        #expect(peaks[1].column == 2 * 16 + 32)
+        #expect(abs(heatmap.probability(nearColumn: 2 * 16 + 32 + 6, row: 2 * 16 + 32) - 1 / (1 + exp(-1.0))) < 1e-9)
     }
 
     // MARK: Loop fitting
