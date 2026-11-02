@@ -64,7 +64,7 @@ public enum CableDetector {
             }
         }
         var evidence = objects.map { LoopFitter.Evidence(xy: $0.xy, weight: max(1, $0.areaM2 / 4)) }
-        evidence += masts.map { LoopFitter.Evidence(xy: $0.xy, weight: options.mastWeight * $0.probability) }
+        evidence += masts.map { LoopFitter.Evidence(xy: $0.xy, weight: options.mastWeight * $0.probability, shapesHull: false) }
         let fitter = LoopFitter(isWater: { xy in
             let pixel = image.pixel(fromLocal: xy)
             return water.isWater(column: pixel.x, row: pixel.y)

@@ -66,8 +66,8 @@ struct CableDetectionTests {
         #expect(net.parameterCount == 17745)
         // Reference logits printed by tools/cable-tracer/detect/export_mastnet.py.
         let black = [UInt8](repeating: 0, count: 64 * 64 * 3)
-        #expect(abs(net.logit(patch: black) - -1.318884) < 2e-3)
-        #expect(abs(net.logit(patch: Self.syntheticPatch()) - -48.563580) < 0.05)
+        #expect(abs(net.logit(patch: black) - -0.317538) < 2e-3)
+        #expect(abs(net.logit(patch: Self.syntheticPatch()) - -35.248455) < 0.05)
     }
 
     @Test func denseHeatmapMatchesThePythonReference() throws {
@@ -82,11 +82,11 @@ struct CableDetectionTests {
         let heatmap = net.heatmap(of: image)
         #expect(heatmap.width == 5 && heatmap.height == 5)
         #expect(heatmap.logits.allSatisfy { $0.isFinite })
-        #expect(abs(heatmap.logits[2 * 5 + 2] - -51.012577) < 0.05)
+        #expect(abs(heatmap.logits[2 * 5 + 2] - -39.556141) < 0.05)
         // Image-border cells differ a little: the tile's zero halo goes through the convolutions,
         // the reference pads every layer with zeros.
-        #expect(abs(heatmap.logits[0] - -17.613) < 0.3)
-        #expect(abs(heatmap.logits[4 * 5 + 4] - -19.505) < 0.3)
+        #expect(abs(heatmap.logits[0] - -11.057) < 0.3)
+        #expect(abs(heatmap.logits[4 * 5 + 4] - -18.187) < 0.3)
     }
 
     @Test func heatmapPeaksAreLocalMaximaStrongestFirst() {

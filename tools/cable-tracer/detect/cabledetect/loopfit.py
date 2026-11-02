@@ -185,20 +185,32 @@ def refine(scorer: LoopScorer, vertices: np.ndarray, step_m: float = 6.0, radius
 
 
 def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False,
-                  extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None) -> list[LoopCandidate]:
+                  extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None, extra_in_hull: bool | None = None) -> list[LoopCandidate]:
     """Loop proposals from the floating objects (and extra evidence such as mast detections, with
     their own weights): the convex hull of the main cluster, simplified to 4-6 vertices, then
-    refined against the image evidence. Returns candidates sorted by score (best first)."""
+    refined against the image evidence. With `extra_in_hull` false the extra evidence only scores
+    (vertex support), it does not shape the starting hull; with None both starts are tried and the
+    candidates are pooled (the scorer is the same, so scores compare). Returns candidates best first."""
+    if extra_in_hull is None and extra_xy is not None and len(extra_xy):
+        pooled = []
+        for in_hull in (True, False):
+            pooled += propose_loops(blobs, blob_xy, water_xy_test, vertex_counts, max_distance_m, water_xy, use_templates, extra_xy, extra_weights, in_hull)
+        pooled.sort(key=lambda c: c.score, reverse=True)
+        return pooled
     weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
     blob_xy = np.asarray(blob_xy, dtype=float).reshape(-1, 2)
+    hull_count = len(blob_xy)
     if extra_xy is not None and len(extra_xy):
         blob_xy = np.concatenate([blob_xy, np.asarray(extra_xy, dtype=float).reshape(-1, 2)])
         weights = np.concatenate([weights, np.asarray(extra_weights, dtype=float)])
     # The cable is never far from the park location (all 27 traced parks: centroid < 260 m).
     near = np.linalg.norm(blob_xy, axis=1) <= max_distance_m if len(blob_xy) else np.zeros(0, bool)
+    for_hull = near & (np.arange(len(blob_xy)) < hull_count if not extra_in_hull else True)
+    hull_xy, hull_weights = blob_xy[for_hull], weights[for_hull]
     blob_xy, weights = blob_xy[near], weights[near]
-    points, weights = merge_close(blob_xy, weights, radius_m=10.0) if len(blob_xy) else (np.zeros((0, 2)), np.zeros(0))
-    scorer = LoopScorer(points, weights, water_xy_test)
+    all_points, all_weights = merge_close(blob_xy, weights, radius_m=10.0) if len(blob_xy) else (np.zeros((0, 2)), np.zeros(0))
+    points, weights = merge_close(hull_xy, hull_weights, radius_m=10.0) if len(hull_xy) else (np.zeros((0, 2)), np.zeros(0))
+    scorer = LoopScorer(all_points, all_weights, water_xy_test)
     candidates: list[LoopCandidate] = []
     # Strategy B (off by default): a loop of the typical size that fits the water body. Tried on
     # 2026-11-02 for narrow lakes and parks with few floating objects; it helped Breakout and

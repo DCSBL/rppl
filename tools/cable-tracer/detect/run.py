@@ -58,6 +58,8 @@ def main() -> None:
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--masts", type=Path, help="mast net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out")
     parser.add_argument("--mast-weight", type=float, default=3.0)
+    parser.add_argument("--mast-probability", type=float, default=0.5)
+    parser.add_argument("--masts-mode", choices=["both", "hull", "score"], default="both", help="mast detections shape the starting hull, only score vertices, or both pooled (default)")
     args = parser.parse_args()
     mast_models = load_mast_models(args.masts) if args.masts else None
     args.out.mkdir(parents=True, exist_ok=True)
@@ -92,8 +94,8 @@ def main() -> None:
         water_xy = water_xy[np.linalg.norm(water_xy, axis=1) <= 380]
         mast_xy, mast_prob, mast_stats = np.zeros((0, 2)), np.zeros(0), {}
         if mast_models:
-            mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w)
-        candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=mast_xy, extra_weights=args.mast_weight * mast_prob)
+            mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w, probability=args.mast_probability)
+        candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=mast_xy, extra_weights=args.mast_weight * mast_prob, extra_in_hull={"both": None, "hull": True, "score": False}[args.masts_mode])
         elapsed = time.time() - started
         row = {"park": example.park_id, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates), **mast_stats}
         if candidates:

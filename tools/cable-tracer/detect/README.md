@@ -11,8 +11,9 @@ python3 run.py /path/to/training-set --out /tmp/cable-eval
 ```
 
 `run.py` prints one JSON line per park (IoU with the traced loop, mean and max distance from
-each traced bend to the nearest proposed vertex, perimeter) and writes a debug image per park:
-water dimmed, floating objects magenta, the hand trace yellow, the best proposal green.
+each traced bend to the nearest proposed vertex, perimeter, mast peaks and bends found) and writes
+a debug image per park: water dimmed, floating objects magenta, mast detections orange, the hand
+trace yellow, the best proposal green.
 
 ## How it works
 
@@ -30,7 +31,28 @@ water dimmed, floating objects magenta, the hand trace yellow, the best proposal
    - every edge over water,
    - a log-normal prior on the perimeter (median 700 m) and a penalty on very narrow loops,
    - 5 vertices preferred over 4 and 6 (masts stand outside the loop, so it is convex).
-4. **Evaluation** (`evaluate.py`): polygon IoU and vertex distances against the hand trace.
+4. **Masts** (`mastheat.py`, optional, `--masts <params.npz>`): a tiny CNN (4 conv layers,
+   17,745 parameters) classifies 64 px (19 m) patches as mast or not. Run densely over the water
+   (stride 16 px) it gives a heatmap; peaks over 0.5 on or next to the water are mast detections.
+   They enter the loop fit as extra vertex evidence, both as hull points (finds corners the floating
+   objects miss) and as pure vertex support (survives a false mast); the two candidate sets are
+   pooled and the best score wins. The same net runs in the app (`RpplCore/CableDetection/MastNet`),
+   from the weights `export_mastnet.py` writes.
+5. **Evaluation** (`evaluate.py`): polygon IoU and vertex distances against the hand trace.
+
+## Training the mast net
+
+```bash
+python3 cabledetect/mastpatches.py <training-set> /tmp/mast-patches.npz          # positives at the traced bends, negatives on water, objects, shore
+python3 cabledetect/masttrain.py /tmp/mast-patches.npz /tmp/mastnet.npz          # 5-fold CV by park, then the final model; writes .foldN.npz/.json too
+python3 cabledetect/mastmine.py <training-set> /tmp/mast-patches.npz /tmp/mastnet.npz /tmp/mast-patches-v2.npz   # confident false peaks become negatives
+python3 cabledetect/masttrain.py /tmp/mast-patches-v2.npz /tmp/mastnet-v2.npz
+python3 export_mastnet.py /tmp/mastnet-v2.npz ../../../RpplCore/Sources/RpplCore/Resources/MastNet.weights   # prints the reference logits for CableDetectionTests
+```
+
+`run.py --masts /tmp/mastnet-v2.npz` scores each park with the fold model that did not see it, so
+the numbers in `RESULTS.md` are honest for new parks. The Swift port is checked against the
+Python heatmap to 0.05 logit.
 
 ## Results (2026-11-02, 25 traced parks)
 

@@ -29,6 +29,8 @@ struct LoopFitter {
     struct Evidence {
         var xy: SIMD2<Double>
         var weight: Double
+        /// False for evidence that scores vertices but never shapes a starting hull (mast detections).
+        var shapesHull = true
     }
 
     var vertexRadiusM = 14.0
@@ -39,12 +41,24 @@ struct LoopFitter {
     var isWater: (SIMD2<Double>) -> Bool
 
     /// Proposals sorted best first. `evidence` is in local metres around the park location.
+    /// Evidence that does not shape the hull (mast detections) is tried both ways: as hull points,
+    /// which finds corners the floating objects miss, and as pure vertex support, which survives a
+    /// false mast. The scorer is the same, so the pooled candidates compare.
     func propose(evidence rawEvidence: [Evidence]) -> [CableLoopCandidate] {
         let near = rawEvidence.filter { vectorLength($0.xy) <= maxDistanceM }
         let merged = Self.mergeClose(near, radiusM: 10)
+        guard merged.count >= 4 else { return [] }
+        var candidates = propose(hullPoints: merged.map(\.xy), evidence: merged)
+        if near.contains(where: { !$0.shapesHull }) {
+            let hullOnly = Self.mergeClose(near.filter(\.shapesHull), radiusM: 10)
+            candidates += propose(hullPoints: hullOnly.map(\.xy), evidence: merged)
+        }
+        return candidates.sorted { $0.score > $1.score }
+    }
+
+    private func propose(hullPoints points: [SIMD2<Double>], evidence merged: [Evidence]) -> [CableLoopCandidate] {
         var candidates: [CableLoopCandidate] = []
-        guard merged.count >= 4 else { return candidates }
-        let points = merged.map(\.xy)
+        guard points.count >= 4 else { return candidates }
         for group in Self.cluster(points, linkM: 260).prefix(2) where group.count >= 4 {
             let cluster = group.map { points[$0] }
             for k in vertexCounts where cluster.count >= k {
@@ -65,7 +79,7 @@ struct LoopFitter {
                 }
             }
         }
-        return candidates.sorted { $0.score > $1.score }
+        return candidates
     }
 
     // MARK: Scoring

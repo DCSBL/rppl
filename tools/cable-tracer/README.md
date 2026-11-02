@@ -33,6 +33,13 @@ swift run cable-tracer --export-training-set /tmp/cable-training   # headless ex
   `--export-training-set <dir>` (add `--all-parks` to include untraced parks, `--parks <dir>` for
   another parks folder).
 
+## Automatic proposal
+
+`detect/` holds the Python prototype of the automatic step (water, floating objects, a mast
+detector and a convex loop fit with a plausibility score) and the training of the mast net. The
+winner is ported to `RpplCore/Sources/RpplCore/CableDetection` and runs in the app behind the
+Debug toggle "Detect cable"; see `detect/README.md` and `detect/RESULTS.md`.
+
 ## iOS simulator build
 
 `CableTracerApp/CableTracerApp.xcodeproj` wraps the same editor as an iOS app, for a Mac where the

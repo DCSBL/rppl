@@ -125,9 +125,10 @@ def main(npz: Path, out: Path) -> None:
         print(f"fold {f}: {list(held)} AUC {auc(cv[test], y[test]):.3f} recall@0.5 {np.mean(cv[test][y[test] == 1] > 0.5):.2f} "
               f"objects flagged {np.mean(cv[obj] > 0.5) if obj.any() else float('nan'):.2f}", flush=True)
     report = {"auc": auc(cv, y), "recall_bends": float(np.mean(cv[y == 1] > 0.5))}
-    for kind in ("object", "water", "land"):
+    for kind in ("object", "water", "land", "falsepeak"):
         sel = (y == 0) & (kinds == kind)
-        report[f"fpr_{kind}"] = float(np.mean(cv[sel] > 0.5))
+        if sel.any():
+            report[f"fpr_{kind}"] = float(np.mean(cv[sel] > 0.5))
     report["recall_per_park"] = {p: round(float(np.mean(cv[(parks == p) & (y == 1)] > 0.5)), 2) for p in np.unique(parks)}
     print(json.dumps(report, indent=1))
     np.save(out.with_suffix(".cv-scores.npy"), cv)
