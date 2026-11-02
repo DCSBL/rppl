@@ -339,7 +339,7 @@ enum Geometry2D {
     static func isSelfIntersecting(_ polygon: [SIMD2<Double>]) -> Bool {
         let n = polygon.count
         guard n >= 4 else { return false }
-        for i in 0..<n {
+        for i in 0..<(n - 2) {
             for j in (i + 2)..<n where !(i == 0 && j == n - 1) {
                 if segmentsIntersect(polygon[i], polygon[(i + 1) % n], polygon[j], polygon[(j + 1) % n]) { return true }
             }
