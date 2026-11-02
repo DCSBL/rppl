@@ -1,0 +1,7 @@
+numpy
+opencv-python-headless
+scikit-image
+scipy
+shapely
+pillow
+jax  # mast net training and heatmaps (CPU is enough)

@@ -12,6 +12,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
+    @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -58,6 +59,13 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Adds a filter to the Parks list and map for parks without cable coordinates.")
+            }
+
+            Section {
+                Toggle("Detect cable", isOn: $cableDetectionEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Adds a button to the trace map of the park editor that looks for the masts and the cable on the satellite imagery and proposes a trace.")
             }
 
             Section {
