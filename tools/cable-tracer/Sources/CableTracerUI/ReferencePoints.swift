@@ -6,7 +6,7 @@ import RpplCore
 /// (`towers.csv`: park,corner,turn_deg,lat,lon,…) or dock points (`dock_points.csv`:
 /// park,kind,n,lat,lon,…). Any CSV with `park`, `lat` and `lon` columns works.
 public struct ReferencePoint: Identifiable, Equatable, Sendable {
-    let id = UUID()
+    public let id = UUID()
     var parkID: String
     var label: String
     var coordinate: ParkCoordinate

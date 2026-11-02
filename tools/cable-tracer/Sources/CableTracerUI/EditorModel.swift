@@ -11,7 +11,7 @@ import AppKit
 public enum TemplateKind: String, CaseIterable, Identifiable {
     case loop = "Full size"
     case straight = "2.0"
-    var id: String { rawValue }
+    public var id: String { rawValue }
 }
 
 @MainActor
@@ -41,7 +41,7 @@ public final class EditorModel {
     /// Where "Export training set" writes when the platform has no folder picker (iOS).
     public var defaultExportDirectory: URL?
 
-    var isDirty: Bool {
+    public var isDirty: Bool {
         guard let draft, let original = parks.first(where: { $0.id == draft.id }) else { return false }
         return draft != original
     }

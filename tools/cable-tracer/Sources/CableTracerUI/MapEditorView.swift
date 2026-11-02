@@ -129,7 +129,11 @@ struct MapEditorView: PlatformViewRepresentable {
         @objc func handleTap(_ recognizer: PlatformTapGesture) {
             guard let mapView, model.isAddingPoints else { return }
             let point = recognizer.location(in: mapView)
+            #if os(iOS)
+            if mapView.hitTest(point, with: nil) is MKAnnotationView { return }
+            #else
             if mapView.hitTest(point) is MKAnnotationView { return }
+            #endif
             model.appendPoint(mapView.convert(point, toCoordinateFrom: mapView))
         }
 

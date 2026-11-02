@@ -8,7 +8,7 @@ import PackageDescription
 // - cable-tracer: macOS executable; also the headless `--export-training-set` command.
 let package = Package(
     name: "cable-tracer",
-    platforms: [.macOS(.v15), .iOS(.v18)],
+    platforms: [.macOS(.v15), .iOS(.v26)],
     products: [
         .library(name: "CableTracerCore", targets: ["CableTracerCore"]),
         .library(name: "CableTracerUI", targets: ["CableTracerUI"]),
