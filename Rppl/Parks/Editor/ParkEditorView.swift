@@ -12,6 +12,7 @@ struct ParkEditorView: View {
     @State private var session: ParkEditorSession
     @State private var confirmClose = false
     @State private var saveError: String?
+    @State private var showImport = false
 
     /// `original` nil starts a new park. `draft` continues unsaved work.
     init(original: Park?, resuming draft: ParkEditDraft? = nil, onSaved: @escaping () -> Void = {}) {
@@ -29,6 +30,9 @@ struct ParkEditorView: View {
         .environment(session)
         .tint(Color.rpplAccent)
         .interactiveDismissDisabled(session.isDirty)
+        .sheet(isPresented: $showImport) {
+            ParkImportView(session: session)
+        }
         .alert("Keep your changes?", isPresented: $confirmClose) {
             Button("Save as draft") {
                 session.saveDraftNow()
@@ -91,6 +95,15 @@ struct ParkEditorView: View {
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
             Button("Close", action: close)
+        }
+        if ParkImportAvailability.isAvailable {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showImport = true
+                } label: {
+                    Label("Fill in from a source", systemImage: "sparkles")
+                }
+            }
         }
         if !session.isGuided {
             ToolbarItem(placement: .confirmationAction) {
