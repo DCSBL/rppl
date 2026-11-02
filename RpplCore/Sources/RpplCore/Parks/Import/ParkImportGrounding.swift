@@ -90,7 +90,7 @@ public struct ParkImportGrounding: Sendable {
         for char in text {
             if char.isASCII, char.isNumber {
                 run.append(char)
-            } else if (char == "," || char == "."), !run.isEmpty {
+            } else if char == "," || char == ".", !run.isEmpty {
                 run.append(char)
             } else {
                 finish()
