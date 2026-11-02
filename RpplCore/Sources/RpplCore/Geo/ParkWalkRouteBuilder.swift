@@ -4,9 +4,10 @@ import Foundation
 ///
 /// Each session walks the same shore path back to the dock a few meters apart, and a map that
 /// strokes every walk is a tangle. This bundles them: keep the points that several walks pass,
-/// pull each point to the local centre of its neighbours (mean shift), thin them to a grid, join
-/// neighbours into a minimum spanning tree and read the longest paths off it. Every section is
-/// one line; a side path that runs along an existing section within the link distance is dropped.
+/// pull each point sideways onto the local centre line of its neighbours (a mean shift that only
+/// moves across the walk, so points never pile up along it), thin them to a grid, join neighbours
+/// into a minimum spanning tree and read the longest paths off it. Every section is one line; a
+/// side path that runs along an existing section within the link distance is dropped.
 public enum ParkWalkRouteBuilder {
     /// Neighbourhood for density and mean shift (m).
     public static let neighbourRadiusM = 10.0
@@ -57,15 +58,11 @@ public enum ParkWalkRouteBuilder {
         }
         guard kept.count >= minPoints else { return [] }
 
-        // Mean shift toward the ridge of the walk.
+        // Mean shift toward the ridge of the walk, across it only.
         for _ in 0..<meanShiftIterations {
             grid = Grid(points: kept, cell: neighbourRadiusM)
             kept = kept.map { point in
-                let neighbours = grid.neighbours(of: point, within: neighbourRadiusM)
-                guard !neighbours.isEmpty else { return point }
-                let sumX = neighbours.reduce(0.0) { $0 + kept[$1].0 }
-                let sumY = neighbours.reduce(0.0) { $0 + kept[$1].1 }
-                return (sumX / Double(neighbours.count), sumY / Double(neighbours.count))
+                shiftedAcross(point, neighbours: grid.neighbours(of: point, within: neighbourRadiusM).map { kept[$0] })
             }
         }
 
@@ -80,18 +77,18 @@ public enum ParkWalkRouteBuilder {
 
         // Minimum spanning tree over nearby nodes.
         grid = Grid(points: nodes, cell: linkDistanceM)
-        var edges: [(Int, Int, Double)] = []
+        var edges: [Edge] = []
         for (index, node) in nodes.enumerated() {
             for other in grid.neighbours(of: node, within: linkDistanceM) where other > index {
-                edges.append((index, other, distance(node, nodes[other])))
+                edges.append(Edge(a: index, b: other, weight: distance(node, nodes[other])))
             }
         }
-        edges.sort { $0.2 < $1.2 }
+        edges.sort { $0.weight < $1.weight }
         var union = UnionFind(count: nodes.count)
         var adjacency = Array(repeating: [(Int, Double)](), count: nodes.count)
-        for (a, b, weight) in edges where union.join(a, b) {
-            adjacency[a].append((b, weight))
-            adjacency[b].append((a, weight))
+        for edge in edges where union.join(edge.a, edge.b) {
+            adjacency[edge.a].append((edge.b, edge.weight))
+            adjacency[edge.b].append((edge.a, edge.weight))
         }
 
         // Longest paths, one component at a time.
@@ -135,6 +132,43 @@ public enum ParkWalkRouteBuilder {
     }
 
     // MARK: - Helpers
+
+    struct Edge {
+        var a: Int
+        var b: Int
+        var weight: Double
+    }
+
+    /// Where a tree walk from a node ends: the farthest node, how far, and each node's predecessor.
+    struct Reach {
+        var node: Int
+        var distance: Double
+        var predecessor: [Int: Int]
+    }
+
+    /// `point` moved onto the line its neighbours lie along, keeping its place along that line.
+    ///
+    /// A plain mean shift drags sparse points along the walk into clumps; moving only the component
+    /// across the neighbourhood's principal direction straightens the walk without shortening it.
+    static func shiftedAcross(_ point: (Double, Double), neighbours: [(Double, Double)]) -> (Double, Double) {
+        guard !neighbours.isEmpty else { return point }
+        let count = Double(neighbours.count)
+        let centreX = neighbours.reduce(0.0) { $0 + $1.0 } / count
+        let centreY = neighbours.reduce(0.0) { $0 + $1.1 } / count
+        var sumXX = 0.0, sumYY = 0.0, sumXY = 0.0
+        for neighbour in neighbours {
+            let dx = neighbour.0 - centreX, dy = neighbour.1 - centreY
+            sumXX += dx * dx
+            sumYY += dy * dy
+            sumXY += dx * dy
+        }
+        guard sumXX + sumYY > 1e-9 else { return (centreX, centreY) }
+        let angle = 0.5 * atan2(2 * sumXY, sumXX - sumYY)
+        let direction = (cos(angle), sin(angle))
+        let offset = (centreX - point.0, centreY - point.1)
+        let along = offset.0 * direction.0 + offset.1 * direction.1
+        return (point.0 + offset.0 - along * direction.0, point.1 + offset.1 - along * direction.1)
+    }
 
     struct Point {
         var x: Double
@@ -213,21 +247,21 @@ public enum ParkWalkRouteBuilder {
     }
 
     /// Farthest node from `from` over alive tree nodes, with the path back.
-    static func farthest(
-        from: Int, adjacency: [[(Int, Double)]], alive: [Bool]
-    ) -> (node: Int, distance: Double, predecessor: [Int: Int]) {
-        var best = (node: from, distance: 0.0)
-        var predecessor: [Int: Int] = [from: -1]
+    static func farthest(from: Int, adjacency: [[(Int, Double)]], alive: [Bool]) -> Reach {
+        var reach = Reach(node: from, distance: 0, predecessor: [from: -1])
         var stack: [(Int, Double)] = [(from, 0)]
         while let item = stack.popLast() {
             let (node, total) = item
-            if total > best.distance { best = (node: node, distance: total) }
-            for (next, weight) in adjacency[node] where alive[next] && predecessor[next] == nil {
-                predecessor[next] = node
+            if total > reach.distance {
+                reach.node = node
+                reach.distance = total
+            }
+            for (next, weight) in adjacency[node] where alive[next] && reach.predecessor[next] == nil {
+                reach.predecessor[next] = node
                 stack.append((next, total + weight))
             }
         }
-        return (node: best.node, distance: best.distance, predecessor: predecessor)
+        return reach
     }
 
     static func longestPath(
