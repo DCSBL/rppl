@@ -81,8 +81,8 @@ public struct DetectionImage: Sendable {
         return gray
     }
 
-    /// Block-averaged copy at 1/`factor` resolution, as Float RGB planes interleaved (R, G, B).
-    func downsampled(by factor: Int) -> (width: Int, height: Int, rgb: [Float]) {
+    /// Block-averaged copy at 1/`factor` resolution, as interleaved Float RGB.
+    func downsampled(by factor: Int) -> FloatRaster {
         let newWidth = width / factor
         let newHeight = height / factor
         var out = [Float](repeating: 0, count: newWidth * newHeight * 3)
@@ -105,12 +105,19 @@ public struct DetectionImage: Sendable {
                 }
             }
         }
-        return (newWidth, newHeight, out)
+        return FloatRaster(width: newWidth, height: newHeight, values: out)
     }
 }
 
-/// Block average of a Float raster.
-func downsample(_ values: [Float], width: Int, height: Int, by factor: Int) -> (width: Int, height: Int, values: [Float]) {
+/// A Float raster with one or more interleaved channels.
+struct FloatRaster {
+    let width: Int
+    let height: Int
+    let values: [Float]
+}
+
+/// Block average of a single-channel Float raster.
+func downsample(_ values: [Float], width: Int, height: Int, by factor: Int) -> FloatRaster {
     let newWidth = width / factor
     let newHeight = height / factor
     var out = [Float](repeating: 0, count: newWidth * newHeight)
@@ -127,7 +134,7 @@ func downsample(_ values: [Float], width: Int, height: Int, by factor: Int) -> (
             }
         }
     }
-    return (newWidth, newHeight, out)
+    return FloatRaster(width: newWidth, height: newHeight, values: out)
 }
 
 /// Bilinear sample of a raster at fractional (x, y); clamps at the edges.

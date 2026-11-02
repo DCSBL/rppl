@@ -48,12 +48,12 @@ struct WaterSegmenter: Sendable {
         var features = [Float](repeating: 0, count: cellCount * 5)
         var gray = [Float](repeating: 0, count: cellCount)
         for index in 0..<cellCount {
-            let r = coarse.rgb[index * 3] / 255, g = coarse.rgb[index * 3 + 1] / 255, b = coarse.rgb[index * 3 + 2] / 255
+            let r = coarse.values[index * 3] / 255, g = coarse.values[index * 3 + 1] / 255, b = coarse.values[index * 3 + 2] / 255
             let lab = Self.lab(r: r, g: g, b: b)
             let maxC = max(r, g, b), minC = min(r, g, b)
-            features[index * 5] = lab.l / 100
-            features[index * 5 + 1] = (lab.a + 128) / 255
-            features[index * 5 + 2] = (lab.b + 128) / 255
+            features[index * 5] = lab.x / 100
+            features[index * 5 + 1] = (lab.y + 128) / 255
+            features[index * 5 + 2] = (lab.z + 128) / 255
             features[index * 5 + 3] = maxC > 0 ? (maxC - minC) / maxC : 0
             gray[index] = (0.299 * r + 0.587 * g + 0.114 * b) * 255
         }
@@ -110,8 +110,8 @@ struct WaterSegmenter: Sendable {
 
     // MARK: Helpers
 
-    /// CIE Lab (D65) from sRGB in 0...1, like OpenCV's RGB2LAB before its 8-bit scaling.
-    static func lab(r: Float, g: Float, b: Float) -> (l: Float, a: Float, b: Float) {
+    /// CIE Lab (D65) as (L, a, b) from sRGB in 0...1, like OpenCV's RGB2LAB before its 8-bit scaling.
+    static func lab(r: Float, g: Float, b: Float) -> SIMD3<Float> {
         func linear(_ c: Float) -> Float { c <= 0.04045 ? c / 12.92 : powf((c + 0.055) / 1.055, 2.4) }
         let rl = linear(r), gl = linear(g), bl = linear(b)
         let x = (0.412453 * rl + 0.357580 * gl + 0.180423 * bl) / 0.950456
@@ -119,7 +119,7 @@ struct WaterSegmenter: Sendable {
         let z = (0.019334 * rl + 0.119193 * gl + 0.950227 * bl) / 1.088754
         func f(_ t: Float) -> Float { t > 0.008856 ? cbrtf(t) : 7.787 * t + 16 / 116 }
         let fx = f(x), fy = f(y), fz = f(z)
-        return (116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz))
+        return SIMD3(116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz))
     }
 
     static func boxBlur(_ values: [Float], width: Int, height: Int, radius: Int) -> [Float] {
