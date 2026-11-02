@@ -10,6 +10,8 @@ struct CableTraceView: View {
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 14
     @Binding var cable: ParkCable
     let center: ParkCoordinate
+    /// The park's other cables: drawn for orientation and kept clear of by the detector.
+    let otherCables: [ParkCable]
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = true
     @Environment(\.dismiss) private var dismiss
@@ -24,9 +26,10 @@ struct CableTraceView: View {
     @State private var askProposalDirection = false
     @State private var confirmReplaceByProposal = false
 
-    init(cable: Binding<ParkCable>, center: ParkCoordinate) {
+    init(cable: Binding<ParkCable>, center: ParkCoordinate, otherCables: [ParkCable] = []) {
         _cable = cable
         self.center = center
+        self.otherCables = otherCables
         let anchor = cable.wrappedValue.points?.first?.coordinate ?? center
         let start = CLLocationCoordinate2D(latitude: anchor.lat, longitude: anchor.lon)
         _viewCenter = State(initialValue: start)
@@ -50,6 +53,12 @@ struct CableTraceView: View {
     var body: some View {
         NavigationStack {
             Map(position: $position) {
+                ForEach(Array(otherCables.enumerated()), id: \.offset) { _, other in
+                    if let line = other.points?.map(coordinate), line.count >= 2 {
+                        MapPolyline(coordinates: other.direction?.isLoop == true ? line + [line[0]] : line)
+                            .stroke(Color.rpplMuted.opacity(0.8), lineWidth: 2)
+                    }
+                }
                 if points.count >= 2 {
                     let line = points.map(coordinate)
                     MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
@@ -235,7 +244,7 @@ struct CableTraceView: View {
         Task {
             defer { detecting = false }
             do {
-                let outcome = try await CableDetectionRunner.detect(around: center)
+                let outcome = try await CableDetectionRunner.detect(around: center, avoiding: otherCables)
                 detection = outcome
                 if let best = outcome.result.best {
                     let coordinates = best.vertices.map { outcome.image.coordinate(fromLocal: $0) }

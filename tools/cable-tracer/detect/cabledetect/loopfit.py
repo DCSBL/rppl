@@ -12,6 +12,7 @@ from .features import Blob
 # Priors from the 27 traced parks (2026-11): loop perimeter 480-1000 m, median ~700 m.
 PERIMETER_MEDIAN_M = 700.0
 PERIMETER_LOG_SIGMA = 0.28
+OCCUPIED_CLEARANCE_M = 20.0  # a new loop keeps this far from an already traced cable
 MAX_TURN_DEG = 95.0
 
 
@@ -65,13 +66,15 @@ def merge_close(points: np.ndarray, weights: np.ndarray, radius_m: float) -> tup
 
 
 class LoopScorer:
-    def __init__(self, blobs_xy: np.ndarray, blob_weights: np.ndarray, water_xy_test, vertex_radius_m=14.0, edge_radius_m=18.0):
+    def __init__(self, blobs_xy: np.ndarray, blob_weights: np.ndarray, water_xy_test, vertex_radius_m=14.0, edge_radius_m=18.0, occupied=None):
         self.blobs_xy = blobs_xy
         self.blob_weights = blob_weights
         self.water_xy_test = water_xy_test  # callable: (N,2) metres -> bool array
         self.vertex_radius_m = vertex_radius_m
         self.edge_radius_m = edge_radius_m
         self.tree = cKDTree(blobs_xy) if len(blobs_xy) else None
+        # Cables already traced in the park (polylines in local metres): a new loop neither crosses nor touches them.
+        self.occupied = [LineString(line) for line in (occupied or []) if len(line) >= 2]
 
     def score(self, vertices: np.ndarray) -> LoopCandidate:
         polygon = Polygon(vertices)
@@ -129,6 +132,13 @@ class LoopScorer:
             elif turn > MAX_TURN_DEG:
                 corner_penalty += (turn - MAX_TURN_DEG) / 5.0
 
+        occupied_penalty = 0.0
+        for line in self.occupied:
+            conflicts = int(ring.intersects(line)) + sum(line.distance(Point(v)) < OCCUPIED_CLEARANCE_M for v in vertices)
+            if conflicts:
+                occupied_penalty += 10.0 * conflicts
+                notes.append("on a traced cable")
+
         prior = -((np.log(perimeter / PERIMETER_MEDIAN_M)) ** 2) / (2 * PERIMETER_LOG_SIGMA ** 2)
         # Shape prior: real loops are wide (axis ratio rarely over 3.5).
         rect = polygon.minimum_rotated_rectangle
@@ -139,7 +149,7 @@ class LoopScorer:
 
         # Most full-size systems have 5 masts; 4 and 6 happen, more is a trace with extra points.
         complexity = {4: -0.5, 5: 0.0, 6: -2.0}.get(len(vertices), -4.0)
-        total = 2.0 * sum(support) + 0.6 * edge - outside_penalty - interior_penalty + 4.0 * prior + shape + complexity - corner_penalty
+        total = 2.0 * sum(support) + 0.6 * edge - outside_penalty - interior_penalty + 4.0 * prior + shape + complexity - corner_penalty - occupied_penalty
         if water_fraction < 0.97:
             total -= 40 * (0.97 - water_fraction) * 10
             notes.append(f"edges over land: {100 * (1 - water_fraction):.0f}%")
@@ -185,7 +195,8 @@ def refine(scorer: LoopScorer, vertices: np.ndarray, step_m: float = 6.0, radius
 
 
 def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False,
-                  extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None, extra_in_hull: bool | None = None) -> list[LoopCandidate]:
+                  extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None, extra_in_hull: bool | None = None,
+                  occupied=None) -> list[LoopCandidate]:
     """Loop proposals from the floating objects (and extra evidence such as mast detections, with
     their own weights): the convex hull of the main cluster, simplified to 4-6 vertices, then
     refined against the image evidence. With `extra_in_hull` false the extra evidence only scores
@@ -194,7 +205,7 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
     if extra_in_hull is None and extra_xy is not None and len(extra_xy):
         pooled = []
         for in_hull in (True, False):
-            pooled += propose_loops(blobs, blob_xy, water_xy_test, vertex_counts, max_distance_m, water_xy, use_templates, extra_xy, extra_weights, in_hull)
+            pooled += propose_loops(blobs, blob_xy, water_xy_test, vertex_counts, max_distance_m, water_xy, use_templates, extra_xy, extra_weights, in_hull, occupied)
         pooled.sort(key=lambda c: c.score, reverse=True)
         return pooled
     weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
@@ -205,12 +216,18 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
         weights = np.concatenate([weights, np.asarray(extra_weights, dtype=float)])
     # The cable is never far from the park location (all 27 traced parks: centroid < 260 m).
     near = np.linalg.norm(blob_xy, axis=1) <= max_distance_m if len(blob_xy) else np.zeros(0, bool)
+    lines = [LineString(line) for line in (occupied or []) if len(line) >= 2]
+    if lines and len(blob_xy):
+        # Evidence on an already traced cable belongs to that cable, and so do the obstacles inside a traced loop.
+        loops = [Polygon(line[:-1]) for line in occupied if len(line) >= 4 and np.allclose(line[0], line[-1])]
+        taken = np.array([min(line.distance(Point(p)) for line in lines) <= OCCUPIED_CLEARANCE_M + 5 or any(poly.contains(Point(p)) for poly in loops) for p in blob_xy])
+        near = near & ~taken
     for_hull = near & (np.arange(len(blob_xy)) < hull_count if not extra_in_hull else True)
     hull_xy, hull_weights = blob_xy[for_hull], weights[for_hull]
     blob_xy, weights = blob_xy[near], weights[near]
     all_points, all_weights = merge_close(blob_xy, weights, radius_m=10.0) if len(blob_xy) else (np.zeros((0, 2)), np.zeros(0))
     points, weights = merge_close(hull_xy, hull_weights, radius_m=10.0) if len(hull_xy) else (np.zeros((0, 2)), np.zeros(0))
-    scorer = LoopScorer(all_points, all_weights, water_xy_test)
+    scorer = LoopScorer(all_points, all_weights, water_xy_test, occupied=occupied)
     candidates: list[LoopCandidate] = []
     # Strategy B (off by default): a loop of the typical size that fits the water body. Tried on
     # 2026-11-02 for narrow lakes and parks with few floating objects; it helped Breakout and

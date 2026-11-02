@@ -13,6 +13,17 @@ points and as pure vertex support; the best score of the pooled candidates wins.
 - Still open: Ermerstrand (no masts found in brown water), Project 7 (masts missing from the imagery), Knokke (two loops), Betuwestrand (glint, nothing found).
 - First mast net (trained on bends vs water/objects/shore only) found 82% of the bends but fired on 382 non-bend spots; mining those as negatives (`mastmine.py`) and retraining gave the net used here (AUC 0.91 leave-parks-out).
 
+### With the park's other cables given (`--given-others`)
+
+The app hands the detector the cables already traced in the park (the ones on the 600 m image).
+Evidence within 25 m of such a cable, and every object inside a traced loop, belongs to that cable;
+a proposal that crosses or touches one (20 m) loses 10 points per conflict and is noted.
+Parks with two loops get one row per loop, the other loop given.
+
+- 26 targets: median IoU 0.77, IoU >= 0.7 for 16, 8 weak. Knokke's big loop 0.48 -> 0.61 (score 5 -> 12), Veendam 0.53 -> 0.71 with its 2.0 given.
+- Knokke's small loop stays at 0.27, flagged weak (score -1): the hull start still spans a few masts in the other basin and the refinement cannot shrink to it. Starts from the mast detections alone did not help (they broke Down Under), so that is left for the reviewer.
+- 2.0 cables are not detected (decision 2026-11-02): the mast net finds the water-side 2.0 mast in 6 of 8 parks but the shore-side one almost never.
+
 | park | floating objects | mast peaks | bends found | IoU | before | mean bend error (m) | perimeter (m) | vertices | score | notes |
 |---|---|---|---|---|---|---|---|---|---|---|
 | stroombroek-braamt | 10 | 7 | 5/5 | 0.94 | 0.85 | 6.2 | 1039 | 5 | 9.6 |  |

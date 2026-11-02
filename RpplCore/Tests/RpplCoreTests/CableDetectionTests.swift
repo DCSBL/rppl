@@ -132,6 +132,36 @@ struct CableDetectionTests {
         #expect(LoopFitter.sharpestVertex(knee) == nil)
     }
 
+    @Test func tracedCableIsKeptClearAndItsEvidenceIgnored() throws {
+        // A second loop traced right of the pentagon: its masts are not evidence for the new loop,
+        // and a candidate on top of it is marked and scores lower.
+        let other: [SIMD2<Double>] = [SIMD2(160, -60), SIMD2(360, -60), SIMD2(360, 60), SIMD2(160, 60), SIMD2(160, -60)]
+        var fitter = LoopFitter(isWater: { _ in true })
+        let evidence = pentagon.map { LoopFitter.Evidence(xy: $0, weight: 4) }
+        let free = fitter.score(Array(other.dropLast()), evidence: evidence)
+        fitter.occupied = [other]
+        let blocked = fitter.score(Array(other.dropLast()), evidence: evidence)
+        #expect(blocked.notes.contains("on a traced cable"))
+        #expect(blocked.score < free.score - 30)
+        #expect(LoopFitter.conflicts(pentagon, with: other) == 0)
+        #expect(abs(LoopFitter.distance(SIMD2(260, 0), toPolyline: other) - 60) < 1e-9)
+
+        let image = Self.syntheticLake(masts: pentagon)
+        let origin = image.origin
+        func point(_ xy: SIMD2<Double>) -> ParkCablePoint {
+            let coordinate = DetectionImage.coordinate(fromLocal: xy, origin: origin)
+            return ParkCablePoint(lat: coordinate.lat, lon: coordinate.lon)
+        }
+        let farAway: [SIMD2<Double>] = [SIMD2(5000, 0), SIMD2(5200, 0)]
+        let cables = [
+            ParkCable(direction: .clockwise, points: other.dropLast().map(point)),
+            ParkCable(direction: .twoPointZero, points: farAway.map(point)),
+        ]
+        let occupied = CableDetector.occupiedPolylines(of: cables, in: image)
+        #expect(occupied.count == 1, "a cable off the image is left out")
+        #expect(occupied.first?.count == 5, "loops are closed")
+    }
+
     // MARK: End to end on a synthetic lake
 
     @Test func detectorFindsTheLoopOnASyntheticLake() throws {
