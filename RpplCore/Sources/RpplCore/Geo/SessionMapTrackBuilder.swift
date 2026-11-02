@@ -19,7 +19,8 @@ public enum SessionMapTrackBuilder {
                 .map(MapCoordinate.init)
         }
 
-        return SessionMapTrackData(start: start, heatmapTracks: heatmapTracks)
+        let walkTracks = WalkTrackBuilder.build(locations: locations, sets: sets).tracks
+        return SessionMapTrackData(start: start, heatmapTracks: heatmapTracks, walkTracks: walkTracks)
     }
 
     static func commonStart(from tracks: [[LocationSample]]) -> MapCoordinate? {

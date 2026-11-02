@@ -20,10 +20,13 @@ public struct MapCoordinate: Codable, Equatable, Sendable {
 public struct SessionMapTrackData: Codable, Equatable, Sendable {
     public var start: MapCoordinate
     public var heatmapTracks: [[MapCoordinate]]
+    /// Walking between sets (`WalkTrackBuilder`); nil on a sidecar from before it was distilled.
+    public var walkTracks: [[MapCoordinate]]?
 
-    public init(start: MapCoordinate, heatmapTracks: [[MapCoordinate]]) {
+    public init(start: MapCoordinate, heatmapTracks: [[MapCoordinate]], walkTracks: [[MapCoordinate]]? = nil) {
         self.start = start
         self.heatmapTracks = heatmapTracks
+        self.walkTracks = walkTracks
     }
 
     public var hasRenderableTrack: Bool {
@@ -44,6 +47,7 @@ public struct SessionMapTrackData: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case start
         case heatmapTracks
+        case walkTracks
     }
 
     public init(from decoder: Decoder) throws {
@@ -51,11 +55,16 @@ public struct SessionMapTrackData: Codable, Equatable, Sendable {
         start = try container.decode(MapCoordinate.self, forKey: .start)
         heatmapTracks = try container.decodeIfPresent([[MapCoordinate]].self, forKey: .heatmapTracks) ?? []
         try SessionImportLimits.validateHeatmapTracks(heatmapTracks)
+        walkTracks = try container.decodeIfPresent([[MapCoordinate]].self, forKey: .walkTracks)
+        if let walkTracks {
+            try SessionImportLimits.validateHeatmapTracks(walkTracks)
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(start, forKey: .start)
         try container.encode(heatmapTracks, forKey: .heatmapTracks)
+        try container.encodeIfPresent(walkTracks, forKey: .walkTracks)
     }
 }
