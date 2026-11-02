@@ -39,8 +39,8 @@ enum SnapshotExporter {
                     path.lineJoinStyle = .round
                     for (index, xy) in cable.geometry.pointsXY.enumerated() {
                         let coordinate = projection.coordinate(xy)
-                        var point = snapshot.point(for: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon))
-                        point.y = rect.height - point.y  // snapshot points are top-left based
+                        // MKMapSnapshot.point(for:) is already bottom-left based on macOS, matching this non-flipped image.
+                        let point = snapshot.point(for: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon))
                         if index == 0 { path.move(to: point) } else { path.line(to: point) }
                     }
                     if cable.geometry.isClosed { path.close() }
