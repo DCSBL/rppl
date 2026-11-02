@@ -14,7 +14,7 @@ public enum ParkImportTopic: String, CaseIterable, Sendable {
             ["prijs", "prijzen", "tarief", "tarieven", "kosten", "tickets", "ticket", "abonnement", "preis", "preise",
              "eintritt", "gebühr", "tarife", "price", "pricing", "rates", "admission", "prix", "tarif"]
         case .contact:
-            ["contact", "kontakt", "bereikbaar", "adres", "anschrift", "address", "adresse", "anfahrt", "route", "find us"]
+            ["contact", "kontakt", "bereikbaar", "anschrift", "address", "anfahrt", "route", "find us"]
         case .facilities:
             ["faciliteiten", "voorzieningen", "facilities", "ausstattung", "einrichtungen", "équipements", "amenities"]
         }
