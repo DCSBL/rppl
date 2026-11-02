@@ -188,7 +188,9 @@ final class EditorModel {
     func toggleStart(cable cableIndex: Int, point pointIndex: Int) {
         updateCable(at: cableIndex) { cable in
             guard cable.points?.indices.contains(pointIndex) == true else { return }
-            cable.points?[pointIndex].start = cable.points?[pointIndex].start == true ? nil : true
+            guard var points = cable.points else { return }
+            points[pointIndex].start = points[pointIndex].start == true ? nil : true
+            cable.points = points
         }
     }
 

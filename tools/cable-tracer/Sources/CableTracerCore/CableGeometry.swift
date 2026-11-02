@@ -63,14 +63,16 @@ public struct CableGeometry: Codable, Equatable, Sendable {
 
         var turns: [Double] = []
         if points.count >= 3 {
-            let range = isClosed ? points.indices : Array(points.indices.dropFirst().dropLast())
+            let range: [Int] = isClosed ? Array(points.indices) : Array(points.indices.dropFirst().dropLast())
             for index in range {
                 let previous = points[(index - 1 + points.count) % points.count]
                 let next = points[(index + 1) % points.count]
                 let incoming = points[index] - previous
                 let outgoing = next - points[index]
                 guard incoming.length > 0.01, outgoing.length > 0.01 else { continue }
-                let dot = (incoming.x * outgoing.x + incoming.y * outgoing.y) / (incoming.length * outgoing.length)
+                let scalar: Double = incoming.x * outgoing.x + incoming.y * outgoing.y
+                let norm: Double = incoming.length * outgoing.length
+                let dot: Double = scalar / norm
                 turns.append(acos(max(-1, min(1, dot))) * 180 / .pi)
             }
         }
@@ -148,7 +150,7 @@ public struct CableGeometry: Codable, Equatable, Sendable {
         let count = pointsXY.count
         for first in 0..<count {
             let a1 = pointsXY[first], a2 = pointsXY[(first + 1) % count]
-            for second in (first + 2)..<count where !(first == 0 && second == count - 1) {
+            for second in stride(from: first + 2, to: count, by: 1) where !(first == 0 && second == count - 1) {
                 let b1 = pointsXY[second], b2 = pointsXY[(second + 1) % count]
                 if Self.segmentsIntersect(a1, a2, b1, b2) { return true }
             }

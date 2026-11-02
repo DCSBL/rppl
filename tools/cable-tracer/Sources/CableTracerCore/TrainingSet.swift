@@ -19,6 +19,14 @@ public struct TrainingRow: Codable, Equatable, Sendable {
         public var metersPerPixel: Double
         /// Snapshot centre; the park location unless the cables pulled it elsewhere.
         public var center: ParkCoordinate
+
+        public init(imageFile: String, maskFile: String?, sizePx: Int, metersPerPixel: Double, center: ParkCoordinate) {
+            self.imageFile = imageFile
+            self.maskFile = maskFile
+            self.sizePx = sizePx
+            self.metersPerPixel = metersPerPixel
+            self.center = center
+        }
     }
 
     public var parkID: String
