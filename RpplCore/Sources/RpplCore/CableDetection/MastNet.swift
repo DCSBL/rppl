@@ -18,7 +18,7 @@ public struct MastNet: Sendable {
     }
 
     public static let patchSize = 64
-    public static let stride = 8
+    public static let heatmapStride = 8
 
     let convs: [ConvLayer]
     let linearWeights: [Float]
@@ -79,7 +79,7 @@ public struct MastNet: Sendable {
     /// Mast heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
     /// is (8 row, 8 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
     func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> MastHeatmap {
-        let patch = Self.patchSize, step = Self.stride
+        let patch = Self.patchSize, step = Self.heatmapStride
         let cellsWide = max(0, image.width / step - patch / step + 1)
         let cellsHigh = max(0, image.height / step - patch / step + 1)
         var logits = [Float](repeating: -.infinity, count: cellsWide * cellsHigh)
@@ -90,8 +90,8 @@ public struct MastNet: Sendable {
         let core = min(512, ((max(image.width, image.height) + 7) / 8) * 8)
         let tileSize = core + 2 * halo
         var tile = [Float](repeating: 0, count: tileSize * tileSize * 3)
-        for tileRow in stride(from: 0, to: image.height, by: core) {
-            for tileColumn in stride(from: 0, to: image.width, by: core) {
+        for tileRow in Swift.stride(from: 0, to: image.height, by: core) {
+            for tileColumn in Swift.stride(from: 0, to: image.width, by: core) {
                 if let water, !Self.hasWater(water, rows: tileRow..<min(tileRow + core, image.height), columns: tileColumn..<min(tileColumn + core, image.width)) {
                     continue
                 }
@@ -115,8 +115,8 @@ public struct MastNet: Sendable {
     }
 
     private static func hasWater(_ water: WaterSegmenter.Mask, rows: Range<Int>, columns: Range<Int>) -> Bool {
-        for row in stride(from: rows.lowerBound, to: rows.upperBound, by: water.factor) {
-            for column in stride(from: columns.lowerBound, to: columns.upperBound, by: water.factor) where water.isWater(column: column, row: row) {
+        for row in Swift.stride(from: rows.lowerBound, to: rows.upperBound, by: water.factor) {
+            for column in Swift.stride(from: columns.lowerBound, to: columns.upperBound, by: water.factor) where water.isWater(column: column, row: row) {
                 return true
             }
         }
@@ -288,7 +288,7 @@ public struct MastNet: Sendable {
     }
 }
 
-/// Mast probabilities on a grid of `MastNet.stride` pixels.
+/// Mast probabilities on a grid of `MastNet.heatmapStride` pixels.
 public struct MastHeatmap: Sendable {
     public let width: Int
     public let height: Int
@@ -325,8 +325,8 @@ public struct MastHeatmap: Sendable {
                 if isMax {
                     let half = Double(MastNet.patchSize) / 2
                     peaks.append(Peak(
-                        column: Double(j * MastNet.stride) + half,
-                        row: Double(i * MastNet.stride) + half,
+                        column: Double(j * MastNet.heatmapStride) + half,
+                        row: Double(i * MastNet.heatmapStride) + half,
                         probability: 1 / (1 + exp(-Double(value)))
                     ))
                 }
@@ -338,8 +338,8 @@ public struct MastHeatmap: Sendable {
     /// Highest probability within `radiusCells` of a pixel position; 0 where nothing was computed.
     public func probability(nearColumn column: Double, row: Double, radiusCells: Int = 1) -> Double {
         let half = Double(MastNet.patchSize) / 2
-        let j = Int(((column - half) / Double(MastNet.stride)).rounded())
-        let i = Int(((row - half) / Double(MastNet.stride)).rounded())
+        let j = Int(((column - half) / Double(MastNet.heatmapStride)).rounded())
+        let i = Int(((row - half) / Double(MastNet.heatmapStride)).rounded())
         var best = -Float.infinity
         for di in -radiusCells...radiusCells {
             for dj in -radiusCells...radiusCells {
