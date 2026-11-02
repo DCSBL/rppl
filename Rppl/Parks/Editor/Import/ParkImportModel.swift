@@ -253,12 +253,26 @@ final class ParkImportModel {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
-        let handler = VNImageRequestHandler(cgImage: image, orientation: CGImagePropertyOrientation(orientation), options: [:])
+        let handler = VNImageRequestHandler(cgImage: image, orientation: imageOrientation(orientation), options: [:])
         do {
             try handler.perform([request])
         } catch {
             return ""
         }
         return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+    }
+
+    private nonisolated static func imageOrientation(_ orientation: UIImage.Orientation) -> CGImagePropertyOrientation {
+        switch orientation {
+        case .up: .up
+        case .upMirrored: .upMirrored
+        case .down: .down
+        case .downMirrored: .downMirrored
+        case .left: .left
+        case .leftMirrored: .leftMirrored
+        case .right: .right
+        case .rightMirrored: .rightMirrored
+        @unknown default: .up
+        }
     }
 }
