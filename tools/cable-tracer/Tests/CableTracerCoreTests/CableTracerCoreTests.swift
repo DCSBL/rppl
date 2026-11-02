@@ -83,6 +83,24 @@ final class CableTracerCoreTests: XCTestCase {
         XCTAssertTrue(CableLint.check(mislabeled, index: 0, parkLocation: almere).contains { $0.message.contains("is this a 2.0") })
     }
 
+    func testConvexityAndWinding() {
+        let loop = CableGeometry(cable: almereLoop, parkLocation: almere)
+        XCTAssertTrue(loop.isConvex)
+        XCTAssertEqual(loop.windingDirection, .counterClockwise)
+
+        var reversed = almereLoop
+        reversed.points?.reverse()
+        XCTAssertEqual(CableGeometry(cable: reversed, parkLocation: almere).windingDirection, .clockwise)
+        XCTAssertTrue(CableLint.check(reversed, index: 0, parkLocation: almere).contains { $0.message.contains("but direction says ccw") })
+
+        // Push the far bend into the loop: a mast "pushing" from the inside.
+        var dented = almereLoop
+        dented.points?[2] = ParkCablePoint(lat: 52.35935, lon: 5.2180)
+        let geometry = CableGeometry(cable: dented, parkLocation: almere)
+        XCTAssertFalse(geometry.isConvex)
+        XCTAssertTrue(CableLint.check(dented, index: 0, parkLocation: almere).contains { $0.message.contains("inward bend") })
+    }
+
     func testPriorAndTemplates() {
         let park = Park(id: "almere", name: "VIEW", location: almere, cables: [almereLoop, almereTwoPointZero])
         let prior = CablePrior.learn(from: [park])

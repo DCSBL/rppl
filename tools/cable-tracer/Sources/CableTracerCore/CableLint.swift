@@ -78,7 +78,14 @@ public enum CableLint {
             if geometry.axes.widthM < thresholds.loopWidthMinimum {
                 add(.warning, "Loop is only \(Int(geometry.axes.widthM)) m wide; looks like a straight line, is this a 2.0?")
             }
-            if geometry.isSelfIntersecting { add(.error, "Loop crosses itself; points are not in travel order") }
+            if geometry.isSelfIntersecting {
+                add(.error, "Loop crosses itself; points are not in travel order")
+            } else if !geometry.isConvex {
+                add(.warning, "Loop has an inward bend; masts stand outside the cable and pull, so a loop is convex")
+            }
+            if let winding = geometry.windingDirection, let direction = cable.direction, direction.isLoop, winding != direction {
+                add(.warning, "Points run \(winding.rawValue) but direction says \(direction.rawValue)")
+            }
         case .straight:
             if points.count != 2 { add(.warning, "2.0 cable traced with \(points.count) points; expected a start and an end") }
             if !thresholds.straightLengthWarning.contains(geometry.pathLengthM) {

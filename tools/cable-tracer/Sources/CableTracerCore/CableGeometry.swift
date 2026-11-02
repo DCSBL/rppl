@@ -114,6 +114,34 @@ public struct CableGeometry: Codable, Equatable, Sendable {
         )
     }
 
+    /// Whether every bend turns the same way. Masts stand outside the loop and pull the cable,
+    /// so a traced full-size loop is a convex polygon; a bend the other way means a point is
+    /// out of order or a mast was drawn "pushing" from the inside.
+    public var isConvex: Bool {
+        guard isClosed, pointsXY.count >= 3 else { return true }
+        var sign = 0.0
+        let count = pointsXY.count
+        for index in 0..<count {
+            let previous = pointsXY[(index - 1 + count) % count], current = pointsXY[index], next = pointsXY[(index + 1) % count]
+            let cross = (current.x - previous.x) * (next.y - current.y) - (current.y - previous.y) * (next.x - current.x)
+            guard abs(cross) > 1 else { continue }  // collinear within a square metre
+            if sign == 0 { sign = cross.sign == .minus ? -1 : 1 } else if (cross < 0) != (sign < 0) { return false }
+        }
+        return true
+    }
+
+    /// Signed travel direction of a closed loop as seen from above: `.counterClockwise`, `.clockwise`, or nil for a line.
+    public var windingDirection: ParkCableDirection? {
+        guard isClosed, pointsXY.count >= 3 else { return nil }
+        var area = 0.0
+        for index in pointsXY.indices {
+            let a = pointsXY[index], b = pointsXY[(index + 1) % pointsXY.count]
+            area += a.x * b.y - b.x * a.y
+        }
+        if abs(area) < 1 { return nil }
+        return area > 0 ? .counterClockwise : .clockwise
+    }
+
     /// Whether the closed outline crosses itself (a loop traced in the wrong vertex order).
     public var isSelfIntersecting: Bool {
         guard isClosed, pointsXY.count >= 4 else { return false }
