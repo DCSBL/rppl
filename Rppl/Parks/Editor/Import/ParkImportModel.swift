@@ -173,6 +173,12 @@ final class ParkImportModel {
         if !notes.contains(note) { notes.append(note) }
     }
 
+    /// Today as `yyyy-MM-dd` in the park's time zone.
+    private static func today(in zone: TimeZone) -> String {
+        let parts = Calendar(identifier: .gregorian).dateComponents(in: zone, from: Date())
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 1, parts.day ?? 1)
+    }
+
     /// The address as a short label: the path, or the host for the front page.
     private static func label(_ address: String) -> String {
         guard let components = URLComponents(string: address) else { return address }
@@ -206,6 +212,7 @@ final class ParkImportModel {
         candidates.merge(ParkImportCandidates(page: page))
         candidates.opening = ParkOpeningReader.read(pages)
         candidates.openingNote = candidates.opening == nil ? ParkOpeningReader.hoursText(pages) : nil
+        candidates.events = ParkEventReader.read(pages, today: Self.today(in: session.park.resolvedTimeZone))
         let chunks = ParkImportChunker.chunks(for: [page], topics: topicsToAsk())
         for (index, chunk) in chunks.enumerated() {
             phase = .reading(part: index + 1, of: chunks.count)
@@ -256,7 +263,7 @@ final class ParkImportModel {
                 var extra = ParkImportCandidates()
                 extra.facilities = result.facilities.filter { !$0.isEmpty }
                 candidates.merge(extra)
-            case .opening:
+            case .opening, .events:
                 break
             }
         } catch {

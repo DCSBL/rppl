@@ -134,24 +134,24 @@ public enum ParkOpeningReader {
     private static let rangeWords: Set<String> = ["-", "tm", "tot", "bis", "to", "through", "thru", "until", "till"]
     private static let listWords: Set<String> = ["en", "und", "and", "of", "&"]
 
-    private static let dayNames: [String: Int] = [
+    static let dayNames: [String: Int] = [
         "maandag": 0, "dinsdag": 1, "woensdag": 2, "donderdag": 3, "vrijdag": 4, "zaterdag": 5, "zondag": 6,
         "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6,
         "montag": 0, "dienstag": 1, "mittwoch": 2, "donnerstag": 3, "freitag": 4, "samstag": 5, "sonntag": 6,
         "sonnabend": 5,
     ]
-    private static let dayAbbreviations: [String: Int] = [
+    static let dayAbbreviations: [String: Int] = [
         "ma": 0, "di": 1, "wo": 2, "do": 3, "vr": 4, "za": 5, "zo": 6,
         "mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6,
         "mo": 0, "mi": 2, "fr": 4, "sa": 5, "so": 6,
     ]
-    private static let monthNamesLookup: [String: Int] = [
+    static let monthNamesLookup: [String: Int] = [
         "januari": 1, "februari": 2, "maart": 3, "april": 4, "mei": 5, "juni": 6, "juli": 7, "augustus": 8,
         "september": 9, "oktober": 10, "november": 11, "december": 12,
         "january": 1, "february": 2, "march": 3, "june": 6, "july": 7, "august": 8, "october": 10,
         "januar": 1, "februar": 2, "märz": 3, "maerz": 3, "mai": 5, "dezember": 12,
     ]
-    private static let monthAbbreviations: [String: Int] = [
+    static let monthAbbreviations: [String: Int] = [
         "jan": 1, "feb": 2, "mrt": 3, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8,
         "sep": 9, "sept": 9, "okt": 10, "oct": 10, "nov": 11, "dec": 12, "dez": 12,
     ]

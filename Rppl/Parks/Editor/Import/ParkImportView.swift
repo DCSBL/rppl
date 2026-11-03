@@ -87,6 +87,7 @@ struct ParkImportView: View {
             Label("Opening hours", systemImage: "clock")
             Label("Prices", systemImage: "eurosign.circle")
             Label("Website and social links", systemImage: "link")
+            Label("Events and closures", systemImage: "calendar")
             Label("Facilities", systemImage: "list.bullet")
         } header: {
             Text("Can be filled in")
@@ -207,6 +208,7 @@ struct ParkImportView: View {
         case .prices: "Prices"
         case .facilities: "Facilities"
         case .opening: "Opening hours"
+        case .events: "Events and closures"
         }
     }
 
