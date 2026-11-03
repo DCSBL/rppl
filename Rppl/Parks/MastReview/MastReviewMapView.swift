@@ -3,7 +3,7 @@ import RpplCore
 import SwiftUI
 
 /// Debug: satellite map of one park. "Find towers" runs the tower detector around the map centre;
-/// the guesses come up one by one (most confident first) under the crosshair, and each gets a
+/// the guesses come up one by one (the most confident first, then always the nearest one) under the crosshair, and each gets a
 /// verdict. Pan the crosshair onto the real tower before "Tower" to correct the position; use
 /// "Add tower here" for towers the detector missed.
 struct MastReviewMapView: View {

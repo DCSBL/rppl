@@ -144,7 +144,8 @@ public struct MastReviewRequest: Codable, Equatable, Sendable {
     }
 }
 
-/// The detector's unreviewed mast guesses for one park, judged one at a time, most confident first.
+/// The detector's unreviewed tower guesses for one park, judged one at a time: the most confident
+/// first, then always the nearest remaining guess, so the map moves in short hops along the shore.
 /// Pure state so the review flow can be tested without a map.
 public struct MastReviewSession: Equatable, Sendable {
     public struct Candidate: Identifiable, Equatable, Sendable {
@@ -172,8 +173,20 @@ public struct MastReviewSession: Equatable, Sendable {
                 guard !labels.isReviewed(coordinate, in: parkID) else { return nil }
                 return Candidate(id: index, coordinate: coordinate, probability: mast.probability)
             }
-            .sorted { $0.probability > $1.probability }
+        candidates = Self.nearestNeighbourOrder(candidates)
         currentIndex = candidates.isEmpty ? nil : 0
+    }
+
+    /// Starts at the most confident guess and walks to the nearest unvisited one each time.
+    static func nearestNeighbourOrder(_ candidates: [Candidate]) -> [Candidate] {
+        guard let first = candidates.indices.max(by: { candidates[$0].probability < candidates[$1].probability }) else { return [] }
+        var remaining = candidates
+        var ordered = [remaining.remove(at: first)]
+        while !remaining.isEmpty, let last = ordered.last {
+            let next = remaining.indices.min { last.coordinate.meters(to: remaining[$0].coordinate) < last.coordinate.meters(to: remaining[$1].coordinate) }!
+            ordered.append(remaining.remove(at: next))
+        }
+        return ordered
     }
 
     public var current: Candidate? { currentIndex.map { candidates[$0] } }

@@ -88,6 +88,23 @@ struct MastReviewTests {
         #expect(nothing == nil)
     }
 
+    @Test func guessesFollowTheNearestRemainingOne() {
+        // Most confident in the middle; the walk then hops to the nearest each time, not by confidence.
+        let detected = [
+            DetectedMast(xy: SIMD2(0, 0), probability: 0.9),
+            DetectedMast(xy: SIMD2(300, 0), probability: 0.8),
+            DetectedMast(xy: SIMD2(-50, 0), probability: 0.4),
+            DetectedMast(xy: SIMD2(-120, 0), probability: 0.6),
+            DetectedMast(xy: SIMD2(200, 0), probability: 0.5),
+        ]
+        var session = MastReviewSession(parkID: "p", detected: detected, image: image, labels: MastLabelStore())
+        #expect(session.candidates.map(\.probability) == [0.9, 0.4, 0.6, 0.5, 0.8])
+        _ = session.judge(.notMast, crosshair: nil)
+        #expect(session.current?.probability == 0.4)
+        session.skip()
+        #expect(session.current?.probability == 0.6)
+    }
+
     @Test func mastVerdictIgnoresACrosshairThatWanderedOff() {
         var session = MastReviewSession(parkID: "p", detected: [DetectedMast(xy: SIMD2(0, 0), probability: 0.5)], image: image, labels: MastLabelStore())
         let label = session.judge(.mast, crosshair: image.coordinate(fromLocal: SIMD2(0, 200)))
