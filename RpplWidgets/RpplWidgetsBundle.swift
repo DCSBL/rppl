@@ -7,5 +7,6 @@ struct RpplWidgetsBundle: WidgetBundle {
         ParkHoursWidget()
         TopParksWidget()
         LastSessionWidget()
+        LiveSessionLiveActivity()
     }
 }

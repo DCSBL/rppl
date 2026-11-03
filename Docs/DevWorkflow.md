@@ -158,6 +158,7 @@ What this does **not** cover: the coverage floor (`make coverage`; Linux coverag
 | `OSLog` | `Platform/LoggerShim.swift`: no-op `Logger` |
 | `String(localized:bundle:)` | `Platform/LocalizationShim.swift`: returns the English key |
 | `FormatStyle` / `MeasurementFormatter` (`DistanceFormat`, `EnergyFormat`, `TemperatureFormat`) | compiled out on Linux, and so are their tests |
+| `ActivityKit`, `AppIntents` (`LiveSessionActivity.swift`) | compiled out except on iOS, the file only holds the shared Live Activity types |
 | App Group `containerURL` | `nil` on Linux |
 | `URLSession` | `import FoundationNetworking` |
 
