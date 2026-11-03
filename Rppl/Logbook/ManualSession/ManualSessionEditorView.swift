@@ -210,7 +210,12 @@ struct ManualSessionEditorView: View {
         isSaving = true
         let store = connectivity.store
         let (draft, editing) = (draft, editing)
-        let entry = ManualEntry(tallies: draft.tallies, distanceM: distanceM, location: park?.location ?? draft.spot)
+        // Set times from a live session only stay valid while the counts and the start are untouched.
+        let keepsSetStarts = draft.tallies == initial.tallies && draft.start == initial.start
+        let entry = ManualEntry(
+            tallies: draft.tallies, distanceM: distanceM, location: park?.location ?? draft.spot,
+            setStarts: keepsSetStarts ? editing.flatMap { try? store.readManifest(sessionId: $0).manual?.setStarts } : nil
+        )
         let parkId = park?.id
         let label = park?.compactName ?? (draft.spot == nil ? nil : (draft.spotName ?? String(localized: "Own location")))
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
