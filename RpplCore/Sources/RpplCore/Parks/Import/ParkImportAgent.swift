@@ -6,6 +6,12 @@ public struct ParkImportTarget: Equatable, Sendable {
     public var topic: ParkImportTopic
     /// `true` when the page is not linked anywhere that was read: a usual address of the site (`/prijzen`).
     public var isGuess: Bool
+
+    public init(url: String, topic: ParkImportTopic, isGuess: Bool) {
+        self.url = url
+        self.topic = topic
+        self.isGuess = isGuess
+    }
 }
 
 /// The part of the import that decides where to look next. Pure, so the loop around it (fetching and
