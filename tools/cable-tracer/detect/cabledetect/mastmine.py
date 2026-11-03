@@ -24,9 +24,9 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
             models[park] = fold_params
     rng = np.random.default_rng(3)
     added = 0
-    for example in dataset.load(root):
-        if not example.detail or not len(example.mast_positions_xy) or example.park_id not in models:
-            continue
+    examples = [e for e in dataset.load(root) if e.detail and len(e.mast_positions_xy) and e.park_id in models]
+    for number, example in enumerate(examples, 1):
+        print(f"progress: mining [{number}/{len(examples)}] {example.park_id}", flush=True)
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]

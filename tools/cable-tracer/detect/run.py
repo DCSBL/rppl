@@ -68,11 +68,9 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
 
     results = []
-    for example in dataset.load(args.training_set):
-        if args.only and example.park_id not in args.only:
-            continue
-        if not example.detail or not example.loops:
-            continue
+    examples = [e for e in dataset.load(args.training_set) if (not args.only or e.park_id in args.only) and e.detail and e.loops]
+    for number, example in enumerate(examples, 1):
+        print(f"progress: loops [{number}/{len(examples)}] {example.park_id}", flush=True)
         started = time.time()
         snapshot = example.detail
         rgb = example.image(snapshot)

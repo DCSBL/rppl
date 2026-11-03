@@ -25,9 +25,9 @@ def crop(rgb: np.ndarray, col: float, row: float, size: int = PATCH) -> np.ndarr
 def build(root: Path, out: Path, rng_seed: int = 7) -> None:
     rng = np.random.default_rng(rng_seed)
     patches, labels, parks, kinds = [], [], [], []
-    for example in dataset.load(root):
-        if not example.detail or not len(example.mast_positions_xy):
-            continue
+    examples = [e for e in dataset.load(root) if e.detail and len(e.mast_positions_xy)]
+    for number, example in enumerate(examples, 1):
+        print(f"progress: patches [{number}/{len(examples)}] {example.park_id}", flush=True)
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]

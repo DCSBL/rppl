@@ -53,6 +53,26 @@ the 600 m close-up for a park that has labels but no traced cable, so such a par
 net too: `mast` is a positive like a traced bend, `none` a hard negative (`kind == "rejected"`),
 `unsure` keeps the patch sampler and the miner away from that spot.
 
+## Training round in one command
+
+`train_round.py` runs a whole round (merge the exported sets, patches, train, mine false peaks,
+train again, evaluate the loop fit) and shows a live status line per step: the park it is on, or
+the fold, epoch, loss and time left while training. Full output of every step goes to a log in the
+work folder. On a Mac (Apple Silicon CPU is plenty for this ~18k-parameter net):
+
+```bash
+cd tools/cable-tracer/detect
+python3 -m venv /tmp/towernet-venv && /tmp/towernet-venv/bin/pip install -r requirements.txt
+C="$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/DCSBL/cable-tracer-check"
+/tmp/towernet-venv/bin/python train_round.py \
+  --sets "$C/training-set" "$C/training-set-2026-11-03" "$C/labels-set1-2026-11-03" "$C/labels-set2-2026-11-03" \
+  --work /tmp/towernet-round --copy-to "$C/train-$(date +%F)"
+```
+
+It ends with the held-out tower scores (AUC, towers found, rejected guesses still fired on) and
+the loop-fit summary line; compare those with `RESULTS.md` before exporting the weights with
+`export_mastnet.py`.
+
 ## Training the mast net
 
 ```bash

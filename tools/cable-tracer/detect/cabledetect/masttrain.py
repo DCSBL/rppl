@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import jax
@@ -68,7 +69,12 @@ def augment(rng: np.random.Generator, x: np.ndarray) -> np.ndarray:
     return np.clip(x, 0, 1)
 
 
-def train(x: np.ndarray, y: np.ndarray, epochs: int = 30, seed: int = 0, batch: int = 64):
+def progress(text: str) -> None:
+    """One-line status; train_round.py shows these in place and keeps them out of the log."""
+    print(f"progress: {text}", flush=True)
+
+
+def train(x: np.ndarray, y: np.ndarray, epochs: int = 30, seed: int = 0, batch: int = 64, label: str = "training"):
     rng = np.random.default_rng(seed)
     params = init_params(jax.random.PRNGKey(seed))
     opt = (jax.tree_util.tree_map(jnp.zeros_like, params), jax.tree_util.tree_map(jnp.zeros_like, params), 0)
@@ -77,13 +83,19 @@ def train(x: np.ndarray, y: np.ndarray, epochs: int = 30, seed: int = 0, batch: 
     pos_weight = float((len(y) - y.sum()) / max(1, y.sum()))
     steps = epochs * (len(y) // batch)
     step = 0
-    for _ in range(epochs):
+    started = time.time()
+    for epoch in range(epochs):
         perm = rng.permutation(len(y))
+        losses = []
         for i in range(0, len(y) - batch + 1, batch):
             idx = perm[i:i + batch]
             lr = 2e-3 * 0.5 * (1 + np.cos(np.pi * step / steps))
-            params, opt, _ = adam_step(params, opt, jnp.asarray(augment(rng, xf[idx])), jnp.asarray(yf[idx]), pos_weight, lr)
+            params, opt, loss = adam_step(params, opt, jnp.asarray(augment(rng, xf[idx])), jnp.asarray(yf[idx]), pos_weight, lr)
+            losses.append(float(loss))
             step += 1
+        elapsed = time.time() - started
+        left = elapsed / (epoch + 1) * (epochs - epoch - 1)
+        progress(f"{label}: epoch {epoch + 1}/{epochs}, loss {np.mean(losses):.3f}, {elapsed:.0f} s, about {left:.0f} s left")
     return params
 
 
@@ -118,7 +130,7 @@ def main(npz: Path, out: Path, seed: int = 0) -> None:
     cv = np.zeros(len(y))
     for f, held in enumerate(folds):
         test = np.isin(parks, held)
-        params = train(x[~test], y[~test], seed=seed)
+        params = train(x[~test], y[~test], seed=seed, label=f"fold {f + 1}/5")
         save_params(params, out.with_name(f"{out.stem}.fold{f}.npz"))
         json.dump([str(p) for p in held], open(out.with_name(f"{out.stem}.fold{f}.json"), "w"))
         cv[test] = predict(params, x[test])
@@ -133,7 +145,7 @@ def main(npz: Path, out: Path, seed: int = 0) -> None:
     report["recall_per_park"] = {p: round(float(np.mean(cv[(parks == p) & (y == 1)] > 0.5)), 2) for p in np.unique(parks)}
     print(json.dumps(report, indent=1))
     np.save(out.with_suffix(".cv-scores.npy"), cv)
-    params = train(x, y, seed=seed)
+    params = train(x, y, seed=seed, label="final model")
     save_params(params, out)
     print("params:", sum(int(np.prod(w.shape)) + int(np.prod(b.shape)) for w, b in params))
 
