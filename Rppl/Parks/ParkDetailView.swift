@@ -28,9 +28,6 @@ struct ParkDetailView: View {
     @AppStorage(AppSettingsKey.didDeclineParkWaterTemperaturePrompt) private var didDeclineWaterTemperaturePrompt = false
     @State private var showWaterTemperaturePrompt = false
     @AppStorage(AppSettingsKey.parkEditorEnabled) private var editorEnabled = true
-    @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
-    /// Debug: the averaged walking route of every session here (`ParkWalkRouteLoader`).
-    @State private var walkRoute: [[CLLocationCoordinate2D]] = []
     @State private var showEditor = false
     @State private var resumeDraft: ParkEditDraft?
     @State private var askAboutDraft = false
@@ -158,13 +155,6 @@ struct ParkDetailView: View {
             waterTemperature = await waterTemperatureResult
             waterTemperatureChecked = true
         }
-        .task(id: walkRouteEnabled) {
-            guard walkRouteEnabled else {
-                walkRoute = []
-                return
-            }
-            walkRoute = await ParkWalkRouteLoader.sections(parkId: park.id, store: PhoneConnectivityService.shared.store)
-        }
         .onChange(of: waterTemperatureEnabled) { _, isEnabled in
             guard isEnabled else { return }
             Task {
@@ -283,12 +273,11 @@ struct ParkDetailView: View {
                     park: park,
                     usesSatellite: usesSatellite,
                     weather: weather,
-                    position: .constant(.region(ParkMap.region(for: park))),
-                    walkRoute: walkRoute
+                    position: .constant(.region(ParkMap.region(for: park)))
                 )
                 .allowsHitTesting(false)
                 NavigationLink {
-                    ParkMapScreen(park: park, weather: weather, walkRoute: walkRoute)
+                    ParkMapScreen(park: park, weather: weather)
                 } label: {
                     Color.clear
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -954,12 +943,9 @@ private struct ParkMapScreen: View {
     @State private var location = ParksLocationProvider()
     @State private var pendingRecenter = false
 
-    var walkRoute: [[CLLocationCoordinate2D]] = []
-
-    init(park: Park, weather: ParkWeather?, walkRoute: [[CLLocationCoordinate2D]] = []) {
+    init(park: Park, weather: ParkWeather?) {
         self.park = park
         self.weather = weather
-        self.walkRoute = walkRoute
         _position = State(initialValue: .region(ParkMap.region(for: park)))
     }
 
@@ -976,7 +962,6 @@ private struct ParkMapScreen: View {
             weather: weather,
             position: $position,
             showsUserLocation: location.availability == .available,
-            walkRoute: walkRoute,
             // Out of the way of the bar buttons in the top corner.
             windRoseAlignment: .bottomTrailing
         )
@@ -1028,8 +1013,6 @@ private struct ParkMap: View {
     let weather: ParkWeather?
     @Binding var position: MapCameraPosition
     var showsUserLocation = false
-    /// Debug: averaged walking route sections, dashed.
-    var walkRoute: [[CLLocationCoordinate2D]] = []
     var windRoseAlignment: Alignment = .topTrailing
 
     @State private var mapHeading: Double = 0
@@ -1056,12 +1039,6 @@ private struct ParkMap: View {
                 if points.count >= 2 {
                     MapPolyline(coordinates: cable.direction?.isLoop == true ? points + [points[0]] : points)
                         .stroke(Color.rpplAccent, lineWidth: 3)
-                }
-            }
-            ForEach(Array(walkRoute.enumerated()), id: \.offset) { _, section in
-                if section.count >= 2 {
-                    MapPolyline(coordinates: section)
-                        .stroke(Color.rpplMetricTime, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [6, 5]))
                 }
             }
             if showsUserLocation {
