@@ -1,8 +1,8 @@
 import Foundation
 import RpplCore
 
-extension MastLabelStore {
-    /// `<repo>/tools/cable-tracer/mast-labels.json` for a parks folder inside the repo; next to the
+extension TowerLabelStore {
+    /// `<repo>/tools/cable-tracer/tower-labels.json` for a parks folder inside the repo; next to the
     /// parks folder otherwise (never inside it: the app bundles that folder).
     public static func defaultFile(parksDirectory: URL) -> URL {
         var url = parksDirectory.standardizedFileURL

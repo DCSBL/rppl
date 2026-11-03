@@ -69,7 +69,7 @@
         "probability": 0.9967293329050773,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -106,7 +106,7 @@
         "probability": 0.9904450511232055,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -132,7 +132,7 @@
         "probability": 0.9897120533023595,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -158,7 +158,7 @@
         "probability": 0.9543997601631901,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -173,7 +173,7 @@
         "probability": 0.7959428261282351,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -267,7 +267,7 @@
         "probability": 0.9997719177746238,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -282,7 +282,7 @@
         "probability": 0.9986880179558103,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -297,7 +297,7 @@
         "probability": 0.9962526947132383,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -312,7 +312,7 @@
         "probability": 0.9932597846581172,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -327,7 +327,7 @@
         "probability": 0.9920833588073924,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -342,7 +342,7 @@
         "probability": 0.9848796496538226,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -623,7 +623,7 @@
         "probability": 0.9959134461960605,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -770,7 +770,7 @@
         "probability": 0.9902354983417688,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -807,7 +807,7 @@
         "probability": 0.9832474911714716,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -899,7 +899,7 @@
         "probability": 0.9750183444577483,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1057,7 +1057,7 @@
         "probability": 0.9195072178297765,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1168,7 +1168,7 @@
         "id": "4693FEDB-A515-413B-9BF3-3D6763035375",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1178,7 +1178,7 @@
         "id": "51CE1A50-407E-488A-ADF8-032B4E16BA85",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1188,7 +1188,7 @@
         "id": "7456CE93-E5B5-435F-B2CF-7C1F906A9551",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1198,7 +1198,7 @@
         "id": "EA7D4327-101B-4EA3-ADD0-2F8F9F55981C",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1208,7 +1208,7 @@
         "id": "3C127276-0947-49A0-81D8-54530AFEAC27",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1638,7 +1638,7 @@
         "id": "D52C4938-2447-4F38-9563-F196B8023D84",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1648,7 +1648,7 @@
         "id": "09081465-AF1F-4661-BE5D-7F36AD1AEE39",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1658,7 +1658,7 @@
         "id": "B960754B-BAEE-4E38-B2C8-560D7E4D6F0A",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1668,7 +1668,7 @@
         "id": "F80FF68D-4809-48F3-BC63-25270C269A15",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1678,7 +1678,7 @@
         "id": "6B8BB05F-B54E-4A10-822D-128C3FAAC171",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1688,7 +1688,7 @@
         "id": "710966F5-1755-4A6B-A535-B63960CED662",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1859,7 +1859,7 @@
         "probability": 0.9962455423655588,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1874,7 +1874,7 @@
         "probability": 0.9961615096874299,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -1889,7 +1889,7 @@
         "probability": 0.9556439507020678,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2229,7 +2229,7 @@
         "id": "B2CE876E-5E1F-4B92-80EE-7237B3E62B09",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2239,7 +2239,7 @@
         "id": "0358BFA2-D9D4-41DA-B3E1-C8B4C67920BB",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       }
     ],
     "goitzsche-wakepark-pouch": [
@@ -2256,7 +2256,7 @@
         "probability": 0.9984706768542924,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2271,7 +2271,7 @@
         "probability": 0.9978066085205253,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2286,7 +2286,7 @@
         "probability": 0.9942473349496131,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2301,7 +2301,7 @@
         "probability": 0.9913721884020027,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2316,7 +2316,7 @@
         "probability": 0.9851402604225326,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2331,7 +2331,7 @@
         "probability": 0.9847474755192513,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2392,7 +2392,7 @@
         "probability": 0.9988119779526641,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2407,7 +2407,7 @@
         "probability": 0.9975189863246324,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2477,7 +2477,7 @@
         "probability": 0.9918470527140473,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2558,7 +2558,7 @@
         "probability": 0.9816296697050731,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2843,7 +2843,7 @@
         "id": "5050C1B7-2FB3-4E85-BEC6-B9DF2A563CE7",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       }
     ],
     "hot-sport-seepark-niederweimar": [
@@ -2860,7 +2860,7 @@
         "probability": 0.9955985353810026,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2875,7 +2875,7 @@
         "probability": 0.9891793977409564,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2890,7 +2890,7 @@
         "probability": 0.9832611994308292,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2905,7 +2905,7 @@
         "probability": 0.9247137239197385,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2916,7 +2916,7 @@
         "probability": 0.8081025799819126,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2966,7 +2966,7 @@
         "probability": 0.9974917966937451,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2981,7 +2981,7 @@
         "probability": 0.9703481409681047,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -2996,7 +2996,7 @@
         "probability": 0.9687423102485112,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3033,7 +3033,7 @@
         "probability": 0.9227436243032311,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3384,7 +3384,7 @@
         "id": "52D37910-E460-4F43-9343-4D8C7E793C17",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       }
     ],
     "spotz-wakeboard-park-norderstedt": [
@@ -3401,7 +3401,7 @@
         "probability": 0.9895874022741972,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3416,7 +3416,7 @@
         "probability": 0.9894734073778659,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3431,7 +3431,7 @@
         "probability": 0.9889524982732196,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3446,7 +3446,7 @@
         "probability": 0.988893986954213,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3527,7 +3527,7 @@
         "probability": 0.35712067228230115,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3566,7 +3566,7 @@
         "probability": 0.9961494039956693,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3581,7 +3581,7 @@
         "probability": 0.9951778698528733,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3596,7 +3596,7 @@
         "probability": 0.9926892151805768,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3611,7 +3611,7 @@
         "probability": 0.9919073225513028,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3648,7 +3648,7 @@
         "probability": 0.5931357082105126,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3676,7 +3676,7 @@
         "probability": 0.9793186407964796,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3691,7 +3691,7 @@
         "probability": 0.977966785491225,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3761,7 +3761,7 @@
         "probability": 0.3318454937638662,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3782,7 +3782,7 @@
         "id": "62B3E632-FCF0-4D68-B88A-CEBAF48C48B2",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       }
     ],
     "wakepark-tunisee-freiburg": [
@@ -3799,7 +3799,7 @@
         "probability": 0.9965829093383449,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3814,7 +3814,7 @@
         "probability": 0.9917653664933702,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3829,7 +3829,7 @@
         "probability": 0.9740844809465372,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3844,7 +3844,7 @@
         "probability": 0.9733487984253837,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -3870,7 +3870,7 @@
         "probability": 0.9437552515922885,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -4173,7 +4173,7 @@
         "probability": 0.9984027941223661,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -4210,7 +4210,7 @@
         "probability": 0.990412627735423,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -4280,7 +4280,7 @@
         "probability": 0.9426420182457887,
         "reviewedAt": "2026-11-03",
         "source": "detector",
-        "verdict": "mast"
+        "verdict": "tower"
       },
       {
         "coordinate": {
@@ -4477,7 +4477,7 @@
         "id": "7BE608BC-6769-483F-AB02-6BE9C75BB65D",
         "reviewedAt": "2026-11-03",
         "source": "manual",
-        "verdict": "mast"
+        "verdict": "tower"
       }
     ]
   },

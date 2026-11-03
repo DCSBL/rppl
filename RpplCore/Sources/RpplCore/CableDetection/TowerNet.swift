@@ -4,11 +4,11 @@ import Accelerate
 #endif
 
 /// Tiny convolutional classifier that says whether a 64 px (about 19 m at 0.29 m/px) patch of
-/// satellite imagery is centred on a cable mast. Four 3x3 convolutions, each followed by 2x2 max
+/// satellite imagery is centred on a cable tower. Four 3x3 convolutions, each followed by 2x2 max
 /// pooling, a global mean and one linear unit: about 18k weights, trained on the hand-traced bends
-/// of the bundled parks (see tools/cable-tracer/detect). Run fully convolutionally it yields a mast
+/// of the bundled parks (see tools/cable-tracer/detect). Run fully convolutionally it yields a tower
 /// heatmap with one cell per 16 px.
-public struct MastNet: Sendable {
+public struct TowerNet: Sendable {
     struct ConvLayer: Sendable {
         let inChannels: Int
         let outChannels: Int
@@ -31,9 +31,9 @@ public struct MastNet: Sendable {
     // MARK: Loading
 
     /// Weights bundled with RpplCore; nil when the resource is missing or malformed.
-    public static let bundled: MastNet? = {
-        guard let url = Bundle.module.url(forResource: "MastNet", withExtension: "weights") else { return nil }
-        return try? MastNet(contentsOf: url)
+    public static let bundled: TowerNet? = {
+        guard let url = Bundle.module.url(forResource: "TowerNet", withExtension: "weights") else { return nil }
+        return try? TowerNet(contentsOf: url)
     }()
 
     public enum LoadError: Error { case badFormat }
@@ -76,14 +76,14 @@ public struct MastNet: Sendable {
         return linear(pooled.values)[0]
     }
 
-    /// Mast heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
+    /// Tower heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
     /// is (16 row, 16 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
-    func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> MastHeatmap {
+    func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> TowerHeatmap {
         let patch = Self.patchSize, step = Self.heatmapStride
         let cellsWide = max(0, image.width / step - patch / step + 1)
         let cellsHigh = max(0, image.height / step - patch / step + 1)
         var logits = [Float](repeating: -.infinity, count: cellsWide * cellsHigh)
-        guard cellsWide > 0, cellsHigh > 0 else { return MastHeatmap(width: cellsWide, height: cellsHigh, logits: logits) }
+        guard cellsWide > 0, cellsHigh > 0 else { return TowerHeatmap(width: cellsWide, height: cellsHigh, logits: logits) }
 
         // Tiles of `core` output pixels with a halo wide enough for the receptive field.
         let halo = 64
@@ -111,7 +111,7 @@ public struct MastNet: Sendable {
                 }
             }
         }
-        return MastHeatmap(width: cellsWide, height: cellsHigh, logits: logits)
+        return TowerHeatmap(width: cellsWide, height: cellsHigh, logits: logits)
     }
 
     private static func hasWater(_ water: WaterSegmenter.Mask, rows: Range<Int>, columns: Range<Int>) -> Bool {
@@ -286,8 +286,8 @@ public struct MastNet: Sendable {
     }
 }
 
-/// Mast probabilities on a grid of `MastNet.heatmapStride` pixels.
-public struct MastHeatmap: Sendable {
+/// Tower probabilities on a grid of `TowerNet.heatmapStride` pixels.
+public struct TowerHeatmap: Sendable {
     public let width: Int
     public let height: Int
     /// Row-major logits; -inf where nothing was computed.
@@ -321,10 +321,10 @@ public struct MastHeatmap: Sendable {
                     }
                 }
                 if isMax {
-                    let half = Double(MastNet.patchSize) / 2
+                    let half = Double(TowerNet.patchSize) / 2
                     peaks.append(Peak(
-                        column: Double(j * MastNet.heatmapStride) + half,
-                        row: Double(i * MastNet.heatmapStride) + half,
+                        column: Double(j * TowerNet.heatmapStride) + half,
+                        row: Double(i * TowerNet.heatmapStride) + half,
                         probability: 1 / (1 + exp(-Double(value)))
                     ))
                 }
@@ -335,9 +335,9 @@ public struct MastHeatmap: Sendable {
 
     /// Highest probability within `radiusCells` of a pixel position; 0 where nothing was computed.
     public func probability(nearColumn column: Double, row: Double, radiusCells: Int = 1) -> Double {
-        let half = Double(MastNet.patchSize) / 2
-        let j = Int(((column - half) / Double(MastNet.heatmapStride)).rounded())
-        let i = Int(((row - half) / Double(MastNet.heatmapStride)).rounded())
+        let half = Double(TowerNet.patchSize) / 2
+        let j = Int(((column - half) / Double(TowerNet.heatmapStride)).rounded())
+        let i = Int(((row - half) / Double(TowerNet.heatmapStride)).rounded())
         var best = -Float.infinity
         for di in -radiusCells...radiusCells {
             for dj in -radiusCells...radiusCells {
@@ -358,7 +358,7 @@ struct ByteReader {
     init(data: Data) { self.data = data }
 
     mutating func bytes(_ count: Int) throws -> [UInt8] {
-        guard offset + count <= data.count else { throw MastNet.LoadError.badFormat }
+        guard offset + count <= data.count else { throw TowerNet.LoadError.badFormat }
         defer { offset += count }
         return Array(data[(data.startIndex + offset)..<(data.startIndex + offset + count)])
     }

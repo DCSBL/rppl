@@ -56,7 +56,7 @@ def cluster_points(points: np.ndarray, link_m: float) -> list[np.ndarray]:
 
 
 def merge_close(points: np.ndarray, weights: np.ndarray, radius_m: float) -> tuple[np.ndarray, np.ndarray]:
-    """Mast platforms and their shadows split into 2-3 blobs; merge them into one weighted point."""
+    """Tower platforms and their shadows split into 2-3 blobs; merge them into one weighted point."""
     merged_p, merged_w = [], []
     for group in cluster_points(points, radius_m):
         w = weights[group]
@@ -86,7 +86,7 @@ class LoopScorer:
         perimeter = polygon.length
         ring = LineString(list(vertices) + [vertices[0]])
 
-        # Vertex support: a blob (mast platform/shadow) close to each vertex, capped at 1 per vertex.
+        # Vertex support: a blob (tower platform/shadow) close to each vertex, capped at 1 per vertex.
         support = []
         for v in vertices:
             if self.tree is None:
@@ -118,8 +118,8 @@ class LoopScorer:
         samples = np.concatenate(samples)
         water_fraction = float(np.mean(self.water_xy_test(samples)))
 
-        # Corner rule: the cable turns at most ~95 degrees around one mast (126 traced bends:
-        # 36-94 degrees; GPS-fitted masts: 36-91). A sharper knee is not a mast, whatever the image says.
+        # Corner rule: the cable turns at most ~95 degrees around one tower (126 traced bends:
+        # 36-94 degrees; GPS-fitted towers: 36-91). A sharper knee is not a tower, whatever the image says.
         corner_penalty = 0.0
         for i in range(len(vertices)):
             incoming = vertices[i] - vertices[i - 1]
@@ -147,7 +147,7 @@ class LoopScorer:
         ratio = max(edges) / max(1e-6, min(edges))
         shape = -max(0.0, ratio - 3.5)
 
-        # Most full-size systems have 5 masts; 4 and 6 happen, more is a trace with extra points.
+        # Most full-size systems have 5 towers; 4 and 6 happen, more is a trace with extra points.
         complexity = {4: -0.5, 5: 0.0, 6: -2.0}.get(len(vertices), -4.0)
         total = 2.0 * sum(support) + 0.6 * edge - outside_penalty - interior_penalty + 4.0 * prior + shape + complexity - corner_penalty - occupied_penalty
         if water_fraction < 0.97:
@@ -197,7 +197,7 @@ def refine(scorer: LoopScorer, vertices: np.ndarray, step_m: float = 6.0, radius
 def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_counts=(4, 5, 6), max_distance_m: float = 520.0, water_xy: np.ndarray | None = None, use_templates: bool = False,
                   extra_xy: np.ndarray | None = None, extra_weights: np.ndarray | None = None, extra_in_hull: bool | None = None,
                   occupied=None) -> list[LoopCandidate]:
-    """Loop proposals from the floating objects (and extra evidence such as mast detections, with
+    """Loop proposals from the floating objects (and extra evidence such as tower detections, with
     their own weights): the convex hull of the main cluster, simplified to 4-6 vertices, then
     refined against the image evidence. With `extra_in_hull` false the extra evidence only scores
     (vertex support), it does not shape the starting hull; with None both starts are tried and the
@@ -254,7 +254,7 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
             start = centroid + (start - centroid) * 1.06
             candidate = refine(scorer, start)
             candidates.append(candidate)
-            # A knee sharper than any mast is a vertex that should not exist: drop it and refit.
+            # A knee sharper than any tower is a vertex that should not exist: drop it and refit.
             # Coordinate descent cannot do this on its own (it moves one vertex at a time).
             for _ in range(2):
                 knee = sharpest_vertex(candidate.vertices_xy)
@@ -267,7 +267,7 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
 
 
 def polish(candidates: list[LoopCandidate], blobs, blob_xy, water_xy_test, max_distance_m, extra_xy, extra_weights, occupied, top: int = 3) -> list[LoopCandidate]:
-    """Fine coordinate descent (2 m steps) on the best candidates: the coarse 6 m grid stops short of the mast."""
+    """Fine coordinate descent (2 m steps) on the best candidates: the coarse 6 m grid stops short of the tower."""
     if not candidates:
         return candidates
     weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
@@ -318,7 +318,7 @@ def template_candidates(scorer: LoopScorer, water_xy: np.ndarray, water_xy_test,
     rough.sort(key=lambda item: item[0], reverse=True)
     results = []
     for _, corners in rough[:top]:
-        # Add a fifth vertex at the middle of one long side so a five-mast loop can form.
+        # Add a fifth vertex at the middle of one long side so a five-tower loop can form.
         pentagon = np.insert(corners, 2, (corners[1] + corners[2]) / 2, axis=0)
         for start in (corners, pentagon):
             candidate = refine(scorer, start)

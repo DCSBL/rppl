@@ -1,4 +1,4 @@
-"""Tiny mast classifier on 64 px (19 m) patches, trained with JAX; grouped cross-validation by
+"""Tiny tower classifier on 64 px (19 m) patches, trained with JAX; grouped cross-validation by
 park so every number below is for parks the model never saw. ~20k parameters."""
 from __future__ import annotations
 

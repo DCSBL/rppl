@@ -1,4 +1,4 @@
-"""Dense mast heatmap: the patch classifier run fully convolutionally over a whole close-up.
+"""Dense tower heatmap: the patch classifier run fully convolutionally over a whole close-up.
 The net pools after every one of its four conv layers, so the output is at 1/16 resolution
 (4.7 m per cell at 0.29 m/px); cell (i, j) scores the 64 px patch whose top-left corner is at
 pixel (16i, 16j), i.e. centred at (16i + 32, 16j + 32)."""
@@ -11,7 +11,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy import ndimage
 
-from .masttrain import LAYERS
+from .towertrain import LAYERS
 
 jax.config.update("jax_platform_name", "cpu")
 
@@ -46,7 +46,7 @@ def heat_to_pixels(i: np.ndarray, j: np.ndarray) -> tuple[np.ndarray, np.ndarray
     return i * STRIDE + PATCH // 2, j * STRIDE + PATCH // 2
 
 
-def mast_peaks(logits: np.ndarray, threshold: float = 0.0, min_separation_cells: int = 2) -> list[tuple[int, int, float]]:
+def tower_peaks(logits: np.ndarray, threshold: float = 0.0, min_separation_cells: int = 2) -> list[tuple[int, int, float]]:
     """Local maxima of the heatmap above `threshold` (logit 0 = probability 0.5), as (row, col, prob)."""
     footprint = np.ones((2 * min_separation_cells + 1,) * 2, bool)
     local_max = ndimage.maximum_filter(logits, footprint=footprint) == logits

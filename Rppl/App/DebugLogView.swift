@@ -14,7 +14,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
     @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
-    @AppStorage(AppSettingsKey.debugMastReview) private var mastReviewEnabled = false
+    @AppStorage(AppSettingsKey.debugTowerReview) private var towerReviewEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -94,11 +94,11 @@ struct DebugLogView: View {
             }
 
             Section {
-                Toggle("Review towers", isOn: $mastReviewEnabled)
+                Toggle("Review towers", isOn: $towerReviewEnabled)
                     .tint(Color.rpplAccent)
-                if mastReviewEnabled {
+                if towerReviewEnabled {
                     NavigationLink {
-                        MastReviewView()
+                        TowerReviewView()
                     } label: {
                         Label("Review towers", systemImage: "scope")
                     }

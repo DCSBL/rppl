@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-11-03",
-  "note": "Round 1: every park without a traced cable first, then traced parks where the detector misses masts or draws the loop wrong. Judge the guesses, pan the real mast under the crosshair before \"Mast\", and add the masts the detector missed.",
+  "note": "Round 1: every park without a traced cable first, then traced parks where the detector misses towers or draws the loop wrong. Judge the guesses, pan the real tower under the crosshair before \"Tower\", and add the towers the detector missed.",
   "parks": [
     {
       "id": "beachclub-nethen-rastede",
@@ -235,107 +235,107 @@
     {
       "id": "beavercreek-roermond",
       "name": "Beaver Creek Wake Park Roermond",
-      "reason": "detector found 5 of 5 masts, 7 false ones, IoU 0.61"
+      "reason": "detector found 5 of 5 towers, 7 false ones, IoU 0.61"
     },
     {
       "id": "betuwestrand-beesd",
       "name": "BetuweStrand",
-      "reason": "detector found 0 of 5 masts, 20 false ones, IoU 0.00"
+      "reason": "detector found 0 of 5 towers, 20 false ones, IoU 0.00"
     },
     {
       "id": "blaue-lagune-wachtendonk",
       "name": "Blaue Lagune Wakepark Wachtendonk",
-      "reason": "detector found 4 of 5 masts, 5 false ones, IoU 0.60"
+      "reason": "detector found 4 of 5 towers, 5 false ones, IoU 0.60"
     },
     {
       "id": "breakout-harkstede",
       "name": "Break Out Grunopark",
-      "reason": "detector found 3 of 4 masts, 2 false ones, IoU 0.75"
+      "reason": "detector found 3 of 4 towers, 2 false ones, IoU 0.75"
     },
     {
       "id": "aquabest-best",
       "name": "Cablepark Aquabest",
-      "reason": "detector found 3 of 4 masts, 6 false ones, IoU 0.75"
+      "reason": "detector found 3 of 4 towers, 6 false ones, IoU 0.75"
     },
     {
       "id": "view-almere",
       "name": "Cablepark VIEW Almere",
-      "reason": "detector found 0 of 5 masts, 3 false ones, IoU 0.86"
+      "reason": "detector found 0 of 5 towers, 3 false ones, IoU 0.86"
     },
     {
       "id": "dock79-saint-ghislain",
       "name": "Dock79 Cable Park",
-      "reason": "detector found 4 of 5 masts, 6 false ones, IoU 0.86"
+      "reason": "detector found 4 of 5 towers, 6 false ones, IoU 0.86"
     },
     {
       "id": "ermerstrand-erm",
       "name": "Ermerstrand",
-      "reason": "detector found 0 of 4 masts, 0 false ones, IoU 0.33"
+      "reason": "detector found 0 of 4 towers, 0 false ones, IoU 0.33"
     },
     {
       "id": "lakeside-paradise-knokke",
       "name": "Lakeside Paradise",
-      "reason": "detector found 20 of 20 masts, 9 false ones, IoU 0.26"
+      "reason": "detector found 20 of 20 towers, 9 false ones, IoU 0.26"
     },
     {
       "id": "lakeside-zwolle",
       "name": "Lakeside Zwolle",
-      "reason": "detector found 0 of 5 masts, 0 false ones, IoU 0.00"
+      "reason": "detector found 0 of 5 towers, 0 false ones, IoU 0.00"
     },
     {
       "id": "lunalake-heerhugowaard",
       "name": "Luna Lake",
-      "reason": "detector found 4 of 5 masts, 13 false ones, IoU 0.87"
+      "reason": "detector found 4 of 5 towers, 13 false ones, IoU 0.87"
     },
     {
       "id": "project7-rotterdam",
       "name": "Project 7 Cablepark Rotterdam",
-      "reason": "detector found 1 of 5 masts, 9 false ones, IoU 0.52"
+      "reason": "detector found 1 of 5 towers, 9 false ones, IoU 0.52"
     },
     {
       "id": "schotsman-kamperland",
       "name": "Schotsman Watersport Kamperland",
-      "reason": "detector found 4 of 4 masts, 30 false ones, IoU 0.68"
+      "reason": "detector found 4 of 4 towers, 30 false ones, IoU 0.68"
     },
     {
       "id": "terhills-dilsen-stokkem",
       "name": "Terhills Cablepark",
-      "reason": "detector found 10 of 20 masts, 22 false ones, IoU 0.80"
+      "reason": "detector found 10 of 20 towers, 22 false ones, IoU 0.80"
     },
     {
       "id": "thebricks-duisburg",
       "name": "The Bricks Duisburg",
-      "reason": "detector found 9 of 24 masts, 4 false ones, IoU 0.64"
+      "reason": "detector found 9 of 24 towers, 4 false ones, IoU 0.64"
     },
     {
       "id": "outsider-oudenaarde",
       "name": "The Outsider Cablepark",
-      "reason": "detector found 5 of 5 masts, 8 false ones, IoU 0.52"
+      "reason": "detector found 5 of 5 towers, 8 false ones, IoU 0.52"
     },
     {
       "id": "wakeup-antwerp",
       "name": "WakeUp Cable Antwerpen",
-      "reason": "detector found 4 of 6 masts, 1 false ones, IoU 0.54"
+      "reason": "detector found 4 of 6 towers, 1 false ones, IoU 0.54"
     },
     {
       "id": "wakebeach-257-dormagen",
       "name": "Wakebeach 257 Dormagen",
-      "reason": "detector found 0 of 5 masts, 3 false ones, IoU 0.31"
+      "reason": "detector found 0 of 5 towers, 3 false ones, IoU 0.31"
     },
     {
       "id": "waterskitwente-enschede",
       "name": "Waterski Twente",
-      "reason": "detector found 3 of 4 masts, 12 false ones, IoU 0.64"
+      "reason": "detector found 3 of 4 towers, 12 false ones, IoU 0.64"
     },
     {
       "id": "wetnwild-alphen",
       "name": "Wet 'n Wild",
-      "reason": "detector found 4 of 5 masts, 4 false ones, IoU 0.83"
+      "reason": "detector found 4 of 5 towers, 4 false ones, IoU 0.83"
     },
     {
       "id": "zeumeren-voorthuizen",
       "name": "Zeumeren Watersport",
-      "reason": "detector found 4 of 5 masts, 9 false ones, IoU 0.82"
+      "reason": "detector found 4 of 5 towers, 9 false ones, IoU 0.82"
     }
   ],
   "version": 1

@@ -76,10 +76,10 @@ struct CableTraceView: View {
                         MapPolyline(coordinates: line + [line[0]])
                             .stroke(Color.purple, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [8, 6]))
                     }
-                    ForEach(Array(detection.result.masts.enumerated()), id: \.offset) { _, mast in
-                        Annotation("", coordinate: mapCoordinate(detection.image.coordinate(fromLocal: mast.xy)), anchor: .center) {
+                    ForEach(Array(detection.result.towers.enumerated()), id: \.offset) { _, tower in
+                        Annotation("", coordinate: mapCoordinate(detection.image.coordinate(fromLocal: tower.xy)), anchor: .center) {
                             Circle()
-                                .fill(Color.purple.opacity(0.4 + 0.6 * mast.probability))
+                                .fill(Color.purple.opacity(0.4 + 0.6 * tower.probability))
                                 .frame(width: 10, height: 10)
                                 .overlay(Circle().strokeBorder(.white, lineWidth: 1))
                         }
@@ -409,7 +409,7 @@ struct CableTraceView: View {
         if best.isWeak { parts.append(String(localized: "weak match, check closely")) }
         if !best.notes.isEmpty { parts.append(best.notes.joined(separator: ", ")) }
         let seconds = String(format: "%.1f", outcome.snapshotSeconds + outcome.result.elapsed)
-        parts.append(String(localized: "\(outcome.result.masts.count) tower hits, \(outcome.result.objects.count) objects, \(seconds) s"))
+        parts.append(String(localized: "\(outcome.result.towers.count) tower hits, \(outcome.result.objects.count) objects, \(seconds) s"))
         return parts.joined(separator: " · ")
     }
 

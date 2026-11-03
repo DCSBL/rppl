@@ -36,7 +36,7 @@ def merge(sets: list[Path], out: Path) -> str:
         for png in folder.glob("*.png"):
             shutil.copy2(png, out / png.name)
     (out / "training-set.json").write_text(json.dumps(list(rows.values())))
-    labelled = sum(1 for r in rows.values() if r.get("masts"))
+    labelled = sum(1 for r in rows.values() if r.get("towers"))
     traced = sum(1 for r in rows.values() if any(len((c.get("geometry") or {}).get("pointsXY") or []) >= 2 for c in r.get("cables") or []))
     return f"{len(rows)} parks ({traced} traced, {labelled} with tower labels)"
 
@@ -85,11 +85,11 @@ def main() -> None:
     first, final = work / f"{name}-a.npz", work / f"{name}.npz"
 
     steps = [
-        ("Patches", ["cabledetect/mastpatches.py", ts, patches]),
-        ("Train, round 1", ["cabledetect/masttrain.py", patches, first]),
-        ("Mine false peaks", ["cabledetect/mastmine.py", ts, patches, first, mined]),
-        ("Train, round 2", ["cabledetect/masttrain.py", mined, final]),
-        ("Evaluate loops", ["run.py", ts, "--out", work / "eval", "--masts", final, "--given-others"]),
+        ("Patches", ["cabledetect/towerpatches.py", ts, patches]),
+        ("Train, round 1", ["cabledetect/towertrain.py", patches, first]),
+        ("Mine false peaks", ["cabledetect/towermine.py", ts, patches, first, mined]),
+        ("Train, round 2", ["cabledetect/towertrain.py", mined, final]),
+        ("Evaluate loops", ["run.py", ts, "--out", work / "eval", "--towers", final, "--given-others"]),
     ]
     total = len(steps) + 1
     started = time.time()
@@ -105,7 +105,7 @@ def main() -> None:
         print(f"  done in {time.time() - step_started:.0f} s ({log.name})")
 
     report = "\n".join(outputs["Train, round 2"])
-    summary = json.loads(report[report.index("{"):report.index("}") + 1]) if "{" in report else {}
+    summary = json.JSONDecoder().raw_decode(report[report.index("{"):])[0] if "{" in report else {}
     print(f"\nFinished in {(time.time() - started) / 60:.1f} min. Tower net, parks held out (5-fold CV):")
     for key in ("auc", "recall_bends", "fpr_rejected", "fpr_falsepeak", "fpr_object", "fpr_water"):
         if key in summary:

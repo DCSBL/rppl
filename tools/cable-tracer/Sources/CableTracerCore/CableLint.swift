@@ -21,7 +21,7 @@ public enum CableLint {
         public var loopWidthMinimum = 15.0
         public var straightLengthWarning: ClosedRange<Double> = 60...300
         public var minimumSegmentM = 20.0
-        /// Turn around one mast: 36-94° on the 126 traced bends, 36-91° on GPS-fitted masts.
+        /// Turn around one tower: 36-94° on the 126 traced bends, 36-91° on GPS-fitted towers.
         public var maxTurnDeg = 95.0
         public var impossibleTurnDeg = 120.0
         public var distanceWarningM = 1000.0
@@ -67,9 +67,9 @@ public enum CableLint {
         if geometry.kind == .loop {
             for turn in geometry.turnAnglesDeg {
                 if turn > thresholds.impossibleTurnDeg {
-                    add(.error, "Bend of \(Int(turn))°: a cable turns at most ~95° around one mast")
+                    add(.error, "Bend of \(Int(turn))°: a cable turns at most ~95° around one tower")
                 } else if turn > thresholds.maxTurnDeg {
-                    add(.warning, "Bend of \(Int(turn))° is sharper than any traced mast (max 94°)")
+                    add(.warning, "Bend of \(Int(turn))° is sharper than any traced tower (max 94°)")
                 }
             }
         } else {
@@ -93,7 +93,7 @@ public enum CableLint {
             if geometry.isSelfIntersecting {
                 add(.error, "Loop crosses itself; points are not in travel order")
             } else if !geometry.isConvex {
-                add(.warning, "Loop has an inward bend; masts stand outside the cable and pull, so a loop is convex")
+                add(.warning, "Loop has an inward bend; towers stand outside the cable and pull, so a loop is convex")
             }
             if let winding = geometry.windingDirection, let direction = cable.direction, direction.isLoop, winding != direction {
                 add(.warning, "Points run \(winding.rawValue) but direction says \(direction.rawValue)")

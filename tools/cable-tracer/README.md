@@ -37,9 +37,9 @@ swift run cable-tracer --export-training-set /tmp/cable-training   # headless ex
 
 Tracing a whole cable takes a while; judging the detector's tower guesses takes seconds, and the
 verdicts are exactly the examples the tower net lacks. The Rppl app collects them behind the Debug
-toggle "Review towers" (`Rppl/Parks/MastReview/`), on the phone where the satellite imagery is:
+toggle "Review towers" (`Rppl/Parks/TowerReview/`), on the phone where the satellite imagery is:
 
-- A request file (`mast-review-request.json`, see `RpplCore/.../CableDetection/MastReview.swift`)
+- A request file (`tower-review-request.json`, see `RpplCore/.../CableDetection/TowerReview.swift`)
   says which parks to do; without one the app lists every park without a traced cable. The
   request for a round is kept under `tools/cable-tracer/requests/`.
 - Per park, "Find towers" takes the same 600 m close-up as the detector and shows the guesses one
@@ -48,18 +48,18 @@ toggle "Review towers" (`Rppl/Parks/MastReview/`), on the phone where the satell
   press **Tower** (saved where the crosshair is), or **No tower** / **Unsure** (saved where the
   detector looked). "Add tower here" marks a tower the detector missed.
   Rings: orange = current guess, green = tower, red = no tower, grey = unsure; tap a ring to remove.
-- "Share results" hands over `mast-labels.json` with every verdict on the phone. Put it at
-  `tools/cable-tracer/mast-labels.json` (it is a superset of earlier shares from the same phone;
+- "Share results" hands over `tower-labels.json` with every verdict on the phone. Put it at
+  `tools/cable-tracer/tower-labels.json` (it is a superset of earlier shares from the same phone;
   merge by park id when several phones contribute; add a trailing newline for pre-commit) and
   commit it like park data; the exporter finds it from the parks folder, `--labels <file>` points
-  elsewhere. Code and file names still say "mast" so existing files keep loading.
+  elsewhere. Files from before the rename (`mast-labels.json`, verdict `mast`) still load.
 - "Export training set" and `--export-training-set` include the labelled parks, with a 600 m
   close-up around the towers, so `detect/` trains on them without a traced cable.
 
 ## Automatic proposal
 
-`detect/` holds the Python prototype of the automatic step (water, floating objects, a mast
-detector and a convex loop fit with a plausibility score) and the training of the mast net. The
+`detect/` holds the Python prototype of the automatic step (water, floating objects, a tower
+detector and a convex loop fit with a plausibility score) and the training of the tower net. The
 winner is ported to `RpplCore/Sources/RpplCore/CableDetection` and runs in the app behind the
 Debug toggle "Detect cable"; see `detect/README.md` and `detect/RESULTS.md`.
 

@@ -16,10 +16,10 @@ public struct CableLoopCandidate: Sendable, Equatable {
     public var isWeak: Bool { score < Self.weakScore }
 }
 
-/// Fits a convex loop of 4-6 masts to the floating objects and mast detections on the water, the
+/// Fits a convex loop of 4-6 towers to the floating objects and tower detections on the water, the
 /// way the Python prototype in tools/cable-tracer/detect does. Scores combine support at the
 /// vertices, obstacles along the edges, an empty interior, edges over water, a perimeter prior
-/// and the corner rule (a cable turns at most ~95 degrees around one mast).
+/// and the corner rule (a cable turns at most ~95 degrees around one tower).
 struct LoopFitter {
     static let perimeterMedianM = 700.0
     static let perimeterLogSigma = 0.28
@@ -31,7 +31,7 @@ struct LoopFitter {
     struct Evidence {
         var xy: SIMD2<Double>
         var weight: Double
-        /// False for evidence that scores vertices but never shapes a starting hull (mast detections).
+        /// False for evidence that scores vertices but never shapes a starting hull (tower detections).
         var shapesHull = true
     }
 
@@ -46,9 +46,9 @@ struct LoopFitter {
     var isWater: (SIMD2<Double>) -> Bool
 
     /// Proposals sorted best first. `evidence` is in local metres around the park location.
-    /// Evidence that does not shape the hull (mast detections) is tried both ways: as hull points,
+    /// Evidence that does not shape the hull (tower detections) is tried both ways: as hull points,
     /// which finds corners the floating objects miss, and as pure vertex support, which survives a
-    /// false mast. The scorer is the same, so the pooled candidates compare.
+    /// false tower. The scorer is the same, so the pooled candidates compare.
     func propose(evidence rawEvidence: [Evidence]) -> [CableLoopCandidate] {
         let near = rawEvidence.filter { vectorLength($0.xy) <= maxDistanceM }
         let merged = Self.mergeClose(near, radiusM: 10)
@@ -59,7 +59,7 @@ struct LoopFitter {
             candidates += propose(hullPoints: hullOnly.map(\.xy), evidence: merged)
         }
         candidates.sort { $0.score > $1.score }
-        // Polish the best few on a 2 m grid: the coarse 6 m grid stops short of the mast
+        // Polish the best few on a 2 m grid: the coarse 6 m grid stops short of the tower
         // (25 parks: median bend error 33 -> 28 m).
         for index in candidates.indices.prefix(3) {
             candidates[index] = refine(candidates[index].vertices, evidence: merged, stepM: 2, radiusM: 8, rounds: 2)
@@ -79,7 +79,7 @@ struct LoopFitter {
                 start = start.map { centroid + ($0 - centroid) * 1.06 }
                 var candidate = refine(start, evidence: merged)
                 candidates.append(candidate)
-                // A knee sharper than any mast is a vertex that should not exist: drop it and refit.
+                // A knee sharper than any tower is a vertex that should not exist: drop it and refit.
                 // Coordinate descent cannot do this on its own (it moves one vertex at a time).
                 for _ in 0..<2 {
                     guard candidate.vertices.count > 4, let knee = Self.sharpestVertex(candidate.vertices) else { break }
@@ -104,7 +104,7 @@ struct LoopFitter {
         let convex = Geometry2D.convexHull(vertices).count == vertices.count
         let perimeter = Geometry2D.perimeter(vertices)
 
-        // Vertex support: an object (mast platform/shadow) or mast detection close to each vertex, capped at 1.
+        // Vertex support: an object (tower platform/shadow) or tower detection close to each vertex, capped at 1.
         var support: [Double] = []
         for vertex in vertices {
             var best = 0.0
@@ -143,7 +143,7 @@ struct LoopFitter {
         }
         let waterFraction = Double(wet) / Double(max(1, samples))
 
-        // Corner rule: 126 traced bends turn 36-94 degrees; a sharper knee is not a mast.
+        // Corner rule: 126 traced bends turn 36-94 degrees; a sharper knee is not a tower.
         var cornerPenalty = 0.0
         for turn in Geometry2D.turnAnglesDegrees(vertices) {
             if turn > Self.impossibleTurnDeg {
@@ -168,7 +168,7 @@ struct LoopFitter {
         let sides = Geometry2D.minimumRectangleSides(vertices)
         let ratio = max(sides.long, 1e-6) / max(sides.short, 1e-6)
         let shape = -max(0, ratio - 3.5)
-        // Most full-size systems have 5 masts; 4 and 6 happen, more is a trace with extra points.
+        // Most full-size systems have 5 towers; 4 and 6 happen, more is a trace with extra points.
         let complexity: Double
         switch vertices.count {
         case 4: complexity = -0.5
@@ -268,7 +268,7 @@ struct LoopFitter {
         return groups.values.sorted { $0.count > $1.count }
     }
 
-    /// Mast platforms and their shadows split into 2-3 objects; merge them into one weighted point.
+    /// Tower platforms and their shadows split into 2-3 objects; merge them into one weighted point.
     static func mergeClose(_ evidence: [Evidence], radiusM: Double) -> [Evidence] {
         let points = evidence.map(\.xy)
         return cluster(points, linkM: radiusM).map { group in
