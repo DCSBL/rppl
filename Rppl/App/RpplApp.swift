@@ -15,6 +15,7 @@ struct RpplApp: App {
                 Task { @MainActor in await ParkDataBackgroundRefresh.updateSchedule() }
             }
             if phase == .active, !UITestFixtures.isActive {
+                LiveSessionController.shared.checkStillRunning()
                 PhoneConnectivityService.shared.refreshSyncState()
                 PhoneConnectivityService.shared.flushPendingAcks()
                 Task { @MainActor in
