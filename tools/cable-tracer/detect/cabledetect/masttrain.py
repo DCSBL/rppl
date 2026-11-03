@@ -108,7 +108,8 @@ def save_params(params, path: Path) -> None:
     np.savez(path, **flat)
 
 
-def main(npz: Path, out: Path) -> None:
+def main(npz: Path, out: Path, seed: int = 0) -> None:
+    """Five-fold CV by park (the split never changes), then the final model; `seed` varies the weights and the batches."""
     data = np.load(npz)
     x, y, parks, kinds = data["x"], data["y"], data["park"], data["kind"]
     unique = np.unique(parks)
@@ -117,7 +118,7 @@ def main(npz: Path, out: Path) -> None:
     cv = np.zeros(len(y))
     for f, held in enumerate(folds):
         test = np.isin(parks, held)
-        params = train(x[~test], y[~test])
+        params = train(x[~test], y[~test], seed=seed)
         save_params(params, out.with_name(f"{out.stem}.fold{f}.npz"))
         json.dump([str(p) for p in held], open(out.with_name(f"{out.stem}.fold{f}.json"), "w"))
         cv[test] = predict(params, x[test])
@@ -125,17 +126,17 @@ def main(npz: Path, out: Path) -> None:
         print(f"fold {f}: {list(held)} AUC {auc(cv[test], y[test]):.3f} recall@0.5 {np.mean(cv[test][y[test] == 1] > 0.5):.2f} "
               f"objects flagged {np.mean(cv[obj] > 0.5) if obj.any() else float('nan'):.2f}", flush=True)
     report = {"auc": auc(cv, y), "recall_bends": float(np.mean(cv[y == 1] > 0.5))}
-    for kind in ("object", "water", "land", "falsepeak"):
+    for kind in ("object", "water", "land", "falsepeak", "rejected"):
         sel = (y == 0) & (kinds == kind)
         if sel.any():
             report[f"fpr_{kind}"] = float(np.mean(cv[sel] > 0.5))
     report["recall_per_park"] = {p: round(float(np.mean(cv[(parks == p) & (y == 1)] > 0.5)), 2) for p in np.unique(parks)}
     print(json.dumps(report, indent=1))
     np.save(out.with_suffix(".cv-scores.npy"), cv)
-    params = train(x, y)
+    params = train(x, y, seed=seed)
     save_params(params, out)
     print("params:", sum(int(np.prod(w.shape)) + int(np.prod(b.shape)) for w, b in params))
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]), Path(sys.argv[2]))
+    main(Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[sys.argv.index("--seed") + 1]) if "--seed" in sys.argv else 0)

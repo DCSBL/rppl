@@ -222,6 +222,22 @@ public enum ParkDraft {
         cable.points = points
     }
 
+    /// Riders go the other way: a loop keeps its first point and runs through the rest backwards,
+    /// clockwise becomes counter-clockwise; a 2.0 or untyped cable just reverses its points.
+    public static func reverse(_ cable: inout ParkCable) {
+        guard let points = cable.points, points.count >= 2 else { return }
+        switch cable.direction {
+        case .clockwise?:
+            cable.points = [points[0]] + points.dropFirst().reversed()
+            cable.direction = .counterClockwise
+        case .counterClockwise?:
+            cable.points = [points[0]] + points.dropFirst().reversed()
+            cable.direction = .clockwise
+        default:
+            cable.points = points.reversed()
+        }
+    }
+
     public static func toggleStart(_ cable: inout ParkCable, index: Int) {
         guard var points = cable.points, points.indices.contains(index) else { return }
         points[index].start = points[index].start == true ? nil : true

@@ -12,21 +12,100 @@ struct SessionMapRendering {
     static let flat = SessionMapRendering()
 }
 
-/// Where a set ended, for the debug fall map: the last usable fix of the set, sized by the
-/// impact around the end (`SetImpact`). No impact (no motion) draws a plain dot.
+/// Where a set ended, for the debug fall map: the last usable fix of the set. A fall gets a badge
+/// with an icon, a clean exit a small dot and a set without motion a muted dot (`SetImpact`).
 struct SessionFallMarker: Identifiable, Equatable {
+    enum Kind: Equatable {
+        case fall
+        case cleanExit
+        /// No motion around the end, so we cannot tell.
+        case unknown
+    }
+
     let setIndex: Int
     let coordinate: MapCoordinate
     let impactG: Double?
 
     var id: Int { setIndex }
     var isFall: Bool { SetImpact.isFall(impactG) }
+    var kind: Kind {
+        guard let impactG else { return .unknown }
+        return SetImpact.isFall(impactG) ? .fall : .cleanExit
+    }
 
-    /// Markers for every set with a drawable track: one per heatmap track, in set order.
+    /// Markers for every set with a drawable track: one per heatmap track. Falls come last so
+    /// their badges stay on top where set ends overlap.
     static func markers(mapData: SessionMapTrackData, sets: [SetSegmentStats], impacts: [Int: Double]) -> [SessionFallMarker] {
-        zip(sets, mapData.heatmapTracks).compactMap { set, track in
+        let all: [SessionFallMarker] = zip(sets, mapData.heatmapTracks).compactMap { set, track in
             guard let last = track.last else { return nil }
             return SessionFallMarker(setIndex: set.index, coordinate: last, impactG: impacts[set.index])
+        }
+        return all.filter { !$0.isFall } + all.filter(\.isFall)
+    }
+}
+
+/// Key to the fall markers, with how many of each, so the map explains itself.
+private struct SessionFallLegend: View {
+    let markers: [SessionFallMarker]
+    @ScaledMetric(relativeTo: .caption2) private var iconSize: CGFloat = 16
+
+    private func count(_ kind: SessionFallMarker.Kind) -> Int {
+        markers.filter { $0.kind == kind }.count
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            entry(.fall, "Fall")
+            entry(.cleanExit, "Clean exit")
+            entry(.unknown, "No motion data")
+        }
+        .font(.caption2)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.regularMaterial, in: Capsule())
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private func entry(_ kind: SessionFallMarker.Kind, _ title: LocalizedStringKey) -> some View {
+        let total = count(kind)
+        if total > 0 {
+            HStack(spacing: 4) {
+                SessionFallSymbol(kind: kind, size: iconSize)
+                Text(title)
+                Text(total.formatted())
+                    .fontWeight(.semibold)
+            }
+        }
+    }
+}
+
+/// The marker glyph, shared by the map and its legend.
+private struct SessionFallSymbol: View {
+    let kind: SessionFallMarker.Kind
+    let size: CGFloat
+
+    var body: some View {
+        switch kind {
+        case .fall:
+            Image(systemName: "figure.fall")
+                .font(.system(size: size * 0.55, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: size, height: size)
+                .background(Color.rpplMetricEnergy, in: Circle())
+                .overlay { Circle().strokeBorder(.white.opacity(0.9), lineWidth: 1.5) }
+        case .cleanExit:
+            Circle()
+                .fill(Color.rpplAccent)
+                .overlay { Circle().strokeBorder(.white, lineWidth: 1.5) }
+                .frame(width: size * 0.5, height: size * 0.5)
+                .frame(width: size, height: size)
+        case .unknown:
+            Circle()
+                .fill(Color.rpplMuted)
+                .overlay { Circle().strokeBorder(.white, lineWidth: 1.5) }
+                .frame(width: size * 0.4, height: size * 0.4)
+                .frame(width: size, height: size)
         }
     }
 }
@@ -77,9 +156,7 @@ struct SessionMapView: View {
     var layout: SessionMapLayout = .embedded
     /// Park cable outlines drawn as a thin line beneath the tracks.
     var cableOverlays: [[CLLocationCoordinate2D]] = []
-    /// Debug: walks between sets, dashed beneath the set tracks.
-    var walkTracks: [[MapCoordinate]] = []
-    /// Debug: set ends sized by impact.
+    /// Debug: how each set ended (fall, clean exit), with a legend.
     var fallMarkers: [SessionFallMarker] = []
     /// Set on a full-screen map: style and reset live in the navigation bar (`MapScreenToolbar`).
     var usesBarButtons = false
@@ -140,11 +217,9 @@ struct SessionMapView: View {
         preferredFrame: MapTrackFrame? = nil,
         layout: SessionMapLayout = .embedded,
         cableOverlays: [[CLLocationCoordinate2D]] = [],
-        walkTracks: [[MapCoordinate]] = [],
         fallMarkers: [SessionFallMarker] = []
     ) {
         self.cableOverlays = cableOverlays
-        self.walkTracks = walkTracks
         self.fallMarkers = fallMarkers
         self.tracks = []
         self.sessionMapData = sessionMapData
@@ -182,6 +257,14 @@ struct SessionMapView: View {
                 )
                 .padding(layout.controlPadding)
                 .zIndex(1)
+            }
+        }
+        .overlay(alignment: .bottomLeading) {
+            if focusedTrack == nil, !fallMarkers.isEmpty {
+                // Clear of the Maps logo in the corner.
+                SessionFallLegend(markers: fallMarkers)
+                    .padding(.leading, 10)
+                    .padding(.bottom, 28)
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -252,12 +335,6 @@ struct SessionMapView: View {
                     style: StrokeStyle(lineWidth: 1.5, dash: differentiateWithoutColor ? [4, 3] : [])
                 )
         }
-        ForEach(Array(walkTracks.enumerated()), id: \.offset) { item in
-            if item.element.count >= 2 {
-                MapPolyline(coordinates: coordinates(item.element))
-                    .stroke(Color.rpplMetricTime.opacity(0.7), style: StrokeStyle(lineWidth: 2, dash: [3, 4]))
-            }
-        }
         if focusedTrack != nil {
             soloContent
         } else {
@@ -316,24 +393,10 @@ struct SessionMapView: View {
         }
     }
 
-    /// Radius grows with the square root of the impact, so a 16 g wipeout reads twice a 4 g one.
+    /// One size for all: the shape says how the set ended, and the legend says which is which.
     private func fallAnnotation(_ marker: SessionFallMarker) -> some MapContent {
-        let size = endpointSize * (marker.impactG.map { 0.45 + 0.3 * $0.squareRoot() } ?? 0.5)
-        let tint = marker.isFall ? Color.rpplMetricEnergy : Color.rpplAccent
-        return Annotation(coordinate: coordinate(marker.coordinate), anchor: .center) {
-            Circle()
-                .fill(tint.opacity(0.55))
-                .overlay {
-                    Circle().strokeBorder(tint, lineWidth: 1.5)
-                }
-                .overlay {
-                    if !marker.isFall, differentiateWithoutColor {
-                        Image(systemName: "hand.raised.fill")
-                            .font(.system(size: size * 0.5, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
-                }
-                .frame(width: size, height: size)
+        Annotation(coordinate: coordinate(marker.coordinate), anchor: .center) {
+            SessionFallSymbol(kind: marker.kind, size: endpointSize)
         } label: {
             if marker.isFall {
                 Text("Fall, set \(marker.setIndex)")
@@ -428,7 +491,7 @@ struct SessionMapView: View {
         if let sessionMapData {
             signature += "-session-\(sessionMapData.heatmapTracks.count)-\(sessionMapData.start.latitude)"
         }
-        signature += "-walks-\(walkTracks.count)-falls-\(fallMarkers.count)"
+        signature += "-falls-\(fallMarkers.count)"
         let trackPoints = renderTracks.reduce(0) { $0 + $1.samples.count }
         signature += "-sets-\(renderTracks.count)-\(trackPoints)"
         return signature
@@ -606,7 +669,6 @@ struct SessionMapFullscreenView: View {
     let title: String
     var preferredFrame: MapTrackFrame? = nil
     var cableOverlays: [[CLLocationCoordinate2D]] = []
-    var walkTracks: [[MapCoordinate]] = []
     var fallMarkers: [SessionFallMarker] = []
 
     init(
@@ -641,11 +703,9 @@ struct SessionMapFullscreenView: View {
         title: String,
         preferredFrame: MapTrackFrame? = nil,
         cableOverlays: [[CLLocationCoordinate2D]] = [],
-        walkTracks: [[MapCoordinate]] = [],
         fallMarkers: [SessionFallMarker] = []
     ) {
         self.cableOverlays = cableOverlays
-        self.walkTracks = walkTracks
         self.fallMarkers = fallMarkers
         self.tracks = []
         self.sessionMapData = sessionMapData
@@ -681,7 +741,6 @@ struct SessionMapFullscreenView: View {
                     preferredFrame: preferredFrame,
                     layout: .fullscreen,
                     cableOverlays: cableOverlays,
-                    walkTracks: walkTracks,
                     fallMarkers: fallMarkers
                 )
                 .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)

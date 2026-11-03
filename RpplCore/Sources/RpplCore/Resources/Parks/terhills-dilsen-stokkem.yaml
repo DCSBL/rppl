@@ -1,10 +1,12 @@
 version: 1
 id: terhills-dilsen-stokkem
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (two full size cables, 2026 hours; no prices published outside the booking system)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand (dock pin moved to the start)
 
 name: Terhills Cablepark
 languages:
@@ -16,8 +18,8 @@ address: Nationaal Parklaan 1, 3650 Dilsen-Stokkem
 timezone: Europe/Brussels
 # Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.0073601
-  lon: 5.6900085
+  lat: 51.005022
+  lon: 5.697598
 
 email: info@terhillscablepark.be
 website: https://www.terhillscablepark.be/
@@ -33,11 +35,33 @@ description: Terhills Cablepark ligt in Nationaal Park Hoge Kempen. Het park hee
 
 cables:
   - name: Beginners Cable
-    direction: ccw
     description: Voor wie voor het eerst waterskiet of wakeboardt en voor licht gevorderde riders.
-  - name: Freestyle Cable
     direction: ccw
+    points:
+      - lat: 51.006146
+        lon: 5.698176
+      - lat: 51.006048
+        lon: 5.700621
+      - lat: 51.006513
+        lon: 5.70137
+      - lat: 51.006772
+        lon: 5.701085
+      - lat: 51.006749
+        lon: 5.698242
+  - name: Freestyle Cable
     description: Snellere cable met obstacles in het water. Alleen riders die zelfstandig kunnen starten en lappen mogen op deze cable.
+    direction: ccw
+    points:
+      - lat: 51.004825
+        lon: 5.697102
+      - lat: 51.006809
+        lon: 5.697007
+      - lat: 51.007078
+        lon: 5.696381
+      - lat: 51.006295
+        lon: 5.694612
+      - lat: 51.00478
+        lon: 5.694718
 
 opening:
   source_url: "https://www.terhillscablepark.be/en/openingstijden/"

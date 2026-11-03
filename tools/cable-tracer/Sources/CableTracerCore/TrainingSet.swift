@@ -29,16 +29,26 @@ public struct TrainingRow: Codable, Equatable, Sendable {
         }
     }
 
+    /// A reviewed mast position in local metres (see `MastLabel`).
+    public struct Mast: Codable, Equatable, Sendable {
+        public var xy: SIMD2<Double>
+        public var verdict: String
+        public var source: String
+        public var probability: Double?
+    }
+
     public var parkID: String
     public var name: String
     public var location: ParkCoordinate
     public var cables: [Cable]
+    /// Mast labels from the review mode; absent when the park has none.
+    public var masts: [Mast]?
     /// 1.4 km overview around the park location.
     public var snapshot: Snapshot?
     /// 600 m close-up around the traced cables; nil for untraced parks.
     public var detailSnapshot: Snapshot?
 
-    public init(park: Park) {
+    public init(park: Park, labels: [MastLabel] = []) {
         parkID = park.id
         name = park.name
         location = park.location
@@ -50,14 +60,26 @@ public struct TrainingRow: Codable, Equatable, Sendable {
                 geometry: CableGeometry(cable: cable, parkLocation: park.location)
             )
         }
+        if !labels.isEmpty {
+            let projection = LocalProjection(origin: park.location)
+            masts = labels.map { Mast(xy: projection.xy($0.coordinate), verdict: $0.verdict.rawValue, source: $0.source.rawValue, probability: $0.probability) }
+        }
     }
 
     public var hasTracedCable: Bool { cables.contains { $0.geometry.pointsXY.count >= 2 } }
+    public var hasMastLabels: Bool { !(masts ?? []).isEmpty }
+    /// Where the 600 m close-up goes: around the traced cables and the reviewed masts.
+    public var detailCenterXY: SIMD2<Double>? {
+        let points = cables.flatMap(\.geometry.pointsXY) + (masts ?? []).filter { $0.verdict != "unsure" }.map(\.xy)
+        guard !points.isEmpty else { return nil }
+        return points.reduce(SIMD2<Double>.zero, +) / Double(points.count)
+    }
 }
 
 public enum TrainingSet {
-    public static func rows(parks: [Park], tracedOnly: Bool = true) -> [TrainingRow] {
-        parks.map(TrainingRow.init).filter { !tracedOnly || $0.hasTracedCable }
+    /// One row per park; with `tracedOnly` just the parks that have a traced cable or reviewed masts.
+    public static func rows(parks: [Park], labels: MastLabelStore = MastLabelStore(), tracedOnly: Bool = true) -> [TrainingRow] {
+        parks.map { TrainingRow(park: $0, labels: labels.labels(for: $0.id)) }.filter { !tracedOnly || $0.hasTracedCable || $0.hasMastLabels }
     }
 
     public static func encode(_ rows: [TrainingRow]) throws -> Data {

@@ -41,6 +41,9 @@ public final class EditorModel {
     /// Where "Export training set" writes when the platform has no folder picker (iOS).
     public var defaultExportDirectory: URL?
 
+    /// Mast verdicts from the app's review screen (`tools/cable-tracer/mast-labels.json`), exported with the training set.
+    var mastLabels = MastLabelStore()
+
     public var isDirty: Bool {
         guard let draft, let original = parks.first(where: { $0.id == draft.id }) else { return false }
         return draft != original
@@ -89,6 +92,7 @@ public final class EditorModel {
         self.workspace = workspace
         parks = workspace.load()
         prior = CablePrior.learn(from: parks)
+        mastLabels = (try? MastLabelStore.load(from: MastLabelStore.defaultFile(parksDirectory: directory))) ?? MastLabelStore()
         statusMessage = "\(parks.count) parks from \(directory.path)"
         if selectedParkID == nil { selectedParkID = parks.first?.id } else { loadDraft() }
     }
@@ -265,7 +269,7 @@ public final class EditorModel {
         Task {
             defer { isExporting = false }
             do {
-                var rows = TrainingSet.rows(parks: parks, tracedOnly: false)
+                var rows = TrainingSet.rows(parks: parks, labels: mastLabels, tracedOnly: false)
                 for index in rows.indices {
                     statusMessage = "Snapshot \(index + 1)/\(rows.count): \(rows[index].name)"
                     let snapshots = try await SnapshotExporter.export(row: rows[index], into: directory)

@@ -4,6 +4,11 @@ import Foundation
 public struct DetectedMast: Sendable, Equatable {
     public var xy: SIMD2<Double>
     public var probability: Double
+
+    public init(xy: SIMD2<Double>, probability: Double) {
+        self.xy = xy
+        self.probability = probability
+    }
 }
 
 /// What the detector found on one close-up: proposals best first, plus the evidence for review.
@@ -37,7 +42,9 @@ public enum CableDetector {
         public var useMastNet = true
         /// Weight of a mast detection as loop evidence: 2 means full vertex support on its own.
         public var mastWeight = 3.0
-        public var minimumMastProbability = 0.5
+        public var minimumMastProbability = 0.7
+        /// Fit cable loops to the evidence; off when only the masts are wanted (mast review).
+        public var fitLoops = true
         /// Cables already traced in the park, as polylines in local metres (loops closed), see
         /// `occupiedPolylines(of:in:)`. Evidence on them is theirs and the new loop stays clear of them.
         public var occupied: [[SIMD2<Double>]] = []
@@ -81,6 +88,9 @@ public enum CableDetector {
             } else {
                 notes.append("Mast detector weights missing; using floating objects only")
             }
+        }
+        guard options.fitLoops else {
+            return CableDetectionResult(candidates: [], objects: objects, masts: masts, waterFraction: water.fraction, notes: notes, elapsed: Date().timeIntervalSince(started))
         }
         var evidence = objects.map { LoopFitter.Evidence(xy: $0.xy, weight: max(1, $0.areaM2 / 4)) }
         evidence += masts.map { LoopFitter.Evidence(xy: $0.xy, weight: options.mastWeight * $0.probability, shapesHull: false) }

@@ -24,6 +24,16 @@ public enum SetImpact {
         return peak
     }
 
+    /// The watch is on the wrist, so a hand or arm slapping the water reads far above what the body
+    /// feels. Shown capped: a single spike past this is the wrist whipping, not a measurement.
+    public static let displayCapG = 30.0
+
+    /// `17.7 g`, or `30+ g` at the cap.
+    public static func label(_ peakG: Double) -> String {
+        if peakG >= displayCapG { return "\(Int(displayCapG))+ g" }
+        return "\(peakG.formatted(.number.precision(.fractionLength(1)))) g"
+    }
+
     public static func isFall(_ peakG: Double?) -> Bool {
         guard let peakG else { return false }
         return peakG >= fallThresholdG

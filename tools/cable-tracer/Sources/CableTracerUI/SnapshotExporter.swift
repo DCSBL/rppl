@@ -28,10 +28,8 @@ public enum SnapshotExporter {
     public static func export(row: TrainingRow, into directory: URL) async throws -> (overview: TrainingRow.Snapshot, detail: TrainingRow.Snapshot?) {
         let overview = try await export(row: row, scale: Self.overview, center: row.location, into: directory)
         var detail: TrainingRow.Snapshot?
-        if row.hasTracedCable {
-            let projection = LocalProjection(origin: row.location)
-            let vertices = row.cables.flatMap(\.geometry.pointsXY)
-            let center = projection.coordinate(vertices.reduce(SIMD2<Double>.zero, +) / Double(vertices.count))
+        if let centerXY = row.detailCenterXY {
+            let center = LocalProjection(origin: row.location).coordinate(centerXY)
             detail = try await export(row: row, scale: Self.detail, center: center, into: directory)
         }
         return (overview, detail)

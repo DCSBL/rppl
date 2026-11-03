@@ -33,14 +33,25 @@ trace yellow, the best proposal green.
    - 5 vertices preferred over 4 and 6 (masts stand outside the loop, so it is convex).
 4. **Masts** (`mastheat.py`, optional, `--masts <params.npz>`): a tiny CNN (4 conv layers,
    17,745 parameters) classifies 64 px (19 m) patches as mast or not. Run densely over the water
-   (stride 16 px) it gives a heatmap; peaks over 0.5 on or next to the water are mast detections.
+   (stride 16 px) it gives a heatmap; peaks over 0.7 on or next to the water are mast detections (0.5 until 2026-11-03).
    They enter the loop fit as extra vertex evidence, both as hull points (finds corners the floating
    objects miss) and as pure vertex support (survives a false mast); the two candidate sets are
    pooled and the best score wins. The same net runs in the app (`RpplCore/CableDetection/MastNet`),
    from the weights `export_mastnet.py` writes.
 5. **Evaluation** (`evaluate.py`): polygon IoU and vertex distances against the hand trace.
    `--given-others` hands each fit the park's other traced cables, as the app does: their
-   evidence is theirs and the new loop keeps clear of them.
+   evidence is theirs and the new loop keeps clear of them. A park with several loops is fitted
+   once per loop, with the water search seeded at that loop, as the user centres the map on the
+   cable they want (the app seeds at the map centre).
+
+## Mast labels from the app
+
+The app's Debug screen "Review masts" (see `../README.md`) produces `tools/cable-tracer/mast-labels.json`:
+per park the detector's guesses with the reviewer's verdict (`mast`, `none`, `unsure`) and the
+masts the reviewer added by hand. The export carries them as `masts` (local metres) and renders
+the 600 m close-up for a park that has labels but no traced cable, so such a park trains the mast
+net too: `mast` is a positive like a traced bend, `none` a hard negative (`kind == "rejected"`),
+`unsure` keeps the patch sampler and the miner away from that spot.
 
 ## Training the mast net
 
@@ -56,6 +67,6 @@ python3 export_mastnet.py /tmp/mastnet-v2.npz ../../../RpplCore/Sources/RpplCore
 the numbers in `RESULTS.md` are honest for new parks. The Swift port is checked against the
 Python heatmap to 0.05 logit.
 
-## Results (2026-11-02, 25 traced parks)
+## Results (2026-11-03, 32 traced parks)
 
 See `RESULTS.md`.
