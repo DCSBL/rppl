@@ -17,6 +17,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
+    @AppStorage(AppSettingsKey.debugParkImport) private var parkImportEnabled = false
 
     var body: some View {
         List {
@@ -53,6 +54,13 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("A tile with the distance walked between sets and an estimate of the distance swum after a fall.")
+            }
+
+            Section {
+                Toggle("Park import", isOn: $parkImportEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Fill in a park from a website or a screenshot in the park editor, with the model on this iPhone. Needs Apple Intelligence.")
             }
 
             Section {

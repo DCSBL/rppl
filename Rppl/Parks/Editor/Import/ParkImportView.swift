@@ -17,8 +17,11 @@ struct ParkImportView: View {
     var body: some View {
         NavigationStack {
             Form {
-                sourceSection
+                websiteSection
+                screenshotSection
+                if !model.hasRead, !model.isWorking { capabilitiesSection }
                 if model.isWorking { progressSection }
+                if !model.trace.isEmpty { traceSection }
                 if !model.notes.isEmpty { notesSection }
                 suggestionsSection
                 if !model.questions.isEmpty, !model.isWorking { questionsSection }
@@ -45,25 +48,50 @@ struct ParkImportView: View {
 
     // MARK: Sections
 
-    private var sourceSection: some View {
+    private var websiteSection: some View {
         Section {
             TextField("Website address", text: $address)
                 .keyboardType(.URL)
                 .textContentType(.URL)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-                .submitLabel(.go)
-                .onSubmit(readWebsite)
-            Button("Read website", action: readWebsite)
-                .disabled(model.isWorking || address.trimmingCharacters(in: .whitespaces).isEmpty)
+                .submitLabel(.search)
+                .onSubmit(searchWebsite)
+            Button(action: searchWebsite) {
+                Label("Search website", systemImage: "magnifyingglass")
+            }
+            .disabled(model.isWorking || address.trimmingCharacters(in: .whitespaces).isEmpty)
+        } header: {
+            Text("Website")
+        } footer: {
+            Text("Reads the page and follows links to the pages with opening hours, prices and contact details.")
+        }
+    }
+
+    private var screenshotSection: some View {
+        Section {
             PhotosPicker(selection: $photo, matching: .images) {
                 Label("Add screenshot", systemImage: "photo")
             }
             .disabled(model.isWorking)
         } header: {
-            Text("Source")
+            Text("Screenshot")
         } footer: {
-            Text("The text is read on this iPhone. Only the website you name is opened. Check every suggestion before you add it.")
+            Text("For a post on Instagram or a page of a PDF. The text is read on this iPhone.")
+        }
+    }
+
+    private var capabilitiesSection: some View {
+        Section {
+            Label("Phone, email and address", systemImage: "phone")
+            Label("Opening hours", systemImage: "clock")
+            Label("Prices", systemImage: "eurosign.circle")
+            Label("Website and social links", systemImage: "link")
+            Label("Facilities", systemImage: "list.bullet")
+        } header: {
+            Text("Can be filled in")
+        } footer: {
+            Text("Cables and the location stay manual.")
         }
     }
 
@@ -78,10 +106,32 @@ struct ParkImportView: View {
 
     private var progressText: Text {
         switch model.phase {
-        case .idle, .fetching: Text("Opening the page…")
+        case .idle: Text("Searching…")
+        case .fetching(let label): Text("Reading \(label)…")
         case .recognizing: Text("Reading the screenshot…")
         case .reading(let part, let total): Text("Reading part \(part) of \(total)…")
         }
+    }
+
+    private var traceSection: some View {
+        Section {
+            ForEach(model.trace) { entry in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: entry.label)
+                    traceDetail(entry)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } header: {
+            Text("Pages read")
+        }
+    }
+
+    private func traceDetail(_ entry: ParkImportTraceEntry) -> Text {
+        if entry.failed { return Text("Could not open that page.") }
+        if entry.found.isEmpty { return Text("Nothing found here") }
+        return Text(verbatim: entry.found.map { String(localized: fieldName($0)) }.joined(separator: ", "))
     }
 
     private var notesSection: some View {
@@ -103,7 +153,12 @@ struct ParkImportView: View {
                             Text(fieldName(item.field))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text(item.title)
+                            Text(verbatim: item.title)
+                            if let detail = item.detail, !detail.isEmpty {
+                                Text(verbatim: detail)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
                             if let previous = item.previous {
                                 Text("Now: \(previous)")
                                     .font(.footnote)
@@ -119,6 +174,8 @@ struct ParkImportView: View {
                 }
             } header: {
                 Text("Suggestions")
+            } footer: {
+                Text("Check every suggestion before you add it.")
             }
         } else if model.hasRead, !model.isWorking {
             Section {
@@ -140,7 +197,7 @@ struct ParkImportView: View {
 
     // MARK: Text
 
-    private func fieldName(_ field: ParkImportField) -> LocalizedStringKey {
+    private func fieldName(_ field: ParkImportField) -> LocalizedStringResource {
         switch field {
         case .phone: "Phone"
         case .email: "Email"
@@ -149,6 +206,7 @@ struct ParkImportView: View {
         case .links: "Links"
         case .prices: "Prices"
         case .facilities: "Facilities"
+        case .opening: "Opening hours"
         }
     }
 
@@ -157,6 +215,7 @@ struct ParkImportView: View {
         case .missing(.phone): "No phone number found"
         case .missing(.email): "No email address found"
         case .missing(.address): "No address found"
+        case .missing(.opening): "No opening hours found"
         case .missing: "No prices found"
         }
     }
@@ -181,9 +240,9 @@ struct ParkImportView: View {
         )
     }
 
-    private func readWebsite() {
+    private func searchWebsite() {
         let text = address
-        Task { await model.addWebsite(text) }
+        Task { await model.searchWebsite(text) }
     }
 
     private func load(_ item: PhotosPickerItem?) async {

@@ -31,6 +31,8 @@ enum AppSettingsKey {
     static let debugWalkRoute = "rppl.debugWalkRoute"
     /// Debug: add a "No cable geo" filter pill to the Parks list and map (default off).
     static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"
+    /// Debug: "Fill in from a source" (website or screenshot, on-device model) in the park editor (default off).
+    static let debugParkImport = "rppl.debugParkImport"
     /// Debug: "Detect cable" button on the trace map of the park editor (default off).
     static let debugCableDetection = "rppl.debugCableDetection"
     /// Debug: parks show up in the system search (Spotlight) and a tap opens the park (default off).

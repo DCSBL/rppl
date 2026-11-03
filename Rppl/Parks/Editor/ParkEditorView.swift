@@ -13,6 +13,7 @@ struct ParkEditorView: View {
     @State private var confirmClose = false
     @State private var saveError: String?
     @State private var showImport = false
+    @AppStorage(AppSettingsKey.debugParkImport) private var parkImportEnabled = false
 
     /// `original` nil starts a new park. `draft` continues unsaved work.
     init(original: Park?, resuming draft: ParkEditDraft? = nil, onSaved: @escaping () -> Void = {}) {
@@ -96,7 +97,7 @@ struct ParkEditorView: View {
         ToolbarItem(placement: .cancellationAction) {
             Button("Close", action: close)
         }
-        if ParkImportAvailability.isAvailable {
+        if parkImportEnabled, ParkImportAvailability.isAvailable {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showImport = true

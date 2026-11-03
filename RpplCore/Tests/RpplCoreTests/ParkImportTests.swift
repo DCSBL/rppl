@@ -159,9 +159,9 @@ struct ParkImportTests {
     @Test func questionsStayWithinTheClosedFieldList() {
         var bare = park()
         bare.phone = nil
-        #expect(ParkImportMerge.questions(items: [], park: bare) == [.missing(.phone), .missing(.email), .missing(.address)])
+        #expect(ParkImportMerge.questions(items: [], park: bare) == [.missing(.phone), .missing(.email), .missing(.address), .missing(.opening)])
         let items = ParkImportMerge.items(from: candidates(), in: bare, grounding: ParkImportGrounding(pages: [Self.page]))
-        #expect(ParkImportMerge.questions(items: items, park: bare).isEmpty)
+        #expect(ParkImportMerge.questions(items: items, park: bare) == [.missing(.opening)])
     }
 
     @Test func candidatesMergeWithoutOverwriting() {
@@ -182,5 +182,109 @@ struct ParkImportTests {
         #expect(ParkImportCandidates.unit("Stunde") == ParkPriceUnit.hour)
         #expect(ParkImportCandidates.unit("per season") == "per season")
         #expect(ParkImportCandidates.unit(" ") == nil)
+    }
+
+    // MARK: Opening hours
+
+    private static let hoursPage = ParkSourceExtractor.extract(
+        html: """
+        <html><head><title>Openingstijden | Project 7</title></head><body>
+        <h1>Openingstijden</h1>
+        <h2>April</h2><table>
+        <tr><td>Maandag t/m vrijdag</td><td>Gesloten</td></tr>
+        <tr><td>Zaterdag en zondag</td><td>12:30 - 17:00 uur</td></tr></table>
+        <h2>Mei t/m september</h2>
+        <p>Ma - vr: 13.00 tot 21.00 uur</p><p>Za, zo 10:00-21:00</p>
+        </body></html>
+        """,
+        url: "https://www.project7cablepark.nl/openingstijden/"
+    )
+
+    @Test func openingHoursAreReadIntoRules() {
+        let finding = ParkOpeningReader.read([Self.hoursPage])
+        #expect(finding?.rules == [
+            ParkOpeningRule(months: [4], days: ["weekend"], open: "12:30", close: "17:00"),
+            ParkOpeningRule(months: [5, 6, 7, 8, 9], days: ["weekdays"], open: "13:00", close: "21:00"),
+            ParkOpeningRule(months: [5, 6, 7, 8, 9], days: ["weekend"], open: "10:00", close: "21:00"),
+        ])
+        #expect(finding?.sourceURL == "https://www.project7cablepark.nl/openingstijden/")
+        #expect(finding?.lines.count == 3)
+    }
+
+    @Test func timesNeedMinutesOrAWordForHours() {
+        func read(_ line: String) -> [String] {
+            ParkOpeningReader.timeRanges(in: line).map { "\($0.open)-\($0.close)" }
+        }
+        #expect(read("10-12-2025").isEmpty)
+        #expect(read("10 - 18 uur") == ["10:00-18:00"])
+        #expect(read("12h30 - 17h00") == ["12:30-17:00"])
+        #expect(read("10:00 - 12:00 en 13:00 - 17:00") == ["10:00-12:00", "13:00-17:00"])
+        #expect(read("Mo-Fr 9.00 bis 18.00 Uhr") == ["09:00-18:00"])
+        #expect(read("25:00 - 26:00").isEmpty)
+    }
+
+    @Test func daysAndMonthsAreReadInThreeLanguages() {
+        #expect(ParkOpeningReader.days(in: "Zaterdag en zondag") == ["weekend"])
+        #expect(ParkOpeningReader.days(in: "Montag bis Freitag") == ["weekdays"])
+        #expect(ParkOpeningReader.days(in: "Mon, Wed and Fri") == ["mon", "wed", "fri"])
+        #expect(ParkOpeningReader.days(in: "ma t/m zo") == nil)
+        #expect(ParkOpeningReader.days(in: "dagelijks") == nil)
+        #expect(ParkOpeningReader.days(in: "wij zijn zo open") == nil)
+        #expect(ParkOpeningReader.months(in: "oktober - maart") == [1, 2, 3, 10, 11, 12])
+        #expect(ParkOpeningReader.months(in: "Mai bis September") == [5, 6, 7, 8, 9])
+        #expect(ParkOpeningReader.months(in: "it may be fine") == [])
+    }
+
+    @Test func timesOnAnUnrelatedPageAreNotHours() {
+        let page = ParkSourcePage(
+            url: "https://park.nl/lessen",
+            blocks: [ParkSourceBlock(heading: "Lessen", text: "Zaterdag 10:00 - 11:00 beginnersles")]
+        )
+        #expect(ParkOpeningReader.read([page]) == nil)
+        let loose = ParkSourcePage(
+            url: "https://park.nl/info",
+            blocks: [ParkSourceBlock(heading: "Openingstijden", text: "Elke dag in de zomer 10:00 tot 18:00")]
+        )
+        #expect(ParkOpeningReader.read([loose])?.rules.count == 1)
+        #expect(ParkOpeningReader.hoursText([loose]) == "Elke dag in de zomer 10:00 tot 18:00")
+    }
+
+    @Test func openingHoursAreProposedAsOneItemAndApplied() {
+        var found = ParkImportCandidates()
+        found.opening = ParkOpeningReader.read([Self.hoursPage])
+        let items = ParkImportMerge.items(from: found, in: park(), grounding: ParkImportGrounding(pages: [Self.hoursPage]))
+        #expect(items.map(\.id) == ["opening"])
+        #expect(items.first?.level == .verified)
+        let result = ParkImportMerge.apply(items, to: park())
+        #expect(result.opening?.rules?.count == 3)
+        #expect(result.opening?.sourceURL == "https://www.project7cablepark.nl/openingstijden/")
+        #expect(ParkImportMerge.items(from: found, in: result, grounding: ParkImportGrounding(pages: [])).isEmpty)
+    }
+
+    // MARK: Where to look next
+
+    @Test func theNextPageIsLinkedBeforeItIsGuessed() {
+        let pages = [Self.page]
+        let missing: [ParkImportTopic] = [.opening, .prices, .contact]
+        let first = ParkImportAgent.next(pages: pages, missing: missing, visited: [], guessesUsed: 0)
+        #expect(first == ParkImportTarget(url: "https://www.breakout-grunopark.nl/prijzen", topic: .prices, isGuess: false))
+        let second = ParkImportAgent.next(pages: pages, missing: missing, visited: [first?.url ?? ""], guessesUsed: 0)
+        #expect(second?.url == "https://www.breakout-grunopark.nl/contact")
+        let guess = ParkImportAgent.next(pages: pages, missing: [.opening], visited: [], guessesUsed: 0)
+        #expect(guess == ParkImportTarget(url: "https://www.breakout-grunopark.nl/openingstijden", topic: .opening, isGuess: true))
+        #expect(ParkImportAgent.next(pages: pages, missing: [.opening], visited: [], guessesUsed: ParkImportAgent.maxGuesses) == nil)
+        let full = Array(repeating: Self.page, count: ParkImportAgent.maxPages)
+        #expect(ParkImportAgent.next(pages: full, missing: missing, visited: [], guessesUsed: 0) == nil)
+    }
+
+    @Test func missingTopicsFollowTheParkAndTheFindings() {
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: park()) == [.opening, .contact])
+        var bare = park()
+        bare.prices = nil
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: bare) == [.opening, .prices, .contact])
+        var done = ParkImportCandidates()
+        done.opening = ParkOpeningReader.read([Self.hoursPage])
+        done.address = "Hoofdweg 163"
+        #expect(ParkImportAgent.missingTopics(candidates: done, park: park()) == [])
     }
 }
