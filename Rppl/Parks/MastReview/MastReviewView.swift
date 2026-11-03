@@ -2,7 +2,7 @@ import RpplCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Debug: the parks to review for masts, the request that lists them and the results to share.
+/// Debug: the parks to review for towers, the request that lists them and the results to share.
 struct MastReviewView: View {
     private var store: MastReviewStore { .shared }
     private var parkStore: ParkStore { .shared }
@@ -69,7 +69,7 @@ struct MastReviewView: View {
                 }
             }
         }
-        .navigationTitle("Review masts")
+        .navigationTitle("Review towers")
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json], allowsMultipleSelection: false) { result in
             do {
@@ -107,7 +107,7 @@ struct MastReviewView: View {
                 Text("\(masts) · \(none) · \(unsure)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel(Text("\(masts) masts, \(none) no mast, \(unsure) unsure"))
+                    .accessibilityLabel(Text("\(masts) towers, \(none) no tower, \(unsure) unsure"))
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
             }
         }
