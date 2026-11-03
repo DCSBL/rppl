@@ -21,6 +21,11 @@ enum LogbookFormatting {
         return formatted.isEmpty ? DurationFormat.units(0, width: .narrow) : formatted
     }
 
+    /// A wait at the dock: whole minutes (`5 min`), seconds under a minute and a half.
+    static func dockWait(_ interval: TimeInterval) -> String {
+        interval < 90 ? DurationFormat.units(interval.rounded(), width: .abbreviated) : DurationFormat.total(interval)
+    }
+
     static func percent(_ fraction: Double) -> String {
         fraction.formatted(.percent.precision(.fractionLength(0)))
     }

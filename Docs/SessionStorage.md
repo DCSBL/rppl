@@ -125,7 +125,7 @@ derived/view.json    # analyzerVersion + SessionStats + MapTrackFrame? + mapTrac
 
 Raw remains required to regenerate `derived/` after analyzer bumps or storage migrations.
 
-**Keys:** `SessionStats` uses `setCount` and `sets`; `SetSegmentStats` uses `lapCount`. `stats.walkedMeters` and `mapTracks.walkTracks` (walking between sets, `WalkTrackBuilder`) are optional: a sidecar from before they existed is still current, and the phone builds them from the raw GPS when a debug view needs them. A stale `analyzerVersion` triggers a rebuild; an unreadable sidecar is treated as missing so `ensureDerivedView` regenerates it from raw.
+**Keys:** `SessionStats` uses `setCount` and `sets`; `SetSegmentStats` uses `lapCount`. `stats.walkedMeters` and `stats.swumMeters` (walking between sets and an estimate of the swim back, `WalkTrackBuilder`) are optional: a sidecar from before they existed is still current, and the phone builds them from the raw GPS when a debug view needs them. Older sidecars may still carry `mapTracks.walkTracks`; it is ignored. A stale `analyzerVersion` triggers a rebuild; an unreadable sidecar is treated as missing so `ensureDerivedView` regenerates it from raw.
 
 ## Out of scope
 

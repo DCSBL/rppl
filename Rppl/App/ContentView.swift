@@ -1,3 +1,4 @@
+import CoreSpotlight
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -84,6 +85,14 @@ struct ContentView: View {
                     showSettings = true
                 }
             }
+        }
+        // A tapped Spotlight result carries the park link it was indexed with (`ParkSpotlightIndexer`).
+        .onContinueUserActivity(CSSearchableItemActionType) { activity in
+            guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+                  let id = ParkSpotlight.parkID(fromIdentifier: identifier)
+            else { return }
+            openParkID = id
+            selectedTab = .parks
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $showICloudImport) {

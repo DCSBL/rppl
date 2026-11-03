@@ -13,6 +13,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
+    @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -38,21 +39,21 @@ struct DebugLogView: View {
                 Toggle("Fall map", isOn: $fallMapEnabled)
                     .tint(Color.rpplAccent)
             } footer: {
-                Text("Where each set ended on the session map, sized by the impact from the motion stream, plus a falls tile.")
+                Text("Marks how each set ended on the session map (fall badge or clean-exit dot, with a legend), plus a falls tile with the hardest hit at the wrist.")
             }
 
             Section {
                 Toggle("Dock wait", isOn: $dockWaitEnabled)
                     .tint(Color.rpplAccent)
             } footer: {
-                Text("A tile with the typical wait between sets: a busyness indicator for the dock.")
+                Text("A tile with the typical wait between sets and a bar per wait: a busyness indicator for the dock.")
             }
 
             Section {
-                Toggle("Walking route", isOn: $walkRouteEnabled)
+                Toggle("Walking and swimming", isOn: $walkRouteEnabled)
                     .tint(Color.rpplAccent)
             } footer: {
-                Text("Distance walked and the walks between sets on the session map; the averaged walking route of all sessions on the park map.")
+                Text("A tile with the distance walked between sets and an estimate of the distance swum after a fall.")
             }
 
             Section {
@@ -74,6 +75,21 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Adds a button to the trace map of the park editor that looks for the masts and the cable on the satellite imagery and proposes a trace.")
+            }
+
+            Section {
+                Toggle("Parks in Spotlight", isOn: $parkSpotlightEnabled)
+                    .tint(Color.rpplAccent)
+                    .onChange(of: parkSpotlightEnabled) { _, enabled in
+                        if enabled {
+                            // Reloading hands the parks to Spotlight.
+                            ParkStore.shared.reload()
+                        } else {
+                            ParkSpotlightIndexer.shared.removeAll()
+                        }
+                    }
+            } footer: {
+                Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
             }
 
             Section {
