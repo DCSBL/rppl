@@ -278,13 +278,13 @@ struct ParkImportTests {
     }
 
     @Test func missingTopicsFollowTheParkAndTheFindings() {
-        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: park()) == [.opening, .contact])
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: park()) == [.opening, .contact, .events])
         var bare = park()
         bare.prices = nil
-        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: bare) == [.opening, .prices, .contact])
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: bare) == [.opening, .prices, .contact, .events])
         var done = ParkImportCandidates()
         done.opening = ParkOpeningReader.read([Self.hoursPage])
         done.address = "Hoofdweg 163"
-        #expect(ParkImportAgent.missingTopics(candidates: done, park: park()) == [])
+        #expect(ParkImportAgent.missingTopics(candidates: done, park: park()) == [.events])
     }
 }

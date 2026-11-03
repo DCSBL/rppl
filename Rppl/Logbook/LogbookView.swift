@@ -18,6 +18,9 @@ struct LogbookView: View {
     @State private var showDeleteConfirmation = false
     @State private var showExampleSession = false
     @State private var showAddSession = false
+    @State private var showStartSession = false
+    @State private var liveSession = LiveSessionController.shared
+    @State private var watchLive = WatchLiveController.shared
     @State private var showActionError = false
     @State private var actionErrorText: String?
     @State private var highlightSessionId: String?
@@ -54,6 +57,15 @@ struct LogbookView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .sheet(isPresented: $showAddSession) {
             ManualSessionEditorView(onSaved: flashHighlight)
+        }
+        .sheet(isPresented: $showStartSession) {
+            LiveSessionStartView {
+                // The start sheet is still leaving: open the running screen a beat later.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(400))
+                    liveSession.showsScreen = true
+                }
+            }
         }
         .alert(
             "Delete session?",
@@ -133,6 +145,21 @@ struct LogbookView: View {
 
     private var listContent: some View {
         List(selection: sessionSelection) {
+            if liveSession.session != nil || watchLive.snapshot != nil {
+                Section {
+                    Group {
+                        if liveSession.session != nil {
+                            LiveSessionBanner(controller: liveSession)
+                        } else if let snapshot = watchLive.snapshot {
+                            WatchLiveBanner(snapshot: snapshot) { liveSession.showsScreen = true }
+                        }
+                    }
+                        .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+            }
+
             if connectivity.pendingAckCount > 0 {
                 Section {
                     SyncStatusIndicator(
@@ -246,6 +273,9 @@ struct LogbookView: View {
                 // Settings above add in the vertical bar of iPhone Duo, settings left of add elsewhere.
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape", action: showAppSettings)
+                    if liveSession.session == nil {
+                        Button("Start session", systemImage: "play.fill") { showStartSession = true }
+                    }
                     Button("Add session", systemImage: "plus") { showAddSession = true }
                 }
             }

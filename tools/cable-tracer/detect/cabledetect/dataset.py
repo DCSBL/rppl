@@ -31,10 +31,10 @@ class Cable:
 
 
 @dataclass
-class Mast:
-    """A reviewed mast position from the tracer's review mode (local metres)."""
+class Tower:
+    """A reviewed tower position from the tracer's review mode (local metres)."""
     xy: np.ndarray
-    verdict: str  # mast | none | unsure
+    verdict: str  # tower | none | unsure
     source: str  # detector | manual
     probability: float | None
 
@@ -49,7 +49,7 @@ class ParkExample:
     overview: Snapshot | None
     detail: Snapshot | None
     root: Path
-    masts: list[Mast] = field(default_factory=list)
+    towers: list[Tower] = field(default_factory=list)
 
     def image(self, snapshot: Snapshot) -> np.ndarray:
         return np.asarray(Image.open(self.root / snapshot.image_file).convert("RGB"))
@@ -89,14 +89,14 @@ class ParkExample:
     def loops(self) -> list[Cable]:
         return [c for c in self.cables if c.kind == "loop" and len(c.points_xy) >= 3]
 
-    def masts_xy(self, verdict: str) -> np.ndarray:
+    def towers_xy(self, verdict: str) -> np.ndarray:
         """Reviewed positions with this verdict, (n, 2) local metres."""
-        return np.array([m.xy for m in self.masts if m.verdict == verdict], dtype=float).reshape(-1, 2)
+        return np.array([m.xy for m in self.towers if m.verdict == verdict], dtype=float).reshape(-1, 2)
 
     @property
-    def mast_positions_xy(self) -> np.ndarray:
-        """Where a mast stands: the traced bends plus the reviewed masts."""
-        parts = [loop.points_xy for loop in self.loops] + [self.masts_xy("mast")]
+    def tower_positions_xy(self) -> np.ndarray:
+        """Where a tower stands: the traced bends plus the reviewed towers."""
+        parts = [loop.points_xy for loop in self.loops] + [self.towers_xy("tower")]
         return np.concatenate(parts).reshape(-1, 2)
 
 
@@ -122,10 +122,12 @@ def load(root: Path) -> list[ParkExample]:
             geometry = cable["geometry"]
             points = np.array([[p[0], p[1]] if isinstance(p, list) else [p["x"], p["y"]] for p in geometry["pointsXY"]], dtype=float).reshape(-1, 2)
             cables.append(Cable(cable.get("name"), cable.get("direction"), geometry["kind"], geometry["isClosed"], points))
-        masts = [Mast(np.array(m["xy"], dtype=float), m["verdict"], m.get("source", "detector"), m.get("probability")) for m in row.get("masts") or []]
+        # Exports before the rename (2026-11-03) used "masts" and the verdict "mast".
+        towers = [Tower(np.array(m["xy"], dtype=float), "tower" if m["verdict"] == "mast" else m["verdict"], m.get("source", "detector"), m.get("probability"))
+                  for m in row.get("towers") or row.get("masts") or []]
         examples.append(ParkExample(
             park_id=row["parkID"], name=row["name"], lat=row["location"]["lat"], lon=row["location"]["lon"],
             cables=cables, overview=_snapshot(row.get("snapshot")), detail=_snapshot(row.get("detailSnapshot")), root=root,
-            masts=masts,
+            towers=towers,
         ))
     return examples

@@ -21,7 +21,7 @@ public enum SnapshotExporter {
     /// 1.4 km square around the park location at 1.37 m/px: context, water and obstacles, but
     /// the cable itself is not visible at this scale (checked 2026-11-02 on Almere and Rotterdam).
     public static let overview = Scale(suffix: "", sizePx: 1024, groundSizeM: 1400)
-    /// 600 m square around the traced cables at 0.29 m/px: the most Apple imagery gives, for masts and boats.
+    /// 600 m square around the traced cables at 0.29 m/px: the most Apple imagery gives, for towers and boats.
     public static let detail = Scale(suffix: "-detail", sizePx: 2048, groundSizeM: 600)
 
     @MainActor

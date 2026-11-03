@@ -2,23 +2,23 @@ import MapKit
 import RpplCore
 import SwiftUI
 
-/// Debug: satellite map of one park. "Find masts" runs the mast detector around the map centre;
-/// the guesses come up one by one (most confident first) under the crosshair, and each gets a
-/// verdict. Pan the crosshair onto the real mast before "Mast" to correct the position; use
-/// "Add mast here" for masts the detector missed.
-struct MastReviewMapView: View {
+/// Debug: satellite map of one park. "Find towers" runs the tower detector around the map centre;
+/// the guesses come up one by one (the most confident first, then always the nearest one) under the crosshair, and each gets a
+/// verdict. Pan the crosshair onto the real tower before "Tower" to correct the position; use
+/// "Add tower here" for towers the detector missed.
+struct TowerReviewMapView: View {
     let park: Park
 
-    private var store: MastReviewStore { .shared }
+    private var store: TowerReviewStore { .shared }
 
     @State private var position: MapCameraPosition
     @State private var viewCenter: CLLocationCoordinate2D
-    @State private var session: MastReviewSession?
+    @State private var session: TowerReviewSession?
     @State private var detecting = false
     @State private var detectionNote: String?
-    @State private var removing: MastLabel?
+    @State private var removing: TowerLabel?
 
-    /// Span of the map when a candidate is shown: close enough to see a single mast.
+    /// Span of the map when a candidate is shown: close enough to see a single tower.
     private static let candidateSpanM = 90.0
 
     init(park: Park) {
@@ -32,7 +32,7 @@ struct MastReviewMapView: View {
         ParkCoordinate(lat: viewCenter.latitude, lon: viewCenter.longitude)
     }
 
-    private var labels: [MastLabel] { store.labels.labels(for: park.id) }
+    private var labels: [TowerLabel] { store.labels.labels(for: park.id) }
 
     var body: some View {
         Map(position: $position) {
@@ -78,7 +78,7 @@ struct MastReviewMapView: View {
         .overlay { MapCrosshair() }
         .overlay(alignment: .top) {
             if detecting {
-                ProgressView("Looking for masts…")
+                ProgressView("Looking for towers…")
                     .padding(12)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     .padding(.top, 12)
@@ -90,9 +90,9 @@ struct MastReviewMapView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    findMasts()
+                    findTowers()
                 } label: {
-                    Label("Find masts", systemImage: "scope")
+                    Label("Find towers", systemImage: "scope")
                 }
                 .disabled(detecting)
             }
@@ -130,16 +130,16 @@ struct MastReviewMapView: View {
                     }
                 }
                 HStack(spacing: 8) {
-                    verdictButton("Mast", color: .green) { judge(.mast) }
-                    verdictButton("No mast", color: .red) { judge(.notMast) }
+                    verdictButton("Tower", color: .green) { judge(.tower) }
+                    verdictButton("No tower", color: .red) { judge(.notTower) }
                     verdictButton("Unsure", color: .gray) { judge(.unsure) }
                 }
             } else {
                 HStack(spacing: 8) {
                     Button {
-                        findMasts()
+                        findTowers()
                     } label: {
-                        Label(session == nil ? "Find masts around the centre" : "Look again around the centre", systemImage: "scope")
+                        Label(session == nil ? "Find towers around the centre" : "Look again around the centre", systemImage: "scope")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -147,9 +147,9 @@ struct MastReviewMapView: View {
                 }
             }
             Button {
-                store.add(MastReviewSession.manualMast(at: centerCoordinate), to: park.id)
+                store.add(TowerReviewSession.manualTower(at: centerCoordinate), to: park.id)
             } label: {
-                Label("Add mast here", systemImage: "plus.circle")
+                Label("Add tower here", systemImage: "plus.circle")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -168,15 +168,15 @@ struct MastReviewMapView: View {
     }
 
     private var summary: String {
-        let masts = store.labels.count(.mast, in: park.id)
-        let none = store.labels.count(.notMast, in: park.id)
+        let towers = store.labels.count(.tower, in: park.id)
+        let none = store.labels.count(.notTower, in: park.id)
         let unsure = store.labels.count(.unsure, in: park.id)
-        return "\(masts) masts · \(none) no mast · \(unsure) unsure"
+        return "\(towers) towers · \(none) no tower · \(unsure) unsure"
     }
 
     // MARK: Actions
 
-    private func findMasts() {
+    private func findTowers() {
         detecting = true
         detectionNote = nil
         let center = centerCoordinate
@@ -187,14 +187,14 @@ struct MastReviewMapView: View {
                 let image = try await CableDetectionRunner.snapshot(around: center)
                 let result = await Task.detached(priority: .userInitiated) {
                     var options = CableDetector.Options()
-                    options.minimumMastProbability = MastReviewSession.minimumProbability
+                    options.minimumTowerProbability = TowerReviewSession.minimumProbability
                     options.fitLoops = false
                     return CableDetector.detect(in: image, options: options)
                 }.value
-                let found = MastReviewSession(parkID: parkID, detected: result.masts, image: image, labels: known)
+                let found = TowerReviewSession(parkID: parkID, detected: result.towers, image: image, labels: known)
                 session = found
                 detectionNote = found.remaining == 0
-                    ? (result.masts.isEmpty ? String(localized: "No masts found") : String(localized: "All guesses here are judged"))
+                    ? (result.towers.isEmpty ? String(localized: "No towers found") : String(localized: "All guesses here are judged"))
                     : nil
                 if let first = found.current { fly(to: first.coordinate) }
             } catch {
@@ -204,7 +204,7 @@ struct MastReviewMapView: View {
         }
     }
 
-    private func judge(_ verdict: MastLabel.Verdict) {
+    private func judge(_ verdict: TowerLabel.Verdict) {
         guard let label = session?.judge(verdict, crosshair: centerCoordinate) else { return }
         store.add(label, to: park.id)
         if let next = session?.current { fly(to: next.coordinate) }
@@ -230,18 +230,18 @@ struct MastReviewMapView: View {
             .shadow(color: .black.opacity(0.5), radius: 2)
     }
 
-    private func color(of verdict: MastLabel.Verdict) -> Color {
+    private func color(of verdict: TowerLabel.Verdict) -> Color {
         switch verdict {
-        case .mast: .green
-        case .notMast: .red
+        case .tower: .green
+        case .notTower: .red
         case .unsure: .gray
         }
     }
 
-    private func accessibilityName(of verdict: MastLabel.Verdict) -> String {
+    private func accessibilityName(of verdict: TowerLabel.Verdict) -> String {
         switch verdict {
-        case .mast: String(localized: "Mast")
-        case .notMast: String(localized: "No mast")
+        case .tower: String(localized: "Tower")
+        case .notTower: String(localized: "No tower")
         case .unsure: String(localized: "Unsure")
         }
     }

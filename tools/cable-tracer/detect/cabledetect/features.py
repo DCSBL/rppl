@@ -20,7 +20,7 @@ class Blob:
 
 def bright_blobs(rgb: np.ndarray, water: np.ndarray, meters_per_pixel: float,
                  min_area_m2: float = 0.8, max_area_m2: float = 120.0, shore_margin_m: float = 6.0) -> list[Blob]:
-    """Small bright objects floating on water: obstacles (kickers, boxes, rails), mast platforms,
+    """Small bright objects floating on water: obstacles (kickers, boxes, rails), tower platforms,
     buoys and boats. Everything that is not water texture and not shore.
     """
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY).astype(np.float32)

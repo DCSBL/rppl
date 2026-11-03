@@ -11,6 +11,7 @@ Custom scheme `rppl://`, registered in `Rppl/Info.plist` and `Info-Dev.plist` (`
 | `rppl://park/<park-id>` | Park detail | `ParkDeepLink` |
 | `rppl://about` | Settings (about, iCloud), opens the Rppl modal | `TabDeepLink` |
 | `rppl://debug` | Hidden Debug screen | `TabDeepLink` |
+| `rppl://live` | Running iPhone session, asks to stop it (Live Activity Stop button) | `TabDeepLink` |
 
 Examples:
 
@@ -24,6 +25,7 @@ rppl://parks/favorites
 
 ## Where they are used
 
+- Live Activity: Stop opens `rppl://live`.
 - Widgets: park hours (`rppl://park/<id>`), top parks (`rppl://parks/favorites`), last session (`rppl://session/<id>`).
 - Debug screen (About, hold the logo): lists every link above; tap opens it, hold copies it.
 - Spotlight (debug toggle "Parks in Spotlight"): every indexed park uses `rppl://park/<id>` as its Spotlight identifier. A tap arrives as a user activity, not through `onOpenURL`, so `ContentView.onContinueUserActivity` takes the id out of it (`ParkSpotlight.parkID`). See [Parks.md](Parks.md#parks-in-spotlight-debug-toggle).

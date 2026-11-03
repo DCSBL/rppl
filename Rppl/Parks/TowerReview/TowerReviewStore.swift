@@ -2,16 +2,16 @@ import Foundation
 import Observation
 import RpplCore
 
-/// Debug: the mast verdicts collected on this phone and the request that says which parks to
-/// review. Both live in Documents/mast-review/ so a session can stop and resume; the labels file
-/// is shared as `mast-labels.json` and read by the cable-tracer's training-set export.
+/// Debug: the tower verdicts collected on this phone and the request that says which parks to
+/// review. Both live in Documents/tower-review/ so a session can stop and resume; the labels file
+/// is shared as `tower-labels.json` and read by the cable-tracer's training-set export.
 @Observable
 @MainActor
-final class MastReviewStore {
-    static let shared = MastReviewStore()
+final class TowerReviewStore {
+    static let shared = TowerReviewStore()
 
-    private(set) var labels = MastLabelStore()
-    private(set) var request: MastReviewRequest?
+    private(set) var labels = TowerLabelStore()
+    private(set) var request: TowerReviewRequest?
     private(set) var lastError: String?
 
     /// A park to review: from the request when there is one, else every park without a traced cable.
@@ -24,10 +24,16 @@ final class MastReviewStore {
     }
 
     private var directory: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("mast-review", isDirectory: true)
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("tower-review", isDirectory: true)
     }
-    private var labelsFile: URL { directory.appendingPathComponent(MastLabelStore.fileName) }
-    private var requestFile: URL { directory.appendingPathComponent("mast-review-request.json") }
+    /// Where builds before the rename (2026-11-03) kept the labels; read once and saved under the new name.
+    private var legacyLabelsFile: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("mast-review", isDirectory: true)
+            .appendingPathComponent(TowerLabelStore.legacyFileName)
+    }
+    private var labelsFile: URL { directory.appendingPathComponent(TowerLabelStore.fileName) }
+    private var requestFile: URL { directory.appendingPathComponent("tower-review-request.json") }
 
     private init() {
         load()
@@ -35,13 +41,18 @@ final class MastReviewStore {
 
     func load() {
         do {
-            labels = try MastLabelStore.load(from: labelsFile)
+            if !FileManager.default.fileExists(atPath: labelsFile.path), FileManager.default.fileExists(atPath: legacyLabelsFile.path) {
+                labels = try TowerLabelStore.load(from: legacyLabelsFile)
+                saveLabels()
+            } else {
+                labels = try TowerLabelStore.load(from: labelsFile)
+            }
             if FileManager.default.fileExists(atPath: requestFile.path) {
-                request = try MastReviewRequest.decode(Data(contentsOf: requestFile))
+                request = try TowerReviewRequest.decode(Data(contentsOf: requestFile))
             }
         } catch {
             lastError = error.localizedDescription
-            WakeLog.error(.store, "mast review load: \(error.localizedDescription)")
+            WakeLog.error(.store, "tower review load: \(error.localizedDescription)")
         }
     }
 
@@ -59,7 +70,7 @@ final class MastReviewStore {
             .map { Row(id: $0.id, name: $0.name, reason: nil, park: $0) }
     }
 
-    func add(_ label: MastLabel, to parkID: String) {
+    func add(_ label: TowerLabel, to parkID: String) {
         labels.add(label, to: parkID)
         saveLabels()
     }
@@ -74,7 +85,7 @@ final class MastReviewStore {
             try labels.save(to: labelsFile)
         } catch {
             lastError = error.localizedDescription
-            WakeLog.error(.store, "mast review save: \(error.localizedDescription)")
+            WakeLog.error(.store, "tower review save: \(error.localizedDescription)")
         }
     }
 
@@ -85,7 +96,7 @@ final class MastReviewStore {
             if accessing { url.stopAccessingSecurityScopedResource() }
         }
         let data = try Data(contentsOf: url)
-        let imported = try MastReviewRequest.decode(data)
+        let imported = try TowerReviewRequest.decode(data)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try imported.encoded().write(to: requestFile, options: .atomic)
         request = imported
@@ -99,12 +110,12 @@ final class MastReviewStore {
     /// Presents the share sheet with the labels file (AirDrop, Files, Mail, …).
     func shareResults() {
         do {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent(MastLabelStore.fileName)
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent(TowerLabelStore.fileName)
             try labels.encoded().write(to: url, options: .atomic)
             ActivitySharePresenter.present(items: [url])
         } catch {
             lastError = error.localizedDescription
-            WakeLog.error(.store, "mast review share: \(error.localizedDescription)")
+            WakeLog.error(.store, "tower review share: \(error.localizedDescription)")
         }
     }
 }

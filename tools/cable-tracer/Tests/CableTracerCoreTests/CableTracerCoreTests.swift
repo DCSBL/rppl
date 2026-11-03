@@ -93,7 +93,7 @@ final class CableTracerCoreTests: XCTestCase {
         XCTAssertEqual(CableGeometry(cable: reversed, parkLocation: almere).windingDirection, .clockwise)
         XCTAssertTrue(CableLint.check(reversed, index: 0, parkLocation: almere).contains { $0.message.contains("but direction says ccw") })
 
-        // Push the far bend into the loop: a mast "pushing" from the inside.
+        // Push the far bend into the loop: a tower "pushing" from the inside.
         var dented = almereLoop
         dented.points?[2] = ParkCablePoint(lat: 52.35935, lon: 5.2180)
         let geometry = CableGeometry(cable: dented, parkLocation: almere)
@@ -146,28 +146,28 @@ final class CableTracerCoreTests: XCTestCase {
     }
 }
 
-final class MastLabelTests: XCTestCase {
+final class TowerLabelTests: XCTestCase {
     let almere = ParkCoordinate(lat: 52.3581295, lon: 5.2152087)
 
-    func testTrainingRowCarriesMastsInLocalMetres() throws {
+    func testTrainingRowCarriesTowersInLocalMetres() throws {
         let park = Park(id: "view-almere", name: "VIEW Almere", location: almere)
-        let mast = ParkCoordinate(lat: 52.3585546998476, lon: 5.21501871403023)
-        var store = MastLabelStore()
-        store.add(MastLabel(coordinate: mast, verdict: .mast, source: .manual, reviewedAt: "2026-11-03"), to: park.id)
-        store.add(MastLabel(coordinate: almere, verdict: .unsure, source: .detector, probability: 0.4, reviewedAt: "2026-11-03"), to: park.id)
+        let tower = ParkCoordinate(lat: 52.3585546998476, lon: 5.21501871403023)
+        var store = TowerLabelStore()
+        store.add(TowerLabel(coordinate: tower, verdict: .tower, source: .manual, reviewedAt: "2026-11-03"), to: park.id)
+        store.add(TowerLabel(coordinate: almere, verdict: .unsure, source: .detector, probability: 0.4, reviewedAt: "2026-11-03"), to: park.id)
 
         XCTAssertTrue(TrainingSet.rows(parks: [park]).isEmpty, "an untraced park without labels is not an example")
         let rows = TrainingSet.rows(parks: [park], labels: store)
         XCTAssertEqual(rows.count, 1)
-        let masts = try XCTUnwrap(rows[0].masts)
-        XCTAssertEqual(masts.map(\.verdict), ["mast", "unsure"])
-        XCTAssertEqual(masts[0].xy.length, almere.meters(to: mast), accuracy: 0.5)
-        // The close-up centres on the confirmed mast; the unsure detection does not pull it.
-        XCTAssertEqual(rows[0].detailCenterXY, masts[0].xy)
+        let towers = try XCTUnwrap(rows[0].towers)
+        XCTAssertEqual(towers.map(\.verdict), ["tower", "unsure"])
+        XCTAssertEqual(towers[0].xy.length, almere.meters(to: tower), accuracy: 0.5)
+        // The close-up centres on the confirmed tower; the unsure detection does not pull it.
+        XCTAssertEqual(rows[0].detailCenterXY, towers[0].xy)
 
         let data = try TrainingSet.encode(rows)
         let json = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [[String: Any]])
-        let encoded = try XCTUnwrap(json[0]["masts"] as? [[String: Any]])
+        let encoded = try XCTUnwrap(json[0]["towers"] as? [[String: Any]])
         XCTAssertEqual((encoded[0]["xy"] as? [Double])?.count, 2)
     }
 }

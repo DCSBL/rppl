@@ -26,6 +26,7 @@ public enum ParkImportAgent {
         .opening: ["/openingstijden", "/openingstijden/", "/opening-hours", "/oeffnungszeiten", "/hours"],
         .prices: ["/prijzen", "/tarieven", "/preise", "/prices"],
         .contact: ["/contact", "/kontakt"],
+        .events: ["/agenda", "/evenementen", "/events", "/veranstaltungen"],
     ]
 
     /// What the park and the findings still lack, most useful first.
@@ -34,6 +35,7 @@ public enum ParkImportAgent {
         if park.opening?.hasSchedule != true, candidates.opening == nil { missing.append(.opening) }
         if candidates.prices.isEmpty, (park.prices ?? []).isEmpty { missing.append(.prices) }
         if candidates.address == nil, (park.address ?? "").isEmpty { missing.append(.contact) }
+        if candidates.events.isEmpty { missing.append(.events) }
         return missing
     }
 

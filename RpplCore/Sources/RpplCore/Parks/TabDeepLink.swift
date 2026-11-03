@@ -1,8 +1,9 @@
 import Foundation
 
 /// `rppl://logbook`, `rppl://parks`, `rppl://about`, `rppl://debug`: open a tab (debug is the hidden screen under About).
+/// `rppl://live` opens the running iPhone session with its stop question (the Live Activity's Stop button).
 public enum TabDeepLink: String, CaseIterable {
-    case logbook, parks, about, debug
+    case logbook, parks, about, debug, live
 
     public var url: URL? {
         var components = URLComponents()
@@ -34,5 +35,6 @@ public enum DeepLinkCatalog {
         Entry(url: "rppl://park/<park-id>", summary: "Park detail"),
         Entry(url: "rppl://about", summary: "Settings, opens the Rppl modal"),
         Entry(url: "rppl://debug", summary: "Hidden Debug screen"),
+        Entry(url: "rppl://live", summary: "Running iPhone session, asks to stop it"),
     ]
 }

@@ -3,7 +3,7 @@ import Foundation
 /// The park fields the import can propose. A closed list on purpose: opening hours, cables and the
 /// location stay manual.
 public enum ParkImportField: String, CaseIterable, Sendable {
-    case phone, email, website, address, links, prices, facilities, opening
+    case phone, email, website, address, links, prices, facilities, opening, events
 }
 
 /// A price as the model read it, with the words it says it read it from.
@@ -30,6 +30,8 @@ public struct ParkImportCandidates: Equatable, Sendable {
     public var opening: ParkOpeningFinding?
     /// Lines about opening hours that gave no rule, kept as a note.
     public var openingNote: String?
+    /// Dated events and closures read by code. Never from the model.
+    public var events: [ParkEventFinding] = []
 
     public init() {}
 
@@ -44,6 +46,7 @@ public struct ParkImportCandidates: Equatable, Sendable {
         if !prices.isEmpty { result.insert(.prices) }
         if !facilities.isEmpty { result.insert(.facilities) }
         if opening != nil || openingNote != nil { result.insert(.opening) }
+        if !events.isEmpty { result.insert(.events) }
         return result
     }
 
@@ -68,6 +71,9 @@ public struct ParkImportCandidates: Equatable, Sendable {
         address = address ?? other.address
         opening = opening ?? other.opening
         openingNote = openingNote ?? other.openingNote
+        for event in other.events where !events.contains(where: { ParkEventReader.sameEvent($0.exception, event.exception) }) {
+            events.append(event)
+        }
         for link in other.links where !links.contains(where: { ParkLinkKinds.normalizedKey($0.kind) == ParkLinkKinds.normalizedKey(link.kind) }) {
             links.append(link)
         }
@@ -137,6 +143,8 @@ public struct ParkImportItem: Identifiable, Equatable, Sendable {
         case opening(rules: [ParkOpeningRule], sourceURL: String?)
         /// Hours the reader could not turn into rules, as the source words them.
         case openingNote(String)
+        /// An announced event or closure, for `opening.exceptions`.
+        case event(ParkOpeningException)
     }
 
     public var id: String
@@ -161,6 +169,8 @@ public struct ParkImportItem: Identifiable, Equatable, Sendable {
             return ParkOpeningReader.summary(of: rules)
         case .openingNote(let text):
             return text
+        case .event(let exception):
+            return ParkEventReader.summary(of: exception)
         }
     }
 
@@ -245,6 +255,13 @@ public enum ParkImportMerge {
                 level: .verified, detail: nil
             ))
         }
+        let known = park.opening?.exceptions ?? []
+        for event in candidates.events where !known.contains(where: { ParkEventReader.sameEvent($0, event.exception) }) {
+            items.append(ParkImportItem(
+                id: "event-" + ParkEventReader.start(event.exception) + "-" + (event.exception.label ?? "").lowercased(),
+                field: .events, value: .event(event.exception), previous: nil, level: .verified, detail: event.line
+            ))
+        }
         return items
     }
 
@@ -277,6 +294,12 @@ public enum ParkImportMerge {
             case .openingNote(let text):
                 var opening = park.opening ?? ParkOpening()
                 opening.note = String(text.prefix(ParkTextField.note.maxLength))
+                park.opening = opening
+            case .event(let exception):
+                var opening = park.opening ?? ParkOpening()
+                var exceptions = opening.exceptions ?? []
+                if !exceptions.contains(where: { ParkEventReader.sameEvent($0, exception) }) { exceptions.append(exception) }
+                opening.exceptions = exceptions
                 park.opening = opening
             case .facility(let text):
                 var facilities = park.facilities ?? []

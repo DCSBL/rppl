@@ -1,7 +1,7 @@
 import Foundation
 
-/// A mast found by the mast detector, in local metres.
-public struct DetectedMast: Sendable, Equatable {
+/// A tower found by the tower detector, in local metres.
+public struct DetectedTower: Sendable, Equatable {
     public var xy: SIMD2<Double>
     public var probability: Double
 
@@ -15,7 +15,7 @@ public struct DetectedMast: Sendable, Equatable {
 public struct CableDetectionResult: Sendable {
     public var candidates: [CableLoopCandidate]
     public var objects: [FloatingObject]
-    public var masts: [DetectedMast]
+    public var towers: [DetectedTower]
     /// Share of the image that is the park's water body.
     public var waterFraction: Double
     public var notes: [String]
@@ -26,24 +26,24 @@ public struct CableDetectionResult: Sendable {
     /// Parks are added by people; a proposal is a starting point for them, never the truth.
     public var summary: String {
         guard let best else { return notes.last ?? "No cable found" }
-        var parts = ["\(best.vertices.count) masts", "\(Int(best.perimeterM.rounded())) m"]
+        var parts = ["\(best.vertices.count) towers", "\(Int(best.perimeterM.rounded())) m"]
         if best.isWeak { parts.append("weak match") }
         parts.append(contentsOf: best.notes)
         return parts.joined(separator: ", ")
     }
 }
 
-/// Finds the cable of a park on a satellite close-up: water, floating objects, masts, then a
+/// Finds the cable of a park on a satellite close-up: water, floating objects, towers, then a
 /// convex loop that explains them. Pure Swift so it runs in tests and on every platform; the
 /// image comes from a map snapshot in the app.
 public enum CableDetector {
     public struct Options: Sendable {
-        /// Use the bundled mast detector as extra vertex evidence (slower, better corners).
-        public var useMastNet = true
-        /// Weight of a mast detection as loop evidence: 2 means full vertex support on its own.
-        public var mastWeight = 3.0
-        public var minimumMastProbability = 0.7
-        /// Fit cable loops to the evidence; off when only the masts are wanted (mast review).
+        /// Use the bundled tower detector as extra vertex evidence (slower, better corners).
+        public var useTowerNet = true
+        /// Weight of a tower detection as loop evidence: 2 means full vertex support on its own.
+        public var towerWeight = 3.0
+        public var minimumTowerProbability = 0.7
+        /// Fit cable loops to the evidence; off when only the towers are wanted (tower review).
         public var fitLoops = true
         /// Cables already traced in the park, as polylines in local metres (loops closed), see
         /// `occupiedPolylines(of:in:)`. Evidence on them is theirs and the new loop stays clear of them.
@@ -73,27 +73,27 @@ public enum CableDetector {
         var notes: [String] = []
         let water = WaterSegmenter().segment(image)
         guard water.cellCount > 0 else {
-            return CableDetectionResult(candidates: [], objects: [], masts: [], waterFraction: 0, notes: ["No water found near the park location"], elapsed: Date().timeIntervalSince(started))
+            return CableDetectionResult(candidates: [], objects: [], towers: [], waterFraction: 0, notes: ["No water found near the park location"], elapsed: Date().timeIntervalSince(started))
         }
         let objects = BrightBlobDetector().detect(in: image, water: water)
-        var masts: [DetectedMast] = []
-        if options.useMastNet {
-            if let net = MastNet.bundled {
+        var towers: [DetectedTower] = []
+        if options.useTowerNet {
+            if let net = TowerNet.bundled {
                 let heatmap = net.heatmap(of: image, water: water)
-                masts = heatmap.peaks(probability: options.minimumMastProbability).compactMap { peak -> DetectedMast? in
-                    // Masts stand on or right next to the water.
+                towers = heatmap.peaks(probability: options.minimumTowerProbability).compactMap { peak -> DetectedTower? in
+                    // Towers stand on or right next to the water.
                     guard water.waterFraction(aroundColumn: Int(peak.column), row: Int(peak.row), halfSize: Int(10 / image.metersPerPixel)) >= 0.3 else { return nil }
-                    return DetectedMast(xy: image.local(fromPixelColumn: peak.column, row: peak.row), probability: peak.probability)
+                    return DetectedTower(xy: image.local(fromPixelColumn: peak.column, row: peak.row), probability: peak.probability)
                 }
             } else {
-                notes.append("Mast detector weights missing; using floating objects only")
+                notes.append("Tower detector weights missing; using floating objects only")
             }
         }
         guard options.fitLoops else {
-            return CableDetectionResult(candidates: [], objects: objects, masts: masts, waterFraction: water.fraction, notes: notes, elapsed: Date().timeIntervalSince(started))
+            return CableDetectionResult(candidates: [], objects: objects, towers: towers, waterFraction: water.fraction, notes: notes, elapsed: Date().timeIntervalSince(started))
         }
         var evidence = objects.map { LoopFitter.Evidence(xy: $0.xy, weight: max(1, $0.areaM2 / 4)) }
-        evidence += masts.map { LoopFitter.Evidence(xy: $0.xy, weight: options.mastWeight * $0.probability, shapesHull: false) }
+        evidence += towers.map { LoopFitter.Evidence(xy: $0.xy, weight: options.towerWeight * $0.probability, shapesHull: false) }
         let occupied = options.occupied.filter { $0.count >= 2 }
         if !occupied.isEmpty {
             // Evidence on an already traced cable belongs to that cable, and so do the obstacles inside a traced loop.
@@ -110,19 +110,19 @@ public enum CableDetector {
         })
         let candidates = fitter.propose(evidence: evidence)
         if candidates.isEmpty {
-            notes.append(evidence.count < 4 ? "Too few floating objects or masts to fit a loop" : "No plausible loop")
+            notes.append(evidence.count < 4 ? "Too few floating objects or towers to fit a loop" : "No plausible loop")
         }
         return CableDetectionResult(
             candidates: candidates,
             objects: objects,
-            masts: masts,
+            towers: towers,
             waterFraction: water.fraction,
             notes: notes,
             elapsed: Date().timeIntervalSince(started)
         )
     }
 
-    /// Traced points for a proposal: the loop in the given travel direction, starting at the mast
+    /// Traced points for a proposal: the loop in the given travel direction, starting at the tower
     /// nearest the park location (the dock is usually by the entrance). Coordinates come from the
     /// image's local frame.
     public static func cable(from candidate: CableLoopCandidate, in image: DetectionImage, direction: ParkCableDirection, name: String? = nil) -> ParkCable {

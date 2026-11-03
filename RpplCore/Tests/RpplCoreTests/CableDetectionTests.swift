@@ -59,21 +59,21 @@ struct CableDetectionTests {
         #expect(bitmap.eroded().count == 64)  // 8x8 core; the lone speck erodes
     }
 
-    // MARK: Mast net
+    // MARK: Tower net
 
-    @Test func bundledMastNetMatchesTheTrainedModel() throws {
-        let net = try #require(MastNet.bundled)
+    @Test func bundledTowerNetMatchesTheTrainedModel() throws {
+        let net = try #require(TowerNet.bundled)
         #expect(net.parameterCount == 17745)
-        // Reference logits printed by tools/cable-tracer/detect/export_mastnet.py.
+        // Reference logits printed by tools/cable-tracer/detect/export_towernet.py.
         let black = [UInt8](repeating: 0, count: 64 * 64 * 3)
         #expect(abs(net.logit(patch: black) - -1.276472) < 2e-3)
         #expect(abs(net.logit(patch: Self.syntheticPatch()) - -71.883278) < 0.05)
     }
 
     @Test func denseHeatmapMatchesThePythonReference() throws {
-        let net = try #require(MastNet.bundled)
+        let net = try #require(TowerNet.bundled)
         // A 128 px image that is black except for the patch at (32, 32). Reference values from
-        // cabledetect.mastheat.dense_logits on the same image (the dense pass sees the biases of the
+        // cabledetect.towerheat.dense_logits on the same image (the dense pass sees the biases of the
         // black surroundings, so its cell differs from the lone patch logit by design).
         var rgb = [UInt8](repeating: 0, count: 128 * 128 * 3)
         let patch = Self.syntheticPatch()
@@ -94,7 +94,7 @@ struct CableDetectionTests {
         logits[2 * 10 + 2] = 1
         logits[2 * 10 + 3] = 0.5  // shoulder of the first peak
         logits[7 * 10 + 7] = 2
-        let heatmap = MastHeatmap(width: 10, height: 10, logits: logits)
+        let heatmap = TowerHeatmap(width: 10, height: 10, logits: logits)
         let peaks = heatmap.peaks(probability: 0.5, minimumSeparationCells: 2)
         #expect(peaks.count == 2)
         #expect(peaks[0].column == 7 * 16 + 32 && peaks[0].row == 7 * 16 + 32)
@@ -107,7 +107,7 @@ struct CableDetectionTests {
 
     private let pentagon: [SIMD2<Double>] = [SIMD2(-120, -40), SIMD2(0, -70), SIMD2(120, -40), SIMD2(90, 60), SIMD2(-90, 60)]
 
-    @Test func loopFitterRecoversAPentagonFromItsMasts() throws {
+    @Test func loopFitterRecoversAPentagonFromItsTowers() throws {
         let fitter = LoopFitter(isWater: { _ in true })
         var evidence = pentagon.map { LoopFitter.Evidence(xy: $0, weight: 4) }
         evidence.append(LoopFitter.Evidence(xy: SIMD2(100, 10), weight: 1))  // an obstacle on an edge
@@ -133,7 +133,7 @@ struct CableDetectionTests {
     }
 
     @Test func tracedCableIsKeptClearAndItsEvidenceIgnored() throws {
-        // A second loop traced right of the pentagon: its masts are not evidence for the new loop,
+        // A second loop traced right of the pentagon: its towers are not evidence for the new loop,
         // and a candidate on top of it is marked and scores lower.
         let other: [SIMD2<Double>] = [SIMD2(160, -60), SIMD2(360, -60), SIMD2(360, 60), SIMD2(160, 60), SIMD2(160, -60)]
         var fitter = LoopFitter(isWater: { _ in true })
@@ -146,7 +146,7 @@ struct CableDetectionTests {
         #expect(LoopFitter.conflicts(pentagon, with: other) == 0)
         #expect(abs(LoopFitter.distance(SIMD2(260, 0), toPolyline: other) - 60) < 1e-9)
 
-        let image = Self.syntheticLake(masts: pentagon)
+        let image = Self.syntheticLake(towers: pentagon)
         let origin = image.origin
         func point(_ xy: SIMD2<Double>) -> ParkCablePoint {
             let coordinate = DetectionImage.coordinate(fromLocal: xy, origin: origin)
@@ -165,11 +165,11 @@ struct CableDetectionTests {
     // MARK: End to end on a synthetic lake
 
     @Test func detectorFindsTheLoopOnASyntheticLake() throws {
-        let image = Self.syntheticLake(masts: pentagon)
+        let image = Self.syntheticLake(towers: pentagon)
         let water = WaterSegmenter().segment(image)
         #expect(abs(water.fraction - 0.33) < 0.06, "water fraction \(water.fraction)")
         var options = CableDetector.Options()
-        options.useMastNet = false  // the net is tested on its own; keeps this test fast in debug builds
+        options.useTowerNet = false  // the net is tested on its own; keeps this test fast in debug builds
         let result = CableDetector.detect(in: image, options: options)
         #expect(result.objects.count >= 5)
         let best = try #require(result.best, "notes: \(result.notes)")
@@ -201,7 +201,7 @@ struct CableDetectionTests {
 
     // MARK: Fixtures
 
-    /// Deterministic pattern shared with export_mastnet.py.
+    /// Deterministic pattern shared with export_towernet.py.
     static func syntheticPatch() -> [UInt8] {
         var patch = [UInt8](repeating: 0, count: 64 * 64 * 3)
         for y in 0..<64 { for x in 0..<64 { for c in 0..<3 { patch[(y * 64 + x) * 3 + c] = UInt8((x * 7 + y * 13 + c * 31 + (x * y) % 17) % 256) } } }
@@ -209,8 +209,8 @@ struct CableDetectionTests {
     }
 
     /// 600 x 600 px at 1 m/px: a dark lake (400 x 300 m) in land made of several colours, bright
-    /// 4 x 4 m platforms just outside each mast position and two obstacles on the long edges.
-    static func syntheticLake(masts: [SIMD2<Double>]) -> DetectionImage {
+    /// 4 x 4 m platforms just outside each tower position and two obstacles on the long edges.
+    static func syntheticLake(towers: [SIMD2<Double>]) -> DetectionImage {
         let size = 600
         var rgb = [UInt8](repeating: 0, count: size * size * 3)
         var rng = SplitMix64(seed: 42)
@@ -243,13 +243,13 @@ struct CableDetectionTests {
                 bright[base] = 210; bright[base + 1] = 205; bright[base + 2] = 200
             } }
         }
-        let centroid = masts.reduce(SIMD2<Double>(0, 0), +) / Double(masts.count)
-        for mast in masts {
-            let outward = mast - centroid
-            platform(at: mast + outward / vectorLength(outward) * 3, width: 4, height: 4)
+        let centroid = towers.reduce(SIMD2<Double>(0, 0), +) / Double(towers.count)
+        for tower in towers {
+            let outward = tower - centroid
+            platform(at: tower + outward / vectorLength(outward) * 3, width: 4, height: 4)
         }
-        platform(at: (masts[0] + masts[1]) / 2, width: 2, height: 6)
-        platform(at: (masts[3] + masts[4]) / 2, width: 6, height: 2)
+        platform(at: (towers[0] + towers[1]) / 2, width: 2, height: 6)
+        platform(at: (towers[3] + towers[4]) / 2, width: 6, height: 2)
         return DetectionImage(width: size, height: size, rgb: bright, metersPerPixel: 1, center: origin, origin: origin)
     }
 }

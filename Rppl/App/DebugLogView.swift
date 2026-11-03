@@ -14,7 +14,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
     @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
-    @AppStorage(AppSettingsKey.debugMastReview) private var mastReviewEnabled = false
+    @AppStorage(AppSettingsKey.debugTowerReview) private var towerReviewEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -75,7 +75,7 @@ struct DebugLogView: View {
                 Toggle("Detect cable", isOn: $cableDetectionEnabled)
                     .tint(Color.rpplAccent)
             } footer: {
-                Text("Adds a button to the trace map of the park editor that looks for the masts and the cable on the satellite imagery and proposes a trace.")
+                Text("Adds a button to the trace map of the park editor that looks for the towers and the cable on the satellite imagery and proposes a trace.")
             }
 
             Section {
@@ -94,17 +94,17 @@ struct DebugLogView: View {
             }
 
             Section {
-                Toggle("Review masts", isOn: $mastReviewEnabled)
+                Toggle("Review towers", isOn: $towerReviewEnabled)
                     .tint(Color.rpplAccent)
-                if mastReviewEnabled {
+                if towerReviewEnabled {
                     NavigationLink {
-                        MastReviewView()
+                        TowerReviewView()
                     } label: {
-                        Label("Review masts", systemImage: "scope")
+                        Label("Review towers", systemImage: "scope")
                     }
                 }
             } footer: {
-                Text("Judge the detector's mast guesses on the satellite map, park by park, and share the verdicts as a file for the detector's training set. A request file says which parks to do.")
+                Text("Judge the detector's tower guesses on the satellite map, park by park, and share the verdicts as a file for the detector's training set. A request file says which parks to do.")
             }
 
             Section {

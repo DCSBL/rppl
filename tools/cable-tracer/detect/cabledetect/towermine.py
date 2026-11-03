@@ -1,6 +1,6 @@
-"""Hard-negative mining for the mast net: run the per-fold models over every park, cut patches at
+"""Hard-negative mining for the tower net: run the per-fold models over every park, cut patches at
 the confident peaks that are not at a traced bend, and add them to the patch set as negatives.
-Usage: mastmine.py <training-set> <patches.npz> <fold-params-prefix.npz> <out.npz>"""
+Usage: towermine.py <training-set> <patches.npz> <fold-params-prefix.npz> <out.npz>"""
 from __future__ import annotations
 
 import json
@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from cabledetect import dataset, mastheat, water  # noqa: E402
-from cabledetect.mastpatches import crop  # noqa: E402
+from cabledetect import dataset, towerheat, water  # noqa: E402
+from cabledetect.towerpatches import crop  # noqa: E402
 
 
 def main(root: Path, patches: Path, params: Path, out: Path, probability: float = 0.6, per_park: int = 40) -> None:
@@ -19,24 +19,24 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
     x, y, parks, kinds = list(data["x"]), list(data["y"]), list(data["park"]), list(data["kind"])
     models = {}
     for fold_json in sorted(params.parent.glob(f"{params.stem}.fold*.json")):
-        fold_params = mastheat.load_params(fold_json.with_suffix(".npz"))
+        fold_params = towerheat.load_params(fold_json.with_suffix(".npz"))
         for park in json.loads(fold_json.read_text()):
             models[park] = fold_params
     rng = np.random.default_rng(3)
     added = 0
-    for example in dataset.load(root):
-        if not example.detail or not len(example.mast_positions_xy) or example.park_id not in models:
-            continue
+    examples = [e for e in dataset.load(root) if e.detail and len(e.tower_positions_xy) and e.park_id in models]
+    for number, example in enumerate(examples, 1):
+        print(f"progress: mining [{number}/{len(examples)}] {example.park_id}", flush=True)
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
         w = water.water_mask(rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
-        logits = mastheat.dense_logits(models[example.park_id], rgb)
-        # A peak near a traced bend, a confirmed mast or an unsure detection is not a false peak.
-        bends = np.concatenate([example.to_pixels(snapshot, example.mast_positions_xy), example.to_pixels(snapshot, example.masts_xy("unsure"))])
+        logits = towerheat.dense_logits(models[example.park_id], rgb)
+        # A peak near a traced bend, a confirmed tower or an unsure detection is not a false peak.
+        bends = np.concatenate([example.to_pixels(snapshot, example.tower_positions_xy), example.to_pixels(snapshot, example.towers_xy("unsure"))])
         mpp = snapshot.meters_per_pixel
         candidates = []
-        for row, col, prob in mastheat.mast_peaks(logits, float(np.log(probability / (1 - probability)))):
+        for row, col, prob in towerheat.tower_peaks(logits, float(np.log(probability / (1 - probability)))):
             if np.min(np.hypot(bends[:, 0] - col, bends[:, 1] - row)) * mpp < 20:
                 continue
             # Only places the detector could meet in the app: on or near the water body.
