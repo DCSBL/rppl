@@ -33,6 +33,8 @@ enum AppSettingsKey {
     static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"
     /// Debug: "Detect cable" button on the trace map of the park editor (default off).
     static let debugCableDetection = "rppl.debugCableDetection"
+    /// Debug: parks show up in the system search (Spotlight) and a tap opens the park (default off).
+    static let debugParkSpotlight = "rppl.debugParkSpotlight"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).

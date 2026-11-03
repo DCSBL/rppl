@@ -13,6 +13,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
+    @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -66,6 +67,21 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Adds a button to the trace map of the park editor that looks for the masts and the cable on the satellite imagery and proposes a trace.")
+            }
+
+            Section {
+                Toggle("Parks in Spotlight", isOn: $parkSpotlightEnabled)
+                    .tint(Color.rpplAccent)
+                    .onChange(of: parkSpotlightEnabled) { _, enabled in
+                        if enabled {
+                            // Reloading hands the parks to Spotlight.
+                            ParkStore.shared.reload()
+                        } else {
+                            ParkSpotlightIndexer.shared.removeAll()
+                        }
+                    }
+            } footer: {
+                Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
             }
 
             Section {

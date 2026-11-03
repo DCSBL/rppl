@@ -15,6 +15,8 @@ final class ParkStore {
 
     func reload() {
         entries = ParkCatalog.loadWithOrigin(userRoot: root, otaDirectory: ParkDataStore.app.activeDirectory())
+        // Spotlight mirrors the list; it does nothing while the debug toggle is off.
+        ParkSpotlightIndexer.shared.sync(parks: entries.map(\.park))
     }
 
     /// The Park hours widget reads the same park files; tell it after an edit.
