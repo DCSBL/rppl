@@ -1,10 +1,12 @@
 version: 1
 id: blaue-lagune-wachtendonk
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand (dock pin moved to the start)
 
 name: Blaue Lagune Wakepark Wachtendonk
 short_name: Blaue Lagune
@@ -16,8 +18,8 @@ address: "Jülicher Str. 1-2, 47669 Wachtendonk"
 timezone: Europe/Berlin
 # Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.359196
-  lon: 6.276248
+  lat: 51.379935
+  lon: 6.269811
 
 phone: "+49 2839 277"
 email: "info@blauelagune.de"
@@ -29,13 +31,28 @@ links:
 cables:
   - name: Full Size Anlage
     length_m: 780
-    description: >-
-      Fünf Masten von Sesitec mit 10 Mitnehmern und Featurepark.
+    description: Fünf Masten von Sesitec mit 10 Mitnehmern und Featurepark.
+    direction: ccw
+    points:
+      - lat: 51.379926
+        lon: 6.270062
+      - lat: 51.377148
+        lon: 6.27031
+      - lat: 51.376976
+        lon: 6.27085
+      - lat: 51.377178
+        lon: 6.271343
+      - lat: 51.379935
+        lon: 6.271005
   - name: Beginner System 2.0
-    direction: "2.0"
     length_m: 100
-    description: >-
-      Zwei Masten am Ufer, für Anfänger. Das Schwimmabzeichen Bronze ist nötig.
+    description: Zwei Masten am Ufer, für Anfänger. Das Schwimmabzeichen Bronze ist nötig.
+    direction: "2.0"
+    points:
+      - lat: 51.379104
+        lon: 6.272058
+      - lat: 51.377174
+        lon: 6.271731
 
 opening:
   source_url: "https://www.blauelagune.de/oeffnungszeiten/"
