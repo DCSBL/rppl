@@ -11,6 +11,9 @@ struct LiveSessionStartView: View {
     @State private var mode = LiveSession.Mode.setsAndTime
     @State private var location = ParksLocationProvider()
     @State private var pickedByHand = false
+    @State private var connectivity = PhoneConnectivityService.shared
+    @State private var isStartingWatch = false
+    @State private var watchFailed = false
 
     /// A fix this close to a park counts as being there.
     private static let atParkRadiusMeters = 2_000.0
@@ -50,16 +53,7 @@ struct LiveSessionStartView: View {
                         .pickerStyle(.segmented)
                     }
 
-                    Text("The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself. For everything else, record with Apple Watch.")
-                        .font(.footnote)
-                        .foregroundStyle(Color.rpplMuted)
-
-                    Button(action: start) {
-                        Text("Track on iPhone").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(.green)
+                    actions
                 }
                 .padding(RpplDesign.tileSpacing)
             }
@@ -71,6 +65,11 @@ struct LiveSessionStartView: View {
             }
             // Only when the person already allowed location elsewhere: starting a session never asks.
             .task { location.refresh() }
+            .alert("Could not start Apple Watch", isPresented: $watchFailed) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Open Rppl on your Apple Watch and start there, or track on iPhone.")
+            }
             .onChange(of: draft.parkId) { pickedByHand = true }
             .onChange(of: draft.spot) { pickedByHand = true }
             .onChange(of: location.coordinate) { _, fix in
@@ -80,6 +79,54 @@ struct LiveSessionStartView: View {
                 draft.setPlace(parkId: near.id, spot: nil, name: nil, parks: parks)
                 pickedByHand = false
             }
+        }
+    }
+
+    private var actions: some View {
+        VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
+            if watchAvailable {
+                Button(action: startWatch) {
+                    Text("Start on Apple Watch").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .tint(.green)
+                .disabled(isStartingWatch)
+                Text("The Watch records everything: sets, speed and heart rate.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+
+            if watchAvailable {
+                Text("On the iPhone you keep time and sets yourself, without speed or heart rate.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.rpplMuted)
+            } else {
+                Text("No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.rpplMuted)
+            }
+
+            if watchAvailable {
+                trackOnPhone.buttonStyle(.bordered).controlSize(.large).tint(.green)
+            } else {
+                trackOnPhone.buttonStyle(.borderedProminent).controlSize(.large).tint(.green)
+            }
+        }
+    }
+
+    private var trackOnPhone: some View {
+        Button(action: start) { Text("Track on iPhone").frame(maxWidth: .infinity) }
+    }
+
+    private var watchAvailable: Bool { connectivity.syncState.isReadyToSync }
+
+    private func startWatch() {
+        isStartingWatch = true
+        Task {
+            let started = await WatchStarter.start()
+            isStartingWatch = false
+            if started { dismiss() } else { watchFailed = true }
         }
     }
 
