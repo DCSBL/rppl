@@ -4,7 +4,7 @@ import CableTracerUI
 import Foundation
 import RpplCore
 
-// `cable-tracer --export-training-set <dir> [--parks <parks dir>]` renders the training set
+// `cable-tracer --export-training-set <dir> [--parks <parks dir>] [--labels <mast-labels.json>]` renders the training set
 // without opening a window (MapKit snapshots still need a logged-in macOS session).
 // Anything else launches the app.
 let arguments = CommandLine.arguments
@@ -20,12 +20,19 @@ if let flag = arguments.firstIndex(of: "--export-training-set"), arguments.indic
         exit(2)
     }
     let tracedOnly = !arguments.contains("--all-parks")
+    let labelsFile: URL
+    if let labelsFlag = arguments.firstIndex(of: "--labels"), arguments.indices.contains(labelsFlag + 1) {
+        labelsFile = URL(fileURLWithPath: arguments[labelsFlag + 1])
+    } else {
+        labelsFile = MastLabelStore.defaultFile(parksDirectory: parksDirectory)
+    }
     Task { @MainActor in
         do {
             try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
             let parks = ParkWorkspace(directory: parksDirectory).load()
-            var rows = TrainingSet.rows(parks: parks, tracedOnly: tracedOnly)
-            print("Exporting \(rows.count) parks from \(parksDirectory.path) to \(output.path)")
+            let labels = try MastLabelStore.load(from: labelsFile)
+            var rows = TrainingSet.rows(parks: parks, labels: labels, tracedOnly: tracedOnly)
+            print("Exporting \(rows.count) parks from \(parksDirectory.path) to \(output.path) (\(labels.reviewedParkIDs.count) parks with mast labels from \(labelsFile.path))")
             for index in rows.indices {
                 let started = Date()
                 let snapshots = try await SnapshotExporter.export(row: rows[index], into: output)

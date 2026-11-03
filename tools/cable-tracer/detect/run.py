@@ -17,22 +17,24 @@ sys.path.insert(0, str(Path(__file__).parent))
 from cabledetect import dataset, evaluate, features, loopfit, water  # noqa: E402
 
 
-def load_mast_models(path: Path):
-    """{park_id: params} from the per-fold files next to `path`, plus "*" for the full model."""
+def load_mast_models(paths: list[Path]):
+    """{park_id: [params]} from the per-fold files next to each path, plus "*" for the full models.
+    Several paths make an ensemble: their logits are averaged (the fold split is the same for all)."""
     from cabledetect import mastheat
-    models = {"*": mastheat.load_params(path)}
-    for fold_json in sorted(path.parent.glob(f"{path.stem}.fold*.json")):
-        params = mastheat.load_params(fold_json.with_suffix(".npz"))
-        for park in json.loads(fold_json.read_text()):
-            models[park] = params
+    models: dict[str, list] = {"*": []}
+    for path in paths:
+        models["*"].append(mastheat.load_params(path))
+        for fold_json in sorted(path.parent.glob(f"{path.stem}.fold*.json")):
+            params = mastheat.load_params(fold_json.with_suffix(".npz"))
+            for park in json.loads(fold_json.read_text()):
+                models.setdefault(park, []).append(params)
     return models
 
 
-def detect_masts(models, example, snapshot, rgb, w, probability=0.5):
+def detect_masts(models, example, snapshot, rgb, w, probability=0.7):
     """Mast peaks in local metres with probabilities, plus how they compare with the traced bends."""
     from cabledetect import mastheat
-    params = models.get(example.park_id, models["*"])
-    logits = mastheat.dense_logits(params, rgb)
+    logits = np.mean([mastheat.dense_logits(params, rgb) for params in models.get(example.park_id, models["*"])], axis=0)
     peaks = []
     for row, col, prob in mastheat.mast_peaks(logits, threshold=float(np.log(probability / (1 - probability)))):
         r0, r1 = max(0, row - 34), min(w.shape[0], row + 35)
@@ -56,9 +58,9 @@ def main() -> None:
     parser.add_argument("training_set", type=Path)
     parser.add_argument("--out", type=Path, default=Path("/tmp/cable-eval"))
     parser.add_argument("--only", nargs="*")
-    parser.add_argument("--masts", type=Path, help="mast net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out")
+    parser.add_argument("--masts", type=Path, nargs="+", help="mast net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out; several files are averaged")
     parser.add_argument("--mast-weight", type=float, default=3.0)
-    parser.add_argument("--mast-probability", type=float, default=0.5)
+    parser.add_argument("--mast-probability", type=float, default=0.7)
     parser.add_argument("--given-others", action="store_true", help="give the fit the park's other traced cables (as the app does); parks with several loops get one row per loop")
     parser.add_argument("--masts-mode", choices=["both", "hull", "score"], default="both", help="mast detections shape the starting hull, only score vertices, or both pooled (default)")
     args = parser.parse_args()
@@ -75,27 +77,34 @@ def main() -> None:
         snapshot = example.detail
         rgb = example.image(snapshot)
         mpp = snapshot.meters_per_pixel
-        # Seed the water search at the park location: the only input a new park has.
-        seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
-        seed_rc = (int(np.clip(seed_px[1], 0, snapshot.size_px - 1)), int(np.clip(seed_px[0], 0, snapshot.size_px - 1)))
-        w = water.water_mask(rgb, seed_rc)
-        blobs = features.bright_blobs(rgb, w, mpp)
-        blob_px = np.array([[b.col, b.row] for b in blobs]).reshape(-1, 2)
-        blob_xy = example.to_local(snapshot, blob_px) if len(blobs) else np.zeros((0, 2))
+        def analyse(seed_xy):
+            """Water, floating objects and mast detections with the water search seeded at `seed_xy` (local metres)."""
+            seed_px = example.to_pixels(snapshot, np.asarray(seed_xy, float).reshape(1, 2))[0]
+            seed_rc = (int(np.clip(seed_px[1], 0, snapshot.size_px - 1)), int(np.clip(seed_px[0], 0, snapshot.size_px - 1)))
+            w = water.water_mask(rgb, seed_rc)
+            blobs = features.bright_blobs(rgb, w, mpp)
+            blob_px = np.array([[b.col, b.row] for b in blobs]).reshape(-1, 2)
+            blob_xy = example.to_local(snapshot, blob_px) if len(blobs) else np.zeros((0, 2))
 
-        def water_test(points_xy, _example=example, _snapshot=snapshot, _w=w):
-            px = _example.to_pixels(_snapshot, points_xy)
-            cols = np.clip(px[:, 0].astype(int), 0, _snapshot.size_px - 1)
-            rows = np.clip(px[:, 1].astype(int), 0, _snapshot.size_px - 1)
-            inside = (px[:, 0] >= 0) & (px[:, 0] < _snapshot.size_px) & (px[:, 1] >= 0) & (px[:, 1] < _snapshot.size_px)
-            return _w[rows, cols] & inside
+            def water_test(points_xy, _example=example, _snapshot=snapshot, _w=w):
+                px = _example.to_pixels(_snapshot, points_xy)
+                cols = np.clip(px[:, 0].astype(int), 0, _snapshot.size_px - 1)
+                rows = np.clip(px[:, 1].astype(int), 0, _snapshot.size_px - 1)
+                inside = (px[:, 0] >= 0) & (px[:, 0] < _snapshot.size_px) & (px[:, 1] >= 0) & (px[:, 1] < _snapshot.size_px)
+                return _w[rows, cols] & inside
 
-        rows_w, cols_w = np.nonzero(w[::8, ::8])
-        water_xy = example.to_local(snapshot, np.stack([cols_w * 8, rows_w * 8], axis=1).astype(float))
-        water_xy = water_xy[np.linalg.norm(water_xy, axis=1) <= 380]
-        mast_xy, mast_prob, mast_stats = np.zeros((0, 2)), np.zeros(0), {}
-        if mast_models:
-            mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w, probability=args.mast_probability)
+            rows_w, cols_w = np.nonzero(w[::8, ::8])
+            water_xy = example.to_local(snapshot, np.stack([cols_w * 8, rows_w * 8], axis=1).astype(float))
+            water_xy = water_xy[np.linalg.norm(water_xy, axis=1) <= 380]
+            mast_xy, mast_prob, mast_stats = np.zeros((0, 2)), np.zeros(0), {}
+            if mast_models:
+                mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w, probability=args.mast_probability)
+            return w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats
+
+        # Seed the water search at the park location: the only input a new park has. A park with
+        # several loops is seeded at each target loop instead, as the user centres the map on the
+        # cable they want (the app seeds at the map centre).
+        analysed = analyse((0.0, 0.0))
         # One fit per target loop. With --given-others every other traced cable of the park is
         # handed to the fit as occupied, the way the app hands over the cables already traced.
         targets = [(loop, [c for c in example.cables if c is not loop]) for loop in example.loops] if args.given_others else [(None, [])]
@@ -103,7 +112,8 @@ def main() -> None:
             targets = [(None, list(example.cables))]
         for target_index, (target, others) in enumerate(targets):
             occupied = [np.vstack([c.points_xy, c.points_xy[:1]]) if c.closed else c.points_xy for c in others]
-            run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats, started,
+            per_target = analyse(target.points_xy.mean(axis=0)) if len(example.loops) > 1 and target is not None else analysed
+            run_park(args, example, snapshot, rgb, *per_target, started,
                      target, occupied, example.park_id if len(targets) == 1 else f"{example.park_id}#{target_index + 1}", results)
 
     (args.out / "results.json").write_text(json.dumps(results, indent=1))

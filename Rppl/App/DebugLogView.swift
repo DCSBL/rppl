@@ -13,6 +13,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
+    @AppStorage(AppSettingsKey.debugMastReview) private var mastReviewEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -66,6 +67,20 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Adds a button to the trace map of the park editor that looks for the masts and the cable on the satellite imagery and proposes a trace.")
+            }
+
+            Section {
+                Toggle("Review masts", isOn: $mastReviewEnabled)
+                    .tint(Color.rpplAccent)
+                if mastReviewEnabled {
+                    NavigationLink {
+                        MastReviewView()
+                    } label: {
+                        Label("Review masts", systemImage: "scope")
+                    }
+                }
+            } footer: {
+                Text("Judge the detector's mast guesses on the satellite map, park by park, and share the verdicts as a file for the detector's training set. A request file says which parks to do.")
             }
 
             Section {

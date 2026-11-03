@@ -1,5 +1,59 @@
 # Results: loop proposal vs hand trace
 
+## Retrained on 32 parks (2026-11-03, evening)
+
+Seven hand-traced Belgian and German parks joined the set (34 rows, 32 traced parks, 35 loop targets with
+`--given-others`; multi-loop parks are seeded at each target loop's centroid, as the app seeds at the map
+centre). The mast net was retrained on the 32 parks (patches + one round of hard-negative mining, same
+recipe), and the mast threshold raised from 0.5 to 0.7: the new parks have dark shorelines and beaches full
+of boats that fire the net at 0.5-0.7.
+
+- Old net (25 parks) @ 0.5: 34/35 proposals, median IoU 0.75, IoU >= 0.7 for 20, median bend error 30.2 m, 150/205 bends found with 330 false peaks, 12 weak; new 7 parks: median IoU 0.61, >= 0.7 for 4/9.
+- Old net @ 0.7: 33/35 proposals, median IoU 0.77, IoU >= 0.7 for 22, median bend error 24.5 m, 145/205 bends found with 219 false peaks, 8 weak; new 7 parks: median IoU 0.62, >= 0.7 for 4/9.
+- New net @ 0.5: 34/35 proposals, median IoU 0.70, IoU >= 0.7 for 19, median bend error 30.1 m, 149/205 bends found with 448 false peaks, 10 weak; new 7 parks: median IoU 0.70, >= 0.7 for 5/9.
+- **New net @ 0.7 (shipped)**: 34/35 proposals, median IoU 0.75, IoU >= 0.7 for 22, median bend error 21.5 m, 142/205 bends found with 256 false peaks, 10 weak; new 7 parks: median IoU 0.70, >= 0.7 for 5/9.
+- Two-seed ensemble of the new net @ 0.7: 34/35 proposals, median IoU 0.78, IoU >= 0.7 for 22, median bend error 30.2 m, 158/205 bends found with 303 false peaks, 9 weak; new 7 parks: median IoU 0.62, >= 0.7 for 4/9; not worth two weight files.
+- Fold AUCs of the new net 0.95-0.96 (leave-parks-out); the Swift port is checked against the Python heatmap as before (new reference logits in `CableDetectionTests`).
+- Still hard: The Outsider (proposal spans the lake, score -6.6 flags it), Wakebeach 257 (beach boats pull the loop), Terhills' first loop and The Bricks' hexagons (short sides, 46-degree corners). These parks follow the 46 untraced parks in the first mast-review request (`../requests/2026-11-03-round-1.json`).
+
+| park | mast peaks | bends found | false peaks | IoU | mean bend error (m) | perimeter (m) | vertices | score | notes |
+|---|---|---|---|---|---|---|---|---|---|
+| stroombroek-braamt | 6 | 5/5 | 1 | 0.93 | 5.8 | 1039 | 5 | 10.8 |  |
+| beavercreek-roermond | 12 | 5/5 | 7 | 0.61 | 36.8 | 739 | 5 | 7.3 |  |
+| betuwestrand-beesd | 20 | 0/5 | 20 | 0.0 | 278.3 | 1035 | 5 | -5.1 | edges over land: 4% |
+| breakout-harkstede | 6 | 3/4 | 2 | 0.75 | 16.7 | 851 | 6 | 13.3 |  |
+| burnside-emst | 14 | 5/5 | 9 | 0.93 | 10.9 | 958 | 6 | 12.3 |  |
+| downunder-nieuwegein | 11 | 5/5 | 6 | 0.92 | 3.9 | 746 | 6 | 15.2 |  |
+| aquabest-best | 10 | 3/4 | 6 | 0.75 | 19.4 | 916 | 5 | 13.1 |  |
+| view-almere | 3 | 0/5 | 3 | 0.86 | 16.8 | 896 | 6 | 13.2 |  |
+| deberendonck-wijchen | 5 | 5/5 | 0 | 0.9 | 5.7 | 816 | 5 | 14.9 |  |
+| ermerstrand-erm | 0 | 0/4 | - | 0.33 | 87.5 | 543 | 6 | 9.2 |  |
+| goodlife-hoogstraten | 9 | 5/5 | 4 | 0.88 | 19.1 | 666 | 5 | 14.6 |  |
+| lakeside-paradise-knokke#1 | 19 | 10/10 | 9 | 0.26 | 49.8 | 713 | 5 | 1.8 | on a traced cable |
+| lakeside-paradise-knokke#2 | 19 | 10/10 | 9 | 0.8 | 23.2 | 695 | 6 | 12.0 |  |
+| lakeside-zwolle | 0 | 0/5 | - | - | - | - | - | - | no proposal |
+| lunalake-heerhugowaard | 19 | 4/5 | 13 | 0.87 | 12.6 | 733 | 5 | 12.3 |  |
+| project7-rotterdam | 10 | 1/5 | 9 | 0.52 | 70.3 | 544 | 5 | 10.1 |  |
+| schotsman-kamperland | 34 | 4/4 | 30 | 0.68 | 39.5 | 892 | 6 | 3.2 |  |
+| seven-twenty-sevenum | 8 | 5/5 | 3 | 0.93 | 4.4 | 805 | 5 | 14.9 |  |
+| wakeup-antwerp | 5 | 4/6 | 1 | 0.54 | 25.3 | 441 | 4 | -9.7 | corner of 157 degrees |
+| waterskitwente-enschede | 15 | 3/4 | 12 | 0.64 | 41.8 | 672 | 6 | 11.1 |  |
+| waterskibaan-sneek | 13 | 5/5 | 8 | 0.74 | 40.1 | 944 | 5 | 10.4 |  |
+| kempervennen-westerhoven | 12 | 5/5 | 7 | 0.84 | 19.9 | 750 | 5 | 12.2 |  |
+| watersportcentre-veendam | 12 | 5/5 | 7 | 0.72 | 35.6 | 706 | 5 | 14.6 |  |
+| wetnwild-alphen | 9 | 4/5 | 4 | 0.83 | 7.4 | 814 | 6 | 14.6 |  |
+| wollebrand-honselersdijk | 7 | 5/5 | 2 | 0.85 | 7.9 | 681 | 5 | 15.2 |  |
+| zeumeren-voorthuizen | 14 | 4/5 | 9 | 0.82 | 26.5 | 797 | 6 | 11.1 |  |
+| blaue-lagune-wachtendonk | 10 | 4/5 | 5 | 0.6 | 51.0 | 686 | 6 | 13.7 |  |
+| dock79-saint-ghislain | 11 | 4/5 | 6 | 0.86 | 15.2 | 740 | 6 | 14.1 |  |
+| suedsee-wakepark-xanten | 7 | 5/5 | 2 | 0.94 | 4.0 | 974 | 5 | 12.7 |  |
+| terhills-dilsen-stokkem#1 | 29 | 5/10 | 22 | 0.8 | 23.3 | 575 | 4 | 8.9 |  |
+| terhills-dilsen-stokkem#2 | 29 | 5/10 | 22 | 0.82 | 22.7 | 778 | 5 | 13.1 |  |
+| thebricks-duisburg#1 | 7 | 4/12 | 3 | 0.64 | 15.2 | 366 | 6 | 0.6 |  |
+| thebricks-duisburg#2 | 9 | 5/12 | 4 | 0.7 | 20.4 | 424 | 5 | 3.7 |  |
+| outsider-oudenaarde | 13 | 5/5 | 8 | 0.52 | 30.5 | 550 | 4 | -6.5 | corner of 142 degrees |
+| wakebeach-257-dormagen | 4 | 0/5 | 3 | 0.31 | 67.4 | 684 | 6 | 8.1 |  |
+
 ## With the mast net (2026-11-02, night)
 
 Same input as below, plus the mast net (`--masts`, each park scored by the fold model that never
