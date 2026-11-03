@@ -102,6 +102,10 @@ Optional start only:
 
 Requires an active HealthKit workout path for Workout intent registration. Cycle Label (manual Action Button labeling) is removed.
 
+## Live view on the iPhone
+
+While a Watch session records, `WatchLiveMirror` mirrors the HealthKit workout to the iPhone (`startMirroringToCompanionDevice`) and sends a small `WatchLiveSnapshot` (sets, set start, speed, heart rate, water, laps, paused) with `sendToRemoteWorkoutSession` every 3 s when something shown changed. The iPhone (`WatchLiveController`) shows it in the Logbook banner, a dashboard and a Live Activity. It is a viewing window only: nothing is stored, the iPhone cannot stop or change the session, and the session still arrives through the normal transfer. Every failure is logged and ignored; recording, detection, the Health save and the transfer do not depend on it. The Watch can also be started from the iPhone (`startWatchApp`), which takes the Action Button path (`handleStartWorkoutIntent`).
+
 ## Battery guard
 
 The Health workout and the phone transfer only happen at Stop, and a park day can outlast an older Watch's battery (roughly 6–7 h with GPS and heart rate). `BatteryGuardPolicy` (Core) decides what the Watch does while it runs down, checked on every flush:

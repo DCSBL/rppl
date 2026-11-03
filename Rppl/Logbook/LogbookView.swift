@@ -20,6 +20,7 @@ struct LogbookView: View {
     @State private var showAddSession = false
     @State private var showStartSession = false
     @State private var liveSession = LiveSessionController.shared
+    @State private var watchLive = WatchLiveController.shared
     @State private var showActionError = false
     @State private var actionErrorText: String?
     @State private var highlightSessionId: String?
@@ -144,9 +145,15 @@ struct LogbookView: View {
 
     private var listContent: some View {
         List(selection: sessionSelection) {
-            if liveSession.session != nil {
+            if liveSession.session != nil || watchLive.snapshot != nil {
                 Section {
-                    LiveSessionBanner(controller: liveSession)
+                    Group {
+                        if liveSession.session != nil {
+                            LiveSessionBanner(controller: liveSession)
+                        } else if let snapshot = watchLive.snapshot {
+                            WatchLiveBanner(snapshot: snapshot) { liveSession.showsScreen = true }
+                        }
+                    }
                         .listRowInsets(LogbookLayout.rowInsets(top: 0, bottom: 8))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
