@@ -83,7 +83,7 @@ public enum ParkEventReader {
         options: [.caseInsensitive]
     )
     private static let monthFirst = try! NSRegularExpression(
-        pattern: #"\b(\#(monthAlternatives))\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*(?:-|–|—|to)\s*(\d{1,2})(?:st|nd|rd|th)?)?(?:,?\s*(\d{4}))?(?!\d)"#,
+        pattern: #"\b(\#(monthAlternatives))\.?\s+(\d{1,2})(?:st|n[d]|rd|th)?(?:\s*(?:-|–|—|to)\s*(\d{1,2})(?:st|n[d]|rd|th)?)?(?:,?\s*(\d{4}))?(?!\d)"#,
         options: [.caseInsensitive]
     )
     private static let numeric = try! NSRegularExpression(pattern: #"(?<!\d)(\d{1,2})[-./](\d{1,2})[-./](\d{4})(?!\d)"#)
