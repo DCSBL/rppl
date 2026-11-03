@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "dataVersion": 4,
-  "publishedAt": "2026-10-26T23:54:27Z",
+  "dataVersion": 5,
+  "publishedAt": "2026-11-03T19:47:04Z",
   "enabled": true,
   "minAppSchema": 1,
   "maxAppSchema": 1,
@@ -29,7 +29,7 @@
     {
       "id": "blaue-lagune-wachtendonk",
       "file": "blaue-lagune-wachtendonk.yaml",
-      "sha256": "5eef330f3575f7edee22e06bf814c7d72e352b5ea67a5ef1f6b0e4480c630bc6"
+      "sha256": "16cd740cc1547f6db9b0d7d92d8fa2bda69f00711dba8e23bb20f3b5c4c36b87"
     },
     {
       "id": "blue-bay-spadener-see-schiffdorf",
@@ -84,7 +84,7 @@
     {
       "id": "dock79-saint-ghislain",
       "file": "dock79-saint-ghislain.yaml",
-      "sha256": "afef3fb985fcd1bcb603b209379ec9e323664f67ba426e2638ebe6e99c7d91e1"
+      "sha256": "422ec8461bbfa63ae1f2a9521d1b9971eb19145bc78cb7b41416e8a98ce3e476"
     },
     {
       "id": "downunder-nieuwegein",
@@ -144,7 +144,7 @@
     {
       "id": "outsider-oudenaarde",
       "file": "outsider-oudenaarde.yaml",
-      "sha256": "7ff517360d2e4a17696eee04fede6fcd85ff3a79a5f1f12068d7ab1b84134837"
+      "sha256": "ec6815ece77d2df84fac2aa882ab506d244641eea521196670d62a5d97fa197e"
     },
     {
       "id": "pineapple-wakepark-rossau",
@@ -194,7 +194,7 @@
     {
       "id": "suedsee-wakepark-xanten",
       "file": "suedsee-wakepark-xanten.yaml",
-      "sha256": "71f6606d014dee057d217066ec707879cb59090555762a037115a5d2e6132b3d"
+      "sha256": "bbdd288c87956d36a658b8df0369c9dcaf0662d8851004b3aa1c810a0ae543f2"
     },
     {
       "id": "supieria-rostock",
@@ -204,12 +204,12 @@
     {
       "id": "terhills-dilsen-stokkem",
       "file": "terhills-dilsen-stokkem.yaml",
-      "sha256": "ecd7defd0fa3a6a9aed8480ad9345381034e533eb9f766af9efbfd0ddf64e55c"
+      "sha256": "02c090468ed6e800a0f0d6661ff9a356c1e785812e15070c5817b19d989e22a1"
     },
     {
       "id": "thebricks-duisburg",
       "file": "thebricks-duisburg.yaml",
-      "sha256": "d815df1c81723e8ef4be23f149d70d97a9765d7431f4f296128dc81d251f8311"
+      "sha256": "6f300aac72d65b24e9e50c33d76f9a3ccbd33dd4b4cc565f35441e30111668ed"
     },
     {
       "id": "turncable-thannhausen",
@@ -239,7 +239,7 @@
     {
       "id": "wakebeach-257-dormagen",
       "file": "wakebeach-257-dormagen.yaml",
-      "sha256": "86b0aad88029d2c67038f560f2acea25323fc8b81c2f59df237d268a98678f63"
+      "sha256": "19ba7e294309903f6432990ef12f765d961f4053a569b852b1f50e2db1f4907b"
     },
     {
       "id": "wakepark-brombachsee",

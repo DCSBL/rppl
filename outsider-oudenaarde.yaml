@@ -1,12 +1,14 @@
 version: 1
 id: outsider-oudenaarde
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (2.0 and full size cable, 2026 prices; hours are only published as an image)
   - date: 2026-10-25
     description: add 2026 opening hours read from the park's hours image (without the Easter holiday week)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand (dock pin moved to the start)
 
 name: The Outsider Cablepark
 short_name: The Outsider
@@ -17,8 +19,8 @@ languages:
 address: Donkstraat 50, 9700 Oudenaarde
 timezone: Europe/Brussels
 location:
-  lat: 50.841645
-  lon: 3.58518
+  lat: 50.84186
+  lon: 3.585968
 
 phone: "+32 (0)55 20 70 30"
 email: info@outsider.be
@@ -35,11 +37,28 @@ links:
 
 cables:
   - name: Kleine kabel (2.0)
-    direction: "2.0"
     description: Initiatiekabel zonder bochten om de start en de basishouding te oefenen. Een rider tegelijk, vanaf 8 jaar.
+    direction: "2.0"
+    points:
+      - lat: 50.842093
+        lon: 3.585696
+      - lat: 50.842777
+        lon: 3.58689
   - name: Grote kabel (5.0)
     length_m: 638
     description: Vijf bochten, met obstacles. Tot acht riders tegelijk, vanaf 10 jaar.
+    direction: ccw
+    points:
+      - lat: 50.841938
+        lon: 3.586193
+      - lat: 50.840777
+        lon: 3.5873
+      - lat: 50.840898
+        lon: 3.58921
+      - lat: 50.841399
+        lon: 3.589402
+      - lat: 50.842444
+        lon: 3.587207
 
 opening:
   source_url: "https://theoutsidervlaamseardennen.be/wakeboarden-en-waterskien-kabelbaan-cablepark-oudenaarde/"
