@@ -207,7 +207,7 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
         for in_hull in (True, False):
             pooled += propose_loops(blobs, blob_xy, water_xy_test, vertex_counts, max_distance_m, water_xy, use_templates, extra_xy, extra_weights, in_hull, occupied)
         pooled.sort(key=lambda c: c.score, reverse=True)
-        return pooled
+        return polish(pooled, blobs, blob_xy, water_xy_test, max_distance_m, extra_xy, extra_weights, occupied)
     weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
     blob_xy = np.asarray(blob_xy, dtype=float).reshape(-1, 2)
     hull_count = len(blob_xy)
@@ -264,6 +264,28 @@ def propose_loops(blobs: list[Blob], blob_xy: np.ndarray, water_xy_test, vertex_
                 candidates.append(candidate)
     candidates.sort(key=lambda c: c.score, reverse=True)
     return candidates
+
+
+def polish(candidates: list[LoopCandidate], blobs, blob_xy, water_xy_test, max_distance_m, extra_xy, extra_weights, occupied, top: int = 3) -> list[LoopCandidate]:
+    """Fine coordinate descent (2 m steps) on the best candidates: the coarse 6 m grid stops short of the mast."""
+    if not candidates:
+        return candidates
+    weights = np.array([max(1.0, b.area_m2 / 4) for b in blobs]) if len(blobs) else np.zeros(0)
+    xy = np.asarray(blob_xy, dtype=float).reshape(-1, 2)
+    if extra_xy is not None and len(extra_xy):
+        xy = np.concatenate([xy, np.asarray(extra_xy, dtype=float).reshape(-1, 2)])
+        weights = np.concatenate([weights, np.asarray(extra_weights, dtype=float)])
+    near = np.linalg.norm(xy, axis=1) <= max_distance_m if len(xy) else np.zeros(0, bool)
+    lines = [LineString(line) for line in (occupied or []) if len(line) >= 2]
+    if lines and len(xy):
+        loops = [Polygon(line[:-1]) for line in occupied if len(line) >= 4 and np.allclose(line[0], line[-1])]
+        taken = np.array([min(line.distance(Point(p)) for line in lines) <= OCCUPIED_CLEARANCE_M + 5 or any(poly.contains(Point(p)) for poly in loops) for p in xy])
+        near = near & ~taken
+    points, w = merge_close(xy[near], weights[near], radius_m=10.0) if near.any() else (np.zeros((0, 2)), np.zeros(0))
+    scorer = LoopScorer(points, w, water_xy_test, occupied=occupied)
+    polished = [refine(scorer, c.vertices_xy, step_m=2.0, radius_m=8.0, rounds=2) for c in candidates[:top]] + candidates[top:]
+    polished.sort(key=lambda c: c.score, reverse=True)
+    return polished
 
 
 def template_candidates(scorer: LoopScorer, water_xy: np.ndarray, water_xy_test, top: int = 3) -> list[LoopCandidate]:

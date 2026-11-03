@@ -308,4 +308,24 @@ struct ParkEditorLogicTests {
         #expect(ParkEditDraft(id: "x", park: park).title == "P")
         #expect(ParkEditDraft(id: "x", park: Park(id: "", name: "  ", location: ParkCoordinate(lat: 0, lon: 0))).title.isEmpty)
     }
+
+    @Test func reversingACableFlipsTheLoopDirectionAndKeepsTheStart() {
+        func point(_ lat: Double) -> ParkCablePoint { ParkCablePoint(lat: lat, lon: 5) }
+        var loop = ParkCable(direction: .clockwise, points: [point(1), point(2), point(3), point(4)])
+        ParkDraft.reverse(&loop)
+        #expect(loop.direction == .counterClockwise)
+        #expect(loop.points?.map(\.lat) == [1, 4, 3, 2])
+        ParkDraft.reverse(&loop)
+        #expect(loop.direction == .clockwise)
+        #expect(loop.points?.map(\.lat) == [1, 2, 3, 4])
+
+        var straight = ParkCable(direction: .twoPointZero, points: [point(1), point(2)])
+        ParkDraft.reverse(&straight)
+        #expect(straight.direction == .twoPointZero)
+        #expect(straight.points?.map(\.lat) == [2, 1])
+
+        var single = ParkCable(points: [point(1)])
+        ParkDraft.reverse(&single)
+        #expect(single.points?.count == 1)
+    }
 }

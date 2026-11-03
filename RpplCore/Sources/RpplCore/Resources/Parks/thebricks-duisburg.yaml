@@ -1,10 +1,12 @@
 version: 1
 id: thebricks-duisburg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand
 
 name: The Bricks Duisburg
 short_name: The Bricks
@@ -28,6 +30,38 @@ links:
     url: "https://wasserski-wedau.wakesys.com/browser/index.php"
   - kind: vimeo
     url: "https://vimeo.com/thebricksvideo"
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 51.407508
+        lon: 6.782561
+      - lat: 51.407689
+        lon: 6.781345
+      - lat: 51.407501
+        lon: 6.780979
+      - lat: 51.406974
+        lon: 6.781002
+      - lat: 51.406685
+        lon: 6.7816
+      - lat: 51.40693
+        lon: 6.782361
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 51.406281
+        lon: 6.784177
+      - lat: 51.406659
+        lon: 6.783293
+      - lat: 51.406321
+        lon: 6.782098
+      - lat: 51.405932
+        lon: 6.781908
+      - lat: 51.40574
+        lon: 6.782256
+      - lat: 51.405807
+        lon: 6.78366
 
 opening:
   source_url: "https://www.thebricks.de"

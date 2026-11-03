@@ -58,6 +58,12 @@ struct LoopFitter {
             let hullOnly = Self.mergeClose(near.filter(\.shapesHull), radiusM: 10)
             candidates += propose(hullPoints: hullOnly.map(\.xy), evidence: merged)
         }
+        candidates.sort { $0.score > $1.score }
+        // Polish the best few on a 2 m grid: the coarse 6 m grid stops short of the mast
+        // (25 parks: median bend error 33 -> 28 m).
+        for index in candidates.indices.prefix(3) {
+            candidates[index] = refine(candidates[index].vertices, evidence: merged, stepM: 2, radiusM: 8, rounds: 2)
+        }
         return candidates.sorted { $0.score > $1.score }
     }
 

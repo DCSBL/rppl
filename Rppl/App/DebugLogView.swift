@@ -14,6 +14,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
     @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
+    @AppStorage(AppSettingsKey.debugMastReview) private var mastReviewEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -90,6 +91,20 @@ struct DebugLogView: View {
                     }
             } footer: {
                 Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
+            }
+
+            Section {
+                Toggle("Review masts", isOn: $mastReviewEnabled)
+                    .tint(Color.rpplAccent)
+                if mastReviewEnabled {
+                    NavigationLink {
+                        MastReviewView()
+                    } label: {
+                        Label("Review masts", systemImage: "scope")
+                    }
+                }
+            } footer: {
+                Text("Judge the detector's mast guesses on the satellite map, park by park, and share the verdicts as a file for the detector's training set. A request file says which parks to do.")
             }
 
             Section {
