@@ -21678,34 +21678,6 @@
         }
       }
     },
-    "The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself. For everything else, record with Apple Watch." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself. For everything else, record with Apple Watch."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'iPhone suit le temps et les sets, sans vitesse ni fréquence cardiaque. Tu touches toi-même Set suivant. Pour le reste, enregistre avec l'Apple Watch."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De iPhone houdt tijd en sets bij, zonder snelheid of hartslag. Je tikt zelf op Volgende set. Voor de rest neem je op met Apple Watch."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das iPhone erfasst Zeit und Sets, ohne Geschwindigkeit oder Herzfrequenz. Du tippst selbst auf Nächstes Set. Für alles andere nimm mit der Apple Watch auf."
-          }
-        }
-      }
-    },
     "Session running" : {
       "localizations" : {
         "en" : {
@@ -22262,6 +22234,174 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf dem iPhone erfasst, gestartet um %@"
+          }
+        }
+      }
+    },
+    "Start on Apple Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start on Apple Watch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer sur l'Apple Watch"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starten op Apple Watch"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Apple Watch starten"
+          }
+        }
+      }
+    },
+    "The Watch records everything: sets, speed and heart rate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Watch records everything: sets, speed and heart rate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La Watch enregistre tout : sets, vitesse et fréquence cardiaque."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De Watch neemt alles op: sets, snelheid en hartslag."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Watch zeichnet alles auf: Sets, Geschwindigkeit und Herzfrequenz."
+          }
+        }
+      }
+    },
+    "On the iPhone you keep time and sets yourself, without speed or heart rate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the iPhone you keep time and sets yourself, without speed or heart rate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur l'iPhone, tu suis le temps et les sets toi-même, sans vitesse ni fréquence cardiaque."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op de iPhone hou je zelf tijd en sets bij, zonder snelheid of hartslag."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem iPhone erfasst du Zeit und Sets selbst, ohne Geschwindigkeit oder Herzfrequenz."
+          }
+        }
+      }
+    },
+    "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune Apple Watch trouvée. L'iPhone suit le temps et les sets, sans vitesse ni fréquence cardiaque. Tu touches toi-même Set suivant."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen Apple Watch gevonden. De iPhone houdt tijd en sets bij, zonder snelheid of hartslag. Je tikt zelf op Volgende set."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Apple Watch gefunden. Das iPhone erfasst Zeit und Sets, ohne Geschwindigkeit oder Herzfrequenz. Du tippst selbst auf Nächstes Set."
+          }
+        }
+      }
+    },
+    "Could not start Apple Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not start Apple Watch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de démarrer l'Apple Watch"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kon Apple Watch niet starten"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch konnte nicht gestartet werden"
+          }
+        }
+      }
+    },
+    "Open Rppl on your Apple Watch and start there, or track on iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Rppl on your Apple Watch and start there, or track on iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Rppl sur ton Apple Watch et démarre là-bas, ou suis sur l'iPhone."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Rppl op je Apple Watch en start daar, of houd het bij op de iPhone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Rppl auf deiner Apple Watch und starte dort, oder erfasse auf dem iPhone."
           }
         }
       }

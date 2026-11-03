@@ -1,8 +1,10 @@
 import SwiftUI
+import WatchKit
 import RpplCore
 
 @main
 struct RpplWatchApp: App {
+    @WKApplicationDelegateAdaptor(RpplWatchAppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
