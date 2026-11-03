@@ -36,4 +36,10 @@ struct SetImpactTests {
         let peak = try #require(SetImpact.peakG(motion: [sample], around: end))
         #expect(abs(peak - 5) < 1e-9)
     }
+
+    @Test func labelCapsAtThirtyG() {
+        #expect(SetImpact.label(5.5).hasSuffix(" g"))
+        #expect(SetImpact.label(29.9) != "30+ g")
+        #expect(SetImpact.label(41.2) == "30+ g")
+    }
 }
