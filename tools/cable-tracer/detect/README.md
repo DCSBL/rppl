@@ -39,6 +39,8 @@ trace yellow, the best proposal green.
    pooled and the best score wins. The same net runs in the app (`RpplCore/CableDetection/MastNet`),
    from the weights `export_mastnet.py` writes.
 5. **Evaluation** (`evaluate.py`): polygon IoU and vertex distances against the hand trace.
+   `--given-others` hands each fit the park's other traced cables, as the app does: their
+   evidence is theirs and the new loop keeps clear of them.
 
 ## Training the mast net
 

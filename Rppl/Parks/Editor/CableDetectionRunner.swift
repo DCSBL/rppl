@@ -26,12 +26,15 @@ enum CableDetectionRunner {
         }
     }
 
-    static func detect(around center: ParkCoordinate) async throws -> Outcome {
+    /// `avoiding` are the park's other cables: the proposal stays clear of the ones on the image.
+    static func detect(around center: ParkCoordinate, avoiding others: [ParkCable] = []) async throws -> Outcome {
         let started = Date()
         let image = try await snapshot(around: center)
         let snapshotSeconds = Date().timeIntervalSince(started)
         let result = await Task.detached(priority: .userInitiated) {
-            CableDetector.detect(in: image)
+            var options = CableDetector.Options()
+            options.occupied = CableDetector.occupiedPolylines(of: others, in: image)
+            return CableDetector.detect(in: image, options: options)
         }.value
         return Outcome(image: image, result: result, snapshotSeconds: snapshotSeconds)
     }

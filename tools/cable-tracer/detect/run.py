@@ -44,10 +44,10 @@ def detect_masts(models, example, snapshot, rgb, w, probability=0.5):
     px = np.array([[c, r] for c, r, _ in peaks], dtype=float)
     xy = example.to_local(snapshot, px)
     prob = np.array([p for _, _, p in peaks])
-    bends = np.concatenate([loop.points_xy for loop in example.loops])
+    bends = np.concatenate([loop.points_xy for loop in example.loops]) if example.loops else np.zeros((0, 2))
     d = np.linalg.norm(bends[:, None, :] - xy[None, :, :], axis=2)
-    hit = int((d.min(axis=1) <= 12).sum())
-    false_peaks = int((d.min(axis=0) > 20).sum())
+    hit = int((d.min(axis=1) <= 12).sum()) if len(bends) else 0
+    false_peaks = int((d.min(axis=0) > 20).sum()) if len(bends) else len(xy)
     return xy, prob, {"mast_peaks": len(peaks), "bends_hit": hit, "bends": len(bends), "false_mast_peaks": false_peaks}
 
 
@@ -59,6 +59,7 @@ def main() -> None:
     parser.add_argument("--masts", type=Path, help="mast net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out")
     parser.add_argument("--mast-weight", type=float, default=3.0)
     parser.add_argument("--mast-probability", type=float, default=0.5)
+    parser.add_argument("--given-others", action="store_true", help="give the fit the park's other traced cables (as the app does); parks with several loops get one row per loop")
     parser.add_argument("--masts-mode", choices=["both", "hull", "score"], default="both", help="mast detections shape the starting hull, only score vertices, or both pooled (default)")
     args = parser.parse_args()
     mast_models = load_mast_models(args.masts) if args.masts else None
@@ -95,37 +96,15 @@ def main() -> None:
         mast_xy, mast_prob, mast_stats = np.zeros((0, 2)), np.zeros(0), {}
         if mast_models:
             mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w, probability=args.mast_probability)
-        candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=mast_xy, extra_weights=args.mast_weight * mast_prob, extra_in_hull={"both": None, "hull": True, "score": False}[args.masts_mode])
-        elapsed = time.time() - started
-        row = {"park": example.park_id, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates), **mast_stats}
-        if candidates:
-            best = candidates[0]
-            matches = [evaluate.compare(best.vertices_xy, loop.points_xy) for loop in example.loops]
-            match = max(matches, key=lambda m: m.iou)
-            row.update({
-                "score": round(best.score, 1), "vertices": len(best.vertices_xy), "perimeter_m": round(best.perimeter_m),
-                "iou": round(match.iou, 2), "mean_vertex_error_m": round(match.mean_vertex_error_m, 1),
-                "max_vertex_error_m": round(match.max_vertex_error_m, 1), "mean_line_error_m": round(match.mean_line_error_m, 1),
-                "notes": best.notes,
-            })
-        results.append(row)
-        print(json.dumps(row))
-
-        # Debug image: water dimmed, blobs magenta, trace yellow, proposal green.
-        vis = rgb.copy()
-        vis[~w] = (vis[~w] * 0.45).astype(np.uint8)
-        for b in blobs:
-            cv2.circle(vis, (int(b.col), int(b.row)), 12, (255, 0, 255), 2)
-        for (x, y), p in zip(example.to_pixels(snapshot, mast_xy), mast_prob):
-            cv2.circle(vis, (int(x), int(y)), 18, (255, 140, 0), 2 if p > 0.75 else 1)
-        for loop in example.loops:
-            px = example.to_pixels(snapshot, loop.points_xy).astype(int)
-            cv2.polylines(vis, [px.reshape(-1, 1, 2)], True, (255, 255, 0), 2)
-        for rank, candidate in enumerate(candidates[:3]):
-            px = example.to_pixels(snapshot, candidate.vertices_xy).astype(int)
-            color = (0, 255, 0) if rank == 0 else (0, 160, 255)
-            cv2.polylines(vis, [px.reshape(-1, 1, 2)], True, color, 3 if rank == 0 else 1)
-        cv2.imwrite(str(args.out / f"{example.park_id}.png"), cv2.cvtColor(cv2.resize(vis, (1024, 1024)), cv2.COLOR_RGB2BGR))
+        # One fit per target loop. With --given-others every other traced cable of the park is
+        # handed to the fit as occupied, the way the app hands over the cables already traced.
+        targets = [(loop, [c for c in example.cables if c is not loop]) for loop in example.loops] if args.given_others else [(None, [])]
+        if args.given_others and not example.loops:
+            targets = [(None, list(example.cables))]
+        for target_index, (target, others) in enumerate(targets):
+            occupied = [np.vstack([c.points_xy, c.points_xy[:1]]) if c.closed else c.points_xy for c in others]
+            run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats, started,
+                     target, occupied, example.park_id if len(targets) == 1 else f"{example.park_id}#{target_index + 1}", results)
 
     (args.out / "results.json").write_text(json.dumps(results, indent=1))
     scored = [r for r in results if "iou" in r]
@@ -133,6 +112,46 @@ def main() -> None:
         print(f"\n{len(scored)}/{len(results)} parks with a proposal; median IoU {np.median([r['iou'] for r in scored]):.2f}, "
               f"median mean vertex error {np.median([r['mean_vertex_error_m'] for r in scored]):.1f} m, "
               f"IoU >= 0.7 for {sum(r['iou'] >= 0.7 for r in scored)}")
+
+
+def run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats, started, target, occupied, label, results):
+    """Fit one target loop (None: the park's best loop) with the given occupied polylines, print and record the row and write the debug image."""
+    candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=mast_xy, extra_weights=args.mast_weight * mast_prob, extra_in_hull={"both": None, "hull": True, "score": False}[args.masts_mode], occupied=occupied)
+    elapsed = time.time() - started
+    row = {"park": label, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates), **mast_stats}
+    match = None
+    if candidates:
+        best = candidates[0]
+        matches = [evaluate.compare(best.vertices_xy, loop.points_xy) for loop in ([target] if target is not None else example.loops)]
+        match = max(matches, key=lambda m: m.iou) if matches else None
+    if match is not None:
+        row.update({
+            "score": round(best.score, 1), "vertices": len(best.vertices_xy), "perimeter_m": round(best.perimeter_m),
+            "iou": round(match.iou, 2), "mean_vertex_error_m": round(match.mean_vertex_error_m, 1),
+            "max_vertex_error_m": round(match.max_vertex_error_m, 1), "mean_line_error_m": round(match.mean_line_error_m, 1),
+            "notes": best.notes,
+        })
+    results.append(row)
+    print(json.dumps(row))
+
+    # Debug image: water dimmed, blobs magenta, trace yellow, proposal green.
+    vis = rgb.copy()
+    vis[~w] = (vis[~w] * 0.45).astype(np.uint8)
+    for b in blobs:
+        cv2.circle(vis, (int(b.col), int(b.row)), 12, (255, 0, 255), 2)
+    for (x, y), p in zip(example.to_pixels(snapshot, mast_xy), mast_prob):
+        cv2.circle(vis, (int(x), int(y)), 18, (255, 140, 0), 2 if p > 0.75 else 1)
+    for loop in example.loops:
+        px = example.to_pixels(snapshot, loop.points_xy).astype(int)
+        cv2.polylines(vis, [px.reshape(-1, 1, 2)], True, (255, 255, 0), 2)
+    for line in occupied:
+        px = example.to_pixels(snapshot, line).astype(int)
+        cv2.polylines(vis, [px.reshape(-1, 1, 2)], False, (0, 255, 255), 2)
+    for rank, candidate in enumerate(candidates[:3]):
+        px = example.to_pixels(snapshot, candidate.vertices_xy).astype(int)
+        color = (0, 255, 0) if rank == 0 else (0, 160, 255)
+        cv2.polylines(vis, [px.reshape(-1, 1, 2)], True, color, 3 if rank == 0 else 1)
+    cv2.imwrite(str(args.out / f"{label.replace('#', '-')}.png"), cv2.cvtColor(cv2.resize(vis, (1024, 1024)), cv2.COLOR_RGB2BGR))
 
 
 if __name__ == "__main__":

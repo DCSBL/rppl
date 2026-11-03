@@ -25,6 +25,8 @@ struct LoopFitter {
     static let perimeterLogSigma = 0.28
     static let maxTurnDeg = 95.0
     static let impossibleTurnDeg = maxTurnDeg + 25
+    /// A new loop keeps this far from a cable that is already traced in the park.
+    static let occupiedClearanceM = 20.0
 
     struct Evidence {
         var xy: SIMD2<Double>
@@ -38,6 +40,9 @@ struct LoopFitter {
     /// The cable is never far from the park location (all traced parks: centroid < 260 m).
     var maxDistanceM = 520.0
     var vertexCounts = [4, 5, 6]
+    /// Cables already traced in the park, as polylines in local metres (loops closed): a new
+    /// loop neither crosses nor touches them.
+    var occupied: [[SIMD2<Double>]] = []
     var isWater: (SIMD2<Double>) -> Bool
 
     /// Proposals sorted best first. `evidence` is in local metres around the park location.
@@ -143,6 +148,15 @@ struct LoopFitter {
             }
         }
 
+        var occupiedPenalty = 0.0
+        for line in occupied where line.count >= 2 {
+            let conflicts = Self.conflicts(vertices, with: line)
+            if conflicts > 0 {
+                occupiedPenalty += 10 * Double(conflicts)
+                notes.append("on a traced cable")
+            }
+        }
+
         let prior = -pow(log(perimeter / Self.perimeterMedianM), 2) / (2 * Self.perimeterLogSigma * Self.perimeterLogSigma)
         // Shape prior: real loops are wide (axis ratio rarely over 3.5).
         let sides = Geometry2D.minimumRectangleSides(vertices)
@@ -156,7 +170,7 @@ struct LoopFitter {
         case 6: complexity = -2
         default: complexity = -4
         }
-        var total = 2 * support.reduce(0, +) + 0.6 * edge - outside - interior + 4 * prior + shape + complexity - cornerPenalty
+        var total = 2 * support.reduce(0, +) + 0.6 * edge - outside - interior + 4 * prior + shape + complexity - cornerPenalty - occupiedPenalty
         if waterFraction < 0.97 {
             total -= 400 * (0.97 - waterFraction)
             notes.append("edges over land: \(Int((100 * (1 - waterFraction)).rounded()))%")
@@ -201,6 +215,33 @@ struct LoopFitter {
     }
 
     // MARK: Evidence helpers
+
+    /// One conflict when the ring crosses the polyline, plus one per vertex closer than the clearance.
+    static func conflicts(_ vertices: [SIMD2<Double>], with line: [SIMD2<Double>]) -> Int {
+        guard line.count >= 2, vertices.count >= 2 else { return 0 }
+        var crosses = false
+        for i in vertices.indices where !crosses {
+            let a = vertices[i], b = vertices[(i + 1) % vertices.count]
+            for j in 0..<(line.count - 1) where Geometry2D.segmentsIntersect(a, b, line[j], line[j + 1]) {
+                crosses = true
+                break
+            }
+        }
+        var count = crosses ? 1 : 0
+        for vertex in vertices where distance(vertex, toPolyline: line) < occupiedClearanceM {
+            count += 1
+        }
+        return count
+    }
+
+    static func distance(_ p: SIMD2<Double>, toPolyline line: [SIMD2<Double>]) -> Double {
+        guard line.count >= 2 else { return .infinity }
+        var best = Double.infinity
+        for j in 0..<(line.count - 1) {
+            best = min(best, Geometry2D.distance(p, toSegment: line[j], line[j + 1]))
+        }
+        return best
+    }
 
     /// Single-linkage clusters (indices), largest first.
     static func cluster(_ points: [SIMD2<Double>], linkM: Double) -> [[Int]] {

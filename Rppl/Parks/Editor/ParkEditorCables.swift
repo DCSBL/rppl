@@ -196,7 +196,7 @@ struct ParkCableDetailPage: View {
                 if session.park.cables?.isEmpty == true { session.park.cables = nil }
             }
             .fullScreenCover(isPresented: $tracing) {
-                CableTraceView(cable: cableBinding, center: traceCenter)
+                CableTraceView(cable: cableBinding, center: traceCenter, otherCables: otherCables)
             }
         }
     }
@@ -206,6 +206,10 @@ struct ParkCableDetailPage: View {
             return String(localized: "Optional. Left empty, the length of the trace is used: \(DistanceFormat.meters(computed)).")
         }
         return String(localized: "Optional. Fill it in when the park publishes the length; it wins over the trace.")
+    }
+
+    private var otherCables: [ParkCable] {
+        (session.park.cables ?? []).enumerated().filter { $0.offset != index }.map(\.element)
     }
 
     private var cableBinding: Binding<ParkCable> {
