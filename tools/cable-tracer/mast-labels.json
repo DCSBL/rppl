@@ -2241,6 +2241,2244 @@
         "source": "manual",
         "verdict": "mast"
       }
+    ],
+    "goitzsche-wakepark-pouch": [
+      {
+        "coordinate": {
+          "lat": 51.63078018314685,
+          "lon": 12.37967603459251
+        },
+        "detected": {
+          "lat": 51.63073797638051,
+          "lon": 12.37962669271393
+        },
+        "id": "63E8F681-4CCA-41DA-BAF1-C9A24B0365F4",
+        "probability": 0.9984706768542924,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.6324162462587,
+          "lon": 12.381142998887984
+        },
+        "detected": {
+          "lat": 51.632434583202816,
+          "lon": 12.381187812336876
+        },
+        "id": "BF0A7864-1F19-4CAC-8D94-000C9A64AEF7",
+        "probability": 0.9978066085205253,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63048281005597,
+          "lon": 12.38066364468769
+        },
+        "detected": {
+          "lat": 51.630398655016045,
+          "lon": 12.380644814207155
+        },
+        "id": "B0CC15D0-38A4-4F72-85E1-1E3382BD058E",
+        "probability": 0.9942473349496131,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.632123188203416,
+          "lon": 12.379365372325044
+        },
+        "detected": {
+          "lat": 51.63213767700891,
+          "lon": 12.379287318882856
+        },
+        "id": "FC2F4B47-C1B6-4F27-89DB-45ACD638636A",
+        "probability": 0.9913721884020027,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63254928551488,
+          "lon": 12.380217975465598
+        },
+        "detected": {
+          "lat": 51.63260424388505,
+          "lon": 12.380169690843651
+        },
+        "id": "BA04BCB7-47DD-4BF1-8FD8-E1C5F3B344AB",
+        "probability": 0.9851402604225326,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63085874621775,
+          "lon": 12.381752105028479
+        },
+        "detected": {
+          "lat": 51.630822806721625,
+          "lon": 12.381866559999025
+        },
+        "id": "435A9288-3A52-4D0A-996D-6884B87C1475",
+        "probability": 0.9847474755192513,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63022899433381,
+          "lon": 12.381391436635521
+        },
+        "id": "D4AD2BBD-903F-4CCF-AA82-D171551E339C",
+        "probability": 0.8922778213089945,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63141661910943,
+          "lon": 12.37881219551935
+        },
+        "id": "8F7CC36C-71E0-47F4-ABD7-3C5B04C827D9",
+        "probability": 0.7384518305280948,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 51.632264922520584,
+          "lon": 12.38179868523281
+        },
+        "id": "E2B18244-21B6-483C-9DB7-B3153E6A3917",
+        "probability": 0.46579180964776223,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 51.63154386462111,
+          "lon": 12.3794909431815
+        },
+        "id": "90141354-8BB2-4467-96BE-622722B68565",
+        "probability": 0.4059937194531328,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      }
+    ],
+    "gufi-see-gundelfingen": [
+      {
+        "coordinate": {
+          "lat": 48.51936006246665,
+          "lon": 10.324555063691081
+        },
+        "detected": {
+          "lat": 48.519359048028946,
+          "lon": 10.32453701939257
+        },
+        "id": "6D3C0BF3-A150-43EF-8CCA-9DDCE671A184",
+        "probability": 0.9988119779526641,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51991765815802,
+          "lon": 10.329032545649811
+        },
+        "detected": {
+          "lat": 48.51991074233408,
+          "lon": 10.32911921027628
+        },
+        "id": "0C5804BA-73B5-43C4-9281-27F0D6737860",
+        "probability": 0.9975189863246324,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519316610005475,
+          "lon": 10.326064416353807
+        },
+        "id": "3E830DF0-E41B-4B4D-9FAA-CE88879060BC",
+        "probability": 0.9938148876230535,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51995318035756,
+          "lon": 10.326573548674219
+        },
+        "id": "B25A97F9-5D69-46D2-850C-088820D4D3A6",
+        "probability": 0.9934360710531908,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519274171982,
+          "lon": 10.325746208653548
+        },
+        "id": "5845DC7F-F01B-4BA2-8342-65BAD6F22820",
+        "probability": 0.9933214402914805,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51944392407589,
+          "lon": 10.325491642493343
+        },
+        "id": "ABFCEA33-C0D7-48CE-B297-B4FA0671875A",
+        "probability": 0.9930790982707158,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52016537047492,
+          "lon": 10.328037304095403
+        },
+        "id": "222D0AA6-E0BE-4E2D-B1A6-13FB395B2C53",
+        "probability": 0.9925802325007659,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51890408432821,
+          "lon": 10.325120701542183
+        },
+        "detected": {
+          "lat": 48.51884979174728,
+          "lon": 10.325109793253034
+        },
+        "id": "33D3B735-C4DF-4732-9328-4445A7B42F01",
+        "probability": 0.9918470527140473,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519571238146305,
+          "lon": 10.326509907134167
+        },
+        "id": "5634A6C5-40BA-4923-9F2B-943CAAF4C100",
+        "probability": 0.9908075656556089,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519783428263665,
+          "lon": 10.325109793253034
+        },
+        "id": "8EC32FC3-BBC2-4CBC-8137-A3C4C1BEB7EC",
+        "probability": 0.9904647376259422,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519528800122835,
+          "lon": 10.327273605614785
+        },
+        "id": "2461E053-6859-4142-BBBB-5170D7C688CE",
+        "probability": 0.9892064095581852,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519783428263665,
+          "lon": 10.327846379475249
+        },
+        "id": "FED7C503-094E-4AF9-933E-E4797E9A61BE",
+        "probability": 0.9876001322823545,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519571238146305,
+          "lon": 10.3279100210153
+        },
+        "id": "C513368B-55B7-4FF7-A6C3-D59779428A54",
+        "probability": 0.9871430381497546,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51910441988811,
+          "lon": 10.326000774813755
+        },
+        "id": "AED20FA1-7D83-4AD6-AB4F-781529DF7ECF",
+        "probability": 0.9843301449756539,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.520533386201045,
+          "lon": 10.328772857935691
+        },
+        "detected": {
+          "lat": 48.52054731268617,
+          "lon": 10.328928285656126
+        },
+        "id": "5F7FA45E-94E3-4569-8182-81F0DFBD081D",
+        "probability": 0.9816296697050731,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51910441988811,
+          "lon": 10.326509907134167
+        },
+        "id": "5B8E951F-17AC-46C4-B984-6658169A91ED",
+        "probability": 0.9785437851540395,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52012293245145,
+          "lon": 10.327719096395146
+        },
+        "id": "E50E4ADA-E1C1-4351-AB74-E183158121E0",
+        "probability": 0.9748087374727578,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51944392407589,
+          "lon": 10.326764473294373
+        },
+        "id": "5D0633F7-3FC5-42F3-986F-7B5038EA53CB",
+        "probability": 0.9746177146498762,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519613676169776,
+          "lon": 10.32701903945458
+        },
+        "id": "99BCB293-1093-4BEA-99FB-2F5F8CD4B3E5",
+        "probability": 0.969381541523598,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52012293245145,
+          "lon": 10.326891756374476
+        },
+        "id": "BF81F792-DBE4-4D4D-A214-7A2D13D12D44",
+        "probability": 0.9668310581240156,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51965611419325,
+          "lon": 10.325873491733653
+        },
+        "id": "5ECE1220-EC6D-4A64-B450-83256951F5E1",
+        "probability": 0.9660901284525285,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519274171982,
+          "lon": 10.326828114834425
+        },
+        "id": "0A623B88-5F79-4E6B-B963-DB3BB1B13F8A",
+        "probability": 0.9599377170112533,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51901954384117,
+          "lon": 10.325555284033394
+        },
+        "id": "7DA4D2AD-09C9-4203-A9E4-0C8EC027F395",
+        "probability": 0.9594860172984027,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51982586628714,
+          "lon": 10.325682567113498
+        },
+        "id": "0B340C90-AABD-49A7-8627-2343C0060D27",
+        "probability": 0.9573871191750861,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52025024652186,
+          "lon": 10.328546436415817
+        },
+        "id": "0C2020EC-83FD-490F-9227-35680D8EEDF9",
+        "probability": 0.9543152651034132,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51944392407589,
+          "lon": 10.325046151712982
+        },
+        "id": "DA0E971D-3642-4E22-8B8D-83DA91D85547",
+        "probability": 0.9537710453203939,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52012293245145,
+          "lon": 10.328610077955867
+        },
+        "id": "43376515-BEC5-4AF0-9BB5-759FB0F7C918",
+        "probability": 0.9486310393596077,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519783428263665,
+          "lon": 10.32829187025561
+        },
+        "id": "1AA3AD1F-3697-4520-A629-C89FF26CAA00",
+        "probability": 0.9483932538873364,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51982586628714,
+          "lon": 10.328673719495919
+        },
+        "id": "EC755B31-0F52-42C8-B8DE-59561B3E709A",
+        "probability": 0.945079764341029,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51999561838103,
+          "lon": 10.328482794875764
+        },
+        "id": "04033C10-6A63-4D28-B89E-573D89D70118",
+        "probability": 0.9441272389088438,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519316610005475,
+          "lon": 10.32491886863288
+        },
+        "id": "34D0192C-BDCA-4B09-B0D1-D5C35BF6277F",
+        "probability": 0.9386390608775205,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519401486052416,
+          "lon": 10.327719096395146
+        },
+        "id": "1373B4D8-FA7A-41D8-B3A7-56BD2FBFFF2C",
+        "probability": 0.9349650351731803,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51982586628714,
+          "lon": 10.32746453023494
+        },
+        "id": "D82C79FB-29B1-4D75-AE02-59F7AFC0807C",
+        "probability": 0.9316574091378437,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51889222977075,
+          "lon": 10.325873491733653
+        },
+        "id": "D94FC217-2C0D-4208-80F4-4A4858FD6268",
+        "probability": 0.9138836738625973,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51889222977075,
+          "lon": 10.326255340973962
+        },
+        "id": "CCEA0730-AB9C-4D64-AA12-58772415B7E8",
+        "probability": 0.898796841485371,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52046243663923,
+          "lon": 10.328355511795662
+        },
+        "id": "4FD5AC26-10F0-41BE-B460-F6D9BFEDB12F",
+        "probability": 0.8926583963191492,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.5189771058177,
+          "lon": 10.326700831754321
+        },
+        "id": "C295B9DC-0341-442F-8156-F98E96457CB5",
+        "probability": 0.8879365863620124,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.519274171982,
+          "lon": 10.327528171774992
+        },
+        "id": "E73E645E-DDD1-464C-91B7-DEB420FC0B65",
+        "probability": 0.8219919375777528,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51918929593506,
+          "lon": 10.327273605614785
+        },
+        "id": "EE4F8EDE-9EF2-4516-824C-FB466E7D6087",
+        "probability": 0.8077000005244822,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.52041999861575,
+          "lon": 10.327591813315044
+        },
+        "id": "D3367837-CAFF-40C8-8744-2DB1AE56A218",
+        "probability": 0.5743799950149158,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.51978255348235,
+          "lon": 10.324760553982461
+        },
+        "id": "5050C1B7-2FB3-4E85-BEC6-B9DF2A563CE7",
+        "reviewedAt": "2026-11-03",
+        "source": "manual",
+        "verdict": "mast"
+      }
+    ],
+    "hot-sport-seepark-niederweimar": [
+      {
+        "coordinate": {
+          "lat": 50.76005506538064,
+          "lon": 8.742622878128657
+        },
+        "detected": {
+          "lat": 50.76006115209259,
+          "lon": 8.74268409497657
+        },
+        "id": "4DD169DD-D286-417B-9511-AAAE7117635E",
+        "probability": 0.9955985353810026,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.759676839463985,
+          "lon": 8.742524216638694
+        },
+        "detected": {
+          "lat": 50.759594515349555,
+          "lon": 8.74268409497657
+        },
+        "id": "D6CF1B16-F741-4E4A-B4C0-560BD74F33D6",
+        "probability": 0.9891793977409564,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.7610790145154,
+          "lon": 8.74011071074155
+        },
+        "detected": {
+          "lat": 50.76112169014493,
+          "lon": 8.740152793377401
+        },
+        "id": "78DF4EF6-F42D-447B-9378-61D11D5631DA",
+        "probability": 0.9832611994308292,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.759446628858505,
+          "lon": 8.74202618496181
+        },
+        "detected": {
+          "lat": 50.75942482926118,
+          "lon": 8.742017962976789
+        },
+        "id": "EA186250-95BC-4137-BFFD-DC72F3F9EF36",
+        "probability": 0.9247137239197385,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.760612080044204,
+          "lon": 8.739619491725062
+        },
+        "id": "6E5CAF7D-225A-422E-8AD5-018B77348688",
+        "probability": 0.8081025799819126,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.760230838180966,
+          "lon": 8.740685698977225
+        },
+        "id": "389E40B5-842E-490B-AF54-103F3D044F8E",
+        "probability": 0.39721466720490534,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.76044294579143,
+          "lon": 8.743483453376307
+        },
+        "id": "9BFEC1B7-71C9-4E95-8A8C-A446B496A325",
+        "probability": 0.37641470980511504,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.76073989644609,
+          "lon": 8.74508217017578
+        },
+        "id": "05858986-3587-413A-B05F-B3169E905EB0",
+        "probability": 0.3471511357863137,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      }
+    ],
+    "pineapple-wakepark-rossau": [
+      {
+        "coordinate": {
+          "lat": 50.98884665225403,
+          "lon": 13.078181732963058
+        },
+        "detected": {
+          "lat": 50.98883343242706,
+          "lon": 13.07821494033137
+        },
+        "id": "AC0BB400-2EE9-437D-B629-0DC1DF7ADF75",
+        "probability": 0.9974917966937451,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.988910177564335,
+          "lon": 13.077157492897866
+        },
+        "detected": {
+          "lat": 50.98896069200849,
+          "lon": 13.077077022357154
+        },
+        "id": "49301E51-E1F1-43AA-8DF1-F3F726789BEC",
+        "probability": 0.9703481409681047,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986371642843416,
+          "lon": 13.07672391106169
+        },
+        "detected": {
+          "lat": 50.986585179821766,
+          "lon": 13.07654153154576
+        },
+        "id": "F7363BE4-02A8-4F28-99C6-5594D047F970",
+        "probability": 0.9687423102485112,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.987560836612744,
+          "lon": 13.077746385871398
+        },
+        "id": "D739AA43-5E18-47D1-90ED-D47FECC5261F",
+        "probability": 0.9375580643238052,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98726389758941,
+          "lon": 13.07761251316855
+        },
+        "id": "85772688-D732-48CD-9820-E4C4C90FB542",
+        "probability": 0.937257425493724,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98908984776239,
+          "lon": 13.077714389588605
+        },
+        "detected": {
+          "lat": 50.989215211171356,
+          "lon": 13.077813322222822
+        },
+        "id": "8B588EE3-709C-441C-B2D3-8F2C0F14B2CA",
+        "probability": 0.9227436243032311,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 50.9891303714504,
+          "lon": 13.077277831411427
+        },
+        "id": "F4C3A018-6C62-42AC-896B-F0E56B32FEE4",
+        "probability": 0.9222865654770214,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98900311186897,
+          "lon": 13.077813322222822
+        },
+        "id": "2176E354-1E58-4995-A255-7BFF64A77EE7",
+        "probability": 0.8985014105161844,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.988112294798945,
+          "lon": 13.078081067628519
+        },
+        "id": "9BF34A2D-D070-4911-947C-3CDE0D7851B9",
+        "probability": 0.8969551899609409,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98688211884511,
+          "lon": 13.076809276951456
+        },
+        "id": "0089BBC3-6B6B-47DA-9DB1-F3D4300B5AD7",
+        "probability": 0.877205951700074,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98628824079843,
+          "lon": 13.076675404248608
+        },
+        "id": "41BEFAF8-2ADA-450E-992F-CF1452CBC723",
+        "probability": 0.8397192072998365,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98883343242706,
+          "lon": 13.076675404248608
+        },
+        "id": "85E54085-2993-476A-978C-CA111EC2B8D7",
+        "probability": 0.8276533499922718,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.988875852287535,
+          "lon": 13.077545576817124
+        },
+        "id": "0943F4B6-37FC-45BC-BEC7-C06125BBF4EC",
+        "probability": 0.8172581057308043,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98705179828702,
+          "lon": 13.077679449519973
+        },
+        "id": "2F1BC7B5-5525-47D1-A556-BF54B7ECF37D",
+        "probability": 0.8163448501164952,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986797279124154,
+          "lon": 13.07761251316855
+        },
+        "id": "CEBA3E7D-89A4-4121-9176-C29AFF47B730",
+        "probability": 0.7843044442650218,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98785777563609,
+          "lon": 13.07687621330288
+        },
+        "id": "01912DE6-5369-40E9-8EBC-834AD4D37221",
+        "probability": 0.776565213914236,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98722147772893,
+          "lon": 13.076943149654305
+        },
+        "id": "8D2F1F4A-7EA9-4DDD-B74F-8B0F63FEBD14",
+        "probability": 0.7697659316018985,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986966958566065,
+          "lon": 13.07654153154576
+        },
+        "id": "F3DBAAF8-29E6-4654-B1BC-C4052CB4B490",
+        "probability": 0.7690684657446248,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.988281974240856,
+          "lon": 13.078148003979944
+        },
+        "id": "62EBE199-F14E-492F-A1A5-5F33FEDDB258",
+        "probability": 0.7630115375122796,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986585179821766,
+          "lon": 13.077545576817124
+        },
+        "id": "96462596-1B7B-4439-A195-3C844C40FB2E",
+        "probability": 0.7618904632345307,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98777293591513,
+          "lon": 13.079285921954158
+        },
+        "id": "8D88A834-3E18-4F3F-88EC-5B704DF9D44A",
+        "probability": 0.7425354104292998,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.987306317449885,
+          "lon": 13.078348813034218
+        },
+        "id": "FF23A905-5A3C-4925-980B-65EC5111EB60",
+        "probability": 0.716171226669501,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98832439410133,
+          "lon": 13.076742340600031
+        },
+        "id": "ED56DD46-9CFE-41E5-87F7-6F2F3AF0382E",
+        "probability": 0.6848380231238096,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98836681396181,
+          "lon": 13.076943149654305
+        },
+        "id": "0B9C2281-66BE-43B2-8D82-859D06456BF8",
+        "probability": 0.6716571979693969,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.988494073543244,
+          "lon": 13.07701008600573
+        },
+        "id": "1F06F1F2-7CF7-41B8-84EA-17BF06BC3440",
+        "probability": 0.654641886522816,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98798503521752,
+          "lon": 13.079085112899886
+        },
+        "id": "48514CC8-138C-4A47-8D44-E99A486D390C",
+        "probability": 0.5540970625400713,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98607614149604,
+          "lon": 13.07687621330288
+        },
+        "id": "AA9652E4-7740-4894-A69D-CC19CFB1FCA4",
+        "probability": 0.5344361086236528,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986203401077475,
+          "lon": 13.07734476776285
+        },
+        "id": "53037BEE-888F-4054-8035-EA52D1F22515",
+        "probability": 0.5239729084882391,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.9881971345199,
+          "lon": 13.079285921954158
+        },
+        "id": "04DD0F49-168A-4430-A523-55D51D6885BE",
+        "probability": 0.5172118180179284,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.987136638007975,
+          "lon": 13.078014131277095
+        },
+        "id": "2FB15870-2A87-4849-94EB-8CD73C22BE0C",
+        "probability": 0.4707629768138484,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.9896818296366,
+          "lon": 13.077077022357154
+        },
+        "id": "FEB661BE-B9EA-4E2A-93C3-663D10AD50FE",
+        "probability": 0.4697470720477515,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98798503521752,
+          "lon": 13.077746385871398
+        },
+        "id": "DF7A03B3-20B4-4D50-AFE1-391641EDDE5C",
+        "probability": 0.43170600022844835,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98768809619418,
+          "lon": 13.078348813034218
+        },
+        "id": "A5A7CB11-34C2-4246-ABE5-143AE9D31F66",
+        "probability": 0.43060983353973686,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.989639409776125,
+          "lon": 13.076809276951456
+        },
+        "id": "E2858B53-3A1A-4D0B-81FF-9FC6F11A9118",
+        "probability": 0.38245322710213076,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.987900195496564,
+          "lon": 13.078348813034218
+        },
+        "id": "6B125B96-771B-4EB7-B162-9CDA45A6C939",
+        "probability": 0.34713408808966206,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.987518416752266,
+          "lon": 13.076742340600031
+        },
+        "id": "2BC7BDFB-2B2A-4623-8955-44788B215051",
+        "probability": 0.33782243462729583,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.98700937842654,
+          "lon": 13.07821494033137
+        },
+        "id": "B371DC96-85D6-4AA9-9F8B-174F8604239A",
+        "probability": 0.3003014228730039,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 50.986293502544186,
+          "lon": 13.077701130078625
+        },
+        "id": "52D37910-E460-4F43-9343-4D8C7E793C17",
+        "reviewedAt": "2026-11-03",
+        "source": "manual",
+        "verdict": "mast"
+      }
+    ],
+    "spotz-wakeboard-park-norderstedt": [
+      {
+        "coordinate": {
+          "lat": 53.713890155516076,
+          "lon": 10.02137006497467
+        },
+        "detected": {
+          "lat": 53.713936086655465,
+          "lon": 10.021332490809371
+        },
+        "id": "6E795488-1E28-41C1-9F35-C4B435F63F16",
+        "probability": 0.9895874022741972,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.713357828827164,
+          "lon": 10.026014410614293
+        },
+        "detected": {
+          "lat": 53.7133848841742,
+          "lon": 10.026100403958903
+        },
+        "id": "236864C7-B98D-45E6-8C16-05F404EC014C",
+        "probability": 0.9894734073778659,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71265477384512,
+          "lon": 10.026514394748405
+        },
+        "detected": {
+          "lat": 53.712621680738586,
+          "lon": 10.026598544138706
+        },
+        "id": "15F432E3-C983-45D3-A413-6E4D39CA6276",
+        "probability": 0.9889524982732196,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71220960503241,
+          "lon": 10.025513671046332
+        },
+        "detected": {
+          "lat": 53.71219767882992,
+          "lon": 10.025459938013444
+        },
+        "id": "85E4AE3B-104A-4F36-AC0C-AD44CC3730B3",
+        "probability": 0.988893986954213,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71533529295409,
+          "lon": 10.023325051528579
+        },
+        "id": "4B62EFDD-C81F-4C80-B56C-03E4095FD812",
+        "probability": 0.9550575515855805,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71516569219062,
+          "lon": 10.024677146302327
+        },
+        "id": "BFFB7633-92BC-463A-B1AD-7E9B459D4163",
+        "probability": 0.9289229619892581,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.712452079975115,
+          "lon": 10.026242729724562
+        },
+        "id": "F838ACD9-B688-4B3E-886D-7E430429255D",
+        "probability": 0.7476581945446211,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71546249352669,
+          "lon": 10.024748309185156
+        },
+        "id": "6972A9C9-6DC1-4746-8F2E-6F12873F7D9A",
+        "probability": 0.7098615264142135,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71236727959339,
+          "lon": 10.026029241076076
+        },
+        "id": "F879FAFD-C6DD-412B-AB34-21198BC04B42",
+        "probability": 0.6587632064378484,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71346968455593,
+          "lon": 10.0251041235993
+        },
+        "id": "EE95B5E5-5E1D-44EC-A905-3EA97A7636AC",
+        "probability": 0.458671841502062,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71321666087564,
+          "lon": 10.021139346450378
+        },
+        "detected": {
+          "lat": 53.71330008379246,
+          "lon": 10.021119002160884
+        },
+        "id": "A6C144B2-E526-4546-9532-F24C21C80DEF",
+        "probability": 0.35712067228230115,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.71317288321986,
+          "lon": 10.021332490809371
+        },
+        "id": "E83E460A-89AA-40F5-B0BD-E1396385686B",
+        "probability": 0.34218290893056486,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.715123291999745,
+          "lon": 10.024250169005354
+        },
+        "id": "5A256742-1FF2-48FD-BEDB-A1F659F58C56",
+        "probability": 0.33656904541602684,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      }
+    ],
+    "strandparx-cable-island-magdeburg": [
+      {
+        "coordinate": {
+          "lat": 52.17566250186696,
+          "lon": 11.640127841314428
+        },
+        "detected": {
+          "lat": 52.17571463709986,
+          "lon": 11.640202418032581
+        },
+        "id": "3830AB43-0099-42FF-B019-41DC338C3D03",
+        "probability": 0.9961494039956693,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.172930667350315,
+          "lon": 11.639803765801181
+        },
+        "detected": {
+          "lat": 52.17287308431506,
+          "lon": 11.639927643232003
+        },
+        "id": "FBAA4386-E6CF-48EC-8E82-8495D2565891",
+        "probability": 0.9951778698528733,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.17258707129515,
+          "lon": 11.638737095665748
+        },
+        "detected": {
+          "lat": 52.17249138319471,
+          "lon": 11.638691156629399
+        },
+        "id": "2D9F8B1E-0EA1-464A-AD81-8FC6934C84A3",
+        "probability": 0.9926892151805768,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.1730875503942,
+          "lon": 11.637749900670919
+        },
+        "detected": {
+          "lat": 52.17304272925743,
+          "lon": 11.637660751127228
+        },
+        "id": "18D9AA38-0818-4694-8B1F-55701D38631A",
+        "probability": 0.9919073225513028,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.173127551728626,
+          "lon": 11.643224940838946
+        },
+        "id": "DACA25AB-217F-4E38-AEAB-3DF8B783AC20",
+        "probability": 0.9070203394289267,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.17266102813709,
+          "lon": 11.638004219627952
+        },
+        "id": "02673D1E-F973-4492-9FB2-233ED54B70D2",
+        "probability": 0.8709713653653207,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.175845429051684,
+          "lon": 11.639092259518566
+        },
+        "detected": {
+          "lat": 52.175799459571046,
+          "lon": 11.639103318830266
+        },
+        "id": "0E0BEFA7-084A-4A8D-98EB-09FF7AF8D8BF",
+        "probability": 0.5931357082105126,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.17316996296422,
+          "lon": 11.641851066836052
+        },
+        "id": "B6FE7BF5-6497-492D-A8CD-F32463079155",
+        "probability": 0.530755922421837,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      }
+    ],
+    "wakepark-grossbeeren": [
+      {
+        "coordinate": {
+          "lat": 52.35312092962687,
+          "lon": 13.294476194896987
+        },
+        "detected": {
+          "lat": 52.35310227034018,
+          "lon": 13.294443664486915
+        },
+        "id": "BB3F44D2-15D3-4EDB-81E4-EE96F6BFDA8C",
+        "probability": 0.9793186407964796,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35519696831167,
+          "lon": 13.297572621565118
+        },
+        "detected": {
+          "lat": 52.354968307735184,
+          "lon": 13.29713348653302
+        },
+        "id": "E178D810-3AA2-43DA-BE27-95C6B83A0872",
+        "probability": 0.977966785491225,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35356877968893,
+          "lon": 13.29485748326324
+        },
+        "id": "E4F7F9E9-B401-493A-A9BF-E51FB1D93C6F",
+        "probability": 0.9334516524082652,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.3547562580312,
+          "lon": 13.295616151019834
+        },
+        "id": "BEBD4C32-B523-4142-A44A-95D97D5F0CE0",
+        "probability": 0.8918848188851235,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35369600951132,
+          "lon": 13.294926453059293
+        },
+        "id": "6715FAB6-932F-484E-B745-CCBDB5143B68",
+        "probability": 0.8866395465477667,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35505312761677,
+          "lon": 13.296305848980372
+        },
+        "id": "E315DEF3-22A8-4B35-9CF6-44BC575FDDFC",
+        "probability": 0.8124324530984458,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35280540075461,
+          "lon": 13.295133362447455
+        },
+        "id": "4F31B86B-A8D0-494A-924A-E69AB1250758",
+        "probability": 0.5980245280812136,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.352833481151166,
+          "lon": 13.2953070022741
+        },
+        "detected": {
+          "lat": 52.352890220636205,
+          "lon": 13.295340271835617
+        },
+        "id": "DC96EDF6-2B73-4417-B997-CE78D73FA87E",
+        "probability": 0.3318454937638662,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35314468028098,
+          "lon": 13.295616151019834
+        },
+        "id": "437B3178-8616-4528-BDF0-3E3ACAF8A503",
+        "probability": 0.30390660085167354,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 52.35555391775078,
+          "lon": 13.296628435530895
+        },
+        "id": "62B3E632-FCF0-4D68-B88A-CEBAF48C48B2",
+        "reviewedAt": "2026-11-03",
+        "source": "manual",
+        "verdict": "mast"
+      }
+    ],
+    "wakepark-tunisee-freiburg": [
+      {
+        "coordinate": {
+          "lat": 48.06701526349579,
+          "lon": 7.813921640506798
+        },
+        "detected": {
+          "lat": 48.067033516220725,
+          "lon": 7.813953169698254
+        },
+        "id": "3CC61E94-CAAC-4EA7-B5E9-CBEB7BDD4FDA",
+        "probability": 0.9965829093383449,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06686964695764,
+          "lon": 7.812562731481446
+        },
+        "detected": {
+          "lat": 48.06686375065859,
+          "lon": 7.812502256894487
+        },
+        "id": "ECA5B0CA-BB5C-4F1B-8F5A-E933A89CC867",
+        "probability": 0.9917653664933702,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06488090330279,
+          "lon": 7.813242639029634
+        },
+        "detected": {
+          "lat": 48.06482656391298,
+          "lon": 7.81319617171368
+        },
+        "id": "FA301023-DCD2-4329-A9BE-CD6278F07A7A",
+        "probability": 0.9740844809465372,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.064969491768295,
+          "lon": 7.814281808256375
+        },
+        "detected": {
+          "lat": 48.06495388808458,
+          "lon": 7.814331668690541
+        },
+        "id": "E0AE0456-9B18-4DDF-82F8-FD172D86FF48",
+        "probability": 0.9733487984253837,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06520853642778,
+          "lon": 7.8166026626442635
+        },
+        "id": "CD663EE3-1F62-4C42-BB00-9C51D40CA415",
+        "probability": 0.9697259958402344,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.067199969470856,
+          "lon": 7.81318130290555
+        },
+        "detected": {
+          "lat": 48.06720328178286,
+          "lon": 7.81319617171368
+        },
+        "id": "63843909-CDCC-4BE4-BFB1-6A40A002841E",
+        "probability": 0.9437552515922885,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06491144669405,
+          "lon": 7.815719498328927
+        },
+        "id": "73338601-A574-4985-9AFD-CF38E97DCF1C",
+        "probability": 0.9390182662383442,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.065123653646715,
+          "lon": 7.814962500344353
+        },
+        "id": "C3AC1578-4FB1-4BAD-BF1A-8982B429D356",
+        "probability": 0.9328853255176478,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06614224701952,
+          "lon": 7.812754589556012
+        },
+        "id": "519B9977-11AF-4DA1-9974-CE7883A077B6",
+        "probability": 0.9042185065340177,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06563295033312,
+          "lon": 7.814647084517447
+        },
+        "id": "7F46C8C7-9499-436D-91C3-D74188E74DF0",
+        "probability": 0.8872392087323854,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06495388808458,
+          "lon": 7.816034914155833
+        },
+        "id": "7D78624F-8D77-4CAA-B729-70DFA2EC9E63",
+        "probability": 0.8786030658904133,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06694863343966,
+          "lon": 7.816034914155833
+        },
+        "id": "1E367419-2784-4694-9907-91DD906C4AEF",
+        "probability": 0.8737916572161434,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06576027450472,
+          "lon": 7.8151517498404965
+        },
+        "id": "DAFEF0ED-FC6F-44E8-BB64-16EB250C7169",
+        "probability": 0.8411162337495804,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.065123653646715,
+          "lon": 7.815908747825071
+        },
+        "id": "C5562344-1E76-4035-B2D3-608D6F6EFE3C",
+        "probability": 0.814330967542926,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.067160840392326,
+          "lon": 7.814457835021304
+        },
+        "id": "C4537E84-B906-4566-BBAF-3553B454055B",
+        "probability": 0.800489415050394,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06745793012606,
+          "lon": 7.814647084517447
+        },
+        "id": "8547646F-E042-4BC0-9B91-FC92F409DBAE",
+        "probability": 0.7146478689348967,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06580271589525,
+          "lon": 7.813890086532873
+        },
+        "id": "74C71D2C-A7AB-40AA-8167-16BB57BE8D85",
+        "probability": 0.7122142868534732,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06754281290713,
+          "lon": 7.8143947518559225
+        },
+        "id": "B9939E0B-77F7-47EC-8AFF-70B3F0279B75",
+        "probability": 0.7110393831742963,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06529341920885,
+          "lon": 7.81534099933664
+        },
+        "id": "41673201-0C89-4854-A027-6DA90A04697D",
+        "probability": 0.6672503644422634,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06495388808458,
+          "lon": 7.81262842322525
+        },
+        "id": "EFE6C43F-383B-48D8-BE13-2C6E58AFBF23",
+        "probability": 0.630728831851764,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06516609503725,
+          "lon": 7.814079336029017
+        },
+        "id": "F46ED115-14CD-4F9E-9CE6-696BA541475F",
+        "probability": 0.5948460676112655,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.064996329475115,
+          "lon": 7.813827003367492
+        },
+        "id": "E8758F78-4865-46A2-B30F-7E01D3DD5069",
+        "probability": 0.589209248909314,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.067373047344994,
+          "lon": 7.814331668690541
+        },
+        "id": "B7C18977-2CF3-4E20-89CC-2669BE2115AD",
+        "probability": 0.5773017323469712,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.066439336753255,
+          "lon": 7.814457835021304
+        },
+        "id": "113ADCED-7DC9-466D-9897-7AD71B3E4D52",
+        "probability": 0.5462728187383201,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06482656391298,
+          "lon": 7.812691506390631
+        },
+        "id": "1D276F91-3934-4A8F-9097-74DD5D78F984",
+        "probability": 0.4669363905648246,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06537830198992,
+          "lon": 7.814710167682828
+        },
+        "id": "EAD62956-FFEA-440B-A47C-0F51132EEEE8",
+        "probability": 0.45372291909956236,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.066184688410054,
+          "lon": 7.812502256894487
+        },
+        "id": "88F2EA55-A5EE-43D8-A1F4-B6DC8E824E13",
+        "probability": 0.44325243904807954,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06601492284792,
+          "lon": 7.814205502359779
+        },
+        "id": "9465DAAE-9F15-4286-B9A6-5FBCFD89A81B",
+        "probability": 0.4304260334479328,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06567539172365,
+          "lon": 7.81426858552516
+        },
+        "id": "ADC926EA-2DFB-49B8-A0BB-8B7975C3F53E",
+        "probability": 0.36598685449156204,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.065250977818316,
+          "lon": 7.813890086532873
+        },
+        "id": "ECC7F850-7985-453A-9481-D0D16DFAF5EC",
+        "probability": 0.36150784131695207,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06537830198992,
+          "lon": 7.812754589556012
+        },
+        "id": "9B0F61D8-CB13-41CD-B776-223ED4EED8D1",
+        "probability": 0.3107290033129368,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 48.06576027450472,
+          "lon": 7.812691506390631
+        },
+        "id": "F8C6C100-813D-42B6-95FA-5EC7D6597DCF",
+        "probability": 0.3081387612499155,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      }
+    ],
+    "wasserski-wakeboard-hamburg": [
+      {
+        "coordinate": {
+          "lat": 53.45621979811785,
+          "lon": 10.012718412395959
+        },
+        "detected": {
+          "lat": 53.45618481861688,
+          "lon": 10.01268755228218
+        },
+        "id": "12E1A198-CBBE-450E-AFDA-ED9F6D610948",
+        "probability": 0.9984027941223661,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.458304919449596,
+          "lon": 10.014597426986786
+        },
+        "id": "E1C5342F-2E86-44BE-B154-E707DE97F918",
+        "probability": 0.9977643498606725,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.4578384972664,
+          "lon": 10.014102274285591
+        },
+        "id": "3F258929-9CBC-42CB-A688-BEEFEFBA2AC7",
+        "probability": 0.9963349352677312,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45584636398987,
+          "lon": 10.014546802875865
+        },
+        "detected": {
+          "lat": 53.455760798450335,
+          "lon": 10.014668163086956
+        },
+        "id": "D3C250A6-08C4-4CB8-B8D2-04A3C68B4668",
+        "probability": 0.990412627735423,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45749928113317,
+          "lon": 10.01403153818542
+        },
+        "id": "124C43BC-B2F5-49B8-BA90-10C743835FB1",
+        "probability": 0.9840685916413774,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.459025753732725,
+          "lon": 10.017497607093778
+        },
+        "id": "2C19D8A2-95ED-4471-A4A8-6C15A8FE7A13",
+        "probability": 0.9833584487285165,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45864413558283,
+          "lon": 10.015870676789856
+        },
+        "id": "BC6C6BA0-ECEC-4937-91DB-7D1A999CAA5F",
+        "probability": 0.982401835684615,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45584560248365,
+          "lon": 10.013111968883203
+        },
+        "id": "D717CA43-6F36-436D-9CE1-1DC4FF4F257A",
+        "probability": 0.9706058806650296,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.456608838783424,
+          "lon": 10.014880371387468
+        },
+        "id": "9DD49504-783B-481B-B9AE-BB057215B2A2",
+        "probability": 0.9434400854416444,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45566491985615,
+          "lon": 10.013458466759602
+        },
+        "detected": {
+          "lat": 53.455633592400375,
+          "lon": 10.013394913283886
+        },
+        "id": "D6F6BE66-F2FC-4787-BFE4-733EFC052CF5",
+        "probability": 0.9426420182457887,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "mast"
+      },
+      {
+        "coordinate": {
+          "lat": 53.458474527516216,
+          "lon": 10.01396080208525
+        },
+        "id": "E3FF385E-B18E-4C69-B3C1-05547A7EBFF7",
+        "probability": 0.9425480363461468,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45868653759949,
+          "lon": 10.014385218686273
+        },
+        "id": "83D46F83-5E90-411A-9FF3-B067BF769107",
+        "probability": 0.9386615361541973,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45911055776603,
+          "lon": 10.017922023694801
+        },
+        "id": "A6AB495D-E7B1-4851-AFAE-F51B10CC06F6",
+        "probability": 0.934099477373602,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.458050507349675,
+          "lon": 10.01516331578815
+        },
+        "id": "E8E3F313-E6C1-4002-9DEB-50452F200247",
+        "probability": 0.9232051832899042,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45889854768276,
+          "lon": 10.016931718292414
+        },
+        "id": "1D6E4B3B-A94B-49A5-90D8-2C738030806A",
+        "probability": 0.842164644442175,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45631202466684,
+          "lon": 10.016931718292414
+        },
+        "id": "B7B8F6EA-4EE3-445A-B1A5-FDA1C6183079",
+        "probability": 0.7394260741217261,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45614241660022,
+          "lon": 10.014738899187126
+        },
+        "id": "2F7FCF06-3CF6-41A6-8495-1A6B4AD673BD",
+        "probability": 0.7062177419127953,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45851692953287,
+          "lon": 10.017922023694801
+        },
+        "id": "C127E4AC-8CE1-4ADE-9BBD-971B75B36C06",
+        "probability": 0.6666034699261814,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.4587713416328,
+          "lon": 10.015587732389173
+        },
+        "id": "056BE593-213C-4C66-AB7A-E3E797DE2889",
+        "probability": 0.6625220693324257,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.457329673066546,
+          "lon": 10.013536385484228
+        },
+        "id": "BA4477B9-ABDA-4092-A369-C72103DB71FD",
+        "probability": 0.5245050865792866,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.458856145666104,
+          "lon": 10.014880371387468
+        },
+        "id": "67B67945-DFA1-44EB-9249-ED8638EDFE0E",
+        "probability": 0.4912993099031376,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.458728939616144,
+          "lon": 10.015092579687979
+        },
+        "id": "8CAAF229-72D2-46AE-A7EF-C2F73DA7F7C4",
+        "probability": 0.49037850410532396,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45822011541629,
+          "lon": 10.015587732389173
+        },
+        "id": "DF62A867-2FDA-4529-8F82-1FCA5CE93684",
+        "probability": 0.45940804000706337,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45749928113317,
+          "lon": 10.015375524088661
+        },
+        "id": "4CAFF6A2-3E9F-438C-AD61-38C1DB55A108",
+        "probability": 0.42481032652297296,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45822011541629,
+          "lon": 10.013819329884909
+        },
+        "id": "8962E3DD-2B7B-4289-89AF-C56F3467D7D6",
+        "probability": 0.41322125558067796,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45724486903324,
+          "lon": 10.013253441083545
+        },
+        "id": "BFDC5F14-DE01-4067-903E-3344217B4C21",
+        "probability": 0.33982680289429107,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.454785552067285,
+          "lon": 10.015516996289003
+        },
+        "id": "24273587-F423-45FA-8C8C-D15EAF7A025B",
+        "probability": 0.3130446978902068,
+        "reviewedAt": "2026-11-03",
+        "source": "detector",
+        "verdict": "none"
+      },
+      {
+        "coordinate": {
+          "lat": 53.45860517606371,
+          "lon": 10.015676249334
+        },
+        "id": "7BE608BC-6769-483F-AB02-6BE9C75BB65D",
+        "reviewedAt": "2026-11-03",
+        "source": "manual",
+        "verdict": "mast"
+      }
     ]
   },
   "version": 1
