@@ -17,32 +17,32 @@ sys.path.insert(0, str(Path(__file__).parent))
 from cabledetect import dataset, evaluate, features, loopfit, water  # noqa: E402
 
 
-def load_mast_models(paths: list[Path]):
+def load_tower_models(paths: list[Path]):
     """{park_id: [params]} from the per-fold files next to each path, plus "*" for the full models.
     Several paths make an ensemble: their logits are averaged (the fold split is the same for all)."""
-    from cabledetect import mastheat
+    from cabledetect import towerheat
     models: dict[str, list] = {"*": []}
     for path in paths:
-        models["*"].append(mastheat.load_params(path))
+        models["*"].append(towerheat.load_params(path))
         for fold_json in sorted(path.parent.glob(f"{path.stem}.fold*.json")):
-            params = mastheat.load_params(fold_json.with_suffix(".npz"))
+            params = towerheat.load_params(fold_json.with_suffix(".npz"))
             for park in json.loads(fold_json.read_text()):
                 models.setdefault(park, []).append(params)
     return models
 
 
-def detect_masts(models, example, snapshot, rgb, w, probability=0.7):
-    """Mast peaks in local metres with probabilities, plus how they compare with the traced bends."""
-    from cabledetect import mastheat
-    logits = np.mean([mastheat.dense_logits(params, rgb) for params in models.get(example.park_id, models["*"])], axis=0)
+def detect_towers(models, example, snapshot, rgb, w, probability=0.7):
+    """Tower peaks in local metres with probabilities, plus how they compare with the traced bends."""
+    from cabledetect import towerheat
+    logits = np.mean([towerheat.dense_logits(params, rgb) for params in models.get(example.park_id, models["*"])], axis=0)
     peaks = []
-    for row, col, prob in mastheat.mast_peaks(logits, threshold=float(np.log(probability / (1 - probability)))):
+    for row, col, prob in towerheat.tower_peaks(logits, threshold=float(np.log(probability / (1 - probability)))):
         r0, r1 = max(0, row - 34), min(w.shape[0], row + 35)
         c0, c1 = max(0, col - 34), min(w.shape[1], col + 35)
-        if w[r0:r1, c0:c1].mean() >= 0.3:  # masts stand on or right next to the water
+        if w[r0:r1, c0:c1].mean() >= 0.3:  # towers stand on or right next to the water
             peaks.append((col, row, prob))
     if not peaks:
-        return np.zeros((0, 2)), np.zeros(0), {"mast_peaks": 0, "bends_hit": 0, "bends": sum(len(l.points_xy) for l in example.loops)}
+        return np.zeros((0, 2)), np.zeros(0), {"tower_peaks": 0, "bends_hit": 0, "bends": sum(len(l.points_xy) for l in example.loops)}
     px = np.array([[c, r] for c, r, _ in peaks], dtype=float)
     xy = example.to_local(snapshot, px)
     prob = np.array([p for _, _, p in peaks])
@@ -50,7 +50,7 @@ def detect_masts(models, example, snapshot, rgb, w, probability=0.7):
     d = np.linalg.norm(bends[:, None, :] - xy[None, :, :], axis=2)
     hit = int((d.min(axis=1) <= 12).sum()) if len(bends) else 0
     false_peaks = int((d.min(axis=0) > 20).sum()) if len(bends) else len(xy)
-    return xy, prob, {"mast_peaks": len(peaks), "bends_hit": hit, "bends": len(bends), "false_mast_peaks": false_peaks}
+    return xy, prob, {"tower_peaks": len(peaks), "bends_hit": hit, "bends": len(bends), "false_tower_peaks": false_peaks}
 
 
 def main() -> None:
@@ -58,27 +58,25 @@ def main() -> None:
     parser.add_argument("training_set", type=Path)
     parser.add_argument("--out", type=Path, default=Path("/tmp/cable-eval"))
     parser.add_argument("--only", nargs="*")
-    parser.add_argument("--masts", type=Path, nargs="+", help="mast net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out; several files are averaged")
-    parser.add_argument("--mast-weight", type=float, default=3.0)
-    parser.add_argument("--mast-probability", type=float, default=0.7)
+    parser.add_argument("--towers", type=Path, nargs="+", help="tower net params (.npz); with .foldN.npz/.json siblings each park uses the fold that held it out; several files are averaged")
+    parser.add_argument("--tower-weight", type=float, default=3.0)
+    parser.add_argument("--tower-probability", type=float, default=0.7)
     parser.add_argument("--given-others", action="store_true", help="give the fit the park's other traced cables (as the app does); parks with several loops get one row per loop")
-    parser.add_argument("--masts-mode", choices=["both", "hull", "score"], default="both", help="mast detections shape the starting hull, only score vertices, or both pooled (default)")
+    parser.add_argument("--towers-mode", choices=["both", "hull", "score"], default="both", help="tower detections shape the starting hull, only score vertices, or both pooled (default)")
     args = parser.parse_args()
-    mast_models = load_mast_models(args.masts) if args.masts else None
+    tower_models = load_tower_models(args.towers) if args.towers else None
     args.out.mkdir(parents=True, exist_ok=True)
 
     results = []
-    for example in dataset.load(args.training_set):
-        if args.only and example.park_id not in args.only:
-            continue
-        if not example.detail or not example.loops:
-            continue
+    examples = [e for e in dataset.load(args.training_set) if (not args.only or e.park_id in args.only) and e.detail and e.loops]
+    for number, example in enumerate(examples, 1):
+        print(f"progress: loops [{number}/{len(examples)}] {example.park_id}", flush=True)
         started = time.time()
         snapshot = example.detail
         rgb = example.image(snapshot)
         mpp = snapshot.meters_per_pixel
         def analyse(seed_xy):
-            """Water, floating objects and mast detections with the water search seeded at `seed_xy` (local metres)."""
+            """Water, floating objects and tower detections with the water search seeded at `seed_xy` (local metres)."""
             seed_px = example.to_pixels(snapshot, np.asarray(seed_xy, float).reshape(1, 2))[0]
             seed_rc = (int(np.clip(seed_px[1], 0, snapshot.size_px - 1)), int(np.clip(seed_px[0], 0, snapshot.size_px - 1)))
             w = water.water_mask(rgb, seed_rc)
@@ -96,10 +94,10 @@ def main() -> None:
             rows_w, cols_w = np.nonzero(w[::8, ::8])
             water_xy = example.to_local(snapshot, np.stack([cols_w * 8, rows_w * 8], axis=1).astype(float))
             water_xy = water_xy[np.linalg.norm(water_xy, axis=1) <= 380]
-            mast_xy, mast_prob, mast_stats = np.zeros((0, 2)), np.zeros(0), {}
-            if mast_models:
-                mast_xy, mast_prob, mast_stats = detect_masts(mast_models, example, snapshot, rgb, w, probability=args.mast_probability)
-            return w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats
+            tower_xy, tower_prob, tower_stats = np.zeros((0, 2)), np.zeros(0), {}
+            if tower_models:
+                tower_xy, tower_prob, tower_stats = detect_towers(tower_models, example, snapshot, rgb, w, probability=args.tower_probability)
+            return w, blobs, blob_xy, water_test, water_xy, tower_xy, tower_prob, tower_stats
 
         # Seed the water search at the park location: the only input a new park has. A park with
         # several loops is seeded at each target loop instead, as the user centres the map on the
@@ -124,11 +122,11 @@ def main() -> None:
               f"IoU >= 0.7 for {sum(r['iou'] >= 0.7 for r in scored)}")
 
 
-def run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_xy, mast_xy, mast_prob, mast_stats, started, target, occupied, label, results):
+def run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_xy, tower_xy, tower_prob, tower_stats, started, target, occupied, label, results):
     """Fit one target loop (None: the park's best loop) with the given occupied polylines, print and record the row and write the debug image."""
-    candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=mast_xy, extra_weights=args.mast_weight * mast_prob, extra_in_hull={"both": None, "hull": True, "score": False}[args.masts_mode], occupied=occupied)
+    candidates = loopfit.propose_loops(blobs, blob_xy, water_test, water_xy=water_xy, extra_xy=tower_xy, extra_weights=args.tower_weight * tower_prob, extra_in_hull={"both": None, "hull": True, "score": False}[args.towers_mode], occupied=occupied)
     elapsed = time.time() - started
-    row = {"park": label, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates), **mast_stats}
+    row = {"park": label, "blobs": len(blobs), "water_fraction": float(w.mean()), "seconds": round(elapsed, 1), "candidates": len(candidates), **tower_stats}
     match = None
     if candidates:
         best = candidates[0]
@@ -149,7 +147,7 @@ def run_park(args, example, snapshot, rgb, w, blobs, blob_xy, water_test, water_
     vis[~w] = (vis[~w] * 0.45).astype(np.uint8)
     for b in blobs:
         cv2.circle(vis, (int(b.col), int(b.row)), 12, (255, 0, 255), 2)
-    for (x, y), p in zip(example.to_pixels(snapshot, mast_xy), mast_prob):
+    for (x, y), p in zip(example.to_pixels(snapshot, tower_xy), tower_prob):
         cv2.circle(vis, (int(x), int(y)), 18, (255, 140, 0), 2 if p > 0.75 else 1)
     for loop in example.loops:
         px = example.to_pixels(snapshot, loop.points_xy).astype(int)

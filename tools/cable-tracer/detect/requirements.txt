@@ -4,4 +4,4 @@ scikit-image
 scipy
 shapely
 pillow
-jax  # mast net training and heatmaps (CPU is enough)
+jax  # tower net training and heatmaps (CPU is enough)

@@ -76,10 +76,10 @@ struct CableTraceView: View {
                         MapPolyline(coordinates: line + [line[0]])
                             .stroke(Color.purple, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [8, 6]))
                     }
-                    ForEach(Array(detection.result.masts.enumerated()), id: \.offset) { _, mast in
-                        Annotation("", coordinate: mapCoordinate(detection.image.coordinate(fromLocal: mast.xy)), anchor: .center) {
+                    ForEach(Array(detection.result.towers.enumerated()), id: \.offset) { _, tower in
+                        Annotation("", coordinate: mapCoordinate(detection.image.coordinate(fromLocal: tower.xy)), anchor: .center) {
                             Circle()
-                                .fill(Color.purple.opacity(0.4 + 0.6 * mast.probability))
+                                .fill(Color.purple.opacity(0.4 + 0.6 * tower.probability))
                                 .frame(width: 10, height: 10)
                                 .overlay(Circle().strokeBorder(.white, lineWidth: 1))
                         }
@@ -146,7 +146,7 @@ struct CableTraceView: View {
             .sheet(isPresented: $askProposalDirection) {
                 CableDirectionSheet(
                     title: String(localized: "Which way do riders go on this cable?"),
-                    message: String(localized: "The proposal is a starting point: check every mast against the imagery and move the points that are off. Reverse later with the arrows button if you pick wrong.")
+                    message: String(localized: "The proposal is a starting point: check every tower against the imagery and move the points that are off. Reverse later with the arrows button if you pick wrong.")
                 ) { direction in
                     askProposalDirection = false
                     applyProposal(direction: direction)
@@ -404,12 +404,12 @@ struct CableTraceView: View {
 
     private func proposalSummary(_ best: CableLoopCandidate, outcome: CableDetectionRunner.Outcome) -> String {
         var parts: [String] = [
-            String(localized: "\(best.vertices.count) masts · \(Int(best.perimeterM.rounded())) m"),
+            String(localized: "\(best.vertices.count) towers · \(Int(best.perimeterM.rounded())) m"),
         ]
         if best.isWeak { parts.append(String(localized: "weak match, check closely")) }
         if !best.notes.isEmpty { parts.append(best.notes.joined(separator: ", ")) }
         let seconds = String(format: "%.1f", outcome.snapshotSeconds + outcome.result.elapsed)
-        parts.append(String(localized: "\(outcome.result.masts.count) mast hits, \(outcome.result.objects.count) objects, \(seconds) s"))
+        parts.append(String(localized: "\(outcome.result.towers.count) tower hits, \(outcome.result.objects.count) objects, \(seconds) s"))
         return parts.joined(separator: " · ")
     }
 
@@ -434,7 +434,7 @@ struct CableTraceLegend: View {
             }
             if showsDetection {
                 row { line(Color.purple, width: 3, dash: [4, 3]) } text: { Text("Proposal from the imagery") }
-                row { dot(Color.purple) } text: { Text("Detected mast") }
+                row { dot(Color.purple) } text: { Text("Detected tower") }
             }
             row {
                 ZStack {

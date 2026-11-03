@@ -116,9 +116,9 @@ public struct CableGeometry: Codable, Equatable, Sendable {
         )
     }
 
-    /// Whether every bend turns the same way. Masts stand outside the loop and pull the cable,
+    /// Whether every bend turns the same way. Towers stand outside the loop and pull the cable,
     /// so a traced full-size loop is a convex polygon; a bend the other way means a point is
-    /// out of order or a mast was drawn "pushing" from the inside.
+    /// out of order or a tower was drawn "pushing" from the inside.
     public var isConvex: Bool {
         guard isClosed, pointsXY.count >= 3 else { return true }
         var sign = 0.0

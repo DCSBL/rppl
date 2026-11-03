@@ -2,9 +2,9 @@ import RpplCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Debug: the parks to review for masts, the request that lists them and the results to share.
-struct MastReviewView: View {
-    private var store: MastReviewStore { .shared }
+/// Debug: the parks to review for towers, the request that lists them and the results to share.
+struct TowerReviewView: View {
+    private var store: TowerReviewStore { .shared }
     private var parkStore: ParkStore { .shared }
 
     @State private var showImporter = false
@@ -51,14 +51,14 @@ struct MastReviewView: View {
             } header: {
                 Text("Results")
             } footer: {
-                Text("The results file (mast-labels.json) holds every verdict on this phone; share it again any time, the newest copy is complete.")
+                Text("The results file (tower-labels.json) holds every verdict on this phone; share it again any time, the newest copy is complete.")
             }
 
             Section("Parks") {
                 ForEach(rows) { row in
                     if let park = row.park {
                         NavigationLink {
-                            MastReviewMapView(park: park)
+                            TowerReviewMapView(park: park)
                         } label: {
                             parkRow(row)
                         }
@@ -69,7 +69,7 @@ struct MastReviewView: View {
                 }
             }
         }
-        .navigationTitle("Review masts")
+        .navigationTitle("Review towers")
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json], allowsMultipleSelection: false) { result in
             do {
@@ -86,13 +86,13 @@ struct MastReviewView: View {
         }
     }
 
-    private var rows: [MastReviewStore.Row] { store.rows(entries: parkStore.entries) }
+    private var rows: [TowerReviewStore.Row] { store.rows(entries: parkStore.entries) }
 
-    private func parkRow(_ row: MastReviewStore.Row) -> some View {
-        let masts = store.labels.count(.mast, in: row.id)
-        let none = store.labels.count(.notMast, in: row.id)
+    private func parkRow(_ row: TowerReviewStore.Row) -> some View {
+        let towers = store.labels.count(.tower, in: row.id)
+        let none = store.labels.count(.notTower, in: row.id)
         let unsure = store.labels.count(.unsure, in: row.id)
-        let reviewed = masts + none + unsure > 0
+        let reviewed = towers + none + unsure > 0
         return HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.name)
@@ -104,10 +104,10 @@ struct MastReviewView: View {
             }
             Spacer()
             if reviewed {
-                Text("\(masts) · \(none) · \(unsure)")
+                Text("\(towers) · \(none) · \(unsure)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel(Text("\(masts) masts, \(none) no mast, \(unsure) unsure"))
+                    .accessibilityLabel(Text("\(towers) towers, \(none) no tower, \(unsure) unsure"))
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
             }
         }

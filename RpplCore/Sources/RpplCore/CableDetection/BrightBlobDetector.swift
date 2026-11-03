@@ -1,6 +1,6 @@
 import Foundation
 
-/// A small bright object floating on the water: obstacle, mast platform, buoy or boat.
+/// A small bright object floating on the water: obstacle, tower platform, buoy or boat.
 public struct FloatingObject: Sendable, Equatable {
     /// Local metres (x east, y north).
     public var xy: SIMD2<Double>

@@ -1,5 +1,5 @@
-"""Writes the trained mast net as the binary resource RpplCore loads (MastNet.weights) and prints
-reference logits for the Swift unit test. Usage: export_mastnet.py <params.npz> <out.weights>"""
+"""Writes the trained tower net as the binary resource RpplCore loads (TowerNet.weights) and prints
+reference logits for the Swift unit test. Usage: export_towernet.py <params.npz> <out.weights>"""
 from __future__ import annotations
 
 import struct
@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cabledetect.masttrain import LAYERS, forward  # noqa: E402
+from cabledetect.towertrain import LAYERS, forward  # noqa: E402
 
 
 def synthetic_patch(size: int = 64) -> np.ndarray:
