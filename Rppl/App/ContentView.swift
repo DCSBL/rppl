@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
     @State private var liveSession = LiveSessionController.shared
+    @State private var watchLive = WatchLiveController.shared
     @State private var showICloudImport = false
     @State private var isManualICloudImport = false
     @State private var manualImportSummaries: [RemoteSessionSummary] = []
@@ -58,10 +59,14 @@ struct ContentView: View {
         }
         .tint(Color.rpplAccent)
         .sheet(isPresented: $liveSession.showsScreen) {
-            LiveSessionView { sessionId in
-                logbookNavigation.openSessionId = sessionId
-                logbookNavigation.highlightSessionId = sessionId
-                selectedTab = .logbook
+            if liveSession.session == nil, let snapshot = watchLive.snapshot {
+                WatchLiveSessionView(snapshot: snapshot)
+            } else {
+                LiveSessionView { sessionId in
+                    logbookNavigation.openSessionId = sessionId
+                    logbookNavigation.highlightSessionId = sessionId
+                    selectedTab = .logbook
+                }
             }
         }
         .alert("Is your session still running?", isPresented: $liveSession.asksToContinue) {
@@ -107,6 +112,8 @@ struct ContentView: View {
                 case .live:
                     if liveSession.session != nil {
                         liveSession.stopRequested = true
+                        liveSession.showsScreen = true
+                    } else if watchLive.snapshot != nil {
                         liveSession.showsScreen = true
                     }
                 case .debug:

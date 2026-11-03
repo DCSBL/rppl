@@ -34,6 +34,7 @@ struct RpplApp: App {
         _ = PhoneConnectivityService.shared
         // Loads a stored live session and hooks up the Live Activity's Next set button.
         _ = LiveSessionController.shared
+        WatchLiveController.shared.register()
         ParkDataBackgroundRefresh.register()
         if UITestFixtures.isActive {
             UITestFixtures.seed()

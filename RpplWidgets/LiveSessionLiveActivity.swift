@@ -33,7 +33,11 @@ struct LiveSessionLiveActivity: Widget {
                         .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Buttons(state: context.state)
+                    if let watch = context.state.watch {
+                        WatchNumbersView(state: context.state, watch: watch)
+                    } else {
+                        Buttons(state: context.state)
+                    }
                 }
             } compactLeading: {
                 Label("\(context.state.setCount)", systemImage: "flag.checkered")
@@ -46,7 +50,7 @@ struct LiveSessionLiveActivity: Widget {
             } minimal: {
                 Image(systemName: "flag.checkered").foregroundStyle(Color("RpplMetricSets"))
             }
-            .widgetURL(URL(string: "rppl://logbook"))
+            .widgetURL(URL(string: "rppl://live"))
         }
     }
 }
@@ -58,7 +62,7 @@ private struct LockScreenView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(attributes.parkName ?? String(localized: "Session")).font(.subheadline.bold())
+                Text(attributes.parkName ?? String(localized: state.watch == nil ? "Session" : "Apple Watch")).font(.subheadline.bold())
                 Spacer()
                 StopwatchText(since: attributes.startedAt)
                     .font(.subheadline.monospacedDigit())
@@ -66,7 +70,9 @@ private struct LockScreenView: View {
                     .multilineTextAlignment(.trailing)
                     .frame(maxWidth: 90, alignment: .trailing)
             }
-            if !state.timeOnly {
+            if let watch = state.watch {
+                WatchNumbersView(state: state, watch: watch)
+            } else if !state.timeOnly {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading) {
                         Text(state.setCount == 0 ? "No set yet" : "Set \(state.setCount)")
@@ -81,7 +87,30 @@ private struct LockScreenView: View {
                     Spacer()
                 }
             }
-            Buttons(state: state)
+            if state.watch == nil { Buttons(state: state) }
+        }
+    }
+}
+
+/// Sets, speed, heart rate, water and laps of a session the Watch records. Nothing to press here.
+private struct WatchNumbersView: View {
+    let state: LiveSessionActivityAttributes.ContentState
+    let watch: LiveSessionActivityAttributes.ContentState.WatchNumbers
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
+            number("\(state.setCount)", label: "Sets")
+            number(watch.speedKmh.map { "\(Int($0.rounded()))" } ?? "-", label: "km/h")
+            number(watch.heartRate.map { "\(Int($0.rounded()))" } ?? "-", label: "bpm")
+            number(watch.waterCelsius.map { "\(Int($0.rounded()))°" } ?? "-", label: "Water")
+            number("\(watch.lapCount)", label: "Laps")
+        }
+    }
+
+    private func number(_ value: String, label: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading) {
+            Text(value).font(.title2.bold().monospacedDigit())
+            Text(label).font(.caption2).foregroundStyle(.secondary)
         }
     }
 }

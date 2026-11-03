@@ -29,6 +29,28 @@ enum LiveSessionActivityManager {
         }
     }
 
+    /// The Watch variant: numbers from the mirrored workout. Updates are budgeted by the system, so the
+    /// caller throttles. Grey after a minute without news.
+    static func sync(_ snapshot: WatchLiveSnapshot) {
+        let content = ActivityContent(
+            state: LiveSessionActivityAttributes.ContentState(snapshot),
+            staleDate: snapshot.sentAt.addingTimeInterval(60)
+        )
+        if let running = Activities.activities.first(where: { $0.attributes.startedAt == snapshot.startedAt }) {
+            Task { await running.update(content) }
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        do {
+            _ = try Activities.request(
+                attributes: LiveSessionActivityAttributes(startedAt: snapshot.startedAt, parkName: nil),
+                content: content
+            )
+        } catch {
+            WakeLog.debug(.ui, "live activity request (watch): \(error.localizedDescription)")
+        }
+    }
+
     static func end() {
         for activity in Activities.activities {
             Task { await activity.end(nil, dismissalPolicy: .immediate) }

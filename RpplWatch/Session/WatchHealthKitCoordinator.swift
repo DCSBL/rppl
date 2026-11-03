@@ -402,6 +402,7 @@ extension WatchSessionController {
         // Session starts inactive: keep HR/basal streaming; set-scoped metrics off until riding.
         setRideMetricsCollection(enabled: false)
         WakeLog.debug(.workout, "HK collection began (inactive — set metrics gated)")
+        WatchLiveMirror.shared.begin(session, controller: self)
     }
 
     func finishAndSaveWorkout(endingAt endDate: Date = Date()) async {
