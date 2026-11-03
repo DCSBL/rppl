@@ -1,5 +1,19 @@
 # Results: loop proposal vs hand trace
 
+## With 15 parks of tower labels (2026-11-03, late)
+
+15 untraced German parks reviewed on the phone (76 towers, 309 rejected guesses) joined the 32
+traced parks. A retrain on all of it (same recipe, trained on the user's Mac) is **not shipped**:
+
+- Held-out tower scores: AUC 0.925, 85% of towers found, 13% of rejected guesses still above 0.5.
+- Loop fit on the 35 traced targets at threshold 0.7: median IoU 0.72, 18 >= 0.7, median bend error
+  33 m, against 0.75, 22 and 21.5 m for the shipped 32-park net.
+- With six of the labelled parks alone, leaving each out in turn, the labels raised the AUC on that
+  park from 0.88 to 0.90 on average: they help on parks like the labelled ones, not yet on the loops.
+
+More labels, especially "No tower" on boats and shore clutter, are the next step; rerun with
+`train_round.py` and compare against these numbers.
+
 ## Retrained on 32 parks (2026-11-03, evening)
 
 Seven hand-traced Belgian and German parks joined the set (34 rows, 32 traced parks, 35 loop targets with
