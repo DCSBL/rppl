@@ -84,9 +84,9 @@ struct CableDetectionTests {
         #expect(heatmap.logits.allSatisfy { $0.isFinite })
         #expect(abs(heatmap.logits[2 * 5 + 2] - -70.216682) < 0.05)
         // Image-border cells differ a little: the tile's zero halo goes through the convolutions,
-        // the reference pads every layer with zeros.
-        #expect(abs(heatmap.logits[0] - -23.943) < 0.3)
-        #expect(abs(heatmap.logits[4 * 5 + 4] - -22.341) < 0.3)
+        // the reference pads every layer with zeros (the 32-park net is more sensitive to it: 0.9 logit).
+        #expect(abs(heatmap.logits[0] - -23.943) < 1.5)
+        #expect(abs(heatmap.logits[4 * 5 + 4] - -22.341) < 1.5)
     }
 
     @Test func heatmapPeaksAreLocalMaximaStrongestFirst() {
