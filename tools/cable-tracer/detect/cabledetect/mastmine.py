@@ -25,14 +25,15 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
     rng = np.random.default_rng(3)
     added = 0
     for example in dataset.load(root):
-        if not example.detail or not example.loops or example.park_id not in models:
+        if not example.detail or not len(example.mast_positions_xy) or example.park_id not in models:
             continue
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
         w = water.water_mask(rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
         logits = mastheat.dense_logits(models[example.park_id], rgb)
-        bends = np.concatenate([example.to_pixels(snapshot, loop.points_xy) for loop in example.loops])
+        # A peak near a traced bend, a confirmed mast or an unsure detection is not a false peak.
+        bends = np.concatenate([example.to_pixels(snapshot, example.mast_positions_xy), example.to_pixels(snapshot, example.masts_xy("unsure"))])
         mpp = snapshot.meters_per_pixel
         candidates = []
         for row, col, prob in mastheat.mast_peaks(logits, float(np.log(probability / (1 - probability)))):

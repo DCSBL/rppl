@@ -1,10 +1,12 @@
 version: 1
 id: wakebeach-257-dormagen
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand (dock pin moved to the start)
 
 name: Wakebeach 257 Dormagen
 short_name: Wakebeach 257
@@ -16,8 +18,8 @@ address: "Am Straberger See 16, 41542 Dormagen"
 timezone: Europe/Berlin
 # Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.102936
-  lon: 6.771495
+  lat: 51.102967
+  lon: 6.773091
 
 email: "info@wakebeach.de"
 website: https://wakebeach.de
@@ -25,6 +27,21 @@ wakesys: true
 links:
   - kind: booking
     url: "https://wakebeach-257.wakesys.com/browser"
+
+cables:
+  - name: Cable
+    direction: ccw
+    points:
+      - lat: 51.102901
+        lon: 6.773342
+      - lat: 51.101491
+        lon: 6.772372
+      - lat: 51.10107
+        lon: 6.772871
+      - lat: 51.101158
+        lon: 6.77378
+      - lat: 51.102615
+        lon: 6.774539
 
 opening:
   source_url: "https://wakebeach.de/oeffnungszeiten/"

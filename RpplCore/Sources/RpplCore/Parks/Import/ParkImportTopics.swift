@@ -6,6 +6,13 @@ public enum ParkImportTopic: String, CaseIterable, Sendable {
     case prices
     case contact
     case facilities
+    /// Read by code (`ParkOpeningReader`), never by the model.
+    case opening
+    /// Read by code (`ParkEventReader`), never by the model.
+    case events
+
+    /// The topics the model is asked about.
+    public static let modelTopics: [ParkImportTopic] = [.prices, .contact, .facilities]
 
     /// Lowercase words (Dutch, German, English, French) that mark a heading, link or address as this topic.
     var keywords: [String] {
@@ -17,6 +24,12 @@ public enum ParkImportTopic: String, CaseIterable, Sendable {
             ["contact", "kontakt", "bereikbaar", "anschrift", "address", "anfahrt", "route", "find us"]
         case .facilities:
             ["faciliteiten", "voorzieningen", "facilities", "ausstattung", "einrichtungen", "équipements", "amenities"]
+        case .opening:
+            ["openingstij", "geopend", "öffnungszeit", "oeffnungszeit", "opening hours", "opening-hours", "opening times",
+             "horaires", "wanneer open", "hours"]
+        case .events:
+            ["agenda", "evenement", "event", "veranstaltung", "kalender", "calendar", "activiteit", "nieuws", "news",
+             "actueel", "aktuell", "wedstrijd", "competition"]
         }
     }
 
@@ -53,11 +66,15 @@ public enum ParkImportChunker {
             result.insert(.contact)
         }
         if ParkImportTopic.facilities.matches(block.heading) { result.insert(.facilities) }
+        if ParkImportTopic.opening.matches(block.heading) || ParkImportTopic.opening.matches(block.text)
+            && !ParkOpeningReader.timeRanges(in: block.text).isEmpty {
+            result.insert(.opening)
+        }
         return result
     }
 
     /// Sorts what the pages say into chunks per topic, in page order.
-    public static func chunks(for pages: [ParkSourcePage], topics: [ParkImportTopic] = ParkImportTopic.allCases) -> [ParkImportChunk] {
+    public static func chunks(for pages: [ParkSourcePage], topics: [ParkImportTopic] = ParkImportTopic.modelTopics) -> [ParkImportChunk] {
         var result: [ParkImportChunk] = []
         for topic in topics {
             var pieces: [String] = []
@@ -104,9 +121,6 @@ public enum ParkImportChunker {
 
 /// Finds the pages of the same site that probably hold what a page did not. Never leaves the site.
 public enum ParkImportCrawler {
-    /// Pages read in one import, the first one included.
-    public static let maxPages = 4
-
     private static let skippedSuffixes = [
         ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".pdf", ".zip", ".mp4", ".mp3", ".css", ".js", ".ics",
     ]

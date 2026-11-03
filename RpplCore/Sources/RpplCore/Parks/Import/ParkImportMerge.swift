@@ -3,7 +3,7 @@ import Foundation
 /// The park fields the import can propose. A closed list on purpose: opening hours, cables and the
 /// location stay manual.
 public enum ParkImportField: String, CaseIterable, Sendable {
-    case phone, email, website, address, links, prices, facilities
+    case phone, email, website, address, links, prices, facilities, opening, events
 }
 
 /// A price as the model read it, with the words it says it read it from.
@@ -26,8 +26,29 @@ public struct ParkImportCandidates: Equatable, Sendable {
     public var links: [ParkLink] = []
     public var prices: [ParkImportPrice] = []
     public var facilities: [String] = []
+    /// Opening hours read by code. Never from the model.
+    public var opening: ParkOpeningFinding?
+    /// Lines about opening hours that gave no rule, kept as a note.
+    public var openingNote: String?
+    /// Dated events and closures read by code. Never from the model.
+    public var events: [ParkEventFinding] = []
 
     public init() {}
+
+    /// The fields that have something in them, for showing what a page added.
+    public var fields: Set<ParkImportField> {
+        var result = Set<ParkImportField>()
+        if phone != nil { result.insert(.phone) }
+        if email != nil { result.insert(.email) }
+        if website != nil { result.insert(.website) }
+        if address != nil { result.insert(.address) }
+        if !links.isEmpty { result.insert(.links) }
+        if !prices.isEmpty { result.insert(.prices) }
+        if !facilities.isEmpty { result.insert(.facilities) }
+        if opening != nil || openingNote != nil { result.insert(.opening) }
+        if !events.isEmpty { result.insert(.events) }
+        return result
+    }
 
     /// What plain code can read from a page: phone, email, social links and, for a web page, the site address.
     public init(page: ParkSourcePage) {
@@ -48,6 +69,11 @@ public struct ParkImportCandidates: Equatable, Sendable {
         email = email ?? other.email
         website = website ?? other.website
         address = address ?? other.address
+        opening = opening ?? other.opening
+        openingNote = openingNote ?? other.openingNote
+        for event in other.events where !events.contains(where: { ParkEventReader.sameEvent($0.exception, event.exception) }) {
+            events.append(event)
+        }
         for link in other.links where !links.contains(where: { ParkLinkKinds.normalizedKey($0.kind) == ParkLinkKinds.normalizedKey(link.kind) }) {
             links.append(link)
         }
@@ -113,6 +139,12 @@ public struct ParkImportItem: Identifiable, Equatable, Sendable {
         case link(ParkLink)
         case price(ParkPrice)
         case facility(String)
+        /// The whole set of opening rules; a partial schedule would say something the source does not.
+        case opening(rules: [ParkOpeningRule], sourceURL: String?)
+        /// Hours the reader could not turn into rules, as the source words them.
+        case openingNote(String)
+        /// An announced event or closure, for `opening.exceptions`.
+        case event(ParkOpeningException)
     }
 
     public var id: String
@@ -121,6 +153,8 @@ public struct ParkImportItem: Identifiable, Equatable, Sendable {
     /// How the park has it now, when this replaces something; nil for an addition.
     public var previous: String?
     public var level: ParkImportGrounding.Level
+    /// What it was read from, when that helps the person judge it (the source lines of the opening hours).
+    public var detail: String? = nil
 
     /// The proposed value as one line.
     public var title: String {
@@ -131,6 +165,12 @@ public struct ParkImportItem: Identifiable, Equatable, Sendable {
             return "\(link.kind): \(link.url)"
         case .price(let price):
             return Self.summary(of: price)
+        case .opening(let rules, _):
+            return ParkOpeningReader.summary(of: rules)
+        case .openingNote(let text):
+            return text
+        case .event(let exception):
+            return ParkEventReader.summary(of: exception)
         }
     }
 
@@ -159,7 +199,7 @@ public enum ParkImportQuestion: Equatable, Sendable, Identifiable {
 
 public enum ParkImportMerge {
     /// The fields that matter enough to ask about when nothing was found.
-    static let askedFields: [ParkImportField] = [.phone, .email, .address, .prices]
+    static let askedFields: [ParkImportField] = [.phone, .email, .address, .prices, .opening]
 
     /// What would change in `park`: new values and different values. A value the park already has is left out.
     public static func items(
@@ -201,6 +241,27 @@ public enum ParkImportMerge {
                 previous: nil, level: grounding.text(facility) ? .verified : .notFound
             ))
         }
+        if let finding = candidates.opening {
+            if finding.rules != park.opening?.rules {
+                let previous = (park.opening?.rules).flatMap { rules -> String? in rules.isEmpty ? nil : ParkOpeningReader.summary(of: rules) }
+                items.append(ParkImportItem(
+                    id: "opening", field: .opening, value: .opening(rules: finding.rules, sourceURL: finding.sourceURL),
+                    previous: previous, level: .verified, detail: finding.lines.joined(separator: "\n")
+                ))
+            }
+        } else if let note = candidates.openingNote, !same(note, park.opening?.note) {
+            items.append(ParkImportItem(
+                id: "opening-note", field: .opening, value: .openingNote(note), previous: trimmed(park.opening?.note),
+                level: .verified, detail: nil
+            ))
+        }
+        let known = park.opening?.exceptions ?? []
+        for event in candidates.events where !known.contains(where: { ParkEventReader.sameEvent($0, event.exception) }) {
+            items.append(ParkImportItem(
+                id: "event-" + ParkEventReader.start(event.exception) + "-" + (event.exception.label ?? "").lowercased(),
+                field: .events, value: .event(event.exception), previous: nil, level: .verified, detail: event.line
+            ))
+        }
         return items
     }
 
@@ -225,6 +286,21 @@ public enum ParkImportMerge {
                     prices.append(price)
                 }
                 park.prices = prices
+            case .opening(let rules, let sourceURL):
+                var opening = park.opening ?? ParkOpening()
+                opening.rules = rules
+                if (opening.sourceURL ?? "").isEmpty { opening.sourceURL = sourceURL }
+                park.opening = opening
+            case .openingNote(let text):
+                var opening = park.opening ?? ParkOpening()
+                opening.note = String(text.prefix(ParkTextField.note.maxLength))
+                park.opening = opening
+            case .event(let exception):
+                var opening = park.opening ?? ParkOpening()
+                var exceptions = opening.exceptions ?? []
+                if !exceptions.contains(where: { ParkEventReader.sameEvent($0, exception) }) { exceptions.append(exception) }
+                opening.exceptions = exceptions
+                park.opening = opening
             case .facility(let text):
                 var facilities = park.facilities ?? []
                 if !facilities.contains(where: { ParkImportCandidates.sameName($0, text) }) { facilities.append(text) }
@@ -243,6 +319,7 @@ public enum ParkImportMerge {
             case .email: has = !(park.email ?? "").isEmpty
             case .address: has = !(park.address ?? "").isEmpty
             case .prices: has = !(park.prices ?? []).isEmpty
+            case .opening: has = park.opening?.hasSchedule == true
             default: has = true
             }
             return has || items.contains { $0.field == field } ? nil : .missing(field)

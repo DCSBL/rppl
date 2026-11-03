@@ -1,10 +1,12 @@
 version: 1
 id: dock79-saint-ghislain
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-03
 history:
   - date: 2026-10-25
     description: initial (full size and beginner cable, 2026 hours and prices)
+  - date: 2026-11-03
+    description: Add cable routes traced by hand (dock pin moved to the start)
 
 name: Dock79 Cable Park
 short_name: Dock79
@@ -16,8 +18,8 @@ address: Rue de la Hamaide 79, 7333 Saint-Ghislain
 timezone: Europe/Brussels
 # Geocode of the address, not a confirmed dock point.
 location:
-  lat: 50.4609828
-  lon: 3.7888121
+  lat: 50.460521
+  lon: 3.79241
 
 phone: "+32 (0)65 66 25 07"
 email: info@dock79.be
@@ -28,8 +30,26 @@ description: Le prix comprend les skis, un wakeboard débutant, un kneeboard, un
 cables:
   - name: Grand câble
     description: Cinq pylônes, pour riders dès 8 ans.
+    direction: ccw
+    points:
+      - lat: 50.460709
+        lon: 3.792386
+      - lat: 50.461211
+        lon: 3.795384
+      - lat: 50.462134
+        lon: 3.795511
+      - lat: 50.462632
+        lon: 3.793806
+      - lat: 50.461418
+        lon: 3.791924
   - name: Câble débutant
     description: Pour les débutants, avec des cours d'initiation personnalisés.
+    direction: "2.0"
+    points:
+      - lat: 50.460572
+        lon: 3.791766
+      - lat: 50.461652
+        lon: 3.791068
 
 opening:
   source_url: "https://dock79.be/en/activity/cable-park/"

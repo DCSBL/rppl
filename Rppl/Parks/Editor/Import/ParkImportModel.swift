@@ -50,11 +50,21 @@ nonisolated struct ImportedFacilities {
 
 // MARK: - The import
 
+/// One page (or screenshot) the import looked at, and what it found there.
+struct ParkImportTraceEntry: Identifiable, Equatable {
+    let id = UUID()
+    var label: String
+    var found: [ParkImportField]
+    var failed: Bool
+    /// The page was not linked anywhere; it is a usual address of the site.
+    var isGuess: Bool
+}
+
 @Observable
 final class ParkImportModel {
     enum Phase: Equatable {
         case idle
-        case fetching
+        case fetching(String)
         case recognizing
         case reading(part: Int, of: Int)
     }
@@ -67,6 +77,8 @@ final class ParkImportModel {
     private(set) var items: [ParkImportItem] = []
     private(set) var questions: [ParkImportQuestion] = []
     private(set) var notes: [Note] = []
+    /// The pages read so far, in order: what the search did.
+    private(set) var trace: [ParkImportTraceEntry] = []
     /// A source was read, so an empty list of suggestions means "nothing new" and not "nothing yet".
     private(set) var hasRead = false
     var selected: Set<String> = []
@@ -83,37 +95,54 @@ final class ParkImportModel {
 
     // MARK: Sources
 
-    /// Reads a website, and when something is still missing, the pages of the same site that look like
-    /// they hold it (prices, contact). Never more than `ParkImportCrawler.maxPages` pages.
-    func addWebsite(_ text: String) async {
+    /// Reads a website like a person would: the page given first, then the pages that should hold what is
+    /// still missing (opening hours, prices, contact), following links and, as a last resort, usual
+    /// addresses of the same site. Stops when nothing is missing, nothing is left to try, or at
+    /// `ParkImportAgent.maxPages` pages.
+    func searchWebsite(_ text: String) async {
         guard !isWorking else { return }
         guard let address = ParkText.normalizedWebAddress(text) else {
-            notes.append(.badAddress)
+            addNote(.badAddress)
             return
         }
-        defer { phase = .idle }
-        phase = .fetching
-        guard let first = await fetchPage(address) else { return }
-        await read(first)
-        var visited: Set<String> = [first.url, address]
-        while pages.count < ParkImportCrawler.maxPages {
-            let missing = missingTopics()
-            guard !missing.isEmpty,
-                  let next = ParkImportCrawler.candidates(from: first, topics: missing, visited: visited).first else { break }
-            visited.insert(next.url)
-            phase = .fetching
-            guard let page = await fetchPage(next.url) else { continue }
-            await read(page)
+        defer {
+            phase = .idle
+            refresh()
+        }
+        var visited: Set<String> = [address]
+        var guesses = 0
+        var target: ParkImportTarget? = ParkImportTarget(url: address, topic: .contact, isGuess: false)
+        while let current = target {
+            phase = .fetching(Self.label(current.url))
+            let before = candidates.fields
+            if let page = await fetchPage(current.url, quiet: current.isGuess) {
+                visited.insert(page.url)
+                await read(page)
+                let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
+                trace.append(ParkImportTraceEntry(label: Self.label(page.url), found: added, failed: false, isGuess: current.isGuess))
+            } else if !current.isGuess {
+                trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false))
+            }
+            let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park)
+            guard !missing.isEmpty else { break }
+            target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses)
+            if let next = target {
+                visited.insert(next.url)
+                if next.isGuess { guesses += 1 }
+            }
         }
     }
 
     /// Reads the text of a screenshot (an Instagram post, a page of a PDF) on the phone.
     func addScreenshot(_ image: UIImage) async {
         guard !isWorking else { return }
-        defer { phase = .idle }
+        defer {
+            phase = .idle
+            refresh()
+        }
         phase = .recognizing
         guard let cgImage = image.cgImage else {
-            notes.append(.unreadableImage)
+            addNote(.unreadableImage)
             return
         }
         let orientation = image.imageOrientation
@@ -121,10 +150,13 @@ final class ParkImportModel {
             Self.recognizeText(in: cgImage, orientation: orientation)
         }.value
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            notes.append(.unreadableImage)
+            addNote(.unreadableImage)
             return
         }
+        let before = candidates.fields
         await read(ParkSourceExtractor.extract(plainText: text, label: "screenshot"))
+        let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
+        trace.append(ParkImportTraceEntry(label: "screenshot", found: added, failed: false, isGuess: false))
     }
 
     /// Writes the chosen suggestions into the park being edited.
@@ -137,7 +169,24 @@ final class ParkImportModel {
 
     // MARK: Steps
 
-    private func fetchPage(_ address: String) async -> ParkSourcePage? {
+    private func addNote(_ note: Note) {
+        if !notes.contains(note) { notes.append(note) }
+    }
+
+    /// Today as `yyyy-MM-dd` in the park's time zone.
+    private static func today(in zone: TimeZone) -> String {
+        let parts = Calendar(identifier: .gregorian).dateComponents(in: zone, from: Date())
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 1, parts.day ?? 1)
+    }
+
+    /// The address as a short label: the path, or the host for the front page.
+    private static func label(_ address: String) -> String {
+        guard let components = URLComponents(string: address) else { return address }
+        let path = components.path
+        return path.isEmpty || path == "/" ? (components.host ?? address) : path
+    }
+
+    private func fetchPage(_ address: String, quiet: Bool) async -> ParkSourcePage? {
         do {
             guard let url = URL(string: address) else { throw URLError(.badURL) }
             var request = URLRequest(url: url, timeoutInterval: 15)
@@ -149,16 +198,21 @@ final class ParkImportModel {
             return ParkSourceExtractor.extract(html: html, url: response.url?.absoluteString ?? address)
         } catch {
             WakeLog.error(.ui, "park import fetch: \(error.localizedDescription)")
-            notes.append(.unreadablePage)
+            if !quiet { addNote(.unreadablePage) }
             return nil
         }
     }
 
-    /// Plain code first (phone, email, social links, site address), then the model, one chunk at a time.
+    /// Plain code first (phone, email, social links, opening hours), then the model, one chunk at a time.
     private func read(_ page: ParkSourcePage) async {
+        // A usual address that answers with the front page again adds nothing.
+        guard !pages.contains(where: { $0.blocks == page.blocks }) else { return }
         pages.append(page)
         hasRead = true
         candidates.merge(ParkImportCandidates(page: page))
+        candidates.opening = ParkOpeningReader.read(pages)
+        candidates.openingNote = candidates.opening == nil ? ParkOpeningReader.hoursText(pages) : nil
+        candidates.events = ParkEventReader.read(pages, today: Self.today(in: session.park.resolvedTimeZone))
         let chunks = ParkImportChunker.chunks(for: [page], topics: topicsToAsk())
         for (index, chunk) in chunks.enumerated() {
             phase = .reading(part: index + 1, of: chunks.count)
@@ -173,13 +227,6 @@ final class ParkImportModel {
         if candidates.prices.isEmpty { topics.append(.prices) }
         if candidates.address == nil { topics.append(.contact) }
         return topics
-    }
-
-    private func missingTopics() -> [ParkImportTopic] {
-        var missing: [ParkImportTopic] = []
-        if candidates.prices.isEmpty, (session.park.prices ?? []).isEmpty { missing.append(.prices) }
-        if candidates.address == nil, (session.park.address ?? "").isEmpty { missing.append(.contact) }
-        return missing
     }
 
     private func ask(_ chunk: ParkImportChunk) async {
@@ -216,10 +263,12 @@ final class ParkImportModel {
                 var extra = ParkImportCandidates()
                 extra.facilities = result.facilities.filter { !$0.isEmpty }
                 candidates.merge(extra)
+            case .opening, .events:
+                break
             }
         } catch {
             WakeLog.error(.ui, "park import model: \(error.localizedDescription)")
-            if !notes.contains(.modelSkipped) { notes.append(.modelSkipped) }
+            addNote(.modelSkipped)
         }
     }
 
