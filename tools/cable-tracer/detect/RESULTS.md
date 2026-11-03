@@ -22,6 +22,7 @@ Parks with two loops get one row per loop, the other loop given.
 
 - 26 targets: median IoU 0.77, IoU >= 0.7 for 16, 8 weak. Knokke's big loop 0.48 -> 0.61 (score 5 -> 12), Veendam 0.53 -> 0.71 with its 2.0 given.
 - Knokke's small loop stays at 0.27, flagged weak (score -1): the hull start still spans a few masts in the other basin and the refinement cannot shrink to it. Starts from the mast detections alone did not help (they broke Down Under), so that is left for the reviewer.
+- Fine polish (2026-11-03): the best three candidates get a second coordinate descent on a 2 m grid (radius 8 m). Median bend error 33 -> 28 m, 7 weak instead of 8, IoU unchanged (Zeumeren 0.80 -> 0.85).
 - 2.0 cables are not detected (decision 2026-11-02): the mast net finds the water-side 2.0 mast in 6 of 8 parks but the shore-side one almost never.
 
 | park | floating objects | mast peaks | bends found | IoU | before | mean bend error (m) | perimeter (m) | vertices | score | notes |
