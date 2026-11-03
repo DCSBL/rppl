@@ -104,6 +104,11 @@ struct ContentView: View {
                 case .logbook: selectedTab = .logbook
                 case .parks: selectedTab = .parks
                 case .about: showSettings = true
+                case .live:
+                    if liveSession.session != nil {
+                        liveSession.stopRequested = true
+                        liveSession.showsScreen = true
+                    }
                 case .debug:
                     openDebug = true
                     showSettings = true

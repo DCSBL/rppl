@@ -25,6 +25,8 @@ struct LiveSessionView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
             }
+            .onAppear(perform: takeStopRequest)
+            .onChange(of: controller.stopRequested) { takeStopRequest() }
             .onChange(of: controller.session == nil) { _, ended in if ended { dismiss() } }
             .alert("Stop session?", isPresented: $confirmStop, presenting: controller.session) { live in
                 Button("Stop session", role: .destructive) { stop() }
@@ -43,6 +45,12 @@ struct LiveSessionView: View {
                 Text(controller.errorText ?? "")
             }
         }
+    }
+
+    private func takeStopRequest() {
+        guard controller.stopRequested else { return }
+        confirmStop = true
+        controller.stopRequested = false
     }
 
     private func content(_ live: LiveSession) -> some View {

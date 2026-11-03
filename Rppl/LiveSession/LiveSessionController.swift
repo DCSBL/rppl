@@ -17,6 +17,8 @@ final class LiveSessionController {
     /// "Is your session still running?": after a relaunch, or two hours without a tap.
     var asksToContinue = false
     var errorText: String?
+    /// The Live Activity's Stop button: the running screen opens on its stop question.
+    var stopRequested = false
 
     private let file: LiveSessionFile
     private static let reminderID = "nl.dcsbl.rppl.live-session-reminder"
@@ -26,6 +28,7 @@ final class LiveSessionController {
         file = LiveSessionFile(url: base.appending(path: "live-session.json"))
         session = file.load()
         asksToContinue = session != nil
+        NextSetIntent.handler = { LiveSessionController.shared.nextSet() }
     }
 
     var park: Park? {
@@ -123,6 +126,7 @@ final class LiveSessionController {
             WakeLog.error(.store, "live session write: \(error.localizedDescription)")
         }
         scheduleReminder(at: live.stillRunningCheckAt)
+        LiveSessionActivityManager.sync(live, parkName: park?.compactName ?? live.spotName)
     }
 
     private func clear() {
@@ -130,6 +134,7 @@ final class LiveSessionController {
         showsScreen = false
         asksToContinue = false
         file.remove()
+        LiveSessionActivityManager.end()
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [Self.reminderID])
     }
 
