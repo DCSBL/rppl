@@ -8,6 +8,8 @@ public enum ParkImportTopic: String, CaseIterable, Sendable {
     case facilities
     /// Read by code (`ParkOpeningReader`), never by the model.
     case opening
+    /// Read by code (`ParkEventReader`), never by the model.
+    case events
 
     /// The topics the model is asked about.
     public static let modelTopics: [ParkImportTopic] = [.prices, .contact, .facilities]
@@ -25,6 +27,9 @@ public enum ParkImportTopic: String, CaseIterable, Sendable {
         case .opening:
             ["openingstij", "geopend", "öffnungszeit", "oeffnungszeit", "opening hours", "opening-hours", "opening times",
              "horaires", "wanneer open", "hours"]
+        case .events:
+            ["agenda", "evenement", "event", "veranstaltung", "kalender", "calendar", "activiteit", "nieuws", "news",
+             "actueel", "aktuell", "wedstrijd", "competition"]
         }
     }
 
