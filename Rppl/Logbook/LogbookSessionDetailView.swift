@@ -66,7 +66,7 @@ struct LogbookSessionDetailView: View {
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
     /// Debug fall map: peak g around each set end, by set index (needs the motion stream).
     @State private var setImpacts: [Int: Double] = [:]
-    /// Debug walking route: built from GPS when the sidecar predates walk tracks.
+    /// Debug walking and swimming: built from GPS when the sidecar predates the swum distance.
     @State private var walkData: WalkTrackData?
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -280,14 +280,12 @@ struct LogbookSessionDetailView: View {
             )
     }
 
-    /// Debug walking route: the sidecar's walks, else the ones built from GPS on load.
-    private var debugWalkTracks: [[MapCoordinate]] {
-        guard walkRouteEnabled else { return [] }
-        return sessionMapTrackData?.walkTracks ?? walkData?.tracks ?? []
-    }
-
     private var debugWalkedMeters: Double? {
         sessionStats?.walkedMeters ?? walkData?.walkedMeters
+    }
+
+    private var debugSwumMeters: Double? {
+        sessionStats?.swumMeters ?? walkData?.swumMeters
     }
 
     private var debugFallMarkers: [SessionFallMarker] {
@@ -315,7 +313,6 @@ struct LogbookSessionDetailView: View {
                     allowsInteraction: false,
                     preferredFrame: mapFrame,
                     cableOverlays: cableOverlays,
-                    walkTracks: debugWalkTracks,
                     fallMarkers: debugFallMarkers
                 )
                 .allowsHitTesting(false)
@@ -327,7 +324,6 @@ struct LogbookSessionDetailView: View {
                         title: navigationTitle,
                         preferredFrame: mapFrame,
                         cableOverlays: cableOverlays,
-                        walkTracks: debugWalkTracks,
                         fallMarkers: debugFallMarkers
                     )
                 } label: {
@@ -466,10 +462,10 @@ struct LogbookSessionDetailView: View {
                     }
                     distanceTile(stats)
                     if dockWaitEnabled, let wait = DockWaitStats.summary(sets: stats.sets) {
-                        dockWaitTile(wait)
+                        dockWaitTile(wait, gaps: DockWaitStats.gaps(sets: stats.sets))
                     }
                     if walkRouteEnabled, !isManual, let walked = debugWalkedMeters {
-                        walkedTile(walked)
+                        onFootTile(walked: walked, swum: debugSwumMeters)
                     }
                     if fallMapEnabled, !stats.sets.isEmpty {
                         fallsTile(stats)
@@ -782,42 +778,36 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    /// Debug: the typical wait between sets, a busyness indicator for the dock.
-    private func dockWaitTile(_ wait: DockWaitSummary) -> some View {
-        InfoTile("Dock wait", systemImage: "hourglass", tint: MetricKind.duration.tint) {
-            MetricValue(LogbookFormatting.compactDuration(wait.median), caption: "Typical wait")
-            StatChip(
-                metric: .duration,
-                value: "\(LogbookFormatting.compactDuration(wait.lowerQuartile)) – \(LogbookFormatting.compactDuration(wait.upperQuartile))",
-                caption: "Between sets"
-            )
+    /// Debug: the typical wait between sets, a busyness indicator for the dock. One bar per wait.
+    private func dockWaitTile(_ wait: DockWaitSummary, gaps: [TimeInterval]) -> some View {
+        InfoTile("Waiting at the dock", systemImage: "hourglass", tint: MetricKind.duration.tint) {
+            MetricValue(LogbookFormatting.dockWait(wait.median), caption: "Typical wait between sets")
+            DockWaitBars(gaps: gaps, median: wait.median, tint: MetricKind.duration.tint)
         }
     }
 
-    /// Debug: meters walked between sets (`WalkTrackBuilder`).
-    private func walkedTile(_ meters: Double) -> some View {
-        InfoTile("Walked", systemImage: "figure.walk", tint: MetricKind.inactive.tint) {
-            MetricValue(DistanceFormat.meters(meters), caption: "Walked")
+    /// Debug: meters walked between sets and an estimate of the swim back (`WalkTrackBuilder`).
+    private func onFootTile(walked: Double, swum: Double?) -> some View {
+        InfoTile("Walked & swum", systemImage: "figure.walk", tint: MetricKind.inactive.tint) {
+            MetricValue(DistanceFormat.meters(walked), caption: "Walked")
+            if let swum {
+                StatChip(metric: .water, value: "~" + DistanceFormat.meters(swum), caption: "Swum")
+            }
         }
     }
 
-    /// Debug: how many sets ended in a fall and the hardest hit (`SetImpact`, from the motion stream).
+    /// Debug: how many sets ended in a fall and the hardest hit at the wrist (`SetImpact`, from the motion stream).
     private func fallsTile(_ stats: SessionStats) -> some View {
         let falls = stats.sets.filter { SetImpact.isFall(setImpacts[$0.index]) }.count
         let hardest = setImpacts.values.max()
         return InfoTile("Falls", systemImage: "figure.fall", tint: MetricKind.energy.tint) {
             MetricValue(
-                setImpacts.isEmpty ? "-" : LogbookFormatting.countValue(falls),
-                caption: "Falls"
+                setImpacts.isEmpty ? "-" : String(localized: "\(falls) of \(stats.sets.count)"),
+                caption: "Sets that ended in a fall"
             )
             if let hardest {
-                StatChip(
-                    metric: .energy,
-                    value: "\(hardest.formatted(.number.precision(.fractionLength(1)))) g",
-                    caption: "Hardest impact"
-                )
+                StatChip(metric: .energy, value: SetImpact.label(hardest), caption: "Hardest hit at the wrist")
             }
-            StatChip(metric: .sets, value: LogbookFormatting.setCount(stats.setCount), caption: "Sets")
         }
     }
 
@@ -1060,7 +1050,7 @@ struct LogbookSessionDetailView: View {
             if wantsImpacts { setImpacts = impacts }
         }
         if UserDefaults.standard.bool(forKey: AppSettingsKey.debugWalkRoute),
-           sessionMapTrackData?.walkTracks == nil || sessionStats?.walkedMeters == nil {
+           sessionStats?.walkedMeters == nil || sessionStats?.swumMeters == nil {
             walkData = WalkTrackBuilder.build(locations: sortedLocations, sets: sets)
         }
         if sessionMapTrackData == nil {

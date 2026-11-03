@@ -23,11 +23,11 @@ enum AppSettingsKey {
     static let debugSetCharts = "rppl.debugSetCharts"
     /// Debug: show and edit set flags/labels in the logbook (default off; stored flags are kept either way).
     static let debugSetFlags = "rppl.debugSetFlags"
-    /// Debug: fall map (set ends sized by impact) on the session map and a falls tile.
+    /// Debug: fall map (fall badges and clean-exit dots with a legend) on the session map and a falls tile.
     static let debugFallMap = "rppl.debugFallMap"
     /// Debug: dock wait (time between sets) tile in the session detail.
     static let debugDockWait = "rppl.debugDockWait"
-    /// Debug: walked distance tile, walks on the session map and the averaged walking route on the park map.
+    /// Debug: walked and swum distance tile (the key predates the swim estimate).
     static let debugWalkRoute = "rppl.debugWalkRoute"
     /// Debug: add a "No cable geo" filter pill to the Parks list and map (default off).
     static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"

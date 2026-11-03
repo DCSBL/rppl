@@ -121,6 +121,7 @@ public enum SessionStatsBuilder {
 
         let highlightedSets = HighlightAssigner.assignSetHighlights(sets)
         let waterSummary = WaterTemperatureSummary.make(from: water)
+        let onFoot = WalkTrackBuilder.build(locations: sortedLocations, sets: highlightedSets)
 
         return SessionStats(
             startedAt: sessionStart,
@@ -138,7 +139,8 @@ public enum SessionStatsBuilder {
             waterTemperatureRangeCelsius: waterSummary?.range,
             waterTemperatureAvailable: manifest.waterTemperatureAvailable ?? false,
             cableSpeedKmh: sessionCableSpeedKmh,
-            walkedMeters: WalkTrackBuilder.build(locations: sortedLocations, sets: highlightedSets).walkedMeters
+            walkedMeters: onFoot.walkedMeters,
+            swumMeters: onFoot.swumMeters
         )
     }
 

@@ -71,17 +71,35 @@ struct WalkTrackBuilderTests {
         #expect(abs(data.walkedMeters - 112) < 2)
     }
 
-    @Test func statsAndMapTracksCarryTheWalk() throws {
+    @Test func slowStepsAfterASetEndAreSwimming() {
+        let sets = [set(1, from: 0, to: 100)]
+        // 60 m at 1.5 km/h starting 30 s after the set end: the swim back.
+        let swim = line(from: 130, meters: 60, kmh: 1.5)
+        let data = WalkTrackBuilder.build(locations: swim, sets: sets)
+
+        #expect(abs(data.swumMeters - 56) < 8)
+        #expect(data.walkedMeters == 0)
+    }
+
+    @Test func walkingAndFarAwayFixesAreNotSwimming() {
+        let sets = [set(1, from: 0, to: 100)]
+        let walk = line(from: 150, meters: 100, kmh: 4.5)
+        let late = line(from: 100 + WalkTrackBuilder.swimWindow + 60, meters: 60, kmh: 1.5)
+        let data = WalkTrackBuilder.build(locations: walk + late, sets: sets)
+
+        #expect(data.swumMeters == 0)
+    }
+
+    @Test func statsCarryTheWalkAndSwimWithoutMapTracks() throws {
         let sets = [set(1, from: 0, to: 100)]
         let walk = line(from: 150, meters: 100, kmh: 4.5)
         let map = SessionMapTrackBuilder.build(locations: line(from: 0, meters: 300, kmh: 30) + walk, sets: sets)
-        #expect(map?.walkTracks?.count == 1)
-
         let encoded = try JSONEncoder().encode(try #require(map))
         let decoded = try JSONDecoder().decode(SessionMapTrackData.self, from: encoded)
-        #expect(decoded.walkTracks?.count == 1)
+        #expect(decoded == map)
 
-        let legacy = Data(#"{"start":{"latitude":52,"longitude":5},"heatmapTracks":[]}"#.utf8)
-        #expect(try JSONDecoder().decode(SessionMapTrackData.self, from: legacy).walkTracks == nil)
+        // A sidecar written while the map still carried the walk keeps decoding.
+        let withWalk = Data(#"{"start":{"latitude":52,"longitude":5},"heatmapTracks":[],"walkTracks":[]}"#.utf8)
+        #expect(try JSONDecoder().decode(SessionMapTrackData.self, from: withWalk).heatmapTracks.isEmpty)
     }
 }
