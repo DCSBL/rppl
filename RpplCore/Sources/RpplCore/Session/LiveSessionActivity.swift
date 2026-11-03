@@ -13,11 +13,31 @@ public struct LiveSessionActivityAttributes: ActivityAttributes {
         public var setStartedAt: Date?
         /// Time-only sessions have no sets and no Next set button.
         public var timeOnly: Bool
+        /// A session recorded on the Apple Watch: more numbers, no Next set button.
+        public var watch: WatchNumbers?
 
-        public init(setCount: Int, setStartedAt: Date?, timeOnly: Bool) {
+        public struct WatchNumbers: Codable, Hashable, Sendable {
+            public var speedKmh: Double?
+            public var heartRate: Double?
+            public var waterCelsius: Double?
+            public var lapCount: Int
+        }
+
+        public init(setCount: Int, setStartedAt: Date?, timeOnly: Bool, watch: WatchNumbers? = nil) {
             self.setCount = setCount
             self.setStartedAt = setStartedAt
             self.timeOnly = timeOnly
+            self.watch = watch
+        }
+
+        public init(_ snapshot: WatchLiveSnapshot) {
+            self.init(
+                setCount: snapshot.setCount, setStartedAt: snapshot.setStartedAt, timeOnly: false,
+                watch: WatchNumbers(
+                    speedKmh: snapshot.speedKmh, heartRate: snapshot.heartRate,
+                    waterCelsius: snapshot.waterCelsius, lapCount: snapshot.lapCount
+                )
+            )
         }
 
         public init(_ session: LiveSession) {
