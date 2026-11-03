@@ -20,11 +20,34 @@ public struct ManualEntry: Codable, Equatable, Sendable {
     public var distanceM: Double?
     /// Park pin or picked spot. Centers the derived map frame, so park matching and visits work.
     public var location: ParkCoordinate?
+    /// When each set began, for a session tracked live on the iPhone ("next set" taps). Nil for a session
+    /// typed in afterwards. The tallies still hold the counts; whoever edits a count drops this list.
+    public var setStarts: [Date]?
 
-    public init(tallies: [Tally] = [Tally()], distanceM: Double? = nil, location: ParkCoordinate? = nil) {
+    public init(
+        tallies: [Tally] = [Tally()], distanceM: Double? = nil, location: ParkCoordinate? = nil,
+        setStarts: [Date]? = nil
+    ) {
         self.tallies = tallies
         self.distanceM = distanceM
         self.location = location
+        self.setStarts = setStarts
+    }
+
+    public struct TimedSet: Equatable, Sendable {
+        public var index: Int
+        public var start: Date
+        public var end: Date
+        public var duration: TimeInterval { max(0, end.timeIntervalSince(start)) }
+    }
+
+    /// Sets with their duration: from one tap to the next, the last until `sessionEnd`. Index starts at 1.
+    /// Out-of-order starts are sorted; a start after `sessionEnd` is dropped.
+    public func timedSets(sessionEnd: Date) -> [TimedSet] {
+        let starts = (setStarts ?? []).filter { $0 <= sessionEnd }.sorted()
+        return starts.enumerated().map { offset, start in
+            TimedSet(index: offset + 1, start: start, end: offset + 1 < starts.count ? starts[offset + 1] : sessionEnd)
+        }
     }
 
     /// Sum of the known sets; nil when no cable has a known value.

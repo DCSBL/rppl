@@ -15,6 +15,7 @@ struct RpplApp: App {
                 Task { @MainActor in await ParkDataBackgroundRefresh.updateSchedule() }
             }
             if phase == .active, !UITestFixtures.isActive {
+                LiveSessionController.shared.checkStillRunning()
                 PhoneConnectivityService.shared.refreshSyncState()
                 PhoneConnectivityService.shared.flushPendingAcks()
                 Task { @MainActor in
@@ -31,6 +32,8 @@ struct RpplApp: App {
         _ = TesterIdentity.resolve()
         // .shared's own init() already calls activate(); don't double-activate WCSession here.
         _ = PhoneConnectivityService.shared
+        // Loads a stored live session and hooks up the Live Activity's Next set button.
+        _ = LiveSessionController.shared
         ParkDataBackgroundRefresh.register()
         if UITestFixtures.isActive {
             UITestFixtures.seed()

@@ -141,6 +141,31 @@ struct ManualEntryTests {
         #expect(SessionManifest(testerId: "t", appVersion: "1", buildNumber: "1", watchModel: "W", systemVersion: "26").mirrorsToWatch)
     }
 
+    @Test func timedSetsRunFromTapToTapAndTheLastToSessionEnd() {
+        let end = t0.addingTimeInterval(900)
+        let entry = ManualEntry(setStarts: [t0.addingTimeInterval(400), t0, t0.addingTimeInterval(1_000)])
+        let sets = entry.timedSets(sessionEnd: end)
+        #expect(sets.map(\.index) == [1, 2])
+        #expect(sets.map(\.duration) == [400, 500])
+        #expect(sets[1].end == end)
+        #expect(ManualEntry().timedSets(sessionEnd: end).isEmpty)
+    }
+
+    @Test func setStartsRoundTripAndLeaveTheCountsAlone() throws {
+        let (store, root) = makeStore()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let entry = ManualEntry(tallies: [.init(sets: 2)], setStarts: [t0, t0.addingTimeInterval(600)])
+        let m = manifest(entry: entry)
+        try store.saveManual(m, label: nil)
+        #expect(try store.readManifest(sessionId: m.sessionId).manual == entry)
+        #expect(try store.ensureDerivedView(sessionId: m.sessionId).stats.setCount == 2)
+
+        var untimed = m
+        untimed.manual = ManualEntry(tallies: [.init(sets: 2)])
+        let json = try JSONEncoder().encode(untimed)
+        #expect(String(bytes: json, encoding: .utf8)?.contains("setStarts") == false)
+    }
+
     @Test("Reversed and long ranges")
     func timeRangeRules() {
         #expect(ManualTimeRange.isReversed(start: t0.addingTimeInterval(1), end: t0))

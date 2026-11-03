@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var iCloud = PhoneICloudDriveController.shared
     @State private var connectivity = PhoneConnectivityService.shared
+    @State private var liveSession = LiveSessionController.shared
     @State private var showICloudImport = false
     @State private var isManualICloudImport = false
     @State private var manualImportSummaries: [RemoteSessionSummary] = []
@@ -56,6 +57,29 @@ struct ContentView: View {
             .presentationSizing(.form)
         }
         .tint(Color.rpplAccent)
+        .sheet(isPresented: $liveSession.showsScreen) {
+            LiveSessionView { sessionId in
+                logbookNavigation.openSessionId = sessionId
+                logbookNavigation.highlightSessionId = sessionId
+                selectedTab = .logbook
+            }
+        }
+        .alert("Is your session still running?", isPresented: $liveSession.asksToContinue) {
+            Button("Keep going", role: .cancel) { liveSession.keepGoing() }
+            Button("End session", role: .destructive) {
+                Task {
+                    if let id = await liveSession.finishAtLastActivity() {
+                        logbookNavigation.openSessionId = id
+                        logbookNavigation.highlightSessionId = id
+                        selectedTab = .logbook
+                    }
+                }
+            }
+        } message: {
+            if let live = liveSession.session {
+                Text("It started at \(live.startedAt.formatted(date: .omitted, time: .shortened)). Ending it uses the last activity, \(live.lastActivityAt.formatted(date: .omitted, time: .shortened)), as its end.")
+            }
+        }
         // Bug reports from a Duo or iPad say which layout was active; logs only when the layout changes.
         .onGeometryChange(for: WindowLayout.self) {
             WindowLayout.resolve(
@@ -80,6 +104,11 @@ struct ContentView: View {
                 case .logbook: selectedTab = .logbook
                 case .parks: selectedTab = .parks
                 case .about: showSettings = true
+                case .live:
+                    if liveSession.session != nil {
+                        liveSession.stopRequested = true
+                        liveSession.showsScreen = true
+                    }
                 case .debug:
                     openDebug = true
                     showSettings = true
