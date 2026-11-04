@@ -19,8 +19,7 @@ struct TowerReviewMapView: View {
     @State private var detecting = false
     @State private var detectionNote: String?
     @State private var removing: TowerLabel?
-    /// Where the ring (the map centre) and the frame's left end are, in map coordinates and on screen.
-    @State private var wheelPoint: CGPoint?
+    /// Where the frame's left end (the tower's foot) is on the map.
     @State private var foot: ParkCoordinate?
     @State private var camera: MapCamera?
 
@@ -28,7 +27,6 @@ struct TowerReviewMapView: View {
     private static let candidateDistanceM = 160.0
     /// Frame length on screen, from the ring to the foot end.
     static let frameLengthPt: CGFloat = 150
-    private static let mapSpace = "towerReviewMap"
 
     init(park: Park) {
         self.park = park
@@ -88,28 +86,24 @@ struct TowerReviewMapView: View {
                     }
                 }
             }
+            // Pinned to the map centre as an annotation, so the ring is exactly where a label is saved
+            // (an overlay drifted from the centre by the navigation bar's height). Annotations stay
+            // upright when the map rotates.
+            Annotation("", coordinate: viewCenter, anchor: .center) {
+                TowerFrame(armLengthM: arm?.lengthM)
+                    .allowsHitTesting(false)
+            }
         }
         .mapStyle(.hybrid(elevation: .flat))
         .onMapCameraChange(frequency: .continuous) { context in
             viewCenter = context.camera.centerCoordinate
             camera = context.camera
-            let wheel = proxy.convert(context.camera.centerCoordinate, to: .named(Self.mapSpace))
-            wheelPoint = wheel
-            foot = wheel
-                .flatMap { proxy.convert(CGPoint(x: $0.x - Self.frameLengthPt, y: $0.y), from: .named(Self.mapSpace)) }
+            // The foot is one frame length left of the centre on screen; both conversions use the
+            // map's own space, so the arm is right wherever the map sits in the view.
+            foot = proxy.convert(context.camera.centerCoordinate, to: .local)
+                .flatMap { proxy.convert(CGPoint(x: $0.x - Self.frameLengthPt, y: $0.y), from: .local) }
                 .map { ParkCoordinate(lat: $0.latitude, lon: $0.longitude) }
         }
-        .overlay {
-            GeometryReader { geometry in
-                let origin = geometry.frame(in: .named(Self.mapSpace)).origin
-                TowerFrame(armLengthM: arm?.lengthM)
-                    .position(wheelPoint.map { CGPoint(x: $0.x - origin.x, y: $0.y - origin.y) }
-                        ?? CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2))
-            }
-            .allowsHitTesting(false)
-        }
-        // On the map and its frame overlay alike, so both convert into the same space.
-        .coordinateSpace(.named(Self.mapSpace))
         .overlay(alignment: .top) {
             if detecting {
                 ProgressView("Looking for towers…")
