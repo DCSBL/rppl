@@ -73,6 +73,14 @@ It ends with the held-out tower scores (AUC, towers found, rejected guesses stil
 the loop-fit summary line; compare those with `RESULTS.md` before exporting the weights with
 `export_towernet.py`.
 
+`--patch 128` trains on 128 px (37 m) patches instead of 64 px (19 m). At 0.29 m/px a tower's arm
+is about 15 m long on the image, so a 64 px patch often holds only the wheel, and a lone white
+dot (buoy, boat, rider) looks much the same. The 128 px net adds one conv layer without pooling,
+so its heatmap keeps the same 4.7 m cells, and the round's other steps read the patch size from the
+weights. Use another `--work` folder to compare it with a 64 px round. The app and
+`export_towernet.py` still take only 64 px nets: port the extra layer to `TowerNet.swift` only
+if the 128 px round wins on the loops.
+
 ## Training the tower net
 
 ```bash
