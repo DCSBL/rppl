@@ -3,9 +3,11 @@ import RpplCore
 import SwiftUI
 
 /// Debug: satellite map of one park. "Find towers" runs the tower detector around the map centre;
-/// the guesses come up one by one (the most confident first, then always the nearest one) under the crosshair, and each gets a
-/// verdict. Pan the crosshair onto the real tower before "Tower" to correct the position; use
-/// "Add tower here" for towers the detector missed.
+/// the guesses come up one by one (the most confident first, then always the nearest one) under the
+/// frame's ring, and each gets a verdict. The frame stays put: pan, rotate and zoom the map until the
+/// wheel sits in the ring and the tower's arm lies along the frame with its foot at the left end, then
+/// tap "Tower". Rotation and zoom are kept between guesses, so the next tower mostly needs a pan.
+/// "Add tower here" and "Not visible here" cover towers the detector missed.
 struct TowerReviewMapView: View {
     let park: Park
 
@@ -17,9 +19,16 @@ struct TowerReviewMapView: View {
     @State private var detecting = false
     @State private var detectionNote: String?
     @State private var removing: TowerLabel?
+    /// Where the ring (the map centre) and the frame's left end are, in map coordinates and on screen.
+    @State private var wheelPoint: CGPoint?
+    @State private var foot: ParkCoordinate?
+    @State private var camera: MapCamera?
 
-    /// Span of the map when a candidate is shown: close enough to see a single tower.
-    private static let candidateSpanM = 90.0
+    /// Camera distance when a park opens zoomed out: close enough to see a single tower.
+    private static let candidateDistanceM = 160.0
+    /// Frame length on screen, from the ring to the foot end.
+    static let frameLengthPt: CGFloat = 150
+    private static let mapSpace = "towerReviewMap"
 
     init(park: Park) {
         self.park = park
@@ -34,8 +43,17 @@ struct TowerReviewMapView: View {
 
     private var labels: [TowerLabel] { store.labels.labels(for: park.id) }
 
+    /// The arm along the frame right now: from the ring to the frame's left end.
+    private var arm: TowerLabel.Arm? { foot.flatMap { TowerLabel.Arm(wheel: centerCoordinate, foot: $0) } }
+
     var body: some View {
-        Map(position: $position) {
+        MapReader { proxy in
+            map(proxy)
+        }
+    }
+
+    private func map(_ proxy: MapProxy) -> some View {
+        Map(position: $position, interactionModes: [.pan, .zoom, .rotate]) {
             ForEach(Array((park.cables ?? []).enumerated()), id: \.offset) { _, cable in
                 if let line = cable.points?.map({ CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }), line.count >= 2 {
                     MapPolyline(coordinates: cable.direction?.isLoop == true ? line + [line[0]] : line)
@@ -74,8 +92,24 @@ struct TowerReviewMapView: View {
         .mapStyle(.hybrid(elevation: .flat))
         .onMapCameraChange(frequency: .continuous) { context in
             viewCenter = context.camera.centerCoordinate
+            camera = context.camera
+            let wheel = proxy.convert(context.camera.centerCoordinate, to: .named(Self.mapSpace))
+            wheelPoint = wheel
+            foot = wheel
+                .flatMap { proxy.convert(CGPoint(x: $0.x - Self.frameLengthPt, y: $0.y), from: .named(Self.mapSpace)) }
+                .map { ParkCoordinate(lat: $0.latitude, lon: $0.longitude) }
         }
-        .overlay { MapCrosshair() }
+        .overlay {
+            GeometryReader { geometry in
+                let origin = geometry.frame(in: .named(Self.mapSpace)).origin
+                TowerFrame(armLengthM: arm?.lengthM)
+                    .position(wheelPoint.map { CGPoint(x: $0.x - origin.x, y: $0.y - origin.y) }
+                        ?? CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2))
+            }
+            .allowsHitTesting(false)
+        }
+        // On the map and its frame overlay alike, so both convert into the same space.
+        .coordinateSpace(.named(Self.mapSpace))
         .overlay(alignment: .top) {
             if detecting {
                 ProgressView("Looking for towers…")
@@ -129,9 +163,10 @@ struct TowerReviewMapView: View {
                         if let next = self.session?.current { fly(to: next.coordinate) }
                     }
                 }
+                verdictButton("Tower fits the frame", color: .green) { judge(.tower) }
                 HStack(spacing: 8) {
-                    verdictButton("Tower", color: .green) { judge(.tower) }
                     verdictButton("No tower", color: .red) { judge(.notTower) }
+                    verdictButton("Not visible", color: .cyan) { judge(.notVisible) }
                     verdictButton("Unsure", color: .gray) { judge(.unsure) }
                 }
             } else {
@@ -146,11 +181,19 @@ struct TowerReviewMapView: View {
                     .disabled(detecting)
                 }
             }
-            Button {
-                store.add(TowerReviewSession.manualTower(at: centerCoordinate), to: park.id)
-            } label: {
-                Label("Add tower here", systemImage: "plus.circle")
-                    .frame(maxWidth: .infinity)
+            HStack(spacing: 8) {
+                Button {
+                    store.add(TowerReviewSession.manualTower(at: centerCoordinate, arm: arm), to: park.id)
+                } label: {
+                    Label("Add tower here", systemImage: "plus.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                Button {
+                    store.add(TowerReviewSession.manualNotVisible(at: centerCoordinate), to: park.id)
+                } label: {
+                    Label("Not visible here", systemImage: "eye.slash")
+                        .frame(maxWidth: .infinity)
+                }
             }
             .buttonStyle(.bordered)
             .tint(Color.rpplAccent)
@@ -170,8 +213,9 @@ struct TowerReviewMapView: View {
     private var summary: String {
         let towers = store.labels.count(.tower, in: park.id)
         let none = store.labels.count(.notTower, in: park.id)
+        let hidden = store.labels.count(.notVisible, in: park.id)
         let unsure = store.labels.count(.unsure, in: park.id)
-        return "\(towers) towers · \(none) no tower · \(unsure) unsure"
+        return "\(towers) towers · \(none) no tower · \(hidden) not visible · \(unsure) unsure"
     }
 
     // MARK: Actions
@@ -205,14 +249,17 @@ struct TowerReviewMapView: View {
     }
 
     private func judge(_ verdict: TowerLabel.Verdict) {
-        guard let label = session?.judge(verdict, crosshair: centerCoordinate) else { return }
+        guard let label = session?.judge(verdict, crosshair: centerCoordinate, arm: arm) else { return }
         store.add(label, to: park.id)
         if let next = session?.current { fly(to: next.coordinate) }
     }
 
+    /// Puts the guess under the ring, keeping the reviewer's rotation and zoom once they are close in.
     private func fly(to coordinate: ParkCoordinate) {
+        // Still zoomed out from opening the park: come down to tower level.
+        let distance = camera.map { $0.distance > Self.candidateDistanceM * 2 ? Self.candidateDistanceM : $0.distance } ?? Self.candidateDistanceM
         withAnimation {
-            position = .region(MKCoordinateRegion(center: mapCoordinate(coordinate), latitudinalMeters: Self.candidateSpanM, longitudinalMeters: Self.candidateSpanM))
+            position = .camera(MapCamera(centerCoordinate: mapCoordinate(coordinate), distance: distance, heading: camera?.heading ?? 0, pitch: 0))
         }
     }
 
@@ -234,6 +281,7 @@ struct TowerReviewMapView: View {
         switch verdict {
         case .tower: .green
         case .notTower: .red
+        case .notVisible: .cyan
         case .unsure: .gray
         }
     }
@@ -242,7 +290,43 @@ struct TowerReviewMapView: View {
         switch verdict {
         case .tower: String(localized: "Tower")
         case .notTower: String(localized: "No tower")
+        case .notVisible: String(localized: "Not visible")
         case .unsure: String(localized: "Unsure")
         }
+    }
+}
+
+/// The fixed review frame: the ring for the wheel at the centre (where the frame is positioned) and
+/// the frame running left to the tower's foot, with the arm length it spans on the map right now.
+private struct TowerFrame: View {
+    let armLengthM: Double?
+
+    private let length = TowerReviewMapView.frameLengthPt
+    private let margin: CGFloat = 14
+    private let height: CGFloat = 32
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(Color.yellow, lineWidth: 2)
+                .frame(width: length + margin, height: height)
+                .offset(x: (margin - length) / 2)
+            Circle()
+                .strokeBorder(Color.yellow, lineWidth: 2)
+                .frame(width: 14, height: 14)
+            Rectangle()
+                .fill(Color.yellow)
+                .frame(width: 8, height: 2)
+                .offset(x: -length + 4)
+            if let armLengthM {
+                Text("\(Int(armLengthM.rounded())) m")
+                    .font(.caption2.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.yellow)
+                    .offset(x: -length / 2, y: height / 2 + 10)
+            }
+        }
+        .shadow(color: .black.opacity(0.6), radius: 1.5)
+        .frame(width: 2 * length + 2 * margin, height: height + 40)
+        .accessibilityHidden(true)
     }
 }

@@ -124,4 +124,45 @@ struct TowerReviewTests {
         #expect(label?.detected == nil)
         #expect(TowerReviewSession.manualTower(at: almere).source == .manual)
     }
+
+    @Test func armRunsFromTheWheelToTheFoot() throws {
+        let south = ParkCoordinate(lat: almere.lat - 15 / 111_320, lon: almere.lon)
+        let arm = try #require(TowerLabel.Arm(wheel: almere, foot: south))
+        #expect(abs(arm.bearingDeg - 180) < 0.5)
+        #expect(abs(arm.lengthM - 15) < 0.2)
+        let west = ParkCoordinate(lat: almere.lat, lon: almere.lon - 10 / (111_320 * cos(almere.lat * .pi / 180)))
+        #expect(abs((TowerLabel.Arm(wheel: almere, foot: west)?.bearingDeg ?? 0) - 270) < 0.5)
+        #expect(TowerLabel.Arm(wheel: almere, foot: almere) == nil)
+    }
+
+    @Test func frameVerdictsKeepTheArmOnlyOnATower() throws {
+        let detected = [DetectedTower(xy: SIMD2(0, 0), probability: 0.8), DetectedTower(xy: SIMD2(0, 30), probability: 0.6), DetectedTower(xy: SIMD2(0, 60), probability: 0.5)]
+        var session = TowerReviewSession(parkID: "p", detected: detected, image: image, labels: TowerLabelStore())
+        let arm = TowerLabel.Arm(bearingDeg: 205, lengthM: 15)
+        let crosshair = image.coordinate(fromLocal: SIMD2(2, 0))
+        let tower = session.judge(.tower, crosshair: crosshair, arm: arm, reviewedAt: "2026-11-04")
+        #expect(tower?.arm == arm)
+        #expect(tower?.coordinate == crosshair)
+
+        // Not visible: saved where the reviewer says it stands, without an arm.
+        let hidden = session.judge(.notVisible, crosshair: image.coordinate(fromLocal: SIMD2(0, 36)), arm: arm, reviewedAt: "2026-11-04")
+        #expect(hidden?.verdict == .notVisible)
+        #expect(hidden?.arm == nil)
+        #expect((hidden.map { image.coordinate(fromLocal: SIMD2(0, 36)).meters(to: $0.coordinate) } ?? 99) < 0.1)
+
+        let rejected = session.judge(.notTower, crosshair: crosshair, arm: arm, reviewedAt: "2026-11-04")
+        #expect(rejected?.arm == nil)
+
+        var store = TowerLabelStore()
+        for label in [tower, hidden, rejected].compactMap({ $0 }) { store.add(label, to: "p") }
+        store.add(TowerReviewSession.manualNotVisible(at: almere, reviewedAt: "2026-11-04"), to: "p")
+        let decoded = try TowerLabelStore.decode(store.encoded())
+        #expect(decoded == store)
+        #expect(decoded.count(.notVisible, in: "p") == 2)
+        let json = try #require(try JSONSerialization.jsonObject(with: store.encoded()) as? [String: Any])
+        let parks = try #require(json["parks"] as? [String: [[String: Any]]])
+        #expect(parks["p"]?.map { $0["verdict"] as? String } == ["tower", "notVisible", "none", "notVisible"])
+        let encodedArm = try #require(parks["p"]?.first?["arm"] as? [String: Any])
+        #expect((encodedArm["bearingDeg"] as? NSNumber)?.doubleValue == 205)
+    }
 }

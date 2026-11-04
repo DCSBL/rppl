@@ -43,11 +43,17 @@ toggle "Review towers" (`Rppl/Parks/TowerReview/`), on the phone where the satel
   says which parks to do; without one the app lists every park without a traced cable. The
   request for a round is kept under `tools/cable-tracer/requests/`.
 - Per park, "Find towers" takes the same 600 m close-up as the detector and shows the guesses one
-  by one under a crosshair: the most confident first, then always the nearest remaining one
-  (threshold lowered to 30% so the doubtful ones come up). Pan the tower under the crosshair and
-  press **Tower** (saved where the crosshair is), or **No tower** / **Unsure** (saved where the
-  detector looked). "Add tower here" marks a tower the detector missed.
-  Rings: orange = current guess, green = tower, red = no tower, grey = unsure; tap a ring to remove.
+  by one under a fixed yellow frame: the most confident first, then always the nearest remaining
+  one (threshold lowered to 30% so the doubtful ones come up). Pan, rotate and zoom the map until
+  the wheel (where the cable wraps it) sits in the frame's ring and the tower's arm lies along the
+  frame with its foot at the left end, then press **Tower fits the frame**: the label is saved at
+  the ring with the arm's compass bearing and length (`arm`). Rotation and zoom stay for the next
+  guess, since every tower on one image leans the same way. **No tower** and **Unsure** are saved
+  where the detector looked; **Not visible** (a tower stands there but the imagery does not show
+  it, or a ghost copy from another imagery layer) is saved at the ring. Training cuts no negative
+  near an unsure or not-visible spot. "Add tower here" and "Not visible here" mark towers the
+  detector missed. Rings: orange = current guess, green = tower, red = no tower, cyan = not
+  visible, grey = unsure; tap a ring to remove.
 - "Share results" hands over `tower-labels.json` with every verdict on the phone. Put it at
   `tools/cable-tracer/tower-labels.json` (it is a superset of earlier shares from the same phone;
   merge by park id when several phones contribute; add a trailing newline for pre-commit) and
