@@ -177,5 +177,31 @@ struct TowerReviewTests {
         #expect(snapshot.fileStem.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" })
         let decoded = try JSONDecoder().decode(TowerReviewSnapshot.self, from: snapshot.encoded())
         #expect(decoded == snapshot)
+        #expect(decoded.labelID == nil)
+    }
+
+    @Test func closeupSnapshotNamesItsLabelAndOldFilesStillLoad() throws {
+        let id = UUID()
+        let closeup = TowerReviewSnapshot(parkID: "view-almere", image: image, labelID: id)
+        #expect(try JSONDecoder().decode(TowerReviewSnapshot.self, from: closeup.encoded()).labelID == id)
+        // Written before close-ups existed: no labelID key.
+        var old = try #require(try JSONSerialization.jsonObject(with: closeup.encoded()) as? [String: Any])
+        old["labelID"] = nil
+        let decoded = try JSONDecoder().decode(TowerReviewSnapshot.self, from: JSONSerialization.data(withJSONObject: old))
+        #expect(decoded.labelID == nil)
+    }
+
+    @Test func closeupsCoverEveryTowerAndTheHardestRejections() {
+        var store = TowerLabelStore()
+        store.add(TowerLabel(coordinate: tower, verdict: .tower, source: .detector, probability: 0.8, reviewedAt: "2026-11-04"), to: "p")
+        store.add(TowerLabel(coordinate: tower, verdict: .tower, source: .manual, reviewedAt: "2026-11-04"), to: "p")
+        for probability in [0.75, 0.95, 0.85, 0.7] {
+            store.add(TowerLabel(coordinate: almere, verdict: .notTower, source: .detector, probability: probability, reviewedAt: "2026-11-04"), to: "p")
+        }
+        store.add(TowerLabel(coordinate: almere, verdict: .notVisible, source: .manual, reviewedAt: "2026-11-04"), to: "p")
+        let picked = store.closeupLabels(in: "p", rejected: 2)
+        #expect(picked.filter { $0.verdict == .tower }.count == 2)
+        #expect(picked.filter { $0.verdict == .notTower }.compactMap(\.probability) == [0.95, 0.85])
+        #expect(!picked.contains { $0.verdict == .notVisible })
     }
 }

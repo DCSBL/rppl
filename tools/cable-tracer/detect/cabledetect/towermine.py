@@ -30,7 +30,7 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
-        w = water.water_mask(rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
+        w = water.water_for(example, snapshot, rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
         net = models[example.park_id]
         patch = towertrain.patch_of(net)
         logits = towerheat.dense_logits(net, rgb)
