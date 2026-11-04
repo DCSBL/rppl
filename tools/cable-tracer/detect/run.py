@@ -81,7 +81,7 @@ def main() -> None:
             """Water, floating objects and tower detections with the water search seeded at `seed_xy` (local metres)."""
             seed_px = example.to_pixels(snapshot, np.asarray(seed_xy, float).reshape(1, 2))[0]
             seed_rc = (int(np.clip(seed_px[1], 0, snapshot.size_px - 1)), int(np.clip(seed_px[0], 0, snapshot.size_px - 1)))
-            w = water.water_mask(rgb, seed_rc)
+            w = water.water_for(example, snapshot, rgb, seed_rc)
             blobs = features.bright_blobs(rgb, w, mpp)
             blob_px = np.array([[b.col, b.row] for b in blobs]).reshape(-1, 2)
             blob_xy = example.to_local(snapshot, blob_px) if len(blobs) else np.zeros((0, 2))

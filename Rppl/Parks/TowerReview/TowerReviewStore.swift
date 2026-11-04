@@ -6,7 +6,8 @@ import UIKit
 /// Debug: the tower verdicts collected on this phone, the request that says which parks to review,
 /// and the satellite close-ups the reviews ran on. All live in Documents/tower-review/ so a session
 /// can stop and resume. "Share results" hands over one zip with `tower-labels.json` and
-/// `snapshots/` (a JPEG plus a `TowerReviewSnapshot` JSON per look), from which
+/// `snapshots/` (a JPEG plus a `TowerReviewSnapshot` JSON per look; `maps/` the plain Apple map of
+/// each look, a water mask; `closeups/` a zoomed photo per tower label), from which
 /// `tools/cable-tracer/detect/phone_set.py` builds the training set without a Mac.
 @Observable
 @MainActor
@@ -18,6 +19,15 @@ final class TowerReviewStore {
     private(set) var lastError: String?
     /// Saved close-ups (one per "Find towers").
     private(set) var snapshotCount = 0
+    /// Saved maps and close-ups, and how far "Fetch maps and close-ups" is.
+    private(set) var mapCount = 0
+    private(set) var closeupCount = 0
+    private(set) var extrasProgress: (done: Int, total: Int)?
+
+    /// A close-up is 40 m wide at 768 px (5 cm/px): sharper than the imagery, so it shows how much
+    /// detail MapKit really has around a tower.
+    static let closeupMeters = 40.0
+    static let closeupPixels = 768
 
     /// A park to review: from the request when there is one, else every park without a traced cable.
     struct Row: Identifiable {
@@ -40,6 +50,8 @@ final class TowerReviewStore {
     private var labelsFile: URL { directory.appendingPathComponent(TowerLabelStore.fileName) }
     private var requestFile: URL { directory.appendingPathComponent("tower-review-request.json") }
     private var snapshotsDirectory: URL { directory.appendingPathComponent("snapshots", isDirectory: true) }
+    private var mapsDirectory: URL { snapshotsDirectory.appendingPathComponent("maps", isDirectory: true) }
+    private var closeupsDirectory: URL { snapshotsDirectory.appendingPathComponent("closeups", isDirectory: true) }
 
     private init() {
         load()
@@ -134,12 +146,104 @@ final class TowerReviewStore {
     }
 
     private func countSnapshots() {
-        let files = (try? FileManager.default.contentsOfDirectory(atPath: snapshotsDirectory.path)) ?? []
-        snapshotCount = files.filter { $0.hasSuffix(".jpg") }.count
+        func count(_ folder: URL, _ suffix: String) -> Int {
+            ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []).filter { $0.hasSuffix(suffix) }.count
+        }
+        snapshotCount = count(snapshotsDirectory, ".jpg")
+        mapCount = count(mapsDirectory, ".png")
+        closeupCount = count(closeupsDirectory, ".jpg")
+    }
+
+    /// Looks and labels still without a map or a close-up.
+    var missingExtras: Int {
+        missingMaps().count + missingCloseups().count
+    }
+
+    private func savedLooks() -> [TowerReviewSnapshot] {
+        let files = (try? FileManager.default.contentsOfDirectory(at: snapshotsDirectory, includingPropertiesForKeys: nil)) ?? []
+        return files
+            .filter { $0.pathExtension == "json" }
+            .compactMap { try? JSONDecoder().decode(TowerReviewSnapshot.self, from: Data(contentsOf: $0)) }
+    }
+
+    private func missingMaps() -> [TowerReviewSnapshot] {
+        savedLooks().filter { !FileManager.default.fileExists(atPath: mapsDirectory.appendingPathComponent($0.fileStem + ".png").path) }
+    }
+
+    private func closeupStem(_ label: TowerLabel, in parkID: String) -> String {
+        "\(parkID)-\(label.id.uuidString.lowercased())"
+    }
+
+    private func missingCloseups() -> [(parkID: String, label: TowerLabel)] {
+        labels.reviewedParkIDs.sorted().flatMap { parkID in
+            labels.closeupLabels(in: parkID)
+                .filter { !FileManager.default.fileExists(atPath: closeupsDirectory.appendingPathComponent(closeupStem($0, in: parkID) + ".jpg").path) }
+                .map { (parkID: parkID, label: $0) }
+        }
+    }
+
+    /// Fetches the plain map of every saved look (its water is the mask the detector should
+    /// find) and a zoomed close-up of every tower label and the hardest rejected guesses.
+    /// Runs one snapshot at a time; what is done stays done when it stops halfway.
+    func fetchExtras() async {
+        guard extrasProgress == nil else { return }
+        let maps = missingMaps()
+        let closeups = missingCloseups()
+        let total = maps.count + closeups.count
+        guard total > 0 else { return }
+        extrasProgress = (0, total)
+        defer {
+            extrasProgress = nil
+            countSnapshots()
+        }
+        do {
+            try FileManager.default.createDirectory(at: mapsDirectory, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: closeupsDirectory, withIntermediateDirectories: true)
+            var done = 0
+            for look in maps {
+                let image = try await CableDetectionRunner.snapshot(
+                    around: look.center,
+                    sideMeters: CableDetectionRunner.sideMeters,
+                    sidePixels: look.widthPx,
+                    style: .map
+                )
+                let meta = TowerReviewSnapshot(parkID: look.parkID, image: image)
+                try await write(image, meta: meta, stem: look.fileStem, to: mapsDirectory, png: true)
+                done += 1
+                extrasProgress = (done, total)
+            }
+            for (parkID, label) in closeups {
+                let image = try await CableDetectionRunner.snapshot(around: label.coordinate, sideMeters: Self.closeupMeters, sidePixels: Self.closeupPixels)
+                let meta = TowerReviewSnapshot(parkID: parkID, image: image, labelID: label.id)
+                try await write(image, meta: meta, stem: closeupStem(label, in: parkID), to: closeupsDirectory, png: false)
+                done += 1
+                extrasProgress = (done, total)
+            }
+        } catch {
+            lastError = error.localizedDescription
+            WakeLog.error(.store, "tower review extras: \(error.localizedDescription)")
+        }
+    }
+
+    private func write(_ image: DetectionImage, meta: TowerReviewSnapshot, stem: String, to folder: URL, png: Bool) async throws {
+        try await Task.detached(priority: .utility) {
+            guard let data = png ? Self.pngData(image) : Self.jpegData(image) else { throw CocoaError(.fileWriteUnknown) }
+            try data.write(to: folder.appendingPathComponent(stem + (png ? ".png" : ".jpg")), options: .atomic)
+            try meta.encoded().write(to: folder.appendingPathComponent(stem + ".json"), options: .atomic)
+        }.value
     }
 
     /// JPEG at high quality: about 1 MB for a 2048 px close-up, against 6-8 MB as PNG.
     nonisolated static func jpegData(_ image: DetectionImage) -> Data? {
+        uiImage(image)?.jpegData(compressionQuality: 0.92)
+    }
+
+    /// PNG for the map: exact colours, and small because the map is flat.
+    nonisolated static func pngData(_ image: DetectionImage) -> Data? {
+        uiImage(image)?.pngData()
+    }
+
+    nonisolated private static func uiImage(_ image: DetectionImage) -> UIImage? {
         let pixels = image.width * image.height
         var rgbx = [UInt8](repeating: 255, count: pixels * 4)
         for index in 0..<pixels {
@@ -162,7 +266,7 @@ final class TowerReviewStore {
                   intent: .defaultIntent
               )
         else { return nil }
-        return UIImage(cgImage: cgImage).jpegData(compressionQuality: 0.92)
+        return UIImage(cgImage: cgImage)
     }
 
     // MARK: Sharing

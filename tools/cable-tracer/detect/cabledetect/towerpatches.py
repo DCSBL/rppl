@@ -31,7 +31,7 @@ def build(root: Path, out: Path, rng_seed: int = 7, size: int = PATCH) -> None:
         snapshot = example.detail
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
-        w = water.water_mask(rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
+        w = water.water_for(example, snapshot, rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
         bends = example.to_pixels(snapshot, example.tower_positions_xy)
         rejected = example.to_pixels(snapshot, example.towers_xy("none"))
         # Nothing is sampled near an unsure detection (it may be a tower after all) or a tower the imagery does not show.

@@ -40,10 +40,30 @@ enum CableDetectionRunner {
         return Outcome(image: image, result: result, snapshotSeconds: snapshotSeconds)
     }
 
+    /// What a snapshot shows: the satellite photo, or the plain Apple map, on which water is
+    /// always the same blue (the Debug tower review saves it as a water mask for training).
+    enum Style {
+        case satellite
+        case map
+    }
+
+    /// The satellite close-up the detector runs on.
     @MainActor
     static func snapshot(around center: ParkCoordinate) async throws -> DetectionImage {
+        try await snapshot(around: center, sideMeters: sideMeters, sidePixels: sidePixels)
+    }
+
+    /// A square snapshot of `sideMeters` at `sidePixels`, with its scale, centre and a 3 x 3 grid
+    /// of control points taken from MapKit's own projection.
+    @MainActor
+    static func snapshot(around center: ParkCoordinate, sideMeters: Double, sidePixels: Int, style: Style = .satellite) async throws -> DetectionImage {
         let options = MKMapSnapshotter.Options()
-        options.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
+        switch style {
+        case .satellite:
+            options.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
+        case .map:
+            options.preferredConfiguration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
+        }
         options.region = MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: center.lat, longitude: center.lon),
             latitudinalMeters: sideMeters,
@@ -53,6 +73,8 @@ enum CableDetectionRunner {
         options.scale = 2
         options.showsBuildings = false
         options.pointOfInterestFilter = .excludingAll
+        // The map's colours (water blue) must not follow the phone's dark mode.
+        options.traitCollection = UITraitCollection(userInterfaceStyle: .light)
         let snapshot = try await MKMapSnapshotter(options: options).start()
         guard let cgImage = snapshot.image.cgImage else { throw Failure.noImage }
         let width = cgImage.width, height = cgImage.height
@@ -81,9 +103,10 @@ enum CableDetectionRunner {
         // Scale and centre from the snapshot's own projection, so a region MapKit adjusted still maps right.
         let pixelScale = Double(width) / Double(snapshot.image.size.width)
         let pin = snapshot.point(for: CLLocationCoordinate2D(latitude: center.lat, longitude: center.lon))
-        let east = DetectionImage.coordinate(fromLocal: SIMD2(100, 0), origin: center)
+        let probe = sideMeters / 6
+        let east = DetectionImage.coordinate(fromLocal: SIMD2(probe, 0), origin: center)
         let eastPoint = snapshot.point(for: CLLocationCoordinate2D(latitude: east.lat, longitude: east.lon))
-        let metersPerPixel = 100 / max(1, Double(eastPoint.x - pin.x) * pixelScale)
+        let metersPerPixel = probe / max(1e-6, Double(eastPoint.x - pin.x) * pixelScale)
         let centerXY = SIMD2(
             (Double(width) / 2 - Double(pin.x) * pixelScale) * metersPerPixel,
             (Double(pin.y) * pixelScale - Double(height) / 2) * metersPerPixel
@@ -98,8 +121,9 @@ enum CableDetectionRunner {
         )
         // A 3 x 3 grid of known coordinates with the pixel MapKit put each at, so the frame can be
         // checked against MapKit itself later (the tower review saves them with the image).
-        image.controlPoints = [-250.0, 0, 250].flatMap { north in
-            [-250.0, 0, 250].map { east in
+        let reach = sideMeters * 5 / 12
+        image.controlPoints = [-reach, 0, reach].flatMap { north in
+            [-reach, 0, reach].map { east in
                 let coordinate = DetectionImage.coordinate(fromLocal: SIMD2(east, north), origin: center)
                 let point = snapshot.point(for: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon))
                 return DetectionImage.ControlPoint(coordinate: coordinate, column: Double(point.x) * pixelScale, row: Double(point.y) * pixelScale)
