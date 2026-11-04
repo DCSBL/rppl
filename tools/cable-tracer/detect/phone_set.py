@@ -20,6 +20,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+import numpy as np
 import yaml
 
 EARTH_RADIUS_M = 6_371_000.0
@@ -49,6 +50,39 @@ def cable_rows(park: dict) -> list[dict]:
     return rows
 
 
+# The app's metres (DetectionImage) use 111,320 m per degree on both axes; ours use the sphere.
+APP_METERS_PER_DEGREE = 111_320.0
+OUR_METERS_PER_DEGREE = math.radians(1) * EARTH_RADIUS_M
+
+
+def georeference(info: dict, origin: dict) -> tuple[dict, float, str]:
+    """Centre and metres per pixel of a phone close-up in this package's metres.
+
+    With the control points the app saves (coordinates and the pixel MapKit drew each at), the
+    scale and centre are fitted to MapKit's own placement and checked: the note gives the worst
+    residual in pixels and the north/east scale ratio. Without them the app's scale is converted."""
+    size = info["widthPx"]
+    points = info.get("controlPoints") or []
+    if len(points) < 3:
+        mpp = info["metersPerPixel"] * OUR_METERS_PER_DEGREE / APP_METERS_PER_DEGREE
+        return info["center"], mpp, "no control points, app scale converted"
+    xy = np.array([local_xy(p["coordinate"]["lat"], p["coordinate"]["lon"], origin) for p in points])
+    cols = np.array([p["column"] for p in points])
+    rows = np.array([p["row"] for p in points])
+    # col = a + x / mpp_x, row = c - y / mpp_y
+    (a, kx), *_ = np.linalg.lstsq(np.stack([np.ones(len(xy)), xy[:, 0]], 1), cols, rcond=None)
+    (c, ky), *_ = np.linalg.lstsq(np.stack([np.ones(len(xy)), -xy[:, 1]], 1), rows, rcond=None)
+    mpp = 2 / (kx + ky)
+    centre_xy = np.array([(size / 2 - a) / kx, -(size / 2 - c) / ky])
+    # Residuals of the single-scale frame the dataset uses.
+    predicted_cols = size / 2 + (xy[:, 0] - centre_xy[0]) / mpp
+    predicted_rows = size / 2 - (xy[:, 1] - centre_xy[1]) / mpp
+    worst = float(np.max(np.hypot(predicted_cols - cols, predicted_rows - rows)))
+    lat = origin["lat"] + math.degrees(centre_xy[1] / EARTH_RADIUS_M)
+    lon = origin["lon"] + math.degrees(centre_xy[0] / (EARTH_RADIUS_M * math.cos(math.radians(origin["lat"]))))
+    return {"lat": lat, "lon": lon}, float(mpp), f"worst control point {worst:.2f} px, north/east scale {kx / ky:.4f}"
+
+
 def inside(snapshot: dict, xy: list[float], centre_xy: list[float]) -> bool:
     half = snapshot["widthPx"] / 2 * snapshot["metersPerPixel"]
     return abs(xy[0] - centre_xy[0]) < half - 10 and abs(xy[1] - centre_xy[1]) < half - 10
@@ -74,7 +108,7 @@ def build(source: Path, out: Path, parks_dir: Path) -> str:
                 snapshots.setdefault(info["parkID"], []).append((info, image))
 
         out.mkdir(parents=True, exist_ok=True)
-        rows, skipped = [], []
+        rows, skipped, checks = [], [], []
         for park_id, park_labels in sorted(labels.items()):
             yaml_file = parks_dir / f"{park_id}.yaml"
             if not park_labels or park_id not in snapshots or not yaml_file.exists():
@@ -100,6 +134,8 @@ def build(source: Path, out: Path, parks_dir: Path) -> str:
                 centre = local_xy(info["center"]["lat"], info["center"]["lon"], origin)
                 return sum(inside(info, t["xy"], centre) for t in towers), info["takenAt"]
             info, image = max(snapshots[park_id], key=score)
+            centre, mpp, check = georeference(info, origin)
+            checks.append(f"  {park_id}: {check}")
             target = out / f"{park_id}-phone.jpg"
             shutil.copy2(image, target)
             rows.append({
@@ -112,15 +148,15 @@ def build(source: Path, out: Path, parks_dir: Path) -> str:
                 "detailSnapshot": {
                     "imageFile": target.name,
                     "sizePx": info["widthPx"],
-                    "metersPerPixel": info["metersPerPixel"],
-                    "center": info["center"],
+                    "metersPerPixel": mpp,
+                    "center": centre,
                 },
             })
         (out / "training-set.json").write_text(json.dumps(rows, indent=1))
     note = f"{len(rows)} parks with labels and a phone close-up"
     if skipped:
         note += f"; skipped {len(skipped)} without a close-up or park file: {', '.join(skipped[:8])}{' …' if len(skipped) > 8 else ''}"
-    return note
+    return "\n".join([note, *checks])
 
 
 def main() -> None:

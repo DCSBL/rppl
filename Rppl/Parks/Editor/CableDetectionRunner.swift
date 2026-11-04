@@ -88,7 +88,7 @@ enum CableDetectionRunner {
             (Double(width) / 2 - Double(pin.x) * pixelScale) * metersPerPixel,
             (Double(pin.y) * pixelScale - Double(height) / 2) * metersPerPixel
         )
-        return DetectionImage(
+        var image = DetectionImage(
             width: width,
             height: height,
             rgb: rgb,
@@ -96,5 +96,15 @@ enum CableDetectionRunner {
             center: DetectionImage.coordinate(fromLocal: centerXY, origin: center),
             origin: center
         )
+        // A 3 x 3 grid of known coordinates with the pixel MapKit put each at, so the frame can be
+        // checked against MapKit itself later (the tower review saves them with the image).
+        image.controlPoints = [-250.0, 0, 250].flatMap { north in
+            [-250.0, 0, 250].map { east in
+                let coordinate = DetectionImage.coordinate(fromLocal: SIMD2(east, north), origin: center)
+                let point = snapshot.point(for: CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon))
+                return DetectionImage.ControlPoint(coordinate: coordinate, column: Double(point.x) * pixelScale, row: Double(point.y) * pixelScale)
+            }
+        }
+        return image
     }
 }

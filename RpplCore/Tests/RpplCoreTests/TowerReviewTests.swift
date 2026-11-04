@@ -167,10 +167,12 @@ struct TowerReviewTests {
     }
 
     @Test func snapshotDescribesTheImageItRanOn() throws {
-        let image = DetectionImage(width: 2, height: 2, rgb: [UInt8](repeating: 0, count: 12), metersPerPixel: 0.293, center: tower, origin: almere)
+        var image = DetectionImage(width: 2, height: 2, rgb: [UInt8](repeating: 0, count: 12), metersPerPixel: 0.293, center: tower, origin: almere)
+        image.controlPoints = [DetectionImage.ControlPoint(coordinate: almere, column: 1, row: 1)]
         let snapshot = TowerReviewSnapshot(parkID: "view-almere", image: image, takenAt: Date(timeIntervalSince1970: 1_793_900_000))
         #expect(snapshot.center == tower)
         #expect(snapshot.widthPx == 2)
+        #expect(snapshot.controlPoints == image.controlPoints)
         #expect(snapshot.fileStem.hasPrefix("view-almere-2026"))
         #expect(snapshot.fileStem.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" })
         let decoded = try JSONDecoder().decode(TowerReviewSnapshot.self, from: snapshot.encoded())

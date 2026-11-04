@@ -85,7 +85,9 @@ if the 128 px round wins on the loops.
 
 The review screen keeps the close-up of every "Find towers", and "Share results" sends them with
 the labels in one zip. `phone_set.py` makes a training set out of it (cables from the park YAML,
-labels in local metres, the close-up that shows the most labels), which `train_round.py` merges
+labels in local metres, the close-up that shows the most labels; its scale and centre are fitted
+to the reference points MapKit placed on that image, and the worst residual is printed per park),
+which `train_round.py` merges
 after the older sets, so its rows replace theirs for the same park:
 
 ```bash

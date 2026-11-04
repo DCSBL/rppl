@@ -160,6 +160,9 @@ public struct TowerReviewSnapshot: Codable, Equatable, Sendable {
     public var heightPx: Int
     /// ISO 8601, UTC.
     public var takenAt: String
+    /// Coordinates with the pixel MapKit drew each at: the reference the training set is built
+    /// from, so it does not depend on this app's metres convention.
+    public var controlPoints: [DetectionImage.ControlPoint]
 
     public init(parkID: String, image: DetectionImage, takenAt: Date = Date()) {
         self.parkID = parkID
@@ -167,6 +170,7 @@ public struct TowerReviewSnapshot: Codable, Equatable, Sendable {
         metersPerPixel = image.metersPerPixel
         widthPx = image.width
         heightPx = image.height
+        controlPoints = image.controlPoints
         self.takenAt = ISO8601DateFormatter().string(from: takenAt)
     }
 
