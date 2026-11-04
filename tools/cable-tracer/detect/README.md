@@ -107,6 +107,20 @@ means the colour test needs a look. `snapshots/closeups/` holds a 40 m, 5 cm/px 
 tower label and the five hardest rejected guesses per park, copied to `<out>/closeups/`: they show
 whether a second, zoomed-in check of each tower guess could see more than the 0.29 m/px photo.
 
+### Overnight run with the close-up check
+
+`overnight.py` runs everything from the phone's zip in one go and can be stopped and started again
+(each stage, each training fold and each round step keeps what it finished): the phone set, the
+close-up check (`cabledetect/closeupcheck.py`, a CNN on the zoomed close-ups that says tower or not,
+scored with parks held out), then the coarse net on 64 px and on 128 px patches with the map's water.
+It writes `REPORT.md` and copies it with the logs, weights and pictures to `--copy-to` after every stage:
+
+```bash
+python3 overnight.py --zip ~/Development/rppl/tower-review-2026-11-04.zip \
+  --old-sets "$C/training-set" "$C/training-set-2026-11-03" "$C/labels-set1-2026-11-03" "$C/labels-set2-2026-11-03" \
+  --work ~/towernet-overnight --copy-to "$C/train-$(date +%F)"
+```
+
 ## Training the tower net
 
 ```bash

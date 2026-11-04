@@ -138,8 +138,15 @@ def save_params(params, path: Path) -> None:
     np.savez(path, **flat)
 
 
-def main(npz: Path, out: Path, seed: int = 0) -> None:
-    """Five-fold CV by park (the split never changes), then the final model; `seed` varies the weights and the batches."""
+def load_saved(path: Path):
+    data = np.load(path)
+    count = len([k for k in data.files if k.startswith("w")])
+    return [(jnp.asarray(data[f"w{i}"]), jnp.asarray(data[f"b{i}"])) for i in range(count)]
+
+
+def main(npz: Path, out: Path, seed: int = 0, resume: bool = False) -> None:
+    """Five-fold CV by park (the split never changes), then the final model; `seed` varies the weights and the batches.
+    With `resume`, folds (and the final model) whose files are already there are loaded instead of trained."""
     data = np.load(npz)
     x, y, parks, kinds = data["x"], data["y"], data["park"], data["kind"]
     unique = np.unique(parks)
@@ -148,9 +155,14 @@ def main(npz: Path, out: Path, seed: int = 0) -> None:
     cv = np.zeros(len(y))
     for f, held in enumerate(folds):
         test = np.isin(parks, held)
-        params = train(x[~test], y[~test], seed=seed, label=f"fold {f + 1}/5")
-        save_params(params, out.with_name(f"{out.stem}.fold{f}.npz"))
-        json.dump([str(p) for p in held], open(out.with_name(f"{out.stem}.fold{f}.json"), "w"))
+        fold_file = out.with_name(f"{out.stem}.fold{f}.npz")
+        if resume and fold_file.exists() and fold_file.with_suffix(".json").exists():
+            params = load_saved(fold_file)
+            print(f"fold {f}: loaded from {fold_file.name}", flush=True)
+        else:
+            params = train(x[~test], y[~test], seed=seed, label=f"fold {f + 1}/5")
+            save_params(params, fold_file)
+            json.dump([str(p) for p in held], open(fold_file.with_suffix(".json"), "w"))
         cv[test] = predict(params, x[test])
         obj = test & (y == 0) & (kinds == "object")
         print(f"fold {f}: {list(held)} AUC {auc(cv[test], y[test]):.3f} recall@0.5 {np.mean(cv[test][y[test] == 1] > 0.5):.2f} "
@@ -163,10 +175,13 @@ def main(npz: Path, out: Path, seed: int = 0) -> None:
     report["recall_per_park"] = {p: round(float(np.mean(cv[(parks == p) & (y == 1)] > 0.5)), 2) for p in np.unique(parks)}
     print(json.dumps(report, indent=1))
     np.save(out.with_suffix(".cv-scores.npy"), cv)
-    params = train(x, y, seed=seed, label="final model")
-    save_params(params, out)
+    if resume and out.exists():
+        params = load_saved(out)
+    else:
+        params = train(x, y, seed=seed, label="final model")
+        save_params(params, out)
     print("params:", sum(int(np.prod(w.shape)) + int(np.prod(b.shape)) for w, b in params))
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[sys.argv.index("--seed") + 1]) if "--seed" in sys.argv else 0)
+    main(Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[sys.argv.index("--seed") + 1]) if "--seed" in sys.argv else 0, "--resume" in sys.argv)

@@ -78,6 +78,8 @@ def main() -> None:
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--copy-to", type=Path)
     parser.add_argument("--name", default="towernet", help="file stem of the trained weights")
+    parser.add_argument("--resume", action="store_true",
+                        help="keep what an interrupted round in the same --work folder already finished")
     parser.add_argument("--patch", type=int, choices=(64, 128), default=64,
                         help="patch size in pixels: 64 (19 m, the shipped net) or 128 (37 m, the whole tower arm)")
     args = parser.parse_args()
@@ -87,24 +89,35 @@ def main() -> None:
     patches, mined = work / "patches.npz", work / "patches-mined.npz"
     first, final = work / f"{name}-a.npz", work / f"{name}.npz"
 
+    resume = ["--resume"] if args.resume else []
+    # Each step with the file that shows it finished (a step is done once its log says so).
     steps = [
-        ("Patches", ["cabledetect/towerpatches.py", ts, patches, "--patch", args.patch]),
-        ("Train, round 1", ["cabledetect/towertrain.py", patches, first]),
-        ("Mine false peaks", ["cabledetect/towermine.py", ts, patches, first, mined]),
-        ("Train, round 2", ["cabledetect/towertrain.py", mined, final]),
-        ("Evaluate loops", ["run.py", ts, "--out", work / "eval", "--towers", final, "--given-others"]),
+        ("Patches", ["cabledetect/towerpatches.py", ts, patches, "--patch", args.patch], patches),
+        ("Train, round 1", ["cabledetect/towertrain.py", patches, first, *resume], first),
+        ("Mine false peaks", ["cabledetect/towermine.py", ts, patches, first, mined], mined),
+        ("Train, round 2", ["cabledetect/towertrain.py", mined, final, *resume], final),
+        ("Evaluate loops", ["run.py", ts, "--out", work / "eval", "--towers", final, "--given-others"], work / "eval" / "results.json"),
     ]
     total = len(steps) + 1
     started = time.time()
 
     print(f"[1/{total}] Merge training sets")
-    print(f"  {merge([s.resolve() for s in args.sets], ts)}")
+    if args.resume and (ts / "training-set.json").exists():
+        print("  kept the merged set from before (--resume)")
+    else:
+        print(f"  {merge([s.resolve() for s in args.sets], ts)}")
     outputs: dict[str, list[str]] = {}
-    for number, (step, step_args) in enumerate(steps, 2):
+    for number, (step, step_args, done_file) in enumerate(steps, 2):
         step_started = time.time()
         print(f"[{number}/{total}] {step}")
         log = work / f"{number}-{step.lower().replace(',', '').replace(' ', '-')}.log"
+        finished = log.with_suffix(".done")
+        if args.resume and finished.exists() and done_file.exists():
+            outputs[step] = log.read_text().splitlines()
+            print(f"  already done ({log.name})")
+            continue
         outputs[step] = run(step, [str(a) for a in step_args], log)
+        finished.touch()
         print(f"  done in {time.time() - step_started:.0f} s ({log.name})")
 
     report = "\n".join(outputs["Train, round 2"])
