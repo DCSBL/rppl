@@ -35,6 +35,8 @@ public struct TrainingRow: Codable, Equatable, Sendable {
         public var verdict: String
         public var source: String
         public var probability: Double?
+        /// Wheel-to-foot arm on the image (see `TowerLabel.Arm`); nil for labels placed before the review frame.
+        public var arm: TowerLabel.Arm?
     }
 
     public var parkID: String
@@ -62,7 +64,7 @@ public struct TrainingRow: Codable, Equatable, Sendable {
         }
         if !labels.isEmpty {
             let projection = LocalProjection(origin: park.location)
-            towers = labels.map { Tower(xy: projection.xy($0.coordinate), verdict: $0.verdict.rawValue, source: $0.source.rawValue, probability: $0.probability) }
+            towers = labels.map { Tower(xy: projection.xy($0.coordinate), verdict: $0.verdict.rawValue, source: $0.source.rawValue, probability: $0.probability, arm: $0.arm) }
         }
     }
 

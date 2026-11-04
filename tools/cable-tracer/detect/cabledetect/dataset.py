@@ -34,9 +34,11 @@ class Cable:
 class Tower:
     """A reviewed tower position from the tracer's review mode (local metres)."""
     xy: np.ndarray
-    verdict: str  # tower | none | unsure
+    verdict: str  # tower | none | notVisible | unsure
     source: str  # detector | manual
     probability: float | None
+    # Wheel-to-foot arm on the image from the review frame: (compass bearing in degrees, length in metres).
+    arm: tuple[float, float] | None = None
 
 
 @dataclass
@@ -89,6 +91,10 @@ class ParkExample:
     def loops(self) -> list[Cable]:
         return [c for c in self.cables if c.kind == "loop" and len(c.points_xy) >= 3]
 
+    def keep_out_xy(self) -> np.ndarray:
+        """Reviewed spots no negative may be cut from: unsure ones and towers the imagery does not show."""
+        return np.concatenate([self.towers_xy("unsure"), self.towers_xy("notVisible")])
+
     def towers_xy(self, verdict: str) -> np.ndarray:
         """Reviewed positions with this verdict, (n, 2) local metres."""
         return np.array([m.xy for m in self.towers if m.verdict == verdict], dtype=float).reshape(-1, 2)
@@ -123,7 +129,8 @@ def load(root: Path) -> list[ParkExample]:
             points = np.array([[p[0], p[1]] if isinstance(p, list) else [p["x"], p["y"]] for p in geometry["pointsXY"]], dtype=float).reshape(-1, 2)
             cables.append(Cable(cable.get("name"), cable.get("direction"), geometry["kind"], geometry["isClosed"], points))
         # Exports before the rename (2026-11-03) used "masts" and the verdict "mast".
-        towers = [Tower(np.array(m["xy"], dtype=float), "tower" if m["verdict"] == "mast" else m["verdict"], m.get("source", "detector"), m.get("probability"))
+        towers = [Tower(np.array(m["xy"], dtype=float), "tower" if m["verdict"] == "mast" else m["verdict"], m.get("source", "detector"), m.get("probability"),
+                        (m["arm"]["bearingDeg"], m["arm"]["lengthM"]) if m.get("arm") else None)
                   for m in row.get("towers") or row.get("masts") or []]
         examples.append(ParkExample(
             park_id=row["parkID"], name=row["name"], lat=row["location"]["lat"], lon=row["location"]["lon"],

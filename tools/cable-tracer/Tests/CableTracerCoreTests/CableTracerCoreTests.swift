@@ -153,7 +153,7 @@ final class TowerLabelTests: XCTestCase {
         let park = Park(id: "view-almere", name: "VIEW Almere", location: almere)
         let tower = ParkCoordinate(lat: 52.3585546998476, lon: 5.21501871403023)
         var store = TowerLabelStore()
-        store.add(TowerLabel(coordinate: tower, verdict: .tower, source: .manual, reviewedAt: "2026-11-03"), to: park.id)
+        store.add(TowerLabel(coordinate: tower, verdict: .tower, source: .manual, arm: TowerLabel.Arm(bearingDeg: 200, lengthM: 14), reviewedAt: "2026-11-03"), to: park.id)
         store.add(TowerLabel(coordinate: almere, verdict: .unsure, source: .detector, probability: 0.4, reviewedAt: "2026-11-03"), to: park.id)
 
         XCTAssertTrue(TrainingSet.rows(parks: [park]).isEmpty, "an untraced park without labels is not an example")
@@ -169,5 +169,7 @@ final class TowerLabelTests: XCTestCase {
         let json = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [[String: Any]])
         let encoded = try XCTUnwrap(json[0]["towers"] as? [[String: Any]])
         XCTAssertEqual((encoded[0]["xy"] as? [Double])?.count, 2)
+        XCTAssertEqual((encoded[0]["arm"] as? [String: Double])?["lengthM"], 14)
+        XCTAssertNil(encoded[1]["arm"])
     }
 }

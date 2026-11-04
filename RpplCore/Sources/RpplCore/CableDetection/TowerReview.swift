@@ -1,7 +1,9 @@
 import Foundation
 
 // Tower review: the app shows the detector's tower guesses for a park on the satellite map and the
-// reviewer judges them (tower / no tower / unsure) or adds towers by hand. The verdicts go into
+// reviewer judges them (tower / no tower / not visible / unsure) or adds towers by hand. A tower is
+// placed by laying the map under a fixed frame: the wheel in the frame's ring, the tower's arm along
+// the frame, so the label also records the arm's direction and length on the image. The verdicts go into
 // `tower-labels.json`, which the cable-tracer's training-set export reads: a confirmed tower trains
 // the tower net like a traced bend does, and a rejected detection is a hard negative.
 
@@ -10,6 +12,9 @@ public struct TowerLabel: Codable, Equatable, Sendable, Identifiable {
     public enum Verdict: String, Codable, Sendable, CaseIterable {
         case tower
         case notTower = "none"
+        /// A tower stands here (the reviewer knows the park) but the imagery does not show it:
+        /// blurred, outdated or a ghost copy from another imagery layer. Training leaves the spot alone.
+        case notVisible
         case unsure
 
         public init(from decoder: Decoder) throws {
@@ -26,6 +31,30 @@ public struct TowerLabel: Codable, Equatable, Sendable, Identifiable {
         case detector, manual
     }
 
+    /// The tower's arm as it lies on the satellite image, from the wheel to the foot.
+    public struct Arm: Codable, Equatable, Sendable {
+        /// Compass bearing from the wheel to the foot, degrees clockwise from north, 0..<360.
+        public var bearingDeg: Double
+        public var lengthM: Double
+
+        public init(bearingDeg: Double, lengthM: Double) {
+            self.bearingDeg = bearingDeg
+            self.lengthM = lengthM
+        }
+
+        /// The arm between the wheel and the foot, or nil when they are less than a metre apart.
+        public init?(wheel: ParkCoordinate, foot: ParkCoordinate) {
+            let length = wheel.meters(to: foot)
+            guard length >= 1 else { return nil }
+            let lat1 = wheel.lat * .pi / 180, lat2 = foot.lat * .pi / 180
+            let dLon = (foot.lon - wheel.lon) * .pi / 180
+            let y = sin(dLon) * cos(lat2)
+            let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+            let bearing = atan2(y, x) * 180 / .pi
+            self.init(bearingDeg: (bearing + 360).truncatingRemainder(dividingBy: 360), lengthM: length)
+        }
+    }
+
     public var id: UUID
     /// The tower itself for `.tower` (after the reviewer centred it); the detector's peak for `.notTower` and `.unsure`.
     public var coordinate: ParkCoordinate
@@ -35,16 +64,19 @@ public struct TowerLabel: Codable, Equatable, Sendable, Identifiable {
     public var probability: Double?
     /// Where the detector put the peak when the reviewer moved the tower; nil when within a metre.
     public var detected: ParkCoordinate?
+    /// The arm along the review frame, for `.tower` labels placed with the frame; nil for older labels.
+    public var arm: Arm?
     /// yyyy-MM-dd, UTC.
     public var reviewedAt: String
 
-    public init(id: UUID = UUID(), coordinate: ParkCoordinate, verdict: Verdict, source: Source, probability: Double? = nil, detected: ParkCoordinate? = nil, reviewedAt: String = TowerLabelStore.today()) {
+    public init(id: UUID = UUID(), coordinate: ParkCoordinate, verdict: Verdict, source: Source, probability: Double? = nil, detected: ParkCoordinate? = nil, arm: Arm? = nil, reviewedAt: String = TowerLabelStore.today()) {
         self.id = id
         self.coordinate = coordinate
         self.verdict = verdict
         self.source = source
         self.probability = probability
         self.detected = detected
+        self.arm = arm
         self.reviewedAt = reviewedAt
     }
 }
@@ -167,8 +199,8 @@ public struct TowerReviewSession: Equatable, Sendable {
 
     /// Detections below this are not worth a look; the app's own cut-off is higher.
     public static let minimumProbability = 0.3
-    /// A "Tower" verdict takes the crosshair position when it is this close to the detection,
-    /// so the reviewer can centre the tower; further away the reviewer looked at something else.
+    /// A "Tower" or "Not visible" verdict takes the crosshair position when it is this close to the
+    /// detection, so the reviewer can centre the tower; further away the reviewer looked at something else.
     public static let maximumCorrectionM = 90.0
 
     public let parkID: String
@@ -211,24 +243,32 @@ public struct TowerReviewSession: Equatable, Sendable {
         currentIndex = (index + 1) % candidates.count
     }
 
-    /// Records the verdict for the current candidate and moves on. A tower is saved where the
-    /// crosshair is when the reviewer moved it onto the tower; the other verdicts keep the detection.
-    public mutating func judge(_ verdict: TowerLabel.Verdict, crosshair: ParkCoordinate?, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel? {
+    /// Records the verdict for the current candidate and moves on. A tower (or a tower that is not
+    /// visible) is saved where the crosshair is when the reviewer moved it onto the tower; the other
+    /// verdicts keep the detection. `arm` is kept only on a tower placed at the crosshair.
+    public mutating func judge(_ verdict: TowerLabel.Verdict, crosshair: ParkCoordinate?, arm: TowerLabel.Arm? = nil, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel? {
         guard let index = currentIndex else { return nil }
         let candidate = candidates[index]
         var coordinate = candidate.coordinate
         var detected: ParkCoordinate?
-        if verdict == .tower, let crosshair, crosshair.meters(to: candidate.coordinate) <= Self.maximumCorrectionM {
+        var keptArm: TowerLabel.Arm?
+        if verdict == .tower || verdict == .notVisible, let crosshair, crosshair.meters(to: candidate.coordinate) <= Self.maximumCorrectionM {
             coordinate = crosshair
             if crosshair.meters(to: candidate.coordinate) > 1 { detected = candidate.coordinate }
+            if verdict == .tower { keptArm = arm }
         }
         candidates.remove(at: index)
         currentIndex = candidates.isEmpty ? nil : index % candidates.count
-        return TowerLabel(coordinate: coordinate, verdict: verdict, source: .detector, probability: candidate.probability, detected: detected, reviewedAt: reviewedAt)
+        return TowerLabel(coordinate: coordinate, verdict: verdict, source: .detector, probability: candidate.probability, detected: detected, arm: keptArm, reviewedAt: reviewedAt)
     }
 
     /// A tower the detector missed, placed by the reviewer.
-    public static func manualTower(at coordinate: ParkCoordinate, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel {
-        TowerLabel(coordinate: coordinate, verdict: .tower, source: .manual, reviewedAt: reviewedAt)
+    public static func manualTower(at coordinate: ParkCoordinate, arm: TowerLabel.Arm? = nil, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel {
+        TowerLabel(coordinate: coordinate, verdict: .tower, source: .manual, arm: arm, reviewedAt: reviewedAt)
+    }
+
+    /// A tower the reviewer knows stands here although the imagery does not show it.
+    public static func manualNotVisible(at coordinate: ParkCoordinate, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel {
+        TowerLabel(coordinate: coordinate, verdict: .notVisible, source: .manual, reviewedAt: reviewedAt)
     }
 }

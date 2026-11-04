@@ -1,5 +1,6 @@
-"""Tiny tower classifier on 64 px (19 m) patches, trained with JAX; grouped cross-validation by
-park so every number below is for parks the model never saw. ~20k parameters."""
+"""Tiny tower classifier on 64 px (19 m) or 128 px (37 m) patches, trained with JAX; grouped
+cross-validation by park so every number below is for parks the model never saw. ~20k parameters
+(~37k for 128 px)."""
 from __future__ import annotations
 
 import json
@@ -15,24 +16,41 @@ jax.config.update("jax_platform_name", "cpu")
 
 # (in_channels, out_channels) per conv layer; each followed by ReLU and 2x2 max pool, then global mean + linear.
 LAYERS = [(3, 12), (12, 20), (20, 28), (28, 40)]
+POOLED = len(LAYERS)
+# 128 px patches add one conv layer without pooling, so the net sees the whole tower and its arm while
+# the dense heatmap keeps its 16 px (4.7 m) cells.
+EXTRA = {64: [], 128: [(40, 48)]}
 
 
-def init_params(key):
+def layers_for(patch: int) -> list[tuple[int, int]]:
+    if patch not in EXTRA:
+        raise ValueError(f"patch size {patch} is not supported, use one of {sorted(EXTRA)}")
+    return LAYERS + EXTRA[patch]
+
+
+def patch_of(params) -> int:
+    """Patch size a parameter list was trained for, from its number of conv layers."""
+    convs = len(params) - 1
+    return next(p for p, extra in EXTRA.items() if POOLED + len(extra) == convs)
+
+
+def init_params(key, patch: int = 64):
     params = []
-    for cin, cout in LAYERS:
+    for cin, cout in layers_for(patch):
         key, k = jax.random.split(key)
         params.append((jax.random.normal(k, (3, 3, cin, cout)) * np.sqrt(2 / (9 * cin)), jnp.zeros(cout)))
     key, k = jax.random.split(key)
-    params.append((jax.random.normal(k, (LAYERS[-1][1], 1)) * 0.1, jnp.zeros(1)))
+    params.append((jax.random.normal(k, (layers_for(patch)[-1][1], 1)) * 0.1, jnp.zeros(1)))
     return params
 
 
-def forward(params, x):  # x: (N,64,64,3) float in 0..1 -> logits (N,)
+def forward(params, x):  # x: (N,P,P,3) float in 0..1 -> logits (N,)
     h = x
-    for w, b in params[:-1]:
+    for layer, (w, b) in enumerate(params[:-1]):
         h = jax.lax.conv_general_dilated(h, w, (1, 1), "SAME", dimension_numbers=("NHWC", "HWIO", "NHWC")) + b
         h = jax.nn.relu(h)
-        h = jax.lax.reduce_window(h, -jnp.inf, jax.lax.max, (1, 2, 2, 1), (1, 2, 2, 1), "VALID")
+        if layer < POOLED:
+            h = jax.lax.reduce_window(h, -jnp.inf, jax.lax.max, (1, 2, 2, 1), (1, 2, 2, 1), "VALID")
     h = h.mean(axis=(1, 2))
     w, b = params[-1]
     return (h @ w + b)[:, 0]
@@ -76,7 +94,7 @@ def progress(text: str) -> None:
 
 def train(x: np.ndarray, y: np.ndarray, epochs: int = 30, seed: int = 0, batch: int = 64, label: str = "training"):
     rng = np.random.default_rng(seed)
-    params = init_params(jax.random.PRNGKey(seed))
+    params = init_params(jax.random.PRNGKey(seed), patch=x.shape[1])
     opt = (jax.tree_util.tree_map(jnp.zeros_like, params), jax.tree_util.tree_map(jnp.zeros_like, params), 0)
     xf = x.astype(np.float32) / 255
     yf = y.astype(np.float32)

@@ -33,10 +33,12 @@ def load_tower_models(paths: list[Path]):
 
 def detect_towers(models, example, snapshot, rgb, w, probability=0.7):
     """Tower peaks in local metres with probabilities, plus how they compare with the traced bends."""
-    from cabledetect import towerheat
-    logits = np.mean([towerheat.dense_logits(params, rgb) for params in models.get(example.park_id, models["*"])], axis=0)
+    from cabledetect import towerheat, towertrain
+    nets = models.get(example.park_id, models["*"])
+    logits = np.mean([towerheat.dense_logits(params, rgb) for params in nets], axis=0)
     peaks = []
-    for row, col, prob in towerheat.tower_peaks(logits, threshold=float(np.log(probability / (1 - probability)))):
+    threshold = float(np.log(probability / (1 - probability)))
+    for row, col, prob in towerheat.tower_peaks(logits, threshold=threshold, patch=towertrain.patch_of(nets[0])):
         r0, r1 = max(0, row - 34), min(w.shape[0], row + 35)
         c0, c1 = max(0, col - 34), min(w.shape[1], col + 35)
         if w[r0:r1, c0:c1].mean() >= 0.3:  # towers stand on or right next to the water
