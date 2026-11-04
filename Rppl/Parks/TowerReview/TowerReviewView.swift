@@ -42,16 +42,27 @@ struct TowerReviewView: View {
                     Label("Share results", systemImage: "square.and.arrow.up")
                 }
                 .disabled(store.labels.labelCount == 0)
-                Text("\(store.labels.labelCount) labels in \(store.labels.reviewedParkIDs.count) parks · \(store.snapshotCount) photos")
+                Text("\(store.labels.labelCount) labels in \(store.labels.reviewedParkIDs.count) parks · \(store.snapshotCount) photos · \(store.mapCount) maps · \(store.closeupCount) close-ups")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if let progress = store.extrasProgress {
+                    ProgressView(value: Double(progress.done), total: Double(max(1, progress.total))) {
+                        Text("Fetching \(progress.done) of \(progress.total)…")
+                    }
+                } else if store.missingExtras > 0 {
+                    Button {
+                        Task { await store.fetchExtras() }
+                    } label: {
+                        Label("Fetch maps and close-ups (\(store.missingExtras))", systemImage: "square.stack.3d.down.right")
+                    }
+                }
                 if let error = store.lastError {
                     Text(error).font(.footnote).foregroundStyle(.red)
                 }
             } header: {
                 Text("Results")
             } footer: {
-                Text("The results zip holds every verdict on this phone (tower-labels.json) and the satellite photo of every \"Find towers\", so the training set can be built without a Mac. Share it again any time; the newest copy is complete.")
+                Text("The results zip holds every verdict on this phone (tower-labels.json) and the satellite photo of every \"Find towers\", so the training set can be built without a Mac. \"Fetch maps and close-ups\" adds the plain map of each photo (its water tells the detector where towers can stand) and a zoomed photo of every tower and the hardest rejected guesses. Share it again any time; the newest copy is complete.")
             }
 
             Section("Parks") {

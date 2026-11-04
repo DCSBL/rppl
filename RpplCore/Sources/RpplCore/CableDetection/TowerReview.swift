@@ -119,6 +119,18 @@ public struct TowerLabelStore: Codable, Equatable, Sendable {
 
     public var labelCount: Int { parks.values.reduce(0) { $0 + $1.count } }
 
+    /// The labels of a park that get a zoomed close-up for training: every tower, and the
+    /// `rejected` most confident guesses the reviewer turned down (the hard negatives).
+    public func closeupLabels(in parkID: String, rejected: Int = 5) -> [TowerLabel] {
+        let park = labels(for: parkID)
+        let towers = park.filter { $0.verdict == .tower }
+        let hardest = park
+            .filter { $0.verdict == .notTower }
+            .sorted { ($0.probability ?? 0) > ($1.probability ?? 0) }
+            .prefix(rejected)
+        return towers + hardest
+    }
+
     public func count(_ verdict: TowerLabel.Verdict, in parkID: String) -> Int {
         labels(for: parkID).filter { $0.verdict == verdict }.count
     }
@@ -163,9 +175,12 @@ public struct TowerReviewSnapshot: Codable, Equatable, Sendable {
     /// Coordinates with the pixel MapKit drew each at: the reference the training set is built
     /// from, so it does not depend on this app's metres convention.
     public var controlPoints: [DetectionImage.ControlPoint]
+    /// For a zoomed close-up of one label (`snapshots/closeups/`): that label's id.
+    public var labelID: UUID?
 
-    public init(parkID: String, image: DetectionImage, takenAt: Date = Date()) {
+    public init(parkID: String, image: DetectionImage, labelID: UUID? = nil, takenAt: Date = Date()) {
         self.parkID = parkID
+        self.labelID = labelID
         center = image.center
         metersPerPixel = image.metersPerPixel
         widthPx = image.width

@@ -97,6 +97,16 @@ python3 train_round.py --sets <older sets...> /tmp/phone-set --work /tmp/towerne
 
 This runs in the cloud session as well (slower: about an hour for a round there).
 
+"Fetch maps and close-ups" on the review screen adds two things to the zip. `snapshots/maps/` holds
+the plain Apple map of every photo (light mode, same frame, its own control points): water is one
+light blue there, so `phone_set.py` turns it into the park's water mask (`waterFile` in the row)
+and every step that needs water (patches, mining, the loop fit) uses it instead of the k-means guess,
+which takes smooth fields for water on some parks. The check line per park gives the share of the
+image that is water and how many confirmed towers stand on it; a park where that count is low
+means the colour test needs a look. `snapshots/closeups/` holds a 40 m, 5 cm/px photo of every
+tower label and the five hardest rejected guesses per park, copied to `<out>/closeups/`: they show
+whether a second, zoomed-in check of each tower guess could see more than the 0.29 m/px photo.
+
 ## Training the tower net
 
 ```bash

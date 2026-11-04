@@ -54,10 +54,40 @@ def water_mask(rgb: np.ndarray, seed_rc: tuple[int, int] | None = None, near_px:
         hole_sizes = ndimage.sum(np.ones_like(mask), holes, range(1, hole_count + 1))
         small_holes = np.isin(holes, np.nonzero(hole_sizes <= max_hole_px)[0] + 1)
         mask = mask | small_holes
+    return keep_body(mask, seed_rc, near_px, min_area_px)
+
+
+def map_water(map_rgb: np.ndarray, max_hole_px: int = 4000) -> np.ndarray:
+    """Water on the plain Apple map of the same spot (the app saves it next to the photo): the
+    map paints every water body one light blue, so this is a colour test, not a guess.
+    Small holes (the lake's name, a jetty line) are filled; islands stay land."""
+    hsv = cv2.cvtColor(map_rgb, cv2.COLOR_RGB2HSV)
+    hue, sat, val = hsv[..., 0].astype(int), hsv[..., 1].astype(int), hsv[..., 2].astype(int)
+    mask = (hue >= 95) & (hue <= 125) & (sat >= 25) & (val >= 90)  # OpenCV hue 0-180: 190-250 degrees
+    mask = ndimage.binary_opening(mask, iterations=1)
+    filled = ndimage.binary_fill_holes(mask)
+    holes, hole_count = ndimage.label(filled & ~mask)
+    if hole_count:
+        hole_sizes = ndimage.sum(np.ones_like(mask), holes, range(1, hole_count + 1))
+        mask = mask | np.isin(holes, np.nonzero(hole_sizes <= max_hole_px)[0] + 1)
+    return mask
+
+
+def water_for(example, snapshot, rgb: np.ndarray, seed_rc: tuple[int, int] | None = None) -> np.ndarray:
+    """The park's water body on `snapshot`: from the saved Apple map when the training set has
+    one (exact), else from the photo itself (`water_mask`)."""
+    known = example.water(snapshot)
+    if known is not None:
+        return keep_body(known, seed_rc)
+    return water_mask(rgb, seed_rc)
+
+
+def keep_body(mask: np.ndarray, seed_rc: tuple[int, int] | None = None, near_px: int = 1000, min_area_px: int = 20000) -> np.ndarray:
+    """The water component at the seed, or the largest one within `near_px` of it."""
     labeled, count = ndimage.label(mask)
     if count == 0:
         return mask
-    seed = seed_rc or (rgb.shape[0] // 2, rgb.shape[1] // 2)
+    seed = seed_rc or (mask.shape[0] // 2, mask.shape[1] // 2)
     sizes = ndimage.sum(mask, labeled, range(1, count + 1))
     seed_label = labeled[seed]
     if seed_label == 0 or sizes[seed_label - 1] < min_area_px:

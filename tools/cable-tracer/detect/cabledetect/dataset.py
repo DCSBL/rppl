@@ -19,6 +19,8 @@ class Snapshot:
     meters_per_pixel: float
     center_lat: float
     center_lon: float
+    # Water mask from the plain Apple map of the same frame (phone sets only): white is water.
+    water_file: str | None = None
 
 
 @dataclass
@@ -60,6 +62,11 @@ class ParkExample:
         if snapshot.mask_file is None:
             return None
         return np.asarray(Image.open(self.root / snapshot.mask_file).convert("L")) > 127
+
+    def water(self, snapshot: Snapshot) -> np.ndarray | None:
+        if snapshot.water_file is None:
+            return None
+        return np.asarray(Image.open(self.root / snapshot.water_file).convert("L")) > 127
 
     def local_xy(self, lat: float, lon: float) -> np.ndarray:
         """Metres east/north of the park location, like CableTracerCore.LocalProjection."""
@@ -116,6 +123,7 @@ def _snapshot(raw: dict | None) -> Snapshot | None:
         meters_per_pixel=raw["metersPerPixel"],
         center_lat=raw["center"]["lat"],
         center_lon=raw["center"]["lon"],
+        water_file=raw.get("waterFile"),
     )
 
 
