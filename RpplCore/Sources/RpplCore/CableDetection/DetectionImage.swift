@@ -13,6 +13,22 @@ public struct DetectionImage: Sendable {
     public let center: ParkCoordinate
     /// Origin of the local metres frame, normally the park location.
     public let origin: ParkCoordinate
+    /// Known coordinates and the pixel MapKit drew each at, for checking the frame afterwards
+    /// (the tower review saves them with the image); empty when the image did not come from MapKit.
+    public var controlPoints: [ControlPoint] = []
+
+    /// A coordinate and where it lies on the image (column and row, from the top-left corner).
+    public struct ControlPoint: Codable, Equatable, Sendable {
+        public var coordinate: ParkCoordinate
+        public var column: Double
+        public var row: Double
+
+        public init(coordinate: ParkCoordinate, column: Double, row: Double) {
+            self.coordinate = coordinate
+            self.column = column
+            self.row = row
+        }
+    }
 
     public init(width: Int, height: Int, rgb: [UInt8], metersPerPixel: Double, center: ParkCoordinate, origin: ParkCoordinate) {
         precondition(rgb.count == width * height * 3, "rgb must hold width * height * 3 bytes")
@@ -26,18 +42,24 @@ public struct DetectionImage: Sendable {
 
     // MARK: Frames
 
+    /// Metres per degree in the local frame, the same along both axes. MapKit's imagery is Web
+    /// Mercator, which locally has as many pixels per metre north as east; with one constant for
+    /// both, a square in local metres is a square on the image. (An earlier 110,574 m per degree
+    /// of latitude stretched the frame north-south by 0.7%, about 2 m at the edge of a close-up.)
+    static let metersPerDegree = 111_320.0
+
     /// Local metres of a coordinate relative to the origin (equirectangular, fine within a few km).
     public static func localXY(of coordinate: ParkCoordinate, origin: ParkCoordinate) -> SIMD2<Double> {
         let scale = cos(origin.lat * .pi / 180)
         return SIMD2(
-            (coordinate.lon - origin.lon) * scale * 111_320,
-            (coordinate.lat - origin.lat) * 110_574
+            (coordinate.lon - origin.lon) * scale * metersPerDegree,
+            (coordinate.lat - origin.lat) * metersPerDegree
         )
     }
 
     public static func coordinate(fromLocal xy: SIMD2<Double>, origin: ParkCoordinate) -> ParkCoordinate {
         let scale = cos(origin.lat * .pi / 180)
-        return ParkCoordinate(lat: origin.lat + xy.y / 110_574, lon: origin.lon + xy.x / (scale * 111_320))
+        return ParkCoordinate(lat: origin.lat + xy.y / metersPerDegree, lon: origin.lon + xy.x / (scale * metersPerDegree))
     }
 
     public func localXY(of coordinate: ParkCoordinate) -> SIMD2<Double> {

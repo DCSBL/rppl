@@ -196,7 +196,7 @@ struct CableDetectionTests {
         #expect(vectorLength(back - xy) < 1e-9)
         let coordinate = image.coordinate(fromLocal: xy)
         #expect(vectorLength(image.localXY(of: coordinate) - xy) < 1e-6)
-        #expect(abs(image.localXY(of: image.center).y - 55.3) < 0.1)
+        #expect(abs(image.localXY(of: image.center).y - 55.66) < 0.01)  // 0.0005° × 111,320 m
     }
 
     // MARK: Fixtures

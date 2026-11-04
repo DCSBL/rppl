@@ -42,7 +42,7 @@ struct TowerReviewView: View {
                     Label("Share results", systemImage: "square.and.arrow.up")
                 }
                 .disabled(store.labels.labelCount == 0)
-                Text("\(store.labels.labelCount) labels in \(store.labels.reviewedParkIDs.count) parks")
+                Text("\(store.labels.labelCount) labels in \(store.labels.reviewedParkIDs.count) parks · \(store.snapshotCount) photos")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if let error = store.lastError {
@@ -51,7 +51,7 @@ struct TowerReviewView: View {
             } header: {
                 Text("Results")
             } footer: {
-                Text("The results file (tower-labels.json) holds every verdict on this phone; share it again any time, the newest copy is complete.")
+                Text("The results zip holds every verdict on this phone (tower-labels.json) and the satellite photo of every \"Find towers\", so the training set can be built without a Mac. Share it again any time; the newest copy is complete.")
             }
 
             Section("Parks") {

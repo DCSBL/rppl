@@ -34,10 +34,10 @@ def merge(sets: list[Path], out: Path) -> str:
             index = folder.with_suffix(".json")
         for row in json.loads(index.read_text()):
             rows[row["parkID"]] = row
-        for png in folder.glob("*.png"):
-            shutil.copy2(png, out / png.name)
+        for image in [*folder.glob("*.png"), *folder.glob("*.jpg")]:  # the phone set (phone_set.py) is JPEG
+            shutil.copy2(image, out / image.name)
     (out / "training-set.json").write_text(json.dumps(list(rows.values())))
-    labelled = sum(1 for r in rows.values() if r.get("towers"))
+    labelled = sum(1 for r in rows.values() if r.get("towers") or r.get("masts"))  # exports before 2026-11-03 say "masts"
     traced = sum(1 for r in rows.values() if any(len((c.get("geometry") or {}).get("pointsXY") or []) >= 2 for c in r.get("cables") or []))
     return f"{len(rows)} parks ({traced} traced, {labelled} with tower labels)"
 
