@@ -5,3 +5,4 @@ scipy
 shapely
 pillow
 jax  # tower net training and heatmaps (CPU is enough)
+pyyaml  # phone_set.py reads the park files

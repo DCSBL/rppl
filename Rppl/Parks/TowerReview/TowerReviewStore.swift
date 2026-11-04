@@ -1,10 +1,13 @@
 import Foundation
 import Observation
 import RpplCore
+import UIKit
 
-/// Debug: the tower verdicts collected on this phone and the request that says which parks to
-/// review. Both live in Documents/tower-review/ so a session can stop and resume; the labels file
-/// is shared as `tower-labels.json` and read by the cable-tracer's training-set export.
+/// Debug: the tower verdicts collected on this phone, the request that says which parks to review,
+/// and the satellite close-ups the reviews ran on. All live in Documents/tower-review/ so a session
+/// can stop and resume. "Share results" hands over one zip with `tower-labels.json` and
+/// `snapshots/` (a JPEG plus a `TowerReviewSnapshot` JSON per look), from which
+/// `tools/cable-tracer/detect/phone_set.py` builds the training set without a Mac.
 @Observable
 @MainActor
 final class TowerReviewStore {
@@ -13,6 +16,8 @@ final class TowerReviewStore {
     private(set) var labels = TowerLabelStore()
     private(set) var request: TowerReviewRequest?
     private(set) var lastError: String?
+    /// Saved close-ups (one per "Find towers").
+    private(set) var snapshotCount = 0
 
     /// A park to review: from the request when there is one, else every park without a traced cable.
     struct Row: Identifiable {
@@ -34,6 +39,7 @@ final class TowerReviewStore {
     }
     private var labelsFile: URL { directory.appendingPathComponent(TowerLabelStore.fileName) }
     private var requestFile: URL { directory.appendingPathComponent("tower-review-request.json") }
+    private var snapshotsDirectory: URL { directory.appendingPathComponent("snapshots", isDirectory: true) }
 
     private init() {
         load()
@@ -50,6 +56,7 @@ final class TowerReviewStore {
             if FileManager.default.fileExists(atPath: requestFile.path) {
                 request = try TowerReviewRequest.decode(Data(contentsOf: requestFile))
             }
+            countSnapshots()
         } catch {
             lastError = error.localizedDescription
             WakeLog.error(.store, "tower review load: \(error.localizedDescription)")
@@ -107,15 +114,94 @@ final class TowerReviewStore {
         try? FileManager.default.removeItem(at: requestFile)
     }
 
-    /// Presents the share sheet with the labels file (AirDrop, Files, Mail, …).
+    // MARK: Snapshots
+
+    /// Keeps the close-up a "Find towers" ran on, encoded off the main actor.
+    func saveSnapshot(_ image: DetectionImage, parkID: String) {
+        let snapshot = TowerReviewSnapshot(parkID: parkID, image: image)
+        let folder = snapshotsDirectory
+        Task.detached(priority: .utility) {
+            do {
+                guard let jpeg = Self.jpegData(image) else { throw CocoaError(.fileWriteUnknown) }
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try jpeg.write(to: folder.appendingPathComponent(snapshot.fileStem + ".jpg"), options: .atomic)
+                try snapshot.encoded().write(to: folder.appendingPathComponent(snapshot.fileStem + ".json"), options: .atomic)
+                await MainActor.run { TowerReviewStore.shared.countSnapshots() }
+            } catch {
+                WakeLog.error(.store, "tower review snapshot: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func countSnapshots() {
+        let files = (try? FileManager.default.contentsOfDirectory(atPath: snapshotsDirectory.path)) ?? []
+        snapshotCount = files.filter { $0.hasSuffix(".jpg") }.count
+    }
+
+    /// JPEG at high quality: about 1 MB for a 2048 px close-up, against 6-8 MB as PNG.
+    nonisolated static func jpegData(_ image: DetectionImage) -> Data? {
+        let pixels = image.width * image.height
+        var rgbx = [UInt8](repeating: 255, count: pixels * 4)
+        for index in 0..<pixels {
+            rgbx[index * 4] = image.rgb[index * 3]
+            rgbx[index * 4 + 1] = image.rgb[index * 3 + 1]
+            rgbx[index * 4 + 2] = image.rgb[index * 3 + 2]
+        }
+        guard let provider = CGDataProvider(data: Data(rgbx) as CFData),
+              let cgImage = CGImage(
+                  width: image.width,
+                  height: image.height,
+                  bitsPerComponent: 8,
+                  bitsPerPixel: 32,
+                  bytesPerRow: image.width * 4,
+                  space: CGColorSpaceCreateDeviceRGB(),
+                  bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
+                  provider: provider,
+                  decode: nil,
+                  shouldInterpolate: false,
+                  intent: .defaultIntent
+              )
+        else { return nil }
+        return UIImage(cgImage: cgImage).jpegData(compressionQuality: 0.92)
+    }
+
+    // MARK: Sharing
+
+    /// Presents the share sheet with one zip (AirDrop, Files, Mail, …): the labels file and every
+    /// saved close-up.
     func shareResults() {
         do {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent(TowerLabelStore.fileName)
-            try labels.encoded().write(to: url, options: .atomic)
-            ActivitySharePresenter.present(items: [url])
+            ActivitySharePresenter.present(items: [try resultsZip()])
         } catch {
             lastError = error.localizedDescription
             WakeLog.error(.store, "tower review share: \(error.localizedDescription)")
         }
+    }
+
+    private func resultsZip() throws -> URL {
+        let fileManager = FileManager.default
+        let name = "tower-review-\(TowerLabelStore.today())"
+        let staging = fileManager.temporaryDirectory.appendingPathComponent(name, isDirectory: true)
+        try? fileManager.removeItem(at: staging)
+        try fileManager.createDirectory(at: staging, withIntermediateDirectories: true)
+        try labels.encoded().write(to: staging.appendingPathComponent(TowerLabelStore.fileName), options: .atomic)
+        if fileManager.fileExists(atPath: snapshotsDirectory.path) {
+            try fileManager.copyItem(at: snapshotsDirectory, to: staging.appendingPathComponent("snapshots", isDirectory: true))
+        }
+        // Reading a folder with .forUploading hands back a zip of it.
+        let zip = fileManager.temporaryDirectory.appendingPathComponent(name + ".zip")
+        var coordinationError: NSError?
+        var copyError: Error?
+        NSFileCoordinator().coordinate(readingItemAt: staging, options: .forUploading, error: &coordinationError) { zipped in
+            do {
+                try? fileManager.removeItem(at: zip)
+                try fileManager.copyItem(at: zipped, to: zip)
+            } catch {
+                copyError = error
+            }
+        }
+        if let coordinationError { throw coordinationError }
+        if let copyError { throw copyError }
+        return zip
     }
 }

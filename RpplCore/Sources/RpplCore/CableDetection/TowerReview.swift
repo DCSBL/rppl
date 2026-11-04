@@ -147,6 +147,45 @@ public struct TowerLabelStore: Codable, Equatable, Sendable {
     }
 }
 
+/// The satellite close-up a review ran on, saved next to the labels so the training set can be
+/// built from the phone's own images (no Mac needed to render them again). The image itself is
+/// `<file stem>.jpg`; this is `<file stem>.json` beside it.
+public struct TowerReviewSnapshot: Codable, Equatable, Sendable {
+    public var version = 1
+    public var parkID: String
+    /// Coordinate of the image centre.
+    public var center: ParkCoordinate
+    public var metersPerPixel: Double
+    public var widthPx: Int
+    public var heightPx: Int
+    /// ISO 8601, UTC.
+    public var takenAt: String
+    /// Coordinates with the pixel MapKit drew each at: the reference the training set is built
+    /// from, so it does not depend on this app's metres convention.
+    public var controlPoints: [DetectionImage.ControlPoint]
+
+    public init(parkID: String, image: DetectionImage, takenAt: Date = Date()) {
+        self.parkID = parkID
+        center = image.center
+        metersPerPixel = image.metersPerPixel
+        widthPx = image.width
+        heightPx = image.height
+        controlPoints = image.controlPoints
+        self.takenAt = ISO8601DateFormatter().string(from: takenAt)
+    }
+
+    /// File stem for this snapshot: park id plus the time it was taken, so several looks at one park all stay.
+    public var fileStem: String {
+        "\(parkID)-\(takenAt.filter { $0.isNumber })"
+    }
+
+    public func encoded() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(self)
+    }
+}
+
 /// Which parks to review, handed to the app as `tower-review-request.json`. Without a request the
 /// app offers every park that has no traced cable.
 public struct TowerReviewRequest: Codable, Equatable, Sendable {

@@ -54,11 +54,15 @@ toggle "Review towers" (`Rppl/Parks/TowerReview/`), on the phone where the satel
   near an unsure or not-visible spot. "Add tower here" and "Not visible here" mark towers the
   detector missed. Rings: orange = current guess, green = tower, red = no tower, cyan = not
   visible, grey = unsure; tap a ring to remove.
-- "Share results" hands over `tower-labels.json` with every verdict on the phone. Put it at
+- "Share results" hands over one zip, `tower-review-<date>.zip`: `tower-labels.json` with every
+  verdict on the phone, and `snapshots/` with the 600 m satellite close-up of every "Find towers"
+  (JPEG plus a JSON with its centre and scale). Put the labels at
   `tools/cable-tracer/tower-labels.json` (it is a superset of earlier shares from the same phone;
   merge by park id when several phones contribute; add a trailing newline for pre-commit) and
   commit it like park data; the exporter finds it from the parks folder, `--labels <file>` points
-  elsewhere. Files from before the rename (`mast-labels.json`, verdict `mast`) still load.
+  elsewhere. Files from before the rename (`mast-labels.json`, verdict `mast`) still load. The
+  snapshots stay out of the repo: `detect/phone_set.py` turns the zip into a training set
+  directly, so no Mac has to render the close-ups again (see `detect/README.md`).
 - "Export training set" and `--export-training-set` include the labelled parks, with a 600 m
   close-up around the towers, so `detect/` trains on them without a traced cable.
 
