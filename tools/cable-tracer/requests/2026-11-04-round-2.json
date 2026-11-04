@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "createdAt": "2026-11-04T06:30:00Z",
+  "note": "Round 2: the 52 parks left from round 1. Traced parks with many false guesses come first: their \"No tower\" verdicts are what the net needs most. Then parks without a traced cable. Use Unsure for a tower you know is there but cannot see, and for ghost copies from mixed imagery.",
+  "parks": [
+    {
+      "id": "schotsman-kamperland",
+      "name": "Schotsman Watersport Kamperland",
+      "reason": "detector found 4 of 4 towers, 30 false ones, IoU 0.68"
+    },
+    {
+      "id": "terhills-dilsen-stokkem",
+      "name": "Terhills Cablepark",
+      "reason": "detector found 10 of 20 towers, 22 false ones, IoU 0.80"
+    },
+    {
+      "id": "betuwestrand-beesd",
+      "name": "BetuweStrand",
+      "reason": "detector found 0 of 5 towers, 20 false ones, IoU 0.00"
+    },
+    {
+      "id": "lunalake-heerhugowaard",
+      "name": "Luna Lake",
+      "reason": "detector found 4 of 5 towers, 13 false ones, IoU 0.87"
+    },
+    {
+      "id": "waterskitwente-enschede",
+      "name": "Waterski Twente",
+      "reason": "detector found 3 of 4 towers, 12 false ones, IoU 0.64"
+    },
+    {
+      "id": "lakeside-paradise-knokke",
+      "name": "Lakeside Paradise",
+      "reason": "detector found 20 of 20 towers, 9 false ones, IoU 0.26"
+    },
+    {
+      "id": "project7-rotterdam",
+      "name": "Project 7 Cablepark Rotterdam",
+      "reason": "detector found 1 of 5 towers, 9 false ones, IoU 0.52"
+    },
+    {
+      "id": "zeumeren-voorthuizen",
+      "name": "Zeumeren Watersport",
+      "reason": "detector found 4 of 5 towers, 9 false ones, IoU 0.82"
+    },
+    {
+      "id": "outsider-oudenaarde",
+      "name": "The Outsider Cablepark",
+      "reason": "detector found 5 of 5 towers, 8 false ones, IoU 0.52"
+    },
+    {
+      "id": "beavercreek-roermond",
+      "name": "Beaver Creek Wake Park Roermond",
+      "reason": "detector found 5 of 5 towers, 7 false ones, IoU 0.61"
+    },
+    {
+      "id": "aquabest-best",
+      "name": "Cablepark Aquabest",
+      "reason": "detector found 3 of 4 towers, 6 false ones, IoU 0.75"
+    },
+    {
+      "id": "dock79-saint-ghislain",
+      "name": "Dock79 Cable Park",
+      "reason": "detector found 4 of 5 towers, 6 false ones, IoU 0.86"
+    },
+    {
+      "id": "blaue-lagune-wachtendonk",
+      "name": "Blaue Lagune Wakepark Wachtendonk",
+      "reason": "detector found 4 of 5 towers, 5 false ones, IoU 0.60"
+    },
+    {
+      "id": "thebricks-duisburg",
+      "name": "The Bricks Duisburg",
+      "reason": "detector found 9 of 24 towers, 4 false ones, IoU 0.64"
+    },
+    {
+      "id": "wetnwild-alphen",
+      "name": "Wet 'n Wild",
+      "reason": "detector found 4 of 5 towers, 4 false ones, IoU 0.83"
+    },
+    {
+      "id": "view-almere",
+      "name": "Cablepark VIEW Almere",
+      "reason": "detector found 0 of 5 towers, 3 false ones, IoU 0.86"
+    },
+    {
+      "id": "wakebeach-257-dormagen",
+      "name": "Wakebeach 257 Dormagen",
+      "reason": "detector found 0 of 5 towers, 3 false ones, IoU 0.31"
+    },
+    {
+      "id": "breakout-harkstede",
+      "name": "Break Out Grunopark",
+      "reason": "detector found 3 of 4 towers, 2 false ones, IoU 0.75"
+    },
+    {
+      "id": "wakeup-antwerp",
+      "name": "WakeUp Cable Antwerpen",
+      "reason": "detector found 4 of 6 towers, 1 false ones, IoU 0.54"
+    },
+    {
+      "id": "ermerstrand-erm",
+      "name": "Ermerstrand",
+      "reason": "detector found 0 of 4 towers, 0 false ones, IoU 0.33"
+    },
+    {
+      "id": "lakeside-zwolle",
+      "name": "Lakeside Zwolle",
+      "reason": "detector found 0 of 5 towers, 0 false ones, IoU 0.00"
+    },
+    {
+      "id": "cable-park-twistesee",
+      "name": "Cable Park Twistesee",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "friedenhainsee-parkstetten",
+      "name": "Friedenhainsee Wasserski",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "southlake-heuchelheim",
+      "name": "Southlake Wasserski- und Wakeboardzentrum Heuchelheim",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "supieria-rostock",
+      "name": "Supieria Wasser- und Wakepark Rostock",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "spin-froidchapelle",
+      "name": "The Spin Leisure Park",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "turncable-thannhausen",
+      "name": "Turncable Wakepark Thannhausen",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wawaco-weissenhaeuser-strand",
+      "name": "WaWaCo Weißenhäuser Strand",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wake-and-groove-geisenfeld",
+      "name": "Wake & Groove Cablepark Geisenfeld",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wake-and-ski-blauer-see-garbsen",
+      "name": "Wake & Ski Blauer See Garbsen",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wake-and-beach-halbendorf",
+      "name": "Wake and Beach Halbendorf",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wakepark-thulba",
+      "name": "WakePark Thulba",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wakepark-triolago-riol",
+      "name": "WakePark Triolago",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wakepark-brombachsee",
+      "name": "Wakepark Brombachsee",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wakepark-fehmarn",
+      "name": "Wakepark Fehmarn",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wakepark-pfullendorf",
+      "name": "Wakepark Pfullendorf",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "waketoolz-wakepark-woerth",
+      "name": "Waketoolz Wakepark Wörth",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-wakeboard-kalletal",
+      "name": "Wasserski & Wakeboard Kalletal",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-kirchheim-seepark",
+      "name": "Wasserski & Wakeboard Paradies Kirchheim",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-bleibtreusee",
+      "name": "Wasserski Bleibtreusee",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-hamm",
+      "name": "Wasserski Hamm",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-jagel",
+      "name": "Wasserski Jagel",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-langenfeld",
+      "name": "Wasserski Langenfeld",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-paderborn",
+      "name": "Wasserski Paderborn",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserski-st-leon",
+      "name": "Wasserski St. Leon",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserskilift-zachun",
+      "name": "Wasserskilift ZachunBeach",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserskipark-aschheim",
+      "name": "Wasserskipark Aschheim",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserskipark-damp",
+      "name": "Wasserskipark Damp",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserskipark-zossen",
+      "name": "Wasserskipark Zossen",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wasserskiseilbahn-neubrandenburg",
+      "name": "Wasserskiseilbahn Neubrandenburg",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wet-and-wild-velten",
+      "name": "Wet & Wild Velten",
+      "reason": "no cable traced"
+    },
+    {
+      "id": "wildwakepark-steinberger-see",
+      "name": "WildWakePark Steinberger See",
+      "reason": "no cable traced"
+    }
+  ]
+}

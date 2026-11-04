@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from cabledetect import dataset, towerheat, water  # noqa: E402
+from cabledetect import dataset, towerheat, towertrain, water  # noqa: E402
 from cabledetect.towerpatches import crop  # noqa: E402
 
 
@@ -31,12 +31,14 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
         rgb = example.image(snapshot)
         seed_px = example.to_pixels(snapshot, np.zeros((1, 2)))[0]
         w = water.water_mask(rgb, (int(np.clip(seed_px[1], 0, 2047)), int(np.clip(seed_px[0], 0, 2047))))
-        logits = towerheat.dense_logits(models[example.park_id], rgb)
-        # A peak near a traced bend, a confirmed tower or an unsure detection is not a false peak.
-        bends = np.concatenate([example.to_pixels(snapshot, example.tower_positions_xy), example.to_pixels(snapshot, example.towers_xy("unsure"))])
+        net = models[example.park_id]
+        patch = towertrain.patch_of(net)
+        logits = towerheat.dense_logits(net, rgb)
+        # A peak near a traced bend, a confirmed tower, an unsure detection or a tower that is not visible is not a false peak.
+        bends = np.concatenate([example.to_pixels(snapshot, example.tower_positions_xy), example.to_pixels(snapshot, example.keep_out_xy())])
         mpp = snapshot.meters_per_pixel
         candidates = []
-        for row, col, prob in towerheat.tower_peaks(logits, float(np.log(probability / (1 - probability)))):
+        for row, col, prob in towerheat.tower_peaks(logits, float(np.log(probability / (1 - probability))), patch=patch):
             if np.min(np.hypot(bends[:, 0] - col, bends[:, 1] - row)) * mpp < 20:
                 continue
             # Only places the detector could meet in the app: on or near the water body.
@@ -48,9 +50,9 @@ def main(root: Path, patches: Path, params: Path, out: Path, probability: float 
         for prob, col, row in candidates[:per_park]:
             for jitter in range(2):
                 jc, jr = (0.0, 0.0) if jitter == 0 else rng.normal(0, 2 / mpp, 2)
-                patch = crop(rgb, col + jc, row + jr)
-                if patch is not None:
-                    x.append(patch); y.append(0); parks.append(example.park_id); kinds.append("falsepeak"); count += 1
+                patch_rgb = crop(rgb, col + jc, row + jr, patch)
+                if patch_rgb is not None:
+                    x.append(patch_rgb); y.append(0); parks.append(example.park_id); kinds.append("falsepeak"); count += 1
         added += count
         print(example.park_id, "false peaks", len(candidates), "added", count, flush=True)
     np.savez_compressed(out, x=np.stack(x).astype(np.uint8), y=np.array(y, dtype=np.int64), park=np.array(parks), kind=np.array(kinds))

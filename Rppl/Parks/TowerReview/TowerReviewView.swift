@@ -91,8 +91,9 @@ struct TowerReviewView: View {
     private func parkRow(_ row: TowerReviewStore.Row) -> some View {
         let towers = store.labels.count(.tower, in: row.id)
         let none = store.labels.count(.notTower, in: row.id)
+        let hidden = store.labels.count(.notVisible, in: row.id)
         let unsure = store.labels.count(.unsure, in: row.id)
-        let reviewed = towers + none + unsure > 0
+        let reviewed = towers + none + hidden + unsure > 0
         return HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.name)

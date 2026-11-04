@@ -1,13 +1,14 @@
 """One training round of the tower net, start to finish, with progress in the terminal.
 
-    python3 train_round.py --sets <training-set> [<training-set> ...] --work <dir> [--copy-to <dir>]
+    python3 train_round.py --sets <training-set> [<training-set> ...] --work <dir> [--copy-to <dir>] [--patch 128]
 
 `--sets` are exported training sets (each a folder with training-set.json and PNGs), merged in order;
 a later set replaces an earlier row for the same park. Steps: merge, patches, train (5-fold CV + final
 model), mine the confident false peaks as extra negatives, train again, evaluate the loop fit on the
 traced parks with the per-fold models. Every step's full output goes to <work>/<step>.log; the
 terminal shows one status line per step and a summary at the end. `--copy-to` copies the weights,
-fold models and logs there (e.g. the iCloud folder), not the patches or images.
+fold models and logs there (e.g. the iCloud folder), not the patches or images. `--patch 128` trains
+on 37 m patches instead of 19 m, so the net sees the whole tower arm (the app ships only 64 px nets).
 """
 from __future__ import annotations
 
@@ -77,6 +78,8 @@ def main() -> None:
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--copy-to", type=Path)
     parser.add_argument("--name", default="towernet", help="file stem of the trained weights")
+    parser.add_argument("--patch", type=int, choices=(64, 128), default=64,
+                        help="patch size in pixels: 64 (19 m, the shipped net) or 128 (37 m, the whole tower arm)")
     args = parser.parse_args()
     work = args.work.resolve()
     work.mkdir(parents=True, exist_ok=True)
@@ -85,7 +88,7 @@ def main() -> None:
     first, final = work / f"{name}-a.npz", work / f"{name}.npz"
 
     steps = [
-        ("Patches", ["cabledetect/towerpatches.py", ts, patches]),
+        ("Patches", ["cabledetect/towerpatches.py", ts, patches, "--patch", args.patch]),
         ("Train, round 1", ["cabledetect/towertrain.py", patches, first]),
         ("Mine false peaks", ["cabledetect/towermine.py", ts, patches, first, mined]),
         ("Train, round 2", ["cabledetect/towertrain.py", mined, final]),

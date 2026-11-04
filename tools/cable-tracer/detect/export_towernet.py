@@ -19,6 +19,8 @@ def synthetic_patch(size: int = 64) -> np.ndarray:
 
 def main(params_path: Path, out: Path) -> None:
     data = np.load(params_path)
+    if len([k for k in data.files if k.startswith("w")]) != len(LAYERS) + 1:
+        sys.exit(f"{params_path} is not a 64 px net; the app's TowerNet only reads 64 px nets (see README, --patch 128)")
     blob = bytearray(b"RPMN")
     blob += struct.pack("<II", 1, len(LAYERS))
     for i, (cin, cout) in enumerate(LAYERS):
