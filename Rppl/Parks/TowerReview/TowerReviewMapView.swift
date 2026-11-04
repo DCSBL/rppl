@@ -223,6 +223,7 @@ struct TowerReviewMapView: View {
         Task {
             do {
                 let image = try await CableDetectionRunner.snapshot(around: center)
+                store.saveSnapshot(image, parkID: parkID)
                 let result = await Task.detached(priority: .userInitiated) {
                     var options = CableDetector.Options()
                     options.minimumTowerProbability = TowerReviewSession.minimumProbability

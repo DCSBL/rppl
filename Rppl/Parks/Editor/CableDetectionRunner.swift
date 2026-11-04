@@ -3,7 +3,8 @@ import RpplCore
 import UIKit
 
 /// Takes a satellite close-up of the park with MapKit and runs the cable detector on it.
-/// The image never leaves the device and is thrown away afterwards.
+/// The image never leaves the device; only the Debug tower review keeps it, for the
+/// detector's training set (see `TowerReviewStore`).
 enum CableDetectionRunner {
     /// Side of the close-up in metres; the cable is never further than ~500 m from the park pin.
     static let sideMeters = 600.0

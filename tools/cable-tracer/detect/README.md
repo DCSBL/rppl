@@ -81,6 +81,20 @@ weights. Use another `--work` folder to compare it with a 64 px round. The app a
 `export_towernet.py` still take only 64 px nets: port the extra layer to `TowerNet.swift` only
 if the 128 px round wins on the loops.
 
+### From the phone's zip, without a Mac
+
+The review screen keeps the close-up of every "Find towers", and "Share results" sends them with
+the labels in one zip. `phone_set.py` makes a training set out of it (cables from the park YAML,
+labels in local metres, the close-up that shows the most labels), which `train_round.py` merges
+after the older sets, so its rows replace theirs for the same park:
+
+```bash
+python3 phone_set.py tower-review-2026-11-05.zip /tmp/phone-set
+python3 train_round.py --sets <older sets...> /tmp/phone-set --work /tmp/towernet-round
+```
+
+This runs in the cloud session as well (slower: about an hour for a round there).
+
 ## Training the tower net
 
 ```bash
