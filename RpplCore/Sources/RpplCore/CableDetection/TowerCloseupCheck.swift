@@ -21,10 +21,6 @@ public struct TowerCloseupCheck: Sendable {
         return TowerCloseupCheck(net: net)
     }()
 
-    init(net: TowerNet) {
-        self.net = net
-    }
-
     /// Probability that a tower stands at the centre of `closeup` (768 or 256 px square).
     public func score(_ closeup: DetectionImage) -> Double {
         let input = Self.input(from: closeup)
