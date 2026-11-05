@@ -76,6 +76,16 @@ public struct TowerNet: Sendable {
         return linear(pooled.values)[0]
     }
 
+    /// Logit for one square input that is already scaled (row-major RGB floats, `size` x `size`):
+    /// the same layers as `logit(patch:)` without the /255, for nets trained on standardised
+    /// input such as `TowerCloseupCheck`.
+    func logit(input: [Float], size: Int) -> Float {
+        precondition(input.count == size * size * 3)
+        let features = backbone(input, width: size, height: size)
+        let pooled = Self.averagePool(features.values, width: features.width, height: features.height, channels: features.channels, window: features.width)
+        return linear(pooled.values)[0]
+    }
+
     /// Tower heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
     /// is (16 row, 16 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
     func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> TowerHeatmap {

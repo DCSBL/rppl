@@ -39,6 +39,8 @@ enum AppSettingsKey {
     static let debugParkSpotlight = "rppl.debugParkSpotlight"
     /// Debug: "Review towers" screen that collects tower verdicts for the detector's training set (default off).
     static let debugTowerReview = "rppl.debugTowerReview"
+    /// Debug: the tower review scores every guess on a zoomed close-up (`TowerCloseupCheck`).
+    static let debugTowerCloseupCheck = "rppl.debugTowerCloseupCheck"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).

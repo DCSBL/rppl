@@ -205,6 +205,7 @@ def build(source: Path, out: Path, parks_dir: Path) -> str:
                 "snapshot": None,
                 "detailSnapshot": detail,
             })
+        shutil.copy2(labels_files[0], out / "tower-labels.json")  # the close-up check reads the verdicts
         closeups = base / "snapshots" / "closeups"
         if closeups.is_dir():
             # Not used in training yet: they show how much detail the imagery has around a tower.
