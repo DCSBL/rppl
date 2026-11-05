@@ -16,7 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cabledetect import closeupcheck  # noqa: E402
 
 
-def synthetic_closeup(size: int = 768) -> np.ndarray:
+def synthetic_closeup(size: int = 1152) -> np.ndarray:
+    """The pattern TowerCloseupCheckTests scores: 1152 px at 6.25 cm/px, the guess drawn at (560, 590)."""
     y, x = np.mgrid[0:size, 0:size]
     return np.stack([(x * 7 + y * 13 + c * 31 + (x * y) % 17) % 256 for c in range(3)], axis=-1).astype(np.uint8)
 
@@ -31,7 +32,7 @@ def main(params_path: Path, out: Path) -> None:
     w, b = (np.asarray(a) for a in params[-1])
     blob += struct.pack("<II", w.shape[0], w.shape[1]) + w.astype("<f4").tobytes() + b.astype("<f4").tobytes()
     out.write_bytes(bytes(blob))
-    stored = closeupcheck.downsample(synthetic_closeup())[None]
+    stored = closeupcheck.window(synthetic_closeup(), 0.0625, 560.0, 590.0)[None]
     plain = float(closeupcheck.forward(params, jnp.asarray(closeupcheck.centre(stored)))[0])
     score = float(closeupcheck.predict(params, stored)[0])
     print(f"wrote {out} ({len(blob)} bytes)")

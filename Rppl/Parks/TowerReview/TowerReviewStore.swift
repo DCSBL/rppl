@@ -24,9 +24,13 @@ final class TowerReviewStore {
     private(set) var closeupCount = 0
     private(set) var extrasProgress: (done: Int, total: Int)?
 
-    /// A close-up is fetched 40 m wide at 768 px (5 cm/px) and kept at 256 px (0.156 m/px), the
-    /// scale `TowerCloseupCheck` works at: about 25 kB each, so every label can have one.
-    static let closeupKeptPixels = 256
+    /// A close-up comes back from MapKit about 70 m wide at about 6 cm/px and is kept averaged to
+    /// about 0.25 m/px (`TowerCloseupCheck.blockFactor`), the scale the check works at: about
+    /// 25 kB each, so every label can have one.
+    nonisolated static func kept(_ closeup: DetectionImage) -> DetectionImage {
+        let factor = TowerCloseupCheck.blockFactor(for: closeup)
+        return factor > 1 ? closeup.scaledDown(by: factor) : closeup
+    }
     /// The map only gives the water outline: 512 px (1.2 m/px) is plenty and keeps the zip small.
     static let mapPixels = 512
 
@@ -240,7 +244,7 @@ final class TowerReviewStore {
     }
 
     private func writeCloseup(_ closeup: DetectionImage, for label: TowerLabel, parkID: String) async throws {
-        let kept = closeup.width > Self.closeupKeptPixels ? closeup.scaledDown(by: closeup.width / Self.closeupKeptPixels) : closeup
+        let kept = Self.kept(closeup)
         let meta = TowerReviewSnapshot(parkID: parkID, image: kept, labelID: label.id)
         try await write(kept, meta: meta, stem: closeupStem(label, in: parkID), to: closeupsDirectory, png: false)
     }

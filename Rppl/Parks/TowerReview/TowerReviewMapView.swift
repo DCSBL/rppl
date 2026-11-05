@@ -291,21 +291,20 @@ struct TowerReviewMapView: View {
         }
     }
 
-    /// Fetches the 40 m close-up of every guess, in review order, and scores it; one at a time.
+    /// Fetches the close-up of every guess, in review order, and scores it; one at a time.
     private func startCloseupChecks(for found: TowerReviewSession) {
         checking?.cancel()
         closeupScores = [:]
         closeups = [:]
         guard closeupCheckEnabled, let check = TowerCloseupCheck.bundled else { return }
         let candidates = found.candidates
-        let keptPixels = TowerReviewStore.closeupKeptPixels
         checking = Task {
             for candidate in candidates {
                 if Task.isCancelled { return }
                 do {
                     let closeup = try await CableDetectionRunner.closeup(around: candidate.coordinate)
                     let (score, kept) = await Task.detached(priority: .userInitiated) {
-                        let kept = closeup.scaledDown(by: closeup.width / keptPixels)
+                        let kept = TowerReviewStore.kept(closeup)
                         return (check.score(kept), kept)
                     }.value
                     if Task.isCancelled { return }
