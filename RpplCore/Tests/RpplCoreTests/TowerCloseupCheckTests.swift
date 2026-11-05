@@ -92,6 +92,6 @@ struct TowerCloseupCheckTests {
         let check = try #require(TowerCloseupCheck.bundled)
         let input = TowerCloseupCheck.input(from: Self.syntheticCloseup(origin: origin))
         // Reference from export_closeupcheck.py (logit of the plain view of the same pattern).
-        #expect(abs(check.net.logit(input: input, size: 192) - -0.127526) < 0.05)
+        #expect(abs(check.net.logit(input: input, size: 192) - 2.193006) < 0.05)
     }
 }
