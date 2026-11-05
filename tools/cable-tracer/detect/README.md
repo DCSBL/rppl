@@ -121,6 +121,17 @@ python3 overnight.py --zip ~/Development/rppl/tower-review-2026-11-04.zip \
   --work ~/towernet-overnight --copy-to "$C/train-$(date +%F)"
 ```
 
+### Close-up check in the app
+
+`export_closeupcheck.py <closeupcheck.npz> RpplCore/Sources/RpplCore/Resources/TowerCloseupCheck.weights`
+writes the check in the TowerNet format and prints the reference logit for `TowerCloseupCheckTests`.
+The app (`TowerCloseupCheck.swift`) prepares the close-up exactly like `closeupcheck.py`: 768 px
+averaged over 3 x 3 pixels to 256 px, the middle 192 px standardised per channel, eight views. With
+the review screen's "Close-up check" on, every guess gets that score under it and the score is saved
+with the verdict (`closeupScore`), so the check is measured on new labels as they come in. The
+close-ups the review keeps are 256 px (all labels, not only five rejected guesses per park), the maps
+512 px.
+
 ## Training the tower net
 
 ```bash

@@ -24,10 +24,11 @@ final class TowerReviewStore {
     private(set) var closeupCount = 0
     private(set) var extrasProgress: (done: Int, total: Int)?
 
-    /// A close-up is 40 m wide at 768 px (5 cm/px): sharper than the imagery, so it shows how much
-    /// detail MapKit really has around a tower.
-    static let closeupMeters = 40.0
-    static let closeupPixels = 768
+    /// A close-up is fetched 40 m wide at 768 px (5 cm/px) and kept at 256 px (0.156 m/px), the
+    /// scale `TowerCloseupCheck` works at: about 25 kB each, so every label can have one.
+    static let closeupKeptPixels = 256
+    /// The map only gives the water outline: 512 px (1.2 m/px) is plenty and keeps the zip small.
+    static let mapPixels = 512
 
     /// A park to review: from the request when there is one, else every park without a traced cable.
     struct Row: Identifiable {
@@ -204,7 +205,7 @@ final class TowerReviewStore {
                 let image = try await CableDetectionRunner.snapshot(
                     around: look.center,
                     sideMeters: CableDetectionRunner.sideMeters,
-                    sidePixels: look.widthPx,
+                    sidePixels: Self.mapPixels,
                     style: .map
                 )
                 let meta = TowerReviewSnapshot(parkID: look.parkID, image: image)
@@ -213,9 +214,8 @@ final class TowerReviewStore {
                 extrasProgress = (done, total)
             }
             for (parkID, label) in closeups {
-                let image = try await CableDetectionRunner.snapshot(around: label.coordinate, sideMeters: Self.closeupMeters, sidePixels: Self.closeupPixels)
-                let meta = TowerReviewSnapshot(parkID: parkID, image: image, labelID: label.id)
-                try await write(image, meta: meta, stem: closeupStem(label, in: parkID), to: closeupsDirectory, png: false)
+                let image = try await CableDetectionRunner.closeup(around: label.coordinate)
+                try await writeCloseup(image, for: label, parkID: parkID)
                 done += 1
                 extrasProgress = (done, total)
             }
@@ -223,6 +223,26 @@ final class TowerReviewStore {
             lastError = error.localizedDescription
             WakeLog.error(.store, "tower review extras: \(error.localizedDescription)")
         }
+    }
+
+    /// Keeps the close-up the check looked at for a label just judged, so "Fetch maps and
+    /// close-ups" does not fetch it again.
+    func saveCloseup(_ closeup: DetectionImage, for label: TowerLabel, parkID: String) {
+        Task {
+            do {
+                try FileManager.default.createDirectory(at: closeupsDirectory, withIntermediateDirectories: true)
+                try await writeCloseup(closeup, for: label, parkID: parkID)
+                countSnapshots()
+            } catch {
+                WakeLog.error(.store, "tower review close-up: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func writeCloseup(_ closeup: DetectionImage, for label: TowerLabel, parkID: String) async throws {
+        let kept = closeup.width > Self.closeupKeptPixels ? closeup.downsampled(by: closeup.width / Self.closeupKeptPixels) : closeup
+        let meta = TowerReviewSnapshot(parkID: parkID, image: kept, labelID: label.id)
+        try await write(kept, meta: meta, stem: closeupStem(label, in: parkID), to: closeupsDirectory, png: false)
     }
 
     private func write(_ image: DetectionImage, meta: TowerReviewSnapshot, stem: String, to folder: URL, png: Bool) async throws {

@@ -40,6 +40,34 @@ public struct DetectionImage: Sendable {
         self.origin = origin
     }
 
+    /// The image shrunk by an integer factor, each pixel the rounded mean of a `factor` x `factor`
+    /// block (the same mean tools/cable-tracer/detect/cabledetect/closeupcheck.py uses). Centre and
+    /// frame stay; metres per pixel grow by `factor`.
+    public func downsampled(by factor: Int) -> DetectionImage {
+        precondition(factor >= 1)
+        guard factor > 1 else { return self }
+        let outWidth = width / factor, outHeight = height / factor
+        let count = Float(factor * factor)
+        var out = [UInt8](repeating: 0, count: outWidth * outHeight * 3)
+        for y in 0..<outHeight {
+            for x in 0..<outWidth {
+                for c in 0..<3 {
+                    var sum = 0
+                    for dy in 0..<factor {
+                        let row = (y * factor + dy) * width
+                        for dx in 0..<factor { sum += Int(rgb[(row + x * factor + dx) * 3 + c]) }
+                    }
+                    out[(y * outWidth + x) * 3 + c] = UInt8((Float(sum) / count).rounded())
+                }
+            }
+        }
+        var image = DetectionImage(width: outWidth, height: outHeight, rgb: out, metersPerPixel: metersPerPixel * Double(factor), center: center, origin: origin)
+        image.controlPoints = controlPoints.map {
+            ControlPoint(coordinate: $0.coordinate, column: $0.column / Double(factor), row: $0.row / Double(factor))
+        }
+        return image
+    }
+
     // MARK: Frames
 
     /// Metres per degree in the local frame, the same along both axes. MapKit's imagery is Web

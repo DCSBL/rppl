@@ -22,6 +22,11 @@ struct TowerReviewMapView: View {
     /// Where the frame's left end (the tower's foot) is on the map.
     @State private var foot: ParkCoordinate?
     @State private var camera: MapCamera?
+    /// Close-up check per guess (by candidate id), and the close-up it looked at (kept at 256 px).
+    @State private var closeupScores: [Int: Double] = [:]
+    @State private var closeups: [Int: DetectionImage] = [:]
+    @State private var checking: Task<Void, Never>?
+    @AppStorage(AppSettingsKey.debugTowerCloseupCheck) private var closeupCheckEnabled = true
 
     /// Camera distance when a park opens zoomed out: close enough to see a single tower.
     private static let candidateDistanceM = 160.0
@@ -113,6 +118,7 @@ struct TowerReviewMapView: View {
             }
         }
         .safeAreaInset(edge: .bottom) { controls }
+        .onDisappear { checking?.cancel() }
         .navigationTitle(park.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -148,8 +154,13 @@ struct TowerReviewMapView: View {
             }
             if let session, let current = session.current, let index = session.position {
                 HStack {
-                    Text("Guess \(index) of \(session.remaining) · \(Int((current.probability * 100).rounded())) %")
-                        .font(.subheadline.weight(.semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Guess \(index) of \(session.remaining) · \(Int((current.probability * 100).rounded())) %")
+                            .font(.subheadline.weight(.semibold))
+                        if closeupCheckEnabled {
+                            closeupLine(for: current.id)
+                        }
+                    }
                     Spacer()
                     Button("Show") { fly(to: current.coordinate) }
                     Button("Skip") {
@@ -232,6 +243,7 @@ struct TowerReviewMapView: View {
                 }.value
                 let found = TowerReviewSession(parkID: parkID, detected: result.towers, image: image, labels: known)
                 session = found
+                startCloseupChecks(for: found)
                 detectionNote = found.remaining == 0
                     ? (result.towers.isEmpty ? String(localized: "No towers found") : String(localized: "All guesses here are judged"))
                     : nil
@@ -244,8 +256,14 @@ struct TowerReviewMapView: View {
     }
 
     private func judge(_ verdict: TowerLabel.Verdict) {
-        guard let label = session?.judge(verdict, crosshair: centerCoordinate, arm: arm) else { return }
+        let id = session?.current?.id
+        let score = id.flatMap { closeupScores[$0] }
+        guard let label = session?.judge(verdict, crosshair: centerCoordinate, arm: arm, closeupScore: score) else { return }
         store.add(label, to: park.id)
+        // The close-up is centred on the guess: it only serves as the label's own when the label stayed there.
+        if let id, let closeup = closeups[id], label.detected == nil {
+            store.saveCloseup(closeup, for: label, parkID: park.id)
+        }
         if let next = session?.current { fly(to: next.coordinate) }
     }
 
@@ -255,6 +273,48 @@ struct TowerReviewMapView: View {
         let distance = camera.map { $0.distance > Self.candidateDistanceM * 2 ? Self.candidateDistanceM : $0.distance } ?? Self.candidateDistanceM
         withAnimation {
             position = .camera(MapCamera(centerCoordinate: mapCoordinate(coordinate), distance: distance, heading: camera?.heading ?? 0, pitch: 0))
+        }
+    }
+
+    // MARK: Close-up check
+
+    @ViewBuilder
+    private func closeupLine(for id: Int) -> some View {
+        if let score = closeupScores[id] {
+            Text("Close-up check \(Int((score * 100).rounded())) % · \(score >= 0.5 ? "tower" : "no tower")")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(score >= 0.5 ? Color.green : Color.red)
+        } else if TowerCloseupCheck.bundled == nil {
+            Text("Close-up check not bundled").font(.caption).foregroundStyle(.secondary)
+        } else {
+            Text("Close-up check…").font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    /// Fetches the 40 m close-up of every guess, in review order, and scores it; one at a time.
+    private func startCloseupChecks(for found: TowerReviewSession) {
+        checking?.cancel()
+        closeupScores = [:]
+        closeups = [:]
+        guard closeupCheckEnabled, let check = TowerCloseupCheck.bundled else { return }
+        let candidates = found.candidates
+        let keptPixels = TowerReviewStore.closeupKeptPixels
+        checking = Task {
+            for candidate in candidates {
+                if Task.isCancelled { return }
+                do {
+                    let closeup = try await CableDetectionRunner.closeup(around: candidate.coordinate)
+                    let (score, kept) = await Task.detached(priority: .userInitiated) {
+                        let kept = closeup.downsampled(by: closeup.width / keptPixels)
+                        return (check.score(kept), kept)
+                    }.value
+                    if Task.isCancelled { return }
+                    closeupScores[candidate.id] = score
+                    closeups[candidate.id] = kept
+                } catch {
+                    WakeLog.error(.store, "tower close-up check: \(error.localizedDescription)")
+                }
+            }
         }
     }
 

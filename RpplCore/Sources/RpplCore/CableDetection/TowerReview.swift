@@ -68,8 +68,10 @@ public struct TowerLabel: Codable, Equatable, Sendable, Identifiable {
     public var arm: Arm?
     /// yyyy-MM-dd, UTC.
     public var reviewedAt: String
+    /// What `TowerCloseupCheck` said about the guess before the verdict; nil when it did not run.
+    public var closeupScore: Double?
 
-    public init(id: UUID = UUID(), coordinate: ParkCoordinate, verdict: Verdict, source: Source, probability: Double? = nil, detected: ParkCoordinate? = nil, arm: Arm? = nil, reviewedAt: String = TowerLabelStore.today()) {
+    public init(id: UUID = UUID(), coordinate: ParkCoordinate, verdict: Verdict, source: Source, probability: Double? = nil, detected: ParkCoordinate? = nil, arm: Arm? = nil, reviewedAt: String = TowerLabelStore.today(), closeupScore: Double? = nil) {
         self.id = id
         self.coordinate = coordinate
         self.verdict = verdict
@@ -78,6 +80,7 @@ public struct TowerLabel: Codable, Equatable, Sendable, Identifiable {
         self.detected = detected
         self.arm = arm
         self.reviewedAt = reviewedAt
+        self.closeupScore = closeupScore
     }
 }
 
@@ -121,7 +124,7 @@ public struct TowerLabelStore: Codable, Equatable, Sendable {
 
     /// The labels of a park that get a zoomed close-up for training: every tower, and the
     /// `rejected` most confident guesses the reviewer turned down (the hard negatives).
-    public func closeupLabels(in parkID: String, rejected: Int = 5) -> [TowerLabel] {
+    public func closeupLabels(in parkID: String, rejected: Int = .max) -> [TowerLabel] {
         let park = labels(for: parkID)
         let towers = park.filter { $0.verdict == .tower }
         let hardest = park
@@ -300,7 +303,7 @@ public struct TowerReviewSession: Equatable, Sendable {
     /// Records the verdict for the current candidate and moves on. A tower (or a tower that is not
     /// visible) is saved where the crosshair is when the reviewer moved it onto the tower; the other
     /// verdicts keep the detection. `arm` is kept only on a tower placed at the crosshair.
-    public mutating func judge(_ verdict: TowerLabel.Verdict, crosshair: ParkCoordinate?, arm: TowerLabel.Arm? = nil, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel? {
+    public mutating func judge(_ verdict: TowerLabel.Verdict, crosshair: ParkCoordinate?, arm: TowerLabel.Arm? = nil, closeupScore: Double? = nil, reviewedAt: String = TowerLabelStore.today()) -> TowerLabel? {
         guard let index = currentIndex else { return nil }
         let candidate = candidates[index]
         var coordinate = candidate.coordinate
@@ -313,7 +316,7 @@ public struct TowerReviewSession: Equatable, Sendable {
         }
         candidates.remove(at: index)
         currentIndex = candidates.isEmpty ? nil : index % candidates.count
-        return TowerLabel(coordinate: coordinate, verdict: verdict, source: .detector, probability: candidate.probability, detected: detected, arm: keptArm, reviewedAt: reviewedAt)
+        return TowerLabel(coordinate: coordinate, verdict: verdict, source: .detector, probability: candidate.probability, detected: detected, arm: keptArm, reviewedAt: reviewedAt, closeupScore: closeupScore)
     }
 
     /// A tower the detector missed, placed by the reviewer.

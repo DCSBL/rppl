@@ -47,6 +47,12 @@ enum CableDetectionRunner {
         case map
     }
 
+    /// The 40 m, 5 cm/px close-up `TowerCloseupCheck` looks at, centred on a guess.
+    @MainActor
+    static func closeup(around center: ParkCoordinate) async throws -> DetectionImage {
+        try await snapshot(around: center, sideMeters: TowerCloseupCheck.closeupMeters, sidePixels: TowerCloseupCheck.closeupPixels)
+    }
+
     /// The satellite close-up the detector runs on.
     @MainActor
     static func snapshot(around center: ParkCoordinate) async throws -> DetectionImage {

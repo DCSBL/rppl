@@ -57,10 +57,12 @@ def water_mask(rgb: np.ndarray, seed_rc: tuple[int, int] | None = None, near_px:
     return keep_body(mask, seed_rc, near_px, min_area_px)
 
 
-def map_water(map_rgb: np.ndarray, max_hole_px: int = 4000) -> np.ndarray:
+def map_water(map_rgb: np.ndarray, max_hole_px: int | None = None) -> np.ndarray:
     """Water on the plain Apple map of the same spot (the app saves it next to the photo): the
     map paints every water body one light blue, so this is a colour test, not a guess.
     Small holes (the lake's name, a jetty line) are filled; islands stay land."""
+    if max_hole_px is None:  # 4000 px on a 2048 px map (about 340 m2), the same area at any size
+        max_hole_px = max(16, int(4000 * (map_rgb.shape[0] / 2048) ** 2))
     hsv = cv2.cvtColor(map_rgb, cv2.COLOR_RGB2HSV)
     hue, sat, val = hsv[..., 0].astype(int), hsv[..., 1].astype(int), hsv[..., 2].astype(int)
     mask = (hue >= 95) & (hue <= 125) & (sat >= 25) & (val >= 90)  # OpenCV hue 0-180: 190-250 degrees

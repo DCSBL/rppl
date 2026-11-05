@@ -26,10 +26,20 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from cabledetect.towertrain import auc  # noqa: E402
 
-CROP_PX = 640   # 32 m of the 40 m close-up around the label
-STORE_PX = 213  # stored at 1/3: 0.15 m/px
-INPUT_PX = 192  # random crop of the stored image while training (+-1.5 m jitter)
+STORE_PX = 256  # the whole 40 m close-up at 0.156 m/px: the app's 768 px snapshot averaged over 3 x 3 pixels
+INPUT_PX = 192  # the middle 30 m the net sees (the app crops the same: TowerCloseupCheck.swift)
+OFFSET = (STORE_PX - INPUT_PX) // 2
+JITTER = 10     # +-1.6 m while training
 LAYERS = [(3, 16), (16, 32), (32, 48), (48, 64), (64, 64)]
+
+
+def downsample(rgb: np.ndarray) -> np.ndarray:
+    """A close-up to STORE_PX: 768 px ones (first app builds) by the 3 x 3 mean the app uses, 256 px ones as they are."""
+    factor = rgb.shape[0] // STORE_PX
+    if factor > 1:
+        size = STORE_PX * factor
+        rgb = rgb[:size, :size].reshape(STORE_PX, factor, STORE_PX, factor, 3).mean(axis=(1, 3))
+    return np.round(rgb).astype(np.uint8)
 
 
 def load(folder: Path) -> dict:
@@ -42,11 +52,7 @@ def load(folder: Path) -> dict:
         if found is None or found[1]["verdict"] not in ("tower", "mast", "none"):
             continue
         park, label = found
-        rgb = Image.open(meta.with_suffix(".jpg")).convert("RGB")
-        w, h = rgb.size
-        left, top = (w - CROP_PX) // 2, (h - CROP_PX) // 2
-        rgb = rgb.crop((left, top, left + CROP_PX, top + CROP_PX)).resize((STORE_PX, STORE_PX), Image.LANCZOS)
-        images.append(np.asarray(rgb))
+        images.append(downsample(np.asarray(Image.open(meta.with_suffix(".jpg")).convert("RGB"))))
         y.append(0 if label["verdict"] == "none" else 1)
         parks.append(park)
         ids.append(meta.stem)
@@ -111,9 +117,8 @@ def normalize(x: np.ndarray) -> np.ndarray:
 
 def augment(rng: np.random.Generator, stored: np.ndarray) -> np.ndarray:
     out = np.empty((len(stored), INPUT_PX, INPUT_PX, 3), np.float32)
-    slack = STORE_PX - INPUT_PX
     for i, image in enumerate(stored):
-        r, c = rng.integers(0, slack + 1, 2)
+        r, c = OFFSET + rng.integers(-JITTER, JITTER + 1, 2)
         patch = image[r:r + INPUT_PX, c:c + INPUT_PX].astype(np.float32) / 255
         patch = np.rot90(patch, rng.integers(4))
         if rng.random() < 0.5:
@@ -124,8 +129,7 @@ def augment(rng: np.random.Generator, stored: np.ndarray) -> np.ndarray:
 
 
 def centre(stored: np.ndarray) -> np.ndarray:
-    o = (STORE_PX - INPUT_PX) // 2
-    return normalize(stored[:, o:o + INPUT_PX, o:o + INPUT_PX].astype(np.float32) / 255)
+    return normalize(stored[:, OFFSET:OFFSET + INPUT_PX, OFFSET:OFFSET + INPUT_PX].astype(np.float32) / 255)
 
 
 def predict(params, stored: np.ndarray) -> np.ndarray:
