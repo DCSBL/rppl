@@ -18,13 +18,13 @@ struct TowerCloseupCheckTests {
         for y in 0..<6 { for x in 0..<6 { for c in 0..<3 { rgb[(y * 6 + x) * 3 + c] = UInt8(x * 10 + c) } } }
         var image = DetectionImage(width: 6, height: 6, rgb: rgb, metersPerPixel: 0.05, center: origin, origin: origin)
         image.controlPoints = [DetectionImage.ControlPoint(coordinate: origin, column: 3, row: 3)]
-        let small = image.downsampled(by: 3)
+        let small = image.scaledDown(by: 3)
         #expect(small.width == 2 && small.height == 2)
         #expect(Array(small.rgb[0..<6]) == [10, 11, 12, 40, 41, 42])
         #expect(abs(small.metersPerPixel - 0.15) < 1e-12)
         #expect(small.center == image.center)
         #expect(small.controlPoints.first?.column == 1)
-        #expect(image.downsampled(by: 1).rgb == image.rgb)
+        #expect(image.scaledDown(by: 1).rgb == image.rgb)
     }
 
     @Test func eightViewsAreTheEightOrientations() {
@@ -50,7 +50,7 @@ struct TowerCloseupCheckTests {
             #expect(abs(mean) < 1e-3)
         }
         // A 256 px close-up (as the review keeps them) gives the same input as the 768 px original.
-        let fromSmall = TowerCloseupCheck.input(from: Self.syntheticCloseup(origin: origin).downsampled(by: 3))
+        let fromSmall = TowerCloseupCheck.input(from: Self.syntheticCloseup(origin: origin).scaledDown(by: 3))
         #expect(fromSmall == input)
     }
 

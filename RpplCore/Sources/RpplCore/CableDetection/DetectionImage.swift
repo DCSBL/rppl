@@ -43,7 +43,7 @@ public struct DetectionImage: Sendable {
     /// The image shrunk by an integer factor, each pixel the rounded mean of a `factor` x `factor`
     /// block (the same mean tools/cable-tracer/detect/cabledetect/closeupcheck.py uses). Centre and
     /// frame stay; metres per pixel grow by `factor`.
-    public func downsampled(by factor: Int) -> DetectionImage {
+    public func scaledDown(by factor: Int) -> DetectionImage {
         precondition(factor >= 1)
         guard factor > 1 else { return self }
         let outWidth = width / factor, outHeight = height / factor

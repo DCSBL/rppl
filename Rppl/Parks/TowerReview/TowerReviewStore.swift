@@ -240,7 +240,7 @@ final class TowerReviewStore {
     }
 
     private func writeCloseup(_ closeup: DetectionImage, for label: TowerLabel, parkID: String) async throws {
-        let kept = closeup.width > Self.closeupKeptPixels ? closeup.downsampled(by: closeup.width / Self.closeupKeptPixels) : closeup
+        let kept = closeup.width > Self.closeupKeptPixels ? closeup.scaledDown(by: closeup.width / Self.closeupKeptPixels) : closeup
         let meta = TowerReviewSnapshot(parkID: parkID, image: kept, labelID: label.id)
         try await write(kept, meta: meta, stem: closeupStem(label, in: parkID), to: closeupsDirectory, png: false)
     }

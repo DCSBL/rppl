@@ -305,7 +305,7 @@ struct TowerReviewMapView: View {
                 do {
                     let closeup = try await CableDetectionRunner.closeup(around: candidate.coordinate)
                     let (score, kept) = await Task.detached(priority: .userInitiated) {
-                        let kept = closeup.downsampled(by: closeup.width / keptPixels)
+                        let kept = closeup.scaledDown(by: closeup.width / keptPixels)
                         return (check.score(kept), kept)
                     }.value
                     if Task.isCancelled { return }

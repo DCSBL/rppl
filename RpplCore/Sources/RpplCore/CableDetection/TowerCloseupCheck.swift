@@ -38,7 +38,7 @@ public struct TowerCloseupCheck: Sendable {
     /// The close-up as the net sees it: 256 px, the middle 192 px, each channel to zero mean and
     /// unit spread (plus 0.02), times 0.15.
     static func input(from closeup: DetectionImage) -> [Float] {
-        let stored = closeup.width > storedPixels ? closeup.downsampled(by: closeup.width / storedPixels) : closeup
+        let stored = closeup.width > storedPixels ? closeup.scaledDown(by: closeup.width / storedPixels) : closeup
         precondition(stored.width >= storedPixels && stored.height >= storedPixels, "close-up must be at least 256 px")
         let size = inputPixels, offset = (storedPixels - inputPixels) / 2
         var values = [Float](repeating: 0, count: size * size * 3)
