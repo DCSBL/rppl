@@ -1,5 +1,5 @@
-"""Second look at a tower guess on a zoomed close-up (40 m at 5 cm/px, from the app's "Fetch maps
-and close-ups"): a small CNN says tower or not. The coarse net finds candidates on the 0.29 m/px
+"""Second look at a tower guess on a zoomed close-up (from the app's "Fetch maps and close-ups" or
+the live check in the tower review): a small CNN says tower or not. The coarse net finds candidates on the 0.29 m/px
 photo; this one checks each candidate where the wheel, the arm and the cable are sharp.
 
     python3 cabledetect/closeupcheck.py <phone-set folder> <out folder> [--epochs 80] [--resume]
@@ -26,20 +26,53 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from cabledetect.towertrain import auc  # noqa: E402
 
-STORE_PX = 256  # the whole 40 m close-up at 0.156 m/px: the app's 768 px snapshot averaged over 3 x 3 pixels
-INPUT_PX = 192  # the middle 30 m the net sees (the app crops the same: TowerCloseupCheck.swift)
+# MapKit does not zoom in as far as the app asks (40 m): its close-ups come back about 70 m wide at
+# about 6 cm/px, a little different per park. So the input is defined in metres, around the guess:
+METERS_PER_PX = 0.25  # the close-up is averaged over whole pixel blocks to about this, then resampled to it
+STORE_PX = 256  # 64 m around the guess
+INPUT_PX = 192  # the middle 48 m the net sees (the app samples the same: TowerCloseupCheck.swift)
 OFFSET = (STORE_PX - INPUT_PX) // 2
-JITTER = 10     # +-1.6 m while training
+JITTER = 10     # +-2.5 m while training
 LAYERS = [(3, 16), (16, 32), (32, 48), (48, 64), (64, 64)]
 
 
-def downsample(rgb: np.ndarray) -> np.ndarray:
-    """A close-up to STORE_PX: 768 px ones (first app builds) by the 3 x 3 mean the app uses, 256 px ones as they are."""
-    factor = rgb.shape[0] // STORE_PX
+def box_factor(meters_per_px: float) -> int:
+    """Whole pixel blocks that bring a close-up nearest to METERS_PER_PX (4 for MapKit's 6 cm/px)."""
+    return max(1, int(round(METERS_PER_PX / meters_per_px)))
+
+
+def box_mean(rgb: np.ndarray, factor: int) -> np.ndarray:
+    """The rounded mean of each factor x factor block, as `DetectionImage.scaledDown(by:)`."""
+    height, width = rgb.shape[0] // factor, rgb.shape[1] // factor
+    blocks = rgb[:height * factor, :width * factor].astype(np.float64).reshape(height, factor, width, factor, 3)
+    return np.floor(blocks.mean(axis=(1, 3)) + 0.5).astype(np.uint8)
+
+
+def window(rgb: np.ndarray, meters_per_px: float, column: float, row: float, size: int = STORE_PX) -> np.ndarray:
+    """`size` x `size` pixels at METERS_PER_PX centred on the guess, which MapKit drew at (column, row)
+    (image coordinates: pixel i spans i..i+1). Block mean first, then bilinear; edges are clamped."""
+    factor = box_factor(meters_per_px)
     if factor > 1:
-        size = STORE_PX * factor
-        rgb = rgb[:size, :size].reshape(STORE_PX, factor, STORE_PX, factor, 3).mean(axis=(1, 3))
-    return np.round(rgb).astype(np.uint8)
+        rgb = box_mean(rgb, factor)
+        meters_per_px, column, row = meters_per_px * factor, column / factor, row / factor
+    step = METERS_PER_PX / meters_per_px
+    offsets = (np.arange(size) + 0.5 - size / 2) * step
+    u = np.clip(column + offsets - 0.5, 0, rgb.shape[1] - 1)
+    v = np.clip(row + offsets - 0.5, 0, rgb.shape[0] - 1)
+    u0 = np.minimum(np.floor(u).astype(int), rgb.shape[1] - 2)
+    v0 = np.minimum(np.floor(v).astype(int), rgb.shape[0] - 2)
+    fu = (u - u0).astype(np.float32)[None, :, None]
+    fv = (v - v0).astype(np.float32)[:, None, None]
+    image = rgb.astype(np.float32)
+    top = image[v0][:, u0] * (1 - fu) + image[v0][:, u0 + 1] * fu
+    bottom = image[v0 + 1][:, u0] * (1 - fu) + image[v0 + 1][:, u0 + 1] * fu
+    return np.floor(top * (1 - fv) + bottom * fv + 0.5).clip(0, 255).astype(np.uint8)
+
+
+def guess_pixel(info: dict) -> tuple[float, float]:
+    """Where MapKit drew the guess: the middle of the 3 x 3 control points (the snapshot is centred on it)."""
+    point = info["controlPoints"][4]
+    return float(point["column"]), float(point["row"])
 
 
 def load(folder: Path) -> dict:
@@ -52,7 +85,8 @@ def load(folder: Path) -> dict:
         if found is None or found[1]["verdict"] not in ("tower", "mast", "none"):
             continue
         park, label = found
-        images.append(downsample(np.asarray(Image.open(meta.with_suffix(".jpg")).convert("RGB"))))
+        rgb = np.asarray(Image.open(meta.with_suffix(".jpg")).convert("RGB"))
+        images.append(window(rgb, float(info["metersPerPixel"]), *guess_pixel(info)))
         y.append(0 if label["verdict"] == "none" else 1)
         parks.append(park)
         ids.append(meta.stem)
