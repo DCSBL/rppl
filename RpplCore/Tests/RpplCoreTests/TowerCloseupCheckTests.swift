@@ -38,7 +38,14 @@ struct TowerCloseupCheckTests {
         #expect(TowerCloseupCheck.transformed(values, size: size, turns: 4, mirrored: false) == values)
         // A quarter turn moves pixels, never the channels within a pixel.
         let turned = TowerCloseupCheck.transformed(values, size: size, turns: 1, mirrored: false)
-        #expect(stride(from: 0, to: turned.count, by: 3).allSatisfy { turned[$0 + 1] == turned[$0] + 1 && turned[$0 + 2] == turned[$0] + 2 })
+        var channelsKept = true
+        for base in stride(from: 0, to: turned.count, by: 3) {
+            let red: Float = turned[base]
+            let green: Float = turned[base + 1]
+            let blue: Float = turned[base + 2]
+            if green != red + 1 || blue != red + 2 { channelsKept = false }
+        }
+        #expect(channelsKept)
     }
 
     @Test func inputIsTheStandardisedMiddleOfTheCloseup() {
