@@ -66,8 +66,8 @@ def init_params(key):
     return params
 
 
-def forward(params, x):  # (N, P, P, 3) in 0..1 -> logits (N,)
-    h = x - 0.5
+def forward(params, x):  # (N, P, P, 3) normalised (see `normalize`) -> logits (N,)
+    h = x
     for w, b in params[:-1]:
         h = jax.lax.conv_general_dilated(h, w, (1, 1), "SAME", dimension_numbers=("NHWC", "HWIO", "NHWC")) + b
         h = jax.nn.relu(h)
@@ -97,6 +97,18 @@ def adam_step(params, opt, x, y, lr):
 _predict = jax.jit(lambda params, x: jax.nn.sigmoid(forward(params, x)))
 
 
+NORMALIZE = True  # per image and channel to zero mean, unit spread: the net sees shapes, not the water's colour
+
+
+def normalize(x: np.ndarray) -> np.ndarray:
+    """(N, P, P, 3) in 0..1 -> per image and channel standardised, scaled to about +-0.5."""
+    if not NORMALIZE:
+        return x - 0.5
+    mean = x.mean(axis=(1, 2), keepdims=True)
+    spread = x.std(axis=(1, 2), keepdims=True) + 0.02
+    return ((x - mean) / spread * 0.15).astype(np.float32)
+
+
 def augment(rng: np.random.Generator, stored: np.ndarray) -> np.ndarray:
     out = np.empty((len(stored), INPUT_PX, INPUT_PX, 3), np.float32)
     slack = STORE_PX - INPUT_PX
@@ -108,12 +120,12 @@ def augment(rng: np.random.Generator, stored: np.ndarray) -> np.ndarray:
             patch = patch[:, ::-1]
         patch = (patch - patch.mean()) * rng.uniform(0.85, 1.15) + patch.mean() + rng.uniform(-0.06, 0.06)
         out[i] = np.clip(patch, 0, 1)
-    return out
+    return normalize(out)
 
 
 def centre(stored: np.ndarray) -> np.ndarray:
     o = (STORE_PX - INPUT_PX) // 2
-    return stored[:, o:o + INPUT_PX, o:o + INPUT_PX].astype(np.float32) / 255
+    return normalize(stored[:, o:o + INPUT_PX, o:o + INPUT_PX].astype(np.float32) / 255)
 
 
 def predict(params, stored: np.ndarray) -> np.ndarray:
@@ -175,7 +187,10 @@ def main() -> None:
     parser.add_argument("out", type=Path)
     parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--raw-colour", action="store_true", help="feed plain colours instead of per-image standardised ones")
     args = parser.parse_args()
+    global NORMALIZE
+    NORMALIZE = not args.raw_colour
     args.out.mkdir(parents=True, exist_ok=True)
     data = load(args.phone_set)
     x, y, parks = data["x"], data["y"], data["park"]
