@@ -1,10 +1,12 @@
 version: 1
 id: strandparx-cable-island-magdeburg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: STRANDPARX cable island Magdeburg
 short_name: Cable Island
@@ -22,6 +24,22 @@ location:
 phone: "+49 152 37713818"
 email: "booking@strandparx.de"
 website: https://www.strandparx.de
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 869
+    points:
+      - lat: 52.1730876
+        lon: 11.6377499
+      - lat: 52.1725871
+        lon: 11.6387371
+      - lat: 52.1729307
+        lon: 11.6398038
+      - lat: 52.1756625
+        lon: 11.6401278
+      - lat: 52.1758454
+        lon: 11.6390923
 
 opening:
   source_url: "https://www.strandparx.de/kontakt/"

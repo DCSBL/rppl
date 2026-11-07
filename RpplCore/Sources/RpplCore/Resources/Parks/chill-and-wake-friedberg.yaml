@@ -1,10 +1,12 @@
 version: 1
 id: chill-and-wake-friedberg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Chill & Wake Friedberg
 short_name: Chill & Wake
@@ -27,6 +29,22 @@ links:
     url: "https://www.chill-and-wake.de/tickets/"
   - kind: instagram
     url: "https://www.instagram.com/chillandwake/"
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 888
+    points:
+      - lat: 48.3625030
+        lon: 10.9623996
+      - lat: 48.3621910
+        lon: 10.9665819
+      - lat: 48.3633178
+        lon: 10.9667218
+      - lat: 48.3636870
+        lon: 10.9627082
+      - lat: 48.3631544
+        lon: 10.9620915
 
 opening:
   source_url: "https://www.chill-and-wake.de/open/"

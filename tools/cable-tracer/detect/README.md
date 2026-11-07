@@ -133,6 +133,24 @@ exactly 0.25 m/px (192 px), standardised per channel, eight views. With the revi
 (`closeupScore`), so the check is measured on new labels as they come in. The close-ups the review
 keeps are the block-averaged ones (about 290 px), the maps 512 px.
 
+## Cable routes from the confirmed towers
+
+`routes_from_labels.py` turns the towers confirmed in the review into cable routes: the reviewer
+puts each tower on its wheel, so the wheels are the bends. It groups a park's wheels into loops
+(4-6 towers on a convex polygon, 350-1300 m, bends 30-95 degrees) and 2.0 pairs (100-240 m),
+preferring the grouping that leaves the fewest towers out. The travel direction cannot be seen, so
+loops are written counter-clockwise.
+
+```bash
+python3 routes_from_labels.py ../tower-labels.json --parks ../../../RpplCore/Sources/RpplCore/Resources/Parks --check   # score on traced parks
+python3 routes_from_labels.py ../tower-labels.json --parks ../../../RpplCore/Sources/RpplCore/Resources/Parks --write   # fill untraced parks
+```
+
+`--write` only fills parks where every confirmed tower fits a loop; a park with a missing tower
+(a bend over 110 degrees, or towers left over) is printed and left for a hand trace. On the 21
+hand-traced parks with labels, 18 of the 24 traced loops come out with every bend within 5 m; the
+rest miss a tower that was never confirmed (2026-11-07).
+
 ## Training the tower net
 
 ```bash
