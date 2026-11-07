@@ -5,7 +5,13 @@ import Testing
 struct TowerWheelFinderTests {
     private let origin = ParkCoordinate(lat: 52.3581295, lon: 5.2152087)
 
-    private func heatmap(peaks: [(column: Int, row: Int, value: Double)]) -> [Double] {
+    private struct Cell {
+        let column: Int
+        let row: Int
+        let value: Double
+    }
+
+    private func heatmap(peaks: [Cell]) -> [Double] {
         var values = [Double](repeating: 0.0001, count: 24 * 24)
         for peak in peaks { values[peak.row * 24 + peak.column] = peak.value }
         return values
@@ -13,19 +19,19 @@ struct TowerWheelFinderTests {
 
     @Test func peakIsTheMiddleOfItsCell() {
         // Cell (15, 12) spans input pixels 120..128 x 96..104; the middle of the input is 96.
-        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [(15, 12, 0.9)]))
+        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [Cell(column: 15, row: 12, value: 0.9)]))
         #expect(abs(offset.x - 28) < 0.1)
         #expect(abs(offset.y - 4) < 0.1)
     }
 
     @Test func peakIsPulledByItsNeighbours() {
-        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [(12, 12, 0.6), (13, 12, 0.3)]))
+        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [Cell(column: 12, row: 12, value: 0.6), Cell(column: 13, row: 12, value: 0.3)]))
         #expect(offset.x > 4 && offset.x < 8)
     }
 
     @Test func aFarPeakLosesToANearOne() {
         // 11 m off and twice as likely, or 2 m off: the prior around the guess picks the near one.
-        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [(12, 12, 0.3), (12, 1, 0.6)]))
+        let offset = TowerWheelFinder.peak(in: heatmap(peaks: [Cell(column: 12, row: 12, value: 0.3), Cell(column: 12, row: 1, value: 0.6)]))
         #expect(abs(offset.y - 4) < 0.5)
     }
 
