@@ -86,6 +86,15 @@ public struct TowerNet: Sendable {
         return linear(pooled.values)[0]
     }
 
+    /// One logit per cell for a square scaled input, for nets that end in a per-cell linear unit
+    /// instead of a global mean (`TowerWheelFinder`): only the first `pooledLayers` convolutions pool,
+    /// so a cell is 2^pooledLayers input pixels. Row-major, `size >> pooledLayers` cells a side.
+    func cellLogits(input: [Float], size: Int, pooledLayers: Int) -> [Float] {
+        precondition(input.count == size * size * 3)
+        let features = backbone(input, width: size, height: size, pooledLayers: pooledLayers)
+        return linear(features.values)
+    }
+
     /// Tower heatmap over the whole image. Cell (row, column) scores the patch whose top-left pixel
     /// is (16 row, 16 column). Tiles without water (when a mask is given) are skipped and stay at -inf.
     func heatmap(of image: DetectionImage, water: WaterSegmenter.Mask? = nil) -> TowerHeatmap {
@@ -158,13 +167,13 @@ public struct TowerNet: Sendable {
         var channels: Int
     }
 
-    /// Convolutions with ReLU, each followed by 2x2 max pooling.
-    private func backbone(_ input: [Float], width: Int, height: Int) -> FeatureMap {
+    /// Convolutions with ReLU; the first `pooledLayers` (all by default) are followed by 2x2 max pooling.
+    private func backbone(_ input: [Float], width: Int, height: Int, pooledLayers: Int = .max) -> FeatureMap {
         var current = FeatureMap(values: input, width: width, height: height, channels: 3)
-        for layer in convs {
+        for (index, layer) in convs.enumerated() {
             current.values = Self.convolve(current.values, width: current.width, height: current.height, layer: layer)
             current.channels = layer.outChannels
-            current = Self.maxPool(current)
+            if index < pooledLayers { current = Self.maxPool(current) }
         }
         return current
     }

@@ -1,10 +1,12 @@
 version: 1
 id: blue-bay-spadener-see-schiffdorf
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Blue Bay Spadener See
 short_name: Blue Bay
@@ -28,6 +30,19 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
+    length_m: 969
+    points:
+      - lat: 53.5709367
+        lon: 8.6507668
+      - lat: 53.5709627
+        lon: 8.6553356
+      - lat: 53.5723704
+        lon: 8.6553167
+      - lat: 53.5731061
+        lon: 8.6522182
+      - lat: 53.5719613
+        lon: 8.6504388
     description: >-
       Fünf-Mast-Anlage, SHAPE Wakepark.
 

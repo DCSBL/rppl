@@ -1,10 +1,12 @@
 version: 1
 id: wakepark-grossbeeren
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: MAGIX Wake- & Freizeitpark Großbeeren
 short_name: MAGIX Wakepark
@@ -24,6 +26,20 @@ website: https://www.wakeboarding-berlin.de
 links:
   - kind: booking
     url: "https://www.wakeboarding-berlin.de/index.php/buchungskalender_neu.html"
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 753
+    points:
+      - lat: 52.3531209
+        lon: 13.2944762
+      - lat: 52.3528335
+        lon: 13.2953070
+      - lat: 52.3551970
+        lon: 13.2975726
+      - lat: 52.3555539
+        lon: 13.2966284
 
 opening:
   source_url: "https://www.wakeboarding-berlin.de/index.php/home"

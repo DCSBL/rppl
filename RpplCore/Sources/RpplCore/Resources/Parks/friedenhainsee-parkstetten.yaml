@@ -1,10 +1,12 @@
 version: 1
 id: friedenhainsee-parkstetten
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Friedenhainsee Wasserski
 short_name: Friedenhainsee
@@ -25,7 +27,17 @@ website: https://www.friedenhainsee.de
 
 cables:
   - name: Cable
-    length_m: 1200
+    direction: ccw
+    length_m: 1175
+    points:
+      - lat: 48.9271755
+        lon: 12.5726659
+      - lat: 48.9265878
+        lon: 12.5769434
+      - lat: 48.9292591
+        lon: 12.5777846
+      - lat: 48.9292307
+        lon: 12.5734688
     description: >-
       Vier Masten, bis zu zwölf Fahrer gleichzeitig. Gestürzte Fahrer holt ein Motorboot ab.
 
