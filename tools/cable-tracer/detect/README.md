@@ -133,6 +133,44 @@ exactly 0.25 m/px (192 px), standardised per channel, eight views. With the revi
 (`closeupScore`), so the check is measured on new labels as they come in. The close-ups the review
 keeps are the block-averaged ones (about 290 px), the maps 512 px.
 
+### Wheel finder
+
+The coarse net's peak often lands on the tower's arm or platform instead of the wheel where the
+cable wraps around it: on the 2026-11-05 labels the guess was a median 5.6 m from the wheel the
+reviewer placed, mostly along the arm towards the foot. `cabledetect/wheelfind.py` trains a small
+fully convolutional net on the close-ups of the confirmed towers (shifted up to 12 m at random,
+turned and mirrored) that gives a probability per 2 m cell of the close-up check's input; the wheel
+is the weighted mean around the most likely cell under a 12 m prior around the guess. Scored with
+parks held out, on the detector's own guesses (`detected` in the labels):
+
+| | median | p75 | p90 | within 2 m |
+|---|---|---|---|---|
+| guess | 5.6 m | 9.0 m | 15.6 m | 9% |
+| wheel finder | 0.7 m | 1.3 m | 12.0 m | 81% |
+
+12 of 131 guesses end up more than a metre further off, mostly on a neighbouring object.
+`export_wheelfind.py <wheelfind.npz> RpplCore/Sources/RpplCore/Resources/TowerWheelFinder.weights`
+writes it for the app (`TowerWheelFinder.swift`), where the review's "Wheel finder" toggle puts each
+guess on its wheel; the label keeps the detector's spot in `detected`.
+
+## Cable routes from the confirmed towers
+
+`routes_from_labels.py` turns the towers confirmed in the review into cable routes: the reviewer
+puts each tower on its wheel, so the wheels are the bends. It groups a park's wheels into loops
+(4-6 towers on a convex polygon, 350-1300 m, bends 30-95 degrees) and 2.0 pairs (100-240 m),
+preferring the grouping that leaves the fewest towers out. The travel direction cannot be seen, so
+loops are written counter-clockwise.
+
+```bash
+python3 routes_from_labels.py ../tower-labels.json --parks ../../../RpplCore/Sources/RpplCore/Resources/Parks --check   # score on traced parks
+python3 routes_from_labels.py ../tower-labels.json --parks ../../../RpplCore/Sources/RpplCore/Resources/Parks --write   # fill untraced parks
+```
+
+`--write` only fills parks where every confirmed tower fits a loop; a park with a missing tower
+(a bend over 110 degrees, or towers left over) is printed and left for a hand trace. On the 21
+hand-traced parks with labels, 18 of the 24 traced loops come out with every bend within 5 m; the
+rest miss a tower that was never confirmed (2026-11-07).
+
 ## Training the tower net
 
 ```bash

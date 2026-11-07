@@ -1,10 +1,12 @@
 version: 1
 id: hot-sport-seepark-niederweimar
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Hot Sport Seepark Niederweimar
 short_name: Hot Sport Seepark
@@ -24,6 +26,22 @@ website: https://seepark.hotsport.de
 links:
   - kind: booking
     url: "https://hotsport.wakeparkmanager.com/angebotsgruppen/seepark-tickets/2"
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 572
+    points:
+      - lat: 50.7594466
+        lon: 8.7420262
+      - lat: 50.7596768
+        lon: 8.7425242
+      - lat: 50.7600551
+        lon: 8.7426229
+      - lat: 50.7610790
+        lon: 8.7401107
+      - lat: 50.7606121
+        lon: 8.7396195
 
 opening:
   source_url: "https://seepark.hotsport.de/preise-3"

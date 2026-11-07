@@ -25,8 +25,11 @@ struct TowerReviewMapView: View {
     /// Close-up check per guess (by candidate id), and the close-up it looked at (kept at 256 px).
     @State private var closeupScores: [Int: Double] = [:]
     @State private var closeups: [Int: DetectionImage] = [:]
+    /// Where the wheel finder put each guess (by candidate id).
+    @State private var wheels: [Int: ParkCoordinate] = [:]
     @State private var checking: Task<Void, Never>?
     @AppStorage(AppSettingsKey.debugTowerCloseupCheck) private var closeupCheckEnabled = true
+    @AppStorage(AppSettingsKey.debugTowerWheelFinder) private var wheelFinderEnabled = true
 
     /// Camera distance when a park opens zoomed out: close enough to see a single tower.
     private static let candidateDistanceM = 160.0
@@ -162,10 +165,10 @@ struct TowerReviewMapView: View {
                         }
                     }
                     Spacer()
-                    Button("Show") { fly(to: current.coordinate) }
+                    Button("Show") { fly(to: target(of: current)) }
                     Button("Skip") {
                         self.session?.skip()
-                        if let next = self.session?.current { fly(to: next.coordinate) }
+                        if let next = self.session?.current { fly(to: target(of: next)) }
                     }
                 }
                 verdictButton("Tower fits the frame", color: .green) { judge(.tower) }
@@ -247,7 +250,7 @@ struct TowerReviewMapView: View {
                 detectionNote = found.remaining == 0
                     ? (result.towers.isEmpty ? String(localized: "No towers found") : String(localized: "All guesses here are judged"))
                     : nil
-                if let first = found.current { fly(to: first.coordinate) }
+                if let first = found.current { fly(to: target(of: first)) }
             } catch {
                 detectionNote = error.localizedDescription
             }
@@ -260,11 +263,17 @@ struct TowerReviewMapView: View {
         let score = id.flatMap { closeupScores[$0] }
         guard let label = session?.judge(verdict, crosshair: centerCoordinate, arm: arm, closeupScore: score) else { return }
         store.add(label, to: park.id)
-        // The close-up is centred on the guess: it only serves as the label's own when the label stayed there.
-        if let id, let closeup = closeups[id], label.detected == nil {
+        // The close-up is centred on the guess: it serves as the label's own when the label stayed there,
+        // and for a tower moved onto its wheel it is what the wheel finder learns from (guess to wheel).
+        if let id, let closeup = closeups[id], label.detected == nil || label.verdict == .tower {
             store.saveCloseup(closeup, for: label, parkID: park.id)
         }
-        if let next = session?.current { fly(to: next.coordinate) }
+        if let next = session?.current { fly(to: target(of: next)) }
+    }
+
+    /// Where to put a guess under the ring: on its wheel once the wheel finder has seen it.
+    private func target(of candidate: TowerReviewSession.Candidate) -> ParkCoordinate {
+        wheels[candidate.id] ?? candidate.coordinate
     }
 
     /// Puts the guess under the ring, keeping the reviewer's rotation and zoom once they are close in.
@@ -281,7 +290,7 @@ struct TowerReviewMapView: View {
     @ViewBuilder
     private func closeupLine(for id: Int) -> some View {
         if let score = closeupScores[id] {
-            Text("Close-up check \(Int((score * 100).rounded())) % · \(score >= 0.5 ? "tower" : "no tower")")
+            Text("Close-up check \(Int((score * 100).rounded())) % · \(score >= 0.5 ? "tower" : "no tower")\(wheelNote(for: id))")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(score >= 0.5 ? Color.green : Color.red)
         } else if TowerCloseupCheck.bundled == nil {
@@ -291,25 +300,39 @@ struct TowerReviewMapView: View {
         }
     }
 
-    /// Fetches the close-up of every guess, in review order, and scores it; one at a time.
+    private func wheelNote(for id: Int) -> String {
+        guard let wheel = wheels[id], let candidate = session?.candidates.first(where: { $0.id == id }) else { return "" }
+        return " · wheel \(Int(candidate.coordinate.meters(to: wheel).rounded())) m off"
+    }
+
+    /// Fetches the close-up of every guess, in review order, scores it and finds its wheel; one at a time.
     private func startCloseupChecks(for found: TowerReviewSession) {
         checking?.cancel()
         closeupScores = [:]
         closeups = [:]
+        wheels = [:]
         guard closeupCheckEnabled, let check = TowerCloseupCheck.bundled else { return }
+        let finder = wheelFinderEnabled ? TowerWheelFinder.bundled : nil
         let candidates = found.candidates
         checking = Task {
             for candidate in candidates {
                 if Task.isCancelled { return }
                 do {
                     let closeup = try await CableDetectionRunner.closeup(around: candidate.coordinate)
-                    let (score, kept) = await Task.detached(priority: .userInitiated) {
+                    let (score, wheel, kept) = await Task.detached(priority: .userInitiated) {
                         let kept = TowerReviewStore.kept(closeup)
-                        return (check.score(kept), kept)
+                        return (check.score(kept), finder?.wheel(in: kept), kept)
                     }.value
                     if Task.isCancelled { return }
                     closeupScores[candidate.id] = score
                     closeups[candidate.id] = kept
+                    if let wheel {
+                        wheels[candidate.id] = wheel
+                        // The guess on screen and the map not moved yet: slide it onto the wheel.
+                        if session?.current?.id == candidate.id, centerCoordinate.meters(to: candidate.coordinate) < 1 {
+                            fly(to: wheel)
+                        }
+                    }
                 } catch {
                     WakeLog.error(.store, "tower close-up check: \(error.localizedDescription)")
                 }

@@ -41,6 +41,8 @@ enum AppSettingsKey {
     static let debugTowerReview = "rppl.debugTowerReview"
     /// Debug: the tower review scores every guess on a zoomed close-up (`TowerCloseupCheck`).
     static let debugTowerCloseupCheck = "rppl.debugTowerCloseupCheck"
+    /// Debug: the tower review moves every guess to the wheel the close-up shows (`TowerWheelFinder`).
+    static let debugTowerWheelFinder = "rppl.debugTowerWheelFinder"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).

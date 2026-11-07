@@ -8,6 +8,7 @@ struct TowerReviewView: View {
     private var parkStore: ParkStore { .shared }
 
     @AppStorage(AppSettingsKey.debugTowerCloseupCheck) private var closeupCheckEnabled = true
+    @AppStorage(AppSettingsKey.debugTowerWheelFinder) private var wheelFinderEnabled = true
     @State private var showImporter = false
     @State private var importError: String?
 
@@ -69,8 +70,10 @@ struct TowerReviewView: View {
             Section {
                 Toggle("Close-up check", isOn: $closeupCheckEnabled)
                     .disabled(TowerCloseupCheck.bundled == nil)
+                Toggle("Wheel finder", isOn: $wheelFinderEnabled)
+                    .disabled(!closeupCheckEnabled || TowerWheelFinder.bundled == nil)
             } footer: {
-                Text("After \"Find towers\" every guess gets a 40 m close-up and a score from the close-up check, shown under the guess and saved with your verdict, so its accuracy can be measured on your labels.")
+                Text("After \"Find towers\" every guess gets a 40 m close-up and a score from the close-up check, shown under the guess and saved with your verdict, so its accuracy can be measured on your labels. The wheel finder looks at the same close-up and puts the guess on the tower's wheel; the detector's own spot stays in the label.")
             }
 
             Section("Parks") {

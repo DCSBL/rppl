@@ -1,10 +1,12 @@
 version: 1
 id: spin-froidchapelle
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (full size and 2.0 cable, rental prices; the cable has no hours of its own on the site)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: The Spin Leisure Park
 short_name: The Spin
@@ -32,6 +34,19 @@ description: The Spin se trouve au lac de Féronval. Le parc a un grand câble e
 
 cables:
   - name: Grand câble
+    direction: ccw
+    length_m: 614
+    points:
+      - lat: 50.2209718
+        lon: 4.3860282
+      - lat: 50.2209371
+        lon: 4.3874422
+      - lat: 50.2220280
+        lon: 4.3882426
+      - lat: 50.2227666
+        lon: 4.3869772
+      - lat: 50.2221480
+        lon: 4.3855620
     description: Boucle de cinq pylônes à vitesse fixe, ou réduite pendant les slow sessions.
   - name: Petit câble (2.0)
     direction: "2.0"

@@ -1,10 +1,12 @@
 version: 1
 id: southlake-heuchelheim
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Southlake Wasserski- und Wakeboardzentrum Heuchelheim
 short_name: Southlake
@@ -22,6 +24,22 @@ location:
 phone: "+49 641 6868888"
 email: "wwz@wasserski-heuchelheim.de"
 website: https://wasserski-heuchelheim.de
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 757
+    points:
+      - lat: 50.5660048
+        lon: 8.6199509
+      - lat: 50.5656791
+        lon: 8.6203443
+      - lat: 50.5658473
+        lon: 8.6246402
+      - lat: 50.5663903
+        lon: 8.6245858
+      - lat: 50.5663196
+        lon: 8.6202751
 
 opening:
   source_url: "https://wasserski-heuchelheim.de/kontakt/"
