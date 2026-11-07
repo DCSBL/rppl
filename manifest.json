@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "dataVersion": 4,
-  "publishedAt": "2026-10-26T23:54:27Z",
+  "dataVersion": 5,
+  "publishedAt": "2026-11-07T12:20:04Z",
   "enabled": true,
   "minAppSchema": 1,
   "maxAppSchema": 1,
@@ -14,7 +14,7 @@
     {
       "id": "beachclub-nethen-rastede",
       "file": "beachclub-nethen-rastede.yaml",
-      "sha256": "ec1008b27b62dda4a44c420054155fbc52479a5d30c5a8a1d2c6c068cde58350"
+      "sha256": "d1641ee3c459aae1ff5b7bb7719a095e7ab3776c8f1802f0f118a8d77726340a"
     },
     {
       "id": "beavercreek-roermond",
@@ -29,12 +29,12 @@
     {
       "id": "blaue-lagune-wachtendonk",
       "file": "blaue-lagune-wachtendonk.yaml",
-      "sha256": "5eef330f3575f7edee22e06bf814c7d72e352b5ea67a5ef1f6b0e4480c630bc6"
+      "sha256": "16cd740cc1547f6db9b0d7d92d8fa2bda69f00711dba8e23bb20f3b5c4c36b87"
     },
     {
       "id": "blue-bay-spadener-see-schiffdorf",
       "file": "blue-bay-spadener-see-schiffdorf.yaml",
-      "sha256": "7c0c40b6810755f612fad1b40557fcee73f10918c361f7ba2ab6aef69ea8389b"
+      "sha256": "1e9e7eeac30bf43a821939f6b8a82bb0a5979b17a9c7bd875a61243d5e7b9d63"
     },
     {
       "id": "breakout-harkstede",
@@ -49,7 +49,7 @@
     {
       "id": "cable-dresden",
       "file": "cable-dresden.yaml",
-      "sha256": "3acd0d2aaf1751a5151b76cc8dac6ac0a41dbd4389e6034ee8c77880e62b1527"
+      "sha256": "8948ed7ca74e90e062216f0b9dce63c0438e1b003c557dfd4fbb5a3f3738eb46"
     },
     {
       "id": "cable-park-ruegen-zirkow",
@@ -64,12 +64,12 @@
     {
       "id": "cablesport-arena-pinneberg",
       "file": "cablesport-arena-pinneberg.yaml",
-      "sha256": "640fcf8429d4021f7504c642394a402b9ee2a4157c35eff637b9cbd1d470db39"
+      "sha256": "8084879e61f37bfda2baa0ebe25177c180472deee3dde22594c0b2fd978288b0"
     },
     {
       "id": "chill-and-wake-friedberg",
       "file": "chill-and-wake-friedberg.yaml",
-      "sha256": "e3aa7f452a64cd2e0116155812d33cb2246f06383c658ab3c1dd8a694526fcae"
+      "sha256": "b3d82cc3b422c983f01a7e5c74667844db7a4595fedf9af4c78a83cc3abb0ed2"
     },
     {
       "id": "dearne-arnemuiden",
@@ -84,7 +84,7 @@
     {
       "id": "dock79-saint-ghislain",
       "file": "dock79-saint-ghislain.yaml",
-      "sha256": "afef3fb985fcd1bcb603b209379ec9e323664f67ba426e2638ebe6e99c7d91e1"
+      "sha256": "422ec8461bbfa63ae1f2a9521d1b9971eb19145bc78cb7b41416e8a98ce3e476"
     },
     {
       "id": "downunder-nieuwegein",
@@ -99,12 +99,12 @@
     {
       "id": "friedenhainsee-parkstetten",
       "file": "friedenhainsee-parkstetten.yaml",
-      "sha256": "f6995ff057617d70c962080d7fee9d2b7f392a1b723d588250c2c79e2beb8369"
+      "sha256": "0b68a7abd3010c338cd23000f25636e2ec06c43accdbba1b885010fcc7cbb372"
     },
     {
       "id": "goitzsche-wakepark-pouch",
       "file": "goitzsche-wakepark-pouch.yaml",
-      "sha256": "be65f54c2cff5f820f0d4dc406ced2576964b0c3af890d0d8efab04ab12177c2"
+      "sha256": "f9f29c3c79b8b88a1dbf7c8a6b04b96b2f99a5c2b1576d706e3f6e0ce0ba2ac8"
     },
     {
       "id": "goodlife-hoogstraten",
@@ -114,12 +114,12 @@
     {
       "id": "gufi-see-gundelfingen",
       "file": "gufi-see-gundelfingen.yaml",
-      "sha256": "62ed4877d3cc0b923ca33944d84e420ec0056eb9007452e3dc80a31146f99212"
+      "sha256": "8348b5582339ac1999ee9fdef773ee9984c1af85371228c13cd8932d9565dabb"
     },
     {
       "id": "hot-sport-seepark-niederweimar",
       "file": "hot-sport-seepark-niederweimar.yaml",
-      "sha256": "a0b550161ef09b4e6d610a551faad347540b8e32797eac222b000146bc62cd34"
+      "sha256": "037cc140ab315da76587badc583ed22ccf4968491e0cb127666b332be7e8427a"
     },
     {
       "id": "kempervennen-westerhoven",
@@ -144,12 +144,12 @@
     {
       "id": "outsider-oudenaarde",
       "file": "outsider-oudenaarde.yaml",
-      "sha256": "7ff517360d2e4a17696eee04fede6fcd85ff3a79a5f1f12068d7ab1b84134837"
+      "sha256": "ec6815ece77d2df84fac2aa882ab506d244641eea521196670d62a5d97fa197e"
     },
     {
       "id": "pineapple-wakepark-rossau",
       "file": "pineapple-wakepark-rossau.yaml",
-      "sha256": "7ffa507f1c2c7d5e557174666769067d624908f030ad71f0ff94234ff13e62eb"
+      "sha256": "2ed15d5a83e5438435c4318d7845940a7e510e24f9291b3a4dd9fbd7bbe053eb"
     },
     {
       "id": "project7-rotterdam",
@@ -169,22 +169,22 @@
     {
       "id": "southlake-heuchelheim",
       "file": "southlake-heuchelheim.yaml",
-      "sha256": "ea6623993703849f100e4f10177967ccbfd9198d9106020ac7038e7211fc3377"
+      "sha256": "9cb3c84d942d91d6cfd77d159be9342c9358de356a4e3520c734c140fffe2bee"
     },
     {
       "id": "spin-froidchapelle",
       "file": "spin-froidchapelle.yaml",
-      "sha256": "8e9c2f6d90a3a3d15986b427618f5353707b49aa57043b4be2959ea3d6e0c5f9"
+      "sha256": "b56045020f8b4cec995534699161564aee5e17fae968808107e37acead070239"
     },
     {
       "id": "spotz-wakeboard-park-norderstedt",
       "file": "spotz-wakeboard-park-norderstedt.yaml",
-      "sha256": "85dbcd04a971a51d86e1cec5d43eaa25fcc8a74b9c700fd2b1fd1893b7645e0e"
+      "sha256": "c364b50f423a955ecf0ad30f56e62e290de5d8fe3b2b411b6fe293b2b7de7700"
     },
     {
       "id": "strandparx-cable-island-magdeburg",
       "file": "strandparx-cable-island-magdeburg.yaml",
-      "sha256": "ceb3ce77a12e909780d4f21d831681a91b55ea2cc1577a1670d3f85627a07766"
+      "sha256": "52a26b4e1f508862ab15e90561c5bf4c9325e7af1a4bcda4286722e5b77f54de"
     },
     {
       "id": "stroombroek-braamt",
@@ -194,22 +194,22 @@
     {
       "id": "suedsee-wakepark-xanten",
       "file": "suedsee-wakepark-xanten.yaml",
-      "sha256": "71f6606d014dee057d217066ec707879cb59090555762a037115a5d2e6132b3d"
+      "sha256": "bbdd288c87956d36a658b8df0369c9dcaf0662d8851004b3aa1c810a0ae543f2"
     },
     {
       "id": "supieria-rostock",
       "file": "supieria-rostock.yaml",
-      "sha256": "ad3d71fa4ea80ea1a8deb85d10d47255362f559a0a3ab15c9662d383edb0ac17"
+      "sha256": "ed630e72a675dd29743f16e2eb1e62a40d6cb8a949e37f4237b443bed78bc269"
     },
     {
       "id": "terhills-dilsen-stokkem",
       "file": "terhills-dilsen-stokkem.yaml",
-      "sha256": "ecd7defd0fa3a6a9aed8480ad9345381034e533eb9f766af9efbfd0ddf64e55c"
+      "sha256": "02c090468ed6e800a0f0d6661ff9a356c1e785812e15070c5817b19d989e22a1"
     },
     {
       "id": "thebricks-duisburg",
       "file": "thebricks-duisburg.yaml",
-      "sha256": "d815df1c81723e8ef4be23f149d70d97a9765d7431f4f296128dc81d251f8311"
+      "sha256": "6f300aac72d65b24e9e50c33d76f9a3ccbd33dd4b4cc565f35441e30111668ed"
     },
     {
       "id": "turncable-thannhausen",
@@ -239,7 +239,7 @@
     {
       "id": "wakebeach-257-dormagen",
       "file": "wakebeach-257-dormagen.yaml",
-      "sha256": "86b0aad88029d2c67038f560f2acea25323fc8b81c2f59df237d268a98678f63"
+      "sha256": "19ba7e294309903f6432990ef12f765d961f4053a569b852b1f50e2db1f4907b"
     },
     {
       "id": "wakepark-brombachsee",
@@ -259,7 +259,7 @@
     {
       "id": "wakepark-grossbeeren",
       "file": "wakepark-grossbeeren.yaml",
-      "sha256": "bdf2b7c0ea13548ed06b3e1933417437da0a20de596c07e2ff1733f98670330e"
+      "sha256": "3716114a98e942a3cb881d4e3b6cef795e00548bfcb194ceca6dfc02dcbf5917"
     },
     {
       "id": "wakepark-pfullendorf",
@@ -279,7 +279,7 @@
     {
       "id": "wakepark-tunisee-freiburg",
       "file": "wakepark-tunisee-freiburg.yaml",
-      "sha256": "dbc8881d0dd3888aa01266b3d9089fcace3754ba610ad044c322b05d4a332a26"
+      "sha256": "00678daf06bdff17a7c9d0a65238b123893d2783af963d84a4e19eec9a38b78d"
     },
     {
       "id": "waketoolz-wakepark-woerth",
