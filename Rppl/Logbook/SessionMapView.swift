@@ -160,6 +160,8 @@ struct SessionMapView: View {
     var cableOverlays: [[CLLocationCoordinate2D]] = []
     /// Debug: how each set ended (fall, clean exit), with a legend.
     var fallMarkers: [SessionFallMarker] = []
+    /// How a single set ended: replaces the end pin on a set map.
+    var endMarker: SessionFallMarker?
     /// Set on a full-screen map: style and reset live in the navigation bar (`MapScreenToolbar`).
     var usesBarButtons = false
     /// Bumped by the bar's reset button: back to the fitted frame.
@@ -183,8 +185,10 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         preferredFrame: MapTrackFrame? = nil,
-        layout: SessionMapLayout = .embedded
+        layout: SessionMapLayout = .embedded,
+        endMarker: SessionFallMarker? = nil
     ) {
+        self.endMarker = endMarker
         self.tracks = locations.count >= 2 ? [locations] : []
         self.sessionMapData = nil
         self.rendering = rendering
@@ -200,8 +204,10 @@ struct SessionMapView: View {
         allowsInteraction: Bool = false,
         showsStyleToggle: Bool = false,
         preferredFrame: MapTrackFrame? = nil,
-        layout: SessionMapLayout = .embedded
+        layout: SessionMapLayout = .embedded,
+        endMarker: SessionFallMarker? = nil
     ) {
+        self.endMarker = endMarker
         self.tracks = tracks.filter { $0.count >= 2 }
         self.sessionMapData = nil
         self.rendering = rendering
@@ -371,7 +377,9 @@ struct SessionMapView: View {
             if let first = tracks.first?.first {
                 Marker("Start", coordinate: coordinate(first))
             }
-            if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
+            if let endMarker {
+                fallAnnotation(endMarker)
+            } else if let last = tracks.last?.last, tracks.flatMap({ $0 }).count > 1 {
                 Marker("End", coordinate: coordinate(last))
             }
         }
@@ -672,13 +680,16 @@ struct SessionMapFullscreenView: View {
     var preferredFrame: MapTrackFrame? = nil
     var cableOverlays: [[CLLocationCoordinate2D]] = []
     var fallMarkers: [SessionFallMarker] = []
+    var endMarker: SessionFallMarker?
 
     init(
         locations: [LocationSample],
         rendering: SessionMapRendering = .flat,
         title: String,
-        preferredFrame: MapTrackFrame? = nil
+        preferredFrame: MapTrackFrame? = nil,
+        endMarker: SessionFallMarker? = nil
     ) {
+        self.endMarker = endMarker
         self.tracks = locations.count >= 2 ? [locations] : []
         self.sessionMapData = nil
         self.rendering = rendering
@@ -752,7 +763,8 @@ struct SessionMapFullscreenView: View {
                     rendering: rendering,
                     allowsInteraction: true,
                     preferredFrame: preferredFrame,
-                    layout: .fullscreen
+                    layout: .fullscreen,
+                    endMarker: endMarker
                 )
                 .barButtons(resetToken: resetToken, locateToken: locateToken, userLocation: userLocation)
             }

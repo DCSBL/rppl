@@ -1216,6 +1216,12 @@ private struct SetDetailCard: View {
     var telemetry: SetTelemetry?
     var impactG: Double?
 
+    /// Red fall figure or green check where the set ended, instead of the end pin.
+    private var endMarker: SessionFallMarker? {
+        guard let impactG, let last = locations.last else { return nil }
+        return SessionFallMarker(setIndex: set.index, coordinate: MapCoordinate(last), impactG: impactG)
+    }
+
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
     }
@@ -1242,14 +1248,15 @@ private struct SetDetailCard: View {
 
             if locations.count >= 2 {
                 ZStack {
-                    SessionMapView(locations: locations, rendering: rendering)
+                    SessionMapView(locations: locations, rendering: rendering, endMarker: endMarker)
                         .allowsHitTesting(false)
 
                     NavigationLink {
                         SessionMapFullscreenView(
                             locations: locations,
                             rendering: rendering,
-                            title: String(localized: "Set \(set.index)")
+                            title: String(localized: "Set \(set.index)"),
+                            endMarker: endMarker
                         )
                     } label: {
                         Color.clear
