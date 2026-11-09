@@ -31,7 +31,6 @@ struct StatisticsView: View {
                         .accessibilityIdentifier("statistics-empty")
                     }
                 }
-                .readableWidth()
                 .padding(.vertical, 8)
             }
             .contentMargins(.horizontal, layout == .twoPane ? LogbookLayout.wideInset : LogbookLayout.horizontalInset, for: .scrollContent)

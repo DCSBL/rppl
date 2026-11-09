@@ -56,7 +56,7 @@ private struct SessionFallLegend: View {
     var body: some View {
         HStack(spacing: 10) {
             entry(.fall, "Fall")
-            entry(.cleanExit, "Clean exit")
+            entry(.cleanExit, "Clean")
             entry(.unknown, "No motion data")
         }
         .font(.caption2)
@@ -81,7 +81,7 @@ private struct SessionFallLegend: View {
 }
 
 /// The marker glyph, shared by the map and its legend.
-private struct SessionFallSymbol: View {
+struct SessionFallSymbol: View {
     let kind: SessionFallMarker.Kind
     let size: CGFloat
 
@@ -95,10 +95,12 @@ private struct SessionFallSymbol: View {
                 .background(Color.rpplMetricEnergy, in: Circle())
                 .overlay { Circle().strokeBorder(.white.opacity(0.9), lineWidth: 1.5) }
         case .cleanExit:
-            Circle()
-                .fill(Color.rpplAccent)
-                .overlay { Circle().strokeBorder(.white, lineWidth: 1.5) }
-                .frame(width: size * 0.5, height: size * 0.5)
+            Image(systemName: "checkmark")
+                .font(.system(size: size * 0.4, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: size * 0.75, height: size * 0.75)
+                .background(Color.rpplMetricRiding, in: Circle())
+                .overlay { Circle().strokeBorder(.white.opacity(0.9), lineWidth: 1.5) }
                 .frame(width: size, height: size)
         case .unknown:
             Circle()

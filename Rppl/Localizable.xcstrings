@@ -9772,34 +9772,6 @@
         }
       }
     },
-    "Sessions and sets" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Park days and sets"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessions et sets"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessies en sets"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessions und Sets"
-          }
-        }
-      }
-    },
     "These sessions are in your iCloud Drive. Choose which to add to this iPhone logbook." : {
       "localizations" : {
         "fr" : {
@@ -18066,34 +18038,6 @@
         }
       }
     },
-    "Clean exit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clean exit"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clean exit"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clean exit"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clean exit"
-          }
-        }
-      }
-    },
     "Clean start" : {
       "localizations" : {
         "en" : {
@@ -18830,22 +18774,22 @@
             "value" : "Fall"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fall"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fall"
+            "value" : "Val"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fall"
+            "value" : "Sturz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chute"
           }
         }
       }
@@ -22458,6 +22402,90 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Halte deine Apple Watch in der Nähe und entsperrt."
+          }
+        }
+      }
+    },
+    "Clean" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clean"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clean"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clean"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clean"
+          }
+        }
+      }
+    },
+    "About the g-force" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About the g-force"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over de g-kracht"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über die g-Kraft"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de la force g"
+          }
+        }
+      }
+    },
+    "Measured at your wrist. The real impact on your body is probably lower." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured at your wrist. The real impact on your body is probably lower."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeten aan je pols. De echte klap voor je lichaam is waarschijnlijk lager."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am Handgelenk gemessen. Die tatsächliche Belastung für deinen Körper ist wahrscheinlich geringer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesuré au poignet. L'impact réel sur ton corps est probablement plus faible."
           }
         }
       }

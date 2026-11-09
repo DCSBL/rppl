@@ -29,7 +29,7 @@ rppl://parks/favorites
 - Live Activity: Stop opens `rppl://live`.
 - Widgets: park hours (`rppl://park/<id>`), top parks (`rppl://parks/favorites`), last session (`rppl://session/<id>`).
 - Debug screen (About, hold the logo): lists every link above; tap opens it, hold copies it.
-- Spotlight (debug toggle "Parks in Spotlight"): every indexed park uses `rppl://park/<id>` as its Spotlight identifier. A tap arrives as a user activity, not through `onOpenURL`, so `ContentView.onContinueUserActivity` takes the id out of it (`ParkSpotlight.parkID`). See [Parks.md](Parks.md#parks-in-spotlight-debug-toggle).
+- Spotlight: every indexed park uses `rppl://park/<id>` as its Spotlight identifier. A tap arrives as a user activity, not through `onOpenURL`, so `ContentView.onContinueUserActivity` takes the id out of it (`ParkSpotlight.parkID`). See [Parks.md](Parks.md#parks-in-spotlight).
 - `rppl://add-reopening` is **internal**: the tappable day in the park detail "Opens again…" text, caught by an `OpenURLAction` in `ParkDetailView`. It never reaches `onOpenURL`.
 
 ## Adding a link
