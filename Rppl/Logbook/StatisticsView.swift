@@ -18,21 +18,25 @@ struct StatisticsView: View {
         NavigationStack {
             // A List, like the Logbook, so both tabs get the same margins next to the Duo bars.
             List {
-                SeasonTotalsCard(season: catalog.season, isLoading: catalog.isLoading)
-                    .statisticsRow(top: 4, bottom: 12)
-                if catalog.season.showsCharts {
-                    SeasonCharts(season: catalog.season)
-                        .statisticsRow()
-                } else if !catalog.isLoading {
-                    ContentUnavailableView {
-                        Label("Not enough sessions yet", systemImage: "chart.bar.xaxis")
-                    } description: {
-                        Text("Charts appear once you have a few sessions in your logbook.")
+                // One row, so everything exists at once (a List builds rows lazily, offscreen ones included).
+                VStack(spacing: RpplDesign.tileSpacing) {
+                    SeasonTotalsCard(season: catalog.season, isLoading: catalog.isLoading)
+                    if catalog.season.showsCharts {
+                        SeasonCharts(season: catalog.season)
+                    } else if !catalog.isLoading {
+                        ContentUnavailableView {
+                            Label("Not enough sessions yet", systemImage: "chart.bar.xaxis")
+                        } description: {
+                            Text("Charts appear once you have a few sessions in your logbook.")
+                        }
+                        .foregroundStyle(Color.rpplMuted)
+                        .accessibilityIdentifier("statistics-empty")
                     }
-                    .foregroundStyle(Color.rpplMuted)
-                    .accessibilityIdentifier("statistics-empty")
-                    .statisticsRow()
                 }
+                .readableWidth()
+                .listRowInsets(LogbookLayout.rowInsets(top: 4, bottom: 12))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -49,15 +53,6 @@ struct StatisticsView: View {
             .tint(Color.rpplAccent)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
-    }
-}
-
-private extension View {
-    func statisticsRow(top: CGFloat = 8, bottom: CGFloat = 8) -> some View {
-        readableWidth()
-            .listRowInsets(LogbookLayout.rowInsets(top: top, bottom: bottom))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
     }
 }
 
