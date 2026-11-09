@@ -36,11 +36,24 @@ final class LiveSessionController {
         return ParkCatalog.loadApp().first { $0.id == id }
     }
 
-    func start(mode: LiveSession.Mode, parkId: String?, spot: ParkCoordinate?, spotName: String?) {
+    /// The park, or "City, Country" of the own spot; nil when neither is known.
+    var placeName: String? { park?.compactName ?? session?.spotName }
+
+    func start(parkId: String?, spot: ParkCoordinate?, spotName: String?) {
         guard session == nil else { return }
-        let live = LiveSession(startedAt: .now, mode: mode, parkId: parkId, spot: spot, spotName: spotName)
+        let live = LiveSession(startedAt: .now, parkId: parkId, spot: spot, spotName: spotName)
         persist(live)
         requestReminderAccess()
+        if let spot, spotName == nil { Task { await resolveSpotName(spot, sessionId: live.id) } }
+    }
+
+    /// Starting never waits for the geocoder: the name lands on the running session when it answers.
+    private func resolveSpotName(_ spot: ParkCoordinate, sessionId: String) async {
+        guard let name = await SessionCityResolver.shared.placeName(near: spot),
+              var live = session, live.id == sessionId, live.spotName == nil
+        else { return }
+        live.spotName = name
+        persist(live)
     }
 
     func nextSet() {

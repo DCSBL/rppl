@@ -38,6 +38,25 @@ final class SessionCityResolver {
         }
     }
 
+    /// "City, Country" for a coordinate the person already shared (a nearest-park fix or a picked spot).
+    /// Nil offline or when the geocoder has nothing; callers fall back to the generic label.
+    func placeName(near coordinate: ParkCoordinate) async -> String? {
+        let key = String(format: "%.2f,%.2f", coordinate.lat, coordinate.lon)
+        if let cached = cache[key] { return cached }
+        let location = CLLocation(latitude: coordinate.lat, longitude: coordinate.lon)
+        guard let request = MKReverseGeocodingRequest(location: location),
+              let item = try? await request.mapItems.first
+        else { return nil }
+        let representations = item.addressRepresentations
+        let parts = [representations?.cityName, representations?.regionName]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !parts.isEmpty else { return nil }
+        let name = parts.joined(separator: ", ")
+        cache[key] = name
+        return name
+    }
+
     func invalidate(sessionId: String) {
         cache.removeValue(forKey: sessionId)
     }
