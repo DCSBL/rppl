@@ -12,10 +12,6 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
-    @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
-    @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
-    @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
-    @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
     @AppStorage(AppSettingsKey.debugParkImport) private var parkImportEnabled = false
 
     var body: some View {
@@ -35,27 +31,6 @@ struct DebugLogView: View {
             }
 
             Section {
-                Toggle("Fall map", isOn: $fallMapEnabled)
-                    .tint(Color.rpplAccent)
-            } footer: {
-                Text("Marks how each set ended on the session map (fall badge or clean-exit dot, with a legend), plus a falls tile with the hardest hit at the wrist.")
-            }
-
-            Section {
-                Toggle("Dock wait", isOn: $dockWaitEnabled)
-                    .tint(Color.rpplAccent)
-            } footer: {
-                Text("A tile with the typical wait between sets and a bar per wait: a busyness indicator for the dock.")
-            }
-
-            Section {
-                Toggle("Walking and swimming", isOn: $walkRouteEnabled)
-                    .tint(Color.rpplAccent)
-            } footer: {
-                Text("A tile with the distance walked between sets and an estimate of the distance swum after a fall.")
-            }
-
-            Section {
                 Toggle("Park import", isOn: $parkImportEnabled)
                     .tint(Color.rpplAccent)
             } footer: {
@@ -67,21 +42,6 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Adds a filter to the Parks list and map for parks without cable coordinates.")
-            }
-
-            Section {
-                Toggle("Parks in Spotlight", isOn: $parkSpotlightEnabled)
-                    .tint(Color.rpplAccent)
-                    .onChange(of: parkSpotlightEnabled) { _, enabled in
-                        if enabled {
-                            // Reloading hands the parks to Spotlight.
-                            ParkStore.shared.reload()
-                        } else {
-                            ParkSpotlightIndexer.shared.removeAll()
-                        }
-                    }
-            } footer: {
-                Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
             }
 
             Section {

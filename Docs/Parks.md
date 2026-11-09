@@ -299,11 +299,11 @@ A logbook session counts as a visit to a park when its track center is within 75
 - Tapping opens that session: `rppl://session/<id>` (`SessionDeepLink`, handled in `ContentView`).
 - Colors come from the copied `RpplMetric*` colorsets in `RpplWidgets/Assets.xcassets`.
 
-### Parks in Spotlight (debug toggle)
+### Parks in Spotlight
 
-Off by default: Debug screen (About, hold the logo) → "Parks in Spotlight". When on, every listed park can be found from the iPhone search (swipe down on the Home Screen): by name, short name, town, country, or a general word like "wakeboard" or "kabelpark". Tapping a result opens the park, and the result offers directions. Turning the toggle off removes the parks from Spotlight again. The index stays on the phone; nothing is sent anywhere.
+Every listed park can be found from the iPhone search (swipe down on the Home Screen): by name, short name, town, country, or a general word like "wakeboard" or "kabelpark". Tapping a result opens the park, and the result offers directions. The index stays on the phone; nothing is sent anywhere.
 
 - What is indexed is `ParkSpotlight.entries` in Core: title = `name`, the line under it = `Park.placeSubtitle` (town and country, in the phone's language), keywords = `short_name` (when it adds a word) plus `ParkSpotlight.genericKeywords`, and the pin position. Permanently closed parks are left out, like in the list and map; custom and edited parks are in.
 - The result's identifier is the park link (`rppl://park/<id>`, see [DeepLinks.md](DeepLinks.md)). A tap arrives as a `CSSearchableItemActionType` activity; `ContentView.onContinueUserActivity` reads the park from it (`ParkSpotlight.parkID`) and sets the same `openParkID` the widgets use.
 - `ParkSpotlightIndexer` (app layer) keeps its own named Core Spotlight index and rewrites it in one batch. The batch's client state is `ParkSpotlight.fingerprint`, a hash of all entries: a launch with the same parks reads it and does nothing, an index the system dropped has no state and is filled again, and a failed run stores a state that matches nothing, so the next sync tries again. Bump `ParkSpotlight.layoutVersion` when the entry layout changes.
-- `ParkStore.reload()` is the only hook. It runs after a save, a delete and a park data update (also in the background), and when the Parks tab loads. With the toggle off it does nothing.
+- `ParkStore.reload()` is the only hook. It runs after a save, a delete and a park data update (also in the background), and when the Parks tab loads.

@@ -61,12 +61,9 @@ struct LogbookSessionDetailView: View {
     @AppStorage(AppSettingsKey.didUnderstandExport) private var didUnderstandExport = false
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var flagsEnabled = false
-    @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
-    @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
-    @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
-    /// Debug fall map: peak g around each set end, by set index (needs the motion stream).
+    /// Peak g around each set end, by set index (needs the motion stream).
     @State private var setImpacts: [Int: Double] = [:]
-    /// Debug walking and swimming: built from GPS when the sidecar predates the swum distance.
+    /// Walking and swimming: built from GPS when the sidecar predates the swum distance.
     @State private var walkData: WalkTrackData?
 
     private nonisolated enum ExportPurpose: Sendable {
@@ -280,16 +277,16 @@ struct LogbookSessionDetailView: View {
             )
     }
 
-    private var debugWalkedMeters: Double? {
+    private var walkedMeters: Double? {
         sessionStats?.walkedMeters ?? walkData?.walkedMeters
     }
 
-    private var debugSwumMeters: Double? {
+    private var swumMeters: Double? {
         sessionStats?.swumMeters ?? walkData?.swumMeters
     }
 
-    private var debugFallMarkers: [SessionFallMarker] {
-        guard fallMapEnabled, let sessionMapTrackData, let stats = sessionStats else { return [] }
+    private var fallMarkers: [SessionFallMarker] {
+        guard let sessionMapTrackData, let stats = sessionStats else { return [] }
         return SessionFallMarker.markers(mapData: sessionMapTrackData, sets: stats.sets, impacts: setImpacts)
     }
 
@@ -313,7 +310,7 @@ struct LogbookSessionDetailView: View {
                     allowsInteraction: false,
                     preferredFrame: mapFrame,
                     cableOverlays: cableOverlays,
-                    fallMarkers: debugFallMarkers
+                    fallMarkers: fallMarkers
                 )
                 .allowsHitTesting(false)
 
@@ -324,7 +321,7 @@ struct LogbookSessionDetailView: View {
                         title: navigationTitle,
                         preferredFrame: mapFrame,
                         cableOverlays: cableOverlays,
-                        fallMarkers: debugFallMarkers
+                        fallMarkers: fallMarkers
                     )
                 } label: {
                     Color.clear
@@ -461,13 +458,13 @@ struct LogbookSessionDetailView: View {
                         ridingTile(stats)
                     }
                     distanceTile(stats)
-                    if dockWaitEnabled, let wait = DockWaitStats.summary(sets: stats.sets) {
+                    if let wait = DockWaitStats.summary(sets: stats.sets) {
                         dockWaitTile(wait, gaps: DockWaitStats.gaps(sets: stats.sets))
                     }
-                    if walkRouteEnabled, !isManual, let walked = debugWalkedMeters {
-                        onFootTile(walked: walked, swum: debugSwumMeters)
+                    if !isManual, let walked = walkedMeters {
+                        onFootTile(walked: walked, swum: swumMeters)
                     }
-                    if fallMapEnabled, !stats.sets.isEmpty {
+                    if !stats.sets.isEmpty {
                         fallsTile(stats)
                     }
                     let measured = stats.waterTemperatureRangeCelsius.map { LogbookFormatting.waterTemperatureRange($0) }
@@ -796,11 +793,11 @@ struct LogbookSessionDetailView: View {
         }
     }
 
-    /// Debug: how many sets ended in a fall and the hardest hit at the wrist (`SetImpact`, from the motion stream).
+    /// How many sets ended in a fall and the hardest hit at the wrist (`SetImpact`, from the motion stream).
     private func fallsTile(_ stats: SessionStats) -> some View {
         let falls = stats.sets.filter { SetImpact.isFall(setImpacts[$0.index]) }.count
         let hardest = setImpacts.values.max()
-        return InfoTile("Falls", systemImage: "figure.fall", tint: MetricKind.energy.tint) {
+        let tile = InfoTile("Falls", systemImage: "figure.fall", tint: MetricKind.energy.tint) {
             MetricValue(
                 setImpacts.isEmpty ? "-" : String(localized: "\(falls) of \(stats.sets.count)"),
                 caption: "Sets that ended in a fall"
@@ -809,6 +806,7 @@ struct LogbookSessionDetailView: View {
                 StatChip(metric: .energy, value: SetImpact.label(hardest), caption: "Hardest hit at the wrist")
             }
         }
+        return tile.overlay(alignment: .topTrailing) { ImpactInfoButton().padding(2) }
     }
 
     @ViewBuilder
@@ -857,7 +855,8 @@ struct LogbookSessionDetailView: View {
                             ),
                             flags: flags(forSet: set.index),
                             flagging: flagging(forSet: set.index),
-                            telemetry: setChartsEnabled ? setTelemetry[set.index] : nil
+                            telemetry: setChartsEnabled ? setTelemetry[set.index] : nil,
+                            impactG: setImpacts[set.index]
                         )
                     }
                 }
@@ -1027,30 +1026,24 @@ struct LogbookSessionDetailView: View {
         allLocations = sortedLocations
         applyTrackLayers(locations: sortedLocations, sets: sets)
         let wantsCharts = UserDefaults.standard.bool(forKey: AppSettingsKey.debugSetCharts)
-        let wantsImpacts = UserDefaults.standard.bool(forKey: AppSettingsKey.debugFallMap)
-        if wantsCharts || wantsImpacts {
-            let (telemetry, impacts) = try await StoreIO.runOffMain {
-                let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
-                let telemetry: [Int: SetTelemetry] = wantsCharts
-                    ? Dictionary(sets.map { set in
-                        (set.index, SetTelemetryBuilder.build(
-                            locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
-                        ))
-                    }, uniquingKeysWith: { first, _ in first })
-                    : [:]
-                let impacts: [Int: Double] = wantsImpacts
-                    ? Dictionary(sets.compactMap { set in
-                        SetImpact.peakG(motion: motion, around: set.endedAt).map { (set.index, $0) }
-                    }, uniquingKeysWith: { first, _ in first })
-                    : [:]
-                return (telemetry, impacts)
-            }
-            try Task.checkCancellation()
-            if wantsCharts { setTelemetry = telemetry }
-            if wantsImpacts { setImpacts = impacts }
+        let (telemetry, impacts) = try await StoreIO.runOffMain {
+            let motion = (try? store.readMotionSamples(sessionId: sessionId)) ?? []
+            let telemetry: [Int: SetTelemetry] = wantsCharts
+                ? Dictionary(sets.map { set in
+                    (set.index, SetTelemetryBuilder.build(
+                        locations: sortedLocations, motion: motion, from: set.startedAt, to: set.endedAt
+                    ))
+                }, uniquingKeysWith: { first, _ in first })
+                : [:]
+            let impacts: [Int: Double] = Dictionary(sets.compactMap { set in
+                SetImpact.peakG(motion: motion, around: set.endedAt).map { (set.index, $0) }
+            }, uniquingKeysWith: { first, _ in first })
+            return (telemetry, impacts)
         }
-        if UserDefaults.standard.bool(forKey: AppSettingsKey.debugWalkRoute),
-           sessionStats?.walkedMeters == nil || sessionStats?.swumMeters == nil {
+        try Task.checkCancellation()
+        if wantsCharts { setTelemetry = telemetry }
+        setImpacts = impacts
+        if sessionStats?.walkedMeters == nil || sessionStats?.swumMeters == nil {
             walkData = WalkTrackBuilder.build(locations: sortedLocations, sets: sets)
         }
         if sessionMapTrackData == nil {
@@ -1221,6 +1214,13 @@ private struct SetDetailCard: View {
     var flags: [String] = []
     var flagging: SetFlagging?
     var telemetry: SetTelemetry?
+    var impactG: Double?
+
+    /// Red fall figure or green check where the set ended, instead of the end pin.
+    private var endMarker: SessionFallMarker? {
+        guard let impactG, let last = locations.last else { return nil }
+        return SessionFallMarker(setIndex: set.index, coordinate: MapCoordinate(last), impactG: impactG)
+    }
 
     private var maxSpeedKmh: Double? {
         SessionLocationHelpers.peakSpeedKmh(for: set, locations: locations)
@@ -1248,14 +1248,15 @@ private struct SetDetailCard: View {
 
             if locations.count >= 2 {
                 ZStack {
-                    SessionMapView(locations: locations, rendering: rendering)
+                    SessionMapView(locations: locations, rendering: rendering, endMarker: endMarker)
                         .allowsHitTesting(false)
 
                     NavigationLink {
                         SessionMapFullscreenView(
                             locations: locations,
                             rendering: rendering,
-                            title: String(localized: "Set \(set.index)")
+                            title: String(localized: "Set \(set.index)"),
+                            endMarker: endMarker
                         )
                     } label: {
                         Color.clear
@@ -1296,6 +1297,7 @@ private struct SetDetailCard: View {
                     value: cableSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                     caption: "Cable speed"
                 )
+                if let impactG { SetImpactChip(impactG: impactG) }
             }
 
             Text(
