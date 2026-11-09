@@ -12,7 +12,7 @@ place.
 |---|---|---|
 | `app/TowerReview/` | `Rppl/Parks/TowerReview/` | Debug "Review towers" screens: judge guesses on the map, "Share results" zip |
 | `app/CableDetectionRunner.swift` | `Rppl/Parks/Editor/` | MapKit snapshots (600 m, close-ups) and the detector call |
-| `app/CableTraceView.detection.diff` | `Rppl/Parks/Editor/CableTraceView.swift` | What was removed from the trace map ("Detect cable", proposal controls, legend rows). `diff` of before and after, so apply it in reverse |
+| `app-wiring.patch` | `Rppl/App/DebugLogView.swift`, `Rppl/Settings/AppSettings.swift`, `Rppl/Parks/Editor/CableTraceView.swift` | The edits that connected it to the app: four debug keys, two toggles, the "Detect cable" button, proposal controls and legend rows |
 | `core/Sources/CableDetection/` | `RpplCore/Sources/RpplCore/CableDetection/` | Swift port: water segmenter, bright blobs, TowerNet, close-up check, wheel finder, loop fitter |
 | `core/Resources/*.weights` | `RpplCore/Sources/RpplCore/Resources/` | TowerNet, TowerCloseupCheck, TowerWheelFinder weights |
 | `core/Tests/` | `RpplCore/Tests/RpplCoreTests/` | Their tests (incl. `DetectionImageFrameTests`) |
@@ -36,13 +36,32 @@ counter-clockwise, so they may need a check.
 - The cloud session has no Swift compiler, so the Swift port was only ever compiled by CI. Expect to
   fix small things after moving it back.
 
-## Resuming
+## Rebuilding it into the app
 
-1. Move the folders back to the old paths (table above) and `git revert` the commit that parked them.
-2. Re-add the four debug keys (`debugCableDetection`, `debugTowerReview`, `debugTowerCloseupCheck`,
-   `debugTowerWheelFinder`) and toggles in `AppSettings.swift` and `DebugLogView.swift`.
-3. Training steps are in `cable-tracer/README.md` and `cable-tracer/detect/README.md`
-   (`phone_set.py`, `train_round.py`, then `export_*.py`).
+From the repo root, on a fresh branch off `main`:
+
+```bash
+archive/tower-detection/restore.sh
+```
+
+That reverses `app-wiring.patch` and moves every folder back to its old path (`git mv`, so
+history follows). Then:
+
+1. Add `tools/cable-tracer/.build/` to `.gitignore` again.
+2. Build the `Rppl` scheme and run `cd RpplCore && swift test`. The Swift port was only ever compiled
+   by CI (the cloud session has no Swift compiler), and `main` may have moved since, so expect small
+   fixes. `RpplCore` needs no `Package.swift` change: the weights are plain resources under `Resources/`.
+3. Delete the now empty `archive/tower-detection/` leftovers (README, patch, script) if you no longer
+   want them.
+4. Debug toggles come back default off: "Detect cable" (adds the button to the trace map) and
+   "Review towers" (the labelling screens; the close-up check and wheel finder keys default on).
+
+To train again, see `cable-tracer/README.md` and `cable-tracer/detect/README.md`: merge new labels
+into `cable-tracer/tower-labels.json`, build a set with `detect/phone_set.py <zip> <out>`, train with
+`detect/train_round.py` (JAX, runs in the cloud), compare against `detect/RESULTS.md`, then export
+weights with `export_towernet.py`, `export_closeupcheck.py` and `export_wheelfind.py` into
+`RpplCore/Sources/RpplCore/Resources/`. Review zips and the older training sets are in the project
+files (below). Keep `core/Tests` reference logits in step with any new weights.
 
 ## Files outside the repo
 
