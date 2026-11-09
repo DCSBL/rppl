@@ -138,5 +138,4 @@ Catalog code `fr`. Address the rider with *tu / ton*. Buttons use the infinitive
 | Delete Session? | Delete session? |
 | Could Not Export | Could not export |
 | Try Again | Try again |
-| Logbook · "Park days and sets" above a list called "Sessions" | Logbook · "Sessions and sets" |
 | End Session? | End session? |

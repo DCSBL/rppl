@@ -255,17 +255,25 @@ struct LogbookView: View {
             .contentMargins(.top, 8, for: .scrollContent)
             .background(RpplBackdrop())
             .navigationTitle("Logbook")
-            // No subtitle at accessibility sizes: with the large title it took a third of a small screen.
-            .navigationSubtitle(useAccessibilityLayout ? Text(verbatim: "") : Text("Sessions and sets"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 // Settings above add in the vertical bar of iPhone Duo, settings left of add elsewhere.
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape", action: showAppSettings)
-                    if liveSession.session == nil {
-                        Button("Start session", systemImage: "play.fill") { showStartSession = true }
+                    if layout == .twoPane {
+                        // Three buttons next to the sidebar button squeeze the title; one menu keeps it readable.
+                        Menu("Add session", systemImage: "plus") {
+                            if liveSession.session == nil {
+                                Button("Start session", systemImage: "play.fill") { showStartSession = true }
+                            }
+                            Button("Add session", systemImage: "plus") { showAddSession = true }
+                        }
+                    } else {
+                        if liveSession.session == nil {
+                            Button("Start session", systemImage: "play.fill") { showStartSession = true }
+                        }
+                        Button("Add session", systemImage: "plus") { showAddSession = true }
                     }
-                    Button("Add session", systemImage: "plus") { showAddSession = true }
                 }
             }
             .tint(Color.rpplAccent)

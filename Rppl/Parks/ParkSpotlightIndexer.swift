@@ -24,17 +24,9 @@ final class ParkSpotlightIndexer {
     /// The fingerprint this process last saw in the index, so a second look is skipped while nothing changed.
     private var knownFingerprint: String?
 
-    private var isEnabled: Bool { UserDefaults.standard.bool(forKey: AppSettingsKey.debugParkSpotlight) }
-
-    /// Indexes `parks` when the toggle is on and they differ from what the index holds.
+    /// Indexes `parks` when they differ from what the index holds.
     func sync(parks: [Park]) {
-        guard isEnabled else { return }
         enqueue { await self.refresh(parks: parks) }
-    }
-
-    /// Takes every park out of Spotlight again (toggle turned off).
-    func removeAll() {
-        enqueue { await self.clear() }
     }
 
     private func enqueue(_ work: @escaping @MainActor () async -> Void) {
@@ -46,8 +38,7 @@ final class ParkSpotlightIndexer {
     }
 
     private func refresh(parks: [Park]) async {
-        // The toggle may have been turned off while this waited for an earlier run.
-        guard isEnabled, CSSearchableIndex.isIndexingAvailable() else { return }
+        guard CSSearchableIndex.isIndexingAvailable() else { return }
         let entries = ParkSpotlight.entries(for: parks)
         let fingerprint = ParkSpotlight.fingerprint(of: entries)
         guard fingerprint != knownFingerprint else { return }
@@ -82,19 +73,6 @@ final class ParkSpotlightIndexer {
         }
         let closed = await endBatch(of: index, state: finished ? fingerprint : Self.emptyState)
         knownFingerprint = finished && closed ? fingerprint : nil
-    }
-
-    private func clear() async {
-        knownFingerprint = nil
-        guard CSSearchableIndex.isIndexingAvailable() else { return }
-        let index = searchIndex
-        index.beginBatch()
-        do {
-            try await index.deleteSearchableItems(withDomainIdentifiers: [ParkSpotlight.domain])
-        } catch {
-            WakeLog.error(.store, "park spotlight remove: \(error.localizedDescription)")
-        }
-        _ = await endBatch(of: index, state: Self.emptyState)
     }
 
     /// Always closes the batch, so a failed run never leaves one open; its state tells the next launch to try again.
