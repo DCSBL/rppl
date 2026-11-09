@@ -84,42 +84,55 @@ struct LiveSessionStartView: View {
 
     private var actions: some View {
         VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
-            if watchAvailable {
-                Button(action: startWatch) {
-                    Text("Start on Apple Watch").frame(maxWidth: .infinity)
+            if let reachable = watchReachable {
+                InfoTile("Apple Watch", systemImage: "applewatch") {
+                    Label(
+                        reachable ? "Reachable" : "Not reachable",
+                        systemImage: reachable ? "checkmark.circle" : "exclamationmark.circle"
+                    )
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.rpplText)
+                    if !reachable {
+                        Text("Keep your Apple Watch close and unlocked.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                }
+            }
+
+            if watchReachable == true {
+                Button(action: startWatch) { Text("Start session").frame(maxWidth: .infinity) }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(Color.rpplAccent)
+                    .disabled(isStartingWatch)
+            } else {
+                if watchReachable == false {
+                    Button { connectivity.refreshSyncState() } label: {
+                        Text("Try again").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(Color.rpplAccent)
+                }
+                Button(action: start) {
+                    Text(watchReachable == false ? "Track on iPhone" : "Start session").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .tint(.green)
-                .disabled(isStartingWatch)
-                Text("The Watch records everything: sets, speed and heart rate.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            }
-
-            if watchAvailable {
-                Text("On the iPhone you keep time and sets yourself, without speed or heart rate.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            } else {
-                Text("No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            }
-
-            if watchAvailable {
-                trackOnPhone.buttonStyle(.bordered).controlSize(.large).tint(.green)
-            } else {
-                trackOnPhone.buttonStyle(.borderedProminent).controlSize(.large).tint(.green)
+                .tint(Color.rpplAccent)
             }
         }
     }
 
-    private var trackOnPhone: some View {
-        Button(action: start) { Text("Track on iPhone").frame(maxWidth: .infinity) }
+    /// nil: no Watch to start on (not paired, or Rppl not installed on it). Otherwise whether it answers now.
+    private var watchReachable: Bool? {
+        switch connectivity.syncState {
+        case .readyLive: true
+        case .readyQueued: false
+        default: nil
+        }
     }
-
-    private var watchAvailable: Bool { connectivity.syncState.isReadyToSync }
 
     private func startWatch() {
         isStartingWatch = true

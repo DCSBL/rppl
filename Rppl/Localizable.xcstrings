@@ -9617,7 +9617,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try Again"
+            "value" : "Try again"
           }
         },
         "fr" : {
@@ -22098,118 +22098,6 @@
         }
       }
     },
-    "Start on Apple Watch" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start on Apple Watch"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Démarrer sur l'Apple Watch"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starten op Apple Watch"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf der Apple Watch starten"
-          }
-        }
-      }
-    },
-    "The Watch records everything: sets, speed and heart rate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The Watch records everything: sets, speed and heart rate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La Watch enregistre tout : sets, vitesse et fréquence cardiaque."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De Watch neemt alles op: sets, snelheid en hartslag."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Watch zeichnet alles auf: Sets, Geschwindigkeit und Herzfrequenz."
-          }
-        }
-      }
-    },
-    "On the iPhone you keep time and sets yourself, without speed or heart rate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On the iPhone you keep time and sets yourself, without speed or heart rate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sur l'iPhone, tu suis le temps et les sets toi-même, sans vitesse ni fréquence cardiaque."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Op de iPhone hou je zelf tijd en sets bij, zonder snelheid of hartslag."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf dem iPhone erfasst du Zeit und Sets selbst, ohne Geschwindigkeit oder Herzfrequenz."
-          }
-        }
-      }
-    },
-    "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune Apple Watch trouvée. L'iPhone suit le temps et les sets, sans vitesse ni fréquence cardiaque. Tu touches toi-même Set suivant."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen Apple Watch gevonden. De iPhone houdt tijd en sets bij, zonder snelheid of hartslag. Je tikt zelf op Volgende set."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Apple Watch gefunden. Das iPhone erfasst Zeit und Sets, ohne Geschwindigkeit oder Herzfrequenz. Du tippst selbst auf Nächstes Set."
-          }
-        }
-      }
-    },
     "Could not start Apple Watch" : {
       "localizations" : {
         "en" : {
@@ -22374,6 +22262,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf der Apple Watch aufgezeichnet. Beende die Session dort."
+          }
+        }
+      }
+    },
+    "Apple Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        }
+      }
+    },
+    "Reachable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reachable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joignable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreichbar"
+          }
+        }
+      }
+    },
+    "Not reachable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not reachable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non joignable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet bereikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht erreichbar"
+          }
+        }
+      }
+    },
+    "Keep your Apple Watch close and unlocked." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your Apple Watch close and unlocked."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garde ton Apple Watch à proximité et déverrouillée."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd je Apple Watch dichtbij en ontgrendeld."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte deine Apple Watch in der Nähe und entsperrt."
           }
         }
       }
