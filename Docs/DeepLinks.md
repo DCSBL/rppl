@@ -6,6 +6,7 @@ Custom scheme `rppl://`, registered in `Rppl/Info.plist` and `Info-Dev.plist` (`
 |------|-------|---------------|
 | `rppl://logbook` | Logbook tab | `TabDeepLink` |
 | `rppl://session/<session-id>` | Session detail in the logbook | `SessionDeepLink` |
+| `rppl://statistics` | Statistics tab | `TabDeepLink` |
 | `rppl://parks` | Parks tab | `TabDeepLink` |
 | `rppl://parks/favorites` | Parks tab, nearby order, starred parks only | `ParkDeepLink.isFavorites` |
 | `rppl://park/<park-id>` | Park detail | `ParkDeepLink` |

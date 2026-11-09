@@ -6,6 +6,7 @@ import RpplCore
 
 enum AppTab: Hashable {
     case logbook
+    case statistics
     case parks
 }
 
@@ -13,6 +14,8 @@ struct ContentView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedTab: AppTab = .logbook
     @State private var logbookNavigation = LogbookNavigationRequest()
+    /// Read by the Logbook and Statistics tabs; the Logbook reloads it.
+    @State private var catalog = SessionCatalog()
     @State private var openParkID: String?
     @State private var openFavorites = false
     @State private var openDebug = false
@@ -34,7 +37,11 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Logbook", systemImage: "book.fill", value: AppTab.logbook) {
-                LogbookView(navigation: $logbookNavigation)
+                LogbookView(navigation: $logbookNavigation, catalog: catalog)
+            }
+
+            Tab("Statistics", systemImage: "chart.bar.xaxis", value: AppTab.statistics) {
+                StatisticsView(catalog: catalog)
             }
 
             Tab("Parks", systemImage: "mappin.and.ellipse", value: AppTab.parks) {
@@ -107,6 +114,7 @@ struct ContentView: View {
             } else if let tab = TabDeepLink(url: url) {
                 switch tab {
                 case .logbook: selectedTab = .logbook
+                case .statistics: selectedTab = .statistics
                 case .parks: selectedTab = .parks
                 case .about: showSettings = true
                 case .live:
