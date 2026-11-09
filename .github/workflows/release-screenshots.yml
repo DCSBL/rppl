@@ -190,7 +190,7 @@ jobs:
         run: |
           set -euo pipefail
           missing=0
-          for n in 02-logbook-3-1 04-session-tracked-2 06-parks-open-1; do
+          for n in 02-logbook-3-1 04-session-tracked-1 06-parks-open-1; do
             [ -f "screenshots/$n.png" ] || { echo "::error::required iPhone shot $n is missing"; missing=1; }
           done
           [ -f screenshots-watch/06-live-riding.png ] || { echo "::error::required Watch shot 06-live-riding is missing"; missing=1; }
@@ -499,7 +499,7 @@ jobs:
           # At most this many shots per device type go in the description; the rest go in one zip.
           per_device = 3
           # The shots marketing/marketing.yaml uses come first; the rest follow in name order.
-          preferred = ["02-logbook-3-1", "04-session-tracked-2", "06-parks-open-1", "06-live-riding",
+          preferred = ["02-logbook-3-1", "04-session-tracked-1", "06-parks-open-1", "06-live-riding",
                        "02-logbook-folded", "04-session-unfolded", "06-parks-unfolded"]
           names = sorted(n for n in Path("assets.txt").read_text().split() if n.endswith(".png"))
           body = re.sub(re.escape(start) + r".*?" + re.escape(end) + r"\n*", "", Path("body.md").read_text(), flags=re.S).rstrip()
