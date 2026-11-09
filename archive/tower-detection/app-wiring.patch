@@ -15,7 +15,7 @@ index 2012aeb..e22920e 100644
 @@ -71,13 +69,6 @@ struct DebugLogView: View {
                  Text("Adds a filter to the Parks list and map for parks without cable coordinates.")
              }
- 
+
 -            Section {
 -                Toggle("Detect cable", isOn: $cableDetectionEnabled)
 -                    .tint(Color.rpplAccent)
@@ -29,7 +29,7 @@ index 2012aeb..e22920e 100644
 @@ -93,20 +84,6 @@ struct DebugLogView: View {
                  Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
              }
- 
+
 -            Section {
 -                Toggle("Review towers", isOn: $towerReviewEnabled)
 -                    .tint(Color.rpplAccent)
@@ -58,7 +58,7 @@ index 938bb09..fcfe6e9 100644
 -    /// The park's other cables: drawn for orientation and kept clear of by the detector.
 +    /// The park's other cables: drawn for orientation.
      let otherCables: [ParkCable]
- 
+
      @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = true
 @@ -19,12 +19,6 @@ struct CableTraceView: View {
      @State private var position: MapCameraPosition
@@ -71,7 +71,7 @@ index 938bb09..fcfe6e9 100644
 -    @State private var askProposalDirection = false
 -    @State private var confirmReplaceByProposal = false
      @State private var showLegend = false
- 
+
      init(cable: Binding<ParkCable>, center: ParkCoordinate, otherCables: [ParkCable] = []) {
 @@ -70,43 +64,20 @@ struct CableTraceView: View {
                          pointMarker(index: index, point: point)
@@ -181,7 +181,7 @@ index 938bb09..fcfe6e9 100644
 @@ -321,10 +256,6 @@ struct CableTraceView: View {
          show(points.map(\.coordinate))
      }
- 
+
 -    private func show(_ candidate: CableLoopCandidate, in image: DetectionImage) {
 -        show(candidate.vertices.map { image.coordinate(fromLocal: $0) })
 -    }
@@ -192,13 +192,13 @@ index 938bb09..fcfe6e9 100644
 @@ -334,85 +265,10 @@ struct CableTraceView: View {
          ))
      }
- 
+
 -    // MARK: Detection
 -
      private func mapCoordinate(_ coordinate: ParkCoordinate) -> CLLocationCoordinate2D {
          CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
      }
- 
+
 -    private func detectCable() {
 -        guard !detecting else { return }
 -        detecting = true
@@ -276,12 +276,12 @@ index 938bb09..fcfe6e9 100644
          guard let length = cable.computedLengthM else { return String(localized: "\(points.count) points") }
          return String(localized: "\(points.count) points · \(Int(length.rounded())) m")
 @@ -421,7 +277,6 @@ struct CableTraceView: View {
- 
+
  /// What the colours on the trace map mean.
  struct CableTraceLegend: View {
 -    var showsDetection: Bool
      var showsOtherCables: Bool
- 
+
      var body: some View {
 @@ -432,10 +287,6 @@ struct CableTraceLegend: View {
              if showsOtherCables {
