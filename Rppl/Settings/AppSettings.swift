@@ -33,16 +33,8 @@ enum AppSettingsKey {
     static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"
     /// Debug: "Fill in from a source" (website or screenshot, on-device model) in the park editor (default off).
     static let debugParkImport = "rppl.debugParkImport"
-    /// Debug: "Detect cable" button on the trace map of the park editor (default off).
-    static let debugCableDetection = "rppl.debugCableDetection"
     /// Debug: parks show up in the system search (Spotlight) and a tap opens the park (default off).
     static let debugParkSpotlight = "rppl.debugParkSpotlight"
-    /// Debug: "Review towers" screen that collects tower verdicts for the detector's training set (default off).
-    static let debugTowerReview = "rppl.debugTowerReview"
-    /// Debug: the tower review scores every guess on a zoomed close-up (`TowerCloseupCheck`).
-    static let debugTowerCloseupCheck = "rppl.debugTowerCloseupCheck"
-    /// Debug: the tower review moves every guess to the wheel the close-up shows (`TowerWheelFinder`).
-    static let debugTowerWheelFinder = "rppl.debugTowerWheelFinder"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).

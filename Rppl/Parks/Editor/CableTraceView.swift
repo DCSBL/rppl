@@ -10,7 +10,7 @@ struct CableTraceView: View {
     @ScaledMetric(relativeTo: .caption2) private var markerSize: CGFloat = 14
     @Binding var cable: ParkCable
     let center: ParkCoordinate
-    /// The park's other cables: drawn for orientation and kept clear of by the detector.
+    /// The park's other cables: drawn for orientation.
     let otherCables: [ParkCable]
 
     @AppStorage(AppSettingsKey.mapUsesSatellite) private var usesSatellite = true
@@ -19,12 +19,6 @@ struct CableTraceView: View {
     @State private var position: MapCameraPosition
     @State private var viewCenter: CLLocationCoordinate2D
     @State private var askShape = false
-    @AppStorage(AppSettingsKey.debugCableDetection) private var detectionEnabled = false
-    @State private var detecting = false
-    @State private var detection: CableDetectionRunner.Outcome?
-    @State private var detectionError: String?
-    @State private var askProposalDirection = false
-    @State private var confirmReplaceByProposal = false
     @State private var showLegend = false
 
     init(cable: Binding<ParkCable>, center: ParkCoordinate, otherCables: [ParkCable] = []) {
@@ -70,43 +64,20 @@ struct CableTraceView: View {
                         pointMarker(index: index, point: point)
                     }
                 }
-                if let detection {
-                    if let proposal = detection.result.best {
-                        let line = proposal.vertices.map { mapCoordinate(detection.image.coordinate(fromLocal: $0)) }
-                        MapPolyline(coordinates: line + [line[0]])
-                            .stroke(Color.purple, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [8, 6]))
-                    }
-                    ForEach(Array(detection.result.towers.enumerated()), id: \.offset) { _, tower in
-                        Annotation("", coordinate: mapCoordinate(detection.image.coordinate(fromLocal: tower.xy)), anchor: .center) {
-                            Circle()
-                                .fill(Color.purple.opacity(0.4 + 0.6 * tower.probability))
-                                .frame(width: 10, height: 10)
-                                .overlay(Circle().strokeBorder(.white, lineWidth: 1))
-                        }
-                    }
-                }
             }
             .mapStyle(usesSatellite ? .hybrid(elevation: .flat) : .standard)
             .onMapCameraChange(frequency: .continuous) { context in
                 viewCenter = context.camera.centerCoordinate
             }
             .overlay { MapCrosshair() }
-            .overlay(alignment: .top) {
-                if detecting {
-                    ProgressView("Looking for the cable…")
-                        .padding(12)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                        .padding(.top, 12)
-                }
-            }
             .overlay(alignment: .topLeading) {
                 if showLegend {
-                    CableTraceLegend(showsDetection: detectionEnabled, showsOtherCables: !otherCables.isEmpty)
+                    CableTraceLegend(showsOtherCables: !otherCables.isEmpty)
                         .padding(12)
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                if detection != nil { proposalControls } else { controls }
+                controls
             }
             .navigationTitle("Trace cable")
             .navigationBarTitleDisplayMode(.inline)
@@ -131,37 +102,6 @@ struct CableTraceView: View {
                     }
                     .accessibilityLabel(Text("Legend"))
                 }
-                if detectionEnabled {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            detectCable()
-                        } label: {
-                            Image(systemName: "sparkles")
-                        }
-                        .disabled(detecting)
-                        .accessibilityLabel(Text("Detect cable"))
-                    }
-                }
-            }
-            .sheet(isPresented: $askProposalDirection) {
-                CableDirectionSheet(
-                    title: String(localized: "Which way do riders go on this cable?"),
-                    message: String(localized: "The proposal is a starting point: check every tower against the imagery and move the points that are off. Reverse later with the arrows button if you pick wrong.")
-                ) { direction in
-                    askProposalDirection = false
-                    applyProposal(direction: direction)
-                }
-            }
-            .alert("Replace the traced points?", isPresented: $confirmReplaceByProposal) {
-                Button("Replace", role: .destructive) { askProposalDirection = true }
-                Button("Keep mine", role: .cancel) {}
-            } message: {
-                Text("The points you traced go away; the proposal takes their place.")
-            }
-            .alert("Detection failed", isPresented: Binding(get: { detectionError != nil }, set: { if !$0 { detectionError = nil } })) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(detectionError ?? "")
             }
             .alert("Is this cable a full-size loop or 2.0?", isPresented: $askShape) {
                 Button("Full size (loop)") {
@@ -251,9 +191,7 @@ struct CableTraceView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                Text(detectionEnabled
-                    ? String(localized: "Pan and zoom until the marker is on the cable, then add the point. Detection looks 300 m around the marker.")
-                    : String(localized: "Pan and zoom until the marker is on the cable, then add the point."))
+                Text("Pan and zoom until the marker is on the cable, then add the point.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -277,9 +215,6 @@ struct CableTraceView: View {
                 Button("Park pin", systemImage: "mappin") { show(center) }
                 if !points.isEmpty {
                     Button("Traced points", systemImage: "point.topleft.down.to.point.bottomright.curvepath") { showTrace() }
-                }
-                if let detection, let best = detection.result.best {
-                    Button("Proposal", systemImage: "sparkles") { show(best, in: detection.image) }
                 }
             } label: {
                 Label("Go to", systemImage: "location.viewfinder")
@@ -321,10 +256,6 @@ struct CableTraceView: View {
         show(points.map(\.coordinate))
     }
 
-    private func show(_ candidate: CableLoopCandidate, in image: DetectionImage) {
-        show(candidate.vertices.map { image.coordinate(fromLocal: $0) })
-    }
-
     private func show(_ coordinates: [ParkCoordinate]) {
         let lats = coordinates.map(\.lat), lons = coordinates.map(\.lon)
         guard let minLat = lats.min(), let maxLat = lats.max(), let minLon = lons.min(), let maxLon = lons.max() else { return }
@@ -334,83 +265,8 @@ struct CableTraceView: View {
         ))
     }
 
-    // MARK: Detection
-
     private func mapCoordinate(_ coordinate: ParkCoordinate) -> CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lon)
-    }
-
-    private func detectCable() {
-        guard !detecting else { return }
-        detecting = true
-        detection = nil
-        selected = nil
-        Task {
-            defer { detecting = false }
-            do {
-                // Look around the marker, not the park pin: zoom in on a lake to pick one of several cables.
-                let outcome = try await CableDetectionRunner.detect(around: centerCoordinate, avoiding: otherCables)
-                detection = outcome
-                showLegend = true
-                if let best = outcome.result.best { show(best, in: outcome.image) }
-            } catch {
-                detectionError = error.localizedDescription
-            }
-        }
-    }
-
-    private func applyProposal(direction: ParkCableDirection) {
-        guard let detection, let best = detection.result.best else { return }
-        let proposed = CableDetector.cable(from: best, in: detection.image, direction: direction)
-        cable.points = proposed.points
-        cable.direction = direction
-        self.detection = nil
-        selected = nil
-    }
-
-    private var proposalControls: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if let detection {
-                if let best = detection.result.best {
-                    Label {
-                        Text(proposalSummary(best, outcome: detection))
-                    } icon: {
-                        Image(systemName: best.isWeak ? "exclamationmark.triangle" : "sparkles")
-                            .foregroundStyle(best.isWeak ? Color.orange : Color.purple)
-                    }
-                    .font(.subheadline)
-                    HStack {
-                        Button {
-                            if points.isEmpty { askProposalDirection = true } else { confirmReplaceByProposal = true }
-                        } label: {
-                            Label("Use proposal", systemImage: "checkmark").frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        Button("Dismiss") { self.detection = nil }
-                            .buttonStyle(.bordered)
-                    }
-                } else {
-                    Label(detection.result.notes.last ?? String(localized: "No cable found on the imagery."), systemImage: "questionmark.circle")
-                        .font(.subheadline)
-                    Button("Dismiss") { self.detection = nil }
-                        .buttonStyle(.bordered)
-                }
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial)
-    }
-
-    private func proposalSummary(_ best: CableLoopCandidate, outcome: CableDetectionRunner.Outcome) -> String {
-        var parts: [String] = [
-            String(localized: "\(best.vertices.count) towers · \(Int(best.perimeterM.rounded())) m"),
-        ]
-        if best.isWeak { parts.append(String(localized: "weak match, check closely")) }
-        if !best.notes.isEmpty { parts.append(best.notes.joined(separator: ", ")) }
-        let seconds = String(format: "%.1f", outcome.snapshotSeconds + outcome.result.elapsed)
-        parts.append(String(localized: "\(outcome.result.towers.count) tower hits, \(outcome.result.objects.count) objects, \(seconds) s"))
-        return parts.joined(separator: " · ")
     }
 
     private var lengthText: String {
@@ -421,7 +277,6 @@ struct CableTraceView: View {
 
 /// What the colours on the trace map mean.
 struct CableTraceLegend: View {
-    var showsDetection: Bool
     var showsOtherCables: Bool
 
     var body: some View {
@@ -432,10 +287,6 @@ struct CableTraceLegend: View {
             if showsOtherCables {
                 row { line(Color.rpplMuted, width: 2) } text: { Text("Other cables of this park") }
             }
-            if showsDetection {
-                row { line(Color.purple, width: 3, dash: [4, 3]) } text: { Text("Proposal from the imagery") }
-                row { dot(Color.purple) } text: { Text("Detected tower") }
-            }
             row {
                 ZStack {
                     Circle().strokeBorder(.white, lineWidth: 1.5).frame(width: 14, height: 14)
@@ -443,7 +294,7 @@ struct CableTraceLegend: View {
                 }
                 .shadow(radius: 1)
             } text: {
-                Text(showsDetection ? "Map centre: points go here, detection looks around it" : "Map centre: points go here")
+                Text("Map centre: points go here")
             }
         }
         .font(.caption)
@@ -470,44 +321,5 @@ struct CableTraceLegend: View {
             path.addLine(to: CGPoint(x: 22, y: 7))
         }
         .stroke(color, style: StrokeStyle(lineWidth: width, lineCap: .round, dash: dash))
-    }
-}
-
-/// Clockwise or counter-clockwise, with the arrow next to the words.
-struct CableDirectionSheet: View {
-    var title: String
-    var message: String
-    var pick: (ParkCableDirection) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Text(title).font(.headline).multilineTextAlignment(.center)
-            Text(message).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            HStack(spacing: 12) {
-                choice(.clockwise, name: String(localized: "Clockwise"), symbol: "arrow.clockwise")
-                choice(.counterClockwise, name: String(localized: "Counter-clockwise"), symbol: "arrow.counterclockwise")
-            }
-            Button("Cancel") { dismiss() }
-                .buttonStyle(.bordered)
-        }
-        .padding(20)
-        .presentationDetents([.height(300)])
-        .presentationDragIndicator(.visible)
-    }
-
-    private func choice(_ direction: ParkCableDirection, name: String, symbol: String) -> some View {
-        Button {
-            pick(direction)
-        } label: {
-            VStack(spacing: 8) {
-                Image(systemName: symbol).font(.system(size: 36, weight: .semibold))
-                Text(name).font(.subheadline.weight(.semibold))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-        }
-        .buttonStyle(.borderedProminent)
-        .tint(Color.rpplAccent)
     }
 }

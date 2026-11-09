@@ -9,6 +9,7 @@ excluded:
   - DerivedData
   - Exports
   - tools
+  - archive
   - Package.swift
 
 disabled_rules:
