@@ -1237,8 +1237,6 @@ private struct SetDetailCard: View {
                     }
                 }
 
-                if let impactG { SetEndBadge(impactG: impactG) }
-
                 SetFlagRow(title: String(localized: "Set \(set.index) flags"), flags: flags, flagging: flagging)
             }
 
@@ -1292,6 +1290,7 @@ private struct SetDetailCard: View {
                     value: cableSpeedKmh.map { DistanceFormat.kilometersPerHour($0) } ?? "-",
                     caption: "Cable speed"
                 )
+                if let impactG { SetImpactChip(impactG: impactG) }
             }
 
             Text(

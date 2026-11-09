@@ -27,22 +27,32 @@ struct ImpactInfoButton: View {
     }
 }
 
-/// How a set ended, on its card: fall or clean, with the hardest hit around the end.
-struct SetEndBadge: View {
+/// Max g around the set end, in the row of set figures. The icon says how it ended: red for a fall,
+/// a green check for a clean exit. A fall also gets the `(i)`.
+struct SetImpactChip: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let impactG: Double
 
     private var isFall: Bool { SetImpact.isFall(impactG) }
 
     var body: some View {
-        HStack(spacing: 6) {
-            SessionFallSymbol(kind: isFall ? .fall : .cleanExit, size: 20)
-                .accessibilityHidden(true)
-            Text(isFall ? LocalizedStringKey("Fall") : LocalizedStringKey("Clean"))
-                .font(.subheadline.weight(.semibold))
-            Text(SetImpact.label(impactG))
-                .font(.subheadline)
-                .foregroundStyle(Color.rpplMuted)
-            Spacer(minLength: 0)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    SessionFallSymbol(kind: isFall ? .fall : .cleanExit, size: 18)
+                        .accessibilityHidden(true)
+                    Text(SetImpact.label(impactG))
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(Color.rpplText)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                }
+                Text(isFall ? "Max G, fall" : "Max G, clean")
+                    .font(.caption2)
+                    .foregroundStyle(RpplDesign.secondaryText)
+            }
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
+            .accessibilityElement(children: .combine)
             if isFall { ImpactInfoButton() }
         }
     }
