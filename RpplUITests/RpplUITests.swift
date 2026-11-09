@@ -116,6 +116,8 @@ final class RpplUITests: XCTestCase {
         app.terminate()
         launch(sessions: 3)
         XCTAssertTrue(app.waitForSessionCount(3))
+        app.tabBars.buttons["Statistics"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["statistics-empty"].firstMatch.waitForExistence(timeout: 15))
         XCTAssertFalse(chart("season-distance-chart").exists)
         XCTAssertFalse(chart("season-temperature-chart").exists)
     }
@@ -124,7 +126,8 @@ final class RpplUITests: XCTestCase {
     func testSeasonChartsShownWithEighteenSessions() {
         app.terminate()
         launch(sessions: 18)
-        // The "18 total" header sits below the charts, so the lazy list never builds it on screen.
+        XCTAssertTrue(app.tabBars.buttons["Statistics"].waitForExistence(timeout: 30))
+        app.tabBars.buttons["Statistics"].tap()
         let distance = chart("season-distance-chart")
         XCTAssertTrue(app.scrollToElement(distance))
         XCTAssertEqual(distance.value as? String, "18") // one bar per session

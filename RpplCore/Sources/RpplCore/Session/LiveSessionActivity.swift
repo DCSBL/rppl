@@ -9,10 +9,8 @@ import Foundation
 public struct LiveSessionActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable, Sendable {
         public var setCount: Int
-        /// Start of the running set; nil before the first tap.
+        /// Start of the running set.
         public var setStartedAt: Date?
-        /// Time-only sessions have no sets and no Next set button.
-        public var timeOnly: Bool
         /// A session recorded on the Apple Watch: more numbers, no Next set button.
         public var watch: WatchNumbers?
 
@@ -23,16 +21,15 @@ public struct LiveSessionActivityAttributes: ActivityAttributes {
             public var lapCount: Int
         }
 
-        public init(setCount: Int, setStartedAt: Date?, timeOnly: Bool, watch: WatchNumbers? = nil) {
+        public init(setCount: Int, setStartedAt: Date?, watch: WatchNumbers? = nil) {
             self.setCount = setCount
             self.setStartedAt = setStartedAt
-            self.timeOnly = timeOnly
             self.watch = watch
         }
 
         public init(_ snapshot: WatchLiveSnapshot) {
             self.init(
-                setCount: snapshot.setCount, setStartedAt: snapshot.setStartedAt, timeOnly: false,
+                setCount: snapshot.setCount, setStartedAt: snapshot.setStartedAt,
                 watch: WatchNumbers(
                     speedKmh: snapshot.speedKmh, heartRate: snapshot.heartRate,
                     waterCelsius: snapshot.waterCelsius, lapCount: snapshot.lapCount
@@ -41,7 +38,7 @@ public struct LiveSessionActivityAttributes: ActivityAttributes {
         }
 
         public init(_ session: LiveSession) {
-            self.init(setCount: session.setCount, setStartedAt: session.currentSetStart, timeOnly: session.mode == .timeOnly)
+            self.init(setCount: session.setCount, setStartedAt: session.currentSetStart)
         }
     }
 
@@ -55,8 +52,11 @@ public struct LiveSessionActivityAttributes: ActivityAttributes {
 }
 
 /// "Next set" on the lock screen or in the Dynamic Island. Runs in the app process; the app sets `handler`.
+/// Works on a locked phone and never opens the app: a set tap with wet hands should not need Face ID.
 public struct NextSetIntent: LiveActivityIntent {
     public static let title: LocalizedStringResource = "Next set"
+    public static let openAppWhenRun = false
+    public static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
     nonisolated(unsafe) public static var handler: (@MainActor @Sendable () -> Void)?
 
     public init() {}

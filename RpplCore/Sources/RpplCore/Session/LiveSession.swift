@@ -1,26 +1,18 @@
 import Foundation
 
-/// A session being tracked live on the iPhone (no Watch): start, park and the "next set" taps. Written to
-/// disk on every change (`LiveSessionFile`) so a force quit loses nothing, and turned into a manual session
-/// (`ManualEntry`) when it ends. Never touches HealthKit.
+/// A session being tracked live on the iPhone (no Watch): start, park and the "next set" taps. Set 1 starts
+/// with the session. Written to disk on every change (`LiveSessionFile`) so a force quit loses nothing, and
+/// turned into a manual session (`ManualEntry`) when it ends. Never touches HealthKit.
 public struct LiveSession: Codable, Equatable, Sendable {
-    public enum Mode: String, Codable, Sendable {
-        /// Taps on "next set" start a set each.
-        case setsAndTime
-        /// Only start and end are kept.
-        case timeOnly
-    }
-
     /// No tap for this long asks "is your session still running?".
     public static let stillRunningAfter: TimeInterval = 2 * 3_600
-    /// A session shorter than this without sets can be thrown away on stop.
+    /// A session shorter than this without a second set can be thrown away on stop.
     public static let discardableBelow: TimeInterval = 30
     /// Taps closer together than this count once (a double tap).
     public static let tapDebounce: TimeInterval = 1
 
     public var id: String
     public var startedAt: Date
-    public var mode: Mode
     public var parkId: String?
     /// Own spot, when no park is picked.
     public var spot: ParkCoordinate?
@@ -30,29 +22,26 @@ public struct LiveSession: Codable, Equatable, Sendable {
     public var lastActivityAt: Date
 
     public init(
-        id: String = UUID().uuidString, startedAt: Date, mode: Mode = .setsAndTime,
+        id: String = UUID().uuidString, startedAt: Date,
         parkId: String? = nil, spot: ParkCoordinate? = nil, spotName: String? = nil
     ) {
         self.id = id
         self.startedAt = startedAt
-        self.mode = mode
         self.parkId = parkId
         self.spot = spot
         self.spotName = spotName
-        setStarts = []
+        setStarts = [startedAt]
         lastActivityAt = startedAt
     }
 
     public var setCount: Int { setStarts.count }
-    public var currentSetStart: Date? { setStarts.last }
+    public var currentSetStart: Date { setStarts.last ?? startedAt }
     public var stillRunningCheckAt: Date { lastActivityAt.addingTimeInterval(Self.stillRunningAfter) }
 
-    /// Starts the next set (the first tap starts set 1). Returns false when ignored: time-only mode, or a
-    /// double tap.
+    /// Starts the next set. Returns false when ignored: a double tap.
     @discardableResult
     public mutating func nextSet(at now: Date) -> Bool {
-        guard mode == .setsAndTime else { return false }
-        if let last = setStarts.last, now.timeIntervalSince(last) < Self.tapDebounce { return false }
+        if now.timeIntervalSince(currentSetStart) < Self.tapDebounce { return false }
         setStarts.append(max(now, startedAt))
         lastActivityAt = now
         return true
@@ -62,17 +51,14 @@ public struct LiveSession: Codable, Equatable, Sendable {
     public mutating func touch(at now: Date) { lastActivityAt = now }
 
     public func isDiscardable(at now: Date) -> Bool {
-        setStarts.isEmpty && now.timeIntervalSince(startedAt) < Self.discardableBelow
+        setCount <= 1 && now.timeIntervalSince(startedAt) < Self.discardableBelow
     }
 
-    /// The manual session this becomes. Time-only keeps the set count unknown, as for a typed-in session.
+    /// The manual session this becomes. Without a second set tap only the duration is known, so the set
+    /// count stays unknown, as for a typed-in session.
     public func entry(location: ParkCoordinate?) -> ManualEntry {
-        switch mode {
-        case .setsAndTime:
-            ManualEntry(tallies: [.init(sets: setCount)], location: location ?? spot, setStarts: setStarts)
-        case .timeOnly:
-            ManualEntry(location: location ?? spot)
-        }
+        guard setCount > 1 else { return ManualEntry(location: location ?? spot) }
+        return ManualEntry(tallies: [.init(sets: setCount)], location: location ?? spot, setStarts: setStarts)
     }
 }
 

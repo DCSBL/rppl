@@ -9617,7 +9617,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try Again"
+            "value" : "Try again"
           }
         },
         "fr" : {
@@ -21566,34 +21566,6 @@
         }
       }
     },
-    "Track on this iPhone" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Track on this iPhone"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suivre sur cet iPhone"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Op deze iPhone bijhouden"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf diesem iPhone erfassen"
-          }
-        }
-      }
-    },
     "Track on iPhone" : {
       "localizations" : {
         "en" : {
@@ -21618,62 +21590,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf dem iPhone erfassen"
-          }
-        }
-      }
-    },
-    "Sets and time" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets and time"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets et temps"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets en tijd"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets und Zeit"
-          }
-        }
-      }
-    },
-    "Time only" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time only"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Temps seulement"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alleen tijd"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur Zeit"
           }
         }
       }
@@ -21930,62 +21846,6 @@
         }
       }
     },
-    "Tap First set when the first set starts." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap First set when the first set starts."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touche Premier set quand le premier set commence."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tik op Eerste set zodra de eerste set begint."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tippe auf Erstes Set, sobald das erste Set beginnt."
-          }
-        }
-      }
-    },
-    "First set" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "First set"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Premier set"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eerste set"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erstes Set"
-          }
-        }
-      }
-    },
     "Next set" : {
       "localizations" : {
         "en" : {
@@ -22238,118 +22098,6 @@
         }
       }
     },
-    "Start on Apple Watch" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start on Apple Watch"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Démarrer sur l'Apple Watch"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starten op Apple Watch"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf der Apple Watch starten"
-          }
-        }
-      }
-    },
-    "The Watch records everything: sets, speed and heart rate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The Watch records everything: sets, speed and heart rate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La Watch enregistre tout : sets, vitesse et fréquence cardiaque."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De Watch neemt alles op: sets, snelheid en hartslag."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Watch zeichnet alles auf: Sets, Geschwindigkeit und Herzfrequenz."
-          }
-        }
-      }
-    },
-    "On the iPhone you keep time and sets yourself, without speed or heart rate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On the iPhone you keep time and sets yourself, without speed or heart rate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sur l'iPhone, tu suis le temps et les sets toi-même, sans vitesse ni fréquence cardiaque."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Op de iPhone hou je zelf tijd en sets bij, zonder snelheid of hartslag."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf dem iPhone erfasst du Zeit und Sets selbst, ohne Geschwindigkeit oder Herzfrequenz."
-          }
-        }
-      }
-    },
-    "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune Apple Watch trouvée. L'iPhone suit le temps et les sets, sans vitesse ni fréquence cardiaque. Tu touches toi-même Set suivant."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen Apple Watch gevonden. De iPhone houdt tijd en sets bij, zonder snelheid of hartslag. Je tikt zelf op Volgende set."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Apple Watch gefunden. Das iPhone erfasst Zeit und Sets, ohne Geschwindigkeit oder Herzfrequenz. Du tippst selbst auf Nächstes Set."
-          }
-        }
-      }
-    },
     "Could not start Apple Watch" : {
       "localizations" : {
         "en" : {
@@ -22514,6 +22262,202 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf der Apple Watch aufgezeichnet. Beende die Session dort."
+          }
+        }
+      }
+    },
+    "Statistics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiques"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistieken"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiken"
+          }
+        }
+      }
+    },
+    "Not enough sessions yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough sessions yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore assez de sessions"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog te weinig sessies"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch zu wenige Sessions"
+          }
+        }
+      }
+    },
+    "Charts appear once you have a few sessions in your logbook." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charts appear once you have a few sessions in your logbook."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les graphiques apparaissent dès que tu as quelques sessions dans ton carnet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafieken verschijnen zodra je een paar sessies in je logboek hebt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagramme erscheinen, sobald du ein paar Sessions im Logbuch hast."
+          }
+        }
+      }
+    },
+    "Apple Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        }
+      }
+    },
+    "Reachable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reachable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joignable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreichbar"
+          }
+        }
+      }
+    },
+    "Not reachable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not reachable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non joignable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet bereikbaar"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht erreichbar"
+          }
+        }
+      }
+    },
+    "Keep your Apple Watch close and unlocked." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your Apple Watch close and unlocked."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garde ton Apple Watch à proximité et déverrouillée."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd je Apple Watch dichtbij en ontgrendeld."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte deine Apple Watch in der Nähe und entsperrt."
           }
         }
       }

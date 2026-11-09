@@ -8,7 +8,6 @@ struct LiveSessionStartView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var parks = ParkCatalog.loadApp()
     @State private var draft = ManualSessionDraft.new()
-    @State private var mode = LiveSession.Mode.setsAndTime
     @State private var location = ParksLocationProvider()
     @State private var pickedByHand = false
     @State private var connectivity = PhoneConnectivityService.shared
@@ -45,14 +44,6 @@ struct LiveSessionStartView: View {
 
                     LiveConditionsTiles(park: park)
 
-                    InfoTile("Track on this iPhone", metric: .sets) {
-                        Picker("Track on this iPhone", selection: $mode) {
-                            Text("Sets and time").tag(LiveSession.Mode.setsAndTime)
-                            Text("Time only").tag(LiveSession.Mode.timeOnly)
-                        }
-                        .pickerStyle(.segmented)
-                    }
-
                     actions
                 }
                 .padding(RpplDesign.tileSpacing)
@@ -73,53 +64,75 @@ struct LiveSessionStartView: View {
             .onChange(of: draft.parkId) { pickedByHand = true }
             .onChange(of: draft.spot) { pickedByHand = true }
             .onChange(of: location.coordinate) { _, fix in
-                guard !pickedByHand, let fix,
-                      let near = ParkListing.nearest(to: fix, in: parks, radiusMeters: Self.atParkRadiusMeters)
-                else { return }
-                draft.setPlace(parkId: near.id, spot: nil, name: nil, parks: parks)
-                pickedByHand = false
+                guard !pickedByHand, let fix else { return }
+                if let near = ParkListing.nearest(to: fix, in: parks, radiusMeters: Self.atParkRadiusMeters) {
+                    draft.setPlace(parkId: near.id, spot: nil, name: nil, parks: parks)
+                    pickedByHand = false
+                } else {
+                    draft.setPlace(parkId: nil, spot: fix, name: nil, parks: parks)
+                    pickedByHand = false
+                    Task {
+                        let name = await SessionCityResolver.shared.placeName(near: fix)
+                        guard !pickedByHand, draft.spot == fix else { return }
+                        draft.spotName = name
+                        pickedByHand = false
+                    }
+                }
             }
         }
     }
 
     private var actions: some View {
         VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
-            if watchAvailable {
-                Button(action: startWatch) {
-                    Text("Start on Apple Watch").frame(maxWidth: .infinity)
+            if let reachable = watchReachable {
+                InfoTile("Apple Watch", systemImage: "applewatch") {
+                    Label(
+                        reachable ? "Reachable" : "Not reachable",
+                        systemImage: reachable ? "checkmark.circle" : "exclamationmark.circle"
+                    )
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.rpplText)
+                    if !reachable {
+                        Text("Keep your Apple Watch close and unlocked.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.rpplMuted)
+                    }
+                }
+            }
+
+            if watchReachable == true {
+                Button(action: startWatch) { Text("Start session").frame(maxWidth: .infinity) }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(Color.rpplAccent)
+                    .disabled(isStartingWatch)
+            } else {
+                if watchReachable == false {
+                    Button { connectivity.refreshSyncState() } label: {
+                        Text("Try again").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(Color.rpplAccent)
+                }
+                Button(action: start) {
+                    Text(watchReachable == false ? "Track on iPhone" : "Start session").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .tint(.green)
-                .disabled(isStartingWatch)
-                Text("The Watch records everything: sets, speed and heart rate.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            }
-
-            if watchAvailable {
-                Text("On the iPhone you keep time and sets yourself, without speed or heart rate.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            } else {
-                Text("No Apple Watch found. The iPhone keeps time and sets, without speed or heart rate. You tap Next set yourself.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.rpplMuted)
-            }
-
-            if watchAvailable {
-                trackOnPhone.buttonStyle(.bordered).controlSize(.large).tint(.green)
-            } else {
-                trackOnPhone.buttonStyle(.borderedProminent).controlSize(.large).tint(.green)
+                .tint(Color.rpplAccent)
             }
         }
     }
 
-    private var trackOnPhone: some View {
-        Button(action: start) { Text("Track on iPhone").frame(maxWidth: .infinity) }
+    /// nil: no Watch to start on (not paired, or Rppl not installed on it). Otherwise whether it answers now.
+    private var watchReachable: Bool? {
+        switch connectivity.syncState {
+        case .readyLive: true
+        case .readyQueued: false
+        default: nil
+        }
     }
-
-    private var watchAvailable: Bool { connectivity.syncState.isReadyToSync }
 
     private func startWatch() {
         isStartingWatch = true
@@ -132,7 +145,7 @@ struct LiveSessionStartView: View {
 
     private func start() {
         LiveSessionController.shared.start(
-            mode: mode, parkId: draft.parkId, spot: draft.parkId == nil ? draft.spot : nil, spotName: draft.spotName
+            parkId: draft.parkId, spot: draft.parkId == nil ? draft.spot : nil, spotName: draft.spotName
         )
         onStarted()
         dismiss()

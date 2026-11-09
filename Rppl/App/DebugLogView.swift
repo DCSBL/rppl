@@ -12,9 +12,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetCharts) private var setChartsEnabled = false
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
-    @AppStorage(AppSettingsKey.debugCableDetection) private var cableDetectionEnabled = false
     @AppStorage(AppSettingsKey.debugParkSpotlight) private var parkSpotlightEnabled = false
-    @AppStorage(AppSettingsKey.debugTowerReview) private var towerReviewEnabled = false
     @AppStorage(AppSettingsKey.debugFallMap) private var fallMapEnabled = false
     @AppStorage(AppSettingsKey.debugDockWait) private var dockWaitEnabled = false
     @AppStorage(AppSettingsKey.debugWalkRoute) private var walkRouteEnabled = false
@@ -72,13 +70,6 @@ struct DebugLogView: View {
             }
 
             Section {
-                Toggle("Detect cable", isOn: $cableDetectionEnabled)
-                    .tint(Color.rpplAccent)
-            } footer: {
-                Text("Adds a button to the trace map of the park editor that looks for the towers and the cable on the satellite imagery and proposes a trace.")
-            }
-
-            Section {
                 Toggle("Parks in Spotlight", isOn: $parkSpotlightEnabled)
                     .tint(Color.rpplAccent)
                     .onChange(of: parkSpotlightEnabled) { _, enabled in
@@ -91,20 +82,6 @@ struct DebugLogView: View {
                     }
             } footer: {
                 Text("Find a cable park from the iPhone search and tap the result to open it here. Parks are added right away and removed again when this is off.")
-            }
-
-            Section {
-                Toggle("Review towers", isOn: $towerReviewEnabled)
-                    .tint(Color.rpplAccent)
-                if towerReviewEnabled {
-                    NavigationLink {
-                        TowerReviewView()
-                    } label: {
-                        Label("Review towers", systemImage: "scope")
-                    }
-                }
-            } footer: {
-                Text("Judge the detector's tower guesses on the satellite map, park by park, and share the verdicts as a file for the detector's training set. A request file says which parks to do.")
             }
 
             Section {

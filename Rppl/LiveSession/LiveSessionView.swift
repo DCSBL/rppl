@@ -59,22 +59,12 @@ struct LiveSessionView: View {
                 VStack(alignment: .leading, spacing: RpplDesign.tileSpacing) {
                     InfoTileGrid {
                         InfoTile("Session", metric: .duration) { LiveTimer(since: live.startedAt) }
-                        if live.mode == .setsAndTime {
-                            InfoTile("Set", metric: .sets) {
-                                MetricValue("\(live.setCount)")
-                            }
+                        InfoTile("Set", metric: .sets) {
+                            MetricValue("\(live.setCount)")
                         }
                     }
-                    if live.mode == .setsAndTime {
-                        InfoTile("Since start of set", metric: .duration) {
-                            if let start = live.currentSetStart {
-                                LiveTimer(since: start)
-                            } else {
-                                Text("Tap First set when the first set starts.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.rpplMuted)
-                            }
-                        }
+                    InfoTile("Since start of set", metric: .duration) {
+                        LiveTimer(since: live.currentSetStart)
                     }
                     LiveConditionsTiles(park: controller.park)
                     Text(subtitle(live))
@@ -84,14 +74,12 @@ struct LiveSessionView: View {
                 .padding(RpplDesign.tileSpacing)
             }
             VStack(spacing: 10) {
-                if live.mode == .setsAndTime {
-                    Button { controller.nextSet() } label: {
-                        Text(live.setCount == 0 ? "First set" : "Next set").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .controlSize(.extraLarge)
+                Button { controller.nextSet() } label: {
+                    Text("Next set").frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .controlSize(.extraLarge)
                 Button(role: .destructive) { confirmStop = true } label: {
                     Text("Stop session").frame(maxWidth: .infinity)
                 }
@@ -106,7 +94,7 @@ struct LiveSessionView: View {
 
     private func subtitle(_ live: LiveSession) -> String {
         let started = live.startedAt.formatted(date: .omitted, time: .shortened)
-        guard let place = controller.park?.compactName ?? live.spotName else {
+        guard let place = controller.placeName else {
             return String(localized: "Tracked on iPhone, started \(started)")
         }
         return String(localized: "\(place) · tracked on iPhone, started \(started)")
@@ -114,7 +102,7 @@ struct LiveSessionView: View {
 
     private func stopMessage(_ live: LiveSession) -> String {
         let elapsed = LogbookFormatting.duration(Date.now.timeIntervalSince(live.startedAt))
-        if live.mode == .timeOnly { return String(localized: "You kept time for \(elapsed). Then it goes into your logbook.") }
+        if live.setCount < 2 { return String(localized: "You kept time for \(elapsed). Then it goes into your logbook.") }
         return String(localized: "You tracked \(LogbookFormatting.setCount(live.setCount)) in \(elapsed). Then it goes into your logbook.")
     }
 
