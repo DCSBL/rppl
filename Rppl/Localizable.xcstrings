@@ -22490,58 +22490,30 @@
         }
       }
     },
-    "Max G, fall" : {
+    "Max G" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Max G, fall"
+            "value" : "Max G"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Max G, val"
+            "value" : "Max. G"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Max. G, Sturz"
+            "value" : "Max. G"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "G max, chute"
-          }
-        }
-      }
-    },
-    "Max G, clean" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Max G, clean"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Max G, clean"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Max. G, clean"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "G max, clean"
+            "value" : "G max"
           }
         }
       }

@@ -27,8 +27,8 @@ struct ImpactInfoButton: View {
     }
 }
 
-/// Max g around the set end, in the row of set figures. The icon says how it ended: red for a fall,
-/// a green check for a clean exit. A fall also gets the `(i)`.
+/// Max g around the set end, laid out like `StatChip`. The bare icon says how it ended: a red fall figure
+/// or a green check.
 struct SetImpactChip: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let impactG: Double
@@ -36,24 +36,26 @@ struct SetImpactChip: View {
     private var isFall: Bool { SetImpact.isFall(impactG) }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    SessionFallSymbol(kind: isFall ? .fall : .cleanExit, size: 18)
-                        .accessibilityHidden(true)
-                    Text(SetImpact.label(impactG))
-                        .font(.subheadline.weight(.semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(Color.rpplText)
-                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
-                }
-                Text(isFall ? "Max G, fall" : "Max G, clean")
-                    .font(.caption2)
-                    .foregroundStyle(RpplDesign.secondaryText)
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                Image(systemName: isFall ? "figure.fall" : "checkmark")
+                    .imageScale(.small)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(isFall ? Color.rpplMetricEnergy : Color.rpplMetricRiding)
+                    .accessibilityHidden(true)
+                Text(SetImpact.label(impactG))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(Color.rpplText)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.75)
             }
-            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
-            .accessibilityElement(children: .combine)
-            if isFall { ImpactInfoButton() }
+            Text("Max G")
+                .font(.caption2)
+                .foregroundStyle(RpplDesign.secondaryText)
         }
+        .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(Text(isFall ? "Fall" : "Clean"))
     }
 }
