@@ -21566,34 +21566,6 @@
         }
       }
     },
-    "Track on this iPhone" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Track on this iPhone"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suivre sur cet iPhone"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Op deze iPhone bijhouden"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf diesem iPhone erfassen"
-          }
-        }
-      }
-    },
     "Track on iPhone" : {
       "localizations" : {
         "en" : {
@@ -21618,62 +21590,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf dem iPhone erfassen"
-          }
-        }
-      }
-    },
-    "Sets and time" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets and time"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets et temps"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets en tijd"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets und Zeit"
-          }
-        }
-      }
-    },
-    "Time only" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time only"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Temps seulement"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alleen tijd"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur Zeit"
           }
         }
       }
@@ -21926,62 +21842,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seit Start des Sets"
-          }
-        }
-      }
-    },
-    "Tap First set when the first set starts." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap First set when the first set starts."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touche Premier set quand le premier set commence."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tik op Eerste set zodra de eerste set begint."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tippe auf Erstes Set, sobald das erste Set beginnt."
-          }
-        }
-      }
-    },
-    "First set" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "First set"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Premier set"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eerste set"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erstes Set"
           }
         }
       }

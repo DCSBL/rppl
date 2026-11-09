@@ -8,7 +8,6 @@ struct LiveSessionStartView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var parks = ParkCatalog.loadApp()
     @State private var draft = ManualSessionDraft.new()
-    @State private var mode = LiveSession.Mode.setsAndTime
     @State private var location = ParksLocationProvider()
     @State private var pickedByHand = false
     @State private var connectivity = PhoneConnectivityService.shared
@@ -45,14 +44,6 @@ struct LiveSessionStartView: View {
 
                     LiveConditionsTiles(park: park)
 
-                    InfoTile("Track on this iPhone", metric: .sets) {
-                        Picker("Track on this iPhone", selection: $mode) {
-                            Text("Sets and time").tag(LiveSession.Mode.setsAndTime)
-                            Text("Time only").tag(LiveSession.Mode.timeOnly)
-                        }
-                        .pickerStyle(.segmented)
-                    }
-
                     actions
                 }
                 .padding(RpplDesign.tileSpacing)
@@ -73,11 +64,20 @@ struct LiveSessionStartView: View {
             .onChange(of: draft.parkId) { pickedByHand = true }
             .onChange(of: draft.spot) { pickedByHand = true }
             .onChange(of: location.coordinate) { _, fix in
-                guard !pickedByHand, let fix,
-                      let near = ParkListing.nearest(to: fix, in: parks, radiusMeters: Self.atParkRadiusMeters)
-                else { return }
-                draft.setPlace(parkId: near.id, spot: nil, name: nil, parks: parks)
-                pickedByHand = false
+                guard !pickedByHand, let fix else { return }
+                if let near = ParkListing.nearest(to: fix, in: parks, radiusMeters: Self.atParkRadiusMeters) {
+                    draft.setPlace(parkId: near.id, spot: nil, name: nil, parks: parks)
+                    pickedByHand = false
+                } else {
+                    draft.setPlace(parkId: nil, spot: fix, name: nil, parks: parks)
+                    pickedByHand = false
+                    Task {
+                        let name = await SessionCityResolver.shared.placeName(near: fix)
+                        guard !pickedByHand, draft.spot == fix else { return }
+                        draft.spotName = name
+                        pickedByHand = false
+                    }
+                }
             }
         }
     }
@@ -132,7 +132,7 @@ struct LiveSessionStartView: View {
 
     private func start() {
         LiveSessionController.shared.start(
-            mode: mode, parkId: draft.parkId, spot: draft.parkId == nil ? draft.spot : nil, spotName: draft.spotName
+            parkId: draft.parkId, spot: draft.parkId == nil ? draft.spot : nil, spotName: draft.spotName
         )
         onStarted()
         dismiss()

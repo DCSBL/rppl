@@ -72,10 +72,10 @@ private struct LockScreenView: View {
             }
             if let watch = state.watch {
                 WatchNumbersView(state: state, watch: watch)
-            } else if !state.timeOnly {
+            } else {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading) {
-                        Text(state.setCount == 0 ? "No set yet" : "Set \(state.setCount)")
+                        Text("Set \(state.setCount)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if let started = state.setStartedAt {
@@ -120,14 +120,12 @@ private struct Buttons: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            if !state.timeOnly {
-                Button(intent: NextSetIntent()) {
-                    Text(state.setCount == 0 ? "First set" : "Next set")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                }
-                .tint(.green)
+            Button(intent: NextSetIntent()) {
+                Text("Next set")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
             }
+            .tint(.green)
             Link(destination: URL(string: "rppl://live") ?? URL(fileURLWithPath: "/")) {
                 Text("Stop")
                     .font(.subheadline.bold())

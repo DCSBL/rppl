@@ -16,7 +16,7 @@ struct LiveSessionBanner: View {
                                 .imageScale(.small)
                                 .foregroundStyle(.green)
                             Spacer()
-                            Text(controller.park?.compactName ?? "")
+                            Text(controller.placeName ?? "")
                                 .font(.caption)
                                 .foregroundStyle(Color.rpplMuted)
                         }
@@ -26,24 +26,20 @@ struct LiveSessionBanner: View {
                                 LiveTimer(since: live.startedAt)
                             }
                             Spacer()
-                            if let start = live.currentSetStart {
-                                VStack(alignment: .trailing) {
-                                    Text("Set \(live.setCount)").font(.caption).foregroundStyle(Color.rpplMuted)
-                                    LiveTimer(since: start)
-                                }
+                            VStack(alignment: .trailing) {
+                                Text("Set \(live.setCount)").font(.caption).foregroundStyle(Color.rpplMuted)
+                                LiveTimer(since: live.currentSetStart)
                             }
                         }
                     }
                 }
                 .buttonStyle(.plain)
-                if live.mode == .setsAndTime {
-                    Button { controller.nextSet() } label: {
-                        Text(live.setCount == 0 ? "First set" : "Next set").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .controlSize(.large)
+                Button { controller.nextSet() } label: {
+                    Text("Next set").frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .controlSize(.large)
             }
             .rpplTileChrome()
             .accessibilityElement(children: .contain)
