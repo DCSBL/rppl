@@ -1,10 +1,12 @@
 version: 1
 id: wakepark-tunisee-freiburg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Wakepark Tunisee
 short_name: Wakepark Tunisee
@@ -25,7 +27,19 @@ website: https://www.wakepark-tunisee.de
 
 cables:
   - name: Cable
-    length_m: 600
+    direction: ccw
+    length_m: 652
+    points:
+      - lat: 48.0648809
+        lon: 7.8132426
+      - lat: 48.0649695
+        lon: 7.8142818
+      - lat: 48.0670153
+        lon: 7.8139216
+      - lat: 48.0672000
+        lon: 7.8131813
+      - lat: 48.0668696
+        lon: 7.8125627
     description: >-
       Full-Size-Cable von Sesitec mit acht Features von Unit Parktech.
 

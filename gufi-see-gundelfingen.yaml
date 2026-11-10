@@ -1,10 +1,12 @@
 version: 1
 id: gufi-see-gundelfingen
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Gufi See Gundelfingen
 short_name: Gufi See
@@ -29,7 +31,19 @@ links:
 
 cables:
   - name: Cable
-    length_m: 809
+    direction: ccw
+    length_m: 803
+    points:
+      - lat: 48.5193601
+        lon: 10.3245551
+      - lat: 48.5189041
+        lon: 10.3251207
+      - lat: 48.5199177
+        lon: 10.3290325
+      - lat: 48.5205334
+        lon: 10.3287729
+      - lat: 48.5197826
+        lon: 10.3247606
     description: >-
       Elf Mitnehmer und 20 Features, seit 1998 in Betrieb. Im öffentlichen Betrieb läuft die
       Bahn mit 28 bis 30 km/h.

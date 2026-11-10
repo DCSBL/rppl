@@ -1,10 +1,12 @@
 version: 1
 id: cable-dresden
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-07
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-07
+    description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
 
 name: Cable Dresden
 languages:
@@ -24,6 +26,22 @@ website: https://www.cable-dresden.de
 links:
   - kind: booking
     url: "https://www.cable-dresden.de/buchung/produkte.html"
+
+cables:
+  - name: Cable
+    direction: ccw
+    length_m: 748
+    points:
+      - lat: 51.0148850
+        lon: 13.8216838
+      - lat: 51.0153669
+        lon: 13.8225618
+      - lat: 51.0172836
+        lon: 13.8200262
+      - lat: 51.0172635
+        lon: 13.8192741
+      - lat: 51.0167724
+        lon: 13.8190481
 
 opening:
   source_url: "https://www.cable-dresden.de/oeffnungszeiten.html"
