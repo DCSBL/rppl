@@ -1,0 +1,69 @@
+# Release notes. When a final release (X.Y.Z, no -beta) is published, Claude turns the merged PRs into short,
+# human-readable "What's New" texts in every App Store language (features and bug fixes only) and puts them in
+# App Store Connect on version X.Y.Z (scripts/ci/release_notes.py, Docs/Release.md).
+#
+# Secrets: ANTHROPIC_API_KEY (required); ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY (optional, without them the
+# texts only land in the job summary). Nothing is submitted for review. Manual run: pick the tag, dry run on by default.
+#
+# The tag name is user input: it reaches the shell only through env, never interpolated.
+
+name: "Release: notes"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Final release tag, X.Y.Z
+        required: true
+      dry_run:
+        description: Write the texts to the summary only, leave App Store Connect alone
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-notes
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  notes:
+    name: What's New for the App Store
+    # Betas are prereleases: they keep the draft notes as TestFlight "What to Test".
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install JWT support
+        run: python3 -m pip install --quiet pyjwt cryptography
+
+      - name: Write and upload the notes
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          args=(--tag "$RELEASE_TAG" --output "$RUNNER_TEMP/whats-new.json")
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          python3 scripts/ci/release_notes.py "${args[@]}"
+
+      - name: Keep the texts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: whats-new
+          path: ${{ runner.temp }}/whats-new.json
+          if-no-files-found: ignore

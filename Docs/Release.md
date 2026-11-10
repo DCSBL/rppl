@@ -110,7 +110,7 @@ Every Apple Developer Program membership includes 25 Xcode Cloud compute hours p
 
 ## Promote a build (manual)
 
-Xcode Cloud never submits anything beyond internal TestFlight and this repo has no App Store Connect API key. Do it by hand, from the build that testers verified (it must come from the Release workflow).
+Xcode Cloud never submits anything beyond internal TestFlight. Do it by hand, from the build that testers verified (it must come from the Release workflow). The only thing automated is the **What's New** text, see [What's New in the App Store](#whats-new-in-the-app-store).
 
 **External TestFlight**
 
@@ -120,10 +120,27 @@ Xcode Cloud never submits anything beyond internal TestFlight and this repo has 
 **App Store**
 
 1. App Store Connect → Rppl → iOS App → **+** → version `X.Y.Z` (same as the tag, without `v`).
-2. Paste **What's New**. The plain-text release notes are in the release preflight summary and in the Post-Clone log.
+2. **What's New** is already filled in for every language when the final release was published and the App Store Connect secrets exist (see below). Check it; otherwise paste it from the **Release: notes** job summary.
 3. **Build** → pick the build.
 4. Fill review information and privacy answers, choose *Manually release this version* if you want to press the final button yourself, then **Add for Review** → **Submit**.
 5. After it is released, that version is closed for new builds.
+
+## What's New in the App Store
+
+Publishing a **final** release (`X.Y.Z`, not a beta) runs **Release: notes** (`.github/workflows/release-notes.yml`, `scripts/ci/release_notes.py`):
+
+1. It takes the squash-merged PRs since the previous final release and drops `ci`, `repo` and `docs` components and `refactor`, `test`, `docs` and `chore` types.
+2. Claude (`claude-sonnet-5-5`, override with the `RELEASE_NOTES_MODEL` env var in the workflow) reads the titles and PR descriptions and writes short, plain "What's New" text in English, Dutch, German and French. Only features and bug fixes a rider notices; debug, ML, tooling and experimental items are left out.
+3. It writes the texts to the job summary and, when the App Store Connect secrets are set, into the `whatsNew` field of App Store version `X.Y.Z`. The version is created when it does not exist. A version that is already waiting for review or released is left alone. Nothing is submitted for review.
+
+Secrets (GitHub → repo **Settings** → **Secrets and variables** → **Actions** → **New repository secret**):
+
+| Secret | Value |
+|--------|-------|
+| `ANTHROPIC_API_KEY` | API key from console.anthropic.com → API keys. Required. |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY` | Optional. App Store Connect → Users and Access → Integrations → App Store Connect API → create a key with role **App Manager**. Key ID and Issuer ID are on that page; `ASC_PRIVATE_KEY` is the full text of the downloaded `.p8` file. Without them the texts only land in the job summary. |
+
+Run it by hand with Actions → **Release: notes** → **Run workflow** (tag `X.Y.Z`; dry run is on by default and leaves App Store Connect alone). Add a new app language to `LOCALES` in `release_notes.py`; the unit test fails until you do.
 
 ## What the build does
 
