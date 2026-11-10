@@ -90,7 +90,10 @@ final class RpplScreenshotTests: XCTestCase {
         XCTAssertTrue(app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 30))
         let loading = app.staticTexts["Loading GPS..."]
         _ = loading.waitForNonExistence(timeout: 30)
-        sleep(3) // map tiles
+        // 04-session-tracked-1 is the marketing shot: the map with the track line and Start marker must be in view.
+        // The Start marker only appears once the route is drawn; the wait does not fail the test when the accessibility tree hides it.
+        _ = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Start'")).firstMatch.waitForExistence(timeout: 20)
+        sleep(5) // map tiles
         scrollShots("04-session-tracked", count: 5)
     }
 

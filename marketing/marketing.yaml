@@ -30,7 +30,7 @@ defaults:
 # Used only with --allow-fallback (PR preview): committed site shots instead of CI exports.
 fallbacks:
   02-logbook-3-1: ../web/public/shots/logbook.webp
-  04-session-tracked-2: ../web/public/shots/session.webp
+  04-session-tracked-1: ../web/public/shots/session.webp
   06-parks-open-1: ../web/public/shots/parks.webp
   watch-01-start: ../web/public/shots/watch.webp
   01-start: ../web/public/shots/watch.webp
@@ -45,7 +45,7 @@ slides:
   - id: track
     text: "TRACK **YOUR** SESSIONS"
     align: right
-    screenshot: 04-session-tracked-2
+    screenshot: 04-session-tracked-1
     watch_screenshot: 06-live-riding
     watch: { side: right }
 
@@ -75,7 +75,7 @@ slides:
     image: photos/search.jpg
     title: rppl
     text: "**YOUR** CABLEPARK BUDDY"
-    screenshot: 04-session-tracked-2
+    screenshot: 04-session-tracked-1
     watch_screenshot: 06-live-riding
     formats: [search-3x2]
 
