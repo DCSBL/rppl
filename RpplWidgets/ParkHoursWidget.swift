@@ -248,7 +248,7 @@ extension ParkWidgetState {
         switch self {
         case .openUntil: .green
         case .opensToday, .opensTomorrow, .opensInDays: .yellow
-        case .closed: .red
+        case .reopensOn, .closed: .red
         case .unknown: .gray
         }
     }
@@ -266,6 +266,9 @@ extension ParkWidgetState {
             let from = ParkSchedule.displayTime(minutes: startMinute)
             return String(localized: "Open tomorrow from \(from)")
         case .opensInDays(let days): return String(localized: "Open in \(days) days")
+        case .reopensOn(let day):
+            let date = day.displayText
+            return String(localized: "Reopens on \(date)")
         case .closed: return String(localized: "Closed")
         case .unknown: return String(localized: "Opening hours unknown")
         }

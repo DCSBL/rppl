@@ -663,7 +663,14 @@ enum ParkStatusBadge {
         case .opensTomorrow:
             return (String(localized: "Opens tomorrow"), .yellow)
         case .closed:
-            return (ParkFormatting.closedText(park.schedule(on: now)), .red)
+            let today = park.schedule(on: now)
+            // A labelled closure ("Closed · Wind") keeps its reason; otherwise name the day it opens again.
+            if !today.notices.contains(where: { $0.kind == ParkExceptionKind.closed && !($0.label ?? "").isEmpty }),
+               let next = park.nextOpening(after: now) {
+                let date = next.day.displayText
+                return (String(localized: "Reopens on \(date)"), .red)
+            }
+            return (ParkFormatting.closedText(today), .red)
         case .unknown:
             return (String(localized: "Opening hours unknown"), .gray)
         }
