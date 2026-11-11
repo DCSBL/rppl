@@ -4,6 +4,12 @@ import Foundation
 /// `openingHoursSpecification` entries and `openingHours` strings such as `Mo-Fr 10:00-18:00`.
 /// No guessing involved, so this is tried before the free text of the page is read.
 public enum ParkStructuredHours {
+    private struct Entry {
+        var days: Set<String>
+        var open: String
+        var close: String
+    }
+
     /// The `<script type="application/ld+json">` blocks of a page, as written.
     public static func jsonLDBlocks(inHTML html: String) -> [String] {
         guard let regex = try? NSRegularExpression(
@@ -16,31 +22,32 @@ public enum ParkStructuredHours {
 
     /// Rules and one readable line per rule. Empty when the blocks hold no opening hours.
     public static func rules(in blocks: [String]) -> (rules: [ParkOpeningRule], lines: [String]) {
-        var entries: [(days: Set<String>, open: String, close: String)] = []
+        var entries: [Entry] = []
         for block in blocks {
             guard let data = block.data(using: .utf8), let json = try? JSONSerialization.jsonObject(with: data) else { continue }
             collect(json, into: &entries, depth: 0)
         }
         // One rule per time range, with every day that has it.
         var rules: [ParkOpeningRule] = []
-        var order: [(open: String, close: String)] = []
+        var order: [[String]] = []
         var daysByRange: [String: Set<String>] = [:]
         for entry in entries {
             let key = entry.open + "-" + entry.close
-            if daysByRange[key] == nil { order.append((entry.open, entry.close)) }
+            if daysByRange[key] == nil { order.append([entry.open, entry.close]) }
             daysByRange[key, default: []].formUnion(entry.days)
         }
         var lines: [String] = []
         for range in order {
-            let days = daysByRange[range.open + "-" + range.close] ?? []
-            rules.append(ParkOpeningRule(days: ParkDaySelection.tokens(from: days), open: range.open, close: range.close))
+            let (open, close) = (range[0], range[1])
+            let days = daysByRange[open + "-" + close] ?? []
+            rules.append(ParkOpeningRule(days: ParkDaySelection.tokens(from: days), open: open, close: close))
             let names = ParkDaySelection.weekdayTokens.filter { days.contains($0) }.map { $0.capitalized }.joined(separator: ", ")
-            lines.append("\(names) \(range.open)-\(range.close)")
+            lines.append("\(names) \(open)-\(close)")
         }
         return (rules, lines)
     }
 
-    private static func collect(_ node: Any, into entries: inout [(days: Set<String>, open: String, close: String)], depth: Int) {
+    private static func collect(_ node: Any, into entries: inout [Entry], depth: Int) {
         guard depth < 8 else { return }
         if let list = node as? [Any] {
             for item in list { collect(item, into: &entries, depth: depth + 1) }
@@ -58,18 +65,18 @@ public enum ParkStructuredHours {
     }
 
     /// A specification for a period or one date (`validFrom`, `validThrough`) is a special case, not the usual hours.
-    private static func addSpecification(_ spec: Any, into entries: inout [(days: Set<String>, open: String, close: String)]) {
+    private static func addSpecification(_ spec: Any, into entries: inout [Entry]) {
         guard let object = spec as? [String: Any], object["validFrom"] == nil, object["validThrough"] == nil,
               let open = clock(object["opens"] as? String), let close = clock(object["closes"] as? String), open != close
         else { return }
         let names = (object["dayOfWeek"] as? [String]) ?? [object["dayOfWeek"] as? String].compactMap { $0 }
         let days = Set(names.compactMap { day($0) })
         guard !days.isEmpty else { return }
-        entries.append((days, open, close))
+        entries.append(Entry(days: days, open: open, close: close))
     }
 
     /// `Mo-Fr 10:00-18:00`, `Sa,Su 09:00-17:00`, `Mo-Fr 10:00-12:00,13:00-17:00`.
-    private static func addString(_ text: String, into entries: inout [(days: Set<String>, open: String, close: String)]) {
+    private static func addString(_ text: String, into entries: inout [Entry]) {
         guard let firstDigit = text.firstIndex(where: \.isNumber) else { return }
         let dayPart = text[..<firstDigit]
         var days = Set<String>()
@@ -96,7 +103,7 @@ public enum ParkStructuredHours {
         for match in regex.matches(in: rest, range: NSRange(rest.startIndex..., in: rest)) {
             guard let a = Range(match.range(at: 1), in: rest), let b = Range(match.range(at: 2), in: rest),
                   let open = clock(String(rest[a])), let close = clock(String(rest[b])), open != close else { continue }
-            entries.append((days, open, close))
+            entries.append(Entry(days: days, open: open, close: close))
         }
     }
 
