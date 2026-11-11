@@ -354,4 +354,64 @@ struct ParkImportTests {
         let none = ParkImportAgent.next(pages: [Self.page], missing: [.opening], visited: [], guessesUsed: 0)
         #expect(none?.isGuess == true)
     }
+
+    // MARK: Structured and model-read hours
+
+    @Test func schemaOrgHoursAreReadWithoutReadingText() {
+        let html = """
+        <html><head><script type="application/ld+json">
+        {"@context":"https://schema.org","@graph":[{"@type":"SportsActivityLocation","openingHoursSpecification":[
+          {"@type":"OpeningHoursSpecification","dayOfWeek":["https://schema.org/Monday","Tuesday"],"opens":"10:00:00","closes":"18:00:00"},
+          {"dayOfWeek":"Saturday","opens":"09:00","closes":"18:00"},
+          {"dayOfWeek":"Sunday","opens":"09:00","closes":"18:00"},
+          {"dayOfWeek":"Friday","opens":"10:00","closes":"22:00","validFrom":"2026-12-24"}]},
+          {"openingHours":["We-Th 12:00-20:00"]}]}
+        </script></head><body><p>Welkom</p></body></html>
+        """
+        let page = ParkSourceExtractor.extract(html: html, url: "https://www.example-park.nl/")
+        let found = ParkOpeningReader.read([page])
+        #expect(found?.rules.count == 3)
+        #expect(found?.rules.first == ParkOpeningRule(days: ["mon", "tue"], open: "10:00", close: "18:00"))
+        #expect(found?.rules.contains(ParkOpeningRule(days: ["weekend"], open: "09:00", close: "18:00")) == true)
+        #expect(found?.rules.contains(ParkOpeningRule(days: ["wed", "thu"], open: "12:00", close: "20:00")) == true)
+        #expect(found?.isVerified == true)
+    }
+
+    @Test func hoursStringsHandleRangesAndSeveralTimes() {
+        let rules = ParkStructuredHours.rules(in: [#"{"openingHours":"Mo-Fr 10:00-12:00,13:00-17:00"}"#, "not json"]).rules
+        #expect(rules.map(\.open) == ["10:00", "13:00"])
+        #expect(rules.allSatisfy { $0.days == ["weekdays"] })
+        #expect(ParkStructuredHours.clock("24:00") == "24:00")
+        #expect(ParkStructuredHours.clock("25:00") == nil)
+    }
+
+    @Test func modelHoursAreCheckedAgainstTheText() {
+        let page = ParkSourceExtractor.extract(
+            html: "<h2>Openingstijden</h2><p>Dinsdag tot en met zondag van 10 tot 18 uur, maandag gesloten</p>",
+            url: "https://www.example-park.nl/tijden"
+        )
+        #expect(ParkOpeningReader.modelHoursText([page])?.contains("maandag gesloten") == true)
+        let good = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "dinsdag t/m zondag", months: "", open: "10:00", close: "18:00")], pages: [page]
+        )
+        #expect(good?.isVerified == true)
+        #expect(good?.rules.first?.days == ["weekend", "tue", "wed", "thu", "fri"])
+        #expect(good?.sourceURL == "https://www.example-park.nl/tijden")
+        let invented = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "", months: "", open: "09:00", close: "18:00")], pages: [page]
+        )
+        #expect(invented?.isVerified == false)
+        let broken = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "", months: "", open: "late", close: "18:00"), ParkModelHours(days: "", months: "", open: "18:00", close: "10:00")],
+            pages: [page]
+        )
+        #expect(broken == nil)
+    }
+
+    @Test func timesAreFoundInTheirUsualWritings() {
+        #expect(ParkOpeningReader.timeStandsInText("12:30", "open 12.30 - 17.00 Uhr"))
+        #expect(ParkOpeningReader.timeStandsInText("08:00", "van 8 tot 12 uur"))
+        #expect(!ParkOpeningReader.timeStandsInText("18:00", "van 8 tot 12 uur"))
+        #expect(!ParkOpeningReader.timeStandsInText("10:15", "van 10:45"))
+    }
 }

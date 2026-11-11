@@ -9,6 +9,34 @@ public struct ParkOpeningFinding: Equatable, Sendable {
     public var lines: [String]
     /// The page the hours were read from (a web address), when the source is a web page.
     public var sourceURL: String?
+    /// Read by code, or by the model with every time found in the source text. `false` when the model gave
+    /// a time that is not in the text: shown to the person, switched off by default.
+    public var isVerified: Bool
+
+    public init(rules: [ParkOpeningRule], lines: [String], sourceURL: String?, isVerified: Bool = true) {
+        self.rules = rules
+        self.lines = lines
+        self.sourceURL = sourceURL
+        self.isVerified = isVerified
+    }
+}
+
+/// One line of opening hours as the model returned it: text, to be checked and turned into a rule by code.
+public struct ParkModelHours: Equatable, Sendable {
+    /// Days as written ("ma t/m vr"); empty is every day.
+    public var days: String
+    /// Months as written ("april - september"); empty is all year.
+    public var months: String
+    /// `HH:mm`, 24 hour.
+    public var open: String
+    public var close: String
+
+    public init(days: String, months: String, open: String, close: String) {
+        self.days = days
+        self.months = months
+        self.open = open
+        self.close = close
+    }
 }
 
 public enum ParkOpeningReader {
@@ -43,7 +71,57 @@ public enum ParkOpeningReader {
         return found.isEmpty ? nil : found.joined(separator: "\n")
     }
 
+    /// The text about opening hours the model is asked to read when code found no rule: blocks that are about
+    /// hours and have a number in them. nil when there is none.
+    public static func modelHoursText(_ pages: [ParkSourcePage], maxCharacters: Int = ParkImportChunker.maxCharacters) -> String? {
+        var parts: [String] = []
+        for page in pages {
+            for block in page.blocks where (ParkImportTopic.opening.matches(block.heading) || hasHoursWord(block.text))
+                && block.text.contains(where: \.isNumber) {
+                let text = block.heading.isEmpty ? block.text : block.heading + "\n" + block.text
+                if !parts.contains(text) { parts.append(text) }
+            }
+        }
+        let joined = parts.joined(separator: "\n\n")
+        return joined.isEmpty ? nil : String(joined.prefix(maxCharacters))
+    }
+
+    /// Rules from what the model read. Days and months go through the same word lists as the parser, and a
+    /// rule needs a valid time range. A time that does not stand in the pages' text makes the whole finding
+    /// unverified. nil when nothing usable is left.
+    public static func finding(from hours: [ParkModelHours], pages: [ParkSourcePage]) -> ParkOpeningFinding? {
+        let source = pages.map(\.evidenceText).joined(separator: "\n")
+        var rules: [ParkOpeningRule] = []
+        var lines: [String] = []
+        var verified = true
+        for item in hours.prefix(ParkLimits.rules) {
+            guard let open = ParkStructuredHours.clock(item.open), let close = ParkStructuredHours.clock(item.close), open != close,
+                  let start = ParkClock.minutes(open), let end = ParkClock.minutes(close), end > start else { continue }
+            let days = item.days.trimmingCharacters(in: .whitespaces).isEmpty ? nil : self.days(in: item.days)
+            let months = ParkDaySelection.months(from: Set(self.months(in: item.months)))
+            let rule = ParkOpeningRule(months: months, days: days, open: open, close: close)
+            guard !rules.contains(where: { sameRule($0, rule) }) else { continue }
+            rules.append(rule)
+            lines.append(summary(of: [rule]))
+            if !timeStandsInText(open, source) || !timeStandsInText(close, source) { verified = false }
+        }
+        guard !rules.isEmpty else { return nil }
+        let url = pages.first { ParkImportCrawler.siteHost($0.url) != nil && modelHoursText([$0]) != nil }?.url
+        return ParkOpeningFinding(rules: rules, lines: lines, sourceURL: url, isVerified: verified)
+    }
+
+    /// Whether `HH:mm` is written in `text` as `12:30`, `12.30`, `12h30` or, for a full hour, as `12`.
+    static func timeStandsInText(_ time: String, _ text: String) -> Bool {
+        let parts = time.split(separator: ":")
+        guard parts.count == 2, let hour = Int(parts[0]), let minute = Int(parts[1]) else { return false }
+        let pattern = minute == 0 ? "(?<!\\d)0?\(hour)(?!\\d)" : "(?<!\\d)0?\(hour)\\D{0,2}\(String(format: "%02d", minute))(?!\\d)"
+        return text.range(of: pattern, options: .regularExpression) != nil
+    }
+
     static func read(_ page: ParkSourcePage) -> (rules: [ParkOpeningRule], lines: [String]) {
+        // What the page states in machine-readable form needs no reading of text.
+        let structured = ParkStructuredHours.rules(in: page.structuredData)
+        if !structured.rules.isEmpty { return structured }
         var rules: [ParkOpeningRule] = []
         var used: [String] = []
         let pageIsAboutHours = ParkImportTopic.opening.matches(page.url) || ParkImportTopic.opening.matches(page.title)

@@ -48,6 +48,24 @@ nonisolated struct ImportedFacilities {
     var facilities: [String]
 }
 
+@Generable
+nonisolated struct ImportedHourLine {
+    @Guide(description: "The days as written, for example 'ma t/m vr' or 'Saturday and Sunday', or empty for every day")
+    var days: String
+    @Guide(description: "The months or season as written, for example 'april - september', or empty for all year")
+    var months: String
+    @Guide(description: "Opening time in 24 hour format HH:mm, for example '10:00'")
+    var open: String
+    @Guide(description: "Closing time in 24 hour format HH:mm, for example '18:00'")
+    var close: String
+}
+
+@Generable
+nonisolated struct ImportedHours {
+    @Guide(description: "One entry for each group of days with its opening and closing time. Leave out closed days.", .maximumCount(14))
+    var hours: [ImportedHourLine]
+}
+
 // MARK: - The import
 
 /// One page (or screenshot) the import looked at, and what it found there.
@@ -90,6 +108,9 @@ final class ParkImportModel {
     /// Pages named by the site's sitemap, read once per search.
     private var sitemap: [ParkSourceLink] = []
     private var candidates = ParkImportCandidates()
+    /// Hours the model read when code could not, and the text it read them from (so it is asked once per text).
+    private var modelOpening: ParkOpeningFinding?
+    private var askedHoursText: String?
 
     init(session: ParkEditorSession) {
         self.session = session
@@ -283,7 +304,12 @@ final class ParkImportModel {
         pages.append(page)
         hasRead = true
         candidates.merge(ParkImportCandidates(page: page))
-        candidates.opening = ParkOpeningReader.read(pages)
+        if ParkOpeningReader.read(pages) == nil, let text = ParkOpeningReader.modelHoursText(pages), text != askedHoursText {
+            // Code found no rule in the hours text: the model reads it, and code checks every time it names.
+            askedHoursText = text
+            modelOpening = await askHours(text)
+        }
+        candidates.opening = ParkOpeningReader.read(pages) ?? modelOpening
         candidates.openingNote = candidates.opening == nil ? ParkOpeningReader.hoursText(pages) : nil
         candidates.events = ParkEventReader.read(pages, today: Self.today(in: session.park.resolvedTimeZone))
         let chunks = ParkImportChunker.chunks(for: [page], topics: topicsToAsk())
@@ -292,6 +318,21 @@ final class ParkImportModel {
             await ask(chunk)
         }
         refresh()
+    }
+
+    private func askHours(_ text: String) async -> ParkOpeningFinding? {
+        phase = .reading(part: 1, of: 1)
+        let instructions = "You read opening hours from text of a cable park website. Use only what the text says. Never guess. "
+            + "Give one entry for each group of days with the same hours. Times are 24 hour HH:mm. Copy days and months as written."
+        do {
+            let result = try await generate(ImportedHours.self, instructions: instructions, prompt: "Text:\n\(text)")
+            let hours = result.hours.map { ParkModelHours(days: $0.days, months: $0.months, open: $0.open, close: $0.close) }
+            return ParkOpeningReader.finding(from: hours, pages: pages)
+        } catch {
+            WakeLog.error(.ui, "park import hours: \(error.localizedDescription)")
+            addNote(.modelSkipped)
+            return nil
+        }
     }
 
     /// The model is only asked for what code cannot read, and only for what is still missing.
