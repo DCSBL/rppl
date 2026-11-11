@@ -148,6 +148,11 @@ public enum ParkDraft {
         }
         park.links = links.isEmpty ? nil : Array(links.prefix(ParkLimits.links))
 
+        var seenSources = Set<String>()
+        let sources = (park.sources ?? []).compactMap { ParkText.finalize($0, field: .url).flatMap { ParkText.normalizedWebAddress($0) } }
+            .filter { seenSources.insert(ParkImportCrawler.normalized($0)).inserted }
+        park.sources = sources.isEmpty ? nil : Array(sources.prefix(ParkLimits.sources))
+
         if var opening = park.opening {
             opening.note = ParkText.finalize(opening.note, field: .note)
             let rules: [ParkOpeningRule] = (opening.rules ?? []).prefix(ParkLimits.rules).map { rule in

@@ -287,4 +287,131 @@ struct ParkImportTests {
         done.address = "Hoofdweg 163"
         #expect(ParkImportAgent.missingTopics(candidates: done, park: park()) == [.events])
     }
+
+    // MARK: Rescanning a known park
+
+    @Test func aRescanAsksForEverythingEvenWhenTheParkHasIt() {
+        let done = park()
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: done, refreshing: true)
+            == [.opening, .prices, .contact, .events])
+    }
+
+    @Test func rescanStartsAtTheRememberedPagesBeforeTheWebsite() {
+        var known = park()
+        known.website = "https://www.breakout-grunopark.nl"
+        known.opening = ParkOpening(sourceURL: "https://breakout-grunopark.nl/openingstijden")
+        known.sources = ["breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/", "mailto:info@park.nl"]
+        #expect(ParkImportAgent.startAddresses(for: known) == [
+            "https://breakout-grunopark.nl/openingstijden",
+            "https://breakout-grunopark.nl/prijzen",
+            "https://www.breakout-grunopark.nl/",
+        ])
+        known.website = nil
+        known.opening = nil
+        known.sources = nil
+        #expect(ParkImportAgent.startAddresses(for: known).isEmpty)
+    }
+
+    @Test func rememberedSourcesAreAddedOnceAndTidiedOnSave() {
+        var known = park()
+        known.sources = ["https://www.breakout-grunopark.nl/prijzen"]
+        known = ParkImportAgent.remember(["https://breakout-grunopark.nl/prijzen/", "https://www.breakout-grunopark.nl/contact"], in: known)
+        #expect(known.sources == ["https://www.breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/contact"])
+        known.sources = (known.sources ?? []) + ["nonsense", " https://www.breakout-grunopark.nl/contact "]
+        #expect(ParkDraft.finalized(known).sources == ["https://www.breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/contact"])
+    }
+
+    // MARK: Sitemap
+
+    @Test func sitemapAddressesAreRead() {
+        let xml = """
+        <?xml version="1.0"?><urlset>
+        <url><loc>https://www.breakout-grunopark.nl/</loc></url>
+        <url>
+          <loc> https://www.breakout-grunopark.nl/openingstijden?a=1&amp;b=2 </loc>
+        </url>
+        </urlset>
+        """
+        #expect(ParkSitemap.locations(in: xml).pages == [
+            "https://www.breakout-grunopark.nl/", "https://www.breakout-grunopark.nl/openingstijden?a=1&b=2",
+        ])
+        let index = "<sitemapindex><sitemap><loc>https://x.nl/a.xml</loc></sitemap><sitemap><loc>https://x.nl/b.xml</loc></sitemap></sitemapindex>"
+        let found = ParkSitemap.locations(in: index)
+        #expect(found.pages.isEmpty)
+        #expect(found.sitemaps == ["https://x.nl/a.xml", "https://x.nl/b.xml"])
+        #expect(ParkSitemap.sitemaps(inRobots: "User-agent: *\nSitemap: https://x.nl/sm.xml\nDisallow: /a") == ["https://x.nl/sm.xml"])
+        #expect(ParkSitemap.usualAddress(forSite: "https://www.x.nl/a/b") == "https://www.x.nl/sitemap.xml")
+        #expect(ParkSitemap.usualAddress(forSite: "screenshot") == nil)
+    }
+
+    @Test func aSitemapPageComesBeforeAGuess() {
+        let sitemap = ParkSitemap.links([
+            "https://www.breakout-grunopark.nl/over-ons", "https://www.breakout-grunopark.nl/nl/openingstijden-en-tijden",
+            "https://other.nl/openingstijden",
+        ])
+        let target = ParkImportAgent.next(pages: [Self.page], missing: [.opening], visited: [], guessesUsed: 0, sitemap: sitemap)
+        #expect(target == ParkImportTarget(url: "https://www.breakout-grunopark.nl/nl/openingstijden-en-tijden", topic: .opening, isGuess: false))
+        let none = ParkImportAgent.next(pages: [Self.page], missing: [.opening], visited: [], guessesUsed: 0)
+        #expect(none?.isGuess == true)
+    }
+
+    // MARK: Structured and model-read hours
+
+    @Test func schemaOrgHoursAreReadWithoutReadingText() {
+        let html = """
+        <html><head><script type="application/ld+json">
+        {"@context":"https://schema.org","@graph":[{"@type":"SportsActivityLocation","openingHoursSpecification":[
+          {"@type":"OpeningHoursSpecification","dayOfWeek":["https://schema.org/Monday","Tuesday"],"opens":"10:00:00","closes":"18:00:00"},
+          {"dayOfWeek":"Saturday","opens":"09:00","closes":"18:00"},
+          {"dayOfWeek":"Sunday","opens":"09:00","closes":"18:00"},
+          {"dayOfWeek":"Friday","opens":"10:00","closes":"22:00","validFrom":"2026-12-24"}]},
+          {"openingHours":["We-Th 12:00-20:00"]}]}
+        </script></head><body><p>Welkom</p></body></html>
+        """
+        let page = ParkSourceExtractor.extract(html: html, url: "https://www.example-park.nl/")
+        let found = ParkOpeningReader.read([page])
+        #expect(found?.rules.count == 3)
+        #expect(found?.rules.first == ParkOpeningRule(days: ["mon", "tue"], open: "10:00", close: "18:00"))
+        #expect(found?.rules.contains(ParkOpeningRule(days: ["weekend"], open: "09:00", close: "18:00")) == true)
+        #expect(found?.rules.contains(ParkOpeningRule(days: ["wed", "thu"], open: "12:00", close: "20:00")) == true)
+        #expect(found?.isVerified == true)
+    }
+
+    @Test func hoursStringsHandleRangesAndSeveralTimes() {
+        let rules = ParkStructuredHours.rules(in: [#"{"openingHours":"Mo-Fr 10:00-12:00,13:00-17:00"}"#, "not json"]).rules
+        #expect(rules.map(\.open) == ["10:00", "13:00"])
+        #expect(rules.allSatisfy { $0.days == ["weekdays"] })
+        #expect(ParkStructuredHours.clock("24:00") == "24:00")
+        #expect(ParkStructuredHours.clock("25:00") == nil)
+    }
+
+    @Test func modelHoursAreCheckedAgainstTheText() {
+        let page = ParkSourceExtractor.extract(
+            html: "<h2>Openingstijden</h2><p>Dinsdag tot en met zondag van 10 tot 18 uur, maandag gesloten</p>",
+            url: "https://www.example-park.nl/tijden"
+        )
+        #expect(ParkOpeningReader.modelHoursText([page])?.contains("maandag gesloten") == true)
+        let good = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "dinsdag t/m zondag", months: "", open: "10:00", close: "18:00")], pages: [page]
+        )
+        #expect(good?.isVerified == true)
+        #expect(good?.rules.first?.days == ["weekend", "tue", "wed", "thu", "fri"])
+        #expect(good?.sourceURL == "https://www.example-park.nl/tijden")
+        let invented = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "", months: "", open: "09:00", close: "18:00")], pages: [page]
+        )
+        #expect(invented?.isVerified == false)
+        let broken = ParkOpeningReader.finding(
+            from: [ParkModelHours(days: "", months: "", open: "late", close: "18:00"), ParkModelHours(days: "", months: "", open: "18:00", close: "10:00")],
+            pages: [page]
+        )
+        #expect(broken == nil)
+    }
+
+    @Test func timesAreFoundInTheirUsualWritings() {
+        #expect(ParkOpeningReader.timeStandsInText("12:30", "open 12.30 - 17.00 Uhr"))
+        #expect(ParkOpeningReader.timeStandsInText("08:00", "van 8 tot 12 uur"))
+        #expect(!ParkOpeningReader.timeStandsInText("18:00", "van 8 tot 12 uur"))
+        #expect(!ParkOpeningReader.timeStandsInText("10:15", "van 10:45"))
+    }
 }

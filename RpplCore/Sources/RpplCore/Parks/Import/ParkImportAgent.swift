@@ -29,24 +29,52 @@ public enum ParkImportAgent {
         .events: ["/agenda", "/evenementen", "/events", "/veranstaltungen"],
     ]
 
-    /// What the park and the findings still lack, most useful first.
-    public static func missingTopics(candidates: ParkImportCandidates, park: Park) -> [ParkImportTopic] {
+    /// Where a rescan of an existing park starts: the page its opening hours were read from, the pages an
+    /// earlier import used, then the website. Web addresses only, each once, at most `maxPages`.
+    public static func startAddresses(for park: Park) -> [String] {
+        var seen = Set<String>()
+        let all = [park.opening?.sourceURL] + (park.sources ?? []).map { Optional($0) } + [park.website]
+        return all.compactMap { $0.flatMap(ParkText.normalizedWebAddress) }
+            .filter { seen.insert(ParkImportCrawler.normalized($0)).inserted }
+            .prefix(maxPages).map { $0 }
+    }
+
+    /// Adds `addresses` to the park's remembered sources (the editor tidies the list when it saves).
+    public static func remember(_ addresses: [String], in park: Park) -> Park {
+        var park = park
+        var sources = park.sources ?? []
+        for address in addresses where !sources.contains(where: { ParkImportCrawler.normalized($0) == ParkImportCrawler.normalized(address) }) {
+            sources.append(address)
+        }
+        park.sources = sources.isEmpty ? nil : sources
+        return park
+    }
+
+    /// What the park and the findings still lack, most useful first. A rescan (`refreshing`) asks for
+    /// everything the page can hold, because what the park has may be out of date.
+    public static func missingTopics(
+        candidates: ParkImportCandidates, park: Park, refreshing: Bool = false
+    ) -> [ParkImportTopic] {
         var missing: [ParkImportTopic] = []
-        if park.opening?.hasSchedule != true, candidates.opening == nil { missing.append(.opening) }
-        if candidates.prices.isEmpty, (park.prices ?? []).isEmpty { missing.append(.prices) }
-        if candidates.address == nil, (park.address ?? "").isEmpty { missing.append(.contact) }
+        if candidates.opening == nil, refreshing || park.opening?.hasSchedule != true { missing.append(.opening) }
+        if candidates.prices.isEmpty, refreshing || (park.prices ?? []).isEmpty { missing.append(.prices) }
+        if candidates.address == nil, refreshing || (park.address ?? "").isEmpty { missing.append(.contact) }
         if candidates.events.isEmpty { missing.append(.events) }
         return missing
     }
 
     /// The next page to read for the first missing topic that has one: a link on a page read so far, else
-    /// a usual address (up to `maxGuesses`). nil when there is nothing left to try.
+    /// a page of the site's `sitemap`, else a usual address (up to `maxGuesses`). nil when there is nothing
+    /// left to try.
     public static func next(
-        pages: [ParkSourcePage], missing: [ParkImportTopic], visited: Set<String>, guessesUsed: Int
+        pages: [ParkSourcePage], missing: [ParkImportTopic], visited: Set<String>, guessesUsed: Int,
+        sitemap: [ParkSourceLink] = []
     ) -> ParkImportTarget? {
         guard pages.count < maxPages else { return nil }
+        // The sitemap is searched like one more page, after the pages that were read.
+        let searched = sitemap.isEmpty || pages.isEmpty ? pages : pages + [ParkSourcePage(url: pages[0].url, links: sitemap)]
         for topic in missing {
-            for page in pages {
+            for page in searched {
                 if let link = ParkImportCrawler.candidates(from: page, topics: [topic], visited: visited).first {
                     return ParkImportTarget(url: link.url, topic: topic, isGuess: false)
                 }

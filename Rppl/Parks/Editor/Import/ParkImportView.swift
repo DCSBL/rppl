@@ -17,6 +17,7 @@ struct ParkImportView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !model.knownSources.isEmpty { rescanSection }
                 websiteSection
                 screenshotSection
                 if !model.hasRead, !model.isWorking { capabilitiesSection }
@@ -43,10 +44,32 @@ struct ParkImportView: View {
             .onChange(of: photo) { _, item in
                 Task { await load(item) }
             }
+            // An existing park is read again from where its data came from, without asking for links.
+            .task { await model.rescan() }
         }
     }
 
     // MARK: Sections
+
+    private var rescanSection: some View {
+        Section {
+            ForEach(model.knownSources, id: \.self) { source in
+                Text(verbatim: source)
+                    .font(.footnote)
+                    .lineLimit(1)
+            }
+            Button {
+                Task { await model.rescan() }
+            } label: {
+                Label("Rescan known sources", systemImage: "arrow.clockwise")
+            }
+            .disabled(model.isWorking)
+        } header: {
+            Text("Known sources")
+        } footer: {
+            Text("Reads these pages again and looks for newer opening hours, prices and contact details.")
+        }
+    }
 
     private var websiteSection: some View {
         Section {
