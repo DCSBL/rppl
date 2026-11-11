@@ -310,6 +310,29 @@ public struct ParkNextOpening: Equatable, Sendable {
     public var start: Date
     public var end: Date
     public var isTomorrow: Bool
+    /// The calendar day of `start` in the park's time zone, ready to show without the zone.
+    public var day: ParkCalendarDay
+}
+
+/// A calendar day without a time zone, so "1 April 2027" reads the same wherever the rider is.
+public struct ParkCalendarDay: Equatable, Sendable {
+    public var year: Int
+    public var month: Int
+    public var day: Int
+
+    public init(year: Int, month: Int, day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
+
+    /// "1 Apr 2027", in the device's date order.
+    public var displayText: String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        guard let date = calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)) else { return "" }
+        return date.formatted(Date.FormatStyle(timeZone: calendar.timeZone).day().month(.abbreviated).year())
+    }
 }
 
 /// One exception on one concrete day, for an "upcoming changes" list.
@@ -494,7 +517,14 @@ public enum ParkSchedule {
             guard let start = calendar.date(byAdding: .minute, value: window.startMinute, to: midnight),
                   let end = calendar.date(byAdding: .minute, value: window.endMinute, to: midnight)
             else { return nil }
-            return ParkNextOpening(start: start, end: end, isTomorrow: offset == 1)
+            let parts = calendar.dateComponents([.year, .month, .day], from: candidate)
+            guard let year = parts.year, let month = parts.month, let dayOfMonth = parts.day else { return nil }
+            return ParkNextOpening(
+                start: start,
+                end: end,
+                isTomorrow: offset == 1,
+                day: ParkCalendarDay(year: year, month: month, day: dayOfMonth)
+            )
         }
         return nil
     }

@@ -8,8 +8,11 @@ public enum ParkWidgetState: Equatable, Sendable {
     case opensToday(ParkTimeWindow)
     /// Opens tomorrow at `startMinute` (minutes after midnight, park time).
     case opensTomorrow(startMinute: Int)
-    /// Closed, next opening in 2 to `maxCountedDays` days. Further out reads `.closed`.
+    /// Closed, next opening in 2 to `maxCountedDays` days.
     case opensInDays(Int)
+    /// Closed, next opening further out than `maxCountedDays` days (a winter break, say).
+    case reopensOn(ParkCalendarDay)
+    /// Closed with no known next opening.
     case closed
     /// No opening times filled in.
     case unknown
@@ -35,7 +38,8 @@ public enum ParkWidgetState: Equatable, Sendable {
                 from: calendar.startOfDay(for: date),
                 to: calendar.startOfDay(for: next.start)
             ).day ?? 0
-            if days <= 0 || days > maxCountedDays { return .closed }
+            if days <= 0 { return .closed }
+            if days > maxCountedDays { return .reopensOn(next.day) }
             if days > 1 { return .opensInDays(days) }
             let parts = calendar.dateComponents([.hour, .minute], from: next.start)
             return .opensTomorrow(startMinute: (parts.hour ?? 0) * 60 + (parts.minute ?? 0))
