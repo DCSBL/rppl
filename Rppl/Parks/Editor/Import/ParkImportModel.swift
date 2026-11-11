@@ -48,6 +48,24 @@ nonisolated struct ImportedFacilities {
     var facilities: [String]
 }
 
+@Generable
+nonisolated struct ImportedHourLine {
+    @Guide(description: "The days as written, for example 'ma t/m vr' or 'Saturday and Sunday', or empty for every day")
+    var days: String
+    @Guide(description: "The months or season as written, for example 'april - september', or empty for all year")
+    var months: String
+    @Guide(description: "Opening time in 24 hour format HH:mm, for example '10:00'")
+    var open: String
+    @Guide(description: "Closing time in 24 hour format HH:mm, for example '18:00'")
+    var close: String
+}
+
+@Generable
+nonisolated struct ImportedHours {
+    @Guide(description: "One entry for each group of days with its opening and closing time. Leave out closed days.", .maximumCount(14))
+    var hours: [ImportedHourLine]
+}
+
 // MARK: - The import
 
 /// One page (or screenshot) the import looked at, and what it found there.
@@ -58,6 +76,8 @@ struct ParkImportTraceEntry: Identifiable, Equatable {
     var failed: Bool
     /// The page was not linked anywhere; it is a usual address of the site.
     var isGuess: Bool
+    /// The address of a page that was read; nil when it could not be opened.
+    var url: String?
 }
 
 @Observable
@@ -85,7 +105,12 @@ final class ParkImportModel {
 
     private let session: ParkEditorSession
     private var pages: [ParkSourcePage] = []
+    /// Pages named by the site's sitemap, read once per search.
+    private var sitemap: [ParkSourceLink] = []
     private var candidates = ParkImportCandidates()
+    /// Hours the model read when code could not, and the text it read them from (so it is asked once per text).
+    private var modelOpening: ParkOpeningFinding?
+    private var askedHoursText: String?
 
     init(session: ParkEditorSession) {
         self.session = session
@@ -105,13 +130,32 @@ final class ParkImportModel {
             addNote(.badAddress)
             return
         }
+        await search(from: [address], refreshing: false)
+    }
+
+    /// The addresses a rescan of this park starts from: where its data came from before.
+    var knownSources: [String] {
+        session.editsParkID == nil ? [] : ParkImportAgent.startAddresses(for: session.park)
+    }
+
+    /// Reads every remembered source of an existing park again, then looks further for what is still missing.
+    /// Unlike a first import, what the park already has does not count as found: it may be out of date.
+    func rescan() async {
+        guard !isWorking, !knownSources.isEmpty else { return }
+        await search(from: knownSources, refreshing: true)
+    }
+
+    private func search(from addresses: [String], refreshing: Bool) async {
         defer {
             phase = .idle
             refresh()
         }
-        var visited: Set<String> = [address]
+        sitemap = []
+        var triedSitemap = false
+        var visited = Set(addresses)
+        var queue = addresses[...]
         var guesses = 0
-        var target: ParkImportTarget? = ParkImportTarget(url: address, topic: .contact, isGuess: false)
+        var target = queue.popFirst().map { ParkImportTarget(url: $0, topic: .contact, isGuess: false) }
         while let current = target {
             phase = .fetching(Self.label(current.url))
             let before = candidates.fields
@@ -119,13 +163,26 @@ final class ParkImportModel {
                 visited.insert(page.url)
                 await read(page)
                 let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
-                trace.append(ParkImportTraceEntry(label: Self.label(page.url), found: added, failed: false, isGuess: current.isGuess))
+                trace.append(ParkImportTraceEntry(
+                    label: Self.label(page.url), found: added, failed: false, isGuess: current.isGuess, url: page.url
+                ))
             } else if !current.isGuess {
-                trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false))
+                trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false, url: nil))
             }
-            let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park)
+            // The sitemap is read once, after the first page of the site was read.
+            if !triedSitemap, let site = pages.first?.url {
+                triedSitemap = true
+                phase = .fetching("sitemap")
+                sitemap = await fetchSitemap(forSite: site)
+            }
+            // Every remembered source is read; only after that the missing topics decide where to look.
+            if let next = queue.popFirst() {
+                target = ParkImportTarget(url: next, topic: .contact, isGuess: false)
+                continue
+            }
+            let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park, refreshing: refreshing)
             guard !missing.isEmpty else { break }
-            target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses)
+            target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses, sitemap: sitemap)
             if let next = target {
                 visited.insert(next.url)
                 if next.isGuess { guesses += 1 }
@@ -156,12 +213,15 @@ final class ParkImportModel {
         let before = candidates.fields
         await read(ParkSourceExtractor.extract(plainText: text, label: "screenshot"))
         let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
-        trace.append(ParkImportTraceEntry(label: "screenshot", found: added, failed: false, isGuess: false))
+        trace.append(ParkImportTraceEntry(label: "screenshot", found: added, failed: false, isGuess: false, url: nil))
     }
 
-    /// Writes the chosen suggestions into the park being edited.
+    /// Writes the chosen suggestions into the park being edited and remembers the pages that gave
+    /// something, so a later rescan starts there.
     func apply() {
-        session.park = ParkImportMerge.apply(items.filter { selected.contains($0.id) }, to: session.park)
+        let chosen = items.filter { selected.contains($0.id) }
+        let sources = trace.compactMap { $0.found.isEmpty ? nil : $0.url }
+        session.park = ParkImportAgent.remember(sources, in: ParkImportMerge.apply(chosen, to: session.park))
         items = []
         selected = []
         refresh()
@@ -203,6 +263,40 @@ final class ParkImportModel {
         }
     }
 
+    /// The pages the site's sitemap lists (`/sitemap.xml`, else the `Sitemap:` line of robots.txt; an index
+    /// is followed one level). Empty when the site has none: the search then falls back to links and guesses.
+    private func fetchSitemap(forSite address: String) async -> [ParkSourceLink] {
+        var files = ParkSitemap.usualAddress(forSite: address).map { [$0] } ?? []
+        var pages: [String] = []
+        var triedRobots = false
+        while let file = files.first, pages.count < ParkSitemap.maxPages {
+            files.removeFirst()
+            guard ParkImportCrawler.siteHost(file) == ParkImportCrawler.siteHost(address) else { continue }
+            if let xml = await fetchText(file) {
+                let found = ParkSitemap.locations(in: xml)
+                pages += found.pages
+                files += found.sitemaps
+            } else if !triedRobots, let site = URLComponents(string: address), let scheme = site.scheme, let host = site.host {
+                triedRobots = true
+                if let robots = await fetchText("\(scheme)://\(host)/robots.txt") { files += ParkSitemap.sitemaps(inRobots: robots) }
+            }
+        }
+        return ParkSitemap.links(Array(pages.prefix(ParkSitemap.maxPages)))
+    }
+
+    /// A text file of the site; nil when it is not there. Misses are normal and stay out of the notes.
+    private func fetchText(_ address: String) async -> String? {
+        guard let url = URL(string: address) else { return nil }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 10))
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
+            guard data.count <= 2_000_000 else { return nil }
+            return String(data: data, encoding: .utf8)
+        } catch {
+            return nil
+        }
+    }
+
     /// Plain code first (phone, email, social links, opening hours), then the model, one chunk at a time.
     private func read(_ page: ParkSourcePage) async {
         // A usual address that answers with the front page again adds nothing.
@@ -210,7 +304,12 @@ final class ParkImportModel {
         pages.append(page)
         hasRead = true
         candidates.merge(ParkImportCandidates(page: page))
-        candidates.opening = ParkOpeningReader.read(pages)
+        if ParkOpeningReader.read(pages) == nil, let text = ParkOpeningReader.modelHoursText(pages), text != askedHoursText {
+            // Code found no rule in the hours text: the model reads it, and code checks every time it names.
+            askedHoursText = text
+            modelOpening = await askHours(text)
+        }
+        candidates.opening = ParkOpeningReader.read(pages) ?? modelOpening
         candidates.openingNote = candidates.opening == nil ? ParkOpeningReader.hoursText(pages) : nil
         candidates.events = ParkEventReader.read(pages, today: Self.today(in: session.park.resolvedTimeZone))
         let chunks = ParkImportChunker.chunks(for: [page], topics: topicsToAsk())
@@ -219,6 +318,21 @@ final class ParkImportModel {
             await ask(chunk)
         }
         refresh()
+    }
+
+    private func askHours(_ text: String) async -> ParkOpeningFinding? {
+        phase = .reading(part: 1, of: 1)
+        let instructions = "You read opening hours from text of a cable park website. Use only what the text says. Never guess. "
+            + "Give one entry for each group of days with the same hours. Times are 24 hour HH:mm. Copy days and months as written."
+        do {
+            let result = try await generate(ImportedHours.self, instructions: instructions, prompt: "Text:\n\(text)")
+            let hours = result.hours.map { ParkModelHours(days: $0.days, months: $0.months, open: $0.open, close: $0.close) }
+            return ParkOpeningReader.finding(from: hours, pages: pages)
+        } catch {
+            WakeLog.error(.ui, "park import hours: \(error.localizedDescription)")
+            addNote(.modelSkipped)
+            return nil
+        }
     }
 
     /// The model is only asked for what code cannot read, and only for what is still missing.

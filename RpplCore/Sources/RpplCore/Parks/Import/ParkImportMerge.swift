@@ -246,7 +246,7 @@ public enum ParkImportMerge {
                 let previous = (park.opening?.rules).flatMap { rules -> String? in rules.isEmpty ? nil : ParkOpeningReader.summary(of: rules) }
                 items.append(ParkImportItem(
                     id: "opening", field: .opening, value: .opening(rules: finding.rules, sourceURL: finding.sourceURL),
-                    previous: previous, level: .verified, detail: finding.lines.joined(separator: "\n")
+                    previous: previous, level: finding.isVerified ? .verified : .notFound, detail: finding.lines.joined(separator: "\n")
                 ))
             }
         } else if let note = candidates.openingNote, !same(note, park.opening?.note) {

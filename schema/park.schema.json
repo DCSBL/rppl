@@ -109,6 +109,11 @@
         }
       }
     },
+    "sources": {
+      "type": "array",
+      "description": "Pages the park's data was read from. A rescan in the app starts here. Optional.",
+      "items": { "$ref": "#/$defs/url" }
+    },
     "description": { "type": "string" },
     "facilities": {
       "type": "array",

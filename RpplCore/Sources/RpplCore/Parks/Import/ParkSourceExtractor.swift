@@ -32,10 +32,12 @@ public struct ParkSourcePage: Equatable, Sendable {
     public var links: [ParkSourceLink]
     public var phones: [String]
     public var emails: [String]
+    /// `application/ld+json` blocks of the page (schema.org), as written.
+    public var structuredData: [String]
 
     public init(
         url: String, title: String = "", blocks: [ParkSourceBlock] = [], links: [ParkSourceLink] = [],
-        phones: [String] = [], emails: [String] = []
+        phones: [String] = [], emails: [String] = [], structuredData: [String] = []
     ) {
         self.url = url
         self.title = title
@@ -43,6 +45,7 @@ public struct ParkSourcePage: Equatable, Sendable {
         self.links = links
         self.phones = phones
         self.emails = emails
+        self.structuredData = structuredData
     }
 
     /// Everything that can back up a value: the text, the link addresses, the phone numbers and emails.
@@ -157,7 +160,8 @@ public enum ParkSourceExtractor {
         return ParkSourcePage(
             url: url, title: collapse(title), blocks: blocks, links: links,
             phones: unique(ParkSourceFacts.phones(in: text) + phones),
-            emails: unique(ParkSourceFacts.emails(in: text) + emails)
+            emails: unique(ParkSourceFacts.emails(in: text) + emails),
+            structuredData: ParkStructuredHours.jsonLDBlocks(inHTML: html)
         )
     }
 

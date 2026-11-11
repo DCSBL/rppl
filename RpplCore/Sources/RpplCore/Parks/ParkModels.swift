@@ -307,6 +307,9 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
     public var website: String?
     public var prices: [ParkPrice]?
     public var links: [ParkLink]?
+    /// Pages the park's data was read from (an import in the editor adds them). A rescan starts here, so
+    /// the person does not have to enter the links again. The park's `website` is always a starting point too.
+    public var sources: [String]?
     public var description: String?
     public var facilities: [String]?
     /// Optional source for an estimated ambient water temperature at this park (nearest official
@@ -321,7 +324,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case version, id, history, author, name, languages, location, address, timezone, cables, opening
-        case phone, email, website, prices, links, description, facilities, wakesys
+        case phone, email, website, prices, links, sources, description, facilities, wakesys
         case permanentlyClosed = "permanently_closed"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
@@ -347,6 +350,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         website: String? = nil,
         prices: [ParkPrice]? = nil,
         links: [ParkLink]? = nil,
+        sources: [String]? = nil,
         description: String? = nil,
         facilities: [String]? = nil,
         waterTemperature: ParkWaterTemperatureSource? = nil,
@@ -374,6 +378,7 @@ public struct Park: Codable, Equatable, Hashable, Sendable, Identifiable {
         self.website = website
         self.prices = prices
         self.links = links
+        self.sources = sources
         self.description = description
         self.facilities = facilities
         self.waterTemperature = waterTemperature
