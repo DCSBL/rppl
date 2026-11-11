@@ -58,6 +58,8 @@ struct ParkImportTraceEntry: Identifiable, Equatable {
     var failed: Bool
     /// The page was not linked anywhere; it is a usual address of the site.
     var isGuess: Bool
+    /// The address of a page that was read; nil when it could not be opened.
+    var url: String?
 }
 
 @Observable
@@ -105,13 +107,30 @@ final class ParkImportModel {
             addNote(.badAddress)
             return
         }
+        await search(from: [address], refreshing: false)
+    }
+
+    /// The addresses a rescan of this park starts from: where its data came from before.
+    var knownSources: [String] {
+        session.editsParkID == nil ? [] : ParkImportAgent.startAddresses(for: session.park)
+    }
+
+    /// Reads every remembered source of an existing park again, then looks further for what is still missing.
+    /// Unlike a first import, what the park already has does not count as found: it may be out of date.
+    func rescan() async {
+        guard !isWorking, !knownSources.isEmpty else { return }
+        await search(from: knownSources, refreshing: true)
+    }
+
+    private func search(from addresses: [String], refreshing: Bool) async {
         defer {
             phase = .idle
             refresh()
         }
-        var visited: Set<String> = [address]
+        var visited = Set(addresses)
+        var queue = addresses[...]
         var guesses = 0
-        var target: ParkImportTarget? = ParkImportTarget(url: address, topic: .contact, isGuess: false)
+        var target = queue.popFirst().map { ParkImportTarget(url: $0, topic: .contact, isGuess: false) }
         while let current = target {
             phase = .fetching(Self.label(current.url))
             let before = candidates.fields
@@ -119,11 +138,18 @@ final class ParkImportModel {
                 visited.insert(page.url)
                 await read(page)
                 let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
-                trace.append(ParkImportTraceEntry(label: Self.label(page.url), found: added, failed: false, isGuess: current.isGuess))
+                trace.append(ParkImportTraceEntry(
+                    label: Self.label(page.url), found: added, failed: false, isGuess: current.isGuess, url: page.url
+                ))
             } else if !current.isGuess {
-                trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false))
+                trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false, url: nil))
             }
-            let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park)
+            // Every remembered source is read; only after that the missing topics decide where to look.
+            if let next = queue.popFirst() {
+                target = ParkImportTarget(url: next, topic: .contact, isGuess: false)
+                continue
+            }
+            let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park, refreshing: refreshing)
             guard !missing.isEmpty else { break }
             target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses)
             if let next = target {
@@ -156,12 +182,15 @@ final class ParkImportModel {
         let before = candidates.fields
         await read(ParkSourceExtractor.extract(plainText: text, label: "screenshot"))
         let added = ParkImportField.allCases.filter { candidates.fields.contains($0) && !before.contains($0) }
-        trace.append(ParkImportTraceEntry(label: "screenshot", found: added, failed: false, isGuess: false))
+        trace.append(ParkImportTraceEntry(label: "screenshot", found: added, failed: false, isGuess: false, url: nil))
     }
 
-    /// Writes the chosen suggestions into the park being edited.
+    /// Writes the chosen suggestions into the park being edited and remembers the pages that gave
+    /// something, so a later rescan starts there.
     func apply() {
-        session.park = ParkImportMerge.apply(items.filter { selected.contains($0.id) }, to: session.park)
+        let chosen = items.filter { selected.contains($0.id) }
+        let sources = trace.compactMap { $0.found.isEmpty ? nil : $0.url }
+        session.park = ParkImportAgent.remember(sources, in: ParkImportMerge.apply(chosen, to: session.park))
         items = []
         selected = []
         refresh()

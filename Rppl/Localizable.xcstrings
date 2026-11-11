@@ -22545,6 +22545,90 @@
           }
         }
       }
+    },
+    "Known sources" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Known sources"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sources connues"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekende bronnen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekannte Quellen"
+          }
+        }
+      }
+    },
+    "Rescan known sources" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan known sources"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relire les sources connues"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekende bronnen opnieuw scannen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekannte Quellen erneut scannen"
+          }
+        }
+      }
+    },
+    "Reads these pages again and looks for newer opening hours, prices and contact details." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reads these pages again and looks for newer opening hours, prices and contact details."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relit ces pages et cherche des horaires, tarifs et coordonnées plus récents."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leest deze pagina’s opnieuw en zoekt naar nieuwere openingstijden, prijzen en contactgegevens."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liest diese Seiten erneut und sucht nach neueren Öffnungszeiten, Preisen und Kontaktdaten."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

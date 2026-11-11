@@ -29,12 +29,36 @@ public enum ParkImportAgent {
         .events: ["/agenda", "/evenementen", "/events", "/veranstaltungen"],
     ]
 
-    /// What the park and the findings still lack, most useful first.
-    public static func missingTopics(candidates: ParkImportCandidates, park: Park) -> [ParkImportTopic] {
+    /// Where a rescan of an existing park starts: the page its opening hours were read from, the pages an
+    /// earlier import used, then the website. Web addresses only, each once, at most `maxPages`.
+    public static func startAddresses(for park: Park) -> [String] {
+        var seen = Set<String>()
+        let all = [park.opening?.sourceURL] + (park.sources ?? []).map { Optional($0) } + [park.website]
+        return all.compactMap { $0.flatMap(ParkText.normalizedWebAddress) }
+            .filter { seen.insert(ParkImportCrawler.normalized($0)).inserted }
+            .prefix(maxPages).map { $0 }
+    }
+
+    /// Adds `addresses` to the park's remembered sources (the editor tidies the list when it saves).
+    public static func remember(_ addresses: [String], in park: Park) -> Park {
+        var park = park
+        var sources = park.sources ?? []
+        for address in addresses where !sources.contains(where: { ParkImportCrawler.normalized($0) == ParkImportCrawler.normalized(address) }) {
+            sources.append(address)
+        }
+        park.sources = sources.isEmpty ? nil : sources
+        return park
+    }
+
+    /// What the park and the findings still lack, most useful first. A rescan (`refreshing`) asks for
+    /// everything the page can hold, because what the park has may be out of date.
+    public static func missingTopics(
+        candidates: ParkImportCandidates, park: Park, refreshing: Bool = false
+    ) -> [ParkImportTopic] {
         var missing: [ParkImportTopic] = []
-        if park.opening?.hasSchedule != true, candidates.opening == nil { missing.append(.opening) }
-        if candidates.prices.isEmpty, (park.prices ?? []).isEmpty { missing.append(.prices) }
-        if candidates.address == nil, (park.address ?? "").isEmpty { missing.append(.contact) }
+        if candidates.opening == nil, refreshing || park.opening?.hasSchedule != true { missing.append(.opening) }
+        if candidates.prices.isEmpty, refreshing || (park.prices ?? []).isEmpty { missing.append(.prices) }
+        if candidates.address == nil, refreshing || (park.address ?? "").isEmpty { missing.append(.contact) }
         if candidates.events.isEmpty { missing.append(.events) }
         return missing
     }

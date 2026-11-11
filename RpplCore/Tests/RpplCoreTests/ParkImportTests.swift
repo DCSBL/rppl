@@ -287,4 +287,37 @@ struct ParkImportTests {
         done.address = "Hoofdweg 163"
         #expect(ParkImportAgent.missingTopics(candidates: done, park: park()) == [.events])
     }
+
+    // MARK: Rescanning a known park
+
+    @Test func aRescanAsksForEverythingEvenWhenTheParkHasIt() {
+        let done = park()
+        #expect(ParkImportAgent.missingTopics(candidates: ParkImportCandidates(), park: done, refreshing: true)
+            == [.opening, .prices, .contact, .events])
+    }
+
+    @Test func rescanStartsAtTheRememberedPagesBeforeTheWebsite() {
+        var known = park()
+        known.website = "https://www.breakout-grunopark.nl"
+        known.opening = ParkOpening(sourceURL: "https://breakout-grunopark.nl/openingstijden")
+        known.sources = ["breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/", "mailto:info@park.nl"]
+        #expect(ParkImportAgent.startAddresses(for: known) == [
+            "https://breakout-grunopark.nl/openingstijden",
+            "https://breakout-grunopark.nl/prijzen",
+            "https://www.breakout-grunopark.nl/",
+        ])
+        known.website = nil
+        known.opening = nil
+        known.sources = nil
+        #expect(ParkImportAgent.startAddresses(for: known).isEmpty)
+    }
+
+    @Test func rememberedSourcesAreAddedOnceAndTidiedOnSave() {
+        var known = park()
+        known.sources = ["https://www.breakout-grunopark.nl/prijzen"]
+        known = ParkImportAgent.remember(["https://breakout-grunopark.nl/prijzen/", "https://www.breakout-grunopark.nl/contact"], in: known)
+        #expect(known.sources == ["https://www.breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/contact"])
+        known.sources = (known.sources ?? []) + ["nonsense", " https://www.breakout-grunopark.nl/contact "]
+        #expect(ParkDraft.finalized(known).sources == ["https://www.breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/contact"])
+    }
 }
