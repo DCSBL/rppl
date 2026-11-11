@@ -320,4 +320,38 @@ struct ParkImportTests {
         known.sources = (known.sources ?? []) + ["nonsense", " https://www.breakout-grunopark.nl/contact "]
         #expect(ParkDraft.finalized(known).sources == ["https://www.breakout-grunopark.nl/prijzen", "https://www.breakout-grunopark.nl/contact"])
     }
+
+    // MARK: Sitemap
+
+    @Test func sitemapAddressesAreRead() {
+        let xml = """
+        <?xml version="1.0"?><urlset>
+        <url><loc>https://www.breakout-grunopark.nl/</loc></url>
+        <url>
+          <loc> https://www.breakout-grunopark.nl/openingstijden?a=1&amp;b=2 </loc>
+        </url>
+        </urlset>
+        """
+        #expect(ParkSitemap.locations(in: xml).pages == [
+            "https://www.breakout-grunopark.nl/", "https://www.breakout-grunopark.nl/openingstijden?a=1&b=2",
+        ])
+        let index = "<sitemapindex><sitemap><loc>https://x.nl/a.xml</loc></sitemap><sitemap><loc>https://x.nl/b.xml</loc></sitemap></sitemapindex>"
+        let found = ParkSitemap.locations(in: index)
+        #expect(found.pages.isEmpty)
+        #expect(found.sitemaps == ["https://x.nl/a.xml", "https://x.nl/b.xml"])
+        #expect(ParkSitemap.sitemaps(inRobots: "User-agent: *\nSitemap: https://x.nl/sm.xml\nDisallow: /a") == ["https://x.nl/sm.xml"])
+        #expect(ParkSitemap.usualAddress(forSite: "https://www.x.nl/a/b") == "https://www.x.nl/sitemap.xml")
+        #expect(ParkSitemap.usualAddress(forSite: "screenshot") == nil)
+    }
+
+    @Test func aSitemapPageComesBeforeAGuess() {
+        let sitemap = ParkSitemap.links([
+            "https://www.breakout-grunopark.nl/over-ons", "https://www.breakout-grunopark.nl/nl/openingstijden-en-tijden",
+            "https://other.nl/openingstijden",
+        ])
+        let target = ParkImportAgent.next(pages: [Self.page], missing: [.opening], visited: [], guessesUsed: 0, sitemap: sitemap)
+        #expect(target == ParkImportTarget(url: "https://www.breakout-grunopark.nl/nl/openingstijden-en-tijden", topic: .opening, isGuess: false))
+        let none = ParkImportAgent.next(pages: [Self.page], missing: [.opening], visited: [], guessesUsed: 0)
+        #expect(none?.isGuess == true)
+    }
 }

@@ -87,6 +87,8 @@ final class ParkImportModel {
 
     private let session: ParkEditorSession
     private var pages: [ParkSourcePage] = []
+    /// Pages named by the site's sitemap, read once per search.
+    private var sitemap: [ParkSourceLink] = []
     private var candidates = ParkImportCandidates()
 
     init(session: ParkEditorSession) {
@@ -127,6 +129,8 @@ final class ParkImportModel {
             phase = .idle
             refresh()
         }
+        sitemap = []
+        var triedSitemap = false
         var visited = Set(addresses)
         var queue = addresses[...]
         var guesses = 0
@@ -144,6 +148,12 @@ final class ParkImportModel {
             } else if !current.isGuess {
                 trace.append(ParkImportTraceEntry(label: Self.label(current.url), found: [], failed: true, isGuess: false, url: nil))
             }
+            // The sitemap is read once, after the first page of the site was read.
+            if !triedSitemap, let site = pages.first?.url {
+                triedSitemap = true
+                phase = .fetching("sitemap")
+                sitemap = await fetchSitemap(forSite: site)
+            }
             // Every remembered source is read; only after that the missing topics decide where to look.
             if let next = queue.popFirst() {
                 target = ParkImportTarget(url: next, topic: .contact, isGuess: false)
@@ -151,7 +161,7 @@ final class ParkImportModel {
             }
             let missing = ParkImportAgent.missingTopics(candidates: candidates, park: session.park, refreshing: refreshing)
             guard !missing.isEmpty else { break }
-            target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses)
+            target = ParkImportAgent.next(pages: pages, missing: missing, visited: visited, guessesUsed: guesses, sitemap: sitemap)
             if let next = target {
                 visited.insert(next.url)
                 if next.isGuess { guesses += 1 }
@@ -228,6 +238,40 @@ final class ParkImportModel {
         } catch {
             WakeLog.error(.ui, "park import fetch: \(error.localizedDescription)")
             if !quiet { addNote(.unreadablePage) }
+            return nil
+        }
+    }
+
+    /// The pages the site's sitemap lists (`/sitemap.xml`, else the `Sitemap:` line of robots.txt; an index
+    /// is followed one level). Empty when the site has none: the search then falls back to links and guesses.
+    private func fetchSitemap(forSite address: String) async -> [ParkSourceLink] {
+        var files = ParkSitemap.usualAddress(forSite: address).map { [$0] } ?? []
+        var pages: [String] = []
+        var triedRobots = false
+        while let file = files.first, pages.count < ParkSitemap.maxPages {
+            files.removeFirst()
+            guard ParkImportCrawler.siteHost(file) == ParkImportCrawler.siteHost(address) else { continue }
+            if let xml = await fetchText(file) {
+                let found = ParkSitemap.locations(in: xml)
+                pages += found.pages
+                files += found.sitemaps
+            } else if !triedRobots, let site = URLComponents(string: address), let scheme = site.scheme, let host = site.host {
+                triedRobots = true
+                if let robots = await fetchText("\(scheme)://\(host)/robots.txt") { files += ParkSitemap.sitemaps(inRobots: robots) }
+            }
+        }
+        return ParkSitemap.links(Array(pages.prefix(ParkSitemap.maxPages)))
+    }
+
+    /// A text file of the site; nil when it is not there. Misses are normal and stay out of the notes.
+    private func fetchText(_ address: String) async -> String? {
+        guard let url = URL(string: address) else { return nil }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 10))
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
+            guard data.count <= 2_000_000 else { return nil }
+            return String(data: data, encoding: .utf8)
+        } catch {
             return nil
         }
     }

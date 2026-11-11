@@ -64,13 +64,17 @@ public enum ParkImportAgent {
     }
 
     /// The next page to read for the first missing topic that has one: a link on a page read so far, else
-    /// a usual address (up to `maxGuesses`). nil when there is nothing left to try.
+    /// a page of the site's `sitemap`, else a usual address (up to `maxGuesses`). nil when there is nothing
+    /// left to try.
     public static func next(
-        pages: [ParkSourcePage], missing: [ParkImportTopic], visited: Set<String>, guessesUsed: Int
+        pages: [ParkSourcePage], missing: [ParkImportTopic], visited: Set<String>, guessesUsed: Int,
+        sitemap: [ParkSourceLink] = []
     ) -> ParkImportTarget? {
         guard pages.count < maxPages else { return nil }
+        // The sitemap is searched like one more page, after the pages that were read.
+        let searched = sitemap.isEmpty || pages.isEmpty ? pages : pages + [ParkSourcePage(url: pages[0].url, links: sitemap)]
         for topic in missing {
-            for page in pages {
+            for page in searched {
                 if let link = ParkImportCrawler.candidates(from: page, topics: [topic], visited: visited).first {
                     return ParkImportTarget(url: link.url, topic: topic, isGuess: false)
                 }
