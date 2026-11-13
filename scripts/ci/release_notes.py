@@ -79,7 +79,8 @@ the earlier change they cancel when both are in this release.
 set, lap, riding, cable, dock, rider, Water Lock). Write natural text for each language, do not translate word for \
 word. Informal "je" in Dutch, "du" in German, "tu" in French.
 - If nothing is rider-facing, write one line saying that this version has small improvements and bug fixes.
-- Every text must stay under 3000 characters."""
+- Every text must stay under 3000 characters.
+- Answer only by calling the save_release_notes tool, once, with a text for every language."""
 
 
 def parse_change(subject: str) -> Tuple[str, str, str]:
@@ -178,7 +179,8 @@ def generate_notes(tag: str, changes: Sequence[Tuple[str, str]], api_key: str, m
         "max_tokens": 4000,
         "system": SYSTEM_PROMPT,
         "tools": [notes_tool()],
-        "tool_choice": {"type": "tool", "name": "save_release_notes"},
+        # Newer models reject a forced tool_choice ("tool" or "any"), so leave it on auto and say so in the prompt.
+        "tool_choice": {"type": "auto"},
         "messages": [{"role": "user", "content": build_user_prompt(tag, changes)}],
     }
     headers = {"x-api-key": api_key, "anthropic-version": "2023-06-01"}
