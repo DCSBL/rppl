@@ -1,0 +1,27 @@
+Rppl enregistre ta session de wakeboard ou de ski nautique au cable park sur ton Apple Watch et te la montre ensuite sur ton iPhone. Gratuit, sans compte, sans abonnement.
+
+Je fais beaucoup de wakeboard en cable park, et l'app Entraînement de base est trop simple. Les alternatives étaient trop complexes, trop limitées, pleines d'abonnements ou avides de mes données. Alors j'ai créé l'app que je voulais.
+
+COMMENT ÇA MARCHE
+Choisis ton activité (wakeboard, ski nautique, monoski, kneeboard ou wakeskate) et lance-la sur ta Watch. Laisse-la tourner toute la journée au park : une session, un seul entraînement continu. Rppl détecte quand tu es en riding et quand tu attends au dock, tu n'as donc rien à toucher pendant la session. Water Lock s'active au démarrage.
+
+CE QUE TU OBTIENS
+- Sets détectés automatiquement
+- Laps comptés autour de la cable
+- Tag un set avec ce que tu as fait : kicker, rail, box, Raley, Backroll et plus
+- Fréquence cardiaque et énergie
+- Température de l'eau sur l'Apple Watch Ultra
+- Ton parcours sur la carte
+- Sessions enregistrées dans Santé, visibles dans Forme comme n'importe quel autre entraînement
+- Pause sur la Watch pour quand tu t'absentes vraiment
+- Compatible avec le bouton Action de l'Apple Watch Ultra
+- Onglet Parks avec cable parks, horaires d'ouverture et météo
+- Pas de Watch ? Ajoute une session à la main sur ton iPhone
+
+SUR TON IPHONE
+Après l'arrêt, la Watch se synchronise avec ton iPhone. Parcours tes sessions et tes sets, regarde la carte, exporte tes données brutes. L'enregistrement reste sur la Watch, l'iPhone sert à regarder en arrière.
+
+CONFIDENTIALITÉ
+Pas de compte, pas de serveur Rppl, pas de pub, pas de tracking. Tes sessions restent sur tes appareils, dans Santé et dans ton iCloud Drive si la synchronisation iCloud est activée (c'est le cas par défaut ; désactive-la dans Rppl → Données). La météo et les cartes viennent d'Apple. Les mises à jour optionnelles des parks (désactivées par défaut) viennent de GitHub, qui peut voir ton adresse IP. Rien d'autre ne quitte tes appareils, sauf si tu le partages toi-même.
+
+Un projet perso venu des Pays-Bas. Le code source est public.
