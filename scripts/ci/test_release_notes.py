@@ -67,6 +67,37 @@ class ValidationTests(unittest.TestCase):
             rn.validate_notes(self.texts("x" * (rn.WHATS_NEW_LIMIT + 1)))
 
 
+class MetadataTests(unittest.TestCase):
+    def test_repo_metadata_is_valid_for_every_locale(self):
+        metadata = rn.load_metadata()
+        self.assertEqual(sorted(metadata), sorted(rn.LOCALES))
+        for texts in metadata.values():
+            self.assertEqual(sorted(texts), ["description", "keywords", "promotionalText"])
+
+    def write(self, root, locale, **overrides):
+        folder = os.path.join(root, locale)
+        os.makedirs(folder, exist_ok=True)
+        files = {"description.txt": "Text\n", "promotional_text.txt": "Promo\n", "keywords.txt": "a,b\n"}
+        files.update(overrides)
+        for name, text in files.items():
+            with open(os.path.join(folder, name), "w", encoding="utf-8") as handle:
+                handle.write(text)
+
+    def test_limits_and_missing_files(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            for locale in rn.LOCALES:
+                self.write(root, locale)
+            self.assertEqual(rn.load_metadata(root)["nl-NL"]["keywords"], "a,b")
+            self.write(root, "de-DE", **{"keywords.txt": "k" * 101})
+            with self.assertRaises(ValueError):
+                rn.load_metadata(root)
+            self.write(root, "de-DE")
+            os.remove(os.path.join(root, "fr-FR", "description.txt"))
+            with self.assertRaises(ValueError):
+                rn.load_metadata(root)
+
+
 class LocaleTests(unittest.TestCase):
     def test_match_locale(self):
         self.assertEqual(rn.match_locale(["en-US", "nl"], "nl-NL"), "nl")

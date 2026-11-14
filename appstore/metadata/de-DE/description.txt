@@ -1,0 +1,27 @@
+Rppl zeichnet deine Wakeboard- oder Waterski-Session im Cablepark auf der Apple Watch auf und zeigt sie dir danach auf dem iPhone. Gratis, ohne Account, ohne Abo.
+
+Ich wakeboarde viel in Cableparks, und die Standard-Workout-App ist mir zu simpel. Die Alternativen waren zu komplex, zu eingeschränkt, voller Abos oder hungrig auf meine Daten. Also habe ich die App gebaut, die ich selbst haben wollte.
+
+SO FUNKTIONIERT'S
+Wähle deine Aktivität (Wakeboard, Waterski, Monoski, Kneeboard oder Wakeskate) und starte auf der Watch. Lass sie den ganzen Parktag laufen: eine Session, ein durchgehendes Workout. Rppl erkennt, wann du riding bist und wann du am Dock wartest, du musst mitten in der Session nichts anfassen. Water Lock schaltet sich beim Start ein.
+
+DAS BEKOMMST DU
+- Sets automatisch erkannt
+- Laps rund um die Cable gezählt
+- Markiere ein Set mit dem, was du gefahren bist: Kicker, Rail, Box, Raley, Backroll und mehr
+- Herzfrequenz und Energie
+- Wassertemperatur auf der Apple Watch Ultra
+- Deine Route auf der Karte
+- Sessions in Apple Health gespeichert, sie erscheinen in Fitness wie jedes andere Workout
+- Pause auf der Watch, wenn du wirklich mal weg bist
+- Unterstützung für den Action-Button der Apple Watch Ultra
+- Parks-Tab mit Cableparks, Öffnungszeiten und Wetter
+- Keine Watch? Füge eine Session von Hand auf dem iPhone hinzu
+
+AUF DEINEM IPHONE
+Nach dem Stoppen synchronisiert die Watch mit deinem iPhone. Stöbere durch deine Sessions und Sets, sieh dir die Karte an, exportiere deine Rohdaten. Aufgezeichnet wird auf der Watch, das iPhone ist zum Zurückblicken.
+
+DATENSCHUTZ
+Kein Account, kein Rppl-Server, keine Werbung, kein Tracking. Deine Sessions bleiben auf deinen Geräten, in Apple Health und in deinem iCloud Drive, wenn die iCloud-Synchronisierung an ist (standardmäßig an; ausschalten unter Rppl → Daten). Wetter und Karten kommen von Apple. Optionale Park-Updates (standardmäßig aus) kommen von GitHub, das deine IP-Adresse sehen kann. Sonst verlässt nichts deine Geräte, außer du teilst es selbst.
+
+Ein Hobbyprojekt aus den Niederlanden. Der Quellcode ist öffentlich.

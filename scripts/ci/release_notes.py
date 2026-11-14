@@ -7,10 +7,12 @@ Called from .github/workflows/release-notes.yml when a final release (X.Y.Z, no 
   2. Drop what is never user-facing (ci, repo, docs, tests, chores, refactors).
   3. Ask Claude to write short notes in every App Store language, only for new features and bug fixes
      (no debug, ML, tooling or other technical items). One call, one language per key.
-  4. Write the texts to the job summary and, when the App Store Connect secrets exist, to the
-     "What's New" field of the App Store version X.Y.Z (the version is created when it does not exist).
+  4. Read the fixed per-language texts in appstore/metadata/<locale>/ (description, promotional text, keywords).
+  5. Write everything to the job summary and, when the App Store Connect secrets exist, to the "What's New",
+     description, promotional text and keywords fields of the App Store version X.Y.Z (the version is created
+     when it does not exist). Screenshots, name and subtitle are not touched.
 
-Without ANTHROPIC_API_KEY the script fails. Without the ASC_* secrets it stops after step 3, so the notes can
+Without ANTHROPIC_API_KEY the script fails. Without the ASC_* secrets it stops after step 4, so the notes can
 be pasted by hand. --dry-run never writes to App Store Connect. Nothing is submitted for review.
 
 Environment: ANTHROPIC_API_KEY, optional RELEASE_NOTES_MODEL; ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY (the .p8
@@ -36,6 +38,14 @@ import draft_releases as dr  # noqa: E402
 DEFAULT_MODEL = "claude-sonnet-5-5"
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ASC_URL = "https://api.appstoreconnect.apple.com"
+METADATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                            "appstore", "metadata")
+# appstore/metadata/<locale>/<file>.txt -> (App Store Connect attribute, character limit)
+METADATA_FILES = {
+    "description.txt": ("description", 4000),
+    "promotional_text.txt": ("promotionalText", 170),
+    "keywords.txt": ("keywords", 100),
+}
 BUNDLE_ID = "nl.dcsbl.rppl"
 WHATS_NEW_LIMIT = 4000
 BODY_LIMIT = 1500
@@ -96,6 +106,33 @@ def is_candidate(subject: str) -> bool:
     """False for PRs that are never user-facing, by component and type. Unknown formats stay for the model."""
     component, kind, _ = parse_change(subject)
     return component not in SKIP_COMPONENTS and kind not in SKIP_TYPES
+
+
+def load_metadata(directory: str = METADATA_DIR) -> Dict[str, Dict[str, str]]:
+    """{locale: {attribute: text}} from appstore/metadata/<locale>/*.txt. Raises ValueError on a missing locale,
+    unknown file, empty text or a text over the App Store limit."""
+    result = {}  # type: Dict[str, Dict[str, str]]
+    for locale in LOCALES:
+        folder = os.path.join(directory, locale)
+        if not os.path.isdir(folder):
+            raise ValueError("no metadata folder for %s in %s" % (locale, directory))
+        unknown = set(os.listdir(folder)) - set(METADATA_FILES) - {"README.md"}
+        if unknown:
+            raise ValueError("%s: unknown metadata files %s" % (locale, sorted(unknown)))
+        texts = {}
+        for name, (attribute, limit) in METADATA_FILES.items():
+            path = os.path.join(folder, name)
+            if not os.path.isfile(path):
+                raise ValueError("%s: %s is missing" % (locale, name))
+            with open(path, encoding="utf-8") as handle:
+                text = handle.read().replace("\r\n", "\n").strip()
+            if not text:
+                raise ValueError("%s: %s is empty" % (locale, name))
+            if len(text) > limit:
+                raise ValueError("%s: %s is %d characters, the limit is %d" % (locale, name, len(text), limit))
+            texts[attribute] = text
+        result[locale] = texts
+    return result
 
 
 def run(*args: str) -> str:
@@ -222,8 +259,8 @@ def match_locale(existing: Sequence[str], wanted: str) -> Optional[str]:
     return None
 
 
-def upload_notes(version: str, notes: Dict[str, str]) -> List[str]:
-    """Write the texts to App Store version X.Y.Z. Returns one summary line per locale or problem."""
+def upload_notes(version: str, notes: Dict[str, str], metadata: Dict[str, Dict[str, str]]) -> List[str]:
+    """Write What's New and the metadata texts to App Store version X.Y.Z. Returns one summary line per locale or problem."""
     lines = []
     apps = asc("GET", "/v1/apps?filter[bundleId]=%s" % BUNDLE_ID)["data"]
     if not apps:
@@ -250,29 +287,38 @@ def upload_notes(version: str, notes: Dict[str, str]) -> List[str]:
     by_locale = {item["attributes"]["locale"]: item["id"] for item in localizations}
     for locale, text in notes.items():
         existing = match_locale(list(by_locale), locale)
-        try:
-            if existing:
-                asc("PATCH", "/v1/appStoreVersionLocalizations/%s" % by_locale[existing], {"data": {
-                    "type": "appStoreVersionLocalizations", "id": by_locale[existing],
-                    "attributes": {"whatsNew": text},
-                }})
-                lines.append("%s: updated (%s)" % (locale, existing))
-            else:
-                asc("POST", "/v1/appStoreVersionLocalizations", {"data": {
-                    "type": "appStoreVersionLocalizations",
-                    "attributes": {"locale": locale, "whatsNew": text},
-                    "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}}},
-                }})
-                lines.append("%s: created" % locale)
-        except RuntimeError as error:
-            # e.g. the first version of an app cannot have What's New text.
-            lines.append("%s: not uploaded (%s)" % (locale, error))
+        full = dict(metadata.get(locale, {}), whatsNew=text)
+        # The first version of an app cannot have What's New text: retry with the other fields only.
+        for attributes in (full, {k: v for k, v in full.items() if k != "whatsNew"}):
+            try:
+                if existing:
+                    asc("PATCH", "/v1/appStoreVersionLocalizations/%s" % by_locale[existing], {"data": {
+                        "type": "appStoreVersionLocalizations", "id": by_locale[existing],
+                        "attributes": attributes,
+                    }})
+                    lines.append("%s: updated %s (%s)" % (locale, ", ".join(sorted(attributes)), existing))
+                else:
+                    asc("POST", "/v1/appStoreVersionLocalizations", {"data": {
+                        "type": "appStoreVersionLocalizations",
+                        "attributes": dict(attributes, locale=locale),
+                        "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}}},
+                    }})
+                    lines.append("%s: created %s" % (locale, ", ".join(sorted(attributes))))
+                break
+            except RuntimeError as error:
+                if attributes is full and len(full) > 1:
+                    continue
+                lines.append("%s: not uploaded (%s)" % (locale, error))
+                break
     return lines
 
 
-def render_summary(tag: str, notes: Dict[str, str], upload: Sequence[str]) -> str:
+def render_summary(tag: str, notes: Dict[str, str], upload: Sequence[str],
+                   metadata: Optional[Dict[str, Dict[str, str]]] = None) -> str:
     blocks = ["### What's New for %s\n" % tag]
     blocks += ["**%s**\n\n```\n%s\n```\n" % (locale, text) for locale, text in notes.items()]
+    if metadata:
+        blocks.append("Description, promotional text and keywords come from `appstore/metadata/<locale>/`.\n")
     blocks.append("**App Store Connect**\n\n" + "\n".join("- " + line for line in upload) + "\n")
     return "\n".join(blocks)
 
@@ -281,6 +327,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--tag", required=True, help="final release tag, X.Y.Z")
     parser.add_argument("--dry-run", action="store_true", help="write the texts, never touch App Store Connect")
+    parser.add_argument("--no-metadata", action="store_true",
+                        help="only What's New, leave description, promotional text and keywords alone")
     parser.add_argument("--output", help="also write the texts as JSON to this file")
     args = parser.parse_args(argv)
     repo = os.environ.get("GITHUB_REPOSITORY", "DCSBL/rppl")
@@ -296,6 +344,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     subjects = [s for s in tag_subjects(base, args.tag) if is_candidate(s)]
     print("%d candidate PRs since %s" % (len(subjects), base or "the start"), flush=True)
 
+    metadata = {} if args.no_metadata else load_metadata()  # fail early on a bad file
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
         print("ANTHROPIC_API_KEY is not set.", file=sys.stderr)
@@ -311,9 +360,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     elif not all(os.environ.get(key) for key in ("ASC_KEY_ID", "ASC_ISSUER_ID", "ASC_PRIVATE_KEY")):
         upload = ["ASC_KEY_ID, ASC_ISSUER_ID or ASC_PRIVATE_KEY is not set: paste the texts in App Store Connect by hand."]
     else:
-        upload = upload_notes(args.tag, notes)
+        upload = upload_notes(args.tag, notes, metadata)
 
-    text = render_summary(args.tag, notes, upload)
+    text = render_summary(args.tag, notes, upload, metadata)
     print(text)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:

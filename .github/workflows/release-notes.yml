@@ -1,6 +1,7 @@
 # Release notes. When a final release (X.Y.Z, no -beta) is published, Claude turns the merged PRs into short,
 # human-readable "What's New" texts in every App Store language (features and bug fixes only) and puts them in
-# App Store Connect on version X.Y.Z (scripts/ci/release_notes.py, Docs/Release.md).
+# App Store Connect on version X.Y.Z, together with the description, promotional text and keywords from
+# appstore/metadata/<locale>/ (scripts/ci/release_notes.py, Docs/Release.md). Screenshots are not touched.
 #
 # Secrets: ANTHROPIC_API_KEY (required); ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY (optional, without them the
 # texts only land in the job summary). Nothing is submitted for review. Manual run: pick the tag, dry run on by default.

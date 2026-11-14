@@ -1,0 +1,27 @@
+Rppl records your wakeboard or waterski session at the cable park on Apple Watch and shows it back on your iPhone. Free, no account, no subscription.
+
+I wakeboard at cable parks a lot, and the standard Workout app is too basic. The alternatives were too complex, too limited, full of subscriptions or hungry for my data. So I built the one I wanted.
+
+HOW IT WORKS
+Pick your activity (wakeboard, waterski, monoski, kneeboard or wakeskate) and start on your Watch. Leave it running the whole park day: one session, one continuous workout. Rppl detects when you're riding and when you're waiting at the dock, so you don't touch anything mid-session. Water Lock turns on when you start.
+
+WHAT YOU GET
+- Sets detected automatically
+- Laps counted around the cable
+- Tag a set with what you rode: kicker, rail, box, Raley, Backroll and more
+- Heart rate and energy
+- Water temperature on Apple Watch Ultra
+- Your route on a map
+- Sessions saved to Apple Health, so they show up in Fitness like any other workout
+- Pause on the Watch for when you really step away
+- Action Button support on Apple Watch Ultra
+- Parks tab with cable parks, opening hours and weather
+- No Watch? Add a session by hand on your iPhone
+
+ON YOUR IPHONE
+After you stop, the Watch syncs to your iPhone. Browse your sessions and sets, check the map, export your raw data. Recording stays on the Watch; the iPhone is for looking back.
+
+PRIVACY
+No account, no Rppl server, no ads, no tracking. Your sessions stay on your devices, in Apple Health, and in your iCloud Drive if iCloud sync is on (it is by default; turn it off in Rppl → Data). Weather and maps come from Apple. Optional park updates (off by default) come from GitHub, which can see your IP address. Nothing else leaves your devices unless you share it yourself.
+
+A hobby project from the Netherlands. The source code is public.

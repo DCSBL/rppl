@@ -50,7 +50,7 @@ jobs:
           fi
           # Resolve outside `if` so a failed `git diff` aborts instead of looking like "no changes".
           changed="$(git diff --name-only "$BASE...$HEAD")"
-          if printf '%s\n' "$changed" | grep -Eq '^(scripts/ci/|ci_scripts/|Rppl\.xcodeproj/project\.pbxproj$|Rppl/Info\.plist$|\.github/workflows/release-preflight\.yml$)'; then
+          if printf '%s\n' "$changed" | grep -Eq '^(scripts/ci/|appstore/|ci_scripts/|Rppl\.xcodeproj/project\.pbxproj$|Rppl/Info\.plist$|\.github/workflows/release-preflight\.yml$)'; then
             echo "scripts=true" >> "$GITHUB_OUTPUT"
           else
             echo "scripts=false" >> "$GITHUB_OUTPUT"
