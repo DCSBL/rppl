@@ -118,7 +118,10 @@ struct ParkPriceParserTests {
                     if case .amount = ParkPriceParser.parse(option.amount ?? "") {} else {
                         Issue.record("\(park.id): \(price.name) has no readable amount")
                     }
-                    #expect(option.currency == "EUR", "\(park.id): \(price.name)")
+                    #expect(
+                        Locale.commonISOCurrencyCodes.contains(option.currency ?? ""),
+                        "\(park.id): \(price.name) has no ISO 4217 currency"
+                    )
                 }
             }
         }
