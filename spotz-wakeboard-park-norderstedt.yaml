@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: SPOTZ Wakeboard Park Norderstedt
 short_name: SPOTZ
@@ -33,7 +35,6 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 865
     points:
       - lat: 53.7122096
         lon: 10.0255137

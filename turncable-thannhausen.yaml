@@ -1,10 +1,12 @@
 version: 1
 id: turncable-thannhausen
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Turncable Wakepark Thannhausen
 short_name: Turncable
@@ -29,8 +31,37 @@ links:
 
 cables:
   - name: Fullsize-Lifte
+    direction: ccw
     description: >-
       Zwei Fullsize-Lifte und ein System 2.0 Lift.
+    points:
+      - lat: 48.2924133999887
+        lon: 10.4448339470884
+      - lat: 48.2936991495086
+        lon: 10.4443056946658
+      - lat: 48.2938767948934
+        lon: 10.4437349200999
+      - lat: 48.293287655916
+        lon: 10.44218762417
+      - lat: 48.2929043640897
+        lon: 10.4422425819152
+      - lat: 48.2922574709091
+        lon: 10.444367777644
+  - name: "Small cable"
+    direction: cw
+    points:
+      - lat: 48.2925395135469
+        lon: 10.4455096814475
+      - lat: 48.2938271428466
+        lon: 10.4449876853993
+      - lat: 48.2941887180921
+        lon: 10.4455836531304
+      - lat: 48.2940603157767
+        lon: 10.4462310179699
+      - lat: 48.292996590497
+        lon: 10.4466919166398
+      - lat: 48.2926403155202
+        lon: 10.4463045556344
 
 opening:
   source_url: "https://www.turncable.de/anfahrt-oeffnungszeiten/"

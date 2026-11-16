@@ -1,12 +1,16 @@
 version: 1
 id: blaue-lagune-wachtendonk
 created_at: 2026-10-25
-updated_at: 2026-11-03
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
   - date: 2026-11-03
     description: Add cable routes traced by hand (dock pin moved to the start)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Blaue Lagune Wakepark Wachtendonk
 short_name: Blaue Lagune
@@ -16,10 +20,9 @@ languages:
   - nl
 address: "Jülicher Str. 1-2, 47669 Wachtendonk"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.379935
-  lon: 6.269811
+  lat: 51.3799349674275
+  lon: 6.26981142903032
 
 phone: "+49 2839 277"
 email: "info@blauelagune.de"
@@ -30,29 +33,27 @@ links:
 
 cables:
   - name: Full Size Anlage
-    length_m: 780
-    description: Fünf Masten von Sesitec mit 10 Mitnehmern und Featurepark.
     direction: ccw
+    description: Fünf Masten von Sesitec mit 10 Mitnehmern und Featurepark.
     points:
-      - lat: 51.379926
-        lon: 6.270062
-      - lat: 51.377148
-        lon: 6.27031
-      - lat: 51.376976
-        lon: 6.27085
-      - lat: 51.377178
-        lon: 6.271343
-      - lat: 51.379935
-        lon: 6.271005
+      - lat: 51.3799256993617
+        lon: 6.2700619959488
+      - lat: 51.3771483637744
+        lon: 6.27031027733686
+      - lat: 51.3769756788813
+        lon: 6.27085015900842
+      - lat: 51.3771776446034
+        lon: 6.27134341901982
+      - lat: 51.3799351840643
+        lon: 6.27100469289658
   - name: Beginner System 2.0
-    length_m: 100
-    description: Zwei Masten am Ufer, für Anfänger. Das Schwimmabzeichen Bronze ist nötig.
     direction: "2.0"
+    description: Zwei Masten am Ufer, für Anfänger. Das Schwimmabzeichen Bronze ist nötig.
     points:
-      - lat: 51.379104
-        lon: 6.272058
-      - lat: 51.377174
-        lon: 6.271731
+      - lat: 51.3791041983587
+        lon: 6.27205757308754
+      - lat: 51.377174005419
+        lon: 6.27173051647957
 
 opening:
   source_url: "https://www.blauelagune.de/oeffnungszeiten/"

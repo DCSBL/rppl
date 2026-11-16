@@ -1,10 +1,12 @@
 version: 1
 id: wasserskipark-damp
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wasserskipark Damp
 short_name: Wasserskipark
@@ -25,8 +27,20 @@ website: https://wasserski-damp.de
 
 cables:
   - name: Cable
+    direction: ccw
     description: >-
       Rixen-Anlage mit fünf Masten, seit 2007 in Betrieb.
+    points:
+      - lat: 54.5781029163923
+        lon: 10.0186275271466
+      - lat: 54.575917781598
+        lon: 10.0195201135313
+      - lat: 54.5758366815341
+        lon: 10.0202126971747
+      - lat: 54.5764460550515
+        lon: 10.0211750933152
+      - lat: 54.578261601972
+        lon: 10.0200149647604
 
 opening:
   source_url: "https://wasserski-damp.de/offnungszeiten-preise/"

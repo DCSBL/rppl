@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Chill & Wake Friedberg
 short_name: Chill & Wake
@@ -33,15 +35,14 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 888
     points:
-      - lat: 48.3625030
+      - lat: 48.362503
         lon: 10.9623996
-      - lat: 48.3621910
+      - lat: 48.362191
         lon: 10.9665819
       - lat: 48.3633178
         lon: 10.9667218
-      - lat: 48.3636870
+      - lat: 48.363687
         lon: 10.9627082
       - lat: 48.3631544
         lon: 10.9620915

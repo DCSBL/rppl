@@ -1,10 +1,14 @@
 version: 1
 id: wasserski-wakeboard-kalletal
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski & Wakeboard Kalletal
 short_name: Wasserski Kalletal
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Seeweg 1, 32689 Kalletal"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 52.176240
-  lon: 9.001698
+  lat: 52.176161742587
+  lon: 8.99456578980186
 
 phone: "+49 5755 777"
 email: "info@wasserski-kalletal.de"
@@ -29,10 +32,21 @@ links:
 
 cables:
   - name: Cable
-    length_m: 800
+    direction: ccw
     description: >-
       Fünf Masten, mit Kickern, Texas Jack, Transition Rail, Diamond Peak, Pipe, Butter Box
       und Funbox. Der See wird nur für Wasserski und Wakeboard genutzt.
+    points:
+      - lat: 52.1758407537588
+        lon: 8.99454912201549
+      - lat: 52.1758719203793
+        lon: 8.9900095301596
+      - lat: 52.1754299476254
+        lon: 8.98967160601276
+      - lat: 52.1750605386018
+        lon: 8.99012945552818
+      - lat: 52.1751224847798
+        lon: 8.99457251860574
 
 opening:
   source_url: "https://www.wasserski-kalletal.de/oeffnungszeiten"

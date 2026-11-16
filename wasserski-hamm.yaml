@@ -1,10 +1,12 @@
 version: 1
 id: wasserski-hamm
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Wasserski Hamm
 short_name: Wasserski Hamm
@@ -25,17 +27,46 @@ website: https://www.wasserski-hamm.de
 
 cables:
   - name: Bahn 1
-    length_m: 784
+    direction: ccw
     description: >-
       Sechs Masten, 11 Mitnehmer und Obstacles.
+    points:
+      - lat: 51.6995588225663
+        lon: 7.91510735763198
+      - lat: 51.7007880804116
+        lon: 7.91906066123423
+      - lat: 51.701174352319
+        lon: 7.91911818573609
+      - lat: 51.7013318941384
+        lon: 7.91865756307998
+      - lat: 51.7006217164814
+        lon: 7.91504838478623
+      - lat: 51.7000567095786
+        lon: 7.91468506666813
   - name: Bahn 2
-    length_m: 440
+    direction: ccw
     description: >-
       Sechs Masten, 6 Mitnehmer.
+    points:
+      - lat: 51.6990307673246
+        lon: 7.91651940131538
+      - lat: 51.6994955670145
+        lon: 7.91877489234162
+      - lat: 51.699757401299
+        lon: 7.91892467477471
+      - lat: 51.6999818836576
+        lon: 7.91844177206834
+      - lat: 51.699391197275
+        lon: 7.91633122348225
   - name: Übungsbahn
     direction: "2.0"
     description: >-
       Zwei Masten, für Anfänger und erste Inverts.
+    points:
+      - lat: 51.6992468229746
+        lon: 7.91454196059854
+      - lat: 51.70064476801
+        lon: 7.91403398393162
 
 opening:
   source_url: "https://www.wasserski-hamm.de/"

@@ -1,10 +1,14 @@
 version: 1
 id: wasserskiseilbahn-neubrandenburg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserskiseilbahn Neubrandenburg
 short_name: Wasserskiseilbahn
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Reitbahnweg 90, 17034 Neubrandenburg"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 53.573825
-  lon: 13.259291
+  lat: 53.5743162697345
+  lon: 13.2561216484199
 
 phone: "+49 395 4216161"
 email: "info@wasserski-seilbahn.de"
@@ -25,9 +28,20 @@ website: https://www.wasserski-seilbahn.de
 
 cables:
   - name: Cable
-    length_m: 845
+    direction: ccw
     description: >-
       Fünf Masten mit je 9,50 m Höhe. Bis zu 10 Rider fahren gleichzeitig.
+    points:
+      - lat: 53.5744425932797
+        lon: 13.2563444680032
+      - lat: 53.5727789634106
+        lon: 13.2600875603971
+      - lat: 53.5729811052678
+        lon: 13.2608386564069
+      - lat: 53.5734247235072
+        lon: 13.2608761559317
+      - lat: 53.574901119637
+        lon: 13.2569209449017
 
 opening:
   source_url: "https://www.wasserski-seilbahn.de/oeffnungszeiten/"

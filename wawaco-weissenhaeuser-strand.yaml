@@ -5,6 +5,8 @@ updated_at: 2026-10-25
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: WaWaCo Weißenhäuser Strand
 short_name: WaWaCo
@@ -25,7 +27,6 @@ website: https://www.wawaco.de
 
 cables:
   - name: Main Lift
-    length_m: 600
     description: >-
       Fünf Masten mit sieben Mitnehmern.
   - name: Little Bro

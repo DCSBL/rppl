@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Blue Bay Spadener See
 short_name: Blue Bay
@@ -31,7 +33,8 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 969
+    description: >-
+      Fünf-Mast-Anlage, SHAPE Wakepark.
     points:
       - lat: 53.5709367
         lon: 8.6507668
@@ -43,8 +46,6 @@ cables:
         lon: 8.6522182
       - lat: 53.5719613
         lon: 8.6504388
-    description: >-
-      Fünf-Mast-Anlage, SHAPE Wakepark.
 
 opening:
   source_url: "https://blue-bay.de/oeffnungszeiten-2/"

@@ -1,0 +1,95 @@
+version: 1
+id: hannams-wake-hub-stretham
+created_at: 2026-11-16
+updated_at: 2026-11-16
+history:
+  - date: 2026-11-16
+    description: initial
+
+name: Hannam's Wake Hub
+languages:
+  - en
+  - nl
+address: Stowbridge Farm, Cambridge Road (A10), Stretham, Cambridgeshire CB6 3LU
+timezone: Europe/London
+# Pin from the map embedded on the park's site, not traced on the water.
+location:
+  lat: 52.3238984
+  lon: 0.2014517
+phone: 01353 523969
+email: info@hannamswakehub.com
+website: https://hannamswakehub.com
+wakesys: true
+
+links:
+  - kind: booking
+    url: "https://hannamswakehub.wakesys.com"
+  - kind: instagram
+    url: "https://www.instagram.com/hannamswakehub/"
+
+cables:
+  - name: Full cable
+    description: Five corner Rixen cable round the lake with UNIT Parktech features. Minimum age 8.
+  - name: System 2.0
+    direction: "2.0"
+    description: Straight line coaching cable driven for one rider by a coach. Minimum age 6.
+
+opening:
+  source_url: "https://hannamswakehub.com"
+  booking: required
+  booking_minutes:
+    - 60
+    - 120
+  note: >-
+    Hours as listed for October. On Saturday only the System 2.0 runs, subject to availability.
+    Sunday hours are subject to availability. Riders arrive 15 minutes before their session.
+  rules:
+    - months:
+        - 10
+      days:
+        - sun
+      open: "11:00"
+      close: sunset
+
+prices:
+  - name: Full cable
+    options:
+      - amount: "27"
+        currency: GBP
+        per: hour
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+  - name: Day pass
+    options:
+      - amount: "60"
+        currency: GBP
+        per: day
+  - name: Season pass
+    options:
+      - amount: "975"
+        currency: GBP
+        per:
+          en: season
+          nl: seizoen
+        note:
+          en: 2027 membership
+          nl: lidmaatschap 2027
+
+sources:
+  - "https://hannamswakehub.com"
+  - "https://hannamswakehub.com/cable-activities/"
+  - "https://hannamswakehub.com/cable-wakeboard-facilities/"
+  - "https://hannamswakehub.com/faqs/"
+  - "https://hannamswakehub.com/events/"
+
+facilities:
+  - Cafe
+  - Bar
+  - Pro Shop
+  - Rental
+  - Changing rooms
+  - Camping
+  - Aqua park

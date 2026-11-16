@@ -1,10 +1,12 @@
 version: 1
 id: wasserskipark-zossen
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wasserskipark Zossen
 short_name: Wasserskipark
@@ -25,6 +27,21 @@ website: https://www.wasserskipark-zossen.de
 links:
   - kind: booking
     url: "https://www.wasserskipark-zossen.de/onlinebuchen"
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 52.2262395941406
+        lon: 13.3878196020273
+      - lat: 52.2278965442317
+        lon: 13.3878326299839
+      - lat: 52.2281089951353
+        lon: 13.3871978472249
+      - lat: 52.2274859407928
+        lon: 13.3861062669338
+      - lat: 52.2262596761128
+        lon: 13.3869541450699
 
 opening:
   source_url: "https://www.wasserskipark-zossen.de/oeffnungszeiten"
