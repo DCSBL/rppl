@@ -1,0 +1,126 @@
+version: 1
+id: spring-lakes-long-eaton
+created_at: 2026-11-16
+updated_at: 2026-11-16
+history:
+  - date: 2026-11-16
+    description: initial (cables, November to January hours, prices)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
+
+name: Spring Lakes Watersports Centre
+short_name: Spring Lakes
+languages:
+  - en
+  - nl
+address: Pasture Lane, Long Eaton, Nottingham NG10 2FZ
+timezone: Europe/London
+location:
+  lat: 52.8848645689801
+  lon: -1.25169189775546
+
+phone: 0115 972 7788
+website: https://springlakes.co.uk
+links:
+  - kind: booking
+    url: "https://ecom.roller.app/springlakeswatersportsandleisure/sessions/en/home"
+  - kind: instagram
+    url: "https://www.instagram.com/springlakeswatersports/"
+  - kind: facebook
+    url: "https://www.facebook.com/springlakeswatersports/"
+
+cables:
+  - name: Cable
+    direction: ccw
+    description: Full-size Rixen 5-point cable with kickers and boxes. 2 straights of 250 m, 12 m high.
+    points:
+      - lat: 52.8849038514128
+        lon: -1.25132193338001
+      - lat: 52.882802195217
+        lon: -1.25006997032272
+      - lat: 52.8827058290024
+        lon: -1.24954320928398
+      - lat: 52.8829758493773
+        lon: -1.24927149116382
+      - lat: 52.8850523942103
+        lon: -1.25060201173677
+  - name: Learner cable
+    direction: "2.0"
+    description: 2-point cable for lessons with a coach.
+
+opening:
+  source_url: "https://springlakes.co.uk/help-and-info/opening-times/"
+  booking: optional
+  note: Hours for the 5-point cable in November, December and January. Opening hours change with season and weather.
+  rules:
+    - months:
+        - 11
+        - 12
+        - 1
+      days:
+        - weekend
+      open: "12:00"
+      close: sunset
+
+prices:
+  - name: Cable pass
+    options:
+      - amount: "25"
+        currency: GBP
+        per:
+          en: 1 hour
+          nl: 1 uur
+        note:
+          en: per person
+          nl: per persoon
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: per person
+          nl: per persoon
+      - amount: "35"
+        currency: GBP
+        per:
+          en: all day, winter
+          nl: hele dag, winter
+        note:
+          en: per person
+          nl: per persoon
+      - amount: "55"
+        currency: GBP
+        per:
+          en: all day, summer
+          nl: hele dag, zomer
+        note:
+          en: per person
+          nl: per persoon
+  - name: Kneeboarding
+    options:
+      - amount: "25"
+        currency: GBP
+        per: session
+        note:
+          en: 1 hour
+          nl: 1 uur
+      - amount: "35"
+        currency: GBP
+        per: session
+        note:
+          en: 2 hours
+          nl: 2 uur
+  - name: Demo board upgrade
+    options:
+      - amount: "15"
+        currency: GBP
+        note:
+          en: can be used on the obstacles
+          nl: te gebruiken op de obstakels
+sources:
+  - "https://springlakes.co.uk/stuff-to-do/wakeboarding/"
+  - "https://springlakes.co.uk/help-and-info/opening-times/"
+  - "https://springlakes.co.uk/help-and-info/contact-us/"

@@ -1,0 +1,171 @@
+version: 1
+id: thorpe-lakes-chertsey
+created_at: 2026-11-16
+updated_at: 2026-11-16
+history:
+  - date: 2026-11-16
+    description: initial
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
+
+name: Thorpe Lakes Watersports Park Chertsey
+short_name: Thorpe Lakes
+languages:
+  - en
+  - nl
+address: Thorpe Lakes, Thorpe Road, Chertsey, Surrey KT16 8PH
+timezone: Europe/London
+location:
+  lat: 51.4024745037856
+  lon: -0.5195096864577
+phone: 01932 579 750
+email: reception@thorpelakes.com
+website: https://thorpelakeswatersports.co.uk
+
+links:
+  - kind: booking
+    url: "https://ecom.roller.app/thorpelakes/thorpelakescheckout/en/home"
+  - kind: instagram
+    url: "https://www.instagram.com/thorpelakesuk/"
+  - kind: facebook
+    url: "https://www.facebook.com/ThorpeLakesUK/"
+
+sources:
+  - "https://thorpelakeswatersports.co.uk/"
+  - "https://thorpelakeswatersports.co.uk/wakeboard-cable-park/"
+  - "https://thorpelakeswatersports.co.uk/opening-hours/"
+  - "https://thorpelakeswatersports.co.uk/contact-us/"
+  - "https://thorpelakeswatersports.co.uk/faqs/"
+
+cables:
+  - name: Cable
+    direction: ccw
+    description: Full size four corner cable.
+    points:
+      - lat: 51.4022295581975
+        lon: -0.519644010057561
+      - lat: 51.403244617966
+        lon: -0.523790965037024
+      - lat: 51.4026459306194
+        lon: -0.524184901919838
+      - lat: 51.4016304476694
+        lon: -0.520048071454245
+  - name: System 2.0
+    direction: "2.0"
+    description: Straight Line System 2.
+    points:
+      - lat: 51.4022391213186
+        lon: -0.518806681767397
+      - lat: 51.4012432492461
+        lon: -0.519389484425622
+
+opening:
+  source_url: "https://thorpelakeswatersports.co.uk/opening-hours/"
+  booking: required
+  note: >-
+    Hours change with the season and daylight, and are longer in the school holidays. The
+    Sunday hours also apply on bank holidays. Book before you arrive and be there 40 minutes
+    before your start time.
+  rules:
+    - months:
+        - 10
+        - 11
+        - 12
+      days:
+        - wed
+        - sat
+        - sun
+      open: "12:00"
+      close: "16:00"
+
+prices:
+  - name: Cable ticket
+    options:
+      - amount: "30"
+        currency: GBP
+        per: person
+        note:
+          en: 1 hour
+          nl: 1 uur
+      - amount: "36"
+        currency: GBP
+        per: person
+        note:
+          en: 2 hours
+          nl: 2 uur
+      - amount: "75"
+        currency: GBP
+        per: person
+        note:
+          en: all day
+          nl: hele dag
+  - name: Beginners Morning
+    options:
+      - amount: "30"
+        currency: GBP
+        per: person
+        note:
+          en: Wednesdays 10:00-12:00, April to the end of October, slower speed, all kit included
+          nl: woensdag 10:00-12:00, van april tot eind oktober, lagere snelheid, alle materiaal inbegrepen
+  - name: Slow Hour
+    options:
+      - amount: "30"
+        currency: GBP
+        per: person
+        note:
+          en: Saturday, Sunday and school holidays 12:00-13:00 from April, cable runs 4 km/h slower, book a standard cable ticket
+          nl: zaterdag, zondag en schoolvakanties 12:00-13:00 vanaf april, de cable gaat 4 km/u langzamer, boek een standaard cableticket
+  - name: Kids Club Coaching
+    options:
+      - amount: "28"
+        currency: GBP
+        per: person
+        note:
+          en: ages 8-15, Saturday and Sunday 10:00-12:00, also Mon, Tue, Thu and Fri in the summer holidays
+          nl: 8 tot 15 jaar, zaterdag en zondag 10:00-12:00, in de zomervakantie ook ma, di, do en vr
+  - name: Kit hire
+    options:
+      - amount: "5"
+        currency: GBP
+        note:
+          en: helmet and life jacket are mandatory, bring your own or hire, wetsuits are optional
+          nl: helm en zwemvest zijn verplicht, neem je eigen mee of huur, wetsuits zijn optioneel
+  - name: Membership
+    options:
+      - amount: "895"
+        currency: GBP
+        per: person
+        note:
+          en: Full, all ages, all year round
+          nl: Full, alle leeftijden, het hele jaar
+      - amount: "695"
+        currency: GBP
+        per: person
+        note:
+          en: Adult Summer, over 16s, 1 April-31 October
+          nl: Adult Summer, vanaf 16 jaar, 1 april-31 oktober
+      - amount: "475"
+        currency: GBP
+        per: person
+        note:
+          en: Child Summer, 16 and under, 1 April-31 October
+          nl: Child Summer, tot en met 16 jaar, 1 april-31 oktober
+      - amount: "330"
+        currency: GBP
+        per: person
+        note:
+          en: Kids Club Only, under 16s, during Kids Club
+          nl: Kids Club Only, onder de 16, tijdens Kids Club
+
+facilities:
+  - Licensed bar and cafe
+  - Changing rooms with showers
+  - Lockers (GBP 1)
+  - Car park
+  - Lakeside beach
+
+description: >-
+  Watersports park near Thorpe Park with a full size four corner cable and a Straight Line
+  System 2. Children from 6 can learn to wakeboard.

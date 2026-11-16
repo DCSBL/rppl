@@ -25,6 +25,8 @@ history:
     description: add short_name
   - date: 2026-10-15
     description: remove past post-season Sunday opening date (2026-10-11)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Cablepark VIEW Almere
 short_name: Cablepark VIEW
@@ -56,8 +58,8 @@ links:
 
 cables:
   - name: Grote baan
-    # Direction confirmed by a rider, not stated on the park's site.
     direction: ccw
+    # Direction confirmed by a rider, not stated on the park's site.
     points:
       - lat: 52.3585546998476
         lon: 5.21501871403023
@@ -71,13 +73,12 @@ cables:
         lon: 5.21479179321656
   - name: Alta Twin
     direction: "2.0"
-    length_m: 200
+    description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
     points:
       - lat: 52.3582029191082
         lon: 5.21550000719344
       - lat: 52.358431785598
         lon: 5.21836969075431
-    description: Small clinic cable with adjustable speed, used for beginner lessons before moving to the main cable.
 
 opening:
   source_url: "https://www.cableparkviewalmere.nl"

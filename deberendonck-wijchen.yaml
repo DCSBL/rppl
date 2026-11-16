@@ -15,6 +15,8 @@ history:
     description: remove month-name labels, author credit and source comments; neutral wording in description
   - date: 2026-10-07
     description: add languages (nl, en) and English variants of per and note
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: De Berendonck
 languages:
@@ -145,7 +147,6 @@ prices:
 cables:
   - name: Skibaan
     direction: cw
-    length_m: 834
     points:
       - lat: 51.8113489584493
         lon: 5.77203034709951

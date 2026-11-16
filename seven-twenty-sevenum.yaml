@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-10-15
     description: Add GPS points for cable
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Seven-Twenty Cablepark
 languages:
@@ -47,9 +49,8 @@ facilities:
 
 cables:
   - name: Kabelbaan
-    length_m: 783
-    description: Een kabel met vijf masten, waar maximaal tien riders tegelijk op kunnen.
     direction: cw
+    description: Een kabel met vijf masten, waar maximaal tien riders tegelijk op kunnen.
     points:
       - lat: 51.38244
         lon: 5.970656

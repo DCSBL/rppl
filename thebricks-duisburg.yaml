@@ -1,12 +1,14 @@
 version: 1
 id: thebricks-duisburg
 created_at: 2026-10-25
-updated_at: 2026-11-03
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
   - date: 2026-11-03
     description: Add cable routes traced by hand
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: The Bricks Duisburg
 short_name: The Bricks
@@ -35,33 +37,33 @@ cables:
   - name: Cable
     direction: ccw
     points:
-      - lat: 51.407508
-        lon: 6.782561
-      - lat: 51.407689
-        lon: 6.781345
-      - lat: 51.407501
-        lon: 6.780979
-      - lat: 51.406974
-        lon: 6.781002
-      - lat: 51.406685
-        lon: 6.7816
-      - lat: 51.40693
-        lon: 6.782361
+      - lat: 51.4075084350009
+        lon: 6.78256071018461
+      - lat: 51.4076889797446
+        lon: 6.78134471792957
+      - lat: 51.407500818861
+        lon: 6.78097873700936
+      - lat: 51.4069735313522
+        lon: 6.78100226237635
+      - lat: 51.4066845211714
+        lon: 6.78159992980419
+      - lat: 51.4069301148732
+        lon: 6.78236090821584
   - name: Cable
     direction: ccw
     points:
-      - lat: 51.406281
-        lon: 6.784177
-      - lat: 51.406659
-        lon: 6.783293
-      - lat: 51.406321
-        lon: 6.782098
-      - lat: 51.405932
-        lon: 6.781908
-      - lat: 51.40574
-        lon: 6.782256
-      - lat: 51.405807
-        lon: 6.78366
+      - lat: 51.4062806344507
+        lon: 6.78417692865104
+      - lat: 51.4066590069318
+        lon: 6.78329274614833
+      - lat: 51.4063214246816
+        lon: 6.78209821682466
+      - lat: 51.4059321652074
+        lon: 6.7819081561291
+      - lat: 51.4057398366163
+        lon: 6.78225589045839
+      - lat: 51.4058070861707
+        lon: 6.78365992619404
 
 opening:
   source_url: "https://www.thebricks.de"
