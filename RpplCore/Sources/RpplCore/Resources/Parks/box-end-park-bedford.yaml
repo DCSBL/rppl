@@ -1,0 +1,332 @@
+version: 1
+id: box-end-park-bedford
+created_at: 2026-11-16
+updated_at: 2026-11-16
+history:
+  - date: 2026-11-16
+    description: initial (cable tow, United Kingdom)
+
+name: Box End Park
+languages:
+  - en
+  - nl
+address: Box End Rd, Bedford MK43 8RN
+timezone: Europe/London
+# Pin of the park's own map embed, not a confirmed dock point.
+location:
+  lat: 52.12396468
+  lon: -0.52594988
+email: info@boxendpark.com
+website: https://boxendpark.com
+links:
+  - kind: booking
+    url: "https://ecom.roller.app/boxendpark/bep2023/en/products"
+  - kind: instagram
+    url: "https://www.instagram.com/boxendpark/"
+  - kind: facebook
+    url: "https://www.facebook.com/boxendpark"
+
+cables:
+  - name: Cable Tow
+    description: >-
+      Full 5-tower cable with normal and slow-speed sessions. Riders must be 10 or older
+      and able to swim 50 m.
+
+opening:
+  source_url: "https://boxendpark.com/cable-tow/"
+  booking: required
+  note: >-
+    Session times vary through the year and are shown in the online booking system.
+    Slow sessions run on weekends and bank holidays (April to October) from 10:00 to 12:00,
+    plus Monday, Wednesday and Friday in August from 12:00 to 14:00.
+
+prices:
+  - name: Cable Taster Session
+    options:
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: "10-16 years, coaching and kit included"
+          nl: "10-16 jaar, coaching en kit inbegrepen"
+      - amount: "39"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: "17 years and older, coaching and kit included"
+          nl: "17 jaar en ouder, coaching en kit inbegrepen"
+  - name: Ride Pass
+    options:
+      - amount: "25"
+        currency: GBP
+        per: hour
+        note:
+          en: non-member
+          nl: geen lid
+      - amount: "30"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: non-member
+          nl: geen lid
+  - name: Day Pass
+    options:
+      - amount: "60"
+        currency: GBP
+        per: person
+        note:
+          en: "Summer, 6 hours: weekdays 14:00-20:00 or dark, weekends 12:00-18:00. No equipment included"
+          nl: "Zomer, 6 uur: doordeweeks 14:00-20:00 of tot het donker is, weekend 12:00-18:00. Geen materiaal inbegrepen"
+      - amount: "40"
+        currency: GBP
+        per: person
+        note:
+          en: "Winter, 4 hours: weekdays 14:00-18:00 or dark, weekends 11:00-15:00. No equipment included"
+          nl: "Winter, 4 uur: doordeweeks 14:00-18:00 of tot het donker is, weekend 11:00-15:00. Geen materiaal inbegrepen"
+  - name: Rental equipment
+    options:
+      - amount: "9"
+        currency: GBP
+        per: person
+        note:
+          en: All the Kit package
+          nl: All the Kit pakket
+      - amount: "2.50"
+        currency: GBP
+        per: person
+        note:
+          en: helmet
+          nl: helm
+      - amount: "2.50"
+        currency: GBP
+        per: person
+        note:
+          en: buoyancy aid
+          nl: zwemvest
+      - amount: "8"
+        currency: GBP
+        per: person
+        note:
+          en: wakeboard
+          nl: wakeboard
+      - amount: "5"
+        currency: GBP
+        per: person
+        note:
+          en: wetsuit
+          nl: wetsuit
+  - name: Silver Cable Membership
+    options:
+      - amount: "549"
+        currency: GBP
+        note:
+          en: "single payment, 4 hours of riding per week"
+          nl: "eenmalige betaling, 4 uur riding per week"
+      - amount: "54.90"
+        currency: GBP
+        per:
+          en: month
+          nl: maand
+        note:
+          en: "direct debit, 12 instalments, £150 joining fee"
+          nl: "automatische incasso, 12 termijnen, 150 inschrijfgeld"
+  - name: Gold Cable Membership
+    options:
+      - amount: "750"
+        currency: GBP
+        note:
+          en: "single payment, up to 2 hours of riding per day"
+          nl: "eenmalige betaling, tot 2 uur riding per dag"
+      - amount: "75"
+        currency: GBP
+        per:
+          en: month
+          nl: maand
+        note:
+          en: "direct debit, 12 instalments, £150 joining fee"
+          nl: "automatische incasso, 12 termijnen, 150 inschrijfgeld"
+
+sources:
+  - "https://boxendpark.com/cable-tow/"
+  - "https://boxendpark.com/pricing-opening-times/"
+  - "https://boxendpark.com/opening-times/"
+  - "https://boxendpark.com/enquire-now/"
+
+facilities:
+  - Free secure parking
+  - Changing rooms with showers and outdoor changing huts
+  - Lockers (£1 coin)
+  - Rental
+  - Cable Cafe (spring to autumn)
+
+description: initial (cable tow, United Kingdom)
+
+name: Box End Park
+languages:
+  - en
+  - nl
+address: Box End Rd, Bedford MK43 8RN
+timezone: Europe/London
+# Pin of the park's own map embed, not a confirmed dock point.
+location:
+  lat: 52.12396468
+  lon: -0.52594988
+email: info@boxendpark.com
+website: https://boxendpark.com
+links:
+  - kind: booking
+    url: "https://ecom.roller.app/boxendpark/bep2023/en/products"
+  - kind: instagram
+    url: "https://www.instagram.com/boxendpark/"
+  - kind: facebook
+    url: "https://www.facebook.com/boxendpark"
+
+cables:
+  - name: Cable Tow
+    description: >-
+      Full 5-tower cable with normal and slow-speed sessions. Riders must be 10 or older
+      and able to swim 50 m.
+
+opening:
+  source_url: "https://boxendpark.com/cable-tow/"
+  booking: required
+  note: >-
+    Session times vary through the year and are shown in the online booking system.
+    Slow sessions run on weekends and bank holidays (April to October) from 10:00 to 12:00,
+    plus Monday, Wednesday and Friday in August from 12:00 to 14:00.
+
+prices:
+  - name: Cable Taster Session
+    options:
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: "10-16 years, coaching and kit included"
+          nl: "10-16 jaar, coaching en kit inbegrepen"
+      - amount: "39"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: "17 years and older, coaching and kit included"
+          nl: "17 jaar en ouder, coaching en kit inbegrepen"
+  - name: Ride Pass
+    options:
+      - amount: "25"
+        currency: GBP
+        per: hour
+        note:
+          en: non-member
+          nl: geen lid
+      - amount: "30"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: non-member
+          nl: geen lid
+  - name: Day Pass
+    options:
+      - amount: "60"
+        currency: GBP
+        per: person
+        note:
+          en: "Summer, 6 hours: weekdays 14:00-20:00 or dark, weekends 12:00-18:00. No equipment included"
+          nl: "Zomer, 6 uur: doordeweeks 14:00-20:00 of tot het donker is, weekend 12:00-18:00. Geen materiaal inbegrepen"
+      - amount: "40"
+        currency: GBP
+        per: person
+        note:
+          en: "Winter, 4 hours: weekdays 14:00-18:00 or dark, weekends 11:00-15:00. No equipment included"
+          nl: "Winter, 4 uur: doordeweeks 14:00-18:00 of tot het donker is, weekend 11:00-15:00. Geen materiaal inbegrepen"
+  - name: Rental equipment
+    options:
+      - amount: "9"
+        currency: GBP
+        per: person
+        note:
+          en: All the Kit package
+          nl: All the Kit pakket
+      - amount: "2.50"
+        currency: GBP
+        per: person
+        note:
+          en: helmet
+          nl: helm
+      - amount: "2.50"
+        currency: GBP
+        per: person
+        note:
+          en: buoyancy aid
+          nl: zwemvest
+      - amount: "8"
+        currency: GBP
+        per: person
+        note:
+          en: wakeboard
+          nl: wakeboard
+      - amount: "5"
+        currency: GBP
+        per: person
+        note:
+          en: wetsuit
+          nl: wetsuit
+  - name: Silver Cable Membership
+    options:
+      - amount: "549"
+        currency: GBP
+        note:
+          en: "single payment, 4 hours of riding per week"
+          nl: "eenmalige betaling, 4 uur riding per week"
+      - amount: "54.90"
+        currency: GBP
+        per:
+          en: month
+          nl: maand
+        note:
+          en: "direct debit, 12 instalments, £150 joining fee"
+          nl: "automatische incasso, 12 termijnen, 150 inschrijfgeld"
+  - name: Gold Cable Membership
+    options:
+      - amount: "750"
+        currency: GBP
+        note:
+          en: "single payment, up to 2 hours of riding per day"
+          nl: "eenmalige betaling, tot 2 uur riding per dag"
+      - amount: "75"
+        currency: GBP
+        per:
+          en: month
+          nl: maand
+        note:
+          en: "direct debit, 12 instalments, £150 joining fee"
+          nl: "automatische incasso, 12 termijnen, 150 inschrijfgeld"
+
+sources:
+  - "https://boxendpark.com/cable-tow/"
+  - "https://boxendpark.com/pricing-opening-times/"
+  - "https://boxendpark.com/opening-times/"
+  - "https://boxendpark.com/enquire-now/"
+
+facilities:
+  - parking
+  - changing rooms
+  - showers
+  - lockers
+  - rental
+  - cafe
+
+description: >-
+  Family run park with two lakes for waterskiing and wakeboarding. BWSW accredited cable
+  wakeboard park with a full 5-tower cable.
