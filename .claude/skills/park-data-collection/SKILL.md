@@ -19,7 +19,9 @@ non-negotiable:
    another park. Per the schema, only `version`, `id`, `name`, `location` are required; everything else
    is optional and safe to leave out.
 3. **Record provenance.** Every run must leave a trail a human reviewer can check before merging: which
-   URL(s) were fetched and when. That trail goes in the PR description, not in the YAML file.
+   URL(s) were fetched and when. That trail goes in the PR description. The file itself keeps only the
+   pages a rescan should start from (`opening.source_url`, `sources`, see step 3), never fetch dates, and
+   no URLs in YAML comments.
 
 ## Steps
 
@@ -29,10 +31,30 @@ non-negotiable:
 2. **Fetch official pages only**: home, hours/pricing, contact, about. Use whatever the site actually
    publishes — don't assume a page (e.g. a dedicated "hours" page) exists if it doesn't.
 3. **Map fetched content to the schema in [Docs/Parks.md](../../../Docs/Parks.md#schema-version-1)**:
-   `name`, `address`, `location` (dock coordinate), `phone`, `email`, `website`, `cables` (name/direction/
-   description; only add `points` if the site's own map/satellite view is clear enough to trace —
-   otherwise leave `points` out), `opening` (`rules`/`slots`), `prices`, `links`, `facilities`,
-   `description`. Leave out anything not directly confirmed by the fetched pages. Write any free-text
+   `name`, `short_name` (no place or business type), `address`, `timezone` (default `Europe/Amsterdam`, set it
+   for parks elsewhere), `location` (dock coordinate), `phone`, `email`, `website`, `cables` (name/direction/
+   description/`length_m`; only add `points` if the site's own map/satellite view is clear enough to
+   trace, otherwise leave `points` out), `opening`, `prices`, `links`, `sources`, `facilities`,
+   `wakesys`, `description`.
+   - **Cables:** `direction` is `cw` or `ccw` for a full-size cable (4-5 points) and `2.0` for a 2-point
+     cable. `points` are the tower positions in travel order, so the cable bends at each point. Towers
+     stand outside the loop, so a full-size loop is convex. Set `start: true` only where the start is
+     explicit. Do not trace from an address alone.
+   - **Opening:** `source_url` is the page where the park publishes its hours (`scripts/hours_watch.py`
+     scans it weekly; set it whenever the park has such a page). `booking` (`required` | `optional` |
+     `none`), `booking_minutes`, `note`, then `rules` (drop-in windows) and/or `slots` (fixed blocks),
+     with `months`, `days`, `from`/`until`, `dates`, and `open`/`close` (`HH:mm` or `sunset`). Without
+     any rules or slots the hours count as unknown; never invent them.
+   - **Exceptions:** announced one-offs go in `opening.exceptions` (`kind`: `hours`, `closed`, `extra`,
+     `event`; needs at least one of `from`, `until`, `dates`), not in `rules`. A park that is closed for
+     a season or a period gets a `closed` exception with `from`/`until` and a `note` such as "Reopens on
+     <day>", only when the site or the park's own post states it. The app derives "Reopens on <date>"
+     from the hours.
+   - **Prices:** one entry per name with an `options` list (`amount` as text, `currency`, `per`, `note`).
+   - **Sources:** list the pages the data was read from under `sources` (only official pages), so the
+     in-app rescan knows where to start.
+   - **`permanently_closed: true`** replaces deleting a park that closed for good.
+   Leave out anything not directly confirmed by the fetched pages. Write any free-text
    `description` (park, cable, `opening.note`) per
    [Docs/ParkDescriptions.md](../../../Docs/ParkDescriptions.md): no em-dash/hyphen-as-dash, direct
    language, no hype words. Write free text in the park's main language. List `languages` (main first):
