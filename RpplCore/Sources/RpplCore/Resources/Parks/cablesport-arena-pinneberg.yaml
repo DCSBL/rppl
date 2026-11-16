@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Cablesport Arena Pinneberg
 short_name: Cablesport Arena
@@ -31,11 +33,10 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 386
     points:
       - lat: 53.6505088
-        lon: 9.8063400
-      - lat: 53.6499330
+        lon: 9.80634
+      - lat: 53.649933
         lon: 9.8070526
       - lat: 53.6503528
         lon: 9.8081996

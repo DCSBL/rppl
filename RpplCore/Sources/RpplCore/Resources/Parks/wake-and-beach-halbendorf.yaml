@@ -1,10 +1,12 @@
 version: 1
 id: wake-and-beach-halbendorf
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Wake and Beach Halbendorf
 short_name: Wake and Beach
@@ -25,14 +27,29 @@ website: https://wakeboard-halbendorf.de
 
 cables:
   - name: Cable
-    length_m: 730
+    direction: cw
     description: >-
       Rixen-Anlage mit fünf Masten.
+    points:
+      - lat: 51.5456880993523
+        lon: 14.560872790621
+      - lat: 51.5465293527926
+        lon: 14.5602100992894
+      - lat: 51.5472283269003
+        lon: 14.5609029239267
+      - lat: 51.5470585967284
+        lon: 14.564201297272
+      - lat: 51.546764474149
+        lon: 14.564401969977
   - name: Lil-Bro
     direction: "2.0"
-    length_m: 130
     description: >-
       Rixen-Übungslift mit zwei Masten für Einsteiger.
+    points:
+      - lat: 51.5465462320866
+        lon: 14.5594634757525
+      - lat: 51.5474151754671
+        lon: 14.5602939660102
 
 opening:
   source_url: "https://wakeboard-halbendorf.de/aktuelle-oeffnungszeiten-der-freizeitmoeglichkeiten-am-strand/"

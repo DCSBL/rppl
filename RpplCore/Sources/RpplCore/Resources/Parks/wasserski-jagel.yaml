@@ -1,10 +1,14 @@
 version: 1
 id: wasserski-jagel
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski Jagel
 short_name: Wasserski Jagel
@@ -14,14 +18,26 @@ languages:
   - nl
 address: "Selker Weg 26a, 24878 Jagel"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 54.459590
-  lon: 9.551409
+  lat: 54.459989987202
+  lon: 9.55158713644952
 
 phone: "+49 4624 981"
 email: "info@wasserski-jagel.de"
 website: https://wasserski-jagel.de
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 54.4599600984464
+        lon: 9.55184001689644
+      - lat: 54.4572843868699
+        lon: 9.55319096538008
+      - lat: 54.457473162071
+        lon: 9.55420259649887
+      - lat: 54.4601389264797
+        lon: 9.55277683760834
 
 opening:
   source_url: "https://wasserski-jagel.de/"

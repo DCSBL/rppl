@@ -188,7 +188,9 @@ struct ParksTests {
         let park = try #require(ParkCatalog.loadBundled().first { $0.id == "downunder-nieuwegein" })
         #expect(park.cables?.count == 2)
         #expect(park.cables?.first?.direction == .counterClockwise)
-        #expect(park.cables?.first?.effectiveLengthM == 720)
+        // No length_m: the length comes from the traced points (closing segment included).
+        let length = try #require(park.cables?.first?.effectiveLengthM)
+        #expect(abs(length - 723) < 2)
         #expect(park.cables?.first?.points?.count == 5)
         #expect(park.prices?.count == 5)
         #expect(park.links?.contains { $0.kind == "booking" } == true)

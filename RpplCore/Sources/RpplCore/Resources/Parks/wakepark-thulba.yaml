@@ -1,10 +1,14 @@
 version: 1
 id: wakepark-thulba
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: WakePark Thulba
 short_name: WakePark
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Untere Au 5, 97723 Thulba"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 50.173958
-  lon: 9.923701
+  lat: 50.1747696910483
+  lon: 9.9233693144588
 
 phone: "+49 9736 4726"
 email: "info@wakepark-thulba.de"
@@ -25,6 +28,19 @@ website: https://www.wakepark-thulba.de
 links:
   - kind: booking
     url: "https://www.wakepark-thulba.de/ticket-buchen/"
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 50.1747887133712
+        lon: 9.92392214146739
+      - lat: 50.172233911519
+        lon: 9.92254736892461
+      - lat: 50.172099745991
+        lon: 9.92309916268314
+      - lat: 50.1746078089174
+        lon: 9.924624926814
 
 opening:
   source_url: "https://www.wakepark-thulba.de/opening-hours/"

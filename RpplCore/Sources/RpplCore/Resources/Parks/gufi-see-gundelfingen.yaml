@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Gufi See Gundelfingen
 short_name: Gufi See
@@ -32,7 +34,9 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 803
+    description: >-
+      Elf Mitnehmer und 20 Features, seit 1998 in Betrieb. Im öffentlichen Betrieb läuft die
+      Bahn mit 28 bis 30 km/h.
     points:
       - lat: 48.5193601
         lon: 10.3245551
@@ -44,9 +48,6 @@ cables:
         lon: 10.3287729
       - lat: 48.5197826
         lon: 10.3247606
-    description: >-
-      Elf Mitnehmer und 20 Features, seit 1998 in Betrieb. Im öffentlichen Betrieb läuft die
-      Bahn mit 28 bis 30 km/h.
 
 opening:
   source_url: "https://www.wasserski-gundelfingen.de/oeffnungszeiten.html"

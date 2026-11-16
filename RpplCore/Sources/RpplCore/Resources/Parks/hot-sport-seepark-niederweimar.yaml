@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Hot Sport Seepark Niederweimar
 short_name: Hot Sport Seepark
@@ -30,7 +32,6 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 572
     points:
       - lat: 50.7594466
         lon: 8.7420262
@@ -38,7 +39,7 @@ cables:
         lon: 8.7425242
       - lat: 50.7600551
         lon: 8.7426229
-      - lat: 50.7610790
+      - lat: 50.761079
         lon: 8.7401107
       - lat: 50.7606121
         lon: 8.7396195

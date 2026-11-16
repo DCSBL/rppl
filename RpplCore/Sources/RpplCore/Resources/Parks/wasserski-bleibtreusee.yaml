@@ -1,10 +1,14 @@
 version: 1
 id: wasserski-bleibtreusee
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski Bleibtreusee
 short_name: Wasserski Bleibtreusee
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Bleibtreuseeweg 1, 50321 Brühl"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 50.840135
-  lon: 6.867640
+  lat: 50.8449631656984
+  lon: 6.85694192980333
 
 phone: "+49 2232 22681"
 email: "info@wasserski-bleibtreusee.de"
@@ -29,7 +32,27 @@ links:
 
 cables:
   - name: Große Bahn
+    direction: ccw
+    points:
+      - lat: 50.8449208599284
+        lon: 6.85726363767696
+      - lat: 50.8430068383996
+        lon: 6.85650041587802
+      - lat: 50.8427943725636
+        lon: 6.85676783437943
+      - lat: 50.8428219288033
+        lon: 6.8572252341461
+      - lat: 50.8441369582622
+        lon: 6.85846041726496
+      - lat: 50.84484254077
+        lon: 6.85796269027534
   - name: Kleine Bahn
+    direction: "2.0"
+    points:
+      - lat: 50.8447856236368
+        lon: 6.856786738076
+      - lat: 50.8436481070609
+        lon: 6.8564180871867
 
 opening:
   source_url: "https://www.wasserski-bleibtreusee.de/oeffnungszeiten"

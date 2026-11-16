@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-10-15
     description: Add GPS points for cable
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Waterskicentrum De Kempervennen
 short_name: De Kempervennen
@@ -42,7 +44,6 @@ facilities:
 cables:
   - name: Waterskibaan
     direction: cw
-    length_m: 770
     description: Kabel met vijf masten en een snelheid van ongeveer 30 km/u.
     points:
       - lat: 51.327242
