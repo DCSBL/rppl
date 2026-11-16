@@ -1,7 +1,7 @@
 version: 1
 id: wollebrand-honselersdijk
 created_at: 2026-09-24
-updated_at: 2026-10-15
+updated_at: 2026-11-16
 history:
   - date: 2026-09-24
     description: initial
@@ -23,6 +23,8 @@ history:
     description: add languages (en, nl) and Dutch variants of per and note
   - date: 2026-10-15
     description: rename to Wollebrand Cablepark, use the site's Facebook link, add Instagram
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wollebrand Cablepark
 short_name: Wollebrand Cablepark
@@ -32,8 +34,8 @@ languages:
 address: Broekpolderlaan 10, 2675 LJ Honselersdijk
 timezone: Europe/Amsterdam
 location:
-  lat: 51.99278189793896
-  lon: 4.239882979511977
+  lat: 51.992781897939
+  lon: 4.23988297951198
 
 # Hoek van Holland is a tidal estuary station.
 water_temperature:

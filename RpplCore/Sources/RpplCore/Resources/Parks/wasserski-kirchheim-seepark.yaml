@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski & Wakeboard Paradies Kirchheim
 short_name: Wasserski Paradies
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Seepark Haus 1, 36275 Kirchheim"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 50.819189
-  lon: 9.523289
+  lat: 50.8184652636949
+  lon: 9.52510367160803
 
 phone: "+49 6628 8666"
 email: "info@wasserski-kirchheim.de"

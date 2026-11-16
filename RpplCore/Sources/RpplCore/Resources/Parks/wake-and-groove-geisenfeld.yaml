@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wake & Groove Cablepark Geisenfeld
 short_name: Wake & Groove
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Am Lorenzisee 1, 85290 Geisenfeld"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 48.714757
-  lon: 11.611807
+  lat: 48.7152193904618
+  lon: 11.612280454935
 
 phone: "+49 175 7225013"
 email: "sven@wakeandgroove.de"

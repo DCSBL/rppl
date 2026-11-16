@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserskilift ZachunBeach
 short_name: ZachunBeach
@@ -16,10 +18,9 @@ languages:
   - nl
 address: Zachun
 timezone: Europe/Berlin
-# Geocode of the village name, the park's site publishes no street address.
 location:
-  lat: 53.477837
-  lon: 11.320740
+  lat: 53.4818864695591
+  lon: 11.3000600777674
 
 phone: "+49 38859 6010"
 email: "info@wasserskilift.de"

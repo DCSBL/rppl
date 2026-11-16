@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski Bleibtreusee
 short_name: Wasserski Bleibtreusee
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Bleibtreuseeweg 1, 50321 Brühl"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 50.840135
-  lon: 6.867640
+  lat: 50.8449631656984
+  lon: 6.85694192980333
 
 phone: "+49 2232 22681"
 email: "info@wasserski-bleibtreusee.de"

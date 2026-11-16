@@ -9,6 +9,8 @@ history:
     description: Add cable routes traced by hand (dock pin moved to the start)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Terhills Cablepark
 languages:
@@ -18,10 +20,9 @@ languages:
   - de
 address: Nationaal Parklaan 1, 3650 Dilsen-Stokkem
 timezone: Europe/Brussels
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.005022
-  lon: 5.697598
+  lat: 51.005022222472
+  lon: 5.69759844991614
 
 email: info@terhillscablepark.be
 website: https://www.terhillscablepark.be/

@@ -9,6 +9,8 @@ history:
     description: Add cable routes traced by hand (dock pin moved to the start)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wakebeach 257 Dormagen
 short_name: Wakebeach 257
@@ -18,10 +20,9 @@ languages:
   - nl
 address: "Am Straberger See 16, 41542 Dormagen"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.102967
-  lon: 6.773091
+  lat: 51.1029667503735
+  lon: 6.77309079389534
 
 email: "info@wakebeach.de"
 website: https://wakebeach.de

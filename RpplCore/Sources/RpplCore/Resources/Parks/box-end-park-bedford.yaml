@@ -7,6 +7,8 @@ history:
     description: initial (cable tow, United Kingdom)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Box End Park
 languages:
@@ -14,10 +16,9 @@ languages:
   - nl
 address: Box End Rd, Bedford MK43 8RN
 timezone: Europe/London
-# Pin of the park's own map embed, not a confirmed dock point.
 location:
-  lat: 52.12396468
-  lon: -0.52594988
+  lat: 52.1254109676372
+  lon: -0.521944126842782
 email: info@boxendpark.com
 website: https://boxendpark.com
 links:

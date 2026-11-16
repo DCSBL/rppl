@@ -9,6 +9,8 @@ history:
     description: Add cable routes traced by hand (dock pin moved to the start)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Südsee Wakepark Xanten
 short_name: Südsee Wakepark
@@ -18,10 +20,9 @@ languages:
   - nl
 address: "Am Meerend 2, 46509 Xanten"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.686575
-  lon: 6.440018
+  lat: 51.6865748327131
+  lon: 6.44001824908254
 
 phone: "+49 2801 715656"
 website: https://www.wasserski-xanten.de

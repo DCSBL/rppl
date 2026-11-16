@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski & Wakeboard Kalletal
 short_name: Wasserski Kalletal
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Seeweg 1, 32689 Kalletal"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 52.176240
-  lon: 9.001698
+  lat: 52.176161742587
+  lon: 8.99456578980186
 
 phone: "+49 5755 777"
 email: "info@wasserski-kalletal.de"

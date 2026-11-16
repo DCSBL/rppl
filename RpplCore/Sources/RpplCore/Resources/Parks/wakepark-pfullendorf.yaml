@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wakepark Pfullendorf
 short_name: Wakepark
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Bannholzerweg 18, 88630 Pfullendorf"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 47.930430
-  lon: 9.236930
+  lat: 47.930155636694
+  lon: 9.23711153702484
 
 phone: "+49 7552 4086901"
 email: "booking@wakepark-pfullendorf.de"

@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Waketoolz Wakepark Wörth
 short_name: Waketoolz Wakepark
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Landshuter Str. 96, 84109 Wörth an der Isar"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 48.624240
-  lon: 12.348961
+  lat: 48.627444800782
+  lon: 12.3557175436109
 
 phone: "+49 8702 9487297"
 website: https://www.waketoolz-wakepark.de

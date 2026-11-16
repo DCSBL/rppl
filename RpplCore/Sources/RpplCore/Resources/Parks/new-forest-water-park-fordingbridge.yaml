@@ -7,6 +7,8 @@ history:
     description: initial (cables, season note, prices)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: New Forest Water Park
 languages:
@@ -14,10 +16,9 @@ languages:
   - nl
 address: Ringwood Road, Fordingbridge, Hampshire SP6 2EY
 timezone: Europe/London
-# Map marker on the park's contact page, not confirmed as the dock.
 location:
-  lat: 50.89993652222432
-  lon: -1.782606181027913
+  lat: 50.9031860355766
+  lon: -1.78582176159963
 
 phone: 01425 656 868
 email: info@newforestwaterpark.co.uk

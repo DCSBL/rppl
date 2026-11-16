@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski & Wakeboard Hamburg
 short_name: Wasserski Hamburg
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Am Neuländer Baggerteich 3, 21079 Hamburg"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 53.458826
-  lon: 10.013902
+  lat: 53.4589124259888
+  lon: 10.0142985859722
 
 phone: "+49 175 1161715"
 email: "info@wasserski-hamburg.de"

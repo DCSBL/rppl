@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wakepark Fehmarn
 short_name: Wakepark Fehmarn
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Wulfener Hals Weg 50, 23769 Fehmarn"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 54.410120
-  lon: 11.164979
+  lat: 54.4100061119523
+  lon: 11.1649524569776
 
 phone: "+49 4371 8890853"
 email: "info@wakeparkfehmarn.de"

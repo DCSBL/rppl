@@ -1,7 +1,7 @@
 version: 1
 id: downunder-nieuwegein
 created_at: 2026-09-24
-updated_at: 2026-10-07
+updated_at: 2026-11-16
 history:
   - date: 2026-09-24
     description: initial
@@ -17,6 +17,8 @@ history:
     description: add languages (en, nl) and Dutch variants of per and note
   - date: 2026-11-16
     description: remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Cable Park Down Under
 languages:
@@ -25,8 +27,8 @@ languages:
 address: Ravensewetering 1, 3439 ZZ Nieuwegein
 timezone: Europe/Amsterdam
 location:
-  lat: 52.048428101966046
-  lon: 5.124218887481674
+  lat: 52.048428101966
+  lon: 5.12421888748167
 
 water_temperature:
   provider: rws_nl

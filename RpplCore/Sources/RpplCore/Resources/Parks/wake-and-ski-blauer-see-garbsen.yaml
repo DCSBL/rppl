@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wake & Ski Blauer See Garbsen
 short_name: Wake & Ski Blauer See
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Am Blauen See 119, 30823 Garbsen"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 52.419028
-  lon: 9.545439
+  lat: 52.4202289166133
+  lon: 9.55291397370901
 
 phone: "+49 5137 899642"
 email: "wasserski@blauersee-garbsen.de"

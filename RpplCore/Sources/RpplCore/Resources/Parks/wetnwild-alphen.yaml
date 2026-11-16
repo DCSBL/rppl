@@ -31,6 +31,8 @@ history:
       SUP and rental prices
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wet 'n Wild
 languages:
@@ -39,8 +41,8 @@ languages:
 address: Sportlaan 5, 2406 LD Alphen aan den Rijn
 timezone: Europe/Amsterdam
 location:
-  lat: 52.13616235164614
-  lon: 4.6779432055000365
+  lat: 52.1361623516461
+  lon: 4.67794320550004
 
 # Nearest station that still reports (~25 km); closer ones stopped reporting.
 water_temperature:

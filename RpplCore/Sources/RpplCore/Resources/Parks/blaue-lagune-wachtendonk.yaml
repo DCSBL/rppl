@@ -9,6 +9,8 @@ history:
     description: Add cable routes traced by hand (dock pin moved to the start)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Blaue Lagune Wakepark Wachtendonk
 short_name: Blaue Lagune
@@ -18,10 +20,9 @@ languages:
   - nl
 address: "Jülicher Str. 1-2, 47669 Wachtendonk"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.379935
-  lon: 6.269811
+  lat: 51.3799349674275
+  lon: 6.26981142903032
 
 phone: "+49 2839 277"
 email: "info@blauelagune.de"

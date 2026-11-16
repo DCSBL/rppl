@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Thorpe Lakes Watersports Park Chertsey
 short_name: Thorpe Lakes
@@ -16,8 +18,8 @@ languages:
 address: Thorpe Lakes, Thorpe Road, Chertsey, Surrey KT16 8PH
 timezone: Europe/London
 location:
-  lat: 51.402474503785605
-  lon: -0.5195096864576996
+  lat: 51.4024745037856
+  lon: -0.5195096864577
 phone: 01932 579 750
 email: reception@thorpelakes.com
 website: https://thorpelakeswatersports.co.uk

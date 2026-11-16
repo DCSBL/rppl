@@ -11,6 +11,8 @@ history:
     description: Add cable routes traced by hand (dock pin moved to the start)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: The Outsider Cablepark
 short_name: The Outsider
@@ -21,8 +23,8 @@ languages:
 address: Donkstraat 50, 9700 Oudenaarde
 timezone: Europe/Brussels
 location:
-  lat: 50.84186
-  lon: 3.585968
+  lat: 50.841860280504
+  lon: 3.58596815963124
 
 phone: "+32 (0)55 20 70 30"
 email: info@outsider.be

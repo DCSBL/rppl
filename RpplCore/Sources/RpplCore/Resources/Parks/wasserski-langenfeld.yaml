@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski Langenfeld
 short_name: Wasserski Langenfeld
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Baumberger Str. 88, 40764 Langenfeld"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.111542
-  lon: 6.912480
+  lat: 51.1130743257797
+  lon: 6.91417147705171
 
 phone: "+49 2173 39462222"
 email: "kontakt@wasserski-langenfeld.de"

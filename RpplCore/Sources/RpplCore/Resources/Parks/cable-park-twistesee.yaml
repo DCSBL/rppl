@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Cable Park Twistesee
 short_name: Cable Park Twistesee
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Zum Wiggenberg, 34454 Bad Arolsen"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 51.381993
-  lon: 9.056971
+  lat: 51.3698790981109
+  lon: 9.05759214279662
 
 phone: "+49 5691 629636"
 email: "info@wasserski-twistesee.de"

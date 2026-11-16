@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wet & Wild Velten
 short_name: Wet & Wild
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "Am Bernsteinsee 1, 16727 Velten"
 timezone: Europe/Berlin
-# Pin from the map embed on the park's site, not a confirmed dock point.
 location:
-  lat: 52.699700
-  lon: 13.224100
+  lat: 52.6993541334922
+  lon: 13.2244342065102
 
 phone: "+49 3303 400145"
 email: "info@wakeboard-berlin.de"

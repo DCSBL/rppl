@@ -7,6 +7,8 @@ history:
     description: initial (cables, November to January hours, prices)
   - date: 2026-11-16
     description: trace cables on the map, remove length_m (length is computed from the traced points)
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Spring Lakes Watersports Centre
 short_name: Spring Lakes
@@ -16,8 +18,8 @@ languages:
 address: Pasture Lane, Long Eaton, Nottingham NG10 2FZ
 timezone: Europe/London
 location:
-  lat: 52.884864568980085
-  lon: -1.2516918977554639
+  lat: 52.8848645689801
+  lon: -1.25169189775546
 
 phone: 0115 972 7788
 website: https://springlakes.co.uk

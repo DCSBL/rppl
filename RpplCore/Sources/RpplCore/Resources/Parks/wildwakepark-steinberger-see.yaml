@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-16
     description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: WildWakePark Steinberger See
 short_name: WildWakePark
@@ -16,10 +18,9 @@ languages:
   - nl
 address: "In der Oder 1, 92449 Steinberg am See"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 49.288754
-  lon: 12.159136
+  lat: 49.2889743333708
+  lon: 12.1608371720907
 
 phone: "+49 9431 790380"
 email: "info@wildwakepark.de"
