@@ -1,0 +1,137 @@
+version: 1
+id: new-forest-water-park-fordingbridge
+created_at: 2026-11-16
+updated_at: 2026-11-16
+history:
+  - date: 2026-11-16
+    description: initial (cables, season note, prices)
+
+name: New Forest Water Park
+languages:
+  - en
+  - nl
+address: Ringwood Road, Fordingbridge, Hampshire SP6 2EY
+timezone: Europe/London
+# Map marker on the park's contact page, not confirmed as the dock.
+location:
+  lat: 50.89993652222432
+  lon: -1.782606181027913
+
+phone: 01425 656 868
+email: info@newforestwaterpark.co.uk
+website: https://www.newforestwaterpark.co.uk
+links:
+  - kind: booking
+    url: "https://nfwp.sports-booker.com"
+  - kind: instagram
+    url: "https://www.instagram.com/newforestwaterpark/"
+  - kind: facebook
+    url: "https://www.facebook.com/nfwpfun"
+
+cables:
+  - name: 5 Corner Full Cable
+    description: Rixen 5 corner cable built in 2013, for riders who have wakeboarded before. Kneeboarding is available to beginners.
+    length_m: 480
+  - name: System 2.0
+    direction: "2.0"
+    description: Two tower straight line cable for lessons one to one with an instructor. It has no features.
+    length_m: 150
+
+opening:
+  source_url: "https://www.newforestwaterpark.co.uk/opening-times/"
+  note: >-
+    Wakeboarding runs from Easter weekend to October and the park is closed from November until the following Easter.
+    The page lists start times only. April and October: Friday from 13:30, weekends from 09:30.
+    May and June: Wednesday to Friday from 13:00, weekends from 09:00.
+    July: weekdays from 11:00 in the first three weeks, then every day from 09:00 through August.
+    September: Wednesday to Friday from 13:00, weekends from 09:00.
+    Activity times vary, check the booking page.
+
+prices:
+  - name: 5 Corner Full Cable
+    options:
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: standard session, equipment hire not included
+          nl: standaard sessie, huur van materiaal niet inbegrepen
+      - amount: "50"
+        currency: GBP
+        per:
+          en: 2 hours
+          nl: 2 uur
+        note:
+          en: slow session, all equipment included
+          nl: slow sessie, al het materiaal inbegrepen
+  - name: System 2.0 Cable
+    options:
+      - amount: "35"
+        currency: GBP
+        per:
+          en: 15 minutes
+          nl: 15 minuten
+        note:
+          en: non-members, equipment included
+          nl: niet-leden, materiaal inbegrepen
+  - name: Wake Park membership
+    options:
+      - amount: "1100"
+        currency: GBP
+        per:
+          en: year
+          nl: jaar
+        note:
+          en: main cable included, 50% off System 2.0 sessions
+          nl: main cable inbegrepen, 50% korting op System 2.0 sessies
+  - name: Equipment hire
+    options:
+      - amount: "15"
+        currency: GBP
+        per: session
+        note:
+          en: all equipment (wetsuit, helmet, buoyancy aid, wakeboard), purchase on site
+          nl: al het materiaal (wetsuit, helm, zwemvest, wakeboard), te koop ter plaatse
+      - amount: "10"
+        currency: GBP
+        per: session
+        note:
+          en: wakeboard, purchase on site
+          nl: wakeboard, te koop ter plaatse
+      - amount: "5"
+        currency: GBP
+        per: session
+        note:
+          en: wetsuit, purchase on site
+          nl: wetsuit, te koop ter plaatse
+      - amount: "2"
+        currency: GBP
+        per: session
+        note:
+          en: helmet, purchase on site
+          nl: helm, te koop ter plaatse
+      - amount: "2"
+        currency: GBP
+        per: session
+        note:
+          en: buoyancy aid, purchase on site
+          nl: zwemvest, te koop ter plaatse
+
+sources:
+  - "https://www.newforestwaterpark.co.uk/opening-times/"
+  - "https://www.newforestwaterpark.co.uk/price-list/"
+  - "https://www.newforestwaterpark.co.uk/contact-us/"
+  - "https://www.newforestwaterpark.co.uk/faqs/wake-park-faqs/"
+  - "https://www.newforestwaterpark.co.uk/activities/wake-park/"
+
+facilities:
+  - Equipment hire
+  - Lockers
+  - Changing rooms and showers
+  - Food and drink
+
+description: >-
+  Cable park on a lake in the New Forest with a 5 corner full cable and a System 2.0 straight line cable.
+  You can wakeboard or kneeboard, and the main cable has features. The park also has an aqua park, kayaks and SUP, open water swimming and camping.
