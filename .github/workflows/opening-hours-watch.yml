@@ -1,5 +1,7 @@
-# Weekly, informational scan of every park's `opening.source_url`. Never fails on a changed or
-# unreachable park; the report (markers triggered, page changed, unreachable) lands in the run summary.
+# Weekly scan of every park's `opening.source_url`. Never fails on a changed or unreachable park;
+# the report (markers triggered, page changed, unreachable) lands in the run summary. A park whose
+# marker fired also gets one GitHub issue (label `hours-watch`); page-changed and unreachable
+# parks stay in the summary only. The issue step fails the run when an issue cannot be written.
 
 name: Opening hours watch
 
@@ -10,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   scan:
@@ -35,10 +38,19 @@ jobs:
           restore-keys: hours-watch-state-
 
       - name: Scan
-        run: python3 scripts/hours_watch.py --state hours-watch-state.json --summary "$GITHUB_STEP_SUMMARY"
+        run: python3 scripts/hours_watch.py --state hours-watch-state.json --summary "$GITHUB_STEP_SUMMARY" --results hours-watch-results.json
 
       - name: Save page hashes
         uses: actions/cache/save@v6
         with:
           path: hours-watch-state.json
           key: hours-watch-state-${{ github.run_id }}
+
+      - name: Open issues for fired markers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/ci/hours_watch_issues.py hours-watch-results.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --summary "$GITHUB_STEP_SUMMARY"

@@ -2,10 +2,12 @@
 """Weekly scan of every park's opening hours page (`opening.source_url`).
 
 Usage:
-    python3 scripts/hours_watch.py [--state PATH] [--summary PATH] [--only park-id ...]
+    python3 scripts/hours_watch.py [--state PATH] [--summary PATH] [--results PATH] [--only park-id ...]
 
-Informational only: prints a Markdown report (also appended to --summary, e.g.
-$GITHUB_STEP_SUMMARY) and never fails the run for a changed or unreachable park.
+Prints a Markdown report (also appended to --summary, e.g. $GITHUB_STEP_SUMMARY) and never
+fails the run for a changed or unreachable park. --results writes the per-park results as
+JSON; the workflow feeds that to scripts/ci/hours_watch_issues.py, which opens a GitHub
+issue per park whose marker fired. Page-changed and unreachable parks stay in the report only.
 Per park it reports which markers fired (see ops/hours-watch/markers.yaml) and whether the
 page text hash changed since the previous run (kept in --state). Fetching uses plain HTTP
 with browser-like headers first and falls back to Playwright when that yields no usable page.
@@ -177,6 +179,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--state", type=Path, help="JSON file with page hashes from the previous run")
     parser.add_argument("--summary", type=Path, help="append the Markdown report to this file")
+    parser.add_argument("--results", type=Path, help="write the per-park results as JSON to this file")
     parser.add_argument("--only", nargs="*", default=[], help="limit to these park ids")
     args = parser.parse_args()
 
@@ -190,6 +193,8 @@ def main() -> int:
     if args.summary:
         with args.summary.open("a") as handle:
             handle.write(report + "\n")
+    if args.results:
+        args.results.write_text(json.dumps(results, indent=2) + "\n")
     if args.state:
         for row in results:
             if row.get("hash"):
