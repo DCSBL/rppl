@@ -177,6 +177,14 @@ This does not replace human review of park data (sourcing, accuracy) — see the
 
 Fixtures + smoke test: `scripts/parks-tests/` (`bash scripts/parks-tests/smoke_test.sh` asserts each fixture passes/fails as expected and that `format_parks.py` turns `fixtures/flow-style.yaml` into `expected/flow-style.yaml` — run it after touching the schema, the validator or the formatter).
 
+### Opening hours watch
+
+Workflow: [`.github/workflows/opening-hours-watch.yml`](../.github/workflows/opening-hours-watch.yml), Mondays 06:00 UTC and on manual dispatch. `scripts/hours_watch.py` fetches every park's `opening.source_url` (per-park markers in `ops/hours-watch/markers.yaml`) and writes a report to the run summary: markers triggered, page changed without a marker, unreachable. The scan never fails the run for a changed or unreachable park.
+
+For each park whose marker fired, `scripts/ci/hours_watch_issues.py` opens one issue titled `parks: check opening hours of <park-id>` with the label `hours-watch` (created when missing; the job has `issues: write`). If an open issue exists it adds a comment only when the set of fired markers changed, otherwise it does nothing. Issues are never closed automatically: close one after refreshing the park (see the `park-data-collection` skill). Page-changed and unreachable parks get no issue, they would be noise. A failure to write an issue fails the run.
+
+Dry run without a token: `python3 scripts/hours_watch.py --only <park-id> --results r.json`, then `python3 scripts/ci/hours_watch_issues.py r.json --dry-run`. Tests: `scripts/ci/test_hours_watch_issues.py`.
+
 ### Marketing assets (Linux)
 
 Workflows: [`.github/workflows/marketing-render.yml`](../.github/workflows/marketing-render.yml) (PRs touching `marketing/`) and the `marketing` job in [`release-screenshots.yml`](../.github/workflows/release-screenshots.yml) (every release or manual). Both install the pinned Playwright Chromium, run `node --test` and `scripts/ci/check_marketing_assets.py` (exact sizes, no alpha) and upload the PNGs; the release job also zips them and attaches the zip to the release. A manual run reuses the screenshot assets already on the release unless `regenerate_screenshots` is ticked. Details, config and local use: [Marketing.md](Marketing.md).
