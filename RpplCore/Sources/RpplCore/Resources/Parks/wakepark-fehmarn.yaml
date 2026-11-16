@@ -1,10 +1,12 @@
 version: 1
 id: wakepark-fehmarn
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wakepark Fehmarn
 short_name: Wakepark Fehmarn
@@ -32,14 +34,29 @@ cables:
     direction: "2.0"
     description: >-
       Einsteigerbahn ohne Hindernisse.
+    points:
+      - lat: 54.4103743445902
+        lon: 11.1663762022033
+      - lat: 54.4102693836496
+        lon: 11.1631923284375
   - name: Bahn 2
     direction: "2.0"
     description: >-
       Mit einem Kicker und einem Table.
+    points:
+      - lat: 54.409998176388
+        lon: 11.1648766358936
+      - lat: 54.4099435906833
+        lon: 11.1634072622916
   - name: Bahn 3
     direction: "2.0"
     description: >-
       Runde von über 400 Metern mit Bi-Level.
+    points:
+      - lat: 54.4099974792853
+        lon: 11.1650976469793
+      - lat: 54.4100453291341
+        lon: 11.1664475737232
 
 opening:
   source_url: "https://wakeparkfehmarn.de/"

@@ -1,10 +1,12 @@
 version: 1
 id: wasserski-kirchheim-seepark
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wasserski & Wakeboard Paradies Kirchheim
 short_name: Wasserski Paradies
@@ -22,6 +24,21 @@ location:
 phone: "+49 6628 8666"
 email: "info@wasserski-kirchheim.de"
 website: https://www.wasserski-kirchheim.de
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 50.81831408116
+        lon: 9.52521878686866
+      - lat: 50.8169962319358
+        lon: 9.52147384096514
+      - lat: 50.8166737902947
+        lon: 9.52136370416172
+      - lat: 50.8164441715602
+        lon: 9.5217653331059
+      - lat: 50.8178804348483
+        lon: 9.52563137515535
 
 opening:
   source_url: "https://www.wasserski-kirchheim.de/oeffnungszeiten"

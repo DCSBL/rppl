@@ -1,10 +1,12 @@
 version: 1
 id: wake-and-ski-blauer-see-garbsen
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wake & Ski Blauer See Garbsen
 short_name: Wake & Ski Blauer See
@@ -22,6 +24,21 @@ location:
 phone: "+49 5137 899642"
 email: "wasserski@blauersee-garbsen.de"
 website: https://www.blauersee-garbsen.de/wake-ski/allgemein
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 52.4200377260706
+        lon: 9.55302354462651
+      - lat: 52.4197872455199
+        lon: 9.54846311191422
+      - lat: 52.4195309075685
+        lon: 9.54826053339216
+      - lat: 52.4193025454472
+        lon: 9.54854553039651
+      - lat: 52.4195303271523
+        lon: 9.55308878687122
 
 opening:
   source_url: "https://www.blauersee-garbsen.de/wake-ski/oeffnungszeiten"

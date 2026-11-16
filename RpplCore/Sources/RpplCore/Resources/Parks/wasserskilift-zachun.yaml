@@ -1,10 +1,12 @@
 version: 1
 id: wasserskilift-zachun
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wasserskilift ZachunBeach
 short_name: ZachunBeach
@@ -22,6 +24,21 @@ location:
 phone: "+49 38859 6010"
 email: "info@wasserskilift.de"
 website: https://www.wasserskilift.de
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 53.481736780951
+        lon: 11.2998490655304
+      - lat: 53.4831178477938
+        lon: 11.2957144407291
+      - lat: 53.4828261008518
+        lon: 11.2950361811388
+      - lat: 53.4824112723515
+        lon: 11.2951294964363
+      - lat: 53.4811841661167
+        lon: 11.2993129521277
 
 opening:
   source_url: "https://alpincenter.com/wittenburg/wasserskilift-zachun/liftzeiten-preise"

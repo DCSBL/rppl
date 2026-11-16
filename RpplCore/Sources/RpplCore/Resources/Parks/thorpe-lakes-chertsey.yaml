@@ -5,6 +5,8 @@ updated_at: 2026-11-16
 history:
   - date: 2026-11-16
     description: initial
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Thorpe Lakes Watersports Park Chertsey
 short_name: Thorpe Lakes
@@ -37,10 +39,25 @@ sources:
 
 cables:
   - name: Cable
+    direction: ccw
     description: Full size four corner cable.
+    points:
+      - lat: 51.4022295581975
+        lon: -0.519644010057561
+      - lat: 51.403244617966
+        lon: -0.523790965037024
+      - lat: 51.4026459306194
+        lon: -0.524184901919838
+      - lat: 51.4016304476694
+        lon: -0.520048071454245
   - name: System 2.0
     direction: "2.0"
     description: Straight Line System 2.
+    points:
+      - lat: 51.4022391213186
+        lon: -0.518806681767397
+      - lat: 51.4012432492461
+        lon: -0.519389484425622
 
 opening:
   source_url: "https://thorpelakeswatersports.co.uk/opening-hours/"

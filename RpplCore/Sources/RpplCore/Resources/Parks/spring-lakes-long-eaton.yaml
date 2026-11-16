@@ -5,6 +5,8 @@ updated_at: 2026-11-16
 history:
   - date: 2026-11-16
     description: initial (cables, November to January hours, prices)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Spring Lakes Watersports Centre
 short_name: Spring Lakes
@@ -29,8 +31,19 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
     description: Full-size Rixen 5-point cable with kickers and boxes. 2 straights of 250 m, 12 m high.
-    length_m: 625
+    points:
+      - lat: 52.8849038514128
+        lon: -1.25132193338001
+      - lat: 52.882802195217
+        lon: -1.25006997032272
+      - lat: 52.8827058290024
+        lon: -1.24954320928398
+      - lat: 52.8829758493773
+        lon: -1.24927149116382
+      - lat: 52.8850523942103
+        lon: -1.25060201173677
   - name: Learner cable
     direction: "2.0"
     description: 2-point cable for lessons with a coach.

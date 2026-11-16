@@ -1,10 +1,12 @@
 version: 1
 id: wakepark-thulba
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: WakePark Thulba
 short_name: WakePark
@@ -25,6 +27,19 @@ website: https://www.wakepark-thulba.de
 links:
   - kind: booking
     url: "https://www.wakepark-thulba.de/ticket-buchen/"
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 50.1747887133712
+        lon: 9.92392214146739
+      - lat: 50.172233911519
+        lon: 9.92254736892461
+      - lat: 50.172099745991
+        lon: 9.92309916268314
+      - lat: 50.1746078089174
+        lon: 9.924624926814
 
 opening:
   source_url: "https://www.wakepark-thulba.de/opening-hours/"

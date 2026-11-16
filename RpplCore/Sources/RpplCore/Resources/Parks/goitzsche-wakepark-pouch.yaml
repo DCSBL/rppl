@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Goitzsche Wakepark
 short_name: Goitzsche Wakepark
@@ -30,22 +32,21 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 633
+    description: >-
+      Sechs Masten und 11 Obstacles von Unit Parktech und PMC.
     points:
       - lat: 51.6307802
-        lon: 12.3796760
+        lon: 12.379676
       - lat: 51.6304828
         lon: 12.3806636
       - lat: 51.6308587
         lon: 12.3817521
       - lat: 51.6324162
-        lon: 12.3811430
+        lon: 12.381143
       - lat: 51.6325493
-        lon: 12.3802180
+        lon: 12.380218
       - lat: 51.6321232
         lon: 12.3793654
-    description: >-
-      Sechs Masten und 11 Obstacles von Unit Parktech und PMC.
 
 opening:
   source_url: "https://agora-erlebnis-resort.de/wakepark/"

@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Cable Dresden
 languages:
@@ -30,9 +32,8 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 748
     points:
-      - lat: 51.0148850
+      - lat: 51.014885
         lon: 13.8216838
       - lat: 51.0153669
         lon: 13.8225618

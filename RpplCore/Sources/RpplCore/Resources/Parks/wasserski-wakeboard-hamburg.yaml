@@ -1,10 +1,12 @@
 version: 1
 id: wasserski-wakeboard-hamburg
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Wasserski & Wakeboard Hamburg
 short_name: Wasserski Hamburg
@@ -28,8 +30,20 @@ links:
 
 cables:
   - name: Cable
+    direction: ccw
     description: >-
       Fünf-Mast-Anlage südlich der Elbe am Neuländersee.
+    points:
+      - lat: 53.4588632915491
+        lon: 10.0145282667197
+      - lat: 53.4562196580946
+        lon: 10.0127172829095
+      - lat: 53.4556636593952
+        lon: 10.0134553537315
+      - lat: 53.4558478244997
+        lon: 10.0145420400625
+      - lat: 53.4586009704414
+        lon: 10.0156771290134
 
 opening:
   source_url: "https://wasserski-hamburg.de/oeffnungszeiten/"

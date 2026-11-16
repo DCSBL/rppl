@@ -5,6 +5,8 @@ updated_at: 2026-11-16
 history:
   - date: 2026-11-16
     description: initial (cables, season note, prices)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: New Forest Water Park
 languages:
@@ -30,12 +32,27 @@ links:
 
 cables:
   - name: 5 Corner Full Cable
+    direction: ccw
     description: Rixen 5 corner cable built in 2013, for riders who have wakeboarded before. Kneeboarding is available to beginners.
-    length_m: 480
+    points:
+      - lat: 50.9032131063914
+        lon: -1.78552270621992
+      - lat: 50.9016570163141
+        lon: -1.78490840084023
+      - lat: 50.9015728558257
+        lon: -1.78438988418547
+      - lat: 50.9018107082411
+        lon: -1.7840653613587
+      - lat: 50.9033681434787
+        lon: -1.78483554575336
   - name: System 2.0
     direction: "2.0"
     description: Two tower straight line cable for lessons one to one with an instructor. It has no features.
-    length_m: 150
+    points:
+      - lat: 50.9034694511324
+        lon: -1.78603698282655
+      - lat: 50.9040113166632
+        lon: -1.78393747106413
 
 opening:
   source_url: "https://www.newforestwaterpark.co.uk/opening-times/"

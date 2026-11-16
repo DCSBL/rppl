@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Supieria Wasser- und Wakepark Rostock
 short_name: Supieria
@@ -32,7 +34,6 @@ links:
 cables:
   - name: Full-Size-Cable
     direction: ccw
-    length_m: 613
     points:
       - lat: 54.1390166
         lon: 12.0893689
@@ -40,7 +41,7 @@ cables:
         lon: 12.0903986
       - lat: 54.1391631
         lon: 12.0912868
-      - lat: 54.1403160
+      - lat: 54.140316
         lon: 12.0912531
       - lat: 54.1407322
         lon: 12.0901604

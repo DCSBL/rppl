@@ -7,6 +7,8 @@ history:
     description: initial
   - date: 2026-10-15
     description: Add GPS points for cable
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: Beachclub & Kabelwaterskibaan Stroombroek
 short_name: Kabelwaterskibaan Stroombroek
@@ -45,9 +47,8 @@ facilities:
 
 cables:
   - name: Kabelwaterskibaan
-    length_m: 1005
-    description: De baan is 1005 meter lang, heeft vier obstakels en een snelheid van 30 km/u.
     direction: ccw
+    description: De baan is 1005 meter lang, heeft vier obstakels en een snelheid van 30 km/u.
     points:
       - lat: 51.936781
         lon: 6.272081

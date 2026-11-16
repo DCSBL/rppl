@@ -1,7 +1,7 @@
 version: 1
 id: wetnwild-alphen
 created_at: 2026-09-24
-updated_at: 2026-10-15
+updated_at: 2026-11-16
 history:
   - date: 2026-09-24
     description: initial
@@ -29,6 +29,8 @@ history:
     description: >-
       remove past extra opening hours (2026-10-14), correct age limit (up to 15 / from 16), add 2-hour,
       SUP and rental prices
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Wet 'n Wild
 languages:
@@ -55,18 +57,17 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 780
     points:
-      - lat: 52.13616893686612
+      - lat: 52.1361689368661
         lon: 4.67831871475394
-      - lat: 52.13359404163105
-        lon: 4.679863667112853
-      - lat: 52.133501843133814
-        lon: 4.680496668426576
-      - lat: 52.13381795147282
-        lon: 4.680936550695433
-      - lat: 52.13640600413686
-        lon: 4.679423784843997
+      - lat: 52.133594041631
+        lon: 4.67986366711285
+      - lat: 52.1335018431338
+        lon: 4.68049666842658
+      - lat: 52.1338179514728
+        lon: 4.68093655069543
+      - lat: 52.1364060041369
+        lon: 4.679423784844
 
 opening:
   source_url: "https://wetnwild.nl/wakepark/"

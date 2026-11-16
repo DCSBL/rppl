@@ -5,6 +5,8 @@ updated_at: 2026-11-16
 history:
   - date: 2026-11-16
     description: initial (cable tow, United Kingdom)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Box End Park
 languages:
@@ -28,9 +30,21 @@ links:
 
 cables:
   - name: Cable Tow
+    direction: ccw
     description: >-
       Full 5-tower cable with normal and slow-speed sessions. Riders must be 10 or older
       and able to swim 50 m.
+    points:
+      - lat: 52.1260958676239
+        lon: -0.521167485584624
+      - lat: 52.1232828965132
+        lon: -0.521001980046891
+      - lat: 52.1230289743702
+        lon: -0.520416636829676
+      - lat: 52.1232888737175
+        lon: -0.519876771593189
+      - lat: 52.1261337828683
+        lon: -0.520085283990022
 
 opening:
   source_url: "https://boxendpark.com/cable-tow/"

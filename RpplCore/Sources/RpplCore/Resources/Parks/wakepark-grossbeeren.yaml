@@ -7,6 +7,8 @@ history:
     description: initial (from the park website)
   - date: 2026-11-07
     description: Cable route from the towers confirmed in the tower review (direction assumed ccw)
+  - date: 2026-11-16
+    description: remove length_m (length is computed from the traced points)
 
 name: MAGIX Wake- & Freizeitpark Großbeeren
 short_name: MAGIX Wakepark
@@ -30,13 +32,12 @@ links:
 cables:
   - name: Cable
     direction: ccw
-    length_m: 753
     points:
       - lat: 52.3531209
         lon: 13.2944762
       - lat: 52.3528335
-        lon: 13.2953070
-      - lat: 52.3551970
+        lon: 13.295307
+      - lat: 52.355197
         lon: 13.2975726
       - lat: 52.3555539
         lon: 13.2966284

@@ -1,10 +1,12 @@
 version: 1
 id: wakepark-brombachsee
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Wakepark Brombachsee
 short_name: Wakepark Brombachsee
@@ -25,13 +27,31 @@ wakesys: true
 
 cables:
   - name: Full Size Cable
-    length_m: 600
+    direction: ccw
     description: >-
       Cable von Wakeparx mit Features von UNIT Parktech.
+    points:
+      - lat: 49.1388670414866
+        lon: 10.8775262429376
+      - lat: 49.1398613939773
+        lon: 10.878855362845
+      - lat: 49.1405251544177
+        lon: 10.8786402380945
+      - lat: 49.140680894149
+        lon: 10.8780281812018
+      - lat: 49.1400439474286
+        lon: 10.876621646976
+      - lat: 49.1392942181637
+        lon: 10.876605853313
   - name: Übungsanlage
     direction: "2.0"
     description: >-
       System 2.0 für Einsteiger.
+    points:
+      - lat: 49.1381802285747
+        lon: 10.8780729904374
+      - lat: 49.1391763223769
+        lon: 10.8788655026814
 
 opening:
   source_url: "https://wakepark-brombachsee.de/wakepark/oeffnungszeiten/"

@@ -1,10 +1,12 @@
 version: 1
 id: wildwakepark-steinberger-see
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: WildWakePark Steinberger See
 short_name: WildWakePark
@@ -28,9 +30,39 @@ links:
     url: "https://wildwakepark.wakesys.com/"
 
 cables:
-  - name: Seilbahnen
-    description: >-
-      Vier Seilbahnen für jedes Niveau, mit Übungsliften für Anfänger und 18 Features.
+  - name: "Seilbahn 1"
+    direction: ccw
+    points:
+      - lat: 49.2888144146506
+        lon: 12.161044272207
+      - lat: 49.2871806824053
+        lon: 12.1576279471577
+      - lat: 49.2867589732923
+        lon: 12.1576607054957
+      - lat: 49.2866189400001
+        lon: 12.1582329868495
+      - lat: 49.2883927396325
+        lon: 12.1615338425889
+  - name: "Seilbahn 2"
+    direction: ccw
+    points:
+      - lat: 49.2894279556327
+        lon: 12.1612045533557
+      - lat: 49.2885596598679
+        lon: 12.1625262356064
+      - lat: 49.2889202385422
+        lon: 12.1638357461334
+      - lat: 49.2892780066863
+        lon: 12.1638202216544
+      - lat: 49.2898749520193
+        lon: 12.1619126971755
+  - name: "Starterscable"
+    direction: "2.0"
+    points:
+      - lat: 49.289552350261
+        lon: 12.1606312249708
+      - lat: 49.2902219132767
+        lon: 12.1616072699733
 
 opening:
   source_url: "https://www.wildwakepark.de/oeffnungszeiten/"
