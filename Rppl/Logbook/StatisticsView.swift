@@ -22,6 +22,7 @@ struct StatisticsView: View {
                 // One row, so everything exists at once (a List builds rows lazily, offscreen ones included).
                 VStack(spacing: RpplDesign.tileSpacing) {
                     SeasonTotalsCard(season: catalog.season, isLoading: catalog.isLoading)
+                        .fixedSize(horizontal: false, vertical: true)
                     if catalog.season.showsCharts {
                         SeasonCharts(season: catalog.season)
                     } else if !catalog.isLoading {
@@ -35,6 +36,7 @@ struct StatisticsView: View {
                     }
                     if parkStatsEnabled {
                         ParkStatsSection(sessions: catalog.entries)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .readableWidth()

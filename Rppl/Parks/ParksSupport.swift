@@ -613,6 +613,9 @@ struct ParkCableBadge: View {
         }
     }
 
+    /// Both kinds are tinted so a cable stands apart from the plain distance and opening chips.
+    private var tint: Color { isTwoPointZero ? Color.rpplAccent : Color.rpplMetricLaps }
+
     private var length: String? { cable.effectiveLengthM.map { DistanceFormat.meters($0) } }
 
     var body: some View {
@@ -620,8 +623,8 @@ struct ParkCableBadge: View {
         ParkChip(
             text: length ?? (isTwoPointZero ? ParkFormatting.cableType(cable.direction) ?? "" : ""),
             systemImage: symbol,
-            tint: isTwoPointZero ? Color.rpplAccent : Color.rpplText,
-            fill: isTwoPointZero ? Color.rpplAccent.opacity(0.14) : Color.rpplFill
+            tint: tint,
+            fill: tint.opacity(0.22)
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
