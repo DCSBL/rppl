@@ -12,6 +12,8 @@ struct SessionEntry: Identifiable, Sendable {
     let highlights: [SessionHighlight]
     /// Track center from the derived map frame; used to match sessions to parks.
     var center: ParkCoordinate?
+    /// One distilled riding track per set, to work out which cable was ridden (`CableMatcher`).
+    var ridingTracks: [[ParkCoordinate]] = []
 
     var id: String { manifest.sessionId }
 
@@ -152,7 +154,10 @@ final class SessionCatalog {
                     topSpeedKmh: stats.maxSpeedKmh ?? stats.topSpeedKmh,
                     cityName: derived.cityName,
                     highlights: [],
-                    center: center
+                    center: center,
+                    ridingTracks: derived.mapTracks?.heatmapTracks.map { track in
+                        track.map { ParkCoordinate(lat: $0.latitude, lon: $0.longitude) }
+                    } ?? []
                 )
             )
         }
@@ -207,7 +212,8 @@ final class SessionCatalog {
                 topSpeedKmh: entry.topSpeedKmh,
                 cityName: entry.cityName,
                 highlights: highlightMap[entry.manifest.sessionId] ?? [],
-                center: entry.center
+                center: entry.center,
+                ridingTracks: entry.ridingTracks
             )
         }
     }
