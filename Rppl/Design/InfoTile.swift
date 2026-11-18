@@ -3,14 +3,15 @@ import SwiftUI
 /// Weather-style tile: small tinted symbol + caps header, then free content.
 struct InfoTile<Content: View>: View {
     private let title: LocalizedStringKey
-    private let systemImage: String
+    private let systemImage: String?
     private let tint: Color
     private let content: Content
     private var metric: MetricKind?
 
+    /// `systemImage` nil: caps header without a symbol.
     init(
         _ title: LocalizedStringKey,
-        systemImage: String,
+        systemImage: String? = nil,
         tint: Color = RpplDesign.headerColor,
         @ViewBuilder content: () -> Content
     ) {
@@ -40,15 +41,17 @@ struct TileHeader: View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: LocalizedStringKey
-    let systemImage: String
+    let systemImage: String?
     var tint: Color = RpplDesign.headerColor
     var metric: MetricKind?
 
     var body: some View {
         HStack(spacing: 6) {
-            MetricIcon(metric: metric, systemImage: systemImage)
-                .foregroundStyle(tint)
-                .accessibilityHidden(true)
+            if let systemImage {
+                MetricIcon(metric: metric, systemImage: systemImage)
+                    .foregroundStyle(tint)
+                    .accessibilityHidden(true)
+            }
             // One shrinking line; two lines at accessibility sizes, where "Distance & duration" no longer fits one.
             Text(title)
                 .textCase(.uppercase)

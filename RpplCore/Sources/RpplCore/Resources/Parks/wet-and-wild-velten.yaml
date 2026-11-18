@@ -1,10 +1,14 @@
 version: 1
 id: wet-and-wild-velten
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wet & Wild Velten
 short_name: Wet & Wild
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Am Bernsteinsee 1, 16727 Velten"
 timezone: Europe/Berlin
-# Pin from the map embed on the park's site, not a confirmed dock point.
 location:
-  lat: 52.699700
-  lon: 13.224100
+  lat: 52.6993541334922
+  lon: 13.2244342065102
 
 phone: "+49 3303 400145"
 email: "info@wakeboard-berlin.de"
@@ -25,12 +28,27 @@ website: https://www.wakeboard-berlin.de
 
 cables:
   - name: Lift I
+    direction: cw
     description: >-
       Große Seilbahn.
+    points:
+      - lat: 52.6991892637109
+        lon: 13.2244897013196
+      - lat: 52.6992863629191
+        lon: 13.228988496199
+      - lat: 52.6986167949095
+        lon: 13.2290142565903
+      - lat: 52.698525486401
+        lon: 13.2245124412903
   - name: Lift II
     direction: "2.0"
     description: >-
       System 2.0.
+    points:
+      - lat: 52.699599013581
+        lon: 13.2248187448589
+      - lat: 52.6997177461644
+        lon: 13.2276694526646
 
 opening:
   source_url: "https://www.wakeboard-berlin.de"

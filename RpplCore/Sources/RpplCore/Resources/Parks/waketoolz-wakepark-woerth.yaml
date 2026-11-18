@@ -1,10 +1,14 @@
 version: 1
 id: waketoolz-wakepark-woerth
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Waketoolz Wakepark Wörth
 short_name: Waketoolz Wakepark
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Landshuter Str. 96, 84109 Wörth an der Isar"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 48.624240
-  lon: 12.348961
+  lat: 48.627444800782
+  lon: 12.3557175436109
 
 phone: "+49 8702 9487297"
 website: https://www.waketoolz-wakepark.de
@@ -28,10 +31,27 @@ links:
 
 cables:
   - name: "5-Mast-Anlage"
+    direction: ccw
+    points:
+      - lat: 48.6275877627273
+        lon: 12.3555736649352
+      - lat: 48.6289513459868
+        lon: 12.359268022454
+      - lat: 48.6297259739177
+        lon: 12.3592267370835
+      - lat: 48.6300412219553
+        lon: 12.35821662752
+      - lat: 48.6282804213533
+        lon: 12.3548659036021
   - name: System 2.0
     direction: "2.0"
     description: >-
       Bis zu drei Wakeboarder gleichzeitig.
+    points:
+      - lat: 48.6270256390955
+        lon: 12.3559733902333
+      - lat: 48.6281270154999
+        lon: 12.3587110969935
 
 opening:
   source_url: "https://www.waketoolz-wakepark.de/"

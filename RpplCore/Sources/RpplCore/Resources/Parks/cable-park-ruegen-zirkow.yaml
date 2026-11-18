@@ -1,10 +1,12 @@
 version: 1
 id: cable-park-ruegen-zirkow
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
 
 name: Cable Park Rügen
 short_name: Cable Park Rügen
@@ -22,6 +24,23 @@ location:
 phone: "+49 38393 131470"
 email: "info@wasserskiruegen.de"
 website: https://wasserskiruegen.de
+
+cables:
+  - name: "Cable"
+    direction: ccw
+    points:
+      - lat: 54.3796468922536
+        lon: 13.525557331344
+      - lat: 54.3788944216291
+        lon: 13.526565780251
+      - lat: 54.3789422827528
+        lon: 13.528403307383
+      - lat: 54.3794461185902
+        lon: 13.5297006841447
+      - lat: 54.3798339290972
+        lon: 13.5296228701167
+      - lat: 54.3800460203809
+        lon: 13.5258725982889
 
 opening:
   source_url: "https://wasserskiruegen.de/oeffnungszeiten/"

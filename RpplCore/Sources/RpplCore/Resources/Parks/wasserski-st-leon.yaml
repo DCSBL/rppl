@@ -1,10 +1,14 @@
 version: 1
 id: wasserski-st-leon
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map
+  - date: 2026-11-16
+    description: move the pin onto the park, using the traced cables
 
 name: Wasserski St. Leon
 short_name: Wasserski St. Leon
@@ -14,10 +18,9 @@ languages:
   - nl
 address: "Am St. Leoner See 1, 68789 St. Leon-Rot"
 timezone: Europe/Berlin
-# Geocode of the address, not a confirmed dock point.
 location:
-  lat: 49.281487
-  lon: 8.585326
+  lat: 49.2822922010788
+  lon: 8.58568197303785
 
 phone: "+49 6227 52314"
 email: "info@wasserski-stleon.de"
@@ -28,12 +31,27 @@ links:
 
 cables:
   - name: Große Bahn
+    direction: ccw
     description: >-
       Vier Masten, für Fortgeschrittene.
+    points:
+      - lat: 49.2824855990822
+        lon: 8.58590322539398
+      - lat: 49.2810379335593
+        lon: 8.5896452751467
+      - lat: 49.2816508559709
+        lon: 8.59017348493594
+      - lat: 49.2830446132201
+        lon: 8.58643886506226
   - name: Anfängerbahn
     direction: "2.0"
     description: >-
       Zwei Masten, für Anfängerkurse in Gruppen bis 12 Teilnehmer.
+    points:
+      - lat: 49.2816979701551
+        lon: 8.58715116922167
+      - lat: 49.2810037692186
+        lon: 8.58877644105904
 
 opening:
   source_url: "https://wasserski-stleon.de/zeiten"

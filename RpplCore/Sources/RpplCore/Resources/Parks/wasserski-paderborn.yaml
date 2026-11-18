@@ -1,10 +1,12 @@
 version: 1
 id: wasserski-paderborn
 created_at: 2026-10-25
-updated_at: 2026-10-25
+updated_at: 2026-11-16
 history:
   - date: 2026-10-25
     description: initial (from the park website)
+  - date: 2026-11-16
+    description: trace cables on the map, remove length_m (length is computed from the traced points)
 
 name: Wasserski Paderborn
 short_name: Wasserski Paderborn
@@ -25,17 +27,44 @@ website: https://www.wasserski-paderborn.de
 
 cables:
   - name: Bahn 1
-    length_m: 780
+    direction: ccw
     description: >-
       Fünf Masten, 10 Mitnehmer und Obstacles.
+    points:
+      - lat: 51.7522077184261
+        lon: 8.66727168868367
+      - lat: 51.7512789066683
+        lon: 8.67135820777759
+      - lat: 51.7515174258647
+        lon: 8.67195682814104
+      - lat: 51.7519315258534
+        lon: 8.67187796630084
+      - lat: 51.7528825639069
+        lon: 8.66766492534431
   - name: Bahn 2
-    length_m: 470
+    direction: ccw
     description: >-
       Sechs Masten, 6 Mitnehmer.
+    points:
+      - lat: 51.7506326458314
+        lon: 8.67051781110974
+      - lat: 51.7500022320907
+        lon: 8.6691208738315
+      - lat: 51.7492992534036
+        lon: 8.66944863041787
+      - lat: 51.7492592593522
+        lon: 8.67039800989851
+      - lat: 51.7502598373946
+        lon: 8.6710556620179
   - name: Übungsbahn
     direction: "2.0"
     description: >-
       Zwei Masten, für Anfänger und erste Inverts.
+    points:
+      - lat: 51.7523160401179
+        lon: 8.66687841200645
+      - lat: 51.7533838485136
+        lon: 8.66729265674912
 
 opening:
   source_url: "https://www.wasserski-paderborn.de/"

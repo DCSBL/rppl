@@ -938,6 +938,7 @@ private struct ParkCard: View {
     let isFavorite: Bool
     let entry: ParkEntry?
     let filterDate: Date?
+    @AppStorage(AppSettingsKey.debugParkStats) private var parkStatsEnabled = false
     /// Two-pane: the park open beside the list. Tapping the card selects its list row, which opens it.
     var isSelected = false
 
@@ -954,7 +955,7 @@ private struct ParkCard: View {
             )
         }
         if let distanceMeters {
-            ParkChip(text: DistanceFormat.kilometers(distanceMeters))
+            ParkChip(text: DistanceFormat.kilometers(distanceMeters), systemImage: parkStatsEnabled ? "location" : nil)
         }
     }
 
@@ -964,6 +965,32 @@ private struct ParkCard: View {
         }
         if park.wakesys == true, !dynamicTypeSize.hidesDecoration {
             ParkChip(text: "Wakesys")
+        }
+    }
+
+    /// One badge per cable. Rows of three, then two, then one, so a park with four cables still fits
+    /// (a wrapping Layout inside a List row does not grow the row, see the chips below).
+    @ViewBuilder private var cableBadges: some View {
+        let cables = (park.cables ?? []).filter(ParkCableBadge.shows)
+        if parkStatsEnabled, !cables.isEmpty {
+            ViewThatFits(in: .horizontal) {
+                badgeRows(cables, perRow: cables.count)
+                badgeRows(cables, perRow: 3)
+                badgeRows(cables, perRow: 2)
+                badgeRows(cables, perRow: 1)
+            }
+        }
+    }
+
+    private func badgeRows(_ cables: [ParkCable], perRow: Int) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(stride(from: 0, to: cables.count, by: perRow)), id: \.self) { start in
+                HStack(spacing: 6) {
+                    ForEach(Array(cables[start..<min(start + perRow, cables.count)].enumerated()), id: \.offset) { _, cable in
+                        ParkCableBadge(cable: cable)
+                    }
+                }
+            }
         }
     }
 
@@ -1018,6 +1045,7 @@ private struct ParkCard: View {
                     countChips
                 }
             }
+            cableBadges
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())

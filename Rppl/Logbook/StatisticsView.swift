@@ -8,6 +8,7 @@ struct StatisticsView: View {
 
     @Environment(\.showAppSettings) private var showAppSettings
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @AppStorage(AppSettingsKey.debugParkStats) private var parkStatsEnabled = false
     @State private var windowWidth: CGFloat = 0
 
     private var layout: WindowLayout {
@@ -31,6 +32,9 @@ struct StatisticsView: View {
                         }
                         .foregroundStyle(Color.rpplMuted)
                         .accessibilityIdentifier("statistics-empty")
+                    }
+                    if parkStatsEnabled {
+                        ParkStatsSection(sessions: catalog.entries)
                     }
                 }
                 .readableWidth()
