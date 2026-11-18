@@ -75,26 +75,22 @@ struct ParkStatsSection: View {
         }
     }
 
+    /// The You / All switch in a tile of its own, like the other charts' pickers; the year sits beside it.
     private var header: some View {
-        AdaptiveStack(rowAlignment: .center, spacing: 8) {
-            Text("Parks")
-                .font(.caption.weight(.semibold))
-                .textCase(.uppercase)
-                .foregroundStyle(RpplDesign.headerColor)
-                .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: 0)
-            if scope == .you, !years.isEmpty {
-                yearMenu
+        InfoTile("Parks") {
+            AdaptiveStack(rowAlignment: .center, spacing: 12) {
+                Picker("Parks", selection: $scope) {
+                    Text("You").tag(Scope.you)
+                    Text("All").tag(Scope.all)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                if scope == .you, !years.isEmpty {
+                    yearMenu
+                }
             }
-            Picker("Parks", selection: $scope) {
-                Text("You").tag(Scope.you)
-                Text("All").tag(Scope.all)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .fixedSize()
         }
-        .padding(.horizontal, 4)
     }
 
     private var yearMenu: some View {
@@ -123,11 +119,7 @@ struct ParkStatsSection: View {
             if ridden.count > 0 {
                 Button { showRidden = true } label: {
                     InfoTile("Cables ridden by type") {
-                        AdaptiveStack(spacing: 12) {
-                            typeCount(ridden.counterClockwise, label: "CCW", symbol: "arrow.counterclockwise")
-                            typeCount(ridden.clockwise, label: "CW", symbol: "arrow.clockwise")
-                            typeCount(ridden.twoPointZero, label: "2.0", symbol: "arrow.left.and.right")
-                        }
+                        typeCounts(ccw: ridden.counterClockwise, cw: ridden.clockwise, twoPointZero: ridden.twoPointZero)
                     }
                     .contentShape(.rect)
                 }
@@ -148,11 +140,7 @@ struct ParkStatsSection: View {
                 }
             }
             InfoTile("Cables in Rppl") {
-                AdaptiveStack(spacing: 12) {
-                    typeCount(stats.counterClockwise, label: "CCW", symbol: "arrow.counterclockwise")
-                    typeCount(stats.clockwise, label: "CW", symbol: "arrow.clockwise")
-                    typeCount(stats.twoPointZero, label: "2.0", symbol: "arrow.left.and.right")
-                }
+                typeCounts(ccw: stats.counterClockwise, cw: stats.clockwise, twoPointZero: stats.twoPointZero)
                 Text("All cables in the app, not just the ones you used.")
                     .font(.footnote)
                     .foregroundStyle(RpplDesign.secondaryText)
@@ -160,13 +148,28 @@ struct ParkStatsSection: View {
         }
     }
 
+    /// CCW, CW and 2.0 counts side by side, split by hairlines like the Total tile.
+    private func typeCounts(ccw: Int, cw: Int, twoPointZero: Int) -> some View {
+        HStack(spacing: 0) {
+            typeCount(ccw, label: "CCW", symbol: "arrow.counterclockwise")
+            typeDivider
+            typeCount(cw, label: "CW", symbol: "arrow.clockwise")
+            typeDivider
+            typeCount(twoPointZero, label: "2.0", symbol: "arrow.left.and.right")
+        }
+    }
+
+    private var typeDivider: some View {
+        Rectangle().fill(Color.rpplFill).frame(width: 1, height: 44)
+    }
+
     private func typeCount(_ count: Int, label: String, symbol: String) -> some View {
         VStack(spacing: 4) {
             MetricValue(String(count), size: .total)
-            Label {
-                Text(verbatim: label)
-            } icon: {
+            HStack(spacing: 4) {
                 Image(systemName: symbol)
+                    .imageScale(.small)
+                Text(verbatim: label)
             }
             .font(.subheadline)
             .foregroundStyle(RpplDesign.secondaryText)
