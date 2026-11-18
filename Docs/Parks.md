@@ -310,3 +310,12 @@ Every listed park can be found from the iPhone search (swipe down on the Home Sc
 - The result's identifier is the park link (`rppl://park/<id>`, see [DeepLinks.md](DeepLinks.md)). A tap arrives as a `CSSearchableItemActionType` activity; `ContentView.onContinueUserActivity` reads the park from it (`ParkSpotlight.parkID`) and sets the same `openParkID` the widgets use.
 - `ParkSpotlightIndexer` (app layer) keeps its own named Core Spotlight index and rewrites it in one batch. The batch's client state is `ParkSpotlight.fingerprint`, a hash of all entries: a launch with the same parks reads it and does nothing, an index the system dropped has no state and is filled again, and a failed run stores a state that matches nothing, so the next sync tries again. Bump `ParkSpotlight.layoutVersion` when the entry layout changes.
 - `ParkStore.reload()` is the only hook. It runs after a save, a delete and a park data update (also in the background), and when the Parks tab loads.
+
+## Park stats (debug toggle)
+
+Debug toggle "Park stats" (`rppl.debugParkStats`, default off):
+
+- Statistics tab: a Parks section under the session charts with a You / All switch. You shows the parks visited, for all time or one year (distinct `parkId` of the logbook sessions). All shows the parks and cable length in the app and the cable counts per direction (CCW, CW, 2.0); the totals come from `ParkStats` and are computed once per catalog reload in `ParkStore`.
+- Parks list: an icon on the distance chip and one badge per cable (direction symbol and length from `ParkCable.effectiveLengthM`; untraced cables show no length).
+
+Not done: "cables ridden". A session stores its park, not its cable.

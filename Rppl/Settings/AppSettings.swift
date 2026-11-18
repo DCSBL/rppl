@@ -27,6 +27,8 @@ enum AppSettingsKey {
     static let debugParkNoCableGeoFilter = "rppl.debugParkNoCableGeoFilter"
     /// Debug: "Fill in from a source" (website or screenshot, on-device model) in the park editor (default off).
     static let debugParkImport = "rppl.debugParkImport"
+    /// Debug: park totals on the Statistics tab, plus per-cable badges and a distance icon on the Parks list (default off).
+    static let debugParkStats = "rppl.debugParkStats"
     /// User dismissed the inline "Show water temperature?" prompt on a park screen — stop offering it.
     static let didDeclineParkWaterTemperaturePrompt = "rppl.didDeclineParkWaterTemperaturePrompt"
     /// Download park updates from GitHub (opt-in; default off).
