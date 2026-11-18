@@ -593,6 +593,44 @@ struct ParkChip: View {
     }
 }
 
+/// One cable on a park card: direction symbol and length. A 2.0 cable is tinted like the other 2.0 hints.
+struct ParkCableBadge: View {
+    let cable: ParkCable
+
+    /// A cable without a direction and without a length has nothing to show.
+    static func shows(_ cable: ParkCable) -> Bool {
+        cable.direction != nil || cable.effectiveLengthM != nil
+    }
+
+    private var isTwoPointZero: Bool { cable.direction == .twoPointZero }
+
+    private var symbol: String? {
+        switch cable.direction {
+        case .some(.clockwise): "arrow.clockwise"
+        case .some(.counterClockwise): "arrow.counterclockwise"
+        case .some(.twoPointZero): "arrow.left.and.right"
+        default: nil
+        }
+    }
+
+    private var length: String? { cable.effectiveLengthM.map { DistanceFormat.meters($0) } }
+
+    var body: some View {
+        // An untraced 2.0 still says "2.0"; the others have nothing but the symbol, which the label spells out.
+        ParkChip(
+            text: length ?? (isTwoPointZero ? ParkFormatting.cableType(cable.direction) ?? "" : ""),
+            systemImage: symbol,
+            tint: isTwoPointZero ? Color.rpplAccent : Color.rpplText,
+            fill: isTwoPointZero ? Color.rpplAccent.opacity(0.14) : Color.rpplFill
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            [ParkFormatting.loopDirection(cable.direction) ?? ParkFormatting.cableType(cable.direction), length]
+                .compactMap { $0 }.joined(separator: ", ")
+        )
+    }
+}
+
 extension ParkOpenStatus {
     var badgeText: String {
         switch self {

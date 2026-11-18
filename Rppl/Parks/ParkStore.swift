@@ -10,11 +10,14 @@ final class ParkStore {
     static let shared = ParkStore()
 
     private(set) var entries: [ParkEntry] = []
+    /// Park totals, recomputed with the catalog so the Statistics tab only reads them.
+    private(set) var stats = ParkStats()
 
     private var root: URL { AppConstants.localPhoneParksRoot }
 
     func reload() {
         entries = ParkCatalog.loadWithOrigin(userRoot: root, otaDirectory: ParkDataStore.app.activeDirectory())
+        stats = ParkStats(parks: entries.map(\.park))
         // Spotlight mirrors the list; it does nothing while the debug toggle is off.
         ParkSpotlightIndexer.shared.sync(parks: entries.map(\.park))
     }

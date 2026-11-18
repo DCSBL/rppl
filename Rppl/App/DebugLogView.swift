@@ -13,6 +13,7 @@ struct DebugLogView: View {
     @AppStorage(AppSettingsKey.debugSetFlags) private var setFlagsEnabled = false
     @AppStorage(AppSettingsKey.debugParkNoCableGeoFilter) private var noCableGeoFilterEnabled = false
     @AppStorage(AppSettingsKey.debugParkImport) private var parkImportEnabled = false
+    @AppStorage(AppSettingsKey.debugParkStats) private var parkStatsEnabled = false
 
     var body: some View {
         List {
@@ -35,6 +36,13 @@ struct DebugLogView: View {
                     .tint(Color.rpplAccent)
             } footer: {
                 Text("Fill in a park from a website or a screenshot in the park editor, with the model on this iPhone. Needs Apple Intelligence.")
+            }
+
+            Section {
+                Toggle("Park stats", isOn: $parkStatsEnabled)
+                    .tint(Color.rpplAccent)
+            } footer: {
+                Text("Shows park totals on the Statistics tab, and a badge per cable and a distance icon on the Parks list.")
             }
 
             Section {
