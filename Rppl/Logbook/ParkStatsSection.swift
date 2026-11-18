@@ -18,12 +18,7 @@ struct ParkStatsSection: View {
     @State private var rides: [Ride] = []
     @State private var showRidden = false
 
-    /// A session with the cables it rode, matched against the park data as it is now.
-    private struct Ride: Sendable {
-        var date: Date
-        var parkId: String
-        var cableIndices: Set<Int>
-    }
+    private typealias Ride = RiddenCables.Ride
 
     /// Changes when sessions or park data change, so a park traced later is matched again.
     private struct RideKey: Equatable {
@@ -45,7 +40,7 @@ struct ParkStatsSection: View {
 
     private var riddenCables: RiddenCables {
         RiddenCables(
-            rides: rides.map { ($0.date, $0.parkId, $0.cableIndices) },
+            rides: rides,
             parks: store.entries.map(\.park),
             year: year
         )

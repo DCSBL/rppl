@@ -73,6 +73,19 @@ public enum CableMatcher {
 
 /// Cables ridden over a set of sessions, grouped per park and counted per direction.
 public struct RiddenCables: Equatable, Sendable {
+    /// A session with the cables it rode.
+    public struct Ride: Equatable, Sendable {
+        public var date: Date
+        public var parkId: String
+        public var cableIndices: Set<Int>
+
+        public init(date: Date, parkId: String, cableIndices: Set<Int>) {
+            self.date = date
+            self.parkId = parkId
+            self.cableIndices = cableIndices
+        }
+    }
+
     public struct Entry: Equatable, Sendable {
         public var parkId: String
         /// Indices into the park's `cables`, ascending.
@@ -92,7 +105,7 @@ public struct RiddenCables: Equatable, Sendable {
     /// `rides`: one entry per session, with the cable indices it rode. A cable counts once however often it
     /// was ridden; a cable index the park no longer has is skipped. `year` nil = all time.
     public init(
-        rides: [(date: Date, parkId: String, cableIndices: Set<Int>)],
+        rides: [Ride],
         parks: [Park],
         year: Int? = nil,
         calendar: Calendar = .current

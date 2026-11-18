@@ -86,8 +86,12 @@ struct CableMatcherTests {
         calendar.timeZone = TimeZone(identifier: "UTC")!
         func date(_ year: Int) -> Date { calendar.date(from: DateComponents(year: year, month: 6, day: 1))! }
         let park = Park(id: "a", name: "a", location: origin, cables: cables)
-        let rides: [(date: Date, parkId: String, cableIndices: Set<Int>)] = [
-            (date(2026), "a", [0]), (date(2026), "a", [0, 1]), (date(2025), "a", [2]), (date(2026), "gone", [0]),
+        typealias Ride = RiddenCables.Ride
+        let rides = [
+            Ride(date: date(2026), parkId: "a", cableIndices: [0]),
+            Ride(date: date(2026), parkId: "a", cableIndices: [0, 1]),
+            Ride(date: date(2025), parkId: "a", cableIndices: [2]),
+            Ride(date: date(2026), parkId: "gone", cableIndices: [0]),
         ]
         let all = RiddenCables(rides: rides, parks: [park], calendar: calendar)
         #expect(all.count == 3)
